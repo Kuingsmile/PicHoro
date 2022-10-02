@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:dio/dio.dart';
-import 'package:path/path.dart' as f_path;
 import 'dart:convert';
 
+//import 'package:permission_handler/permission_handler.dart';
 //a textfield to get hosts,username,passwd,token and strategy_id
 class HostConfig extends StatefulWidget {
   const HostConfig({Key? key}) : super(key: key);
@@ -65,6 +65,7 @@ class _HostConfigState extends State<HostConfig> {
             ),
             TextFormField(
               controller: _passwdController,
+              obscureText: true,
               decoration: const InputDecoration(
                 hintText: '密码',
               ),
@@ -122,12 +123,9 @@ class _HostConfigState extends State<HostConfig> {
       data: formData,
     );
     token = token + response.data['data']['token'].toString();
-    print(token);
-    print(response.data);
-    print(response.data['data']);
     final hostConfig = HostConfigModel(host, token, strategyId);
     final hostConfigJson = jsonEncode(hostConfig);
-    
+
     final hostConfigFile = await _localFile;
     hostConfigFile.writeAsString(hostConfigJson);
     Navigator.pop(context);

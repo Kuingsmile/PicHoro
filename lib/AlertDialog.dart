@@ -14,7 +14,7 @@ showAlertDialog({required BuildContext context, required String title, required 
               },
               child: const Padding(
                 padding: EdgeInsets.all(8.0),
-                child: Text('Continue'),
+                child: Text('确定'),
               ),
             ),
           ],

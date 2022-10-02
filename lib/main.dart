@@ -8,6 +8,15 @@ import 'package:horopic/bottompicker_sheet.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:horopic/hostconfig.dart';
 import 'package:path_provider/path_provider.dart';
+//import 'package:permission_handler/permission_handler.dart';
+
+/*
+@Author: Horo
+@e-mail: ma_shiqing@163.com
+@Date: 2022-10-02
+@Description:HoroPic, a picture upload tool 
+@version: 1.0.0
+*/
 
 void main() {
   runApp(const MyApp());
@@ -45,8 +54,8 @@ class _HomePageState extends State<HomePage> {
     if (pickedImage == null) {
       showAlertDialog(
           context: context,
-          title: "Error Uploading!",
-          content: "No Image was selected.");
+          title: "上传失败!",
+          content: "请重新选择图片.");
       return;
     }
     final File fileImage = File(pickedImage.path);
@@ -64,8 +73,8 @@ class _HomePageState extends State<HomePage> {
     if (pickedImage == null) {
       showAlertDialog(
           context: context,
-          title: "Error Uploading!",
-          content: "No Image was selected.");
+          title: "上传失败!",
+          content: "请重新选择图片.");
       return;
     }
     final File fileImage = File(pickedImage.path);
@@ -77,12 +86,12 @@ class _HomePageState extends State<HomePage> {
   }
 
   bool imageConstraint(File image) {
-    if (!['bmp', 'jpg', 'jpeg']
+    if (!['bmp', 'jpg', 'jpeg','png','gif','webp']
         .contains(image.path.split('.').last.toString())) {
       showAlertDialog(
           context: context,
-          title: "Error Uploading!",
-          content: "Image format should be jpg/jpeg/bmp.");
+          title: "上传失败!",
+          content: "图片格式因该为bmp,jpg,jpeg,png,gif,webp.");
       return false;
     }
     return true;
@@ -108,8 +117,8 @@ class _HomePageState extends State<HomePage> {
     if (_image == null) {
       showAlertDialog(
           context: context,
-          title: "Error Uploading!",
-          content: "No Image was selected.");
+          title: "上传失败!",
+          content: "请先选择图片.");
       return;
     }
     String path = _image!.path;
@@ -118,8 +127,8 @@ class _HomePageState extends State<HomePage> {
     if (config_data == "Error") {
       showAlertDialog(
           context: context,
-          title: "Error Uploading!",
-          content: "No host_config.txt found.");
+          title: "上传失败!",
+          content: "请先配置上传参数.");
       return;
     }
 

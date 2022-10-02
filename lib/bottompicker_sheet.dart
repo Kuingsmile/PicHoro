@@ -9,16 +9,16 @@ void bottomPickerSheet(BuildContext context, Function _imageFromCamera,
             child: Wrap(
           children: [
             ListTile(
-              leading: Icon(Icons.photo_camera),
-              title: Text('Camera'),
+              leading: const Icon(Icons.photo_camera),
+              title: const Text('拍照'),
               onTap: () {
                 _imageFromCamera();
                 Navigator.pop(context);
               },
             ),
             ListTile(
-              leading: Icon(Icons.photo_library),
-              title: Text('Gallery'),
+              leading: const Icon(Icons.photo_library),
+              title: const Text('相册'),
               onTap: () {
                 _imageFromGallery();
                 Navigator.pop(context);
