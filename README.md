@@ -1,13 +1,15 @@
 # PicHoro
 
 Mobile tool for pictures uploading built by flutter
-一个基于flutter的移动端图片上传工具，支持兰空图床
+<br />
+一个基于flutter的移动端图片上传工具，已支持兰空图床
 
-## 开发日志
+## Development log
 
-- 2022-10-02: 项目初始化，完成基本的上传功能，目前仅支持兰空图床，需要手动授予存储和相机权限
+- 2022-10-02: 项目初始化，完成基本的上传功能，目前仅支持兰空图床，需要手动授予存储和相机权限  
+2022-10-02: The project is initialized and the basic uploading function is completed. Currently, only Lsky pro is supported, and the storage and camera permissions need to be granted manually.
 
-## 下载地址
+## Download
 
 **安卓版**：
 
