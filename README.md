@@ -16,3 +16,17 @@ Mobile tool for pictures uploading built by flutter
 <div align =center>
 <img src="http://imgx.horosama.com/admin_uploads/2022/10/2022_10_02_633977c5af2de.png" width=30% alt ='http://www.horosama.com/self_apk/PicHoro.apk'>
 </div>
+
+## Roadmap
+
+- 增加主动获取权限的功能，避免用户手动授予权限
+  add the function of actively obtaining permissions to avoid users manually granting permissions
+- 增加相册图片多选上传功能
+  add the function of uploading multiple pictures from the album
+- 增加拍照后自动上传功能
+  add the function of automatically uploading after taking pictures
+- 增加对腾讯云对象存储的支持
+  add support for Tencent Cloud Object Storage
+- 增加对其它图床的支持
+  add support for other image hosting services
+  
