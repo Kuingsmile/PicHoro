@@ -9,6 +9,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:horopic/hostconfig.dart';
 import 'package:path_provider/path_provider.dart';
 //import 'package:permission_handler/permission_handler.dart';
+import 'package:horopic/utils/permission.dart';
 
 /*
 @Author: Horo
@@ -52,10 +53,7 @@ class _HomePageState extends State<HomePage> {
     final XFile? pickedImage =
         await _picker.pickImage(source: ImageSource.camera, imageQuality: 100);
     if (pickedImage == null) {
-      showAlertDialog(
-          context: context,
-          title: "上传失败!",
-          content: "请重新选择图片.");
+      showAlertDialog(context: context, title: "上传失败!", content: "请重新选择图片.");
       return;
     }
     final File fileImage = File(pickedImage.path);
@@ -67,14 +65,59 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  _cameraAndBack() async {
+    final XFile? pickedImage =
+        await _picker.pickImage(source: ImageSource.camera, imageQuality: 100);
+    if (pickedImage == null) {
+      showAlertDialog(context: context, title: "上传失败!", content: "请重新选择图片.");
+      return;
+    }
+    final File fileImage = File(pickedImage.path);
+    if (imageConstraint(fileImage)) {
+      setState(() {
+        _image = fileImage;
+        _uploadAndBackToCamera();
+      });
+    }
+  }
+
+  _uploadAndBackToCamera() async {
+    if (_image == null) {
+      showAlertDialog(context: context, title: "上传失败!", content: "请先选择图片.");
+      return;
+    }
+    String path = _image!.path;
+    var name = path.substring(path.lastIndexOf("/") + 1, path.length);
+    var configData = await readHostConfig();
+    if (configData == "Error") {
+      showAlertDialog(context: context, title: "上传失败!", content: "请先配置上传参数.");
+      return;
+    }
+
+    Map configMap = jsonDecode(configData);
+
+    FormData formdata = FormData.fromMap({
+      "file": await MultipartFile.fromFile(path, filename: name),
+      "strategy_id": configMap["strategy_id"],
+    });
+
+    BaseOptions options = BaseOptions();
+    options.headers = {
+      "Authorization": configMap["token"],
+      "Accept": "application/json",
+      "Content-Type": "multipart/form-data",
+    };
+    Dio dio = Dio(options);
+    String uploadUrl = configMap["host"] + "/api/v1/upload";
+    var respone = await dio.post<String>(uploadUrl, data: formdata);
+    _cameraAndBack();
+  }
+
   _imageFromGallery() async {
     final XFile? pickedImage =
         await _picker.pickImage(source: ImageSource.gallery, imageQuality: 100);
     if (pickedImage == null) {
-      showAlertDialog(
-          context: context,
-          title: "上传失败!",
-          content: "请重新选择图片.");
+      showAlertDialog(context: context, title: "上传失败!", content: "请重新选择图片.");
       return;
     }
     final File fileImage = File(pickedImage.path);
@@ -86,7 +129,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   bool imageConstraint(File image) {
-    if (!['bmp', 'jpg', 'jpeg','png','gif','webp']
+    if (!['bmp', 'jpg', 'jpeg', 'png', 'gif', 'webp']
         .contains(image.path.split('.').last.toString())) {
       showAlertDialog(
           context: context,
@@ -115,24 +158,18 @@ class _HomePageState extends State<HomePage> {
 
   _upLoadImage() async {
     if (_image == null) {
-      showAlertDialog(
-          context: context,
-          title: "上传失败!",
-          content: "请先选择图片.");
+      showAlertDialog(context: context, title: "上传失败!", content: "请先选择图片.");
       return;
     }
     String path = _image!.path;
     var name = path.substring(path.lastIndexOf("/") + 1, path.length);
-    var config_data = await readHostConfig();
-    if (config_data == "Error") {
-      showAlertDialog(
-          context: context,
-          title: "上传失败!",
-          content: "请先配置上传参数.");
+    var configData = await readHostConfig();
+    if (configData == "Error") {
+      showAlertDialog(context: context, title: "上传失败!", content: "请先配置上传参数.");
       return;
     }
 
-    Map configMap = jsonDecode(config_data);
+    Map configMap = jsonDecode(configData);
 
     FormData formdata = FormData.fromMap({
       "file": await MultipartFile.fromFile(path, filename: name),
@@ -147,119 +184,202 @@ class _HomePageState extends State<HomePage> {
     };
     Dio dio = Dio(options);
     String uploadUrl = configMap["host"] + "/api/v1/upload";
-    var respone = await dio.post<String>(
-        uploadUrl,
-        data: formdata);
-    if (respone.statusCode == 200) {
+    var response = await dio.post(uploadUrl, data: formdata);
+    if (response.statusCode == 200 && response.data!['status'] == true) {
+      _image = null;
       Fluttertoast.showToast(
           msg: "图片上传成功", gravity: ToastGravity.CENTER, textColor: Colors.grey);
+    } else {
+      if (response.data['status'] == false) {
+        showAlertDialog(
+            context: context, title: '错误', content: response.data['message']);
+        return;
+      } else if (response.statusCode == 403) {
+        showAlertDialog(context: context, title: '错误', content: '管理员关闭了接口功能');
+        return;
+      } else if (response.statusCode == 401) {
+        showAlertDialog(context: context, title: '错误', content: '授权失败');
+        return;
+      } else if (response.statusCode == 500) {
+        showAlertDialog(context: context, title: '错误', content: '服务器异常');
+        return;
+      } else if (response.statusCode == 404) {
+        showAlertDialog(context: context, title: '错误', content: '接口不存在');
+        return;
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    Permissionutils.askPermission();
+    Permissionutils.askPermissionCamera();
+    Permissionutils.askPermissionGallery();
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
         title: const Text('赫萝图片上传工具'),
       ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          // Display Progress Indicator if uploadStatus is true
-          child: uploadStatus
-              ? Container(
-                  height: 100,
-                  width: 100,
-                  child: const CircularProgressIndicator(
-                    strokeWidth: 7,
-                  ),
-                )
-              : Padding(
-                  padding: const EdgeInsets.only(top: 40),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      GestureDetector(
-                        onTap: () {
-                          bottomPickerSheet(
-                              context, _imageFromCamera, _imageFromGallery);
-                        },
-                        child: CircleAvatar(
-                          radius: MediaQuery.of(context).size.width / 6,
-                          backgroundColor: Colors.grey,
-                          backgroundImage: _image != null
-                              ? FileImage(_image!)
-                              : const Image(image: AssetImage('assets/favicon.jpg'))
-                                  .image,
-                        ),
+      //
+      body: Column(
+        children: [
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              // Display Progress Indicator if uploadStatus is true
+              child: uploadStatus
+                  ? Container(
+                      height: 100,
+                      width: 100,
+                      child: const CircularProgressIndicator(
+                        strokeWidth: 7,
                       ),
-                      const SizedBox(
-                        height: 20,
-                      ),
-                      ElevatedButton(
-                        onPressed: _upLoadImage, // Upload Image
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: const [
-                              Icon(Icons.file_upload),
-                              Text(
-                                '上传图片',
-                              ),
-                            ],
+                    )
+                  : Padding(
+                      padding: const EdgeInsets.only(top: 40),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          GestureDetector(
+                            onTap: () {
+                              bottomPickerSheet(
+                                  context, _imageFromCamera, _imageFromGallery);
+                            },
+                            child: CircleAvatar(
+                              radius: MediaQuery.of(context).size.width / 6,
+                              backgroundColor: Colors.grey,
+                              backgroundImage: _image != null
+                                  ? FileImage(_image!)
+                                  : const Image(
+                                          image:
+                                              AssetImage('assets/favicon.jpg'))
+                                      .image,
+                            ),
                           ),
-                        ),
-                      ),
-                      Expanded(
-                        child: Container(
-                          alignment: FractionalOffset.center,
-                          margin: const EdgeInsets.only(left: 20, right: 20),
-                      child: ElevatedButton(
-                        onPressed: _imageFromCamera,
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: const [
-                              Icon(Icons.camera_alt),
-                              Text(
-                                '拍照',
-                              ),
-                            ],
+                          const SizedBox(
+                            height: 20,
                           ),
-                        ),
-                      ),
-                        ),
-                      ),
-                      Expanded(
-                        child: Container(  
-                          alignment: FractionalOffset.center,
-                         margin: const EdgeInsets.only(left: 20, right: 20,bottom: 50),
-                          child: ElevatedButton(
-                            onPressed: _imageFromGallery,
+                          ElevatedButton(
+                            onPressed: _upLoadImage, // Upload Image
                             child: Padding(
-                              padding: const EdgeInsets.all(8.0),
+                              padding: const EdgeInsets.all(18.0),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: const [
-                                  Icon(Icons.photo_library),
+                                  Icon(Icons.file_upload),
                                   Text(
-                                    '相册',
+                                    '上传图片',
                                   ),
                                 ],
                               ),
                             ),
                           ),
-                        ), 
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+            ),
+          ),
+          Container(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Column(
+                  children: [
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    Container(
+                      child: Container(
+                        alignment: FractionalOffset.center,
+                        margin: const EdgeInsets.only(left: 20, right: 20),
+                        child: ElevatedButton(
+                          onPressed: _imageFromCamera,
+                          child: Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: const [
+                                Icon(Icons.camera_alt),
+                                Text(
+                                  '单次拍照',
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 30,
+                    ),
+                    Container(
+                      child: Container(
+                        alignment: FractionalOffset.center,
+                        margin: const EdgeInsets.only(
+                          left: 20,
+                          right: 20,
+                        ),
+                        child: ElevatedButton(
+                          onPressed: _imageFromGallery,
+                          child: Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: const [
+                                Icon(Icons.photo_library),
+                                Text(
+                                  '相册上传',
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-        ),
+                Column(
+                  children: [
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    Container(
+                      child: Container(
+                        alignment: FractionalOffset.center,
+                        margin: const EdgeInsets.only(
+                          left: 20,
+                          right: 20,
+                        ),
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.yellow[300],
+                            minimumSize: const Size(20, 100),
+                          ),
+                          onPressed: _cameraAndBack,
+                          child: Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: const [
+                                Icon(Icons.backup),
+                                Text(
+                                  '  连续上传',
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
+      // This trailing comma makes auto-formatting nicer for build methods.
       //switch wthin upload and hostconfig
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
@@ -273,7 +393,7 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
         currentIndex: 0,
-        selectedItemColor: Colors.amber[800],
+        selectedItemColor: Colors.cyan[600],
         onTap: (int index) {
           if (index == 1) {
             Navigator.push(
