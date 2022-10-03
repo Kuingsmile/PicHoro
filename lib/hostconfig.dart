@@ -108,6 +108,12 @@ class _HostConfigState extends State<HostConfig> {
               },
               child: const Text('获取储存策略Id列表'),
             ),
+            ElevatedButton(
+              onPressed: () {
+                checkHostConfig();
+              },
+              child: const Text('检查当前配置'),
+            ),
           ],
         ),
       ),
@@ -228,6 +234,53 @@ class _HostConfigState extends State<HostConfig> {
     }
   }
 
+  void checkHostConfig() async {
+    try {
+    final hostConfigFile = await _localFile;
+    
+    String configData = await hostConfigFile.readAsString();
+    if (configData == "Error") {
+      showAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");
+      return;
+    }
+    Map configMap = jsonDecode(configData);
+    BaseOptions options = BaseOptions();
+    options.headers = {
+      "Authorization": configMap["token"],
+      "Accept": "application/json",
+      "Content-Type": "multipart/form-data",
+    };
+    String profileUrl = configMap["host"] + "/api/v1/profile";
+    Dio dio = Dio(options);
+    var response = await dio.get(profileUrl,);
+    if (response.statusCode == 200 && response.data['status'] == true) {
+      showAlertDialog(context: context, title: "检查成功!", content: "配置正确.");
+    } else {
+      if (response.statusCode == 403) {
+        showAlertDialog(context: context, title: '错误', content: '管理员关闭了接口功能');
+        return;
+      } else if (response.statusCode == 401) {
+        showAlertDialog(context: context, title: '错误', content: '授权失败');
+        return;
+      } else if (response.statusCode == 500) {
+        showAlertDialog(context: context, title: '错误', content: '服务器异常');
+        return;
+      } else if (response.statusCode == 404) {
+        showAlertDialog(context: context, title: '错误', content: '接口不存在');
+        return;
+      }
+      if (response.data['status'] == false) {
+        showAlertDialog(
+            context: context, title: '错误', content: response.data['message']);
+        return;
+      }
+    }
+  }
+  catch (e) {
+    showAlertDialog(context: context, title: "检查失败!", content: e.toString());
+  }
+  }
+
   Future<File> get _localFile async {
     final path = await _localPath;
     return File('$path/host_config.txt');
@@ -236,6 +289,16 @@ class _HostConfigState extends State<HostConfig> {
   Future<String> get _localPath async {
     final directory = await getApplicationDocumentsDirectory();
     return directory.path;
+  }
+
+    Future<String> readHostConfig() async {
+    try {
+      final file = await _localFile;
+      String contents = await file.readAsString();
+      return contents;
+    } catch (e) {
+      return "Error";
+    }
   }
 }
 
