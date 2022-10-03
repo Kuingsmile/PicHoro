@@ -11,3 +11,7 @@ path_provider_ios=D:\\flutter\\.pub-cache\\hosted\\pub.flutter-io.cn\\path_provi
 path_provider_linux=D:\\flutter\\.pub-cache\\hosted\\pub.flutter-io.cn\\path_provider_linux-2.1.7\\
 path_provider_macos=D:\\flutter\\.pub-cache\\hosted\\pub.flutter-io.cn\\path_provider_macos-2.0.6\\
 path_provider_windows=D:\\flutter\\.pub-cache\\hosted\\pub.flutter-io.cn\\path_provider_windows-2.1.3\\
+permission_handler=D:\\flutter\\.pub-cache\\hosted\\pub.flutter-io.cn\\permission_handler-10.0.2\\
+permission_handler_android=D:\\flutter\\.pub-cache\\hosted\\pub.flutter-io.cn\\permission_handler_android-10.1.0\\
+permission_handler_apple=D:\\flutter\\.pub-cache\\hosted\\pub.flutter-io.cn\\permission_handler_apple-9.0.4\\
+permission_handler_windows=D:\\flutter\\.pub-cache\\hosted\\pub.flutter-io.cn\\permission_handler_windows-0.1.0\\
