@@ -10,6 +10,11 @@ import 'package:horopic/hostconfig.dart';
 import 'package:path_provider/path_provider.dart';
 //import 'package:permission_handler/permission_handler.dart';
 import 'package:horopic/utils/permission.dart';
+import 'package:horopic/utils/common_func.dart';
+import 'package:wechat_assets_picker/wechat_assets_picker.dart';
+import 'package:camera/camera.dart';
+import 'package:horopic/configurePage.dart';
+import 'package:horopic/pages/themeSet.dart';
 
 /*
 @Author: Horo
@@ -31,7 +36,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: '赫萝图床上传工具',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(primarySwatch: Colors.cyan),
+      theme: lightThemeData,
       home: const HomePage(),
     );
   }
@@ -47,7 +52,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final ImagePicker _picker = ImagePicker();
   File? _image;
-  bool uploadStatus = false;
+  List<File> _imagesList = [];
 
   _imageFromCamera() async {
     final XFile? pickedImage =
@@ -57,10 +62,11 @@ class _HomePageState extends State<HomePage> {
       return;
     }
     final File fileImage = File(pickedImage.path);
-
-    if (imageConstraint(fileImage)) {
+    _imagesList.clear();
+    if (imageConstraint(context: context, image: fileImage)) {
       setState(() {
         _image = fileImage;
+        _imagesList.add(_image!);
       });
     }
   }
@@ -73,7 +79,7 @@ class _HomePageState extends State<HomePage> {
       return;
     }
     final File fileImage = File(pickedImage.path);
-    if (imageConstraint(fileImage)) {
+    if (imageConstraint(context: context, image: fileImage)) {
       setState(() {
         _image = fileImage;
         _uploadAndBackToCamera();
@@ -109,35 +115,33 @@ class _HomePageState extends State<HomePage> {
     };
     Dio dio = Dio(options);
     String uploadUrl = configMap["host"] + "/api/v1/upload";
-    var respone = await dio.post<String>(uploadUrl, data: formdata);
+    var response = await dio.post<String>(uploadUrl, data: formdata);
     _cameraAndBack();
   }
 
-  _imageFromGallery() async {
-    final XFile? pickedImage =
-        await _picker.pickImage(source: ImageSource.gallery, imageQuality: 100);
+  _multiImagePickerFromGallery() async {
+    AssetPickerConfig config = const AssetPickerConfig(
+      maxAssets: 100,
+      selectedAssets: [],
+    );
+    final List<AssetEntity>? pickedImage =
+        await AssetPicker.pickAssets(context, pickerConfig: config);
+
     if (pickedImage == null) {
       showAlertDialog(context: context, title: "上传失败!", content: "请重新选择图片.");
       return;
     }
-    final File fileImage = File(pickedImage.path);
-    if (imageConstraint(fileImage)) {
-      setState(() {
-        _image = fileImage;
-      });
+    for (var i = 0; i < pickedImage.length; i++) {
+      final File? fileImage = await pickedImage[i].originFile;
+      if (imageConstraint(context: context, image: fileImage!)) {
+        setState(() {
+          _imagesList.add(fileImage);
+          if (i == 0) {
+            _image = fileImage;
+          }
+        });
+      }
     }
-  }
-
-  bool imageConstraint(File image) {
-    if (!['bmp', 'jpg', 'jpeg', 'png', 'gif', 'webp']
-        .contains(image.path.split('.').last.toString())) {
-      showAlertDialog(
-          context: context,
-          title: "上传失败!",
-          content: "图片格式因该为bmp,jpg,jpeg,png,gif,webp.");
-      return false;
-    }
-    return true;
   }
 
 //read from host_config.txt to get token,host,strategy_id
@@ -157,57 +161,64 @@ class _HomePageState extends State<HomePage> {
   }
 
   _upLoadImage() async {
-    if (_image == null) {
+    if (_imagesList.isEmpty) {
       showAlertDialog(context: context, title: "上传失败!", content: "请先选择图片.");
       return;
     }
-    String path = _image!.path;
-    var name = path.substring(path.lastIndexOf("/") + 1, path.length);
     var configData = await readHostConfig();
     if (configData == "Error") {
       showAlertDialog(context: context, title: "上传失败!", content: "请先配置上传参数.");
       return;
     }
-
     Map configMap = jsonDecode(configData);
-
-    FormData formdata = FormData.fromMap({
-      "file": await MultipartFile.fromFile(path, filename: name),
-      "strategy_id": configMap["strategy_id"],
-    });
-
     BaseOptions options = BaseOptions();
     options.headers = {
       "Authorization": configMap["token"],
       "Accept": "application/json",
       "Content-Type": "multipart/form-data",
     };
-    Dio dio = Dio(options);
     String uploadUrl = configMap["host"] + "/api/v1/upload";
-    var response = await dio.post(uploadUrl, data: formdata);
-    if (response.statusCode == 200 && response.data!['status'] == true) {
-      _image = null;
-      Fluttertoast.showToast(
-          msg: "图片上传成功", gravity: ToastGravity.CENTER, textColor: Colors.grey);
-    } else {
-      if (response.data['status'] == false) {
-        showAlertDialog(
-            context: context, title: '错误', content: response.data['message']);
-        return;
-      } else if (response.statusCode == 403) {
-        showAlertDialog(context: context, title: '错误', content: '管理员关闭了接口功能');
-        return;
-      } else if (response.statusCode == 401) {
-        showAlertDialog(context: context, title: '错误', content: '授权失败');
-        return;
-      } else if (response.statusCode == 500) {
-        showAlertDialog(context: context, title: '错误', content: '服务器异常');
-        return;
-      } else if (response.statusCode == 404) {
-        showAlertDialog(context: context, title: '错误', content: '接口不存在');
-        return;
+    int successCount = 0;
+    int failCount = 0;
+    List<String> failList = [];
+    List<String> successList = [];
+    for (File imageToTread in _imagesList) {
+      String path = imageToTread.path;
+      var name = path.substring(path.lastIndexOf("/") + 1, path.length);
+      FormData formdata = FormData.fromMap({
+        "file": await MultipartFile.fromFile(path, filename: name),
+        "strategy_id": configMap["strategy_id"],
+      });
+
+      Dio dio = Dio(options);
+      var response = await dio.post(uploadUrl, data: formdata);
+      if (response.statusCode == 200 && response.data!['status'] == true) {
+        successCount += 1;
+        successList.add(name);
+      } else {
+        failCount += 1;
+        failList.add(name);
       }
     }
+    String content =
+        "上传成功$successCount张图片.\n上传失败$failCount张图片.\n上传失败列表:$failList";
+    if (successCount == 0) {
+      showAlertDialog(
+          context: context,
+          title: "上传失败!",
+          content: "哭唧唧，全部上传失败了.\n失败的图片列表:$failList");
+    } else if (failCount == 0) {
+      showAlertDialog(
+          context: context,
+          title: "上传成功!",
+          content: "哇塞，全部上传成功了.\n成功上传的图片列表:$successList");
+    } else {
+      showAlertDialog(context: context, title: "上传完成!", content: content);
+    }
+    _imagesList.clear();
+    successList.clear();
+    failList.clear();
+    _image = null;
   }
 
   @override
@@ -226,58 +237,48 @@ class _HomePageState extends State<HomePage> {
           Center(
             child: Padding(
               padding: const EdgeInsets.all(8.0),
-              // Display Progress Indicator if uploadStatus is true
-              child: uploadStatus
-                  ? Container(
-                      height: 100,
-                      width: 100,
-                      child: const CircularProgressIndicator(
-                        strokeWidth: 7,
-                      ),
-                    )
-                  : Padding(
-                      padding: const EdgeInsets.only(top: 40),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          GestureDetector(
-                            onTap: () {
-                              bottomPickerSheet(
-                                  context, _imageFromCamera, _imageFromGallery);
-                            },
-                            child: CircleAvatar(
-                              radius: MediaQuery.of(context).size.width / 6,
-                              backgroundColor: Colors.grey,
-                              backgroundImage: _image != null
-                                  ? FileImage(_image!)
-                                  : const Image(
-                                          image:
-                                              AssetImage('assets/favicon.jpg'))
-                                      .image,
-                            ),
-                          ),
-                          const SizedBox(
-                            height: 20,
-                          ),
-                          ElevatedButton(
-                            onPressed: _upLoadImage, // Upload Image
-                            child: Padding(
-                              padding: const EdgeInsets.all(18.0),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: const [
-                                  Icon(Icons.file_upload),
-                                  Text(
-                                    '上传图片',
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
+              child: Padding(
+                padding: const EdgeInsets.only(top: 40),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        bottomPickerSheet(context, _imageFromCamera,
+                            _multiImagePickerFromGallery);
+                      },
+                      child: CircleAvatar(
+                        radius: MediaQuery.of(context).size.width / 6,
+                        backgroundColor: Colors.grey,
+                        backgroundImage: _image != null
+                            ? FileImage(_image!)
+                            : const Image(
+                                    image: AssetImage('assets/favicon.jpg'))
+                                .image,
                       ),
                     ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    ElevatedButton(
+                      onPressed: _upLoadImage, // Upload Image
+                      child: Padding(
+                        padding: const EdgeInsets.all(18.0),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: const [
+                            Icon(Icons.file_upload),
+                            Text(
+                              '上传图片',
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
           Container(
@@ -321,7 +322,7 @@ class _HomePageState extends State<HomePage> {
                           right: 20,
                         ),
                         child: ElevatedButton(
-                          onPressed: _imageFromGallery,
+                          onPressed: _multiImagePickerFromGallery,
                           child: Padding(
                             padding: const EdgeInsets.all(12.0),
                             child: Row(
@@ -353,7 +354,7 @@ class _HomePageState extends State<HomePage> {
                         ),
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.yellow[300],
+                            //backgroundColor: Colors.yellow[300],
                             minimumSize: const Size(20, 100),
                           ),
                           onPressed: _cameraAndBack,
@@ -393,12 +394,12 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
         currentIndex: 0,
-        selectedItemColor: Colors.cyan[600],
+        //selectedItemColor: Colors.cyan[600],
         onTap: (int index) {
           if (index == 1) {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => HostConfig()),
+              MaterialPageRoute(builder: (context) => ConfigurePage()),
             );
           }
         },
