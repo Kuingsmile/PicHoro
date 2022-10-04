@@ -15,41 +15,6 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "2.1.0"
-  camera:
-    dependency: "direct main"
-    description:
-      name: camera
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "0.10.0+3"
-  camera_android:
-    dependency: transitive
-    description:
-      name: camera_android
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "0.10.0+3"
-  camera_avfoundation:
-    dependency: transitive
-    description:
-      name: camera_avfoundation
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "0.9.8+6"
-  camera_platform_interface:
-    dependency: transitive
-    description:
-      name: camera_platform_interface
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "2.2.2"
-  camera_web:
-    dependency: transitive
-    description:
-      name: camera_web
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "0.3.0+1"
   characters:
     dependency: transitive
     description:
@@ -450,13 +415,6 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "6.0.3"
-  quiver:
-    dependency: transitive
-    description:
-      name: quiver
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "3.1.0"
   sky_engine:
     dependency: transitive
     description: flutter
@@ -483,13 +441,6 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "2.1.0"
-  stream_transform:
-    dependency: transitive
-    description:
-      name: stream_transform
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "2.0.0"
   string_scanner:
     dependency: transitive
     description:
