@@ -4,6 +4,9 @@ import 'package:path_provider/path_provider.dart';
 import 'package:dio/dio.dart';
 import 'dart:convert';
 import 'package:horopic/AlertDialog.dart';
+import 'package:horopic/pages/themeSet.dart';
+import 'package:horopic/pages/loading.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 //import 'package:permission_handler/permission_handler.dart';
 //a textfield to get hosts,username,passwd,token and strategy_id
@@ -97,7 +100,17 @@ class _HostConfigState extends State<HostConfig> {
             ElevatedButton(
               onPressed: () {
                 if (_formKey.currentState!.validate()) {
-                  _saveHostConfig();
+                  showDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (context) {
+                        return NetLoadingDialog(
+                          outsideDismiss: false,
+                          loading: true,
+                          loadingText: "配置中...",
+                          requestCallBack: _saveHostConfig(),
+                        );
+                      });
                 }
               },
               child: const Text('提交完整表单'),
@@ -152,6 +165,7 @@ class _HostConfigState extends State<HostConfig> {
         response = await dio.get(strategiesUrl);
 
         showAlertDialog(
+            barrierDismissible: false,
             context: context,
             title: '储存策略Id列表',
             content: response.data['data']['strategies'].toString());
@@ -180,7 +194,7 @@ class _HostConfigState extends State<HostConfig> {
     }
   }
 
-  void _saveHostConfig() async {
+  Future _saveHostConfig() async {
     final host = _hostController.text;
     String token = 'Bearer ';
     final username = _usernameController.text;
@@ -208,7 +222,12 @@ class _HostConfigState extends State<HostConfig> {
 
         final hostConfigFile = await _localFile;
         hostConfigFile.writeAsString(hostConfigJson);
-        Navigator.pop(context);
+        //Navigator.pop(context);
+        return showAlertDialog(
+            context: context,
+            barrierDismissible: false,
+            title: '配置成功',
+            content: '您的密钥为：$token,\n请妥善保管，不要泄露给他人');
       } else {
         if (response.statusCode == 403) {
           showAlertDialog(context: context, title: '错误', content: '管理员关闭了接口功能');
@@ -236,49 +255,61 @@ class _HostConfigState extends State<HostConfig> {
 
   void checkHostConfig() async {
     try {
-    final hostConfigFile = await _localFile;
-    
-    String configData = await hostConfigFile.readAsString();
-    if (configData == "Error") {
-      showAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");
-      return;
-    }
-    Map configMap = jsonDecode(configData);
-    BaseOptions options = BaseOptions();
-    options.headers = {
-      "Authorization": configMap["token"],
-      "Accept": "application/json",
-      "Content-Type": "multipart/form-data",
-    };
-    String profileUrl = configMap["host"] + "/api/v1/profile";
-    Dio dio = Dio(options);
-    var response = await dio.get(profileUrl,);
-    if (response.statusCode == 200 && response.data['status'] == true) {
-      showAlertDialog(context: context, title: "检查成功!", content: "配置正确.");
-    } else {
-      if (response.statusCode == 403) {
-        showAlertDialog(context: context, title: '错误', content: '管理员关闭了接口功能');
-        return;
-      } else if (response.statusCode == 401) {
-        showAlertDialog(context: context, title: '错误', content: '授权失败');
-        return;
-      } else if (response.statusCode == 500) {
-        showAlertDialog(context: context, title: '错误', content: '服务器异常');
-        return;
-      } else if (response.statusCode == 404) {
-        showAlertDialog(context: context, title: '错误', content: '接口不存在');
+      final hostConfigFile = await _localFile;
+
+      String configData = await hostConfigFile.readAsString();
+      if (configData == "Error") {
+        showAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");
         return;
       }
-      if (response.data['status'] == false) {
-        showAlertDialog(
-            context: context, title: '错误', content: response.data['message']);
-        return;
+      Map configMap = jsonDecode(configData);
+      BaseOptions options = BaseOptions();
+      options.headers = {
+        "Authorization": configMap["token"],
+        "Accept": "application/json",
+        "Content-Type": "multipart/form-data",
+      };
+      String profileUrl = configMap["host"] + "/api/v1/profile";
+      Dio dio = Dio(options);
+      var response = await dio.get(
+        profileUrl,
+      );
+      if (response.statusCode == 200 && response.data['status'] == true) {
+        //showAlertDialog(context: context, title: "检查成功!", content: "配置正确.");
+        Fluttertoast.showToast(
+            msg: "恭喜，配置正确",
+            toastLength: Toast.LENGTH_SHORT,
+            timeInSecForIosWeb: 2,
+            backgroundColor: Theme.of(context).brightness == Brightness.light
+                ? Colors.black
+                : Colors.white,
+            textColor: Theme.of(context).brightness == Brightness.light
+                ? Colors.white
+                : Colors.black,
+            fontSize: 16.0);
+      } else {
+        if (response.statusCode == 403) {
+          showAlertDialog(context: context, title: '错误', content: '管理员关闭了接口功能');
+          return;
+        } else if (response.statusCode == 401) {
+          showAlertDialog(context: context, title: '错误', content: '授权失败');
+          return;
+        } else if (response.statusCode == 500) {
+          showAlertDialog(context: context, title: '错误', content: '服务器异常');
+          return;
+        } else if (response.statusCode == 404) {
+          showAlertDialog(context: context, title: '错误', content: '接口不存在');
+          return;
+        }
+        if (response.data['status'] == false) {
+          showAlertDialog(
+              context: context, title: '错误', content: response.data['message']);
+          return;
+        }
       }
+    } catch (e) {
+      showAlertDialog(context: context, title: "检查失败!", content: e.toString());
     }
-  }
-  catch (e) {
-    showAlertDialog(context: context, title: "检查失败!", content: e.toString());
-  }
   }
 
   Future<File> get _localFile async {
@@ -291,7 +322,7 @@ class _HostConfigState extends State<HostConfig> {
     return directory.path;
   }
 
-    Future<String> readHostConfig() async {
+  Future<String> readHostConfig() async {
     try {
       final file = await _localFile;
       String contents = await file.readAsString();
