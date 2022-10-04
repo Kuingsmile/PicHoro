@@ -2,8 +2,7 @@
 
 Mobile tool for pictures uploading built by flutter  
 
-  
-一个基于flutter的移动端图片上传工具，已支持兰空图床
+一个基于flutter的移动端图片上传工具，已支持兰空图床，正在研究添加各种其它图床的支持
 
 @author: Horosama   
 
