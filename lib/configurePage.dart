@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:horopic/hostconfig.dart';
-import 'dart:io';
-import 'package:path_provider/path_provider.dart';
-import 'package:dio/dio.dart';
-import 'dart:convert';
+//import 'dart:io';
+//import 'package:path_provider/path_provider.dart';
+//import 'package:dio/dio.dart';
+//import 'dart:convert';
 import 'package:horopic/AlertDialog.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:horopic/pages/author.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:horopic/main.dart';
 
 //a configure page for user to show configure entry
 class ConfigurePage extends StatefulWidget {
@@ -20,6 +21,7 @@ class ConfigurePage extends StatefulWidget {
 class _ConfigurePageState extends State<ConfigurePage> {
   String version = ' ';
   final Uri uri = Uri.parse('https://github.com/Kuingsmile/PicHoro');
+
   @override
   void initState() {
     super.initState();
@@ -39,7 +41,7 @@ class _ConfigurePageState extends State<ConfigurePage> {
       appBar: AppBar(
         centerTitle: true,
         title: const Text(
-          '配置页面',
+          '设置页面',
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
@@ -86,7 +88,7 @@ class _ConfigurePageState extends State<ConfigurePage> {
           ListTile(
             title: const Text('项目地址'),
             onTap: () {
-              launchUrl(uri);
+              _launchUrl();
             },
             trailing: const Icon(Icons.arrow_forward_ios),
           ),
@@ -102,6 +104,30 @@ class _ConfigurePageState extends State<ConfigurePage> {
           ),
         ],
       ),
+      bottomNavigationBar: BottomNavigationBar(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.file_upload),
+            label: '上传',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings),
+            label: '设置',
+          ),
+        ],
+        currentIndex: 1,
+        onTap: (int index) {
+          if (index == 0) {
+            Navigator.pop(context);
+          }
+        },
+      ),
     );
+  }
+
+  Future<void> _launchUrl() async {
+    if (!await launchUrl(uri)) {
+      showAlertDialog(context: context, title: '错误', content: '无法打开网页');
+    }
   }
 }
