@@ -6,22 +6,22 @@ import 'package:image_picker/image_picker.dart';
 import 'package:horopic/AlertDialog.dart';
 import 'package:horopic/bottompicker_sheet.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:horopic/hostconfig.dart';
+//import 'package:horopic/hostconfig.dart';
 import 'package:path_provider/path_provider.dart';
 //import 'package:permission_handler/permission_handler.dart';
 import 'package:horopic/utils/permission.dart';
 import 'package:horopic/utils/common_func.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
-import 'package:camera/camera.dart';
+//import 'package:camera/camera.dart';
 import 'package:horopic/configurePage.dart';
 import 'package:horopic/pages/themeSet.dart';
-
+import 'package:horopic/pages/loading.dart';
 /*
 @Author: Horo
 @e-mail: ma_shiqing@163.com
-@Date: 2022-10-02
+@Date: 2022-10-04
 @Description:HoroPic, a picture upload tool 
-@version: 1.0.0
+@version: 1.2.1
 */
 
 void main() {
@@ -58,7 +58,17 @@ class _HomePageState extends State<HomePage> {
     final XFile? pickedImage =
         await _picker.pickImage(source: ImageSource.camera, imageQuality: 100);
     if (pickedImage == null) {
-      showAlertDialog(context: context, title: "上传失败!", content: "请重新选择图片.");
+      Fluttertoast.showToast(
+          msg: "未拍摄图片",
+          toastLength: Toast.LENGTH_SHORT,
+          timeInSecForIosWeb: 2,
+          backgroundColor: Theme.of(context).brightness == Brightness.light
+              ? Colors.black
+              : Colors.white,
+          textColor: Theme.of(context).brightness == Brightness.light
+              ? Colors.white
+              : Colors.black,
+          fontSize: 16.0);
       return;
     }
     final File fileImage = File(pickedImage.path);
@@ -75,33 +85,76 @@ class _HomePageState extends State<HomePage> {
     final XFile? pickedImage =
         await _picker.pickImage(source: ImageSource.camera, imageQuality: 100);
     if (pickedImage == null) {
-      showAlertDialog(context: context, title: "上传失败!", content: "请重新选择图片.");
+      Fluttertoast.showToast(
+          msg: "未选择图片",
+          toastLength: Toast.LENGTH_SHORT,
+          timeInSecForIosWeb: 2,
+          backgroundColor: Theme.of(context).brightness == Brightness.light
+              ? Colors.black
+              : Colors.white,
+          textColor: Theme.of(context).brightness == Brightness.light
+              ? Colors.white
+              : Colors.black,
+          fontSize: 16.0);
       return;
     }
     final File fileImage = File(pickedImage.path);
     if (imageConstraint(context: context, image: fileImage)) {
-      setState(() {
-        _image = fileImage;
-        _uploadAndBackToCamera();
-      });
+      _image = fileImage;
+      //setState(//() {
+      //_uploadAndBackToCamera();
+      if (_image == null) {
+        Fluttertoast.showToast(
+            backgroundColor: Theme.of(context).brightness == Brightness.light
+                ? Colors.black
+                : Colors.white,
+            textColor: Theme.of(context).brightness == Brightness.light
+                ? Colors.white
+                : Colors.black,
+            msg: '请先选择图片');
+        return;
+      } else {
+        showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (context) {
+              return NetLoadingDialog(
+                outsideDismiss: false,
+                loading: true,
+                loadingText: "上传中...",
+                requestCallBack: _uploadAndBackToCamera(),
+              );
+            });
+      }
     }
+    _cameraAndBack();
   }
 
   _uploadAndBackToCamera() async {
     if (_image == null) {
-      showAlertDialog(context: context, title: "上传失败!", content: "请先选择图片.");
-      return;
+      return Fluttertoast.showToast(
+          msg: "未选择图片",
+          toastLength: Toast.LENGTH_SHORT,
+          timeInSecForIosWeb: 2,
+          backgroundColor: Theme.of(context).brightness == Brightness.light
+              ? Colors.black
+              : Colors.white,
+          textColor: Theme.of(context).brightness == Brightness.light
+              ? Colors.white
+              : Colors.black,
+          fontSize: 16.0);
     }
     String path = _image!.path;
     var name = path.substring(path.lastIndexOf("/") + 1, path.length);
     var configData = await readHostConfig();
     if (configData == "Error") {
-      showAlertDialog(context: context, title: "上传失败!", content: "请先配置上传参数.");
-      return;
+      return showAlertDialog(
+          context: context, 
+          title: "上传失败!",
+           content: "请先配置上传参数.");
     }
 
     Map configMap = jsonDecode(configData);
-
     FormData formdata = FormData.fromMap({
       "file": await MultipartFile.fromFile(path, filename: name),
       "strategy_id": configMap["strategy_id"],
@@ -116,7 +169,7 @@ class _HomePageState extends State<HomePage> {
     Dio dio = Dio(options);
     String uploadUrl = configMap["host"] + "/api/v1/upload";
     var response = await dio.post<String>(uploadUrl, data: formdata);
-    _cameraAndBack();
+    return true;
   }
 
   _multiImagePickerFromGallery() async {
@@ -128,7 +181,17 @@ class _HomePageState extends State<HomePage> {
         await AssetPicker.pickAssets(context, pickerConfig: config);
 
     if (pickedImage == null) {
-      showAlertDialog(context: context, title: "上传失败!", content: "请重新选择图片.");
+      Fluttertoast.showToast(
+          msg: "未选择任何图片",
+          toastLength: Toast.LENGTH_SHORT,
+          timeInSecForIosWeb: 2,
+          backgroundColor: Theme.of(context).brightness == Brightness.light
+              ? Colors.black
+              : Colors.white,
+          textColor: Theme.of(context).brightness == Brightness.light
+              ? Colors.white
+              : Colors.black,
+          fontSize: 16.0);
       return;
     }
     for (var i = 0; i < pickedImage.length; i++) {
@@ -161,14 +224,10 @@ class _HomePageState extends State<HomePage> {
   }
 
   _upLoadImage() async {
-    if (_imagesList.isEmpty) {
-      showAlertDialog(context: context, title: "上传失败!", content: "请先选择图片.");
-      return;
-    }
     var configData = await readHostConfig();
     if (configData == "Error") {
-      showAlertDialog(context: context, title: "上传失败!", content: "请先配置上传参数.");
-      return;
+      return showAlertDialog(
+          context: context, title: "上传失败!", content: "请先配置上传参数.");
     }
     Map configMap = jsonDecode(configData);
     BaseOptions options = BaseOptions();
@@ -180,8 +239,12 @@ class _HomePageState extends State<HomePage> {
     String uploadUrl = configMap["host"] + "/api/v1/upload";
     int successCount = 0;
     int failCount = 0;
+
     List<String> failList = [];
     List<String> successList = [];
+    failList.clear();
+    successList.clear();
+
     for (File imageToTread in _imagesList) {
       String path = imageToTread.path;
       var name = path.substring(path.lastIndexOf("/") + 1, path.length);
@@ -200,25 +263,35 @@ class _HomePageState extends State<HomePage> {
         failList.add(name);
       }
     }
-    String content =
-        "上传成功$successCount张图片.\n上传失败$failCount张图片.\n上传失败列表:$failList";
-    if (successCount == 0) {
-      showAlertDialog(
-          context: context,
-          title: "上传失败!",
-          content: "哭唧唧，全部上传失败了.\n失败的图片列表:$failList");
-    } else if (failCount == 0) {
-      showAlertDialog(
-          context: context,
-          title: "上传成功!",
-          content: "哇塞，全部上传成功了.\n成功上传的图片列表:$successList");
-    } else {
-      showAlertDialog(context: context, title: "上传完成!", content: content);
-    }
     _imagesList.clear();
-    successList.clear();
-    failList.clear();
     _image = null;
+
+    if (successCount == 0) {
+      String content = "哭唧唧，全部上传失败了=_=\n上传失败的图片列表:\n";
+      for (String failImage in failList) {
+        content += failImage + "\n";
+      }
+      return showAlertDialog(
+          context: context, title: "上传失败!", content: content);
+    } else if (failCount == 0) {
+      String content = "哇塞，全部上传成功了！\n上传成功的图片列表:\n";
+      for (String successImage in successList) {
+        content += successImage + "\n";
+      }
+      return showAlertDialog(
+          context: context, title: "上传成功!", content: content);
+    } else {
+      String content = "部分上传成功~\n上传成功的图片列表:\n";
+      for (String successImage in successList) {
+        content += successImage + "\n";
+      }
+      content += "上传失败的图片列表:\n";
+      for (String failImage in failList) {
+        content += failImage + "\n";
+      }
+      return showAlertDialog(
+          context: context, title: "上传完成!", content: content);
+    }
   }
 
   @override
@@ -262,7 +335,33 @@ class _HomePageState extends State<HomePage> {
                       height: 20,
                     ),
                     ElevatedButton(
-                      onPressed: _upLoadImage, // Upload Image
+                      onPressed: () {
+                        if (_imagesList.isEmpty) {
+                          Fluttertoast.showToast(
+                              backgroundColor: Theme.of(context).brightness ==
+                                      Brightness.light
+                                  ? Colors.black
+                                  : Colors.white,
+                              textColor: Theme.of(context).brightness ==
+                                      Brightness.light
+                                  ? Colors.white
+                                  : Colors.black,
+                              msg: '请先选择图片');
+                          return;
+                        } else {
+                          showDialog(
+                              context: context,
+                              barrierDismissible: false,
+                              builder: (context) {
+                                return NetLoadingDialog(
+                                  outsideDismiss: false,
+                                  loading: true,
+                                  loadingText: "上传中...",
+                                  requestCallBack: _upLoadImage(),
+                                );
+                              });
+                        }
+                      }, // Upload Image
                       child: Padding(
                         padding: const EdgeInsets.all(18.0),
                         child: Row(
@@ -303,7 +402,7 @@ class _HomePageState extends State<HomePage> {
                               children: const [
                                 Icon(Icons.camera_alt),
                                 Text(
-                                  '单次拍照',
+                                  '单张拍照',
                                 ),
                               ],
                             ),
@@ -330,7 +429,7 @@ class _HomePageState extends State<HomePage> {
                               children: const [
                                 Icon(Icons.photo_library),
                                 Text(
-                                  '相册上传',
+                                  '相册多选',
                                 ),
                               ],
                             ),
@@ -386,11 +485,11 @@ class _HomePageState extends State<HomePage> {
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.file_upload),
-            label: '上传界面',
+            label: '上传',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings),
-            label: '配置',
+            label: '设置',
           ),
         ],
         currentIndex: 0,
