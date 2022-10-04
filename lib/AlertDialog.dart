@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 
-showAlertDialog(
-    {required BuildContext context,
-    required String title,
-    required String content}) {
+showAlertDialog({
+  bool? barrierDismissible,
+  required BuildContext context,
+  required String title,
+  required String content,
+}) {
   return showDialog(
       context: context,
+      barrierDismissible: barrierDismissible == true ? true : false,
       builder: (BuildContext context) {
         return AlertDialog(
           contentPadding: const EdgeInsets.only(left: 20, right: 20),
