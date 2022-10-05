@@ -18,7 +18,7 @@ Mobile tool for pictures uploading built by flutter
 <tr>
 <td>
 <center>
-<img src="http://imgx.horosama.com/admin_uploads/2022/10/2022_10_05_633d85a4eb29d.jpg" width="97%" height = 105%/>
+<img src="http://imgx.horosama.com/admin_uploads/2022/10/2022_10_05_633d85a4eb29d.jpg" width="97%" />
 <br/>
 <font color="AAAAAA">主页.jpg</font>
 </center>
