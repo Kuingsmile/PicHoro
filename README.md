@@ -2,7 +2,7 @@
 <div align="center">
   <img src="http://imgx.horosama.com/admin_uploads/2022/10/2022_10_05_633d79e401694.png" alt="">
   <h1>PicHoro</h1>
-
+</div>
 # PicHoro
 
 Mobile tool for pictures uploading built by flutter
