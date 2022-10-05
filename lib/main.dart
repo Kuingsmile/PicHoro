@@ -9,7 +9,7 @@ import 'package:horopic/utils/themeProvider.dart';
 @Author: Horo
 @e-mail: ma_shiqing@163.com
 @Date: 2022-10-05
-@Description:HoroPic, a picture upload tool 
+@Description:PicHoro, a picture upload tool 
 @version: 1.3.0
 */
 
