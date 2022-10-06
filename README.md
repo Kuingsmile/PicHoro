@@ -60,7 +60,7 @@ Mobile tool for pictures uploading built by flutter
 
 **安卓版**：
 
-[https://www.horosama.com/self_apk/PicHoro.apk]('https://www.horosama.com/self_apk/PicHoro.apk)
+[https://www.horosama.com/self_apk/PicHoro.apk](https://www.horosama.com/self_apk/PicHoro.apk)
 
 <div align =center>
 <img src="http://imgx.horosama.com/admin_uploads/2022/10/2022_10_05_633d79dbadc96.png" width=30% alt ='http://www.horosama.com/self_apk/PicHoro.apk'>
@@ -80,6 +80,6 @@ Mobile tool for pictures uploading built by flutter
 
 ## License
 
-[MIT](http://opensource.org/licenses/MIT)
+GPL-3.0
 
 Copyright (c) 2022 Kuingsmile
