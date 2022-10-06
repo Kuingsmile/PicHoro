@@ -9,22 +9,18 @@ import 'package:horopic/utils/themeProvider.dart';
 @Author: Horo
 @e-mail: ma_shiqing@163.com
 @Date: 2022-10-05
-@Description:PicHoro, a picture upload tool 
+@Description:icHoroP, a picture upload tool 
 @version: 1.3.0
 */
 
-initGLobal() async {}
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  String initUSer = await Global.getUser();
-  await Global.setUser(initUSer);
+  String initUser = await Global.getUser();
+  await Global.setUser(initUser);
   String initPassword = await Global.getPassword();
   await Global.setPassword(initPassword);
   String initPShost = await Global.getPShost();
   await Global.setPShost(initPShost);
-  await initGLobal();
-
   runApp(MyApp());
 }
 
