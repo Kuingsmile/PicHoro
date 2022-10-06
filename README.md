@@ -37,7 +37,7 @@ Mobile tool for pictures uploading built by flutter
 
   详细更新日志请查看[更新日志](https://github.com/Kuingsmile/PicHoro/blob/main/Version_update_log.md "更新日志")
 
-- 2022-10-06: **V1.30**:
+- 2022-10-06: **V1.31**:
   - 修复了已注册用户在新设备第一次登录的时候，无法正常登录的bug
   - 修复了连续上传功能在退出的时候会卡在上传中的bug
   - 已登录的设备在获取云端配置的时候不需要重新输入用户名和密码了
