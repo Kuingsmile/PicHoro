@@ -7,6 +7,7 @@ import 'package:horopic/hostconfigure/hostconfig.dart' as lskyhost;
 import 'dart:convert';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class APPPassword extends StatefulWidget {
   const APPPassword({Key? key}) : super(key: key);
@@ -22,8 +23,10 @@ class _APPPasswordState extends State<APPPassword> {
 
   _saveuserpasswd() async {
     try {
+      await Global.setPassword(_passwordcontroller.text);
       var usernamecheck =
           await MySqlUtils.queryUser(username: _userNametext.text);
+
       if (usernamecheck == 'Empty') {
         await Global.setUser(_userNametext.text);
         await Global.setPassword(_passwordcontroller.text);
@@ -47,8 +50,10 @@ class _APPPasswordState extends State<APPPassword> {
           if (Global.defaultUser != _userNametext.text) {
             await Global.setUser(_userNametext.text);
             await Global.setPassword(_passwordcontroller.text);
-            await Global.setPShost(usernamecheck['host']);
-            await _fetchconfig();
+            await Global.setPShost(usernamecheck['defaultPShost']);
+            await _fetchconfig(_userNametext.text.toString(),
+                _passwordcontroller.text.toString());
+
             return showAlertDialog(
                 context: context, title: '通知', content: '已成功切换用户');
           } else {
@@ -66,10 +71,9 @@ class _APPPasswordState extends State<APPPassword> {
     }
   }
 
-  _fetchconfig() async {
+  _fetchconfig(String username, String password) async {
     try {
-      var usernamecheck =
-          await MySqlUtils.queryUser(username: _userNametext.text.toString());
+      var usernamecheck = await MySqlUtils.queryUser(username: username);
       if (usernamecheck == 'Empty') {
         return showAlertDialog(
             context: context, title: '通知', content: '用户不存在，请重试');
@@ -77,13 +81,13 @@ class _APPPasswordState extends State<APPPassword> {
         return showAlertDialog(
             context: context, title: "错误", content: "获取登录信息失败,请重试!");
       } else {
-        if (usernamecheck['password'] == _passwordcontroller.text) {
-          await Global.setUser(_userNametext.text);
-          await Global.setPassword(_passwordcontroller.text);
+        if (usernamecheck['password'] == password) {
+          await Global.setUser(username);
+          await Global.setPassword(password);
           await Global.setPShost(usernamecheck['defaultPShost']);
           //拉取兰空图床配置
           var lskyhostresult =
-              await MySqlUtils.queryLankong(username: _userNametext.text);
+              await MySqlUtils.queryLankong(username: username);
           if (lskyhostresult == 'Error') {
             return showAlertDialog(
                 context: context, title: "错误", content: "获取登录信息失败,请重试!");
@@ -104,8 +108,17 @@ class _APPPasswordState extends State<APPPassword> {
             }
           }
           //全部拉取完成后，提示用户
-          return showAlertDialog(
-              context: context, title: '通知', content: '已成功拉取全部云端配置');
+          return Fluttertoast.showToast(
+              msg: "已拉取云端配置",
+              toastLength: Toast.LENGTH_SHORT,
+              timeInSecForIosWeb: 2,
+              backgroundColor: Theme.of(context).brightness == Brightness.light
+                  ? Colors.black
+                  : Colors.white,
+              textColor: Theme.of(context).brightness == Brightness.light
+                  ? Colors.white
+                  : Colors.black,
+              fontSize: 16.0);
         } else {
           return showAlertDialog(
               context: context, title: '通知', content: '密码错误，请重试');
@@ -182,19 +195,42 @@ class _APPPasswordState extends State<APPPassword> {
               child: const Text('注册和登录'),
             ),
             ElevatedButton(
-              onPressed: () {
-                if (_formKey.currentState!.validate()) {
-                  showDialog(
-                      context: context,
-                      barrierDismissible: false,
-                      builder: (context) {
-                        return NetLoadingDialog(
-                          outsideDismiss: false,
-                          loading: true,
-                          loadingText: "配置中...",
-                          requestCallBack: _fetchconfig(),
-                        );
-                      });
+              onPressed: () async {
+                String currentusername = await Global.getUser();
+                var usernamecheck =
+                    await MySqlUtils.queryUser(username: currentusername);
+                String currentpassword = await Global.getPassword();
+                try {
+                  if (usernamecheck['password'] == currentpassword) {
+                    showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (context) {
+                          return NetLoadingDialog(
+                            outsideDismiss: false,
+                            loading: true,
+                            loadingText: "配置中...",
+                            requestCallBack:
+                                _fetchconfig(currentusername, currentpassword),
+                          );
+                        });
+                  }
+                } catch (e) {
+                  if (_formKey.currentState!.validate()) {
+                    showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (context) {
+                          return NetLoadingDialog(
+                            outsideDismiss: false,
+                            loading: true,
+                            loadingText: "配置中...",
+                            requestCallBack: _fetchconfig(
+                                _userNametext.text.toString(),
+                                _passwordcontroller.text.toString()),
+                          );
+                        });
+                  }
                 }
               },
               child: const Text('拉取云端配置'),
