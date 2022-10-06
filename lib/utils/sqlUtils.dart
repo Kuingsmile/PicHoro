@@ -4,13 +4,14 @@ import 'package:dart_des/dart_des.dart';
 import 'package:convert/convert.dart';
 
 class MySqlUtils {
-  static String encryptKey = Global.defaultPassword * 3;
   static List<int> iv = "保密占位符";
   static List<int> encrypted = [];
   static List<int> decrypted = [];
 
   static encryptSelf(String data) async {
     //加密保存用户数据
+    String passwordUser = await Global.getPassword();
+    String encryptKey = passwordUser * 3;
     String to_encrypt = data + "保密占位符";
     DES3 des3CBC = DES3(key: encryptKey.codeUnits, mode: DESMode.CBC, iv: iv);
     encrypted = des3CBC.encrypt(to_encrypt.codeUnits);
@@ -20,6 +21,8 @@ class MySqlUtils {
 
   static decryptSelf(String encryptedString) async {
     //用户本地解密
+    String passwordUser = await Global.getPassword();
+    String encryptKey = passwordUser * 3;
     List<int> encrypted = hex.decode(encryptedString);
     DES3 des3CBC = DES3(key: encryptKey.codeUnits, mode: DESMode.CBC, iv: iv);
     decrypted = des3CBC.decrypt(encrypted);
