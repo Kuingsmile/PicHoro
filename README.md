@@ -60,6 +60,10 @@ Mobile tool for pictures uploading built by flutter
 
 **安卓版**：
 
+<div>
+<a href='http://www.horosama.com/self_apk/PicHoro.apk' target='_blank'>
+</div>
+
 <div align =center>
 <img src="http://imgx.horosama.com/admin_uploads/2022/10/2022_10_05_633d79dbadc96.png" width=30% alt ='http://www.horosama.com/self_apk/PicHoro.apk'>
 </div>
