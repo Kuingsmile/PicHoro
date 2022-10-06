@@ -8,6 +8,7 @@ class Global {
   static String defaultPShost = 'lsky.pro';
   static String defaultUser = ' ';
   static String defaultPassword = ' ';
+  static String multiUpload = 'fail';
 
   static getPShost() async {
     await SpUtil.getInstance();
