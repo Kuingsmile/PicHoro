@@ -52,7 +52,7 @@ class _HomePageState extends State<HomePage> {
     XFile? pickedImage =
         await _picker.pickImage(source: ImageSource.camera, imageQuality: 100);
     if (pickedImage == null) {
-      Fluttertoast.showToast(
+      return Fluttertoast.showToast(
           msg: "未选择图片",
           toastLength: Toast.LENGTH_SHORT,
           timeInSecForIosWeb: 2,
@@ -63,25 +63,26 @@ class _HomePageState extends State<HomePage> {
               ? Colors.white
               : Colors.black,
           fontSize: 16.0);
-      return;
     }
     io.File fileImage = io.File(pickedImage.path);
 
-    if (imageConstraint(context: context, image: fileImage)) {
-      Global.imageFile = fileImage;
-      showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (context) {
-            return NetLoadingDialog(
-              outsideDismiss: false,
-              loading: true,
-              loadingText: "上传中...",
-              requestCallBack: _uploadAndBackToCamera(),
-            );
-          });
+    Global.imageFile = fileImage;
+    await showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) {
+          return NetLoadingDialog(
+            outsideDismiss: false,
+            loading: true,
+            loadingText: "上传中...",
+            requestCallBack: _uploadAndBackToCamera(),
+          );
+        });
+    if (Global.multiUpload == 'fail') {
+      return true;
+    } else {
+      _cameraAndBack();
     }
-    _cameraAndBack();
   }
 
   _uploadAndBackToCamera() async {
@@ -90,16 +91,19 @@ class _HomePageState extends State<HomePage> {
     Global.imageFile = null;
 
     var uploadResult = await uploader_entry(path: path, name: name);
-
     if (uploadResult == "Error") {
+      Global.multiUpload = 'fail';
       return showAlertDialog(
           context: context, title: "上传失败!", content: "请先配置上传参数.");
-    } else if (uploadResult == "sucess") {
+    } else if (uploadResult == "success") {
+      Global.multiUpload = 'success';
       return true;
     } else if (uploadResult == "failed") {
+      Global.multiUpload = 'fail';
       return showAlertDialog(
           context: context, title: "上传失败!", content: "上传参数有误.");
     } else {
+      Global.multiUpload = 'fail';
       return showAlertDialog(
           context: context, title: "上传失败!", content: uploadResult);
     }
@@ -157,7 +161,7 @@ class _HomePageState extends State<HomePage> {
       if (uploadResult == "Error") {
         return showAlertDialog(
             context: context, title: "上传失败!", content: "请先配置上传参数.");
-      } else if (uploadResult == "sucess") {
+      } else if (uploadResult == "success") {
         successCount++;
         successList.add(name);
       } else if (uploadResult == "failed") {
