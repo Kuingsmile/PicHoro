@@ -228,11 +228,12 @@ class _HostConfigState extends State<HostConfig> {
           sqlconfig.add(host);
           sqlconfig.add(strategyId.toString());
           sqlconfig.add(token);
-          sqlconfig.add(Global.defaultUser);
+          String defaultUser = await Global.getUser();
+          sqlconfig.add(defaultUser);
           var querylankong =
-              await MySqlUtils.queryLankong(username: Global.defaultUser);
+              await MySqlUtils.queryLankong(username: defaultUser);
           var queryuser =
-              await MySqlUtils.queryUser(username: Global.defaultUser);
+              await MySqlUtils.queryUser(username: defaultUser);
           if (queryuser == 'Empty') {
             return showAlertDialog(
                 context: context, title: '错误', content: '用户不存在,请先登录');
