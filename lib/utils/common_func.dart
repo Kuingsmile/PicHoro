@@ -1,25 +1,23 @@
-import 'dart:io' as io;
-import 'package:dio/dio.dart';
+import 'dart:io';
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:horopic/utils/common_func.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:path/path.dart';
-//import 'package:horopic/hostconfig.dart';
-import 'package:path_provider/path_provider.dart';
-//import 'package:permission_handler/permission_handler.dart';
-import 'package:horopic/utils/permission.dart';
-import 'package:horopic/utils/common_func.dart';
-import 'package:wechat_assets_picker/wechat_assets_picker.dart';
-//import 'package:camera/camera.dart';
-import 'package:horopic/pages/configurePage.dart';
-import 'package:horopic/pages/themeSet.dart';
-import 'package:horopic/pages/loading.dart';
 import 'package:horopic/utils/global.dart';
+import 'dart:math';
+import 'package:flutter/foundation.dart';
+import 'package:path/path.dart' as mypath;
+
+Map<String, Function> linkGenerateDict = {
+  'rawurl': generateUrl,
+  'html': generateHtmlFormatedUrl,
+  'markdown': generateMarkdownFormatedUrl,
+  'bbcode': generateBBcodeFormatedUrl,
+  'markdown_with_link': generateMarkdownWithLinkFormatedUrl,
+};
 
 //图片检查
-bool imageConstraint({required BuildContext context, required io.File image}) {
+bool imageConstraint({required BuildContext context, required File image}) {
   if (!['bmp', 'jpg', 'jpeg', 'png', 'gif', 'webp']
       .contains(image.path.split('.').last.toString())) {
     showAlertDialog(
@@ -117,4 +115,77 @@ void bottomPickerSheet(BuildContext context, Function _imageFromCamera,
           ],
         ));
       });
+}
+
+//random String Generator
+String randomStringGenerator(int length) {
+  const chars =
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  final Random rnd = Random();
+  return String.fromCharCodes(Iterable.generate(
+      length, (_) => chars.codeUnitAt(rnd.nextInt(chars.length))));
+}
+
+//rename file with timestamp
+String renameFileWithTimestamp() {
+  var now = DateTime.now();
+  var timestamp = now.millisecondsSinceEpoch;
+  var newFileName = timestamp.toString() + randomStringGenerator(5);
+  return newFileName;
+}
+
+//rename file with random string
+String renameFileWithRandomString(int length) {
+  String randomString = randomStringGenerator(length);
+  return randomString;
+}
+
+//rename picture with timestamp
+Future<File> renamePictureWithTimestamp(File file) {
+  var path = file.path;
+  var lastSeparator = path.lastIndexOf(Platform.pathSeparator);
+  var extension = mypath.extension(path);
+  var newFileName = renameFileWithTimestamp() + extension;
+  var newPath = path.substring(0, lastSeparator + 1) + newFileName;
+  return file.rename(newPath);
+}
+
+//rename picture with random string
+Future<File> renamePictureWithRandomString(File file) {
+  var path = file.path;
+  var lastSeparator = path.lastIndexOf(Platform.pathSeparator);
+  var extension = mypath.extension(path);
+  var newFileName = renameFileWithRandomString(30) + extension;
+  var newPath = path.substring(0, lastSeparator + 1) + newFileName;
+  return file.rename(newPath);
+}
+
+//generate url formated url by raw url
+String generateUrl(String rawUrl, String fileName) {
+  return rawUrl;
+}
+
+//generate html formated url by raw url
+String generateHtmlFormatedUrl(String rawUrl, String fileName) {
+  String htmlFormatedUrl =
+      '<img src="$rawUrl" alt="$fileName" title="$fileName" />';
+  return htmlFormatedUrl;
+}
+
+//generate markdown formated url by raw url
+String generateMarkdownFormatedUrl(String rawUrl, String fileName) {
+  String markdownFormatedUrl = '![filename]($rawUrl)';
+  return markdownFormatedUrl;
+}
+
+//generate markdown with link formated url by raw url
+String generateMarkdownWithLinkFormatedUrl(String rawUrl, String fileName) {
+  String markdownWithLinkFormatedUrl = '[![filename]($rawUrl)]($rawUrl)';
+  return markdownWithLinkFormatedUrl;
+}
+
+//generate BBCode formated url by raw url
+String generateBBcodeFormatedUrl(String rawUrl, String fileName) {
+  String bbCodeFormatedUrl = '[img]$rawUrl[/img]';
+  return bbCodeFormatedUrl;
 }
