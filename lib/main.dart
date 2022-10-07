@@ -4,23 +4,39 @@ import 'package:horopic/pages/homePage.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:provider/provider.dart';
 import 'package:horopic/utils/themeProvider.dart';
-
+import 'package:horopic/utils/permission.dart';
 /*
 @Author: Horo
 @e-mail: ma_shiqing@163.com
-@Date: 2022-10-05
-@Description:icHoroP, a picture upload tool 
-@version: 1.3.0
+@Date: 2022-10-07
+@Description:PicHoro, a picture upload tool 
+@version: 1.4.0
 */
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  //请求权限
+  await Permissionutils.askPermission();
+  await Permissionutils.askPermissionCamera();
+  await Permissionutils.askPermissionGallery();
+  await Permissionutils.askPermissionManageExternalStorage();
+  await Permissionutils.askPermissionMediaLibrary();
+  //初始化全局信息，会在APP启动时执行
   String initUser = await Global.getUser();
   await Global.setUser(initUser);
   String initPassword = await Global.getPassword();
   await Global.setPassword(initPassword);
   String initPShost = await Global.getPShost();
   await Global.setPShost(initPShost);
+  String initLKformat = await Global.getLKformat();
+  await Global.setLKformat(initLKformat);
+  bool initIsTimeStamp = await Global.getTimeStamp();
+  await Global.setTimeStamp(initIsTimeStamp);
+  bool initIsRandomName = await Global.getRandomName();
+  await Global.setRandomName(initIsRandomName);
+  bool initIsCopyLink = await Global.getCopyLink();
+  await Global.setCopyLink(initIsCopyLink);
+
   runApp(MyApp());
 }
 
