@@ -8,6 +8,12 @@ import 'package:horopic/main.dart';
 import 'package:horopic/pages/commonConfig.dart';
 import 'package:horopic/pages/APPpassword.dart';
 import 'package:horopic/pages/autoupdate.dart';
+import 'package:horopic/pages/autoUpgrade.dart';
+import 'package:horopic/utils/permission.dart';
+import 'package:r_upgrade/r_upgrade.dart';
+import 'package:horopic/utils/sqlUtils.dart';
+import 'package:horopic/pages/UpdateLog.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 //a configure page for user to show configure entry
 class ConfigurePage extends StatefulWidget {
@@ -32,6 +38,63 @@ class _ConfigurePageState extends State<ConfigurePage> {
     setState(() {
       version = info.version;
     });
+  }
+
+  _checkUpdate() async {
+    PackageInfo packageInfo = await PackageInfo.fromPlatform();
+    String version = packageInfo.version;
+    String buildNumber = packageInfo.buildNumber;
+
+    String remoteVersion = await MySqlUtils.getCurrentVersion();
+    if (version != remoteVersion) {
+      _showUpdateDialog(version, remoteVersion);
+    } else {
+      return Fluttertoast.showToast(
+          msg: "已是最新版本",
+          toastLength: Toast.LENGTH_SHORT,
+          timeInSecForIosWeb: 2,
+          backgroundColor: Theme.of(context).brightness == Brightness.light
+              ? Colors.black
+              : Colors.white,
+          textColor: Theme.of(context).brightness == Brightness.light
+              ? Colors.white
+              : Colors.black,
+          fontSize: 16.0);
+    }
+  }
+
+  _showUpdateDialog(String version, String remoteVersion) {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text('发现新版本$remoteVersion'),
+            content: Text('当前版本$version'),
+            actions: [
+              TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('取消')),
+              TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    _update(remoteVersion);
+                  },
+                  child: Text('更新')),
+            ],
+          );
+        });
+  }
+
+  _update(String remoteVersion) async {
+    String url =
+        'https://www.horosama.com/self_apk/PicHoro_V$remoteVersion.apk';
+    int? id = await RUpgrade.upgrade(url,
+        fileName: 'PicHoro_V$remoteVersion.apk',
+        isAutoRequestInstall: true,
+        notificationStyle: NotificationStyle.speechAndPlanTime);
+    setState(() {});
   }
 
   @override
@@ -103,13 +166,6 @@ class _ConfigurePageState extends State<ConfigurePage> {
             trailing: const Icon(Icons.arrow_forward_ios),
           ),
           ListTile(
-            title: const Text('项目地址'),
-            onTap: () {
-              _launchUrl();
-            },
-            trailing: const Icon(Icons.arrow_forward_ios),
-          ),
-          ListTile(
             title: const Text('联系作者'),
             onTap: () {
               Navigator.push(
@@ -120,10 +176,18 @@ class _ConfigurePageState extends State<ConfigurePage> {
             trailing: const Icon(Icons.arrow_forward_ios),
           ),
           ListTile(
-            title: const Text('软件更新'),
+            title: const Text('立即更新'),
+            onTap: () async {
+              Permissionutils.askPermissionRequestInstallPackage();
+              _checkUpdate();
+            },
+            trailing: const Icon(Icons.arrow_forward_ios),
+          ),
+          ListTile(
+            title: const Text('更新日志'),
             onTap: () {
               Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => const AutoUpdate()));
+                  MaterialPageRoute(builder: (context) => const UpdateLog()));
             },
             trailing: const Icon(Icons.arrow_forward_ios),
           ),
@@ -148,11 +212,5 @@ class _ConfigurePageState extends State<ConfigurePage> {
         },
       ),
     );
-  }
-
-  Future<void> _launchUrl() async {
-    if (!await launchUrl(uri)) {
-      showAlertDialog(context: context, title: '错误', content: '无法打开网页');
-    }
   }
 }
