@@ -1,4 +1,6 @@
 import 'package:dio/dio.dart';
+import 'package:horopic/utils/common_func.dart';
+import 'package:horopic/utils/global.dart';
 
 class LskyproImageUploadUtils {
   //上传接口
@@ -6,10 +8,12 @@ class LskyproImageUploadUtils {
       {required String path,
       required String name,
       required Map configMap}) async {
+    String formatedURL = '';
     FormData formdata = FormData.fromMap({
       "file": await MultipartFile.fromFile(path, filename: name),
       "strategy_id": configMap["strategy_id"],
     });
+
     BaseOptions options = BaseOptions();
     options.headers = {
       "Authorization": configMap["token"],
@@ -21,12 +25,19 @@ class LskyproImageUploadUtils {
     try {
       var response = await dio.post(uploadUrl, data: formdata);
       if (response.statusCode == 200 && response.data!['status'] == true) {
-        return "sucess";
+        String returnUrl = response.data!['data']['links']['url'];
+        if (Global.isCopyLink == true) {
+          formatedURL =
+              linkGenerateDict[Global.defaultLKformat]!(returnUrl, name);
+        } else {
+          formatedURL = returnUrl;
+        }
+        return ["success", formatedURL];
       } else {
-        return "failed";
+        return ["failed"];
       }
     } catch (e) {
-      return e.toString();
+      return [e.toString()];
     }
   }
 }
