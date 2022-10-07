@@ -3,10 +3,20 @@ import 'dart:io';
 import 'dart:convert';
 import 'package:path_provider/path_provider.dart';
 import 'package:horopic/api/lskypro.dart';
+import 'package:horopic/api/smms.dart';
 
 //默认图床参数和配置文件名对应关系
 Map<String, String> pd_config = {
   'lsky.pro': 'host_config',
+  'sm.ms': 'smms_config',
+  'imgur': 'imgur_config',
+  'upyun': 'upyun_config',
+  'qiniu': 'qiniu_config',
+  'aliyun': 'aliyun_config',
+  'tencent': 'tencent_config',
+  'github': 'github_config',
+  'gitee': 'gitee_config',
+  'weibo': 'weibo_config',
 };
 
 //获取图床配置文件
@@ -45,6 +55,17 @@ uploader_entry({required String path, required String name}) async {
   if (defaultConfig == 'lsky.pro') {
     try {
       var result = await LskyproImageUploadUtils()
+          .uploadApi(path: path, name: name, configMap: configMap);
+      return result;
+    } catch (e) {
+      return [e.toString()];
+    }
+  }
+
+  //sm.ms
+  if (defaultConfig == 'sm.ms') {
+    try {
+      var result = await SmmsImageUploadUtils()
           .uploadApi(path: path, name: name, configMap: configMap);
       return result;
     } catch (e) {
