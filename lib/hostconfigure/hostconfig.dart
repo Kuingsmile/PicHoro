@@ -232,8 +232,7 @@ class _HostConfigState extends State<HostConfig> {
           sqlconfig.add(defaultUser);
           var querylankong =
               await MySqlUtils.queryLankong(username: defaultUser);
-          var queryuser =
-              await MySqlUtils.queryUser(username: defaultUser);
+          var queryuser = await MySqlUtils.queryUser(username: defaultUser);
           if (queryuser == 'Empty') {
             return showAlertDialog(
                 context: context, title: '错误', content: '用户不存在,请先登录');
@@ -334,7 +333,8 @@ class _HostConfigState extends State<HostConfig> {
 
   Future<File> get _localFile async {
     final path = await _localPath;
-    return File('$path/host_config.txt');
+    String defaultUser = await Global.getUser();
+    return File('$path/${defaultUser}_host_config.txt');
   }
 
   Future<String> get _localPath async {
@@ -353,18 +353,121 @@ class _HostConfigState extends State<HostConfig> {
   }
 
   _setdefault() async {
-    await Global.setPShost('lsky.pro');
-    Fluttertoast.showToast(
-        msg: "已设置兰空图床为默认图床",
-        toastLength: Toast.LENGTH_SHORT,
-        timeInSecForIosWeb: 2,
-        backgroundColor: Theme.of(context).brightness == Brightness.light
-            ? Colors.black
-            : Colors.white,
-        textColor: Theme.of(context).brightness == Brightness.light
-            ? Colors.white
-            : Colors.black,
-        fontSize: 16.0);
+    try {
+      String defaultUser = await Global.getUser();
+      String defaultPassword = await Global.getPassword();
+      var queryuser = await MySqlUtils.queryUser(username: defaultUser);
+      if (queryuser == 'Empty') {
+        return Fluttertoast.showToast(
+            msg: "请先注册用户",
+            toastLength: Toast.LENGTH_SHORT,
+            timeInSecForIosWeb: 2,
+            backgroundColor: Theme.of(context).brightness == Brightness.light
+                ? Colors.black
+                : Colors.white,
+            textColor: Theme.of(context).brightness == Brightness.light
+                ? Colors.white
+                : Colors.black,
+            fontSize: 16.0);
+      } else if (queryuser['password'] != defaultPassword) {
+        return Fluttertoast.showToast(
+            msg: "请先登录",
+            toastLength: Toast.LENGTH_SHORT,
+            timeInSecForIosWeb: 2,
+            backgroundColor: Theme.of(context).brightness == Brightness.light
+                ? Colors.black
+                : Colors.white,
+            textColor: Theme.of(context).brightness == Brightness.light
+                ? Colors.white
+                : Colors.black,
+            fontSize: 16.0);
+      }
+      var querylankong = await MySqlUtils.queryLankong(username: defaultUser);
+      if (querylankong == 'Empty') {
+        return Fluttertoast.showToast(
+            msg: "请先配置上传参数",
+            toastLength: Toast.LENGTH_SHORT,
+            timeInSecForIosWeb: 2,
+            backgroundColor: Theme.of(context).brightness == Brightness.light
+                ? Colors.black
+                : Colors.white,
+            textColor: Theme.of(context).brightness == Brightness.light
+                ? Colors.white
+                : Colors.black,
+            fontSize: 16.0);
+      }
+      if (querylankong == 'Error') {
+        return Fluttertoast.showToast(
+            msg: "Error",
+            toastLength: Toast.LENGTH_SHORT,
+            timeInSecForIosWeb: 2,
+            backgroundColor: Theme.of(context).brightness == Brightness.light
+                ? Colors.black
+                : Colors.white,
+            textColor: Theme.of(context).brightness == Brightness.light
+                ? Colors.white
+                : Colors.black,
+            fontSize: 16.0);
+      }
+      if (queryuser['defaultPShost'] == 'lsky.pro') {
+        await Global.setPShost('lsky.pro');
+        return Fluttertoast.showToast(
+            msg: "已经是默认配置",
+            toastLength: Toast.LENGTH_SHORT,
+            timeInSecForIosWeb: 2,
+            backgroundColor: Theme.of(context).brightness == Brightness.light
+                ? Colors.black
+                : Colors.white,
+            textColor: Theme.of(context).brightness == Brightness.light
+                ? Colors.white
+                : Colors.black,
+            fontSize: 16.0);
+      } else {
+        List sqlconfig = [];
+        sqlconfig.add(defaultUser);
+        sqlconfig.add(defaultPassword);
+        sqlconfig.add('lsky.pro');
+        var updateResult = await MySqlUtils.updateUser(content: sqlconfig);
+        if (updateResult == 'Success') {
+          await Global.setPShost('lsky.pro');
+          Fluttertoast.showToast(
+              msg: "已设置兰空图床为默认图床",
+              toastLength: Toast.LENGTH_SHORT,
+              timeInSecForIosWeb: 2,
+              backgroundColor: Theme.of(context).brightness == Brightness.light
+                  ? Colors.black
+                  : Colors.white,
+              textColor: Theme.of(context).brightness == Brightness.light
+                  ? Colors.white
+                  : Colors.black,
+              fontSize: 16.0);
+        } else {
+          Fluttertoast.showToast(
+              msg: "写入数据库失败",
+              toastLength: Toast.LENGTH_SHORT,
+              timeInSecForIosWeb: 2,
+              backgroundColor: Theme.of(context).brightness == Brightness.light
+                  ? Colors.black
+                  : Colors.white,
+              textColor: Theme.of(context).brightness == Brightness.light
+                  ? Colors.white
+                  : Colors.black,
+              fontSize: 16.0);
+        }
+      }
+    } catch (e) {
+      Fluttertoast.showToast(
+          msg: "Error",
+          toastLength: Toast.LENGTH_SHORT,
+          timeInSecForIosWeb: 2,
+          backgroundColor: Theme.of(context).brightness == Brightness.light
+              ? Colors.black
+              : Colors.white,
+          textColor: Theme.of(context).brightness == Brightness.light
+              ? Colors.white
+              : Colors.black,
+          fontSize: 16.0);
+    }
   }
 }
 
