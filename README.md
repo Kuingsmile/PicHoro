@@ -4,8 +4,6 @@
   <h1>PicHoro</h1>
 </div>
 
-Mobile tool for pictures uploading built by flutter
-
 一款基于flutter的移动端图片上传工具，已支持兰空图床，正在研究添加各种其它图床的支持，个人开发用于学习flutter和替代很久没更新了的[flutter-Picgo](https://github.com/PicGo/flutter-picgo)。
 
 @author: Horosama
@@ -14,18 +12,18 @@ Mobile tool for pictures uploading built by flutter
 
 ## 应用截图
 
-<table rules="none" align="center">
-<tr>
-<td>
+<table rules="none" align="center" border="none">
+<tr border="none">
+<td border="none">
 <center>
-<img src="http://imgx.horosama.com/admin_uploads/2022/10/2022_10_05_633d85a4eb29d.jpg" width="100%" />
+<img src="http://imgx.horosama.com/admin_uploads/2022/10/2022_10_07_633f92429faf6.jpg" width="100%" />
 <br/>
 <font color="AAAAAA">主页.jpg</font>
 </center>
 </td>
-<td>
+<td border="none">
 <center>
-<img src="http://imgx.horosama.com/admin_uploads/2022/10/2022_10_05_633d859a5d809.jpg" width="100%" />
+<img src="http://imgx.horosama.com/admin_uploads/2022/10/2022_10_07_633f9f49cf071.jpg" width="100%" />
 <br/>
 <font color="AAAAAA">设置.jpg</font>
 </center>
@@ -37,6 +35,12 @@ Mobile tool for pictures uploading built by flutter
 
   详细更新日志请查看[更新日志](https://github.com/Kuingsmile/PicHoro/blob/main/Version_update_log.md "更新日志")
 
+2022-10-07: **V1.40**:
+  - 增加了文件上传自动重命名的功能
+  - 增加了文件上传后自动复制链接的功能，同时可选url，html，markdown，bbcode和带链接的markdown等格式
+  - 增加了软件APP内自动更新的功能
+  - Github国内打开太慢，把项目地址页面换成更新日志页面
+  - 部分bug修复
 - 2022-10-06: **V1.31**:
   - 修复了已注册用户在新设备第一次登录的时候，无法正常登录的bug
   - 修复了连续上传功能在退出的时候会卡在上传中的bug
@@ -48,30 +52,20 @@ Mobile tool for pictures uploading built by flutter
   - 增加了软件主题切换的功能，增加了软件更新页面
   - 新设计了软件的图标和启动画面，同时对软件的UI进行了一些优化
   - 一些BUG修复
-- 2002-10-04: **V1.21**:
-  - 增加了上传图片和配置图床时的等待动画
-  - 在设置页面增加了底部导航栏，修改了部分按钮的名字
-  - 调整了部分弹出式提示框的实现方式，修改为自动消失的小提示框，同时部分重要提示框禁止了点击背景消失
-  - 修复了项目地址页面打不开的问题
-  - 优化了部分代码
 - 2022-10-02: **V1.00**: 项目初始化，完成基本的上传功能，目前仅支持兰空图床，需要手动授予存储和相机权限
 
 ## 下载
 
 **安卓版**：
 
-[https://www.horosama.com/self_apk/PicHoro.apk](https://www.horosama.com/self_apk/PicHoro.apk)
-
-<div align =center>
-<img src="http://imgx.horosama.com/admin_uploads/2022/10/2022_10_05_633d79dbadc96.png" width=30% alt ='http://www.horosama.com/self_apk/PicHoro.apk'>
-</div>
+[https://www.horosama.com/self_apk/PicHoro_V1.4.0.apk](https://www.horosama.com/self_apk/PicHoro_V1.4.0.apk)
 
 ## 开发计划
 
 - 增加对各种图床平台的支持，预计先写github和腾讯云存储的代码
-- 增加上传时的设置功能，如是否修改文件名等
-- 增加上传后复制链接到剪贴板的功能，同时可以再设置里选择链接的格式
 - 增加软件更新后保留本地配置的功能
+- 增加上传时的设置功能，如是否修改文件名等-**已实现**
+- 增加上传后复制链接到剪贴板的功能，同时可以再设置里选择链接的格式-**已实现**
 - 增加主动获取权限的功能，避免用户手动授予权限-**已实现**
 - 增加相册图片多选上传功能-**已实现**
 - 增加拍照后自动上传功能-**已实现**
