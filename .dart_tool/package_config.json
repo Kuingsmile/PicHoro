@@ -2,6 +2,12 @@
   "configVersion": 2,
   "packages": [
     {
+      "name": "args",
+      "rootUri": "file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/args-2.3.1",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
       "name": "async",
       "rootUri": "file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/async-2.9.0",
       "packageUri": "lib/",
@@ -134,6 +140,12 @@
       "languageVersion": "2.17"
     },
     {
+      "name": "flutter_markdown",
+      "rootUri": "file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/flutter_markdown-0.6.12",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
       "name": "flutter_plugin_android_lifecycle",
       "rootUri": "file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/flutter_plugin_android_lifecycle-2.0.7",
       "packageUri": "lib/",
@@ -228,6 +240,12 @@
       "rootUri": "file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/logging-1.0.2",
       "packageUri": "lib/",
       "languageVersion": "2.12"
+    },
+    {
+      "name": "markdown",
+      "rootUri": "file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/markdown-6.0.1",
+      "packageUri": "lib/",
+      "languageVersion": "2.17"
     },
     {
       "name": "matcher",
@@ -406,6 +424,12 @@
     {
       "name": "provider",
       "rootUri": "file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/provider-6.0.3",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "r_upgrade",
+      "rootUri": "file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/r_upgrade-0.3.8+2",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
@@ -632,7 +656,7 @@
       "languageVersion": "2.18"
     }
   ],
-  "generated": "2022-10-06T08:18:25.258427Z",
+  "generated": "2022-10-07T03:44:01.458237Z",
   "generator": "pub",
   "generatorVersion": "2.18.0"
 }

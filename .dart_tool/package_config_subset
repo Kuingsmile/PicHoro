@@ -1,3 +1,7 @@
+args
+2.12
+file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/args-2.3.1/
+file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/args-2.3.1/lib/
 async
 2.14
 file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/async-2.9.0/
@@ -82,6 +86,10 @@ flutter_lints
 2.17
 file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/flutter_lints-2.0.1/
 file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/flutter_lints-2.0.1/lib/
+flutter_markdown
+2.12
+file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/flutter_markdown-0.6.12/
+file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/flutter_markdown-0.6.12/lib/
 flutter_plugin_android_lifecycle
 2.12
 file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/flutter_plugin_android_lifecycle-2.0.7/
@@ -138,6 +146,10 @@ logging
 2.12
 file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/logging-1.0.2/
 file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/logging-1.0.2/lib/
+markdown
+2.17
+file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/markdown-6.0.1/
+file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/markdown-6.0.1/lib/
 matcher
 2.12
 file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/matcher-0.12.12/
@@ -258,6 +270,10 @@ provider
 2.12
 file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/provider-6.0.3/
 file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/provider-6.0.3/lib/
+r_upgrade
+2.12
+file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/r_upgrade-0.3.8+2/
+file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/r_upgrade-0.3.8+2/lib/
 rational
 2.14
 file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/rational-2.2.0/
