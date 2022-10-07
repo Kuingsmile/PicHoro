@@ -203,4 +203,66 @@ class MySqlUtils {
       await conn.close();
     }
   }
+
+  static querySmms({required String username}) async {
+    var conn = await MySqlConnection.connect(settings);
+    try {
+      var results =
+          await conn.query('select * from smms where username = ?', [username]);
+      if (results.isEmpty) {
+        return "Empty";
+      }
+      Map<String, dynamic> resultsMap = {};
+      resultsMap.clear();
+      for (var row in results) {
+        String token = await decryptSelf(row[1].toString());
+        resultsMap['token'] = token;
+      }
+      return resultsMap;
+    } catch (e) {
+      //print(e);
+      return "Error";
+    } finally {
+      await conn.close();
+    }
+  }
+
+  static insertSmms({required List content}) async {
+    var conn = await MySqlConnection.connect(settings);
+    try {
+      String token = content[0].toString();
+      String username = content[1].toString();
+
+      String encryptedToken = await encryptSelf(token);
+
+      var results = await conn.query(
+          "insert into smms (token,username) values (?,?)",
+          [encryptedToken, username]);
+      return 'Success';
+    } catch (e) {
+      return "Error";
+    } finally {
+      await conn.close();
+    }
+  }
+
+  static updateSmms({required List content}) async {
+    var conn = await MySqlConnection.connect(settings);
+
+    try {
+      String token = content[0].toString();
+      String username = content[1].toString();
+
+      String encryptedToken = await encryptSelf(token);
+
+      var results = await conn.query(
+          "update smms set ,token = ? where username = ?",
+          [encryptedToken, username]);
+      return 'Success';
+    } catch (e) {
+      return "Error";
+    } finally {
+      await conn.close();
+    }
+  }
 }
