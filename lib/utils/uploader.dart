@@ -12,7 +12,12 @@ Map<String, String> pd_config = {
 //获取图床配置文件
 Future<File> get _localFile async {
   final directory = await getApplicationDocumentsDirectory();
-  return File('${directory.path}/${pd_config[Global.defaultPShost]}.txt');
+  String defaultConfig = await Global.getPShost();
+  String defaultUser = await Global.getUser();
+
+  //从本地读取
+  return File(
+      '${directory.path}/${defaultUser}_${pd_config[defaultConfig]}.txt');
 }
 
 //读取图床配置文件
@@ -29,12 +34,21 @@ Future<String> readHostConfig() async {
 uploader_entry({required String path, required String name}) async {
   String configData = await readHostConfig();
   if (configData == 'Error') {
-    return "Error";
+    return ["Error"];
   }
   Map configMap = jsonDecode(configData);
-  if (Global.defaultPShost == 'lsky.pro') {
-    var result = await LskyproImageUploadUtils()
-        .uploadApi(path: path, name: name, configMap: configMap);
-    return result;
+  //获取用户设置的默认图床
+  String defaultConfig = await Global.getPShost();
+  //调用对应图床的上传接口
+
+  //lsky.pro
+  if (defaultConfig == 'lsky.pro') {
+    try {
+      var result = await LskyproImageUploadUtils()
+          .uploadApi(path: path, name: name, configMap: configMap);
+      return result;
+    } catch (e) {
+      return [e.toString()];
+    }
   }
 }
