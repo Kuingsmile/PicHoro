@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:horopic/hostconfigure/hostconfig.dart';
+import 'package:horopic/hostconfigure/smmsconfig.dart';
 
 //a configure page for user to show configure entry
 class AllPShost extends StatefulWidget {
@@ -29,6 +30,14 @@ class _AllPShostState extends State<AllPShost> {
             onTap: () {
               Navigator.push(context,
                   MaterialPageRoute(builder: (context) => const HostConfig()));
+            },
+            trailing: const Icon(Icons.arrow_forward_ios),
+          ),
+          ListTile(
+            title: const Text('SM.MS图床'),
+            onTap: () {
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => const SmmsConfig()));
             },
             trailing: const Icon(Icons.arrow_forward_ios),
           ),
