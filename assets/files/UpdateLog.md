@@ -1,6 +1,9 @@
 
 [https://github.com/Kuingsmile/PicHoro](https://github.com/Kuingsmile/PicHoro)
 
+- 2022-10-07: **V1.41**:
+  - 增加了对SM.MS图床的支持
+  - 修复了markdown链接的文件名错误的问题
 - 2022-10-07: **V1.40**:
   - 增加了文件上传自动重命名的功能
   - 增加了文件上传后自动复制链接的功能，同时可选url，html，markdown，bbcode和带链接的markdown等格式

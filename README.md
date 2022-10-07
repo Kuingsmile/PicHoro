@@ -4,7 +4,11 @@
   <h1>PicHoro</h1>
 </div>
 
-一款基于flutter的移动端图片上传工具，已支持兰空图床，正在研究添加各种其它图床的支持，个人开发用于学习flutter和替代很久没更新了的[flutter-Picgo](https://github.com/PicGo/flutter-picgo)。
+&emsp;&emsp;一款基于flutter的移动端图片上传工具，已支持如下图床：  
+- [x] 兰空图床 个人图床网站[https://imgx.horosama.com](https://imgx.horosama.com)
+- [x] SM.MS(**V1.41版本添加**) 图床网站[https://smms.app](https://smms.app)或[https://sm.ms](https://sm.ms)
+
+&emsp;&emsp;正在研究添加各种其它图床的支持，个人开发用于学习flutter和替代很久没更新了的[flutter-Picgo](https://github.com/PicGo/flutter-picgo)。
 
 @author: Horosama
 
@@ -35,7 +39,10 @@
 
   详细更新日志请查看[更新日志](https://github.com/Kuingsmile/PicHoro/blob/main/Version_update_log.md "更新日志")
 
-2022-10-07: **V1.40**:
+- 2022-10-07: **V1.41**:
+  - 增加了对SM.MS图床的支持
+  - 修复了markdown链接的文件名错误的问题
+- 2022-10-07: **V1.40**:
   - 增加了文件上传自动重命名的功能
   - 增加了文件上传后自动复制链接的功能，同时可选url，html，markdown，bbcode和带链接的markdown等格式
   - 增加了软件APP内自动更新的功能
@@ -58,11 +65,14 @@
 
 **安卓版**：
 
-[https://www.horosama.com/self_apk/PicHoro_V1.4.0.apk](https://www.horosama.com/self_apk/PicHoro_V1.4.0.apk)
+[https://www.horosama.com/self_apk/PicHoro_V1.4.1.apk](https://www.horosama.com/self_apk/PicHoro_V1.4.1.apk)
 
 ## 开发计划
 
-- 增加对各种图床平台的支持，预计先写github和腾讯云存储的代码
+- 增加对各种图床平台的支持，预计先写github和腾讯云存储的代码,已完成
+  - [x] 兰空图床
+  - [x] SM.MS
+- 增加相册功能，可以查看已上传的图片并进行管理
 - 增加软件更新后保留本地配置的功能
 - 增加上传时的设置功能，如是否修改文件名等-**已实现**
 - 增加上传后复制链接到剪贴板的功能，同时可以再设置里选择链接的格式-**已实现**
