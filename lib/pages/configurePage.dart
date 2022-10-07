@@ -7,8 +7,6 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:horopic/main.dart';
 import 'package:horopic/pages/commonConfig.dart';
 import 'package:horopic/pages/APPpassword.dart';
-import 'package:horopic/pages/autoupdate.dart';
-import 'package:horopic/pages/autoUpgrade.dart';
 import 'package:horopic/utils/permission.dart';
 import 'package:r_upgrade/r_upgrade.dart';
 import 'package:horopic/utils/sqlUtils.dart';
