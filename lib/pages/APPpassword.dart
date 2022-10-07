@@ -28,12 +28,16 @@ class _APPPasswordState extends State<APPPassword> {
           await MySqlUtils.queryUser(username: _userNametext.text);
 
       if (usernamecheck == 'Empty') {
+        //如果没有这个用户，就创建一个，设置初始选项
         await Global.setUser(_userNametext.text);
         await Global.setPassword(_passwordcontroller.text);
+        await Global.setPShost('lsky.pro');
+        await Global.setLKformat('rawurl');
+        //在数据库中创建用户
         var result = await MySqlUtils.insertUser(content: [
           _userNametext.text,
           _passwordcontroller.text,
-          Global.defaultPShost
+          Global.defaultPShost,
         ]);
         if (result == 'Success') {
           return showAlertDialog(
@@ -100,7 +104,8 @@ class _APPPasswordState extends State<APPPassword> {
               );
               final hostConfigJson = jsonEncode(hostConfig);
               final directory = await getApplicationDocumentsDirectory();
-              File lskyLocalFile = File('${directory.path}/host_config.txt');
+              File lskyLocalFile =
+                  File('${directory.path}/${username}_host_config.txt');
               lskyLocalFile.writeAsString(hostConfigJson);
             } catch (e) {
               return showAlertDialog(
