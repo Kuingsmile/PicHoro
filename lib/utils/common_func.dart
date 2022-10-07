@@ -174,13 +174,13 @@ String generateHtmlFormatedUrl(String rawUrl, String fileName) {
 
 //generate markdown formated url by raw url
 String generateMarkdownFormatedUrl(String rawUrl, String fileName) {
-  String markdownFormatedUrl = '![filename]($rawUrl)';
+  String markdownFormatedUrl = '![$fileName]($rawUrl)';
   return markdownFormatedUrl;
 }
 
 //generate markdown with link formated url by raw url
 String generateMarkdownWithLinkFormatedUrl(String rawUrl, String fileName) {
-  String markdownWithLinkFormatedUrl = '[![filename]($rawUrl)]($rawUrl)';
+  String markdownWithLinkFormatedUrl = '[![$fileName]($rawUrl)]($rawUrl)';
   return markdownWithLinkFormatedUrl;
 }
 
