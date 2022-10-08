@@ -86,4 +86,3 @@
 
 MIT
 
-Copyright (c) 2022 Kuingsmile
