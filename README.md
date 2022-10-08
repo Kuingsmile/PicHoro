@@ -84,6 +84,6 @@
 
 ## License
 
-GPL-3.0
+MIT
 
 Copyright (c) 2022 Kuingsmile
