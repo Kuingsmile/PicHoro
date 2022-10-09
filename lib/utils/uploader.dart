@@ -6,7 +6,7 @@ import 'package:horopic/api/lskypro.dart';
 import 'package:horopic/api/smms.dart';
 
 //默认图床参数和配置文件名对应关系
-Map<String, String> pd_config = {
+Map<String, String> pdconfig = {
   'lsky.pro': 'host_config',
   'sm.ms': 'smms_config',
   'imgur': 'imgur_config',
@@ -19,6 +19,11 @@ Map<String, String> pd_config = {
   'weibo': 'weibo_config',
 };
 
+Map<String, Function> uploadFunc = {
+  'lsky.pro': LskyproImageUploadUtils.uploadApi,
+  'sm.ms': SmmsImageUploadUtils.uploadApi,
+};
+
 //获取图床配置文件
 Future<File> get _localFile async {
   final directory = await getApplicationDocumentsDirectory();
@@ -27,7 +32,7 @@ Future<File> get _localFile async {
 
   //从本地读取
   return File(
-      '${directory.path}/${defaultUser}_${pd_config[defaultConfig]}.txt');
+      '${directory.path}/${defaultUser}_${pdconfig[defaultConfig]}.txt');
 }
 
 //读取图床配置文件
@@ -41,7 +46,7 @@ Future<String> readHostConfig() async {
   }
 }
 
-uploader_entry({required String path, required String name}) async {
+uploaderentry({required String path, required String name}) async {
   String configData = await readHostConfig();
   if (configData == 'Error') {
     return ["Error"];
@@ -50,26 +55,11 @@ uploader_entry({required String path, required String name}) async {
   //获取用户设置的默认图床
   String defaultConfig = await Global.getPShost();
   //调用对应图床的上传接口
-
-  //lsky.pro
-  if (defaultConfig == 'lsky.pro') {
-    try {
-      var result = await LskyproImageUploadUtils()
-          .uploadApi(path: path, name: name, configMap: configMap);
-      return result;
-    } catch (e) {
-      return [e.toString()];
-    }
-  }
-
-  //sm.ms
-  if (defaultConfig == 'sm.ms') {
-    try {
-      var result = await SmmsImageUploadUtils()
-          .uploadApi(path: path, name: name, configMap: configMap);
-      return result;
-    } catch (e) {
-      return [e.toString()];
-    }
+  try {
+    var result = await uploadFunc[defaultConfig]!(
+        path: path, name: name, configMap: configMap);
+    return result;
+  } catch (e) {
+    return ["Error"];
   }
 }
