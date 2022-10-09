@@ -5,12 +5,14 @@ import 'package:horopic/utils/global.dart';
 import 'package:provider/provider.dart';
 import 'package:horopic/utils/themeProvider.dart';
 import 'package:horopic/utils/permission.dart';
+import 'package:horopic/album/albumSQL.dart';
+import 'package:sqflite/sqflite.dart';
 /*
 @Author: Horo
 @e-mail: ma_shiqing@163.com
-@Date: 2022-10-07
+@Date: 2022-10-09
 @Description:PicHoro, a picture upload tool 
-@version: 1.4.0
+@version: 1.5.0
 */
 
 void main() async {
@@ -36,6 +38,14 @@ void main() async {
   await Global.setRandomName(initIsRandomName);
   bool initIsCopyLink = await Global.getCopyLink();
   await Global.setCopyLink(initIsCopyLink);
+  String initShowedPBhost = await Global.getShowedPBhost();
+  await Global.setShowedPBhost(initShowedPBhost);
+  bool isDeleteLocal = await Global.getDeleteLocal();
+  await Global.setDeleteLocal(isDeleteLocal);
+
+  //初始化数据库
+  Database db = await Global.getDatabase();
+  await Global.setDatabase(db);
 
   runApp(MyApp());
 }
