@@ -7,11 +7,14 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:horopic/main.dart';
 import 'package:horopic/pages/commonConfig.dart';
 import 'package:horopic/pages/APPpassword.dart';
+import 'package:horopic/pages/autoupdate.dart';
+import 'package:horopic/pages/autoUpgrade.dart';
 import 'package:horopic/utils/permission.dart';
 import 'package:r_upgrade/r_upgrade.dart';
 import 'package:horopic/utils/sqlUtils.dart';
 import 'package:horopic/pages/UpdateLog.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:horopic/album/albumPage.dart';
 
 //a configure page for user to show configure entry
 class ConfigurePage extends StatefulWidget {
@@ -63,6 +66,7 @@ class _ConfigurePageState extends State<ConfigurePage> {
 
   _showUpdateDialog(String version, String remoteVersion) {
     showDialog(
+        barrierDismissible: true,
         context: context,
         builder: (context) {
           return AlertDialog(
@@ -198,17 +202,25 @@ class _ConfigurePageState extends State<ConfigurePage> {
             label: '上传',
           ),
           BottomNavigationBarItem(
+            icon: Icon(Icons.photo_outlined),
+            label: '相册',
+          ),
+          BottomNavigationBarItem(
             icon: Icon(Icons.settings),
             label: '设置',
           ),
         ],
-        currentIndex: 1,
+        currentIndex: 2,
         onTap: (int index) {
           if (index == 0) {
             Navigator.pop(context);
+          }else if(index == 1){
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) =>  UploadedImages()));
           }
         },
       ),
+      
     );
   }
 }
