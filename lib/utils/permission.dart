@@ -38,28 +38,24 @@ class Permissionutils {
   }
 
   static Future<bool> askPermissionRequestInstallPackage() async {
-    final PermissionStatus status =
-        await Permission.requestInstallPackages.status;
+    final PermissionStatus status = await Permission.requestInstallPackages.status;
     if (status.isGranted) {
       return true;
     } else {
       final Map<Permission, PermissionStatus> statuses =
           await [Permission.requestInstallPackages].request();
-      return statuses[Permission.requestInstallPackages] ==
-          PermissionStatus.granted;
+      return statuses[Permission.requestInstallPackages] == PermissionStatus.granted;
     }
   }
 
   static Future<bool> askPermissionManageExternalStorage() async {
-    final PermissionStatus status =
-        await Permission.manageExternalStorage.status;
+    final PermissionStatus status = await Permission.manageExternalStorage.status;
     if (status.isGranted) {
       return true;
     } else {
       final Map<Permission, PermissionStatus> statuses =
           await [Permission.manageExternalStorage].request();
-      return statuses[Permission.manageExternalStorage] ==
-          PermissionStatus.granted;
+      return statuses[Permission.manageExternalStorage] == PermissionStatus.granted;
     }
   }
 
@@ -73,4 +69,7 @@ class Permissionutils {
       return statuses[Permission.mediaLibrary] == PermissionStatus.granted;
     }
   }
+
+
+
 }
