@@ -8,6 +8,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:horopic/hostconfigure/smmsconfig.dart' as smmshostclass;
+import 'package:sqflite/sqflite.dart';
 
 class APPPassword extends StatefulWidget {
   const APPPassword({Key? key}) : super(key: key);
@@ -46,6 +48,8 @@ class _APPPasswordState extends State<APPPassword> {
           return showAlertDialog(
               context: context, title: '通知', content: '注册失败，请重试');
         }
+        Database db = await Global.getDatabase();
+        await Global.setDatabase(db);
       } else if (usernamecheck == 'Error') {
         return showAlertDialog(
             context: context, title: "错误", content: "设置失败,请重试!");
@@ -57,7 +61,8 @@ class _APPPasswordState extends State<APPPassword> {
             await Global.setPShost(usernamecheck['defaultPShost']);
             await _fetchconfig(_userNametext.text.toString(),
                 _passwordcontroller.text.toString());
-
+            Database db = await Global.getDatabase();
+            await Global.setDatabase(db);
             return showAlertDialog(
                 context: context, title: '通知', content: '已成功切换用户');
           } else {
@@ -110,6 +115,26 @@ class _APPPasswordState extends State<APPPassword> {
             } catch (e) {
               return showAlertDialog(
                   context: context, title: "错误", content: "拉取兰空图床配置失败,请重试!");
+            }
+          }
+          //拉取SM.MS图床配置
+          var smmshostresult = await MySqlUtils.querySmms(username: username);
+          if (smmshostresult == 'Error') {
+            return showAlertDialog(
+                context: context, title: "错误", content: "获取登录信息失败,请重试!");
+          } else if (smmshostresult != 'Empty') {
+            try {
+              final smmshostConfig = smmshostclass.SmmsConfigModel(
+                smmshostresult['token'],
+              );
+              final smmsConfigJson = jsonEncode(smmshostConfig);
+              final directory = await getApplicationDocumentsDirectory();
+              File lskyLocalFile =
+                  File('${directory.path}/${username}_smms_config.txt');
+              lskyLocalFile.writeAsString(smmsConfigJson);
+            } catch (e) {
+              return showAlertDialog(
+                  context: context, title: "错误", content: "拉取SM.MS图床配置失败,请重试!");
             }
           }
           //全部拉取完成后，提示用户
