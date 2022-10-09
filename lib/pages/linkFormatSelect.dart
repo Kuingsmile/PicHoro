@@ -26,7 +26,7 @@ class _LinkFormatSelectState extends State<LinkFormatSelect> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('长按查看示例'),
+        title: const Text('链接格式选择'),
       ),
       body: ListView(
         children: [
