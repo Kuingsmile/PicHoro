@@ -3,14 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:horopic/utils/common_func.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:horopic/utils/permission.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 import 'package:horopic/pages/configurePage.dart';
 import 'package:horopic/pages/loading.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/uploader.dart';
-import 'package:horopic/utils/sqlUtils.dart';
 import 'package:flutter/services.dart' as flutterServices;
+import 'package:horopic/album/albumSQL.dart';
+import 'package:horopic/album/albumPage.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -26,6 +26,8 @@ class _HomePageState extends State<HomePage> {
   _imageFromCamera() async {
     final XFile? pickedImage =
         await _picker.pickImage(source: ImageSource.camera, imageQuality: 100);
+    //Database imageDB = await AlbumSQL.getDatabase();
+    //await AlbumSQL.EmptyAllTable(imageDB);
     if (pickedImage == null) {
       Fluttertoast.showToast(
           msg: "未拍摄图片",
@@ -118,12 +120,23 @@ class _HomePageState extends State<HomePage> {
     String name = path.substring(path.lastIndexOf("/") + 1, path.length);
     Global.imageFile = null;
 
-    var uploadResult = await uploader_entry(path: path, name: name);
+    var uploadResult = await uploaderentry(path: path, name: name);
     if (uploadResult[0] == "Error") {
       Global.multiUpload = 'fail';
       return showAlertDialog(
           context: context, title: "上传失败!", content: "请先配置上传参数.");
     } else if (uploadResult[0] == "success") {
+      Map<String, dynamic> maps = {
+        'path': path,
+        'name': name,
+        'url': uploadResult[2],
+        'PBhost': Global.defaultPShost,
+        'pictureKey': uploadResult[3],
+        'hostSpecificArgA': 'test',
+        'hostSpecificArgB': 'test',
+      };
+      int id = await AlbumSQL.insertData(
+          Global.imageDB!, PBhostToTableName[Global.defaultPShost]!, maps);
       clipbordList.add(uploadResult[1]);
       Global.multiUpload = 'success';
       return true;
@@ -192,7 +205,7 @@ class _HomePageState extends State<HomePage> {
     for (io.File imageToTread in Global.imagesList) {
       String path = imageToTread.path;
       var name = path.substring(path.lastIndexOf("/") + 1, path.length);
-      var uploadResult = await uploader_entry(path: path, name: name);
+      var uploadResult = await uploaderentry(path: path, name: name);
 
       if (uploadResult[0] == "Error") {
         return showAlertDialog(
@@ -200,6 +213,19 @@ class _HomePageState extends State<HomePage> {
       } else if (uploadResult[0] == "success") {
         successCount++;
         successList.add(name);
+
+        Map<String, dynamic> maps = {
+          'path': path,
+          'name': name,
+          'url': uploadResult[2],
+          'PBhost': Global.defaultPShost,
+          'pictureKey': uploadResult[3],
+          'hostSpecificArgA': 'test',
+          'hostSpecificArgB': 'test',
+        };
+        int id = await AlbumSQL.insertData(
+            Global.imageDB!, PBhostToTableName[Global.defaultPShost]!, maps);
+
         clipbordList.add(uploadResult[1]);
       } else if (uploadResult[0] == "failed") {
         failCount++;
@@ -219,7 +245,10 @@ class _HomePageState extends State<HomePage> {
         content += "$failImage\n";
       }
       return showAlertDialog(
-          context: context, title: "上传失败!", content: content);
+          barrierDismissible: true,
+          context: context,
+          title: "上传失败!",
+          content: content);
     } else if (failCount == 0) {
       if (Global.isCopyLink == true) {
         await flutterServices.Clipboard.setData(
@@ -230,12 +259,29 @@ class _HomePageState extends State<HomePage> {
       for (String successImage in successList) {
         content += "$successImage\n";
       }
-      return showAlertDialog(
-          context: context, title: "上传成功!", content: content);
+      if (successList.length == 1) {
+        return Fluttertoast.showToast(
+            backgroundColor: Theme.of(context).brightness == Brightness.light
+                ? Colors.black
+                : Colors.white,
+            textColor: Theme.of(context).brightness == Brightness.light
+                ? Colors.white
+                : Colors.black,
+            msg: '上传成功');
+      } else {
+        return showAlertDialog(
+            barrierDismissible: true,
+            context: context,
+            title: "上传成功!",
+            content: content);
+      }
     } else {
       if (Global.isCopyLink == true) {
-        await flutterServices.Clipboard.setData(
-            flutterServices.ClipboardData(text: clipbordList.toString()));
+        await flutterServices.Clipboard.setData(flutterServices.ClipboardData(
+            text: clipbordList
+                .toString()
+                .substring(1, clipbordList.toString().length - 1)
+                .replaceAll(',', '\n')));
         clipbordList.clear();
       }
 
@@ -248,7 +294,10 @@ class _HomePageState extends State<HomePage> {
         content += "$failImage\n";
       }
       return showAlertDialog(
-          context: context, title: "上传完成!", content: content);
+          barrierDismissible: true,
+          context: context,
+          title: "上传完成!",
+          content: content);
     }
   }
 
@@ -458,6 +507,10 @@ class _HomePageState extends State<HomePage> {
                 label: '上传',
               ),
               BottomNavigationBarItem(
+                icon: Icon(Icons.photo_outlined),
+                label: '相册',
+              ),
+              BottomNavigationBarItem(
                 icon: Icon(Icons.settings),
                 label: '设置',
               ),
@@ -466,6 +519,11 @@ class _HomePageState extends State<HomePage> {
             //selectedItemColor: Colors.cyan[600],
             onTap: (int index) {
               if (index == 1) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => UploadedImages()),
+                );
+              } else if (index == 2) {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => ConfigurePage()),
