@@ -4,6 +4,7 @@ import 'package:horopic/utils/global.dart';
 import 'package:horopic/pages/homePage.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter/services.dart';
+import 'package:path/path.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:horopic/utils/common_func.dart';
 import 'package:horopic/album/albumSQL.dart';
@@ -405,7 +406,8 @@ class _UploadedImagesState extends State<UploadedImages> {
                     return;
                   } else {
                     List multiUrls = [];
-                    for (int i = 0; i < selectedImagesBool.length; i++) {
+
+                    for (int i = 0; i < currentShowedImagesUrl.length; i++) {
                       if (selectedImagesBool[i]) {
                         String finalFormatedurl = ' ';
                         finalFormatedurl =
@@ -413,28 +415,29 @@ class _UploadedImagesState extends State<UploadedImages> {
                                 currentShowedImagesUrl[i],
                                 showedImageName[
                                     i + _perPageItemSize * _currentPage]);
+
                         multiUrls.add(finalFormatedurl);
                       }
-                      await Clipboard.setData(ClipboardData(
-                          text: multiUrls
-                              .toString()
-                              .substring(1, multiUrls.toString().length - 1)
-                              .replaceAll(',', '\n')));
-                      Fluttertoast.showToast(
-                          msg: "已复制全部链接",
-                          toastLength: Toast.LENGTH_SHORT,
-                          timeInSecForIosWeb: 2,
-                          backgroundColor:
-                              Theme.of(context).brightness == Brightness.light
-                                  ? Colors.black
-                                  : Colors.white,
-                          textColor:
-                              Theme.of(context).brightness == Brightness.light
-                                  ? Colors.white
-                                  : Colors.black,
-                          fontSize: 16.0);
-                      return;
                     }
+                    await Clipboard.setData(ClipboardData(
+                        text: multiUrls
+                            .toString()
+                            .substring(1, multiUrls.toString().length - 1)
+                            .replaceAll(',', '\n')));
+                    Fluttertoast.showToast(
+                        msg: "已复制全部链接",
+                        toastLength: Toast.LENGTH_SHORT,
+                        timeInSecForIosWeb: 2,
+                        backgroundColor:
+                            Theme.of(context).brightness == Brightness.light
+                                ? Colors.black
+                                : Colors.white,
+                        textColor:
+                            Theme.of(context).brightness == Brightness.light
+                                ? Colors.white
+                                : Colors.black,
+                        fontSize: 16.0);
+                    return;
                   }
                 },
                 child: const Icon(Icons.copy),
@@ -518,6 +521,12 @@ class _UploadedImagesState extends State<UploadedImages> {
     setState(() {
       _currentPage = 0;
       currentShowedImagesUrl.clear();
+
+      selectedImagesBool = List.filled(
+        _perPageItemSize,
+        false,
+      );
+
       _refreshController.resetNoData();
     });
     initLoadUploadedImages();
@@ -538,12 +547,6 @@ class _UploadedImagesState extends State<UploadedImages> {
         msg: "$format已复制",
         toastLength: Toast.LENGTH_SHORT,
         timeInSecForIosWeb: 2,
-        backgroundColor: Theme.of(context).brightness == Brightness.light
-            ? Colors.black
-            : Colors.white,
-        textColor: Theme.of(context).brightness == Brightness.light
-            ? Colors.white
-            : Colors.black,
         fontSize: 16.0);
   }
 
