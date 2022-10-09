@@ -1,13 +1,9 @@
 import 'dart:io';
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:path/path.dart';
-import 'package:horopic/utils/global.dart';
 import 'dart:math';
-import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as mypath;
 
+//defaultLKformat和对应的转换函数
 Map<String, Function> linkGenerateDict = {
   'rawurl': generateUrl,
   'html': generateHtmlFormatedUrl,
@@ -16,16 +12,16 @@ Map<String, Function> linkGenerateDict = {
   'markdown_with_link': generateMarkdownWithLinkFormatedUrl,
 };
 
-//图片检查
+//图片检查,有点问题，暂时不用
 bool imageConstraint({required BuildContext context, required File image}) {
-  if (!['bmp', 'jpg', 'jpeg', 'png', 'gif', 'webp']
+  /*if (!['bmp', 'jpg', 'jpeg', 'png', 'gif', 'webp']
       .contains(image.path.split('.').last.toString())) {
     showAlertDialog(
         context: context,
         title: "上传失败!",
         content: "图片格式应为bmp,jpg,jpeg,png,gif,webp.");
     return false;
-  }
+  }*/
   return true;
 }
 
