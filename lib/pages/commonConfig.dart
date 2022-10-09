@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/pages/changeTheme.dart';
 import 'package:horopic/pages/linkFormatSelect.dart';
+import 'package:horopic/album/EmptyDatabase.dart';
 
 class CommonConfig extends StatefulWidget {
   const CommonConfig({Key? key}) : super(key: key);
@@ -58,14 +59,6 @@ class _CommonConfigState extends State<CommonConfig> {
             ),
           ),
           ListTile(
-            title: const Text('主题设置'),
-            trailing: const Icon(Icons.arrow_forward_ios),
-            onTap: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => const ChangeTheme()));
-            },
-          ),
-          ListTile(
             title: const Text('默认复制链接格式'),
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () {
@@ -73,6 +66,34 @@ class _CommonConfigState extends State<CommonConfig> {
                   context,
                   MaterialPageRoute(
                       builder: (context) => const LinkFormatSelect()));
+            },
+          ),
+          ListTile(
+            title: const Text('删除时是否同步删除本地图片'),
+            subtitle: const Text('不推荐开启，会导致本地相册图片丢失'),
+            trailing: Switch(
+              value: Global.isDeleteLocal,
+              onChanged: (value) async {
+                await Global.setDeleteLocal(value);
+                setState(() {});
+              },
+            ),
+          ),
+          ListTile(
+            title: const Text('清空数据库'),
+            subtitle: const Text('只会清空上传记录，不会清空任何图片'),
+            trailing: const Icon(Icons.arrow_forward_ios),
+            onTap: () {
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => EmptyDatabase()));
+            },
+          ),
+          ListTile(
+            title: const Text('主题设置'),
+            trailing: const Icon(Icons.arrow_forward_ios),
+            onTap: () {
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => const ChangeTheme()));
             },
           ),
         ],
