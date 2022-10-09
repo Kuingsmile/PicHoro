@@ -266,6 +266,12 @@
       "languageVersion": "2.12"
     },
     {
+      "name": "msh_checkbox",
+      "rootUri": "file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/msh_checkbox-1.1.1",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
       "name": "mysql1",
       "rootUri": "file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/mysql1-0.20.0",
       "packageUri": "lib/",
@@ -428,6 +434,12 @@
       "languageVersion": "2.12"
     },
     {
+      "name": "pull_to_refresh",
+      "rootUri": "file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/pull_to_refresh-2.0.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
       "name": "r_upgrade",
       "rootUri": "file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/r_upgrade-0.3.8+2",
       "packageUri": "lib/",
@@ -504,6 +516,18 @@
       "rootUri": "file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/sp_util-2.0.3",
       "packageUri": "lib/",
       "languageVersion": "2.12"
+    },
+    {
+      "name": "sqflite",
+      "rootUri": "file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/sqflite-2.1.0+1",
+      "packageUri": "lib/",
+      "languageVersion": "2.18"
+    },
+    {
+      "name": "sqflite_common",
+      "rootUri": "file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/sqflite_common-2.3.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.16"
     },
     {
       "name": "stack_trace",
@@ -656,7 +680,7 @@
       "languageVersion": "2.18"
     }
   ],
-  "generated": "2022-10-07T07:20:22.206049Z",
+  "generated": "2022-10-09T09:09:53.417474Z",
   "generator": "pub",
   "generatorVersion": "2.18.0"
 }

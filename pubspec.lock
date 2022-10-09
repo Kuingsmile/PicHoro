@@ -107,7 +107,7 @@ packages:
     source: hosted
     version: "4.0.6"
   extended_image:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: extended_image
       url: "https://pub.flutter-io.cn"
@@ -303,6 +303,13 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "1.8.0"
+  msh_checkbox:
+    dependency: "direct main"
+    description:
+      name: msh_checkbox
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "1.1.1"
   mysql1:
     dependency: "direct main"
     description:
@@ -492,6 +499,13 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "6.0.3"
+  pull_to_refresh:
+    dependency: "direct main"
+    description:
+      name: pull_to_refresh
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "2.0.0"
   r_upgrade:
     dependency: "direct main"
     description:
@@ -581,6 +595,20 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "2.0.3"
+  sqflite:
+    dependency: "direct main"
+    description:
+      name: sqflite
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "2.1.0+1"
+  sqflite_common:
+    dependency: transitive
+    description:
+      name: sqflite_common
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "2.3.0"
   stack_trace:
     dependency: transitive
     description:
