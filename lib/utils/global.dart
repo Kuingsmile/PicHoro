@@ -1,6 +1,31 @@
 import 'dart:io';
 import 'package:flustars_flutter3/flustars_flutter3.dart';
 //全局共享变量
+import 'package:sqflite/sqflite.dart';
+import 'package:horopic/album/albumSQL.dart';
+
+class UploadedImage {
+  String path;
+  String url;
+  String pbhost;
+  UploadedImage({required this.path, required this.url, required this.pbhost});
+
+  UploadedImage.fromMap(Map<String, dynamic> map)
+      : assert(map['path'] != null),
+        assert(map['url'] != null),
+        assert(map['pbhost'] != null),
+        path = map['path'],
+        url = map['url'],
+        pbhost = map['pbhost'];
+
+  Map<String, dynamic> toMap() {
+    return {
+      'path': path,
+      'url': url,
+      'pbhost': pbhost,
+    };
+  }
+}
 
 class Global {
   static File? imageFile;
@@ -13,6 +38,9 @@ class Global {
   static bool isTimeStamp = false; //是否使用时间戳重命名
   static bool isRandomName = false; //是否使用随机名重命名
   static bool isCopyLink = true; //是否复制链接
+  static Database? imageDB; //默认数据库
+  static String defaultShowedPBhost = 'lskypro'; //默认显示的图床
+  static bool isDeleteLocal = false; //是否删除本地图片
 
   static getPShost() async {
     await SpUtil.getInstance();
@@ -96,5 +124,39 @@ class Global {
     await SpUtil.getInstance();
     bool isCopyLink = SpUtil.getBool('key_isCopyLink', defValue: true)!;
     return isCopyLink;
+  }
+
+  static getDatabase() async {
+    imageDB = await AlbumSQL.getDatabase();
+    return imageDB;
+  }
+
+  static setDatabase(Database db) async {
+    imageDB = db;
+  }
+
+  static setShowedPBhost(String showedPBhost) async {
+    await SpUtil.getInstance();
+    SpUtil.putString('key_showedPBhost', showedPBhost);
+    defaultShowedPBhost = showedPBhost;
+  }
+
+  static getShowedPBhost() async {
+    await SpUtil.getInstance();
+    String showedPBhost =
+        SpUtil.getString('key_showedPBhost', defValue: 'lskypro')!;
+    return showedPBhost;
+  }
+
+  static setDeleteLocal(bool isDeleteLocal) async {
+    await SpUtil.getInstance();
+    SpUtil.putBool('key_isDeleteLocal', isDeleteLocal);
+    Global.isDeleteLocal = isDeleteLocal;
+  }
+
+  static getDeleteLocal() async {
+    await SpUtil.getInstance();
+    bool isDeleteLocal = SpUtil.getBool('key_isDeleteLocal', defValue: false)!;
+    return isDeleteLocal;
   }
 }
