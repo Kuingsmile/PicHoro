@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:horopic/hostconfigure/hostconfig.dart';
 import 'package:horopic/hostconfigure/smmsconfig.dart';
+import 'package:horopic/hostconfigure/PShostSelect.dart';
 
 //a configure page for user to show configure entry
 class AllPShost extends StatefulWidget {
@@ -25,6 +26,16 @@ class _AllPShostState extends State<AllPShost> {
           ),
         ),
         body: ListView(children: [
+          ListTile(
+            title: const Text('默认图床选择'),
+            onTap: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const defaultPShostSelect()));
+            },
+            trailing: const Icon(Icons.arrow_forward_ios),
+          ),
           ListTile(
             title: const Text('兰空图床'),
             onTap: () {
