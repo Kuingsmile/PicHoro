@@ -57,6 +57,25 @@ class _EmptyDatabaseState extends State<EmptyDatabase> {
             },
           ),
           ListTile(
+            title: const Text('github'),
+            onTap: () async {
+              await AlbumSQL.DeleteTable(Global.imageDB!, 'github');
+              Fluttertoast.showToast(
+                  msg: "已请空github数据库",
+                  toastLength: Toast.LENGTH_SHORT,
+                  timeInSecForIosWeb: 2,
+                  backgroundColor:
+                      Theme.of(context).brightness == Brightness.light
+                          ? Colors.black
+                          : Colors.white,
+                  textColor: Theme.of(context).brightness == Brightness.light
+                      ? Colors.white
+                      : Colors.black,
+                  fontSize: 16.0);
+              Navigator.pop(context);
+            },
+          ),
+          ListTile(
             title: const Text('所有数据库'),
             onTap: () async {
               await AlbumSQL.EmptyAllTable(
