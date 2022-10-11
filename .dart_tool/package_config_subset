@@ -6,6 +6,10 @@ async
 2.14
 file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/async-2.9.0/
 file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/async-2.9.0/lib/
+barcode_scan2
+2.12
+file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/barcode_scan2-4.2.1/
+file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/barcode_scan2-4.2.1/lib/
 boolean_selector
 2.12
 file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/boolean_selector-2.1.0/
@@ -78,6 +82,10 @@ file
 2.12
 file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/file-6.1.4/
 file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/file-6.1.4/lib/
+fixnum
+2.12
+file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/fixnum-1.0.1/
+file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/fixnum-1.0.1/lib/
 flustars_flutter3
 2.12
 file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/flustars_flutter3-3.0.0/
@@ -94,6 +102,10 @@ flutter_plugin_android_lifecycle
 2.12
 file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/flutter_plugin_android_lifecycle-2.0.7/
 file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/flutter_plugin_android_lifecycle-2.0.7/lib/
+flutter_speed_dial
+2.12
+file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/flutter_speed_dial-6.1.0+1/
+file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/flutter_speed_dial-6.1.0+1/lib/
 fluttertoast
 2.12
 file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/fluttertoast-8.0.9/
@@ -270,6 +282,10 @@ process
 2.14
 file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/process-4.2.4/
 file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/process-4.2.4/lib/
+protobuf
+2.12
+file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/protobuf-2.1.0/
+file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/protobuf-2.1.0/lib/
 provider
 2.12
 file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/provider-6.0.3/
