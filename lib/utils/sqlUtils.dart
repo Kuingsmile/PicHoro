@@ -265,4 +265,112 @@ class MySqlUtils {
       await conn.close();
     }
   }
+
+  static queryGithub({required String username}) async {
+    var conn = await MySqlConnection.connect(settings);
+    try {
+      var results = await conn
+          .query('select * from github where username = ?', [username]);
+      if (results.isEmpty) {
+        return "Empty";
+      }
+      Map<String, dynamic> resultsMap = {};
+      resultsMap.clear();
+      for (var row in results) {
+        String githubusername = await decryptSelf(row[1].toString());
+        String repo = await decryptSelf(row[2].toString());
+        String token = await decryptSelf(row[3].toString());
+        String storePath = await decryptSelf(row[4].toString());
+        String branch = await decryptSelf(row[5].toString());
+        String customDomain = await decryptSelf(row[6].toString());
+
+        resultsMap['githubusername'] = githubusername;
+        resultsMap['repo'] = repo;
+        resultsMap['token'] = token;
+        resultsMap['storePath'] = storePath;
+        resultsMap['branch'] = branch;
+        resultsMap['customDomain'] = customDomain;
+      }
+      return resultsMap;
+    } catch (e) {
+      return "Error";
+    } finally {
+      await conn.close();
+    }
+  }
+
+  static insertGithub({required List content}) async {
+    var conn = await MySqlConnection.connect(settings);
+    try {
+      String githubusername = content[0].toString();
+      String repo = content[1].toString();
+      String token = content[2].toString();
+      String storePath = content[3].toString();
+      String branch = content[4].toString();
+      String customDomain = content[5].toString();
+      String username = content[6].toString();
+
+      String encryptedGithubusername = await encryptSelf(githubusername);
+      String encryptedRepo = await encryptSelf(repo);
+      String encryptedToken = await encryptSelf(token);
+      String encryptedStorePath = await encryptSelf(storePath);
+      String encryptedBranch = await encryptSelf(branch);
+      String encryptedCustomDomain = await encryptSelf(customDomain);
+
+      var results = await conn.query(
+          "insert into github (githubusername,repo,token,storePath,branch,customDomain,username) values (?,?,?,?,?,?,?)",
+          [
+            encryptedGithubusername,
+            encryptedRepo,
+            encryptedToken,
+            encryptedStorePath,
+            encryptedBranch,
+            encryptedCustomDomain,
+            username
+          ]);
+      return 'Success';
+    } catch (e) {
+      return "Error";
+    } finally {
+      await conn.close();
+    }
+  }
+
+  static updateGithub({required List content}) async {
+    var conn = await MySqlConnection.connect(settings);
+
+    try {
+      String githubusername = content[0].toString();
+      String repo = content[1].toString();
+      String token = content[2].toString();
+      String storePath = content[3].toString();
+      String branch = content[4].toString();
+      String customDomain = content[5].toString();
+      String username = content[6].toString();
+
+      String encryptedGithubusername = await encryptSelf(githubusername);
+      String encryptedRepo = await encryptSelf(repo);
+      String encryptedToken = await encryptSelf(token);
+      String encryptedStorePath = await encryptSelf(storePath);
+      String encryptedBranch = await encryptSelf(branch);
+      String encryptedCustomDomain = await encryptSelf(customDomain);
+
+      var results = await conn.query(
+          "update github set githubusername = ?,repo = ?,token = ?,storePath = ?,branch = ?,customDomain = ? where username = ?",
+          [
+            encryptedGithubusername,
+            encryptedRepo,
+            encryptedToken,
+            encryptedStorePath,
+            encryptedBranch,
+            encryptedCustomDomain,
+            username
+          ]);
+      return 'Success';
+    } catch (e) {
+      return "Error";
+    } finally {
+      await conn.close();
+    }
+  }
 }
