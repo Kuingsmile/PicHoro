@@ -25,6 +25,12 @@ class _HostConfigState extends State<HostConfig> {
   final _strategyIdController = TextEditingController();
 
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
+
+  @override
   void dispose() {
     _hostController.dispose();
     _usernameController.dispose();
@@ -46,7 +52,7 @@ class _HostConfigState extends State<HostConfig> {
             TextFormField(
               controller: _hostController,
               decoration: const InputDecoration(
-                hintText: '域名(eg:https://imgx.horosama.com )',
+                hintText: '域名 eg:https://imgx.horosama.com )',
               ),
               textAlign: TextAlign.center,
               validator: (value) {
@@ -59,7 +65,8 @@ class _HostConfigState extends State<HostConfig> {
             TextFormField(
               controller: _usernameController,
               decoration: const InputDecoration(
-                hintText: '用户名',
+                label: Center(child: Text('用户名')),
+                hintText: '设定用户名',
               ),
               textAlign: TextAlign.center,
               validator: (value) {
@@ -73,7 +80,8 @@ class _HostConfigState extends State<HostConfig> {
               controller: _passwdController,
               obscureText: true,
               decoration: const InputDecoration(
-                hintText: '密码',
+                label: Center(child: Text('密码')),
+                hintText: '输入密码',
               ),
               textAlign: TextAlign.center,
               validator: (value) {
@@ -87,7 +95,8 @@ class _HostConfigState extends State<HostConfig> {
               controller: _strategyIdController,
               decoration: const InputDecoration(
                 contentPadding: EdgeInsets.zero,
-                hintText: '储存策略Id,可先输入前三项获取完整列表',
+                label: Center(child: Text('储存策略ID')),
+                hintText: '可先输入前三项获取完整列表,一般是1',
               ),
               textAlign: TextAlign.center,
               validator: (value) {
@@ -216,6 +225,7 @@ class _HostConfigState extends State<HostConfig> {
       'email': username,
       'password': passwd,
     });
+    String sqlResult = '';
     try {
       var response = await dio.post(
         fullUrl,
@@ -237,24 +247,33 @@ class _HostConfigState extends State<HostConfig> {
             return showAlertDialog(
                 context: context, title: '错误', content: '用户不存在,请先登录');
           } else if (querylankong == 'Empty') {
-            await MySqlUtils.insertLankong(content: sqlconfig);
+            sqlResult = await MySqlUtils.insertLankong(content: sqlconfig);
           } else {
-            await MySqlUtils.updateLankong(content: sqlconfig);
+            sqlResult = await MySqlUtils.updateLankong(content: sqlconfig);
           }
         } catch (e) {
           return showAlertDialog(
               context: context, title: '错误', content: e.toString());
         }
-        final hostConfig = HostConfigModel(host, token, strategyId.toString());
-        final hostConfigJson = jsonEncode(hostConfig);
-        final hostConfigFile = await _localFile;
-        hostConfigFile.writeAsString(hostConfigJson);
+        if (sqlResult == "Success") {
+          final hostConfig =
+              HostConfigModel(host, token, strategyId.toString());
+          final hostConfigJson = jsonEncode(hostConfig);
+          final hostConfigFile = await _localFile;
+          hostConfigFile.writeAsString(hostConfigJson);
 
-        return showAlertDialog(
-            context: context,
-            barrierDismissible: false,
-            title: '配置成功',
-            content: '您的密钥为：$token,\n请妥善保管，不要泄露给他人');
+          return showAlertDialog(
+              context: context,
+              barrierDismissible: false,
+              title: '配置成功',
+              content: '您的密钥为：$token,\n请妥善保管，不要泄露给他人');
+        } else {
+          return showAlertDialog(
+              context: context,
+              barrierDismissible: false,
+              title: '配置失败',
+              content: '数据库错误');
+        }
       } else {
         if (response.statusCode == 403) {
           return showAlertDialog(
@@ -293,7 +312,6 @@ class _HostConfigState extends State<HostConfig> {
       options.headers = {
         "Authorization": configMap["token"],
         "Accept": "application/json",
-        "Content-Type": "multipart/form-data",
       };
       String profileUrl = configMap["host"] + "/api/v1/profile";
       Dio dio = Dio(options);
@@ -411,6 +429,7 @@ class _HostConfigState extends State<HostConfig> {
       }
       if (queryuser['defaultPShost'] == 'lsky.pro') {
         await Global.setPShost('lsky.pro');
+        await Global.setShowedPBhost('lskypro');
         return Fluttertoast.showToast(
             msg: "已经是默认配置",
             toastLength: Toast.LENGTH_SHORT,
@@ -430,6 +449,7 @@ class _HostConfigState extends State<HostConfig> {
         var updateResult = await MySqlUtils.updateUser(content: sqlconfig);
         if (updateResult == 'Success') {
           await Global.setPShost('lsky.pro');
+          await Global.setShowedPBhost('lskypro');
           Fluttertoast.showToast(
               msg: "已设置兰空图床为默认图床",
               toastLength: Toast.LENGTH_SHORT,
