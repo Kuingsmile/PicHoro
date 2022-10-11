@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:path/path.dart' as mypath;
+import 'package:horopic/utils/global.dart';
 
 //defaultLKformat和对应的转换函数
 Map<String, Function> linkGenerateDict = {
@@ -10,6 +11,7 @@ Map<String, Function> linkGenerateDict = {
   'markdown': generateMarkdownFormatedUrl,
   'bbcode': generateBBcodeFormatedUrl,
   'markdown_with_link': generateMarkdownWithLinkFormatedUrl,
+  'custom': generateCustomFormatedUrl,
 };
 
 //图片检查,有点问题，暂时不用
@@ -184,4 +186,15 @@ String generateMarkdownWithLinkFormatedUrl(String rawUrl, String fileName) {
 String generateBBcodeFormatedUrl(String rawUrl, String fileName) {
   String bbCodeFormatedUrl = '[img]$rawUrl[/img]';
   return bbCodeFormatedUrl;
+}
+
+//generate custom formated url by url and format
+String generateCustomFormatedUrl(String url, String filename) {
+  String fileName = filename;
+  String rawUrl = url;
+  String customLinkFormat = Global.customLinkFormat;
+  String customFormatedUrl = customLinkFormat
+      .replaceAll(r'${fileName}', fileName)
+      .replaceAll(r'${url}', rawUrl);
+  return customFormatedUrl;
 }
