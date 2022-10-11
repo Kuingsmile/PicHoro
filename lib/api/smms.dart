@@ -54,12 +54,12 @@ class SmmsImageUploadUtils {
       "Authorization": configMap["token"],
     };
     Dio dio = Dio(options);
-    String uploadUrl =
+    String deleteUrl =
         "https://smms.app/api/v2/delete/${deleteMap["pictureKey"]}";
     //String uploadUrl = "https://sm.ms/api/v2/delete/:hash"; //主要接口,国内访问不了
 
     try {
-      var response = await dio.get(uploadUrl, queryParameters: formdata);
+      var response = await dio.get(deleteUrl, queryParameters: formdata);
       if (response.statusCode == 200 && response.data!['success'] == true) {
         return ["success"];
       } else {
