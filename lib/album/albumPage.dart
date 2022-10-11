@@ -4,12 +4,11 @@ import 'package:horopic/utils/global.dart';
 import 'package:horopic/pages/homePage.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter/services.dart';
-import 'package:path/path.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:horopic/utils/common_func.dart';
 import 'package:horopic/album/albumSQL.dart';
 import 'dart:io';
-import 'package:horopic/pages/configurePage.dart';
+import 'package:horopic/configurePage/configurePage.dart';
 import 'package:horopic/album/albumPreview.dart';
 import 'package:horopic/album/LoadStateChanged.dart';
 import 'package:msh_checkbox/msh_checkbox.dart';
@@ -43,6 +42,7 @@ class _UploadedImagesState extends State<UploadedImages> {
   Map<String, String> nameToPara = {
     'lskypro': '兰空',
     'smms': 'SM.MS',
+    'github': 'GitHub',
   };
 
   @override
@@ -90,7 +90,7 @@ class _UploadedImagesState extends State<UploadedImages> {
                         textAlign: TextAlign.center,
                       ),
                       content: const Text(
-                        '是否删除全部选择的图片？\n点击确定后请耐心等待下,不要操作!',
+                        '是否删除全部选择的图片？\n请注意检查删除本地和删除云端两项设置!',
                         textAlign: TextAlign.center,
                       ),
                       actions: [
@@ -109,66 +109,29 @@ class _UploadedImagesState extends State<UploadedImages> {
                                   try {
                                     List<int> toDelete = [];
                                     for (int i = 0;
-                                        i < selectedImagesBool.length;
+                                        i < currentShowedImagesUrl.length;
                                         i++) {
                                       if (selectedImagesBool[i]) {
                                         toDelete.add(i);
                                       }
                                     }
-                                    await deleteImageAll(toDelete);
+                                    selectedImagesBool =
+                                        List.filled(_perPageItemSize, false);
                                     Navigator.pop(context);
-                                    int retainedImageNum =
-                                        currentShowedImagesUrl.length -
-                                            toDelete.length;
-                                    setState(() {
-                                      for (int i = 0;
-                                          i < toDelete.length;
-                                          i++) {
-                                        showedImageId.removeAt(toDelete[i] - i);
-                                        showedImageUrl
-                                            .removeAt(toDelete[i] - i);
-                                        showedImagePaths
-                                            .removeAt(toDelete[i] - i);
-                                        showedImageName
-                                            .removeAt(toDelete[i] - i);
-                                        showedImagePictureKey
-                                            .removeAt(toDelete[i] - i);
-                                      }
-                                      if (retainedImageNum == 0) {
-                                        if (_currentPage == 0) {
-                                          currentShowedImagesUrl = [];
-                                        } else {
-                                          _currentPage--;
-                                          currentShowedImagesUrl =
-                                              showedImageUrl.sublist(
-                                                  _currentPage *
-                                                      _perPageItemSize,
-                                                  (_currentPage + 1) *
-                                                      _perPageItemSize);
-                                        }
-                                      } else {
-                                        if (showedImageUrl.length -
-                                                _currentPage *
-                                                    _perPageItemSize >=
-                                            _perPageItemSize) {
-                                          currentShowedImagesUrl =
-                                              showedImageUrl.sublist(
-                                                  _currentPage *
-                                                      _perPageItemSize,
-                                                  (_currentPage + 1) *
-                                                      _perPageItemSize);
-                                        } else {
-                                          currentShowedImagesUrl =
-                                              showedImageUrl.sublist(
-                                                  _currentPage *
-                                                      _perPageItemSize,
-                                                  showedImageUrl.length);
-                                        }
-                                      }
-                                      selectedImagesBool =
-                                          List.filled(_perPageItemSize, false);
-                                    });
-                                    //_onRefresh();
+                                    await deleteImageAll(toDelete);
+                                    Fluttertoast.showToast(
+                                        backgroundColor:
+                                            Theme.of(this.context).brightness ==
+                                                    Brightness.light
+                                                ? Colors.black
+                                                : Colors.white,
+                                        textColor:
+                                            Theme.of(this.context).brightness ==
+                                                    Brightness.light
+                                                ? Colors.white
+                                                : Colors.black,
+                                        msg: '删除完成');
+                                    return;
                                   } catch (e) {
                                     //跳转一下
                                     Navigator.push(
@@ -180,7 +143,7 @@ class _UploadedImagesState extends State<UploadedImages> {
                                         barrierDismissible: true,
                                         context: context,
                                         title: '错误',
-                                        content: '删除图片失败，请检查网络连接或稍后重试');
+                                        content: e.toString());
                                   }
                                 },
                               ),
@@ -319,7 +282,7 @@ class _UploadedImagesState extends State<UploadedImages> {
               width: 40,
               child: FloatingActionButton(
                 heroTag: 'switch',
-                backgroundColor: Color.fromARGB(255, 180, 236, 182),
+                backgroundColor: const Color.fromARGB(255, 180, 236, 182),
                 //select host menu
                 onPressed: () async {
                   await showDialog(
@@ -337,8 +300,9 @@ class _UploadedImagesState extends State<UploadedImages> {
                             child:
                                 const Text('兰空图床', textAlign: TextAlign.center),
                             onPressed: () {
-                              Global.defaultShowedPBhost = 'lskypro';
+                              Global.setShowedPBhost('lskypro');
                               Navigator.pop(context);
+                              _currentPage = 0;
                               _onRefresh();
                             },
                           ),
@@ -346,8 +310,19 @@ class _UploadedImagesState extends State<UploadedImages> {
                             child: const Text('SM.MS',
                                 textAlign: TextAlign.center),
                             onPressed: () {
-                              Global.defaultShowedPBhost = 'smms';
+                              Global.setShowedPBhost('smms');
                               Navigator.pop(context);
+                              _currentPage = 0;
+                              _onRefresh();
+                            },
+                          ),
+                          SimpleDialogOption(
+                            child: const Text('Github',
+                                textAlign: TextAlign.center),
+                            onPressed: () {
+                              Global.defaultShowedPBhost = 'github';
+                              Navigator.pop(context);
+                              _currentPage = 0;
                               _onRefresh();
                             },
                           ),
@@ -370,21 +345,30 @@ class _UploadedImagesState extends State<UploadedImages> {
                 backgroundColor: Colors.blue,
                 //select host menu
                 onPressed: () async {
-                  _onRefresh();
+                  setState(() {
+                    _currentPage = 0;
+                    currentShowedImagesUrl.clear();
+                    selectedImagesBool = List.filled(
+                      _perPageItemSize,
+                      false,
+                    );
+                    _refreshController.resetNoData();
+                  });
+                  initLoadUploadedImages();
                 },
                 child: const Icon(
                   Icons.home_outlined,
                   size: 30,
                 ),
               )),
-          SizedBox(width: 10),
+          const SizedBox(width: 10),
           Container(
               height: 40,
               width: 40,
               child: FloatingActionButton(
                 heroTag: 'copy',
                 backgroundColor: selectedImagesBool.contains(true)
-                    ? Color.fromARGB(255, 232, 177, 241)
+                    ? const Color.fromARGB(255, 232, 177, 241)
                     : Colors.transparent,
                 elevation: 5,
                 //select host menu
@@ -442,7 +426,7 @@ class _UploadedImagesState extends State<UploadedImages> {
                 },
                 child: const Icon(Icons.copy),
               )),
-          SizedBox(width: 10),
+          const SizedBox(width: 10),
           Container(
               height: 40,
               width: 40,
@@ -514,27 +498,6 @@ class _UploadedImagesState extends State<UploadedImages> {
         },
       ),
     );
-  }
-
-  /// 刷新
-  _onRefresh() async {
-    setState(() {
-      _currentPage = 0;
-      currentShowedImagesUrl.clear();
-
-      selectedImagesBool = List.filled(
-        _perPageItemSize,
-        false,
-      );
-
-      _refreshController.resetNoData();
-    });
-    initLoadUploadedImages();
-  }
-
-  /// 上拉加载
-  _onLoading() async {
-    doLoadUploadedImages();
   }
 
   copyFormatedLink(int index, String format) async {
@@ -640,6 +603,22 @@ class _UploadedImagesState extends State<UploadedImages> {
             height: 20,
             value: 6,
             child: Center(
+              child: Text('自定义格式', textAlign: TextAlign.center),
+            ),
+          ),
+          const PopupMenuItem(
+            height: 1,
+            value: 10,
+            child: Divider(
+              height: 1,
+              color: Colors.grey,
+              thickness: 1,
+            ),
+          ),
+          const PopupMenuItem(
+            height: 20,
+            value: 7,
+            child: Center(
               child: Text('删除', textAlign: TextAlign.center),
             ),
           ),
@@ -661,9 +640,11 @@ class _UploadedImagesState extends State<UploadedImages> {
           copyFormatedLink(index, 'markdown_with_link');
           break;
         case 6:
+          copyFormatedLink(index, 'custom');
+          break;
+        case 7:
           try {
             await deleteImage(index);
-            // _onRefresh();
             break;
           } catch (e) {
             Fluttertoast.showToast(
@@ -685,24 +666,49 @@ class _UploadedImagesState extends State<UploadedImages> {
 
   deleteImageAll(List imagesIndex) async {
     bool deleteLocal = await Global.getDeleteLocal();
-    for (int index = 0; index < imagesIndex.length; index++) {
+    bool deleteCloud = await Global.getDeleteCloud();
+    for (int i = 0; i < imagesIndex.length; i++) {
       try {
         Map deleteConfig = {
-          'pictureKey':
-              showedImagePictureKey[index + (_currentPage * _perPageItemSize)],
+          'pictureKey': showedImagePictureKey[
+              imagesIndex[i] + (_currentPage * _perPageItemSize) - i],
+          "name": showedImageName[
+              imagesIndex[i] + (_currentPage * _perPageItemSize) - i],
         };
-        await deleterentry(deleteConfig);
-        await AlbumSQL.deleteData(Global.imageDB!, Global.defaultShowedPBhost,
-            showedImageId[index + (_currentPage * _perPageItemSize)]);
+        if (deleteCloud) {
+          await deleterentry(deleteConfig);
+        }
+        await AlbumSQL.deleteData(
+            Global.imageDB!,
+            Global.defaultShowedPBhost,
+            showedImageId[
+                imagesIndex[i] + (_currentPage * _perPageItemSize) - i]);
         if (deleteLocal) {
           try {
-            await File(
-                    showedImagePaths[index + _currentPage * _perPageItemSize])
+            await File(showedImagePaths[
+                    imagesIndex[i] + (_currentPage * _perPageItemSize) - i])
                 .delete();
           } catch (e) {}
         }
+        showedImageId
+            .removeAt(imagesIndex[i] + (_currentPage * _perPageItemSize) - i);
+        showedImageUrl
+            .removeAt(imagesIndex[i] + (_currentPage * _perPageItemSize) - i);
+        showedImagePaths
+            .removeAt(imagesIndex[i] + (_currentPage * _perPageItemSize) - i);
+        showedImageName
+            .removeAt(imagesIndex[i] + (_currentPage * _perPageItemSize) - i);
+        showedImagePictureKey
+            .removeAt(imagesIndex[i] + (_currentPage * _perPageItemSize) - i);
+        setState(() {
+          currentShowedImagesUrl = showedImageUrl.sublist(
+              _currentPage * _perPageItemSize,
+              (_currentPage + 1) * _perPageItemSize > showedImageUrl.length
+                  ? showedImageUrl.length
+                  : (_currentPage + 1) * _perPageItemSize);
+        });
       } catch (e) {
-        throw e;
+        rethrow;
       }
     }
     return true;
@@ -710,13 +716,17 @@ class _UploadedImagesState extends State<UploadedImages> {
 
   deleteImage(int index) async {
     bool deleteLocal = await Global.getDeleteLocal();
-
+    bool deleteCloud = await Global.getDeleteCloud();
     try {
       Map deleteConfig = {
         'pictureKey':
             showedImagePictureKey[index + (_currentPage * _perPageItemSize)],
+        "name": showedImageName[index + (_currentPage * _perPageItemSize)],
       };
-      await deleterentry(deleteConfig);
+      if (deleteCloud) {
+        await deleterentry(deleteConfig);
+      }
+
       await AlbumSQL.deleteData(Global.imageDB!, Global.defaultShowedPBhost,
           showedImageId[index + (_currentPage * _perPageItemSize)]);
 
@@ -734,9 +744,9 @@ class _UploadedImagesState extends State<UploadedImages> {
         showedImagePaths.removeAt(index + _perPageItemSize * _currentPage);
         currentShowedImagesUrl.removeAt(index);
         selectedImagesBool = List.filled(_perPageItemSize, false);
-        if (currentShowedImagesUrl.length == 0 && _currentPage == 0) {
+        if (currentShowedImagesUrl.isEmpty && _currentPage == 0) {
           currentShowedImagesUrl = [];
-        } else if (currentShowedImagesUrl.length == 0 && _currentPage > 0) {
+        } else if (currentShowedImagesUrl.isEmpty && _currentPage > 0) {
           _currentPage--;
           currentShowedImagesUrl = showedImageUrl.sublist(
               _currentPage * _perPageItemSize,
@@ -753,8 +763,31 @@ class _UploadedImagesState extends State<UploadedImages> {
         }
       });
     } catch (e) {
-      throw e;
+      rethrow;
     }
+  }
+
+  /// 刷新或返回上一页
+  _onRefresh() async {
+    if (_currentPage == 0 || _currentPage == 1) {
+      setState(() {
+        _currentPage = 0;
+        currentShowedImagesUrl.clear();
+        selectedImagesBool = List.filled(
+          _perPageItemSize,
+          false,
+        );
+        _refreshController.resetNoData();
+      });
+      initLoadUploadedImages();
+    } else {
+      doBackUploadedImages();
+    }
+  }
+
+  /// 上拉加载
+  _onLoading() async {
+    doLoadUploadedImages();
   }
 
   void initLoadUploadedImages() async {
@@ -764,23 +797,33 @@ class _UploadedImagesState extends State<UploadedImages> {
         await AlbumSQL.getAllTableData(Global.imageDB!, 'id');
     //默认图床的图片ID
     showedImageId = imageList[Global.defaultShowedPBhost]!;
-
+    showedImageId = showedImageId.reversed.toList();
     showedImageUrl.clear();
+    showedImagePictureKey.clear();
+    showedImageName.clear();
+    showedImagePaths.clear();
     for (int i = 0; i < showedImageId.length; i++) {
       List<Map<String, dynamic>> maps = await AlbumSQL.queryData(
           Global.imageDB!, Global.defaultShowedPBhost, showedImageId[i]);
-      String path = maps[0]['url'];
-      showedImageUrl.add(path);
-      showedImageName.add(maps[0]['name']);
-      showedImagePictureKey.add(maps[0]['pictureKey']);
-      showedImagePaths.add(maps[0]['path']);
+      if (Global.defaultShowedPBhost == 'lskypro' ||
+          Global.defaultShowedPBhost == 'smms') {
+        showedImageUrl.add(maps[0]['url']);
+        showedImageName.add(maps[0]['name']);
+        showedImagePictureKey.add(maps[0]['pictureKey']);
+        showedImagePaths.add(maps[0]['path']);
+      } else if (Global.defaultShowedPBhost == 'github') {
+        showedImageUrl.add(maps[0]['hostSpecificArgA']);
+        showedImageName.add(maps[0]['name']);
+        showedImagePictureKey.add(maps[0]['pictureKey']);
+        showedImagePaths.add(maps[0]['path']);
+      }
     }
+
     currentShowedImagesUrl = showedImageUrl.sublist(
         0,
         _perPageItemSize > showedImageUrl.length
             ? showedImageUrl.length
             : _perPageItemSize);
-
     setState(() {
       _refreshController.refreshCompleted();
     });
@@ -796,6 +839,7 @@ class _UploadedImagesState extends State<UploadedImages> {
           showedImageUrl.length > _perPageItemSize * (_currentPage + 1)
               ? _perPageItemSize * (_currentPage + 1)
               : showedImageUrl.length);
+      selectedImagesBool = List.filled(_perPageItemSize, false);
     }
     LoadUploadedImages();
   }
@@ -812,6 +856,22 @@ class _UploadedImagesState extends State<UploadedImages> {
       } else {
         _refreshController.loadComplete();
       }
+    });
+  }
+
+  void doBackUploadedImages() async {
+    _currentPage = _currentPage - 1;
+    currentShowedImagesUrl.clear();
+    currentShowedImagesUrl = showedImageUrl.sublist(
+        (_currentPage) * _perPageItemSize,
+        _perPageItemSize * (_currentPage + 1));
+    selectedImagesBool = List.filled(_perPageItemSize, false);
+    BackUploadedImages();
+  }
+
+  void BackUploadedImages() async {
+    setState(() {
+      _refreshController.refreshCompleted();
     });
   }
 }
