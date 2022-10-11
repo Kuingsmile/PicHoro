@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:horopic/pages/themeSet.dart';
+import 'package:horopic/configurePage/others/themeSet.dart';
 import 'package:horopic/pages/homePage.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:provider/provider.dart';
@@ -10,9 +10,9 @@ import 'package:sqflite/sqflite.dart';
 /*
 @Author: Horo
 @e-mail: ma_shiqing@163.com
-@Date: 2022-10-09
+@Date: 2022-10-11
 @Description:PicHoro, a picture upload tool 
-@version: 1.5.0
+@version: 1.5.5
 */
 
 void main() async {
@@ -42,6 +42,10 @@ void main() async {
   await Global.setShowedPBhost(initShowedPBhost);
   bool isDeleteLocal = await Global.getDeleteLocal();
   await Global.setDeleteLocal(isDeleteLocal);
+  String initCustomLinkFormat = await Global.getCustomLinkFormat();
+  await Global.setCustomLinkFormat(initCustomLinkFormat);
+  bool isDeleteCloud = await Global.getDeleteCloud();
+  await Global.setDeleteCloud(isDeleteCloud);
 
   //初始化数据库
   Database db = await Global.getDatabase();
