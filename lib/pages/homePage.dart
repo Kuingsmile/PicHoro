@@ -4,13 +4,15 @@ import 'package:image_picker/image_picker.dart';
 import 'package:horopic/utils/common_func.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
-import 'package:horopic/pages/configurePage.dart';
+import 'package:horopic/configurePage/configurePage.dart';
 import 'package:horopic/pages/loading.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/uploader.dart';
 import 'package:flutter/services.dart' as flutterServices;
 import 'package:horopic/album/albumSQL.dart';
 import 'package:horopic/album/albumPage.dart';
+import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'package:horopic/hostconfigure/PShostSelect.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -213,16 +215,36 @@ class _HomePageState extends State<HomePage> {
       } else if (uploadResult[0] == "success") {
         successCount++;
         successList.add(name);
+        Map<String, dynamic> maps = {};
+        if (Global.defaultPShost == 'sm.ms' ||
+            Global.defaultPShost == 'lsky.pro') {
+          maps = {
+            'path': path,
+            'name': name,
+            'url': uploadResult[2],
+            'PBhost': Global.defaultPShost,
+            'pictureKey': uploadResult[3],
+            'hostSpecificArgA': 'test',
+            'hostSpecificArgB': 'test',
+            'hostSpecificArgC': 'test',
+            'hostSpecificArgD': 'test',
+            'hostSpecificArgE': 'test',
+          };
+        } else if (Global.defaultPShost == 'github') {
+          maps = {
+            'path': path,
+            'name': name,
+            'url': uploadResult[2],
+            'PBhost': Global.defaultPShost,
+            'pictureKey': uploadResult[3],
+            'hostSpecificArgA': uploadResult[4], //github download url或者自定义域名+路径
+            'hostSpecificArgB': 'test',
+            'hostSpecificArgC': 'test',
+            'hostSpecificArgD': 'test',
+            'hostSpecificArgE': 'test',
+          };
+        }
 
-        Map<String, dynamic> maps = {
-          'path': path,
-          'name': name,
-          'url': uploadResult[2],
-          'PBhost': Global.defaultPShost,
-          'pictureKey': uploadResult[3],
-          'hostSpecificArgA': 'test',
-          'hostSpecificArgB': 'test',
-        };
         int id = await AlbumSQL.insertData(
             Global.imageDB!, PBhostToTableName[Global.defaultPShost]!, maps);
 
@@ -313,6 +335,7 @@ class _HomePageState extends State<HomePage> {
           appBar: AppBar(
             //backgroundColor: Colors.transparent,
             //elevation: 0,
+
             centerTitle: true,
             title: const Text('PicHoro',
                 style: TextStyle(
@@ -409,22 +432,20 @@ class _HomePageState extends State<HomePage> {
                           height: 20,
                         ),
                         Container(
-                          child: Container(
-                            alignment: FractionalOffset.center,
-                            margin: const EdgeInsets.only(left: 20, right: 20),
-                            child: ElevatedButton(
-                              onPressed: _imageFromCamera,
-                              child: Padding(
-                                padding: const EdgeInsets.all(12.0),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: const [
-                                    Icon(Icons.camera_alt),
-                                    Text(
-                                      '单张拍照',
-                                    ),
-                                  ],
-                                ),
+                          alignment: FractionalOffset.center,
+                          margin: const EdgeInsets.only(left: 20, right: 20),
+                          child: ElevatedButton(
+                            onPressed: _imageFromCamera,
+                            child: Padding(
+                              padding: const EdgeInsets.all(12.0),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: const [
+                                  Icon(Icons.camera_alt),
+                                  Text(
+                                    '单张拍照',
+                                  ),
+                                ],
                               ),
                             ),
                           ),
@@ -433,25 +454,23 @@ class _HomePageState extends State<HomePage> {
                           height: 30,
                         ),
                         Container(
-                          child: Container(
-                            alignment: FractionalOffset.center,
-                            margin: const EdgeInsets.only(
-                              left: 20,
-                              right: 20,
-                            ),
-                            child: ElevatedButton(
-                              onPressed: _multiImagePickerFromGallery,
-                              child: Padding(
-                                padding: const EdgeInsets.all(12.0),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: const [
-                                    Icon(Icons.photo_library),
-                                    Text(
-                                      '相册多选',
-                                    ),
-                                  ],
-                                ),
+                          alignment: FractionalOffset.center,
+                          margin: const EdgeInsets.only(
+                            left: 20,
+                            right: 20,
+                          ),
+                          child: ElevatedButton(
+                            onPressed: _multiImagePickerFromGallery,
+                            child: Padding(
+                              padding: const EdgeInsets.all(12.0),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: const [
+                                  Icon(Icons.photo_library),
+                                  Text(
+                                    '相册多选',
+                                  ),
+                                ],
                               ),
                             ),
                           ),
@@ -464,29 +483,27 @@ class _HomePageState extends State<HomePage> {
                           height: 20,
                         ),
                         Container(
-                          child: Container(
-                            alignment: FractionalOffset.center,
-                            margin: const EdgeInsets.only(
-                              left: 20,
-                              right: 20,
+                          alignment: FractionalOffset.center,
+                          margin: const EdgeInsets.only(
+                            left: 20,
+                            right: 20,
+                          ),
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              minimumSize: const Size(20, 100),
                             ),
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                //backgroundColor: Colors.yellow[300],
-                                minimumSize: const Size(20, 100),
-                              ),
-                              onPressed: _cameraAndBack,
-                              child: Padding(
-                                padding: const EdgeInsets.all(12.0),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: const [
-                                    Icon(Icons.backup),
-                                    Text(
-                                      '  连续上传',
-                                    ),
-                                  ],
-                                ),
+                            onPressed: _cameraAndBack,
+                            child: Padding(
+                              //RenderFlex
+                              padding: const EdgeInsets.all(1.0),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: const [
+                                  Icon(Icons.backup),
+                                  Text(
+                                    '  连续上传',
+                                  ),
+                                ],
                               ),
                             ),
                           ),
@@ -498,6 +515,58 @@ class _HomePageState extends State<HomePage> {
               ),
             ],
           ),
+          floatingActionButton: SpeedDial(
+            overlayOpacity: 0.5,
+            buttonSize: const Size(45, 45),
+            childrenButtonSize: const Size(40, 40),
+            animatedIcon: AnimatedIcons.menu_close,
+            animatedIconTheme: IconThemeData(size: 33.0),
+            backgroundColor: Colors.blue,
+            visible: true,
+            curve: Curves.bounceIn,
+            children: [
+              SpeedDialChild(
+                shape: const CircleBorder(),
+                child: const Icon(
+                  IconData(0x004C),
+                  color: Colors.white,
+                ),
+                backgroundColor: Color.fromARGB(255, 97, 180, 248),
+                label: '兰空',
+                labelStyle: const TextStyle(fontSize: 12.0),
+                onTap: () async {
+                  await setdefaultPShostRemoteAndLocal('lsky.pro');
+                },
+              ),
+              SpeedDialChild(
+                shape: const CircleBorder(),
+                child: const Icon(
+                  IconData(0x0053),
+                  color: Colors.white,
+                ),
+                backgroundColor: Color.fromARGB(255, 97, 180, 248),
+                label: 'SM.MS',
+                labelStyle: const TextStyle(fontSize: 12.0),
+                onTap: () async {
+                  await setdefaultPShostRemoteAndLocal('sm.ms');
+                },
+              ),
+              SpeedDialChild(
+                shape: const CircleBorder(),
+                child: const Icon(
+                  IconData(0x0047),
+                  color: Colors.white,
+                ),
+                backgroundColor: Color.fromARGB(255, 97, 180, 248),
+                label: 'Github',
+                labelStyle: const TextStyle(fontSize: 12.0),
+                onTap: () async {
+                  await setdefaultPShostRemoteAndLocal('github');
+                },
+              ),
+            ],
+          ),
+
           // This trailing comma makes auto-formatting nicer for build methods.
           //switch wthin upload and hostconfig
           bottomNavigationBar: BottomNavigationBar(
