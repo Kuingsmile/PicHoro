@@ -40,6 +40,7 @@ class _SmmsConfigState extends State<SmmsConfig> {
             TextFormField(
               controller: _tokenController,
               decoration: const InputDecoration(
+                label: Center(child: Text('Token')),
                 hintText: 'token',
               ),
               textAlign: TextAlign.center,
@@ -112,21 +113,27 @@ class _SmmsConfigState extends State<SmmsConfig> {
       //需要加一个空的formdata，不然会报错
       FormData formData = FormData.fromMap({});
       Dio dio = Dio(options);
+      String sqlResult = '';
       try {
         var validateResponse = await dio.post(validateURL, data: formData);
         if (validateResponse.statusCode == 200 &&
             validateResponse.data['success'] == true) {
           if (querysmms == 'Empty') {
-            await MySqlUtils.insertSmms(content: sqlconfig);
+            sqlResult = await MySqlUtils.insertSmms(content: sqlconfig);
           } else {
-            await MySqlUtils.updateSmms(content: sqlconfig);
+            sqlResult = await MySqlUtils.updateSmms(content: sqlconfig);
           }
-          final smmsConfig = SmmsConfigModel(token);
-          final smmsConfigJson = jsonEncode(smmsConfig);
-          final smmsConfigFile = await _localFile;
-          await smmsConfigFile.writeAsString(smmsConfigJson);
-          return showAlertDialog(
-              context: context, title: '成功', content: '配置成功');
+          if (sqlResult == "Success") {
+            final smmsConfig = SmmsConfigModel(token);
+            final smmsConfigJson = jsonEncode(smmsConfig);
+            final smmsConfigFile = await _localFile;
+            await smmsConfigFile.writeAsString(smmsConfigJson);
+            return showAlertDialog(
+                context: context, title: '成功', content: '配置成功');
+          } else {
+            return showAlertDialog(
+                context: context, title: '错误', content: '数据库错误');
+          }
         } else {
           return showAlertDialog(
               context: context, title: '错误', content: 'token错误');
@@ -256,7 +263,8 @@ class _SmmsConfigState extends State<SmmsConfig> {
             fontSize: 16.0);
       }
       if (queryuser['defaultPShost'] == 'sm.ms') {
-        await Global.setPShost('lsky.pro');
+        await Global.setPShost('sm.ms');
+        await Global.setShowedPBhost('smms');
         return Fluttertoast.showToast(
             msg: "已经是默认配置",
             toastLength: Toast.LENGTH_SHORT,
@@ -276,6 +284,7 @@ class _SmmsConfigState extends State<SmmsConfig> {
         var updateResult = await MySqlUtils.updateUser(content: sqlconfig);
         if (updateResult == 'Success') {
           await Global.setPShost('sm.ms');
+          await Global.setShowedPBhost('smms');
           Fluttertoast.showToast(
               msg: "已设置sm.ms为默认图床",
               toastLength: Toast.LENGTH_SHORT,
