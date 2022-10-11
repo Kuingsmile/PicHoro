@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:horopic/utils/common_func.dart';
 import 'package:horopic/utils/global.dart';
 
+//兰空V2
 class LskyproImageUploadUtils {
   //上传接口
   static uploadApi(
@@ -11,8 +12,15 @@ class LskyproImageUploadUtils {
     String formatedURL = '';
     FormData formdata = FormData.fromMap({
       "file": await MultipartFile.fromFile(path, filename: name),
-      "strategy_id": configMap["strategy_id"],
     });
+    if (configMap["strategy_id"] == "None") {
+      formdata = FormData.fromMap({});
+    } else {
+      formdata = FormData.fromMap({
+        "file": await MultipartFile.fromFile(path, filename: name),
+        "strategy_id": configMap["strategy_id"],
+      });
+    }
 
     BaseOptions options = BaseOptions();
     options.headers = {
@@ -52,9 +60,10 @@ class LskyproImageUploadUtils {
       "Accept": "application/json",
     };
     Dio dio = Dio(options);
-    String uploadUrl = configMap["host"] + "/api/v1/images/${deleteMap["pictureKey"]}";
+    String deleteUrl =
+        configMap["host"] + "/api/v1/images/${deleteMap["pictureKey"]}";
     try {
-      var response = await dio.delete(uploadUrl, data: formdata);
+      var response = await dio.delete(deleteUrl, data: formdata);
       if (response.statusCode == 200 && response.data!['status'] == true) {
         return [
           "success",
