@@ -4,6 +4,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
+
 //所有的数据库的图床表名
 List<String> allPBhost = [
   'lskypro', //兰空图床
@@ -20,10 +21,21 @@ List<String> allPBhost = [
   'PBhost2', //自定义图床2
   'PBhost3', //自定义图床3
 ];
-
+// XXX 重要，默认上传图床名和数据库表名对应关系
 Map<String, String> PBhostToTableName = {
   "lsky.pro": "lskypro",
   "sm.ms": "smms",
+  'github': 'github',
+  'gitee': 'gitee',
+  'weibo': 'weibo',
+  'imgur': 'imgur',
+  'upyun': 'upyun',
+  'qiniu': 'qiniu',
+  'aliyun': 'aliyun',
+  'tencent': 'tencent',
+  'PBhost1': 'PBhost1',
+  'PBhost2': 'PBhost2',
+  'PBhost3': 'PBhost3',
 };
 
 List<String> tableKeysList = [
@@ -64,7 +76,10 @@ class AlbumSQL {
               PBhost TEXT,
               pictureKey TEXT,
               hostSpecificArgA TEXT,
-              hostSpecificArgB TEXT
+              hostSpecificArgB TEXT,
+              hostSpecificArgC TEXT,
+              hostSpecificArgD TEXT,
+              hostSpecificArgE TEXT
             )
             ''');
         }
@@ -81,7 +96,7 @@ class AlbumSQL {
 
   static createTable(Database db, String tableName) async {
     await db.execute(
-        "CREATE TABLE $tableName (id INTEGER PRIMARY KEY AUTOINCREMENT,path TEXT,name TEXT,url TEXT,PBhost TEXT,pictureKey TEXT,hostSpecificArgA TEXT,hostSpecificArgB TEXT)");
+        "CREATE TABLE $tableName (id INTEGER PRIMARY KEY AUTOINCREMENT,path TEXT,name TEXT,url TEXT,PBhost TEXT,pictureKey TEXT,hostSpecificArgA TEXT,hostSpecificArgB TEXT,hostSpecificArgC TEXT,hostSpecificArgD TEXT,hostSpecificArgE TEXT)");
   }
 
   static insertData(
