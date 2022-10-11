@@ -14,6 +14,12 @@
       "languageVersion": "2.14"
     },
     {
+      "name": "barcode_scan2",
+      "rootUri": "file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/barcode_scan2-4.2.1",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
       "name": "boolean_selector",
       "rootUri": "file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/boolean_selector-2.1.0",
       "packageUri": "lib/",
@@ -122,6 +128,12 @@
       "languageVersion": "2.12"
     },
     {
+      "name": "fixnum",
+      "rootUri": "file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/fixnum-1.0.1",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
       "name": "flustars_flutter3",
       "rootUri": "file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/flustars_flutter3-3.0.0",
       "packageUri": "lib/",
@@ -148,6 +160,12 @@
     {
       "name": "flutter_plugin_android_lifecycle",
       "rootUri": "file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/flutter_plugin_android_lifecycle-2.0.7",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "flutter_speed_dial",
+      "rootUri": "file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/flutter_speed_dial-6.1.0+1",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
@@ -428,6 +446,12 @@
       "languageVersion": "2.14"
     },
     {
+      "name": "protobuf",
+      "rootUri": "file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/protobuf-2.1.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
       "name": "provider",
       "rootUri": "file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/provider-6.0.3",
       "packageUri": "lib/",
@@ -680,7 +704,7 @@
       "languageVersion": "2.18"
     }
   ],
-  "generated": "2022-10-09T09:09:53.417474Z",
+  "generated": "2022-10-11T07:31:57.807198Z",
   "generator": "pub",
   "generatorVersion": "2.18.0"
 }
