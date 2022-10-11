@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:path_provider/path_provider.dart';
 import 'package:horopic/api/lskypro.dart';
 import 'package:horopic/api/smms.dart';
+import 'package:horopic/api/github.dart';
 
 //默认图床参数和配置文件名对应关系
 Map<String, String> pdconfig = {
@@ -20,15 +21,21 @@ Map<String, String> pdconfig = {
 };
 
 Map<String, Function> deleteFunc = {
-  'lsky.pro': LskyproImageUploadUtils.deleteApi,
-  'sm.ms': SmmsImageUploadUtils.deleteApi,
+  'lskypro': LskyproImageUploadUtils.deleteApi,
+  'smms': SmmsImageUploadUtils.deleteApi,
+  'github': GithubImageUploadUtils.deleteApi,
 };
 
 //获取图床配置文件
 Future<File> get _localFile async {
   final directory = await getApplicationDocumentsDirectory();
-  String defaultConfig = await Global.getPShost();
+  String defaultConfig = await Global.getShowedPBhost();
   String defaultUser = await Global.getUser();
+  if (defaultConfig == 'lskypro') {
+    defaultConfig = 'lsky.pro';
+  } else if (defaultConfig == 'smms') {
+    defaultConfig = 'sm.ms';
+  }
   return File(
       '${directory.path}/${defaultUser}_${pdconfig[defaultConfig]}.txt');
 }
@@ -51,12 +58,13 @@ deleterentry(Map deleteConfig) async {
   }
   Map configMap = jsonDecode(configData);
   //获取用户设置的默认图床
-  String defaultConfig = await Global.getPShost();
+  String defaultConfig = await Global.getShowedPBhost();
 
-  //调用对应图床的上传接口
+  //调用对应图床的删除接口
   try {
     var result = await deleteFunc[defaultConfig]!(
         deleteMap: deleteConfig, configMap: configMap);
+
     return result;
   } catch (e) {
     return ["Error"];
