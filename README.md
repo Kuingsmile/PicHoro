@@ -5,14 +5,14 @@
 </div>
 
 &emsp;&emsp;一款基于flutter的移动端图片上传和图床管理工具，可上传和删除图片，已支持如下图床：  
-- [x] 兰空图床 个人图床网站[https://imgx.horosama.com](https://imgx.horosama.com)
+- [x] 兰空图床 
 - [x] SM.MS(**V1.41版本添加**) 图床网站[https://smms.app](https://smms.app)或[https://sm.ms](https://sm.ms)
-- [x] Github(**V1.55版本添加**) 使用自己的Github仓库作为图床
+- [x] Github(**V1.55版本添加**) 使用Github仓库作为图床
 
 &emsp;&emsp;正在研究添加各种其它图床的支持，个人开发用于学习flutter和替代很久没更新了的[flutter-Picgo](https://github.com/PicGo/flutter-picgo)。
 
 @author: Horosama
-
+@website: [https://www.horosama.com](https://www.horosama.com)
 @email: ma_shiqing@163.com
 
 ## 应用截图
