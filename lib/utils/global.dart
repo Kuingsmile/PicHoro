@@ -41,6 +41,9 @@ class Global {
   static Database? imageDB; //默认数据库
   static String defaultShowedPBhost = 'lskypro'; //默认显示的图床
   static bool isDeleteLocal = false; //是否删除本地图片
+  static bool isDeleteCloud = false; //是否删除远程图片
+  static String customLinkFormat = r'[${fileName}][${url}]'; //自定义链接格式
+  static String qrScanResult = ''; //扫码结果
 
   static getPShost() async {
     await SpUtil.getInstance();
@@ -158,5 +161,30 @@ class Global {
     await SpUtil.getInstance();
     bool isDeleteLocal = SpUtil.getBool('key_isDeleteLocal', defValue: false)!;
     return isDeleteLocal;
+  }
+
+  static setCustomLinkFormat(String customLinkFormat) async {
+    await SpUtil.getInstance();
+    SpUtil.putString('key_customLinkFormat', customLinkFormat);
+    Global.customLinkFormat = customLinkFormat;
+  }
+
+  static getCustomLinkFormat() async {
+    await SpUtil.getInstance();
+    String customLinkFormat =
+        SpUtil.getString('key_customLinkFormat', defValue: 'rawurl')!;
+    return customLinkFormat;
+  }
+
+  static setDeleteCloud(bool isDeleteCloud) async {
+    await SpUtil.getInstance();
+    SpUtil.putBool('key_isDeleteCloud', isDeleteCloud);
+    Global.isDeleteCloud = isDeleteCloud;
+  }
+
+  static getDeleteCloud() async {
+    await SpUtil.getInstance();
+    bool isDeleteCloud = SpUtil.getBool('key_isDeleteCloud', defValue: false)!;
+    return isDeleteCloud;
   }
 }
