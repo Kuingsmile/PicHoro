@@ -5,14 +5,13 @@ import 'package:horopic/utils/global.dart';
 import 'package:provider/provider.dart';
 import 'package:horopic/utils/themeProvider.dart';
 import 'package:horopic/utils/permission.dart';
-import 'package:horopic/album/albumSQL.dart';
 import 'package:sqflite/sqflite.dart';
 /*
 @Author: Horo
 @e-mail: ma_shiqing@163.com
-@Date: 2022-10-11
-@Description:PicHoro, a picture upload tool 
-@version: 1.5.5
+@Date: 2022-10-12
+@Description:PicHoro, your mobile PicGo
+@version: 1.6.0
 */
 
 void main() async {
