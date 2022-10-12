@@ -30,9 +30,11 @@ class _UploadedImagesState extends State<UploadedImages> {
   List showedImageName = []; //showedImages的name
   List showedImageId = []; //showedImages的id
   List showedImagePictureKey = []; //showedImages的pictureKey
+  List showedImageDisplayAddressUrl = []; //showedImages的用来显示到相册里的url
 
   final int _perPageItemSize = 12;
-  List currentShowedImagesUrl = []; //当前显示的图片url
+  List currentShowedImagesUrl = []; //当前显示的图片url,用来复制
+  List currentShowedImagesDisplayAddressUrl = []; //当前显示的图片用来显示到相册里的url
 
   int _currentPage = 0;
   RefreshController _refreshController =
@@ -43,6 +45,7 @@ class _UploadedImagesState extends State<UploadedImages> {
     'lskypro': '兰空',
     'smms': 'SM.MS',
     'github': 'GitHub',
+    'imgur': 'Imgur',
   };
 
   @override
@@ -204,13 +207,25 @@ class _UploadedImagesState extends State<UploadedImages> {
             itemBuilder: (context, index) {
               return GestureDetector(
                 onTap: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => ImagePreview(
-                                index: index,
-                                images: currentShowedImagesUrl,
-                              )));
+                  if (Global.defaultShowedPBhost == 'lskypro' ||
+                      Global.defaultShowedPBhost == 'github' ||
+                      Global.defaultShowedPBhost == 'smms') {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => ImagePreview(
+                                  index: index,
+                                  images: currentShowedImagesUrl,
+                                )));
+                  } else if (Global.defaultShowedPBhost == 'imgur') {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => ImagePreview(
+                                  index: index,
+                                  images: currentShowedImagesDisplayAddressUrl,
+                                )));
+                  }
                 },
                 onDoubleTap: () =>
                     copyFormatedLink(index, Global.defaultLKformat),
@@ -229,7 +244,7 @@ class _UploadedImagesState extends State<UploadedImages> {
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadiusDirectional.circular(8)),
                         child: ExtendedImage.network(
-                          currentShowedImagesUrl[index],
+                          currentShowedImagesDisplayAddressUrl[index],
                           height: 150,
                           fit: BoxFit.cover,
                           cache: true,
@@ -348,6 +363,7 @@ class _UploadedImagesState extends State<UploadedImages> {
                   setState(() {
                     _currentPage = 0;
                     currentShowedImagesUrl.clear();
+                    currentShowedImagesDisplayAddressUrl.clear();
                     selectedImagesBool = List.filled(
                       _perPageItemSize,
                       false,
@@ -694,6 +710,8 @@ class _UploadedImagesState extends State<UploadedImages> {
             .removeAt(imagesIndex[i] + (_currentPage * _perPageItemSize) - i);
         showedImageUrl
             .removeAt(imagesIndex[i] + (_currentPage * _perPageItemSize) - i);
+        showedImageDisplayAddressUrl
+            .removeAt(imagesIndex[i] + (_currentPage * _perPageItemSize) - i);
         showedImagePaths
             .removeAt(imagesIndex[i] + (_currentPage * _perPageItemSize) - i);
         showedImageName
@@ -706,6 +724,13 @@ class _UploadedImagesState extends State<UploadedImages> {
               (_currentPage + 1) * _perPageItemSize > showedImageUrl.length
                   ? showedImageUrl.length
                   : (_currentPage + 1) * _perPageItemSize);
+          currentShowedImagesDisplayAddressUrl =
+              showedImageDisplayAddressUrl.sublist(
+                  _currentPage * _perPageItemSize,
+                  (_currentPage + 1) * _perPageItemSize >
+                          showedImageDisplayAddressUrl.length
+                      ? showedImageDisplayAddressUrl.length
+                      : (_currentPage + 1) * _perPageItemSize);
         });
       } catch (e) {
         rethrow;
@@ -739,27 +764,43 @@ class _UploadedImagesState extends State<UploadedImages> {
       setState(() {
         showedImageId.removeAt(index + _perPageItemSize * _currentPage);
         showedImageUrl.removeAt(index + _perPageItemSize * _currentPage);
+        showedImageDisplayAddressUrl
+            .removeAt(index + _perPageItemSize * _currentPage);
         showedImagePictureKey.removeAt(index + _perPageItemSize * _currentPage);
         showedImageName.removeAt(index + _perPageItemSize * _currentPage);
         showedImagePaths.removeAt(index + _perPageItemSize * _currentPage);
         currentShowedImagesUrl.removeAt(index);
+        currentShowedImagesDisplayAddressUrl.removeAt(index);
         selectedImagesBool = List.filled(_perPageItemSize, false);
         if (currentShowedImagesUrl.isEmpty && _currentPage == 0) {
           currentShowedImagesUrl = [];
+          currentShowedImagesDisplayAddressUrl = [];
         } else if (currentShowedImagesUrl.isEmpty && _currentPage > 0) {
           _currentPage--;
           currentShowedImagesUrl = showedImageUrl.sublist(
               _currentPage * _perPageItemSize,
               (_currentPage + 1) * _perPageItemSize);
+          currentShowedImagesDisplayAddressUrl =
+              showedImageDisplayAddressUrl.sublist(
+                  _currentPage * _perPageItemSize,
+                  (_currentPage + 1) * _perPageItemSize);
         } else if (showedImageUrl.length >=
             (_currentPage + 1) * _perPageItemSize) {
           currentShowedImagesUrl = showedImageUrl.sublist(
               _currentPage * _perPageItemSize,
               (_currentPage + 1) * _perPageItemSize);
+          currentShowedImagesDisplayAddressUrl =
+              showedImageDisplayAddressUrl.sublist(
+                  _currentPage * _perPageItemSize,
+                  (_currentPage + 1) * _perPageItemSize);
         } else if (showedImageUrl.length <
             (_currentPage + 1) * _perPageItemSize) {
           currentShowedImagesUrl = showedImageUrl.sublist(
               _currentPage * _perPageItemSize, showedImageUrl.length);
+          currentShowedImagesDisplayAddressUrl =
+              showedImageDisplayAddressUrl.sublist(
+                  _currentPage * _perPageItemSize,
+                  showedImageDisplayAddressUrl.length);
         }
       });
     } catch (e) {
@@ -773,6 +814,7 @@ class _UploadedImagesState extends State<UploadedImages> {
       setState(() {
         _currentPage = 0;
         currentShowedImagesUrl.clear();
+        currentShowedImagesDisplayAddressUrl.clear();
         selectedImagesBool = List.filled(
           _perPageItemSize,
           false,
@@ -799,20 +841,37 @@ class _UploadedImagesState extends State<UploadedImages> {
     showedImageId = imageList[Global.defaultShowedPBhost]!;
     showedImageId = showedImageId.reversed.toList();
     showedImageUrl.clear();
+    showedImageDisplayAddressUrl.clear();
     showedImagePictureKey.clear();
     showedImageName.clear();
     showedImagePaths.clear();
     for (int i = 0; i < showedImageId.length; i++) {
       List<Map<String, dynamic>> maps = await AlbumSQL.queryData(
           Global.imageDB!, Global.defaultShowedPBhost, showedImageId[i]);
-      if (Global.defaultShowedPBhost == 'lskypro' ||
-          Global.defaultShowedPBhost == 'smms') {
-        showedImageUrl.add(maps[0]['url']);
+      if (Global.defaultShowedPBhost == 'smms') {
+        showedImageUrl.add(maps[0]['url']); //smms的returnUrl就是用来复制和相册展示的url
+        showedImageDisplayAddressUrl.add(maps[0]['url']);
+        showedImageName.add(maps[0]['name']);
+        showedImagePictureKey.add(maps[0]['pictureKey']);
+        showedImagePaths.add(maps[0]['path']);
+      } else if (Global.defaultShowedPBhost == 'lskypro') {
+        showedImageUrl.add(maps[0]['url']); //用来复制的url
+        showedImageDisplayAddressUrl
+            .add(maps[0]['hostSpecificArgA']); //用来相册展示的url
         showedImageName.add(maps[0]['name']);
         showedImagePictureKey.add(maps[0]['pictureKey']);
         showedImagePaths.add(maps[0]['path']);
       } else if (Global.defaultShowedPBhost == 'github') {
-        showedImageUrl.add(maps[0]['hostSpecificArgA']);
+        showedImageUrl.add(maps[0]['hostSpecificArgA']); //用来复制的url
+        showedImageDisplayAddressUrl
+            .add(maps[0]['hostSpecificArgA']); //用来相册展示的url
+        showedImageName.add(maps[0]['name']);
+        showedImagePictureKey.add(maps[0]['pictureKey']);
+        showedImagePaths.add(maps[0]['path']);
+      } else if (Global.defaultShowedPBhost == 'imgur') {
+        showedImageUrl.add(maps[0]['url']); //用来复制的url
+        showedImageDisplayAddressUrl
+            .add(maps[0]['hostSpecificArgA']); //用来显示的url
         showedImageName.add(maps[0]['name']);
         showedImagePictureKey.add(maps[0]['pictureKey']);
         showedImagePaths.add(maps[0]['path']);
@@ -824,6 +883,12 @@ class _UploadedImagesState extends State<UploadedImages> {
         _perPageItemSize > showedImageUrl.length
             ? showedImageUrl.length
             : _perPageItemSize);
+    currentShowedImagesDisplayAddressUrl = showedImageDisplayAddressUrl.sublist(
+        0,
+        _perPageItemSize > showedImageDisplayAddressUrl.length
+            ? showedImageDisplayAddressUrl.length
+            : _perPageItemSize);
+
     setState(() {
       _refreshController.refreshCompleted();
     });
@@ -839,6 +904,14 @@ class _UploadedImagesState extends State<UploadedImages> {
           showedImageUrl.length > _perPageItemSize * (_currentPage + 1)
               ? _perPageItemSize * (_currentPage + 1)
               : showedImageUrl.length);
+      currentShowedImagesDisplayAddressUrl.clear();
+      currentShowedImagesDisplayAddressUrl =
+          showedImageDisplayAddressUrl.sublist(
+              (_currentPage) * _perPageItemSize,
+              showedImageDisplayAddressUrl.length >
+                      _perPageItemSize * (_currentPage + 1)
+                  ? _perPageItemSize * (_currentPage + 1)
+                  : showedImageDisplayAddressUrl.length);
       selectedImagesBool = List.filled(_perPageItemSize, false);
     }
     LoadUploadedImages();
@@ -862,7 +935,11 @@ class _UploadedImagesState extends State<UploadedImages> {
   void doBackUploadedImages() async {
     _currentPage = _currentPage - 1;
     currentShowedImagesUrl.clear();
+    currentShowedImagesDisplayAddressUrl.clear();
     currentShowedImagesUrl = showedImageUrl.sublist(
+        (_currentPage) * _perPageItemSize,
+        _perPageItemSize * (_currentPage + 1));
+    currentShowedImagesDisplayAddressUrl = showedImageDisplayAddressUrl.sublist(
         (_currentPage) * _perPageItemSize,
         _perPageItemSize * (_currentPage + 1));
     selectedImagesBool = List.filled(_perPageItemSize, false);
