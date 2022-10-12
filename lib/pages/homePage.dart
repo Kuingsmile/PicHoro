@@ -56,7 +56,6 @@ class _HomePageState extends State<HomePage> {
         Global.imageFile = fileImage;
       }
       setState(() {
-        //Global.imageFile = fileImage;
         Global.imagesList.add(Global.imageFile!);
       });
     }
@@ -107,8 +106,16 @@ class _HomePageState extends State<HomePage> {
 
     if (Global.multiUpload == 'fail') {
       if (Global.isCopyLink == true) {
-        await flutterServices.Clipboard.setData(
-            flutterServices.ClipboardData(text: clipbordList.toString()));
+        if (clipbordList.length == 1) {
+          await flutterServices.Clipboard.setData(
+              flutterServices.ClipboardData(text: clipbordList[0]));
+        } else {
+          await flutterServices.Clipboard.setData(flutterServices.ClipboardData(
+              text: clipbordList
+                  .toString()
+                  .substring(1, clipbordList.toString().length - 1)
+                  .replaceAll(',', '\n')));
+        }
         clipbordList.clear();
       }
       return true;
@@ -128,18 +135,71 @@ class _HomePageState extends State<HomePage> {
       return showAlertDialog(
           context: context, title: "上传失败!", content: "请先配置上传参数.");
     } else if (uploadResult[0] == "success") {
-      Map<String, dynamic> maps = {
-        'path': path,
-        'name': name,
-        'url': uploadResult[2],
-        'PBhost': Global.defaultPShost,
-        'pictureKey': uploadResult[3],
-        'hostSpecificArgA': 'test',
-        'hostSpecificArgB': 'test',
-      };
+      Map<String, dynamic> maps = {};
+      //
+      if (Global.defaultPShost == 'sm.ms') {
+        //["success", formatedURL, returnUrl, pictureKey]
+        maps = {
+          'path': path,
+          'name': name,
+          'url': uploadResult[2], //返回地址可以直接访问
+          'PBhost': Global.defaultPShost,
+          'pictureKey': uploadResult[3],
+          'hostSpecificArgA': 'test',
+          'hostSpecificArgB': 'test',
+          'hostSpecificArgC': 'test',
+          'hostSpecificArgD': 'test',
+          'hostSpecificArgE': 'test',
+        };
+      } else if (Global.defaultPShost == 'lsky.pro') {
+        //["success", formatedURL, returnUrl, pictureKey, displayUrl]
+        maps = {
+          'path': path,
+          'name': name,
+          'url': uploadResult[2], //原图地址
+          'PBhost': Global.defaultPShost,
+          'pictureKey': uploadResult[3],
+          'hostSpecificArgA': uploadResult[4], //实际展示的是缩略图
+          'hostSpecificArgB': 'test',
+          'hostSpecificArgC': 'test',
+          'hostSpecificArgD': 'test',
+          'hostSpecificArgE': 'test',
+        };
+      } else if (Global.defaultPShost == 'github') {
+        //["success", formatedURL, returnUrl, pictureKey, downloadUrl]
+        maps = {
+          'path': path,
+          'name': name,
+          'url': uploadResult[2], //github文件原始地址
+          'PBhost': Global.defaultPShost,
+          'pictureKey': uploadResult[3],
+          'hostSpecificArgA':
+              uploadResult[4], //实际展示的是github download url或者自定义域名+路径
+          'hostSpecificArgB': 'test',
+          'hostSpecificArgC': 'test',
+          'hostSpecificArgD': 'test',
+          'hostSpecificArgE': 'test',
+        };
+      } else if (Global.defaultPShost == 'imgur') {
+        // ["success", formatedURL, returnUrl, pictureKey,cdnUrl]
+        maps = {
+          'path': path,
+          'name': name,
+          'url': uploadResult[2], //imgur文件原始地址
+          'PBhost': Global.defaultPShost,
+          'pictureKey': uploadResult[3],
+          'hostSpecificArgA': uploadResult[4], //实际展示的是imgur cdn url
+          'hostSpecificArgB': 'test',
+          'hostSpecificArgC': 'test',
+          'hostSpecificArgD': 'test',
+          'hostSpecificArgE': 'test',
+        };
+      }
+
       int id = await AlbumSQL.insertData(
           Global.imageDB!, PBhostToTableName[Global.defaultPShost]!, maps);
-      clipbordList.add(uploadResult[1]);
+
+      clipbordList.add(uploadResult[1]); //这里是formatedURL,应该是可以直接访问的地址
       Global.multiUpload = 'success';
       return true;
     } else if (uploadResult[0] == "failed") {
@@ -216,8 +276,7 @@ class _HomePageState extends State<HomePage> {
         successCount++;
         successList.add(name);
         Map<String, dynamic> maps = {};
-        if (Global.defaultPShost == 'sm.ms' ||
-            Global.defaultPShost == 'lsky.pro') {
+        if (Global.defaultPShost == 'sm.ms') {
           maps = {
             'path': path,
             'name': name,
@@ -225,6 +284,20 @@ class _HomePageState extends State<HomePage> {
             'PBhost': Global.defaultPShost,
             'pictureKey': uploadResult[3],
             'hostSpecificArgA': 'test',
+            'hostSpecificArgB': 'test',
+            'hostSpecificArgC': 'test',
+            'hostSpecificArgD': 'test',
+            'hostSpecificArgE': 'test',
+          };
+        } else if (Global.defaultPShost == 'lsky.pro') {
+          //["success", formatedURL, returnUrl, pictureKey, displayUrl]
+          maps = {
+            'path': path,
+            'name': name,
+            'url': uploadResult[2], //原图地址
+            'PBhost': Global.defaultPShost,
+            'pictureKey': uploadResult[3],
+            'hostSpecificArgA': uploadResult[4], //实际展示的是缩略图
             'hostSpecificArgB': 'test',
             'hostSpecificArgC': 'test',
             'hostSpecificArgD': 'test',
@@ -243,8 +316,21 @@ class _HomePageState extends State<HomePage> {
             'hostSpecificArgD': 'test',
             'hostSpecificArgE': 'test',
           };
+        } else if (Global.defaultPShost == 'imgur') {
+          // ["success", formatedURL, returnUrl, pictureKey,cdnUrl]
+          maps = {
+            'path': path,
+            'name': name,
+            'url': uploadResult[2], //imgur文件原始地址
+            'PBhost': Global.defaultPShost,
+            'pictureKey': uploadResult[3],
+            'hostSpecificArgA': uploadResult[4], //实际展示的是imgur cdn url
+            'hostSpecificArgB': 'test',
+            'hostSpecificArgC': 'test',
+            'hostSpecificArgD': 'test',
+            'hostSpecificArgE': 'test',
+          };
         }
-
         int id = await AlbumSQL.insertData(
             Global.imageDB!, PBhostToTableName[Global.defaultPShost]!, maps);
 
@@ -273,8 +359,10 @@ class _HomePageState extends State<HomePage> {
           content: content);
     } else if (failCount == 0) {
       if (Global.isCopyLink == true) {
-        await flutterServices.Clipboard.setData(
-            flutterServices.ClipboardData(text: clipbordList.toString()));
+        await flutterServices.Clipboard.setData(flutterServices.ClipboardData(
+            text: clipbordList
+                .toString()
+                .substring(1, clipbordList.toString().length - 1)));
         clipbordList.clear();
       }
       String content = "哇塞，全部上传成功了！\n\n上传成功的图片列表:\n\n";
@@ -562,6 +650,19 @@ class _HomePageState extends State<HomePage> {
                 labelStyle: const TextStyle(fontSize: 12.0),
                 onTap: () async {
                   await setdefaultPShostRemoteAndLocal('github');
+                },
+              ),
+              SpeedDialChild(
+                shape: const CircleBorder(),
+                child: const Icon(
+                  IconData(0x0049),
+                  color: Colors.white,
+                ),
+                backgroundColor: Color.fromARGB(255, 97, 180, 248),
+                label: 'Imgur',
+                labelStyle: const TextStyle(fontSize: 12.0),
+                onTap: () async {
+                  await setdefaultPShostRemoteAndLocal('imgur');
                 },
               ),
             ],
