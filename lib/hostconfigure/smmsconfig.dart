@@ -105,7 +105,12 @@ class _SmmsConfigState extends State<SmmsConfig> {
       }
       String validateURL = "https://smms.app/api/v2/profile";
       // String validateURL = "https://sm.ms/api/v2/profile";被墙了
-      BaseOptions options = BaseOptions();
+      BaseOptions options = BaseOptions(
+        //连接服务器超时时间，单位是毫秒.
+        connectTimeout: 10000,
+        //响应超时时间。
+        receiveTimeout: 10000,
+      );
       options.headers = {
         "Content-Type": 'multipart/form-data',
         "Authorization": token,
@@ -157,7 +162,12 @@ class _SmmsConfigState extends State<SmmsConfig> {
         return;
       }
       Map configMap = jsonDecode(configData);
-      BaseOptions options = BaseOptions();
+      BaseOptions options = BaseOptions(
+        //连接服务器超时时间，单位是毫秒.
+        connectTimeout: 10000,
+        //响应超时时间。
+        receiveTimeout: 10000,
+      );
       options.headers = {
         "Authorization": configMap["token"],
         "Content-Type": "multipart/form-data",

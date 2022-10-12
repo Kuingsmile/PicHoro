@@ -20,6 +20,7 @@ class _defaultPShostSelectState extends State<defaultPShostSelect> {
     'lsky.pro',
     'sm.ms',
     'github',
+    'imgur',
   ];
 
   @override
@@ -60,6 +61,16 @@ class _defaultPShostSelectState extends State<defaultPShostSelect> {
               setState(() {});
             },
           ),
+          ListTile(
+            title: const Text('Imgur图床'),
+            trailing: Global.defaultPShost == 'imgur'
+                ? const Icon(Icons.check)
+                : null,
+            onTap: () async {
+              await setdefaultPShostRemoteAndLocal('imgur');
+              setState(() {});
+            },
+          ),
         ],
       ),
     );
@@ -72,6 +83,7 @@ setdefaultPShostRemoteAndLocal(String psHost) async {
     'lsky.pro': MySqlUtils.queryLankong,
     'sm.ms': MySqlUtils.querySmms,
     'github': MySqlUtils.queryGithub,
+    'imgur': MySqlUtils.queryImgur,
   };
   try {
     String defaultUser = await Global.getUser();
@@ -112,8 +124,10 @@ setdefaultPShostRemoteAndLocal(String psHost) async {
         await Global.setShowedPBhost('lskypro');
       } else if (psHost == 'sm.ms') {
         await Global.setShowedPBhost('smms');
-      } else {
-        await Global.setShowedPBhost(psHost);
+      } else if (psHost == 'github') {
+        await Global.setShowedPBhost('github');
+      } else if (psHost == 'imgur') {
+        await Global.setShowedPBhost('imgur');
       }
       return Fluttertoast.showToast(
           msg: "已经是默认配置",
@@ -125,6 +139,7 @@ setdefaultPShostRemoteAndLocal(String psHost) async {
       sqlconfig.add(defaultUser);
       sqlconfig.add(defaultPassword);
       sqlconfig.add(psHost);
+      
       var updateResult = await MySqlUtils.updateUser(content: sqlconfig);
 
       if (updateResult == 'Success') {
@@ -133,8 +148,10 @@ setdefaultPShostRemoteAndLocal(String psHost) async {
           await Global.setShowedPBhost('lskypro');
         } else if (psHost == 'sm.ms') {
           await Global.setShowedPBhost('smms');
-        } else {
-          await Global.setShowedPBhost(psHost);
+        } else if (psHost == 'github') {
+          await Global.setShowedPBhost('github');
+        } else if (psHost == 'imgur') {
+          await Global.setShowedPBhost('imgur');
         }
         Fluttertoast.showToast(
             msg: "已设置$psHost为默认图床",

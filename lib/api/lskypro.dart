@@ -22,7 +22,12 @@ class LskyproImageUploadUtils {
       });
     }
 
-    BaseOptions options = BaseOptions();
+    BaseOptions options = BaseOptions(
+      //连接服务器超时时间，单位是毫秒.
+      connectTimeout: 10000,
+      //响应超时时间。
+      receiveTimeout: 10000,
+    );
     options.headers = {
       "Authorization": configMap["token"],
       "Accept": "application/json",
@@ -30,18 +35,22 @@ class LskyproImageUploadUtils {
     };
     Dio dio = Dio(options);
     String uploadUrl = configMap["host"] + "/api/v1/upload";
+
     try {
       var response = await dio.post(uploadUrl, data: formdata);
       if (response.statusCode == 200 && response.data!['status'] == true) {
         String returnUrl = response.data!['data']['links']['url'];
+        //返回缩略图地址用来在相册显示
+        String displayUrl = response.data!['data']['links']['thumbnail_url'];
         String pictureKey = response.data!['data']['key'];
+
         if (Global.isCopyLink == true) {
           formatedURL =
               linkGenerateDict[Global.defaultLKformat]!(returnUrl, name);
         } else {
           formatedURL = returnUrl;
         }
-        return ["success", formatedURL, returnUrl, pictureKey];
+        return ["success", formatedURL, returnUrl, pictureKey, displayUrl];
       } else {
         return ["failed"];
       }
@@ -54,7 +63,12 @@ class LskyproImageUploadUtils {
     Map<String, dynamic> formdata = {
       "key": deleteMap["pictureKey"],
     };
-    BaseOptions options = BaseOptions();
+    BaseOptions options = BaseOptions(
+      //连接服务器超时时间，单位是毫秒.
+      connectTimeout: 10000,
+      //响应超时时间。
+      receiveTimeout: 10000,
+    );
     options.headers = {
       "Authorization": configMap["token"],
       "Accept": "application/json",

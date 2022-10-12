@@ -19,7 +19,12 @@ class GithubImageUploadUtils {
       'branch': configMap["branch"], //分支
     };
 
-    BaseOptions options = BaseOptions();
+    BaseOptions options = BaseOptions(
+      //连接服务器超时时间，单位是毫秒.
+      connectTimeout: 10000,
+      //响应超时时间。
+      receiveTimeout: 10000,
+    );
 
     options.headers = {
       "Authorization": configMap["token"],
@@ -50,9 +55,9 @@ class GithubImageUploadUtils {
         String downloadUrl = '';
         if (configMap['customDomain'] != 'None') {
           if (configMap['customDomain'].toString().endsWith('/')) {
-            String trimedCustomDomain =
-                configMap['customDomain'].toString().substring(
-                    0, configMap['customDomain'].toString().length - 1);
+            String trimedCustomDomain = configMap['customDomain']
+                .toString()
+                .substring(0, configMap['customDomain'].toString().length - 1);
             if (trimedPath == 'None') {
               downloadUrl = '$trimedCustomDomain$name';
             } else {
@@ -62,18 +67,18 @@ class GithubImageUploadUtils {
             if (trimedPath == 'None') {
               downloadUrl = '${configMap['customDomain']}/$name';
             } else {
-              downloadUrl =
-                  '${configMap['customDomain']}/$trimedPath/$name';
+              downloadUrl = '${configMap['customDomain']}/$trimedPath/$name';
             }
           }
         } else {
           downloadUrl = response.data!['content']['download_url'];
         }
+        //复制的链接地址应该是downloadUrl
         if (Global.isCopyLink == true) {
           formatedURL =
-              linkGenerateDict[Global.defaultLKformat]!(returnUrl, name);
+              linkGenerateDict[Global.defaultLKformat]!(downloadUrl, name);
         } else {
-          formatedURL = returnUrl;
+          formatedURL = downloadUrl;
         }
         return ["success", formatedURL, returnUrl, pictureKey, downloadUrl];
       } else {
@@ -90,7 +95,12 @@ class GithubImageUploadUtils {
       "sha": deleteMap["pictureKey"],
       "branch": configMap["branch"],
     };
-    BaseOptions options = BaseOptions();
+    BaseOptions options = BaseOptions(
+      //连接服务器超时时间，单位是毫秒.
+      connectTimeout: 10000,
+      //响应超时时间。
+      receiveTimeout: 10000,
+    );
     options.headers = {
       "Authorization": configMap["token"],
       "Accept": "application/vnd.github+json",

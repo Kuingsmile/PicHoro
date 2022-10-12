@@ -153,7 +153,12 @@ class _HostConfigState extends State<HostConfig> {
     String token = 'Bearer ';
     final username = _usernameController.text;
     final passwd = _passwdController.text;
-    BaseOptions options = BaseOptions();
+    BaseOptions options = BaseOptions(
+      //连接服务器超时时间，单位是毫秒.
+        connectTimeout:  10000,
+        //响应超时时间。
+        receiveTimeout: 10000,
+    );
     options.headers = {
       "Accept": "application/json",
     };
@@ -171,7 +176,12 @@ class _HostConfigState extends State<HostConfig> {
       if (response.statusCode == 200 && response.data['status'] == true) {
         token = token + response.data['data']['token'].toString();
         String strategiesUrl = '$host/api/v1/strategies';
-        BaseOptions strategiesOptions = BaseOptions();
+        BaseOptions strategiesOptions = BaseOptions(
+            //连接服务器超时时间，单位是毫秒.
+      connectTimeout: 10000,
+      //响应超时时间。
+      receiveTimeout: 10000,
+        );
         strategiesOptions.headers = {
           "Accept": "application/json",
           "Authorization": token,
@@ -215,7 +225,12 @@ class _HostConfigState extends State<HostConfig> {
     final username = _usernameController.text;
     final passwd = _passwdController.text;
     final strategyId = _strategyIdController.text;
-    BaseOptions options = BaseOptions();
+    BaseOptions options = BaseOptions(
+      //连接服务器超时时间，单位是毫秒.
+        connectTimeout:  10000,
+        //响应超时时间。
+        receiveTimeout: 10000,
+    );
     options.headers = {
       "Accept": "application/json",
     };
@@ -308,7 +323,12 @@ class _HostConfigState extends State<HostConfig> {
         return;
       }
       Map configMap = jsonDecode(configData);
-      BaseOptions options = BaseOptions();
+      BaseOptions options = BaseOptions(
+        //连接服务器超时时间，单位是毫秒.
+        connectTimeout:  10000,
+        //响应超时时间。
+        receiveTimeout: 10000,
+      );
       options.headers = {
         "Authorization": configMap["token"],
         "Accept": "application/json",
