@@ -45,6 +45,7 @@ class Global {
   static String customLinkFormat = r'[${fileName}][${url}]'; //自定义链接格式
   static String qrScanResult = ''; //扫码结果
 
+
   static getPShost() async {
     await SpUtil.getInstance();
     String pshost = SpUtil.getString('key_pshost', defValue: 'lsky.pro')!;

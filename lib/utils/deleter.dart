@@ -5,7 +5,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:horopic/api/lskypro.dart';
 import 'package:horopic/api/smms.dart';
 import 'package:horopic/api/github.dart';
-
+import 'package:horopic/api/imgur.dart';
 //默认图床参数和配置文件名对应关系
 Map<String, String> pdconfig = {
   'lsky.pro': 'host_config',
@@ -24,6 +24,7 @@ Map<String, Function> deleteFunc = {
   'lskypro': LskyproImageUploadUtils.deleteApi,
   'smms': SmmsImageUploadUtils.deleteApi,
   'github': GithubImageUploadUtils.deleteApi,
+  'imgur': ImgurImageUploadUtils.deleteApi,
 };
 
 //获取图床配置文件
