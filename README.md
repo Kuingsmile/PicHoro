@@ -4,16 +4,18 @@
   <h1>PicHoro</h1>
 </div>
 
-&emsp;&emsp;一款基于flutter的移动端图片上传和图床管理工具，可上传和删除图片，已支持如下图床：  
-- [x] 兰空图床 
+&emsp;&emsp;一款基于flutter的移动端图片上传和图床管理工具，与PicGo配置互通，可直接扫码导入，主要功能包括上传，查看，删除图片，已支持如下图床：  
+
+- [x] 兰空图床V2 (**V1.00版本添加**)
 - [x] SM.MS(**V1.41版本添加**) 图床网站[https://smms.app](https://smms.app)或[https://sm.ms](https://sm.ms)
 - [x] Github(**V1.55版本添加**) 使用Github仓库作为图床
+- [x] Imgur(**V1.60版本添加**) Imgur国内用户需要配合翻墙使用，个人手机测试配合clash可以正常使用
 
 &emsp;&emsp;正在研究添加各种其它图床的支持，个人开发用于学习flutter和替代很久没更新了的[flutter-Picgo](https://github.com/PicGo/flutter-picgo)。
 
-@author: Horosama
-@website: [https://www.horosama.com](https://www.horosama.com)
-@email: ma_shiqing@163.com
+@author: Horosama  
+@website: [https://www.horosama.com](https://www.horosama.com)  
+@email: ma_shiqing@163.com  
 
 ## 应用截图
 
@@ -33,9 +35,17 @@
 
   详细更新日志请查看[更新日志](https://github.com/Kuingsmile/PicHoro/blob/main/Version_update_log.md "更新日志")
 
+- 2022-10-12: **V1.60**:
+  - 增加了对Imgur图床的支持，但是由于Imgur的限制，使用的时候需要配置手机代理，在个人手机上配合clash测试可用。
+  - 加入了设置配置和图片上传/删除的时候的响应和连接超时时间设置，防止网络不好的情况下卡死。
+  - 区分了相册显示的时候的图片地址和复制的时候的图片地址，改善相册加载图片的速度，例如兰空图床在相册小图中显示的是缩略图，预览大图的时候才会加载原图。
+  - 修复了设置页面跳转到主页的时候，有时会先跳转到相册页面的问题
+  - 修复了注册用户的时候，同步创建本地相册数据库的代码没有执行的bug
+  - 修复了连续上传功能中，复制的链接的格式错误的bug
+  - 更改了登录页面UI，方便区分出是否已经登录
 - 2022-10-11: **V1.55**:
   - 增加了扫码导入PicGo配置的功能，和PicGo进一步兼容。
-  - 增加了对github图床的支持,在主页增加了切换默认上传图床的浮动按钮。
+  - 增加了对Github图床的支持,在主页增加了切换默认上传图床的浮动按钮。
   - 增加了自定义复制链接的格式的功能，和PicGo的自定义格式一样，使用\${url}和\${filename}来表示链接和文件名，可以在设置中自定义。
   - 增加了新的设置选项，可以选择在删除图片的时候是否同步删除网络端的图片（默认不删除）。
   - 重新整理了源代码文件架构，使得代码更加清晰，方便后续的更新和维护。
@@ -60,20 +70,22 @@
 - 2022-10-07: **V1.41**:
   - 增加了对SM.MS图床的支持
   - 修复了markdown链接的文件名错误的问题
-- 2022-10-02: **V1.00**: 项目初始化，完成基本的上传功能，目前仅支持兰空图床，需要手动授予存储和相机权限
+- 2022-10-02: **V1.00**:
+  - 项目初始化，完成基本的上传功能，目前仅支持兰空图床，需要手动授予存储和相机权限
 
 ## 下载
 
 **安卓版**：
 
-[https://www.horosama.com/self_apk/PicHoro_V1.5.5.apk](https://www.horosama.com/self_apk/PicHoro_V1.5.5.apk)
+[https://www.horosama.com/self_apk/PicHoro_V1.6.0.apk](https://www.horosama.com/self_apk/PicHoro_V1.6.0.apk)
 
 ## 开发计划
 
 - 增加对各种图床平台的支持，预计先写github和腾讯云存储的代码,已完成
-  - [x] 兰空图床
+  - [x] 兰空图床V2版本
   - [x] SM.MS
   - [x] Github
+  - [x] Imgur
 - 增加图床仓库管理的功能，增加从相册里删除图片的时候只删除数据库记录的功能-**已实现**
 - 增加从剪贴板和网络URL上传图片的功能
 - 增加自定义复制的链接格式的功能-**已实现**
