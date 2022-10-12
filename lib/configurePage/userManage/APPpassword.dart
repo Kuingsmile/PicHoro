@@ -11,6 +11,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:horopic/hostconfigure/lskyproconfig.dart' as lskyhost;
 import 'package:horopic/hostconfigure/smmsconfig.dart' as smmshostclass;
 import 'package:horopic/hostconfigure/githubconfig.dart' as githubhostclass;
+import 'package:horopic/hostconfigure/Imgurconfig.dart' as imgurhostclass;
 
 class APPPassword extends StatefulWidget {
   const APPPassword({Key? key}) : super(key: key);
@@ -34,8 +35,13 @@ class _APPPasswordState extends State<APPPassword> {
         //如果没有这个用户，就创建一个，设置初始选项
         await Global.setUser(_userNametext.text);
         await Global.setPassword(_passwordcontroller.text);
+        //设定默认的图床
         await Global.setPShost('lsky.pro');
+        await Global.setShowedPBhost('lskypro');
         await Global.setLKformat('rawurl');
+        //创建相册数据库
+        Database db = await Global.getDatabase();
+        await Global.setDatabase(db);
         //在数据库中创建用户
         var result = await MySqlUtils.insertUser(content: [
           _userNametext.text,
@@ -44,13 +50,13 @@ class _APPPasswordState extends State<APPPassword> {
         ]);
         if (result == 'Success') {
           return showAlertDialog(
-              context: context, title: '通知', content: '已成功注册，请妥善保管您的密码');
+              context: context,
+              title: '通知',
+              content: '已成功注册，您的密码是：\n${_passwordcontroller.text}\n请妥善保管');
         } else {
           return showAlertDialog(
               context: context, title: '通知', content: '注册失败，请重试');
         }
-        Database db = await Global.getDatabase();
-        await Global.setDatabase(db);
       } else if (usernamecheck == 'Error') {
         return showAlertDialog(
             context: context, title: "错误", content: "设置失败,请重试!");
@@ -100,7 +106,7 @@ class _APPPasswordState extends State<APPPassword> {
               await MySqlUtils.queryLankong(username: username);
           if (lskyhostresult == 'Error') {
             return showAlertDialog(
-                context: context, title: "错误", content: "获取登录信息失败,请重试!");
+                context: context, title: "错误", content: "获取兰空云端信息失败,请重试!");
           } else if (lskyhostresult != 'Empty') {
             try {
               final hostConfig = lskyhost.HostConfigModel(
@@ -122,7 +128,7 @@ class _APPPasswordState extends State<APPPassword> {
           var smmshostresult = await MySqlUtils.querySmms(username: username);
           if (smmshostresult == 'Error') {
             return showAlertDialog(
-                context: context, title: "错误", content: "获取登录信息失败,请重试!");
+                context: context, title: "错误", content: "获取SM.MS云端信息失败,请重试!");
           } else if (smmshostresult != 'Empty') {
             try {
               final smmshostConfig = smmshostclass.SmmsConfigModel(
@@ -130,9 +136,9 @@ class _APPPasswordState extends State<APPPassword> {
               );
               final smmsConfigJson = jsonEncode(smmshostConfig);
               final directory = await getApplicationDocumentsDirectory();
-              File lskyLocalFile =
+              File smmsLocalFile =
                   File('${directory.path}/${username}_smms_config.txt');
-              lskyLocalFile.writeAsString(smmsConfigJson);
+              smmsLocalFile.writeAsString(smmsConfigJson);
             } catch (e) {
               return showAlertDialog(
                   context: context, title: "错误", content: "拉取SM.MS图床配置失败,请重试!");
@@ -142,7 +148,7 @@ class _APPPasswordState extends State<APPPassword> {
           var githubresult = await MySqlUtils.queryGithub(username: username);
           if (githubresult == 'Error') {
             return showAlertDialog(
-                context: context, title: "错误", content: "获取登录信息失败,请重试!");
+                context: context, title: "错误", content: "获取Github云端信息失败,请重试!");
           } else if (githubresult != 'Empty') {
             try {
               final githubhostConfig = githubhostclass.GithubConfigModel(
@@ -154,14 +160,35 @@ class _APPPasswordState extends State<APPPassword> {
                   githubresult['customDomain']);
               final githubConfigJson = jsonEncode(githubhostConfig);
               final directory = await getApplicationDocumentsDirectory();
-              File lskyLocalFile =
+              File githubLocalFile =
                   File('${directory.path}/${username}_github_config.txt');
-              lskyLocalFile.writeAsString(githubConfigJson);
+              githubLocalFile.writeAsString(githubConfigJson);
             } catch (e) {
               return showAlertDialog(
                   context: context,
                   title: "错误",
                   content: "拉取github图床配置失败,请重试!");
+            }
+          }
+          //拉取Imgur图床配置
+          var imgurresult = await MySqlUtils.queryImgur(username: username);
+          if (imgurresult == 'Error') {
+            return showAlertDialog(
+                context: context, title: "错误", content: "获取Imgur云端信息失败,请重试!");
+          } else if (imgurresult != 'Empty') {
+            try {
+              final imgurhostConfig = imgurhostclass.ImgurConfigModel(
+                imgurresult['clientId'],
+                imgurresult['proxy'],
+              );
+              final imgurConfigJson = jsonEncode(imgurhostConfig);
+              final directory = await getApplicationDocumentsDirectory();
+              File imgurLocalFile =
+                  File('${directory.path}/${username}_imgur_config.txt');
+              imgurLocalFile.writeAsString(imgurConfigJson);
+            } catch (e) {
+              return showAlertDialog(
+                  context: context, title: "错误", content: "拉取Imgur图床配置失败,请重试!");
             }
           }
           //全部拉取完成后，提示用户
@@ -192,7 +219,8 @@ class _APPPasswordState extends State<APPPassword> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: const Text('APP密码设置'),
+        title: Text(
+            Global.defaultUser == ' ' ? '未登录' : '已登录为${Global.defaultUser}'),
       ),
       body: Form(
         key: _formKey,
@@ -249,7 +277,7 @@ class _APPPasswordState extends State<APPPassword> {
                       });
                 }
               },
-              child: const Text('注册和登录'),
+              child: Text(Global.defaultUser == ' ' ? '注册或登录' : '切换用户'),
             ),
             ElevatedButton(
               onPressed: () async {
