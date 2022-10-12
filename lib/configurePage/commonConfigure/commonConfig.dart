@@ -79,7 +79,7 @@ class _CommonConfigState extends State<CommonConfig> {
               },
             ),
           ),
-             ListTile(
+          ListTile(
             title: const Text('删除时是否同步删除云端图片'),
             subtitle: const Text('根据需要开启'),
             trailing: Switch(

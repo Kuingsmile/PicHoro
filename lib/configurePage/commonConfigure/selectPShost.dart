@@ -13,6 +13,8 @@ import 'package:dio/dio.dart';
 import 'package:horopic/pages/loading.dart';
 import 'package:barcode_scan2/barcode_scan2.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:horopic/hostconfigure/Imgurconfig.dart';
+import 'package:dio_proxy_adapter/dio_proxy_adapter.dart';
 
 //a configure page for user to show configure entry
 class AllPShost extends StatefulWidget {
@@ -79,12 +81,20 @@ class _AllPShostState extends State<AllPShost> {
     return File('$path/${defaultUser}_github_config.txt');
   }
 
+  //imgur配置
+  Future<File> get imgurFile async {
+    final path = await _localPath;
+    String defaultUser = await Global.getUser();
+    return File('$path/${defaultUser}_imgur_config.txt');
+  }
+
   processingQRCodeResult() async {
     String result = Global.qrScanResult;
     Global.qrScanResult = "";
     if (!(result.contains('smms')) &&
         !(result.contains('github')) &&
-        !(result.contains('lankong'))) {
+        !(result.contains('lankong')) &&
+        !(result.contains('imgur'))) {
       return Fluttertoast.showToast(
           msg: "不包含支持的图床配置信息",
           toastLength: Toast.LENGTH_SHORT,
@@ -111,7 +121,12 @@ class _AllPShostState extends State<AllPShost> {
         }
         String validateURL = "https://smms.app/api/v2/profile";
         // String validateURL = "https://sm.ms/api/v2/profile";被墙了
-        BaseOptions options = BaseOptions();
+        BaseOptions options = BaseOptions(
+          //连接服务器超时时间，单位是毫秒.
+          connectTimeout: 10000,
+          //响应超时时间。
+          receiveTimeout: 10000,
+        );
         options.headers = {
           "Content-Type": 'multipart/form-data',
           "Authorization": smmsToken,
@@ -164,6 +179,7 @@ class _AllPShostState extends State<AllPShost> {
             fontSize: 16.0);
       }
     }
+
     if (jsonResult['github'] != null) {
       try {
         String token = jsonResult['github']['token'];
@@ -214,7 +230,12 @@ class _AllPShostState extends State<AllPShost> {
                 timeInSecForIosWeb: 2,
                 fontSize: 16.0);
           }
-          BaseOptions options = BaseOptions();
+          BaseOptions options = BaseOptions(
+            //连接服务器超时时间，单位是毫秒.
+            connectTimeout: 10000,
+            //响应超时时间。
+            receiveTimeout: 10000,
+          );
           options.headers = {
             "Accept": 'application/vnd.github+json',
             "Authorization": token,
@@ -302,7 +323,12 @@ class _AllPShostState extends State<AllPShost> {
               lanKongstrategyId = 'None';
             }
 
-            BaseOptions options = BaseOptions();
+            BaseOptions options = BaseOptions(
+              //连接服务器超时时间，单位是毫秒.
+              connectTimeout: 10000,
+              //响应超时时间。
+              receiveTimeout: 10000,
+            );
             options.headers = {
               "Accept": "application/json",
               "Authorization": lankongToken,
@@ -399,6 +425,103 @@ class _AllPShostState extends State<AllPShost> {
         }
       }
     }
+
+    if (jsonResult['imgur'] != null) {
+      final imgurclientId = jsonResult['imgur']['clientId'];
+      String imgurProxy = jsonResult['imgur']['proxy'];
+      try {
+        List sqlconfig = [];
+        sqlconfig.add(imgurclientId);
+        sqlconfig.add(imgurProxy);
+        String defaultUser = await Global.getUser();
+        sqlconfig.add(defaultUser);
+
+        var queryimgur = await MySqlUtils.queryImgur(username: defaultUser);
+        var queryuser = await MySqlUtils.queryUser(username: defaultUser);
+
+        if (queryuser == 'Empty') {
+          Fluttertoast.showToast(
+              msg: "请先登录",
+              toastLength: Toast.LENGTH_SHORT,
+              timeInSecForIosWeb: 2,
+              fontSize: 16.0);
+        }
+        String baiduPicUrl =
+            "https://dss0.bdstatic.com/5aV1bjqh_Q23odCf/static/superman/img/logo/logo_white-d0c9fe2af5.png";
+        String validateURL = "https://api.imgur.com/3/image";
+
+        BaseOptions options = BaseOptions(
+          //连接服务器超时时间，单位是毫秒.
+          connectTimeout: 10000,
+          //响应超时时间。
+          receiveTimeout: 10000,
+        );
+        options.headers = {
+          "Authorization": "Client-ID $imgurclientId",
+        };
+        //需要加一个空的formdata，不然会报错
+        FormData formData = FormData.fromMap({
+          "image": baiduPicUrl,
+        });
+        Dio dio = Dio(options);
+        String proxyClean = '';
+
+        if (imgurProxy != 'None') {
+          if (imgurProxy.startsWith('http://') ||
+              imgurProxy.startsWith('https://')) {
+            proxyClean = imgurProxy.split('://')[1];
+          } else {
+            proxyClean = imgurProxy;
+          }
+          dio.useProxy(proxyClean);
+        }
+
+        String sqlResult = '';
+        try {
+          var validateResponse = await dio.post(validateURL, data: formData);
+          if (validateResponse.statusCode == 200 &&
+              validateResponse.data['success'] == true) {
+            if (queryimgur == 'Empty') {
+              sqlResult = await MySqlUtils.insertImgur(content: sqlconfig);
+            } else {
+              sqlResult = await MySqlUtils.updateImgur(content: sqlconfig);
+            }
+            if (sqlResult == "Success") {
+              final imgurConfig = ImgurConfigModel(imgurclientId, imgurProxy);
+              final imgurConfigJson = jsonEncode(imgurConfig);
+              final imgurConfigFile = await smmsFile;
+              await imgurConfigFile.writeAsString(imgurConfigJson);
+              Fluttertoast.showToast(
+                  msg: "Imgur配置成功",
+                  toastLength: Toast.LENGTH_SHORT,
+                  timeInSecForIosWeb: 2,
+                  fontSize: 16.0);
+            } else {
+              Fluttertoast.showToast(
+                  msg: "Imgur数据库错误",
+                  toastLength: Toast.LENGTH_SHORT,
+                  timeInSecForIosWeb: 2,
+                  fontSize: 16.0);
+            }
+          } else {
+            Fluttertoast.showToast(
+                msg: "Imgur验证失败",
+                toastLength: Toast.LENGTH_SHORT,
+                timeInSecForIosWeb: 2,
+                fontSize: 16.0);
+          }
+        } catch (e) {
+          rethrow;
+        }
+      } catch (e) {
+        Fluttertoast.showToast(
+            msg: "Imgur配置错误",
+            toastLength: Toast.LENGTH_SHORT,
+            timeInSecForIosWeb: 2,
+            fontSize: 16.0);
+      }
+    }
+
     return true;
   }
 
@@ -452,7 +575,7 @@ class _AllPShostState extends State<AllPShost> {
             trailing: const Icon(Icons.arrow_forward_ios),
           ),
           ListTile(
-            title: const Text('兰空图床'),
+            title: const Text('兰空图床V2'),
             onTap: () {
               Navigator.push(context,
                   MaterialPageRoute(builder: (context) => const HostConfig()));
@@ -474,6 +597,14 @@ class _AllPShostState extends State<AllPShost> {
                   context,
                   MaterialPageRoute(
                       builder: (context) => const GithubConfig()));
+            },
+            trailing: const Icon(Icons.arrow_forward_ios),
+          ),
+          ListTile(
+            title: const Text('Imgur图床（需翻墙）'),
+            onTap: () {
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => const ImgurConfig()));
             },
             trailing: const Icon(Icons.arrow_forward_ios),
           ),
