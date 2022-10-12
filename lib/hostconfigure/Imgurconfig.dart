@@ -8,32 +8,24 @@ import 'package:horopic/pages/loading.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:horopic/utils/sqlUtils.dart';
 import 'package:horopic/utils/global.dart';
+import 'package:dio_proxy_adapter/dio_proxy_adapter.dart';
 
 //a textfield to get hosts,username,passwd,token and strategy_id
-class GithubConfig extends StatefulWidget {
-  const GithubConfig({Key? key}) : super(key: key);
+class ImgurConfig extends StatefulWidget {
+  const ImgurConfig({Key? key}) : super(key: key);
 
   @override
-  _GithubConfigState createState() => _GithubConfigState();
+  _ImgurConfigState createState() => _ImgurConfigState();
 }
 
-class _GithubConfigState extends State<GithubConfig> {
+class _ImgurConfigState extends State<ImgurConfig> {
   final _formKey = GlobalKey<FormState>();
-
-  final _githubusernameController = TextEditingController();
-  final _repoController = TextEditingController();
-  final _tokenController = TextEditingController();
-  final _storePathController = TextEditingController();
-  final _branchController = TextEditingController();
-  final _customDomainController = TextEditingController();
+  final _clientIdController = TextEditingController();
+  final _proxyController = TextEditingController();
 
   @override
   void dispose() {
-    _githubusernameController.dispose();
-    _repoController.dispose();
-    _tokenController.dispose();
-    _storePathController.dispose();
-
+    _clientIdController.dispose();
     super.dispose();
   }
 
@@ -41,80 +33,31 @@ class _GithubConfigState extends State<GithubConfig> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Github参数配置'),
+        title: const Text('Imgur参数配置'),
       ),
       body: Form(
         key: _formKey,
         child: ListView(
           children: [
             TextFormField(
-              controller: _githubusernameController,
+              controller: _clientIdController,
               decoration: const InputDecoration(
-                label: Center(child: Text('Github用户名')),
-                hintText: '设定用户名',
+                label: Center(child: Text('设定clientID')),
+                hintText: 'clientID',
               ),
               textAlign: TextAlign.center,
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return '请输入Github用户名';
+                  return '请输入clientID';
                 }
                 return null;
               },
             ),
             TextFormField(
-              controller: _repoController,
+              controller: _proxyController,
               decoration: const InputDecoration(
-                label: Center(child: Text('仓库名')),
-                hintText: '设定仓库名',
-              ),
-              textAlign: TextAlign.center,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return '请输入仓库名';
-                }
-                return null;
-              },
-            ),
-            TextFormField(
-              controller: _tokenController,
-              obscureText: true,
-              decoration: const InputDecoration(
-                label: Center(child: Text('token')),
-                hintText: '设定Token',
-              ),
-              textAlign: TextAlign.center,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return '请输入token';
-                }
-                return null;
-              },
-            ),
-            TextFormField(
-              controller: _storePathController,
-              decoration: const InputDecoration(
-                contentPadding: EdgeInsets.zero,
-                label: Center(child: Text('可选:存储路径')),
-                hintText: '例如: test/',
-              ),
-              textAlign: TextAlign.center,
-            ),
-            TextFormField(
-              controller: _branchController,
-              decoration: const InputDecoration(
-                contentPadding: EdgeInsets.zero,
-                label: Center(child: Text('可选：分支')),
-                hintText: '例如: main(默认为main)',
-              ),
-              textAlign: TextAlign.center,
-            ),
-            TextFormField(
-              controller: _customDomainController,
-              decoration: const InputDecoration(
-                contentPadding: EdgeInsets.zero,
-                label: Center(child: Text('可选：自定义域名')),
-                hintText: 'eg: https://cdn.jsdelivr.net/gh/用户名/仓库名@分支名',
-                hintStyle: TextStyle(fontSize: 13),
+                label: Center(child: Text('可选:设定代理,需要配合手机FQ软件使用')),
+                hintText: '例如127.0.0.1:7890',
               ),
               textAlign: TextAlign.center,
             ),
@@ -129,16 +72,16 @@ class _GithubConfigState extends State<GithubConfig> {
                           outsideDismiss: false,
                           loading: true,
                           loadingText: "配置中...",
-                          requestCallBack: _saveGithubConfig(),
+                          requestCallBack: _saveImgurConfig(),
                         );
                       });
                 }
               },
-              child: const Text('提交表单'),
+              child: const Text('提交'),
             ),
             ElevatedButton(
               onPressed: () {
-                checkGithubConfig();
+                checkImgurConfig();
               },
               child: const Text('检查当前配置'),
             ),
@@ -154,86 +97,80 @@ class _GithubConfigState extends State<GithubConfig> {
     );
   }
 
-  Future _saveGithubConfig() async {
-    String token = 'Bearer ';
-    String githubUserApi = 'https://api.github.com/user';
-    final String githubusername = _githubusernameController.text;
-    final String repo = _repoController.text;
-    String storePath = '';
-    if (_storePathController.text.isEmpty) {
-      storePath = 'None';
+  Future _saveImgurConfig() async {
+    String clientId = '';
+    if (_clientIdController.text.startsWith('Client-ID ')) {
+      clientId = _clientIdController.text.substring(10);
     } else {
-      storePath = _storePathController.text;
+      clientId = _clientIdController.text;
     }
-    String branch = '';
-    if (_branchController.text.isEmpty) {
-      branch = 'main';
+    String proxy = '';
+    if (_proxyController.text == '' ||
+        _proxyController.text == null ||
+        _proxyController.text.isEmpty) {
+      proxy = 'None';
     } else {
-      branch = _branchController.text;
-    }
-    String customDomain = '';
-    if (_customDomainController.text.isEmpty) {
-      customDomain = 'None';
-    } else {
-      customDomain = _customDomainController.text;
-    }
-
-    if (_tokenController.text.startsWith('Bearer ')) {
-      token = _tokenController.text;
-    } else {
-      token = token + _tokenController.text;
+      proxy = _proxyController.text;
     }
 
     try {
       List sqlconfig = [];
-      sqlconfig.add(githubusername);
-      sqlconfig.add(repo);
-      sqlconfig.add(token);
-      sqlconfig.add(storePath);
-      sqlconfig.add(branch);
-      sqlconfig.add(customDomain);
-      //添加默认用户
+      sqlconfig.add(clientId);
+      sqlconfig.add(proxy);
       String defaultUser = await Global.getUser();
       sqlconfig.add(defaultUser);
 
-      var queryGithub = await MySqlUtils.queryGithub(username: defaultUser);
+      var queryImgur = await MySqlUtils.queryImgur(username: defaultUser);
       var queryuser = await MySqlUtils.queryUser(username: defaultUser);
 
       if (queryuser == 'Empty') {
         return showAlertDialog(
             context: context, title: '错误', content: '用户不存在,请先登录');
       }
+      //拿百度的logo来测试
+
+      String baiduPicUrl =
+          "https://dss0.bdstatic.com/5aV1bjqh_Q23odCf/static/superman/img/logo/logo_white-d0c9fe2af5.png";
+      String validateURL = "https://api.imgur.com/3/image";
+
       BaseOptions options = BaseOptions(
         //连接服务器超时时间，单位是毫秒.
-        connectTimeout: 10000,
+        connectTimeout:  10000,
         //响应超时时间。
         receiveTimeout: 10000,
       );
       options.headers = {
-        "Accept": 'application/vnd.github+json',
-        "Authorization": token,
+        "Authorization": "Client-ID $clientId",
       };
       //需要加一个空的formdata，不然会报错
-      Map<String, dynamic> queryData = {};
+      FormData formData = FormData.fromMap({
+        "image": baiduPicUrl,
+      });
       Dio dio = Dio(options);
       String sqlResult = '';
+      String proxyClean = '';
+      if (proxy != 'None') {
+        if (proxy.startsWith('http://') || proxy.startsWith('https://')) {
+          proxyClean = proxy.split('://')[1];
+        } else {
+          proxyClean = proxy;
+        }
+        dio.useProxy(proxyClean);
+      }
       try {
-        var validateResponse =
-            await dio.get(githubUserApi, queryParameters: queryData);
+        var validateResponse = await dio.post(validateURL, data: formData);
         if (validateResponse.statusCode == 200 &&
-            validateResponse.data.toString().contains("email")) {
-          //验证成功
-          if (queryGithub == 'Empty') {
-            sqlResult = await MySqlUtils.insertGithub(content: sqlconfig);
+            validateResponse.data['success'] == true) {
+          if (queryImgur == 'Empty') {
+            sqlResult = await MySqlUtils.insertImgur(content: sqlconfig);
           } else {
-            sqlResult = await MySqlUtils.updateGithub(content: sqlconfig);
+            sqlResult = await MySqlUtils.updateImgur(content: sqlconfig);
           }
           if (sqlResult == "Success") {
-            final githubConfig = GithubConfigModel(
-                githubusername, repo, token, storePath, branch, customDomain);
-            final githubConfigJson = jsonEncode(githubConfig);
-            final githubConfigFile = await _localFile;
-            await githubConfigFile.writeAsString(githubConfigJson);
+            final ImgurConfig = ImgurConfigModel(clientId, proxy);
+            final ImgurConfigJson = jsonEncode(ImgurConfig);
+            final ImgurConfigFile = await _localFile;
+            await ImgurConfigFile.writeAsString(ImgurConfigJson);
             return showAlertDialog(
                 context: context, title: '成功', content: '配置成功');
           } else {
@@ -242,7 +179,7 @@ class _GithubConfigState extends State<GithubConfig> {
           }
         } else {
           return showAlertDialog(
-              context: context, title: '错误', content: 'token错误');
+              context: context, title: '错误', content: 'clientId错误');
         }
       } catch (e) {
         return showAlertDialog(
@@ -254,49 +191,54 @@ class _GithubConfigState extends State<GithubConfig> {
     }
   }
 
-  void checkGithubConfig() async {
+  void checkImgurConfig() async {
     try {
-      final githubConfigFile = await _localFile;
-      String configData = await githubConfigFile.readAsString();
-
+      final ImgurConfigFile = await _localFile;
+      String configData = await ImgurConfigFile.readAsString();
       if (configData == "Error") {
         showAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");
         return;
       }
-
       Map configMap = jsonDecode(configData);
+
       BaseOptions options = BaseOptions(
         //连接服务器超时时间，单位是毫秒.
-        connectTimeout: 10000,
+        connectTimeout:  10000,
         //响应超时时间。
         receiveTimeout: 10000,
+
       );
       options.headers = {
-        "Authorization": configMap["token"],
-        "Accept": 'application/vnd.github+json',
+        "Authorization": "Client-ID ${configMap['clientId']}",
       };
-      String validateURL = "https://api.github.com/user";
-      Map<String, dynamic> queryData = {};
+      String baiduPicUrl =
+          "https://dss0.bdstatic.com/5aV1bjqh_Q23odCf/static/superman/img/logo/logo_white-d0c9fe2af5.png";
+      String validateURL = "https://api.imgur.com/3/image";
+      FormData formData = FormData.fromMap({
+        "image": baiduPicUrl,
+      });
       Dio dio = Dio(options);
-      var response = await dio.get(validateURL, queryParameters: queryData);
+      String proxyClean = '';
 
-      if (response.statusCode == 200 &&
-          response.data.toString().contains("email")) {
+      if (configMap["proxy"] != 'None') {
+        if (configMap["proxy"].startsWith('http://') ||
+            configMap["proxy"].startsWith('https://')) {
+          proxyClean = configMap["proxy"].split('://')[1];
+        } else {
+          proxyClean = configMap["proxy"];
+        }
+        dio.useProxy(proxyClean);
+      }
+      var response = await dio.post(validateURL, data: formData);
+      if (response.statusCode == 200 && response.data['success'] == true) {
         showAlertDialog(
             context: context,
             title: '通知',
-            content: '检测通过，您的配置信息为:\n用户名: ' +
-                configMap["githubusername"] +
-                '\n仓库名: ' +
-                configMap["repo"] +
-                '\n存储路径: ' +
-                configMap["storePath"] +
-                '\n分支: ' +
-                configMap["branch"] +
-                '\n自定义域名: ' +
-                configMap["customDomain"]);
+            content:
+                '检测通过，您的配置信息为:\nclientId:\n${configMap["clientId"]}\n代理:\n${configMap["proxy"]}');
       } else {
-        showAlertDialog(context: context, title: '错误', content: '检查失败，请检查配置信息');
+        showAlertDialog(
+            context: context, title: '错误', content: '配置有误，请检查网络或重新配置');
         return;
       }
     } catch (e) {
@@ -307,7 +249,7 @@ class _GithubConfigState extends State<GithubConfig> {
   Future<File> get _localFile async {
     final path = await _localPath;
     String defaultUser = await Global.getUser();
-    return File('$path/${defaultUser}_github_config.txt');
+    return File('$path/${defaultUser}_imgur_config.txt');
   }
 
   Future<String> get _localPath async {
@@ -315,7 +257,7 @@ class _GithubConfigState extends State<GithubConfig> {
     return directory.path;
   }
 
-  Future<String> readGithubConfig() async {
+  Future<String> readHostConfig() async {
     try {
       final file = await _localFile;
       String contents = await file.readAsString();
@@ -356,9 +298,8 @@ class _GithubConfigState extends State<GithubConfig> {
                 : Colors.black,
             fontSize: 16.0);
       }
-
-      var queryGithub = await MySqlUtils.queryGithub(username: defaultUser);
-      if (queryGithub == 'Empty') {
+      var queryImgur = await MySqlUtils.queryImgur(username: defaultUser);
+      if (queryImgur == 'Empty') {
         return Fluttertoast.showToast(
             msg: "请先配置上传参数",
             toastLength: Toast.LENGTH_SHORT,
@@ -371,7 +312,7 @@ class _GithubConfigState extends State<GithubConfig> {
                 : Colors.black,
             fontSize: 16.0);
       }
-      if (queryGithub == 'Error') {
+      if (queryImgur == 'Error') {
         return Fluttertoast.showToast(
             msg: "Error",
             toastLength: Toast.LENGTH_SHORT,
@@ -384,9 +325,10 @@ class _GithubConfigState extends State<GithubConfig> {
                 : Colors.black,
             fontSize: 16.0);
       }
-      if (queryuser['defaultPShost'] == 'github') {
-        await Global.setPShost('github');
-        await Global.setShowedPBhost('github');
+      if (queryuser['defaultPShost'] == 'imgur') {
+        await Global.setPShost('imgur');
+        await Global.setShowedPBhost('imgur');
+
         return Fluttertoast.showToast(
             msg: "已经是默认配置",
             toastLength: Toast.LENGTH_SHORT,
@@ -402,14 +344,13 @@ class _GithubConfigState extends State<GithubConfig> {
         List sqlconfig = [];
         sqlconfig.add(defaultUser);
         sqlconfig.add(defaultPassword);
-        sqlconfig.add('github');
-
+        sqlconfig.add('imgur');
         var updateResult = await MySqlUtils.updateUser(content: sqlconfig);
         if (updateResult == 'Success') {
-          await Global.setPShost('github');
-          await Global.setShowedPBhost('github');
+          await Global.setPShost('imgur');
+          await Global.setShowedPBhost('imgur');
           Fluttertoast.showToast(
-              msg: "已设置Github为默认图床",
+              msg: "已设置Imgur为默认图床",
               toastLength: Toast.LENGTH_SHORT,
               timeInSecForIosWeb: 2,
               backgroundColor: Theme.of(context).brightness == Brightness.light
@@ -449,23 +390,14 @@ class _GithubConfigState extends State<GithubConfig> {
   }
 }
 
-class GithubConfigModel {
-  final String githubusername;
-  final String repo;
-  final String token;
-  final String storePath;
-  final String branch;
-  final String customDomain;
+class ImgurConfigModel {
+  final String clientId;
+  final String proxy;
 
-  GithubConfigModel(this.githubusername, this.repo, this.token, this.storePath,
-      this.branch, this.customDomain);
+  ImgurConfigModel(this.clientId, this.proxy);
 
   Map<String, dynamic> toJson() => {
-        'githubusername': githubusername,
-        'repo': repo,
-        'token': token,
-        'storePath': storePath,
-        'branch': branch,
-        'customDomain': customDomain,
+        'clientId': clientId,
+        'proxy': proxy,
       };
 }

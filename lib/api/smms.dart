@@ -14,7 +14,12 @@ class SmmsImageUploadUtils {
       "format": "json",
     });
 
-    BaseOptions options = BaseOptions();
+    BaseOptions options = BaseOptions(
+      //连接服务器超时时间，单位是毫秒.
+      connectTimeout: 10000,
+      //响应超时时间。
+      receiveTimeout: 10000,
+    );
     options.headers = {
       "Authorization": configMap["token"],
       "Content-Type": "multipart/form-data",
@@ -49,7 +54,12 @@ class SmmsImageUploadUtils {
       "format": "json",
     };
 
-    BaseOptions options = BaseOptions();
+    BaseOptions options = BaseOptions(
+      //连接服务器超时时间，单位是毫秒.
+      connectTimeout: 10000,
+      //响应超时时间。
+      receiveTimeout: 10000,
+    );
     options.headers = {
       "Authorization": configMap["token"],
     };
