@@ -373,4 +373,72 @@ class MySqlUtils {
       await conn.close();
     }
   }
+
+  static queryImgur({required String username}) async {
+    var conn = await MySqlConnection.connect(settings);
+    try {
+      var results = await conn
+          .query('select * from imgur where username = ?', [username]);
+
+      if (results.isEmpty) {
+        return "Empty";
+      }
+      Map<String, dynamic> resultsMap = {};
+      resultsMap.clear();
+      for (var row in results) {
+        //第一列是id
+        String clientId = await decryptSelf(row[1].toString());
+        String proxy = await decryptSelf(row[2].toString());
+
+        resultsMap['clientId'] = clientId;
+        resultsMap['proxy'] = proxy;
+      }
+      return resultsMap;
+    } catch (e) {
+      return "Error";
+    } finally {
+      await conn.close();
+    }
+  }
+
+  static insertImgur({required List content}) async {
+    var conn = await MySqlConnection.connect(settings);
+    try {
+      String clientId = content[0].toString();
+      String proxy = content[1].toString();
+      String username = content[2].toString();
+
+      String encryptedClientId = await encryptSelf(clientId);
+      String encryptedProxy = await encryptSelf(proxy);
+
+      var results = await conn.query(
+          "insert into imgur (clientId,proxy,username) values (?,?,?)",
+          [encryptedClientId, encryptedProxy, username]);
+      return 'Success';
+    } catch (e) {
+      return "Error";
+    } finally {
+      await conn.close();
+    }
+  }
+
+  static updateImgur({required List content}) async {
+    var conn = await MySqlConnection.connect(settings);
+
+    try {
+      String clientId = content[0].toString();
+      String proxy = content[1].toString();
+      String username = content[2].toString();
+      String encryptedClientId = await encryptSelf(clientId);
+      String encryptedProxy = await encryptSelf(proxy);
+      var results = await conn.query(
+          "update imgur set clientId = ?,proxy = ? where username = ?",
+          [encryptedClientId, encryptedProxy, username]);
+      return 'Success';
+    } catch (e) {
+      return "Error";
+    } finally {
+      await conn.close();
+    }
+  }
 }
