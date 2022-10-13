@@ -12,6 +12,7 @@ import 'package:horopic/hostconfigure/lskyproconfig.dart' as lskyhost;
 import 'package:horopic/hostconfigure/smmsconfig.dart' as smmshostclass;
 import 'package:horopic/hostconfigure/githubconfig.dart' as githubhostclass;
 import 'package:horopic/hostconfigure/Imgurconfig.dart' as imgurhostclass;
+import 'package:horopic/hostconfigure/qiniuconfig.dart' as qiniuhostclass;
 
 class APPPassword extends StatefulWidget {
   const APPPassword({Key? key}) : super(key: key);
@@ -189,6 +190,32 @@ class _APPPasswordState extends State<APPPassword> {
             } catch (e) {
               return showAlertDialog(
                   context: context, title: "错误", content: "拉取Imgur图床配置失败,请重试!");
+            }
+          }
+          //拉取七牛图床配置
+          var qiniuresult = await MySqlUtils.queryQiniu(username: username);
+          if (qiniuresult == 'Error') {
+            return showAlertDialog(
+                context: context, title: "错误", content: "获取七牛云端信息失败,请重试!");
+          } else if (qiniuresult != 'Empty') {
+            try {
+              final qiniuhostConfig = qiniuhostclass.QiniuConfigModel(
+                qiniuresult['accessKey'],
+                qiniuresult['secretKey'],
+                qiniuresult['bucket'],
+                qiniuresult['url'],
+                qiniuresult['area'],
+                qiniuresult['options'],
+                qiniuresult['path'],
+              );
+              final qiniuConfigJson = jsonEncode(qiniuhostConfig);
+              final directory = await getApplicationDocumentsDirectory();
+              File qiniuLocalFile =
+                  File('${directory.path}/${username}_qiniu_config.txt');
+              qiniuLocalFile.writeAsString(qiniuConfigJson);
+            } catch (e) {
+              return showAlertDialog(
+                  context: context, title: "错误", content: "拉取七牛云配置失败,请重试!");
             }
           }
           //全部拉取完成后，提示用户

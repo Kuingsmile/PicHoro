@@ -21,6 +21,7 @@ class _defaultPShostSelectState extends State<defaultPShostSelect> {
     'sm.ms',
     'github',
     'imgur',
+    'qiniu',
   ];
 
   @override
@@ -71,6 +72,16 @@ class _defaultPShostSelectState extends State<defaultPShostSelect> {
               setState(() {});
             },
           ),
+          ListTile(
+            title: const Text('七牛云'),
+            trailing: Global.defaultPShost == 'qiniu'
+                ? const Icon(Icons.check)
+                : null,
+            onTap: () async {
+              await setdefaultPShostRemoteAndLocal('qiniu');
+              setState(() {});
+            },
+          ),
         ],
       ),
     );
@@ -84,7 +95,9 @@ setdefaultPShostRemoteAndLocal(String psHost) async {
     'sm.ms': MySqlUtils.querySmms,
     'github': MySqlUtils.queryGithub,
     'imgur': MySqlUtils.queryImgur,
+    'qiniu': MySqlUtils.queryQiniu,
   };
+
   try {
     String defaultUser = await Global.getUser();
     String defaultPassword = await Global.getPassword();
@@ -128,6 +141,8 @@ setdefaultPShostRemoteAndLocal(String psHost) async {
         await Global.setShowedPBhost('github');
       } else if (psHost == 'imgur') {
         await Global.setShowedPBhost('imgur');
+      } else if (psHost == 'qiniu') {
+        await Global.setShowedPBhost('qiniu');
       }
       return Fluttertoast.showToast(
           msg: "已经是默认配置",
@@ -139,7 +154,7 @@ setdefaultPShostRemoteAndLocal(String psHost) async {
       sqlconfig.add(defaultUser);
       sqlconfig.add(defaultPassword);
       sqlconfig.add(psHost);
-      
+
       var updateResult = await MySqlUtils.updateUser(content: sqlconfig);
 
       if (updateResult == 'Success') {
@@ -152,6 +167,8 @@ setdefaultPShostRemoteAndLocal(String psHost) async {
           await Global.setShowedPBhost('github');
         } else if (psHost == 'imgur') {
           await Global.setShowedPBhost('imgur');
+        } else if (psHost == 'qiniu') {
+          await Global.setShowedPBhost('qiniu');
         }
         Fluttertoast.showToast(
             msg: "已设置$psHost为默认图床",
