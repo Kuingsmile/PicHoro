@@ -23,7 +23,7 @@ class _EmptyDatabaseState extends State<EmptyDatabase> {
             onTap: () async {
               await AlbumSQL.DeleteTable(Global.imageDB!, 'lskypro');
               Fluttertoast.showToast(
-                  msg: "已请空兰空数据库",
+                  msg: "已清空兰空数据库",
                   toastLength: Toast.LENGTH_SHORT,
                   timeInSecForIosWeb: 2,
                   backgroundColor:
@@ -34,7 +34,6 @@ class _EmptyDatabaseState extends State<EmptyDatabase> {
                       ? Colors.white
                       : Colors.black,
                   fontSize: 16.0);
-              Navigator.pop(context);
             },
           ),
           ListTile(
@@ -42,7 +41,7 @@ class _EmptyDatabaseState extends State<EmptyDatabase> {
             onTap: () async {
               await AlbumSQL.DeleteTable(Global.imageDB!, 'smms');
               Fluttertoast.showToast(
-                  msg: "已请空SM.MS数据库",
+                  msg: "已清空SM.MS数据库",
                   toastLength: Toast.LENGTH_SHORT,
                   timeInSecForIosWeb: 2,
                   backgroundColor:
@@ -53,7 +52,6 @@ class _EmptyDatabaseState extends State<EmptyDatabase> {
                       ? Colors.white
                       : Colors.black,
                   fontSize: 16.0);
-              Navigator.pop(context);
             },
           ),
           ListTile(
@@ -61,7 +59,7 @@ class _EmptyDatabaseState extends State<EmptyDatabase> {
             onTap: () async {
               await AlbumSQL.DeleteTable(Global.imageDB!, 'github');
               Fluttertoast.showToast(
-                  msg: "已请空github数据库",
+                  msg: "已清空github数据库",
                   toastLength: Toast.LENGTH_SHORT,
                   timeInSecForIosWeb: 2,
                   backgroundColor:
@@ -72,7 +70,42 @@ class _EmptyDatabaseState extends State<EmptyDatabase> {
                       ? Colors.white
                       : Colors.black,
                   fontSize: 16.0);
-              Navigator.pop(context);
+            },
+          ),
+          ListTile(
+            title: const Text('Imgur'),
+            onTap: () async {
+              await AlbumSQL.DeleteTable(Global.imageDB!, 'imgur');
+              Fluttertoast.showToast(
+                  msg: "已清空Imgur数据库",
+                  toastLength: Toast.LENGTH_SHORT,
+                  timeInSecForIosWeb: 2,
+                  backgroundColor:
+                      Theme.of(context).brightness == Brightness.light
+                          ? Colors.black
+                          : Colors.white,
+                  textColor: Theme.of(context).brightness == Brightness.light
+                      ? Colors.white
+                      : Colors.black,
+                  fontSize: 16.0);
+            },
+          ),
+          ListTile(
+            title: const Text('七牛云'),
+            onTap: () async {
+              await AlbumSQL.DeleteTable(Global.imageDB!, 'qiniu');
+              Fluttertoast.showToast(
+                  msg: "已清空七牛云数据库",
+                  toastLength: Toast.LENGTH_SHORT,
+                  timeInSecForIosWeb: 2,
+                  backgroundColor:
+                      Theme.of(context).brightness == Brightness.light
+                          ? Colors.black
+                          : Colors.white,
+                  textColor: Theme.of(context).brightness == Brightness.light
+                      ? Colors.white
+                      : Colors.black,
+                  fontSize: 16.0);
             },
           ),
           ListTile(
@@ -82,7 +115,7 @@ class _EmptyDatabaseState extends State<EmptyDatabase> {
                 Global.imageDB!,
               );
               Fluttertoast.showToast(
-                  msg: "已请空所有数据库",
+                  msg: "已清空所有数据库",
                   toastLength: Toast.LENGTH_SHORT,
                   timeInSecForIosWeb: 2,
                   backgroundColor:
@@ -93,7 +126,6 @@ class _EmptyDatabaseState extends State<EmptyDatabase> {
                       ? Colors.white
                       : Colors.black,
                   fontSize: 16.0);
-              Navigator.pop(context);
             },
           ),
         ],

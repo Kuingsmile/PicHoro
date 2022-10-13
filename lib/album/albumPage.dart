@@ -46,6 +46,7 @@ class _UploadedImagesState extends State<UploadedImages> {
     'smms': 'SM.MS',
     'github': 'GitHub',
     'imgur': 'Imgur',
+    'qiniu': '七牛云',
   };
 
   @override
@@ -225,6 +226,14 @@ class _UploadedImagesState extends State<UploadedImages> {
                                   index: index,
                                   images: currentShowedImagesDisplayAddressUrl,
                                 )));
+                  }else if (Global.defaultShowedPBhost == 'qiniu') {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => ImagePreview(
+                                  index: index,
+                                  images: currentShowedImagesUrl,
+                                )));
                   }
                 },
                 onDoubleTap: () =>
@@ -243,12 +252,19 @@ class _UploadedImagesState extends State<UploadedImages> {
                         clipBehavior: Clip.antiAlias,
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadiusDirectional.circular(8)),
+                        //这玩意只识别http或者https开头的链接
                         child: ExtendedImage.network(
                           currentShowedImagesDisplayAddressUrl[index],
+                          clearMemoryCacheIfFailed: true,
+                          retries: 5,
                           height: 150,
                           fit: BoxFit.cover,
                           cache: true,
-                          border: Border.all(color: Colors.grey, width: 1.0),
+                          border: Border.all(
+                              color: selectedImagesBool[index]
+                                  ? Colors.red
+                                  : Colors.transparent,
+                              width: 2),
                           borderRadius: BorderRadius.all(Radius.circular(8)),
                           loadStateChanged: (state) =>
                               defaultLoadStateChanged(state, iconSize: 30),
@@ -336,6 +352,26 @@ class _UploadedImagesState extends State<UploadedImages> {
                                 textAlign: TextAlign.center),
                             onPressed: () {
                               Global.defaultShowedPBhost = 'github';
+                              Navigator.pop(context);
+                              _currentPage = 0;
+                              _onRefresh();
+                            },
+                          ),
+                          SimpleDialogOption(
+                            child: const Text('Imgur',
+                                textAlign: TextAlign.center),
+                            onPressed: () {
+                              Global.defaultShowedPBhost = 'imgur';
+                              Navigator.pop(context);
+                              _currentPage = 0;
+                              _onRefresh();
+                            },
+                          ),
+                          SimpleDialogOption(
+                            child:
+                                const Text('七牛云', textAlign: TextAlign.center),
+                            onPressed: () {
+                              Global.defaultShowedPBhost = 'qiniu';
                               Navigator.pop(context);
                               _currentPage = 0;
                               _onRefresh();
@@ -862,9 +898,21 @@ class _UploadedImagesState extends State<UploadedImages> {
         showedImagePictureKey.add(maps[0]['pictureKey']);
         showedImagePaths.add(maps[0]['path']);
       } else if (Global.defaultShowedPBhost == 'github') {
-        showedImageUrl.add(maps[0]['hostSpecificArgA']); //用来复制的url
-        showedImageDisplayAddressUrl
-            .add(maps[0]['hostSpecificArgA']); //用来相册展示的url
+        if (!maps[0]['url'].toString().startsWith('https://') &&
+            !maps[0]['url'].toString().startsWith('http://')) {
+          showedImageUrl.add('http://' + maps[0]['url']);
+        } else {
+          showedImageUrl.add(maps[0]['url']);
+        }
+       // showedImageUrl.add(maps[0]['hostSpecificArgA']); //用来复制的url
+       if (!maps[0]['hostSpecificArgA'].toString().startsWith('https://') &&
+            !maps[0]['hostSpecificArgA'].toString().startsWith('http://')) {
+          showedImageDisplayAddressUrl.add('http://' + maps[0]['hostSpecificArgA']);
+        } else {
+          showedImageDisplayAddressUrl.add(maps[0]['hostSpecificArgA']);
+        }
+       // showedImageDisplayAddressUrl
+          //  .add(maps[0]['hostSpecificArgA']); //用来相册展示的url
         showedImageName.add(maps[0]['name']);
         showedImagePictureKey.add(maps[0]['pictureKey']);
         showedImagePaths.add(maps[0]['path']);
@@ -875,7 +923,26 @@ class _UploadedImagesState extends State<UploadedImages> {
         showedImageName.add(maps[0]['name']);
         showedImagePictureKey.add(maps[0]['pictureKey']);
         showedImagePaths.add(maps[0]['path']);
-      }
+      } else if (Global.defaultShowedPBhost == 'qiniu') {
+        if (!maps[0]['url'].toString().startsWith('https://') &&
+            !maps[0]['url'].toString().startsWith('http://')) {
+          showedImageUrl.add('http://' + maps[0]['url']);
+        } else {
+          showedImageUrl.add(maps[0]['url']);
+        }
+        //showedImageUrl.add(maps[0]['url']); //用来复制的url
+        if (!maps[0]['hostSpecificArgA'].toString().startsWith('https://') &&
+            !maps[0]['hostSpecificArgA'].toString().startsWith('http://')) {
+          showedImageDisplayAddressUrl.add('http://' + maps[0]['hostSpecificArgA']);
+        } else {
+          showedImageDisplayAddressUrl.add(maps[0]['hostSpecificArgA']);
+        }
+       // showedImageDisplayAddressUrl
+          //  .add(maps[0]['hostSpecificArgA']); //用来显示的url
+        showedImageName.add(maps[0]['name']);
+        showedImagePictureKey.add(maps[0]['pictureKey']);
+        showedImagePaths.add(maps[0]['path']);
+      } 
     }
 
     currentShowedImagesUrl = showedImageUrl.sublist(
