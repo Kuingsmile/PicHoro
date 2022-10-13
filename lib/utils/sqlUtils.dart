@@ -441,4 +441,122 @@ class MySqlUtils {
       await conn.close();
     }
   }
+
+  static queryQiniu({required String username}) async {
+    var conn = await MySqlConnection.connect(settings);
+    try {
+      var results = await conn
+          .query('select * from qiniu where username = ?', [username]);
+
+      if (results.isEmpty) {
+        return "Empty";
+      }
+      Map<String, dynamic> resultsMap = {};
+      resultsMap.clear();
+      for (var row in results) {
+        //第一列是id
+        String accessKey = await decryptSelf(row[1].toString());
+        String secretKey = await decryptSelf(row[2].toString());
+        String bucket = await decryptSelf(row[3].toString());
+        String url = await decryptSelf(row[4].toString());
+        String area = await decryptSelf(row[5].toString());
+        String options = await decryptSelf(row[6].toString());
+        String path = await decryptSelf(row[7].toString());
+
+        resultsMap['accessKey'] = accessKey;
+        resultsMap['secretKey'] = secretKey;
+        resultsMap['bucket'] = bucket;
+        resultsMap['url'] = url;
+        resultsMap['area'] = area;
+        resultsMap['options'] = options;
+        resultsMap['path'] = path;
+      }
+      return resultsMap;
+    } catch (e) {
+      return "Error";
+    } finally {
+      await conn.close();
+    }
+  }
+
+  static insertQiniu({required List content}) async {
+    var conn = await MySqlConnection.connect(settings);
+    try {
+      String accessKey = content[0].toString();
+      String secretKey = content[1].toString();
+      String bucket = content[2].toString();
+      String url = content[3].toString();
+      String area = content[4].toString();
+      String options = content[5].toString();
+      String path = content[6].toString();
+      String username = content[7].toString();
+
+      String encryptedAccessKey = await encryptSelf(accessKey);
+      String encryptedSecretKey = await encryptSelf(secretKey);
+      String encryptedBucket = await encryptSelf(bucket);
+      String encryptedUrl = await encryptSelf(url);
+      String encryptedArea = await encryptSelf(area);
+      String encryptedOptions = await encryptSelf(options);
+      String encryptedPath = await encryptSelf(path);
+
+      var results = await conn.query(
+          "insert into qiniu (accessKey,secretKey,bucket,url,area,options,path,username) values (?,?,?,?,?,?,?,?)",
+          [
+            encryptedAccessKey,
+            encryptedSecretKey,
+            encryptedBucket,
+            encryptedUrl,
+            encryptedArea,
+            encryptedOptions,
+            encryptedPath,
+            username
+          ]);
+      return 'Success';
+    } catch (e) {
+      return "Error";
+    } finally {
+      await conn.close();
+    }
+  }
+
+  static updateQiniu({required List content}) async {
+    var conn = await MySqlConnection.connect(settings);
+
+    try {
+      String accessKey = content[0].toString();
+      String secretKey = content[1].toString();
+      String bucket = content[2].toString();
+      String url = content[3].toString();
+      String area = content[4].toString();
+      String options = content[5].toString();
+      String path = content[6].toString();
+      String username = content[7].toString();
+
+      String encryptedAccessKey = await encryptSelf(accessKey);
+      String encryptedSecretKey = await encryptSelf(secretKey);
+      String encryptedBucket = await encryptSelf(bucket);
+      String encryptedUrl = await encryptSelf(url);
+      String encryptedArea = await encryptSelf(area);
+      String encryptedOptions = await encryptSelf(options);
+      String encryptedPath = await encryptSelf(path);
+
+      var results = await conn.query(
+          "update qiniu set accessKey = ?,secretKey = ?,bucket = ?,url = ?,area = ?,options = ?,path = ? where username = ?",
+          [
+            encryptedAccessKey,
+            encryptedSecretKey,
+            encryptedBucket,
+            encryptedUrl,
+            encryptedArea,
+            encryptedOptions,
+            encryptedPath,
+            username
+          ]);
+      return 'Success';
+    } catch (e) {
+      return "Error";
+    } finally {
+      await conn.close();
+    }
+  }
 }

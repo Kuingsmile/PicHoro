@@ -194,6 +194,20 @@ class _HomePageState extends State<HomePage> {
           'hostSpecificArgD': 'test',
           'hostSpecificArgE': 'test',
         };
+      } else if (Global.defaultPShost == 'qiniu') {
+        // ["success", formatedURL, returnUrl, pictureKey,displayUrl]
+        maps = {
+          'path': path,
+          'name': name,
+          'url': uploadResult[2], //qiniu文件原始地址
+          'PBhost': Global.defaultPShost,
+          'pictureKey': uploadResult[3],
+          'hostSpecificArgA': uploadResult[4], //实际展示的是displayUrl
+          'hostSpecificArgB': 'test',
+          'hostSpecificArgC': 'test',
+          'hostSpecificArgD': 'test',
+          'hostSpecificArgE': 'test',
+        };
       }
 
       int id = await AlbumSQL.insertData(
@@ -267,8 +281,8 @@ class _HomePageState extends State<HomePage> {
     for (io.File imageToTread in Global.imagesList) {
       String path = imageToTread.path;
       var name = path.substring(path.lastIndexOf("/") + 1, path.length);
-      var uploadResult = await uploaderentry(path: path, name: name);
 
+      var uploadResult = await uploaderentry(path: path, name: name);
       if (uploadResult[0] == "Error") {
         return showAlertDialog(
             context: context, title: "上传失败!", content: "请先配置上传参数.");
@@ -330,7 +344,22 @@ class _HomePageState extends State<HomePage> {
             'hostSpecificArgD': 'test',
             'hostSpecificArgE': 'test',
           };
+        } else if (Global.defaultPShost == 'qiniu') {
+          // ["success", formatedURL, returnUrl, pictureKey,displayUrl]
+          maps = {
+            'path': path,
+            'name': name,
+            'url': uploadResult[2], //qiniu文件原始地址
+            'PBhost': Global.defaultPShost,
+            'pictureKey': uploadResult[3],
+            'hostSpecificArgA': uploadResult[4], //实际展示的是displayUrl
+            'hostSpecificArgB': 'test',
+            'hostSpecificArgC': 'test',
+            'hostSpecificArgD': 'test',
+            'hostSpecificArgE': 'test',
+          };
         }
+
         int id = await AlbumSQL.insertData(
             Global.imageDB!, PBhostToTableName[Global.defaultPShost]!, maps);
 
@@ -343,10 +372,12 @@ class _HomePageState extends State<HomePage> {
         failList.add(name);
       }
     }
+
     setState(() {
       Global.imagesList.clear();
       Global.imageFile = null;
     });
+
     if (successCount == 0) {
       String content = "哭唧唧，全部上传失败了=_=\n\n上传失败的图片列表:\n\n";
       for (String failImage in failList) {
@@ -608,7 +639,7 @@ class _HomePageState extends State<HomePage> {
             buttonSize: const Size(45, 45),
             childrenButtonSize: const Size(40, 40),
             animatedIcon: AnimatedIcons.menu_close,
-            animatedIconTheme: IconThemeData(size: 33.0),
+            animatedIconTheme: const IconThemeData(size: 33.0),
             backgroundColor: Colors.blue,
             visible: true,
             curve: Curves.bounceIn,
@@ -619,7 +650,7 @@ class _HomePageState extends State<HomePage> {
                   IconData(0x004C),
                   color: Colors.white,
                 ),
-                backgroundColor: Color.fromARGB(255, 97, 180, 248),
+                backgroundColor: const Color.fromARGB(255, 97, 180, 248),
                 label: '兰空',
                 labelStyle: const TextStyle(fontSize: 12.0),
                 onTap: () async {
@@ -632,7 +663,7 @@ class _HomePageState extends State<HomePage> {
                   IconData(0x0053),
                   color: Colors.white,
                 ),
-                backgroundColor: Color.fromARGB(255, 97, 180, 248),
+                backgroundColor: const Color.fromARGB(255, 97, 180, 248),
                 label: 'SM.MS',
                 labelStyle: const TextStyle(fontSize: 12.0),
                 onTap: () async {
@@ -645,7 +676,7 @@ class _HomePageState extends State<HomePage> {
                   IconData(0x0047),
                   color: Colors.white,
                 ),
-                backgroundColor: Color.fromARGB(255, 97, 180, 248),
+                backgroundColor: const Color.fromARGB(255, 97, 180, 248),
                 label: 'Github',
                 labelStyle: const TextStyle(fontSize: 12.0),
                 onTap: () async {
@@ -658,11 +689,24 @@ class _HomePageState extends State<HomePage> {
                   IconData(0x0049),
                   color: Colors.white,
                 ),
-                backgroundColor: Color.fromARGB(255, 97, 180, 248),
+                backgroundColor: const Color.fromARGB(255, 97, 180, 248),
                 label: 'Imgur',
                 labelStyle: const TextStyle(fontSize: 12.0),
                 onTap: () async {
                   await setdefaultPShostRemoteAndLocal('imgur');
+                },
+              ),
+              SpeedDialChild(
+                shape: const CircleBorder(),
+                child: const Icon(
+                  IconData(0x0051),
+                  color: Colors.white,
+                ),
+                backgroundColor: const Color.fromARGB(255, 97, 180, 248),
+                label: '七牛',
+                labelStyle: const TextStyle(fontSize: 12.0),
+                onTap: () async {
+                  await setdefaultPShostRemoteAndLocal('qiniu');
                 },
               ),
             ],
