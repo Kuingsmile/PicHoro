@@ -194,7 +194,7 @@ String generateCustomFormatedUrl(String url, String filename) {
   String rawUrl = url;
   String customLinkFormat = Global.customLinkFormat;
   String customFormatedUrl = customLinkFormat
-      .replaceAll(r'${fileName}', fileName)
-      .replaceAll(r'${url}', rawUrl);
+      .replaceAll(r'$fileName', fileName)
+      .replaceAll(r'$url', rawUrl);
   return customFormatedUrl;
 }

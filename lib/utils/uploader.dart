@@ -7,6 +7,7 @@ import 'package:horopic/api/smms.dart';
 import 'package:horopic/api/github.dart';
 import 'package:horopic/api/imgur.dart';
 import 'package:horopic/api/qiniu.dart';
+import 'package:horopic/api/tencent.dart';
 
 //默认图床参数和配置文件名对应关系
 Map<String, String> pdconfig = {
@@ -28,6 +29,7 @@ Map<String, Function> uploadFunc = {
   'github': GithubImageUploadUtils.uploadApi,
   'imgur': ImgurImageUploadUtils.uploadApi,
   'qiniu': QiniuImageUploadUtils.uploadApi,
+  'tencent': TencentImageUploadUtils.uploadApi,
 };
 
 //获取图床配置文件
@@ -68,4 +70,5 @@ uploaderentry({required String path, required String name}) async {
   } catch (e) {
     return ["Error"];
   }
+  
 }

@@ -3,6 +3,7 @@ import 'package:horopic/hostconfigure/lskyproconfig.dart';
 import 'package:horopic/hostconfigure/smmsconfig.dart';
 import 'package:horopic/hostconfigure/PShostSelect.dart';
 import 'package:horopic/hostconfigure/githubconfig.dart';
+import 'package:horopic/hostconfigure/tencentconfig.dart';
 import 'package:horopic/utils/common_func.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -19,6 +20,8 @@ import 'package:horopic/hostconfigure/qiniuconfig.dart';
 import 'package:horopic/api/qiniu.dart';
 import 'package:flutter/services.dart';
 import 'package:qiniu_flutter_sdk/qiniu_flutter_sdk.dart';
+import 'package:horopic/api/tencent.dart';
+import 'package:crypto/crypto.dart';
 
 //a configure page for user to show configure entry
 class AllPShost extends StatefulWidget {
@@ -99,6 +102,13 @@ class _AllPShostState extends State<AllPShost> {
     return File('$path/${defaultUser}_qiniu_config.txt');
   }
 
+  //tencent配置
+  Future<File> get tencentFile async {
+    final path = await _localPath;
+    String defaultUser = await Global.getUser();
+    return File('$path/${defaultUser}_tencent_config.txt');
+  }
+
   processingQRCodeResult() async {
     String result = Global.qrScanResult;
     Global.qrScanResult = "";
@@ -106,7 +116,8 @@ class _AllPShostState extends State<AllPShost> {
         !(result.contains('github')) &&
         !(result.contains('lankong')) &&
         !(result.contains('imgur')) &&
-        !(result.contains('qiniu'))) {
+        !(result.contains('qiniu')) &&
+        !(result.contains('tcyun'))) {
       return Fluttertoast.showToast(
           msg: "不包含支持的图床配置信息",
           toastLength: Toast.LENGTH_SHORT,
@@ -204,6 +215,8 @@ class _AllPShostState extends State<AllPShost> {
         String storePath = jsonResult['github']['path'];
         if (storePath == null || storePath == '' || storePath.isEmpty) {
           storePath = 'None';
+        } else if (!storePath.endsWith('/')) {
+          storePath = '$storePath/';
         }
         String branch = jsonResult['github']['branch'];
         if (branch == '' || branch == null || branch.isEmpty) {
@@ -214,6 +227,15 @@ class _AllPShostState extends State<AllPShost> {
             customDomain == null ||
             customDomain.isEmpty) {
           customDomain = 'None';
+        }
+        if (customDomain != 'None') {
+          if (!customDomain.startsWith('http') &&
+              !customDomain.startsWith('https')) {
+            customDomain = 'http://$customDomain';
+          }
+          if (customDomain.endsWith('/')) {
+            customDomain = customDomain.substring(0, customDomain.length - 1);
+          }
         }
 
         if (token.startsWith('Bearer ')) {
@@ -444,6 +466,9 @@ class _AllPShostState extends State<AllPShost> {
     if (jsonResult['imgur'] != null) {
       final imgurclientId = jsonResult['imgur']['clientId'];
       String imgurProxy = jsonResult['imgur']['proxy'];
+      if (imgurProxy.isEmpty || imgurProxy == null) {
+        imgurProxy = 'None';
+      }
       try {
         List sqlconfig = [];
         sqlconfig.add(imgurclientId);
@@ -548,17 +573,7 @@ class _AllPShostState extends State<AllPShost> {
       String qiniuPath = jsonResult['qiniu']['path'];
 
       try {
-        List sqlconfig = [];
-        sqlconfig.add(qiniuAccessKey);
-        sqlconfig.add(qiniuSecretKey);
-        sqlconfig.add(qiniuBucket);
-        sqlconfig.add(qiniuUrl);
-        sqlconfig.add(qiniuArea);
-        sqlconfig.add(qiniuOptions);
-        sqlconfig.add(qiniuPath);
         String defaultUser = await Global.getUser();
-        sqlconfig.add(defaultUser);
-
         var queryqiniu = await MySqlUtils.queryQiniu(username: defaultUser);
         var queryuser = await MySqlUtils.queryUser(username: defaultUser);
 
@@ -569,16 +584,42 @@ class _AllPShostState extends State<AllPShost> {
               timeInSecForIosWeb: 2,
               fontSize: 16.0);
         }
+
         if (!qiniuUrl.startsWith('http') && !qiniuUrl.startsWith('https')) {
           qiniuUrl = 'http://$qiniuUrl';
         }
+        if (qiniuUrl.endsWith('/')) {
+          qiniuUrl = qiniuUrl.substring(0, qiniuUrl.length - 1);
+        }
 
-        if (qiniuPath.startsWith('/')) {
-          qiniuPath = qiniuPath.substring(1);
+        if (qiniuPath.isEmpty || qiniuPath == null) {
+          qiniuPath = 'None';
+        } else {
+          if (qiniuPath.startsWith('/')) {
+            qiniuPath = qiniuPath.substring(1);
+          }
+          if (!qiniuPath.endsWith('/')) {
+            qiniuPath = '$qiniuPath/';
+          }
         }
-        if (!qiniuPath.endsWith('/')) {
-          qiniuPath = '$qiniuPath/';
+
+        if (qiniuOptions.isEmpty || qiniuOptions == null) {
+          qiniuOptions = 'None';
+        } else {
+          if (!qiniuOptions.startsWith('?')) {
+            qiniuOptions = '?$qiniuOptions';
+          }
         }
+        List sqlconfig = [];
+        sqlconfig.add(qiniuAccessKey);
+        sqlconfig.add(qiniuSecretKey);
+        sqlconfig.add(qiniuBucket);
+        sqlconfig.add(qiniuUrl);
+        sqlconfig.add(qiniuArea);
+        sqlconfig.add(qiniuOptions);
+        sqlconfig.add(qiniuPath);
+
+        sqlconfig.add(defaultUser);
         //save asset image to app dir
         String assetPath = 'assets/validateImage/PicHoroValidate.jpeg';
         String appDir = await getApplicationDocumentsDirectory().then((value) {
@@ -657,6 +698,206 @@ class _AllPShostState extends State<AllPShost> {
       }
     }
 
+    if (jsonResult['tcyun'] != null) {
+      String tencentVersion = jsonResult['tcyun']['version'];
+      if (tencentVersion == 'v5') {
+        String tencentSecretId = jsonResult['tcyun']['secretId'];
+        String tencentSecretKey = jsonResult['tcyun']['secretKey'];
+        String tencentBucket = jsonResult['tcyun']['bucket'];
+        String tencentAppId = jsonResult['tcyun']['appId'];
+        String tencentArea = jsonResult['tcyun']['area'];
+        String tencentPath = jsonResult['tcyun']['path'];
+        String tencentCustomUrl = jsonResult['tcyun']['customUrl'];
+        String tencentOptions = jsonResult['tcyun']['options'];
+
+        try {
+          String defaultUser = await Global.getUser();
+          var querytencent =
+              await MySqlUtils.queryTencent(username: defaultUser);
+          var queryuser = await MySqlUtils.queryUser(username: defaultUser);
+
+          if (queryuser == 'Empty') {
+            Fluttertoast.showToast(
+                msg: "请先登录",
+                toastLength: Toast.LENGTH_SHORT,
+                timeInSecForIosWeb: 2,
+                fontSize: 16.0);
+          }
+          if (tencentCustomUrl.isNotEmpty) {
+            if (!tencentCustomUrl.startsWith('http') &&
+                !tencentCustomUrl.startsWith('https')) {
+              tencentCustomUrl = 'http://$tencentCustomUrl';
+            }
+            if (tencentCustomUrl.endsWith('/')) {
+              tencentCustomUrl =
+                  tencentCustomUrl.substring(0, tencentCustomUrl.length - 1);
+            }
+          } else {
+            tencentCustomUrl = 'None';
+          }
+
+          if (tencentPath.isEmpty || tencentPath == null) {
+            tencentPath = 'None';
+          } else {
+            if (tencentPath.startsWith('/')) {
+              tencentPath = tencentPath.substring(1);
+            }
+            if (!tencentPath.endsWith('/')) {
+              tencentPath = '$tencentPath/';
+            }
+          }
+
+          if (tencentOptions.isEmpty || tencentOptions == null) {
+            tencentOptions = 'None';
+          } else {
+            if (!tencentOptions.startsWith('?')) {
+              tencentOptions = '?$tencentOptions';
+            }
+          }
+          List sqlconfig = [];
+          sqlconfig.add(tencentSecretId);
+          sqlconfig.add(tencentSecretKey);
+          sqlconfig.add(tencentBucket);
+          sqlconfig.add(tencentAppId);
+          sqlconfig.add(tencentArea);
+          sqlconfig.add(tencentPath);
+          sqlconfig.add(tencentCustomUrl);
+          sqlconfig.add(tencentOptions);
+
+          sqlconfig.add(defaultUser);
+          //save asset image to app dir
+          String assetPath = 'assets/validateImage/PicHoroValidate.jpeg';
+          String appDir =
+              await getApplicationDocumentsDirectory().then((value) {
+            return value.path;
+          });
+          String assetFilePath = '$appDir/PicHoroValidate.jpeg';
+          File assetFile = File(assetFilePath);
+
+          if (!assetFile.existsSync()) {
+            ByteData data = await rootBundle.load(assetPath);
+            List<int> bytes =
+                data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+            await assetFile.writeAsBytes(bytes);
+          }
+          String key = 'PicHoroValidate.jpeg';
+          String host = '$tencentBucket.cos.$tencentArea.myqcloud.com';
+          String urlpath = '';
+          if (tencentPath != 'None') {
+            urlpath = '$tencentPath$key';
+          } else {
+            urlpath = key;
+          }
+          int startTimestamp = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+          int endTimestamp = startTimestamp + 86400;
+          String keyTime = '$startTimestamp;$endTimestamp';
+          Map<String, dynamic> uploadPolicy = {
+            "expiration": "2033-03-03T09:38:12.414Z",
+            "conditions": [
+              {"acl": "default"},
+              {"bucket": tencentBucket},
+              {"key": urlpath},
+              {"q-sign-algorithm": "sha1"},
+              {"q-ak": tencentSecretId},
+              {"q-sign-time": keyTime}
+            ]
+          };
+          String uploadPolicyStr = jsonEncode(uploadPolicy);
+          String singature = TencentImageUploadUtils.getUploadAuthorization(
+              tencentSecretKey, keyTime, uploadPolicyStr);
+          //policy中的字段，除了bucket，其它的都要在formdata中添加
+          FormData formData = FormData.fromMap({
+            'key': urlpath,
+            'policy': base64Encode(utf8.encode(uploadPolicyStr)),
+            'acl': 'default',
+            'q-sign-algorithm': 'sha1',
+            'q-ak': tencentSecretId,
+            'q-key-time': keyTime,
+            'q-sign-time': keyTime,
+            'q-signature': singature,
+            'file': await MultipartFile.fromFile(assetFilePath, filename: key),
+          });
+
+          BaseOptions baseoptions = BaseOptions(
+            //连接服务器超时时间，单位是毫秒.
+            connectTimeout: 30000,
+            //响应超时时间。
+            receiveTimeout: 30000,
+            sendTimeout: 30000,
+          );
+          String contentLength = await assetFile.length().then((value) {
+            return value.toString();
+          });
+          baseoptions.headers = {
+            'Host': host,
+            'Content-Type':
+                'multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW',
+            'Content-Length': contentLength,
+          };
+          Dio dio = Dio(baseoptions);
+          String tencentSqlResult = '';
+
+          var response = await dio.post(
+            'http://$host',
+            data: formData,
+          );
+
+          if (response.statusCode == 204) {
+            if (querytencent == 'Empty') {
+              tencentSqlResult =
+                  await MySqlUtils.insertTencent(content: sqlconfig);
+            } else {
+              tencentSqlResult =
+                  await MySqlUtils.updateTencent(content: sqlconfig);
+            }
+            if (tencentSqlResult == "Success") {
+              final tencentConfig = TencentConfigModel(
+                tencentSecretId,
+                tencentSecretKey,
+                tencentBucket,
+                tencentAppId,
+                tencentArea,
+                tencentPath,
+                tencentCustomUrl,
+                tencentOptions,
+              );
+              final tencentConfigJson = jsonEncode(tencentConfig);
+              final tencentConfigFile = await tencentFile;
+              await tencentConfigFile.writeAsString(tencentConfigJson);
+              Fluttertoast.showToast(
+                  msg: "腾讯云配置成功",
+                  toastLength: Toast.LENGTH_SHORT,
+                  timeInSecForIosWeb: 2,
+                  fontSize: 16.0);
+            } else {
+              Fluttertoast.showToast(
+                  msg: "腾讯云数据库错误",
+                  toastLength: Toast.LENGTH_SHORT,
+                  timeInSecForIosWeb: 2,
+                  fontSize: 16.0);
+            }
+          } else {
+            Fluttertoast.showToast(
+                msg: "腾讯云验证失败",
+                toastLength: Toast.LENGTH_SHORT,
+                timeInSecForIosWeb: 2,
+                fontSize: 16.0);
+          }
+        } catch (e) {
+          Fluttertoast.showToast(
+              msg: "腾讯云配置错误",
+              toastLength: Toast.LENGTH_SHORT,
+              timeInSecForIosWeb: 2,
+              fontSize: 16.0);
+        }
+      }
+    } else {
+      Fluttertoast.showToast(
+          msg: "不支持腾讯V4",
+          toastLength: Toast.LENGTH_SHORT,
+          timeInSecForIosWeb: 2,
+          fontSize: 16.0);
+    }
     return true;
   }
 
@@ -751,6 +992,16 @@ class _AllPShostState extends State<AllPShost> {
             },
             trailing: const Icon(Icons.arrow_forward_ios),
           ),
+          ListTile(
+            title: const Text('腾讯云COS'),
+            onTap: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const TencentConfig()));
+            },
+            trailing: const Icon(Icons.arrow_forward_ios),
+          )
         ]));
   }
 }

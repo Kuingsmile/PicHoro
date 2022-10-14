@@ -13,6 +13,7 @@ import 'package:horopic/hostconfigure/smmsconfig.dart' as smmshostclass;
 import 'package:horopic/hostconfigure/githubconfig.dart' as githubhostclass;
 import 'package:horopic/hostconfigure/Imgurconfig.dart' as imgurhostclass;
 import 'package:horopic/hostconfigure/qiniuconfig.dart' as qiniuhostclass;
+import 'package:horopic/hostconfigure/tencentconfig.dart' as tencenthostclass;
 
 class APPPassword extends StatefulWidget {
   const APPPassword({Key? key}) : super(key: key);
@@ -216,6 +217,33 @@ class _APPPasswordState extends State<APPPassword> {
             } catch (e) {
               return showAlertDialog(
                   context: context, title: "错误", content: "拉取七牛云配置失败,请重试!");
+            }
+          }
+          //拉取腾讯云COS图床配置
+          var tencentresult = await MySqlUtils.queryTencent(username: username);
+          if (tencentresult == 'Error') {
+            return showAlertDialog(
+                context: context, title: "错误", content: "获取七牛云端信息失败,请重试!");
+          } else if (tencentresult != 'Empty') {
+            try {
+              final tencenthostConfig = tencenthostclass.TencentConfigModel(
+                tencentresult['secretId'],
+                tencentresult['secretKey'],
+                tencentresult['bucket'],
+                tencentresult['appId'],
+                tencentresult['area'],
+                tencentresult['path'],
+                tencentresult['customUrl'],
+                tencentresult['options'],
+              );
+              final tencentConfigJson = jsonEncode(tencenthostConfig);
+              final directory = await getApplicationDocumentsDirectory();
+              File tencentLocalFile =
+                  File('${directory.path}/${username}_tencent_config.txt');
+              tencentLocalFile.writeAsString(tencentConfigJson);
+            } catch (e) {
+              return showAlertDialog(
+                  context: context, title: "错误", content: "拉取腾讯云配置失败,请重试!");
             }
           }
           //全部拉取完成后，提示用户

@@ -22,6 +22,7 @@ class _defaultPShostSelectState extends State<defaultPShostSelect> {
     'github',
     'imgur',
     'qiniu',
+    'tencent',
   ];
 
   @override
@@ -82,6 +83,16 @@ class _defaultPShostSelectState extends State<defaultPShostSelect> {
               setState(() {});
             },
           ),
+          ListTile(
+            title: const Text('腾讯云'),
+            trailing: Global.defaultPShost == 'tencent'
+                ? const Icon(Icons.check)
+                : null,
+            onTap: () async {
+              await setdefaultPShostRemoteAndLocal('tencent');
+              setState(() {});
+            },
+          ),
         ],
       ),
     );
@@ -96,6 +107,7 @@ setdefaultPShostRemoteAndLocal(String psHost) async {
     'github': MySqlUtils.queryGithub,
     'imgur': MySqlUtils.queryImgur,
     'qiniu': MySqlUtils.queryQiniu,
+    'tencent': MySqlUtils.queryTencent,
   };
 
   try {
@@ -143,6 +155,8 @@ setdefaultPShostRemoteAndLocal(String psHost) async {
         await Global.setShowedPBhost('imgur');
       } else if (psHost == 'qiniu') {
         await Global.setShowedPBhost('qiniu');
+      } else if (psHost == 'tencent') {
+        await Global.setShowedPBhost('tencent');
       }
       return Fluttertoast.showToast(
           msg: "已经是默认配置",
@@ -169,6 +183,8 @@ setdefaultPShostRemoteAndLocal(String psHost) async {
           await Global.setShowedPBhost('imgur');
         } else if (psHost == 'qiniu') {
           await Global.setShowedPBhost('qiniu');
+        } else if (psHost == 'tencent') {
+          await Global.setShowedPBhost('tencent');
         }
         Fluttertoast.showToast(
             msg: "已设置$psHost为默认图床",

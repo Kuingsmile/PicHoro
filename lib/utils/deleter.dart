@@ -7,6 +7,7 @@ import 'package:horopic/api/smms.dart';
 import 'package:horopic/api/github.dart';
 import 'package:horopic/api/imgur.dart';
 import 'package:horopic/api/qiniu.dart';
+import 'package:horopic/api/tencent.dart';
 
 //默认图床参数和配置文件名对应关系
 Map<String, String> pdconfig = {
@@ -28,6 +29,7 @@ Map<String, Function> deleteFunc = {
   'github': GithubImageUploadUtils.deleteApi,
   'imgur': ImgurImageUploadUtils.deleteApi,
   'qiniu': QiniuImageUploadUtils.deleteApi,
+  'tencent': TencentImageUploadUtils.deleteApi,
 };
 
 //获取图床配置文件

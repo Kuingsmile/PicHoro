@@ -62,6 +62,10 @@ dio
 2.12
 file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/dio-4.0.6/
 file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/dio-4.0.6/lib/
+dio_proxy_adapter
+2.12
+file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/dio_proxy_adapter-1.0.1/
+file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/dio_proxy_adapter-1.0.1/lib/
 extended_image
 2.18
 file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/extended_image-6.3.1/
@@ -294,6 +298,14 @@ pull_to_refresh
 2.12
 file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/pull_to_refresh-2.0.0/
 file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/pull_to_refresh-2.0.0/lib/
+qiniu_flutter_sdk
+2.12
+file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/qiniu_flutter_sdk-0.4.0/
+file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/qiniu_flutter_sdk-0.4.0/lib/
+qiniu_sdk_base
+2.12
+file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/qiniu_sdk_base-0.4.0/
+file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/qiniu_sdk_base-0.4.0/lib/
 r_upgrade
 2.12
 file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/r_upgrade-0.3.8+2/
@@ -410,6 +422,10 @@ url_launcher_windows
 2.12
 file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/url_launcher_windows-3.0.1/
 file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/url_launcher_windows-3.0.1/lib/
+uuid
+2.12
+file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/uuid-3.0.6/
+file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/uuid-3.0.6/lib/
 vector_math
 2.14
 file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/vector_math-2.1.2/

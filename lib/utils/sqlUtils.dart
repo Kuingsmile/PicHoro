@@ -559,4 +559,130 @@ class MySqlUtils {
       await conn.close();
     }
   }
+
+  static queryTencent({required String username}) async {
+    var conn = await MySqlConnection.connect(settings);
+    try {
+      var results = await conn
+          .query('select * from tencent where username = ?', [username]);
+
+      if (results.isEmpty) {
+        return "Empty";
+      }
+      Map<String, dynamic> resultsMap = {};
+      resultsMap.clear();
+      for (var row in results) {
+        //第一列是id
+        String secretId = await decryptSelf(row[1].toString());
+        String secretKey = await decryptSelf(row[2].toString());
+        String bucket = await decryptSelf(row[3].toString());
+        String appId = await decryptSelf(row[4].toString());
+        String area = await decryptSelf(row[5].toString());
+        String path = await decryptSelf(row[6].toString());
+        String customUrl = await decryptSelf(row[7].toString());
+        String options = await decryptSelf(row[8].toString());
+
+        resultsMap['secretId'] = secretId;
+        resultsMap['secretKey'] = secretKey;
+        resultsMap['bucket'] = bucket;
+        resultsMap['appId'] = appId;
+        resultsMap['area'] = area;
+        resultsMap['path'] = path;
+        resultsMap['customUrl'] = customUrl;
+        resultsMap['options'] = options;
+      }
+      return resultsMap;
+    } catch (e) {
+      return "Error";
+    } finally {
+      await conn.close();
+    }
+  }
+
+  static insertTencent({required List content}) async {
+    var conn = await MySqlConnection.connect(settings);
+    try {
+      String secretId = content[0].toString();
+      String secretKey = content[1].toString();
+      String bucket = content[2].toString();
+      String appId = content[3].toString();
+      String area = content[4].toString();
+      String path = content[5].toString();
+      String customUrl = content[6].toString();
+      String options = content[7].toString();
+      String username = content[8].toString();
+
+      String encryptedSecretId = await encryptSelf(secretId);
+      String encryptedSecretKey = await encryptSelf(secretKey);
+      String encryptedBucket = await encryptSelf(bucket);
+      String encryptedAppId = await encryptSelf(appId);
+      String encryptedArea = await encryptSelf(area);
+      String encryptedPath = await encryptSelf(path);
+      String encryptedCustomUrl = await encryptSelf(customUrl);
+      String encryptedOptions = await encryptSelf(options);
+
+      var results = await conn.query(
+          "insert into tencent (secretId,secretKey,bucket,appId,area,path,customUrl,options,username) values (?,?,?,?,?,?,?,?,?)",
+          [
+            encryptedSecretId,
+            encryptedSecretKey,
+            encryptedBucket,
+            encryptedAppId,
+            encryptedArea,
+            encryptedPath,
+            encryptedCustomUrl,
+            encryptedOptions,
+            username
+          ]);
+      return 'Success';
+    } catch (e) {
+      return "Error";
+    } finally {
+      await conn.close();
+    }
+  }
+
+  static updateTencent({required List content}) async {
+    var conn = await MySqlConnection.connect(settings);
+
+    try {
+      String secretId = content[0].toString();
+      String secretKey = content[1].toString();
+      String bucket = content[2].toString();
+      String appId = content[3].toString();
+      String area = content[4].toString();
+      String path = content[5].toString();
+      String customUrl = content[6].toString();
+      String options = content[7].toString();
+      String username = content[8].toString();
+
+      String encryptedSecretId = await encryptSelf(secretId);
+      String encryptedSecretKey = await encryptSelf(secretKey);
+      String encryptedBucket = await encryptSelf(bucket);
+      String encryptedAppId = await encryptSelf(appId);
+      String encryptedArea = await encryptSelf(area);
+      String encryptedPath = await encryptSelf(path);
+      String encryptedCustomUrl = await encryptSelf(customUrl);
+      String encryptedOptions = await encryptSelf(options);
+
+      var results = await conn.query(
+          "update tencent set secretId = ?,secretKey = ?,bucket = ?,appId = ?,area = ?,path = ?,customUrl = ?,options = ? where username = ?",
+          [
+            encryptedSecretId,
+            encryptedSecretKey,
+            encryptedBucket,
+            encryptedAppId,
+            encryptedArea,
+            encryptedPath,
+            encryptedCustomUrl,
+            encryptedOptions,
+            username
+          ]);
+      return 'Success';
+    } catch (e) {
+      return "Error";
+    } finally {
+      await conn.close();
+    }
+  }
 }

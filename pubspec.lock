@@ -72,7 +72,7 @@ packages:
     source: hosted
     version: "0.3.3+2"
   crypto:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: crypto
       url: "https://pub.flutter-io.cn"
@@ -113,6 +113,13 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "4.0.6"
+  dio_proxy_adapter:
+    dependency: "direct main"
+    description:
+      name: dio_proxy_adapter
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "1.0.1"
   extended_image:
     dependency: "direct main"
     description:
@@ -534,6 +541,20 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "2.0.0"
+  qiniu_flutter_sdk:
+    dependency: "direct main"
+    description:
+      name: qiniu_flutter_sdk
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "0.4.0"
+  qiniu_sdk_base:
+    dependency: transitive
+    description:
+      name: qiniu_sdk_base
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "0.4.0"
   r_upgrade:
     dependency: "direct main"
     description:
@@ -742,6 +763,13 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "3.0.1"
+  uuid:
+    dependency: transitive
+    description:
+      name: uuid
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "3.0.6"
   vector_math:
     dependency: transitive
     description:
