@@ -47,6 +47,7 @@ class _UploadedImagesState extends State<UploadedImages> {
     'github': 'GitHub',
     'imgur': 'Imgur',
     'qiniu': '七牛云',
+    'tencent': '腾讯云',
   };
 
   @override
@@ -226,7 +227,15 @@ class _UploadedImagesState extends State<UploadedImages> {
                                   index: index,
                                   images: currentShowedImagesDisplayAddressUrl,
                                 )));
-                  }else if (Global.defaultShowedPBhost == 'qiniu') {
+                  } else if (Global.defaultShowedPBhost == 'qiniu') {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => ImagePreview(
+                                  index: index,
+                                  images: currentShowedImagesUrl,
+                                )));
+                  } else if (Global.defaultShowedPBhost == 'tencent') {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -284,7 +293,6 @@ class _UploadedImagesState extends State<UploadedImages> {
                           checkedColor: Colors.blue,
                           value: selectedImagesBool[index],
                           style: MSHCheckboxStyle.fillScaleCheck,
-                          //isChecked: selectedImagesBool[index],
                           onChanged: (selected) {
                             setState(() {
                               if (selected) {
@@ -372,6 +380,16 @@ class _UploadedImagesState extends State<UploadedImages> {
                                 const Text('七牛云', textAlign: TextAlign.center),
                             onPressed: () {
                               Global.defaultShowedPBhost = 'qiniu';
+                              Navigator.pop(context);
+                              _currentPage = 0;
+                              _onRefresh();
+                            },
+                          ),
+                          SimpleDialogOption(
+                            child:
+                                const Text('腾讯云', textAlign: TextAlign.center),
+                            onPressed: () {
+                              Global.defaultShowedPBhost = 'tencent';
                               Navigator.pop(context);
                               _currentPage = 0;
                               _onRefresh();
@@ -904,15 +922,16 @@ class _UploadedImagesState extends State<UploadedImages> {
         } else {
           showedImageUrl.add(maps[0]['url']);
         }
-       // showedImageUrl.add(maps[0]['hostSpecificArgA']); //用来复制的url
-       if (!maps[0]['hostSpecificArgA'].toString().startsWith('https://') &&
+        // showedImageUrl.add(maps[0]['hostSpecificArgA']); //用来复制的url
+        if (!maps[0]['hostSpecificArgA'].toString().startsWith('https://') &&
             !maps[0]['hostSpecificArgA'].toString().startsWith('http://')) {
-          showedImageDisplayAddressUrl.add('http://' + maps[0]['hostSpecificArgA']);
+          showedImageDisplayAddressUrl
+              .add('http://' + maps[0]['hostSpecificArgA']);
         } else {
           showedImageDisplayAddressUrl.add(maps[0]['hostSpecificArgA']);
         }
-       // showedImageDisplayAddressUrl
-          //  .add(maps[0]['hostSpecificArgA']); //用来相册展示的url
+        // showedImageDisplayAddressUrl
+        //  .add(maps[0]['hostSpecificArgA']); //用来相册展示的url
         showedImageName.add(maps[0]['name']);
         showedImagePictureKey.add(maps[0]['pictureKey']);
         showedImagePaths.add(maps[0]['path']);
@@ -930,19 +949,34 @@ class _UploadedImagesState extends State<UploadedImages> {
         } else {
           showedImageUrl.add(maps[0]['url']);
         }
-        //showedImageUrl.add(maps[0]['url']); //用来复制的url
         if (!maps[0]['hostSpecificArgA'].toString().startsWith('https://') &&
             !maps[0]['hostSpecificArgA'].toString().startsWith('http://')) {
-          showedImageDisplayAddressUrl.add('http://' + maps[0]['hostSpecificArgA']);
+          showedImageDisplayAddressUrl
+              .add('http://' + maps[0]['hostSpecificArgA']);
         } else {
           showedImageDisplayAddressUrl.add(maps[0]['hostSpecificArgA']);
         }
-       // showedImageDisplayAddressUrl
-          //  .add(maps[0]['hostSpecificArgA']); //用来显示的url
         showedImageName.add(maps[0]['name']);
         showedImagePictureKey.add(maps[0]['pictureKey']);
         showedImagePaths.add(maps[0]['path']);
-      } 
+      } else if (Global.defaultShowedPBhost == 'tencent') {
+        if (!maps[0]['url'].toString().startsWith('https://') &&
+            !maps[0]['url'].toString().startsWith('http://')) {
+          showedImageUrl.add('http://' + maps[0]['url']);
+        } else {
+          showedImageUrl.add(maps[0]['url']);
+        }
+        if (!maps[0]['hostSpecificArgA'].toString().startsWith('https://') &&
+            !maps[0]['hostSpecificArgA'].toString().startsWith('http://')) {
+          showedImageDisplayAddressUrl
+              .add('http://' + maps[0]['hostSpecificArgA']);
+        } else {
+          showedImageDisplayAddressUrl.add(maps[0]['hostSpecificArgA']);
+        }
+        showedImageName.add(maps[0]['name']);
+        showedImagePictureKey.add(maps[0]['pictureKey']);
+        showedImagePaths.add(maps[0]['path']);
+      }
     }
 
     currentShowedImagesUrl = showedImageUrl.sublist(

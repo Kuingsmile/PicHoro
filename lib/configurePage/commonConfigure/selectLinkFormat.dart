@@ -90,30 +90,29 @@ class _LinkFormatSelectState extends State<LinkFormatSelect> {
               setState(() {});
             },
           ),
-           ListView(
-           shrinkWrap: true,
-          children: [
-            TextFormField(
-              textAlign: TextAlign.center,
-              initialValue: Global.customLinkFormat,
-              decoration: const InputDecoration(
-                labelText: '自定义格式',
-                hintText: r'使用${url}和${fileName}作为占位符',
+          ListView(
+            shrinkWrap: true,
+            children: [
+              TextFormField(
+                textAlign: TextAlign.center,
+                initialValue: Global.customLinkFormat,
+                decoration: const InputDecoration(
+                  labelText: '自定义格式',
+                  hintText: r'使用$url和$fileName作为占位符',
+                ),
+                onChanged: (String value) async {
+                  await Global.setCustomLinkFormat(value);
+                },
+                validator: (String? value) {
+                  if (!value!.contains(r'$url') &&
+                      !value.contains(r'$fileName')) {
+                    return '格式错误';
+                  }
+                  return null;
+                },
               ),
-              onChanged: (String value) async {
-                await Global.setCustomLinkFormat(value);
-              },
-              
-              validator: (String? value) {
-                if (!value!.contains(r'${url}') && !value.contains(r'${fileName}')) {
-                  return '格式错误';
-                }
-                return null;
-              },
-            ),
-           
-          ],
-            ),
+            ],
+          ),
         ],
       ),
     );

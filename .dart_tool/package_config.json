@@ -98,6 +98,12 @@
       "languageVersion": "2.12"
     },
     {
+      "name": "dio_proxy_adapter",
+      "rootUri": "file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/dio_proxy_adapter-1.0.1",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
       "name": "extended_image",
       "rootUri": "file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/extended_image-6.3.1",
       "packageUri": "lib/",
@@ -464,6 +470,18 @@
       "languageVersion": "2.12"
     },
     {
+      "name": "qiniu_flutter_sdk",
+      "rootUri": "file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/qiniu_flutter_sdk-0.4.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "qiniu_sdk_base",
+      "rootUri": "file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/qiniu_sdk_base-0.4.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
       "name": "r_upgrade",
       "rootUri": "file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/r_upgrade-0.3.8+2",
       "packageUri": "lib/",
@@ -644,6 +662,12 @@
       "languageVersion": "2.12"
     },
     {
+      "name": "uuid",
+      "rootUri": "file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/uuid-3.0.6",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
       "name": "vector_math",
       "rootUri": "file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/vector_math-2.1.2",
       "packageUri": "lib/",
@@ -704,7 +728,7 @@
       "languageVersion": "2.18"
     }
   ],
-  "generated": "2022-10-11T07:31:57.807198Z",
+  "generated": "2022-10-14T08:04:55.215300Z",
   "generator": "pub",
   "generatorVersion": "2.18.0"
 }

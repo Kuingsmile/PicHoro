@@ -208,6 +208,20 @@ class _HomePageState extends State<HomePage> {
           'hostSpecificArgD': 'test',
           'hostSpecificArgE': 'test',
         };
+      } else if (Global.defaultPShost == 'tencent') {
+        // ["success", formatedURL, returnUrl, pictureKey,displayUrl]
+        maps = {
+          'path': path,
+          'name': name,
+          'url': uploadResult[2], //tencent文件原始地址
+          'PBhost': Global.defaultPShost,
+          'pictureKey': uploadResult[3],
+          'hostSpecificArgA': uploadResult[4], //实际展示的是displayUrl
+          'hostSpecificArgB': 'test',
+          'hostSpecificArgC': 'test',
+          'hostSpecificArgD': 'test',
+          'hostSpecificArgE': 'test',
+        };
       }
 
       int id = await AlbumSQL.insertData(
@@ -350,6 +364,20 @@ class _HomePageState extends State<HomePage> {
             'path': path,
             'name': name,
             'url': uploadResult[2], //qiniu文件原始地址
+            'PBhost': Global.defaultPShost,
+            'pictureKey': uploadResult[3],
+            'hostSpecificArgA': uploadResult[4], //实际展示的是displayUrl
+            'hostSpecificArgB': 'test',
+            'hostSpecificArgC': 'test',
+            'hostSpecificArgD': 'test',
+            'hostSpecificArgE': 'test',
+          };
+        } else if (Global.defaultPShost == 'tencent') {
+          // ["success", formatedURL, returnUrl, pictureKey,displayUrl]
+          maps = {
+            'path': path,
+            'name': name,
+            'url': uploadResult[2], //tencent文件原始地址
             'PBhost': Global.defaultPShost,
             'pictureKey': uploadResult[3],
             'hostSpecificArgA': uploadResult[4], //实际展示的是displayUrl
@@ -709,6 +737,19 @@ class _HomePageState extends State<HomePage> {
                   await setdefaultPShostRemoteAndLocal('qiniu');
                 },
               ),
+              SpeedDialChild(
+                shape: const CircleBorder(),
+                child: const Icon(
+                  IconData(0x0054),
+                  color: Colors.white,
+                ),
+                backgroundColor: const Color.fromARGB(255, 97, 180, 248),
+                label: '腾讯',
+                labelStyle: const TextStyle(fontSize: 12.0),
+                onTap: () async {
+                  await setdefaultPShostRemoteAndLocal('tencent');
+                },
+              ),
             ],
           ),
 
@@ -730,7 +771,6 @@ class _HomePageState extends State<HomePage> {
               ),
             ],
             currentIndex: 0,
-            //selectedItemColor: Colors.cyan[600],
             onTap: (int index) {
               if (index == 1) {
                 Navigator.push(
