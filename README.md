@@ -10,7 +10,8 @@
 - [x] SM.MS(**V1.41版本添加**) 图床网站[https://smms.app](https://smms.app)或[https://sm.ms](https://sm.ms)
 - [x] Github(**V1.55版本添加**) 使用Github仓库作为图床
 - [x] Imgur(**V1.60版本添加**) Imgur国内用户需要配合翻墙使用，个人手机测试配合clash可以正常使用
-- [x] 七牛云存储(**V1.65版本添加**) 七牛云存储，需要配合七牛云账号使用
+- [x] 七牛云存储(**V1.65版本添加**) 七牛云存储
+- [x] 腾讯云COS(**V1.70版本添加**) 腾讯云COS
 
 &emsp;&emsp;正在研究添加各种其它图床的支持，个人开发用于学习flutter和替代很久没更新了的[flutter-Picgo](https://github.com/PicGo/flutter-picgo)。
 
@@ -36,6 +37,11 @@
 
   详细更新日志请查看[更新日志](https://github.com/Kuingsmile/PicHoro/blob/main/Version_update_log.md "更新日志")
 
+- 2022-10-14: **V1.70**:
+  - 增加了对腾讯云COS的支持
+  - 修改自定义链接格式的占位符为`$fileName`和`$url`，来和PicGo保持一致，同时修改了默认的自定义链接格式。
+  - 修复了七牛云不设置存储路径的时候保存路径错误的问题。
+  - 修复了github，imgur和七牛云导入二维码配置的时候可选参数默认值错误和七牛云数据库保存的数据错误的问题。
 - 2022-10-13: **V1.65**:
   - 增加了对七牛云的支持（吐槽一下，七牛云这官方文档真的是emmmm）
   - 调整了配置和图片上传/删除的时候的响应和连接超时时间设置数值。
@@ -79,16 +85,17 @@
 
 **安卓版**：
 
-[https://www.horosama.com/self_apk/PicHoro_V1.6.5.apk](https://www.horosama.com/self_apk/PicHoro_V1.6.5.apk)
+[https://www.horosama.com/self_apk/PicHoro_V1.7.0.apk](https://www.horosama.com/self_apk/PicHoro_V1.7.0.apk)
 
 ## 开发计划
 
-- 增加对各种图床平台的支持，预计先写github和腾讯云存储的代码,已完成
+- 增加对各种图床平台的,已完成
   - [x] 兰空图床V2版本
   - [x] SM.MS
   - [x] Github
   - [x] Imgur
   - [x] 七牛云
+  - [x] 腾讯云
 - 增加从剪贴板和网络URL上传图片的功能
 - 增加图片分享到其他APP的功能
 - 增加软件更新后保留本地配置的功能-**部分实现，APP内升级可以保留配置**
