@@ -25,11 +25,11 @@
   <tr>
     <td><img src="http://imgx.horosama.com/admin_uploads/2022/10/2022_10_07_633f92429faf6.jpg" width="200" height="400" alt=""/></td>
     <td><img src="http://imgx.horosama.com/admin_uploads/2022/10/2022_10_09_63428bdd8a02c.jpg" width="200" height="400" alt=""/></td>
-    <td><img src="http://imgx.horosama.com/admin_uploads/2022/10/2022_10_11_634539370c248.png" width="200" height="400" alt=""/></td>
+    <td><img src="http://imgx.horosama.com/admin_uploads/2022/10/2022_10_14_6349196cca0c2.jpg" width="200" height="400" alt=""/></td>
   </tr>
    <tr>
     <td><img src="http://imgx.horosama.com/admin_uploads/2022/10/2022_10_11_63453925be3cb.png" width="200" height="400" alt=""/></td>
-    <td><img src="http://imgx.horosama.com/admin_uploads/2022/10/2022_10_11_6345392f8d997.png" width="200" height="400" alt=""/></td>
+    <td><img src="http://imgx.horosama.com/admin_uploads/2022/10/2022_10_14_6349196be91f3.jpg" width="200" height="400" alt=""/></td>
   </tr>
 </table>
 
