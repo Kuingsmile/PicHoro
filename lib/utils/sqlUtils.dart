@@ -685,4 +685,232 @@ class MySqlUtils {
       await conn.close();
     }
   }
+
+  static queryAliyun({required String username}) async {
+    var conn = await MySqlConnection.connect(settings);
+    try {
+      var results = await conn
+          .query('select * from aliyun where username = ?', [username]);
+
+      if (results.isEmpty) {
+        return "Empty";
+      }
+      Map<String, dynamic> resultsMap = {};
+      resultsMap.clear();
+      for (var row in results) {
+        //第一列是id
+        String keyId = await decryptSelf(row[1].toString());
+        String keySecret = await decryptSelf(row[2].toString());
+        String bucket = await decryptSelf(row[3].toString());
+        String area = await decryptSelf(row[4].toString());
+        String path = await decryptSelf(row[5].toString());
+        String customUrl = await decryptSelf(row[6].toString());
+        String options = await decryptSelf(row[7].toString());
+
+        resultsMap['keyId'] = keyId;
+        resultsMap['keySecret'] = keySecret;
+        resultsMap['bucket'] = bucket;
+        resultsMap['area'] = area;
+        resultsMap['path'] = path;
+        resultsMap['customUrl'] = customUrl;
+        resultsMap['options'] = options;
+      }
+      return resultsMap;
+    } catch (e) {
+      return "Error";
+    } finally {
+      await conn.close();
+    }
+  }
+
+  static insertAliyun({required List content}) async {
+    var conn = await MySqlConnection.connect(settings);
+    try {
+      String keyId = content[0].toString();
+      String keySecret = content[1].toString();
+      String bucket = content[2].toString();
+      String area = content[3].toString();
+      String path = content[4].toString();
+      String customUrl = content[5].toString();
+      String options = content[6].toString();
+      String username = content[7].toString();
+
+      String encryptedKeyId = await encryptSelf(keyId);
+      String encryptedKeySecret = await encryptSelf(keySecret);
+      String encryptedBucket = await encryptSelf(bucket);
+      String encryptedArea = await encryptSelf(area);
+      String encryptedPath = await encryptSelf(path);
+      String encryptedCustomUrl = await encryptSelf(customUrl);
+      String encryptedOptions = await encryptSelf(options);
+
+      var results = await conn.query(
+          "insert into aliyun (keyId,keySecret,bucket,area,path,customUrl,options,username) values (?,?,?,?,?,?,?,?)",
+          [
+            encryptedKeyId,
+            encryptedKeySecret,
+            encryptedBucket,
+            encryptedArea,
+            encryptedPath,
+            encryptedCustomUrl,
+            encryptedOptions,
+            username
+          ]);
+      return 'Success';
+    } catch (e) {
+      return "Error";
+    } finally {
+      await conn.close();
+    }
+  }
+
+  static updateAliyun({required List content}) async {
+    var conn = await MySqlConnection.connect(settings);
+
+    try {
+      String keyId = content[0].toString();
+      String keySecret = content[1].toString();
+      String bucket = content[2].toString();
+      String area = content[3].toString();
+      String path = content[4].toString();
+      String customUrl = content[5].toString();
+      String options = content[6].toString();
+      String username = content[7].toString();
+
+      String encryptedKeyId = await encryptSelf(keyId);
+      String encryptedKeySecret = await encryptSelf(keySecret);
+      String encryptedBucket = await encryptSelf(bucket);
+      String encryptedArea = await encryptSelf(area);
+      String encryptedPath = await encryptSelf(path);
+      String encryptedCustomUrl = await encryptSelf(customUrl);
+      String encryptedOptions = await encryptSelf(options);
+
+      var results = await conn.query(
+          "update aliyun set keyId = ?,keySecret = ?,bucket = ?,area = ?,path = ?,customUrl = ?,options = ? where username = ?",
+          [
+            encryptedKeyId,
+            encryptedKeySecret,
+            encryptedBucket,
+            encryptedArea,
+            encryptedPath,
+            encryptedCustomUrl,
+            encryptedOptions,
+            username
+          ]);
+      return 'Success';
+    } catch (e) {
+      return "Error";
+    } finally {
+      await conn.close();
+    }
+  }
+
+  static queryUpyun({required String username}) async {
+    var conn = await MySqlConnection.connect(settings);
+    try {
+      var results = await conn
+          .query('select * from upyun where username = ?', [username]);
+
+      if (results.isEmpty) {
+        return "Empty";
+      }
+      Map<String, dynamic> resultsMap = {};
+      resultsMap.clear();
+      for (var row in results) {
+        //第一列是id
+        String bucket = await decryptSelf(row[1].toString());
+        String upyunOperator = await decryptSelf(row[2].toString());
+        String password = await decryptSelf(row[3].toString());
+        String url = await decryptSelf(row[4].toString());
+        String opptions = await decryptSelf(row[5].toString());
+        String path = await decryptSelf(row[6].toString());
+
+        resultsMap['bucket'] = bucket;
+        resultsMap['operator'] = upyunOperator;
+        resultsMap['password'] = password;
+        resultsMap['url'] = url;
+        resultsMap['options'] = opptions;
+        resultsMap['path'] = path;
+      }
+      return resultsMap;
+    } catch (e) {
+      return "Error";
+    } finally {
+      await conn.close();
+    }
+  }
+
+  static insertUpyun({required List content}) async {
+    var conn = await MySqlConnection.connect(settings);
+    try {
+      String bucket = content[0].toString();
+      String upyunOperator = content[1].toString();
+      String password = content[2].toString();
+      String url = content[3].toString();
+      String opptions = content[4].toString();
+      String path = content[5].toString();
+      String username = content[6].toString();
+
+      String encryptedBucket = await encryptSelf(bucket);
+      String encryptedOperator = await encryptSelf(upyunOperator);
+      String encryptedPassword = await encryptSelf(password);
+      String encryptedUrl = await encryptSelf(url);
+      String encryptedOptions = await encryptSelf(opptions);
+      String encryptedPath = await encryptSelf(path);
+
+      var results = await conn.query(
+          "insert into upyun (bucket,operator,password,url,options,path,username) values (?,?,?,?,?,?,?)",
+          [
+            encryptedBucket,
+            encryptedOperator,
+            encryptedPassword,
+            encryptedUrl,
+            encryptedOptions,
+            encryptedPath,
+            username
+          ]);
+      return 'Success';
+    } catch (e) {
+      return "Error";
+    } finally {
+      await conn.close();
+    }
+  }
+
+  static updateUpyun({required List content}) async {
+    var conn = await MySqlConnection.connect(settings);
+
+    try {
+      String bucket = content[0].toString();
+      String upyunOperator = content[1].toString();
+      String password = content[2].toString();
+      String url = content[3].toString();
+      String opptions = content[4].toString();
+      String path = content[5].toString();
+      String username = content[6].toString();
+
+      String encryptedBucket = await encryptSelf(bucket);
+      String encryptedOperator = await encryptSelf(upyunOperator);
+      String encryptedPassword = await encryptSelf(password);
+      String encryptedUrl = await encryptSelf(url);
+      String encryptedOptions = await encryptSelf(opptions);
+      String encryptedPath = await encryptSelf(path);
+
+      var results = await conn.query(
+          "update upyun set bucket = ?,operator = ?,password = ?,url = ?,options = ?,path = ? where username = ?",
+          [
+            encryptedBucket,
+            encryptedOperator,
+            encryptedPassword,
+            encryptedUrl,
+            encryptedOptions,
+            encryptedPath,
+            username
+          ]);
+      return 'Success';
+    } catch (e) {
+      return "Error";
+    } finally {
+      await conn.close();
+    }
+  }
 }
