@@ -109,6 +109,60 @@ class _EmptyDatabaseState extends State<EmptyDatabase> {
             },
           ),
           ListTile(
+            title: const Text('腾讯云'),
+            onTap: () async {
+              await AlbumSQL.DeleteTable(Global.imageDB!, 'tencent');
+              Fluttertoast.showToast(
+                  msg: "已清空腾讯云数据库",
+                  toastLength: Toast.LENGTH_SHORT,
+                  timeInSecForIosWeb: 2,
+                  backgroundColor:
+                      Theme.of(context).brightness == Brightness.light
+                          ? Colors.black
+                          : Colors.white,
+                  textColor: Theme.of(context).brightness == Brightness.light
+                      ? Colors.white
+                      : Colors.black,
+                  fontSize: 16.0);
+            },
+          ),
+          ListTile(
+            title: const Text('阿里云'),
+            onTap: () async {
+              await AlbumSQL.DeleteTable(Global.imageDB!, 'aliyun');
+              Fluttertoast.showToast(
+                  msg: "已清空阿里云数据库",
+                  toastLength: Toast.LENGTH_SHORT,
+                  timeInSecForIosWeb: 2,
+                  backgroundColor:
+                      Theme.of(context).brightness == Brightness.light
+                          ? Colors.black
+                          : Colors.white,
+                  textColor: Theme.of(context).brightness == Brightness.light
+                      ? Colors.white
+                      : Colors.black,
+                  fontSize: 16.0);
+            },
+          ),
+          ListTile(
+            title: const Text('又拍云'),
+            onTap: () async {
+              await AlbumSQL.DeleteTable(Global.imageDB!, 'upyun');
+              Fluttertoast.showToast(
+                  msg: "已清空又拍云数据库",
+                  toastLength: Toast.LENGTH_SHORT,
+                  timeInSecForIosWeb: 2,
+                  backgroundColor:
+                      Theme.of(context).brightness == Brightness.light
+                          ? Colors.black
+                          : Colors.white,
+                  textColor: Theme.of(context).brightness == Brightness.light
+                      ? Colors.white
+                      : Colors.black,
+                  fontSize: 16.0);
+            },
+          ),
+          ListTile(
             title: const Text('所有数据库'),
             onTap: () async {
               await AlbumSQL.EmptyAllTable(

@@ -48,6 +48,8 @@ class _UploadedImagesState extends State<UploadedImages> {
     'imgur': 'Imgur',
     'qiniu': '七牛云',
     'tencent': '腾讯云',
+    'aliyun': '阿里云',
+    'upyun': '又拍云',
   };
 
   @override
@@ -243,6 +245,22 @@ class _UploadedImagesState extends State<UploadedImages> {
                                   index: index,
                                   images: currentShowedImagesUrl,
                                 )));
+                  } else if (Global.defaultShowedPBhost == 'aliyun') {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => ImagePreview(
+                                  index: index,
+                                  images: currentShowedImagesUrl,
+                                )));
+                  } else if (Global.defaultShowedPBhost == 'upyun') {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => ImagePreview(
+                                  index: index,
+                                  images: currentShowedImagesUrl,
+                                )));
                   }
                 },
                 onDoubleTap: () =>
@@ -390,6 +408,26 @@ class _UploadedImagesState extends State<UploadedImages> {
                                 const Text('腾讯云', textAlign: TextAlign.center),
                             onPressed: () {
                               Global.defaultShowedPBhost = 'tencent';
+                              Navigator.pop(context);
+                              _currentPage = 0;
+                              _onRefresh();
+                            },
+                          ),
+                          SimpleDialogOption(
+                            child:
+                                const Text('阿里云', textAlign: TextAlign.center),
+                            onPressed: () {
+                              Global.defaultShowedPBhost = 'aliyun';
+                              Navigator.pop(context);
+                              _currentPage = 0;
+                              _onRefresh();
+                            },
+                          ),
+                          SimpleDialogOption(
+                            child:
+                                const Text('又拍云', textAlign: TextAlign.center),
+                            onPressed: () {
+                              Global.defaultShowedPBhost = 'upyun';
                               Navigator.pop(context);
                               _currentPage = 0;
                               _onRefresh();
@@ -960,6 +998,40 @@ class _UploadedImagesState extends State<UploadedImages> {
         showedImagePictureKey.add(maps[0]['pictureKey']);
         showedImagePaths.add(maps[0]['path']);
       } else if (Global.defaultShowedPBhost == 'tencent') {
+        if (!maps[0]['url'].toString().startsWith('https://') &&
+            !maps[0]['url'].toString().startsWith('http://')) {
+          showedImageUrl.add('http://' + maps[0]['url']);
+        } else {
+          showedImageUrl.add(maps[0]['url']);
+        }
+        if (!maps[0]['hostSpecificArgA'].toString().startsWith('https://') &&
+            !maps[0]['hostSpecificArgA'].toString().startsWith('http://')) {
+          showedImageDisplayAddressUrl
+              .add('http://' + maps[0]['hostSpecificArgA']);
+        } else {
+          showedImageDisplayAddressUrl.add(maps[0]['hostSpecificArgA']);
+        }
+        showedImageName.add(maps[0]['name']);
+        showedImagePictureKey.add(maps[0]['pictureKey']);
+        showedImagePaths.add(maps[0]['path']);
+      } else if (Global.defaultShowedPBhost == 'aliyun') {
+        if (!maps[0]['url'].toString().startsWith('https://') &&
+            !maps[0]['url'].toString().startsWith('http://')) {
+          showedImageUrl.add('http://' + maps[0]['url']);
+        } else {
+          showedImageUrl.add(maps[0]['url']);
+        }
+        if (!maps[0]['hostSpecificArgA'].toString().startsWith('https://') &&
+            !maps[0]['hostSpecificArgA'].toString().startsWith('http://')) {
+          showedImageDisplayAddressUrl
+              .add('http://' + maps[0]['hostSpecificArgA']);
+        } else {
+          showedImageDisplayAddressUrl.add(maps[0]['hostSpecificArgA']);
+        }
+        showedImageName.add(maps[0]['name']);
+        showedImagePictureKey.add(maps[0]['pictureKey']);
+        showedImagePaths.add(maps[0]['path']);
+      } else if (Global.defaultShowedPBhost == 'upyun') {
         if (!maps[0]['url'].toString().startsWith('https://') &&
             !maps[0]['url'].toString().startsWith('http://')) {
           showedImageUrl.add('http://' + maps[0]['url']);

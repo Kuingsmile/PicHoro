@@ -4,6 +4,7 @@ import 'package:horopic/hostconfigure/smmsconfig.dart';
 import 'package:horopic/hostconfigure/PShostSelect.dart';
 import 'package:horopic/hostconfigure/githubconfig.dart';
 import 'package:horopic/hostconfigure/tencentconfig.dart';
+import 'package:horopic/hostconfigure/upyunconfig.dart';
 import 'package:horopic/utils/common_func.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -22,6 +23,8 @@ import 'package:flutter/services.dart';
 import 'package:qiniu_flutter_sdk/qiniu_flutter_sdk.dart';
 import 'package:horopic/api/tencent.dart';
 import 'package:crypto/crypto.dart';
+import 'package:horopic/hostconfigure/aliyunconfig.dart';
+import 'package:path/path.dart' as mypath;
 
 //a configure page for user to show configure entry
 class AllPShost extends StatefulWidget {
@@ -109,6 +112,56 @@ class _AllPShostState extends State<AllPShost> {
     return File('$path/${defaultUser}_tencent_config.txt');
   }
 
+  //aliyun配置
+  Future<File> get aliyunFile async {
+    final path = await _localPath;
+    String defaultUser = await Global.getUser();
+    return File('$path/${defaultUser}_aliyun_config.txt');
+  }
+
+  //upyun配置
+  Future<File> get upyunFile async {
+    final path = await _localPath;
+    String defaultUser = await Global.getUser();
+    return File('$path/${defaultUser}_upyun_config.txt');
+  }
+
+  exportConfiguration(String pshost) async {
+    try {
+      String configPath = await _localPath;
+      String defaultUser = await Global.getUser();
+      Map<String, dynamic> configFilePath = {
+        "smms": "$configPath/${defaultUser}_smms_config.txt",
+        "lankong": "$configPath/${defaultUser}_host_config.txt",
+        "github": "$configPath/${defaultUser}_github_config.txt",
+        "imgur": "$configPath/${defaultUser}_imgur_config.txt",
+        "qiniu": "$configPath/${defaultUser}_qiniu_config.txt",
+        "tcyun": "$configPath/${defaultUser}_tencent_config.txt",
+        "aliyun": "$configPath/${defaultUser}_aliyun_config.txt",
+        "upyun": "$configPath/${defaultUser}_upyun_config.txt",
+      };
+      String config = await File(configFilePath[pshost]!).readAsString();
+      Map<String, dynamic> configMap = jsonDecode(config);
+      Map configMap2 = {pshost: configMap};
+      String configJson = jsonEncode(configMap2);
+      configJson = configJson.replaceAll('None', '');
+      configJson = configJson.replaceAll('keyId', 'accessKeyId');
+      configJson = configJson.replaceAll('keySecret', 'accessKeySecret');
+      await Clipboard.setData(ClipboardData(text: configJson));
+      Fluttertoast.showToast(
+          msg: "$pshost配置已复制到剪贴板",
+          toastLength: Toast.LENGTH_SHORT,
+          timeInSecForIosWeb: 2,
+          fontSize: 16.0);
+    } catch (e) {
+      Fluttertoast.showToast(
+          msg: "导出失败",
+          toastLength: Toast.LENGTH_SHORT,
+          timeInSecForIosWeb: 2,
+          fontSize: 16.0);
+    }
+  }
+
   processingQRCodeResult() async {
     String result = Global.qrScanResult;
     Global.qrScanResult = "";
@@ -117,7 +170,9 @@ class _AllPShostState extends State<AllPShost> {
         !(result.contains('lankong')) &&
         !(result.contains('imgur')) &&
         !(result.contains('qiniu')) &&
-        !(result.contains('tcyun'))) {
+        !(result.contains('tcyun')) &&
+        !(result.contains('aliyun')) &&
+        !(result.contains('upyun'))) {
       return Fluttertoast.showToast(
           msg: "不包含支持的图床配置信息",
           toastLength: Toast.LENGTH_SHORT,
@@ -890,118 +945,565 @@ class _AllPShostState extends State<AllPShost> {
               timeInSecForIosWeb: 2,
               fontSize: 16.0);
         }
+      } else {
+        Fluttertoast.showToast(
+            msg: "不支持腾讯V4",
+            toastLength: Toast.LENGTH_SHORT,
+            timeInSecForIosWeb: 2,
+            fontSize: 16.0);
       }
-    } else {
-      Fluttertoast.showToast(
-          msg: "不支持腾讯V4",
-          toastLength: Toast.LENGTH_SHORT,
-          timeInSecForIosWeb: 2,
-          fontSize: 16.0);
     }
+
+    if (jsonResult['aliyun'] != null) {
+      String aliyunKeyId = jsonResult['aliyun']['accessKeyId'];
+      String aliyunKeySecret = jsonResult['aliyun']['accessKeySecret'];
+      String aliyunBucket = jsonResult['aliyun']['bucket'];
+      String aliyunArea = jsonResult['aliyun']['area'];
+      String aliyunPath = jsonResult['aliyun']['path'];
+      String aliyunCustomUrl = jsonResult['aliyun']['customUrl'];
+      String aliyunOptions = jsonResult['aliyun']['options'];
+
+      try {
+        String defaultUser = await Global.getUser();
+        var queryaliyun = await MySqlUtils.queryAliyun(username: defaultUser);
+        var queryuser = await MySqlUtils.queryUser(username: defaultUser);
+
+        if (queryuser == 'Empty') {
+          Fluttertoast.showToast(
+              msg: "请先登录",
+              toastLength: Toast.LENGTH_SHORT,
+              timeInSecForIosWeb: 2,
+              fontSize: 16.0);
+        }
+        if (aliyunCustomUrl.isNotEmpty) {
+          if (!aliyunCustomUrl.startsWith('http') &&
+              !aliyunCustomUrl.startsWith('https')) {
+            aliyunCustomUrl = 'http://$aliyunCustomUrl';
+          }
+          if (aliyunCustomUrl.endsWith('/')) {
+            aliyunCustomUrl =
+                aliyunCustomUrl.substring(0, aliyunCustomUrl.length - 1);
+          }
+        } else {
+          aliyunCustomUrl = 'None';
+        }
+
+        if (aliyunPath.isEmpty || aliyunPath == null) {
+          aliyunPath = 'None';
+        } else {
+          if (aliyunPath.startsWith('/')) {
+            aliyunPath = aliyunPath.substring(1);
+          }
+          if (!aliyunPath.endsWith('/')) {
+            aliyunPath = '$aliyunPath/';
+          }
+        }
+
+        if (aliyunOptions.isEmpty || aliyunOptions == null) {
+          aliyunOptions = 'None';
+        } else {
+          if (!aliyunOptions.startsWith('?')) {
+            aliyunOptions = '?$aliyunOptions';
+          }
+        }
+        List sqlconfig = [];
+        sqlconfig.add(aliyunKeyId);
+        sqlconfig.add(aliyunKeySecret);
+        sqlconfig.add(aliyunBucket);
+        sqlconfig.add(aliyunArea);
+        sqlconfig.add(aliyunPath);
+        sqlconfig.add(aliyunCustomUrl);
+        sqlconfig.add(aliyunOptions);
+        sqlconfig.add(defaultUser);
+        //save asset image to app dir
+        String assetPath = 'assets/validateImage/PicHoroValidate.jpeg';
+        String appDir = await getApplicationDocumentsDirectory().then((value) {
+          return value.path;
+        });
+        String assetFilePath = '$appDir/PicHoroValidate.jpeg';
+        File assetFile = File(assetFilePath);
+
+        if (!assetFile.existsSync()) {
+          ByteData data = await rootBundle.load(assetPath);
+          List<int> bytes =
+              data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+          await assetFile.writeAsBytes(bytes);
+        }
+        String key = 'PicHoroValidate.jpeg';
+        String host = '$aliyunBucket.$aliyunArea.aliyuncs.com';
+        String urlpath = '';
+        if (aliyunPath != 'None') {
+          urlpath = '$aliyunPath$key';
+        } else {
+          urlpath = key;
+        }
+        Map<String, dynamic> uploadPolicy = {
+          "expiration": "2034-12-01T12:00:00.000Z",
+          "conditions": [
+            {"bucket": aliyunBucket},
+            ["content-length-range", 0, 104857600],
+            {"key": urlpath}
+          ]
+        };
+        String base64Policy =
+            base64.encode(utf8.encode(json.encode(uploadPolicy)));
+        String singature = base64.encode(
+            Hmac(sha1, utf8.encode(aliyunKeySecret))
+                .convert(utf8.encode(base64Policy))
+                .bytes);
+        FormData formData = FormData.fromMap({
+          'key': urlpath,
+          'OSSAccessKeyId': aliyunKeyId,
+          'policy': base64Policy,
+          'Signature': singature,
+          //阿里默认的content-type是application/octet-stream，这里改成image/xxx
+          'x-oss-content-type':
+              'image/${mypath.extension(assetFilePath).replaceFirst('.', '')}',
+          'file': await MultipartFile.fromFile(assetFilePath, filename: key),
+        });
+
+        BaseOptions baseoptions = BaseOptions(
+          //连接服务器超时时间，单位是毫秒.
+          connectTimeout: 30000,
+          //响应超时时间。
+          receiveTimeout: 30000,
+          sendTimeout: 30000,
+        );
+        String contentLength = await assetFile.length().then((value) {
+          return value.toString();
+        });
+        baseoptions.headers = {
+          'Host': host,
+          'Content-Type':
+              'multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW',
+          'Content-Length': contentLength,
+        };
+        Dio dio = Dio(baseoptions);
+        String aliyunSqlResult = '';
+
+        var response = await dio.post(
+          'https://$host',
+          data: formData,
+        );
+
+        if (response.statusCode == 204) {
+          if (queryaliyun == 'Empty') {
+            aliyunSqlResult = await MySqlUtils.insertAliyun(content: sqlconfig);
+          } else {
+            aliyunSqlResult = await MySqlUtils.updateAliyun(content: sqlconfig);
+          }
+          if (aliyunSqlResult == "Success") {
+            final aliyunConfig = AliyunConfigModel(
+              aliyunKeyId,
+              aliyunKeySecret,
+              aliyunBucket,
+              aliyunArea,
+              aliyunPath,
+              aliyunCustomUrl,
+              aliyunOptions,
+            );
+            final aliyunConfigJson = jsonEncode(aliyunConfig);
+            final aliyunConfigFile = await aliyunFile;
+            await aliyunConfigFile.writeAsString(aliyunConfigJson);
+            Fluttertoast.showToast(
+                msg: "阿里云配置成功",
+                toastLength: Toast.LENGTH_SHORT,
+                timeInSecForIosWeb: 2,
+                fontSize: 16.0);
+          } else {
+            Fluttertoast.showToast(
+                msg: "阿里云数据库错误",
+                toastLength: Toast.LENGTH_SHORT,
+                timeInSecForIosWeb: 2,
+                fontSize: 16.0);
+          }
+        } else {
+          Fluttertoast.showToast(
+              msg: "阿里云验证失败",
+              toastLength: Toast.LENGTH_SHORT,
+              timeInSecForIosWeb: 2,
+              fontSize: 16.0);
+        }
+      } catch (e) {
+        Fluttertoast.showToast(
+            msg: "阿里云配置错误",
+            toastLength: Toast.LENGTH_SHORT,
+            timeInSecForIosWeb: 2,
+            fontSize: 16.0);
+      }
+    }
+
+    if (jsonResult['upyun'] != null) {
+      String upyunBucket = jsonResult['upyun']['bucket'];
+      String upyunOperator = jsonResult['upyun']['operator'];
+      String upyunPassword = jsonResult['upyun']['password'];
+      String upyunUrl = jsonResult['upyun']['url'];
+      String upyunOptions = jsonResult['upyun']['options'];
+      String upyunPath = jsonResult['upyun']['path'];
+      try {
+        String defaultUser = await Global.getUser();
+        var queryupyun = await MySqlUtils.queryUpyun(username: defaultUser);
+        var queryuser = await MySqlUtils.queryUser(username: defaultUser);
+
+        if (queryuser == 'Empty') {
+          Fluttertoast.showToast(
+              msg: "请先登录",
+              toastLength: Toast.LENGTH_SHORT,
+              timeInSecForIosWeb: 2,
+              fontSize: 16.0);
+        }
+        if (!upyunUrl.startsWith('http') && !upyunUrl.startsWith('https')) {
+          upyunUrl = 'http://$upyunUrl';
+        }
+
+        if (upyunUrl.endsWith('/')) {
+          upyunUrl = upyunUrl.substring(0, upyunUrl.length - 1);
+        }
+
+        if (upyunPath.isEmpty || upyunPath == null) {
+          upyunPath = 'None';
+        } else {
+          if (upyunPath.startsWith('/')) {
+            upyunPath = upyunPath.substring(1);
+          }
+
+          if (!upyunPath.endsWith('/')) {
+            upyunPath = '$upyunPath/';
+          }
+        }
+
+        List sqlconfig = [];
+        sqlconfig.add(upyunBucket);
+        sqlconfig.add(upyunOperator);
+        sqlconfig.add(upyunPassword);
+        sqlconfig.add(upyunUrl);
+        sqlconfig.add(upyunOptions);
+        sqlconfig.add(upyunPath);
+        sqlconfig.add(defaultUser);
+        //save asset image to app dir
+        String assetPath = 'assets/validateImage/PicHoroValidate.jpeg';
+        String appDir = await getApplicationDocumentsDirectory().then((value) {
+          return value.path;
+        });
+        String assetFilePath = '$appDir/PicHoroValidate.jpeg';
+        File assetFile = File(assetFilePath);
+
+        if (!assetFile.existsSync()) {
+          ByteData data = await rootBundle.load(assetPath);
+          List<int> bytes =
+              data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+          await assetFile.writeAsBytes(bytes);
+        }
+        String key = 'PicHoroValidate.jpeg';
+        String host = 'http://v0.api.upyun.com';
+        String urlpath = '';
+        if (upyunPath != 'None') {
+          urlpath = '/$upyunPath$key';
+        } else {
+          urlpath = '/$key';
+        }
+        String date = HttpDate.format(DateTime.now());
+        String assetFileMd5 = await assetFile.readAsBytes().then((value) {
+          return md5.convert(value).toString();
+        });
+        Map<String, dynamic> uploadPolicy = {
+          'bucket': upyunBucket,
+          'save-key': urlpath,
+          'expiration': DateTime.now().millisecondsSinceEpoch + 1800000,
+          'date': date,
+          'content-md5': assetFileMd5,
+        };
+        String base64Policy =
+            base64.encode(utf8.encode(json.encode(uploadPolicy)));
+        String stringToSign =
+            'POST&/$upyunBucket&$date&$base64Policy&$assetFileMd5';
+        String passwordMd5 = md5.convert(utf8.encode(upyunPassword)).toString();
+        String signature = base64.encode(Hmac(sha1, utf8.encode(passwordMd5))
+            .convert(utf8.encode(stringToSign))
+            .bytes);
+        String authorization = 'UPYUN $upyunOperator:$signature';
+        FormData formData = FormData.fromMap({
+          'authorization': authorization,
+          'policy': base64Policy,
+          'file': await MultipartFile.fromFile(assetFilePath, filename: key),
+        });
+
+        BaseOptions baseoptions = BaseOptions(
+          //连接服务器超时时间，单位是毫秒.
+          connectTimeout: 30000,
+          //响应超时时间。
+          receiveTimeout: 30000,
+          sendTimeout: 30000,
+        );
+        String contentLength = await assetFile.length().then((value) {
+          return value.toString();
+        });
+        baseoptions.headers = {
+          'Host': 'v0.api.upyun.com',
+          'Content-Type':
+              'multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW',
+          'Content-Length': contentLength,
+          'Date': date,
+          'Authorization': authorization,
+          'Content-MD5': assetFileMd5,
+        };
+        Dio dio = Dio(baseoptions);
+        String upyunSqlResult = '';
+
+        var response = await dio.post(
+          '$host/$upyunBucket',
+          data: formData,
+        );
+
+        if (response.statusCode == 200) {
+          if (queryupyun == 'Empty') {
+            upyunSqlResult = await MySqlUtils.insertUpyun(content: sqlconfig);
+          } else {
+            upyunSqlResult = await MySqlUtils.updateUpyun(content: sqlconfig);
+          }
+          if (upyunSqlResult == "Success") {
+            final upyunConfig = UpyunConfigModel(
+              upyunBucket,
+              upyunOperator,
+              upyunPassword,
+              upyunUrl,
+              upyunOptions,
+              upyunPath,
+            );
+            final upyunConfigJson = jsonEncode(upyunConfig);
+            final upyunConfigFile = await upyunFile;
+            await upyunConfigFile.writeAsString(upyunConfigJson);
+            Fluttertoast.showToast(
+                msg: "又拍云配置成功",
+                toastLength: Toast.LENGTH_SHORT,
+                timeInSecForIosWeb: 2,
+                fontSize: 16.0);
+          } else {
+            Fluttertoast.showToast(
+                msg: "又拍云数据库错误",
+                toastLength: Toast.LENGTH_SHORT,
+                timeInSecForIosWeb: 2,
+                fontSize: 16.0);
+          }
+        } else {
+          Fluttertoast.showToast(
+              msg: "又拍云验证失败",
+              toastLength: Toast.LENGTH_SHORT,
+              timeInSecForIosWeb: 2,
+              fontSize: 16.0);
+        }
+      } catch (e) {
+        Fluttertoast.showToast(
+            msg: "又拍云配置错误",
+            toastLength: Toast.LENGTH_SHORT,
+            timeInSecForIosWeb: 2,
+            fontSize: 16.0);
+      }
+    }
+
     return true;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          centerTitle: true,
-          title: const Text(
-            '图床设置',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
+      appBar: AppBar(
+        centerTitle: true,
+        title: const Text(
+          '图床设置',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
           ),
         ),
-        body: ListView(children: [
-          ListTile(
-            tileColor: const Color.fromARGB(255, 188, 187, 238),
-            textColor: const Color.fromARGB(255, 11, 173, 19),
-            title: const Text('二维码扫描导入PicGo配置'),
-            onTap: () async {
-              await _scan();
+      ),
+      body: ListView(children: [
+        ListTile(
+          tileColor: const Color.fromARGB(255, 188, 187, 238),
+          textColor: const Color.fromARGB(255, 11, 173, 19),
+          title: const Text('二维码扫描导入PicGo配置'),
+          onTap: () async {
+            await _scan();
 
-              showDialog(
-                  context: this.context,
-                  barrierDismissible: false,
-                  builder: (context) {
-                    return NetLoadingDialog(
-                      outsideDismiss: false,
-                      loading: true,
-                      loadingText: "配置中...",
-                      requestCallBack: processingQRCodeResult(),
-                    );
-                  });
+            showDialog(
+                context: this.context,
+                barrierDismissible: false,
+                builder: (context) {
+                  return NetLoadingDialog(
+                    outsideDismiss: false,
+                    loading: true,
+                    loadingText: "配置中...",
+                    requestCallBack: processingQRCodeResult(),
+                  );
+                });
+          },
+          trailing: const Icon(Icons.arrow_forward_ios),
+        ),
+        const Divider(
+          height: 1,
+          color: Colors.grey,
+        ),
+        ListTile(
+          title: const Text('默认图床选择'),
+          onTap: () {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const defaultPShostSelect()));
+          },
+          trailing: const Icon(Icons.arrow_forward_ios),
+        ),
+        ListTile(
+          title: const Text('兰空图床V2'),
+          onTap: () {
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => const HostConfig()));
+          },
+          trailing: const Icon(Icons.arrow_forward_ios),
+        ),
+        ListTile(
+          title: const Text('SM.MS图床'),
+          onTap: () {
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => const SmmsConfig()));
+          },
+          trailing: const Icon(Icons.arrow_forward_ios),
+        ),
+        ListTile(
+          title: const Text('Github图床'),
+          onTap: () {
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => const GithubConfig()));
+          },
+          trailing: const Icon(Icons.arrow_forward_ios),
+        ),
+        ListTile(
+          title: const Text('Imgur图床（需翻墙）'),
+          onTap: () {
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => const ImgurConfig()));
+          },
+          trailing: const Icon(Icons.arrow_forward_ios),
+        ),
+        ListTile(
+          title: const Text('七牛云'),
+          onTap: () {
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => const QiniuConfig()));
+          },
+          trailing: const Icon(Icons.arrow_forward_ios),
+        ),
+        ListTile(
+          title: const Text('腾讯云COS V5'),
+          onTap: () {
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => const TencentConfig()));
+          },
+          trailing: const Icon(Icons.arrow_forward_ios),
+        ),
+        ListTile(
+          title: const Text('阿里云OSS'),
+          onTap: () {
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => const AliyunConfig()));
+          },
+          trailing: const Icon(Icons.arrow_forward_ios),
+        ),
+        ListTile(
+          title: const Text('又拍云'),
+          onTap: () {
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => const UpyunConfig()));
+          },
+          trailing: const Icon(Icons.arrow_forward_ios),
+        ),
+      ]),
+      floatingActionButton: Container(
+          height: 40,
+          width: 40,
+          child: FloatingActionButton(
+            heroTag: 'copyConfig',
+            backgroundColor: Color.fromARGB(255, 198, 135, 235),
+            //select host menu
+            onPressed: () async {
+              await showDialog(
+                barrierDismissible: true,
+                context: context,
+                builder: (context) {
+                  return SimpleDialog(
+                    title: const Text(
+                      '选择要复制配置的图床',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    children: [
+                      SimpleDialogOption(
+                        child: const Text('兰空图床', textAlign: TextAlign.center),
+                        onPressed: () {
+                          exportConfiguration('lankong');
+                          Navigator.pop(context);
+                        },
+                      ),
+                      SimpleDialogOption(
+                        child: const Text('SM.MS', textAlign: TextAlign.center),
+                        onPressed: () {
+                          exportConfiguration('smms');
+                          Navigator.pop(context);
+                        },
+                      ),
+                      SimpleDialogOption(
+                        child:
+                            const Text('Github', textAlign: TextAlign.center),
+                        onPressed: () {
+                          exportConfiguration('github');
+                          Navigator.pop(context);
+                        },
+                      ),
+                      SimpleDialogOption(
+                        child: const Text('Imgur', textAlign: TextAlign.center),
+                        onPressed: () {
+                          exportConfiguration('imgur');
+                          Navigator.pop(context);
+                        },
+                      ),
+                      SimpleDialogOption(
+                        child: const Text('七牛云', textAlign: TextAlign.center),
+                        onPressed: () {
+                          exportConfiguration('qiniu');
+                          Navigator.pop(context);
+                        },
+                      ),
+                      SimpleDialogOption(
+                        child: const Text('腾讯云', textAlign: TextAlign.center),
+                        onPressed: () {
+                          exportConfiguration('tcyun');
+                          Navigator.pop(context);
+                        },
+                      ),
+                      SimpleDialogOption(
+                        child: const Text('阿里云', textAlign: TextAlign.center),
+                        onPressed: () {
+                          exportConfiguration('aliyun');
+                          Navigator.pop(context);
+                        },
+                      ),
+                      SimpleDialogOption(
+                        child: const Text('又拍云', textAlign: TextAlign.center),
+                        onPressed: () {
+                          exportConfiguration('upyun');
+                          Navigator.pop(context);
+                        },
+                      ),
+                    ],
+                  );
+                },
+              );
             },
-            trailing: const Icon(Icons.arrow_forward_ios),
-          ),
-          const Divider(
-            height: 1,
-            color: Colors.grey,
-          ),
-          ListTile(
-            title: const Text('默认图床选择'),
-            onTap: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const defaultPShostSelect()));
-            },
-            trailing: const Icon(Icons.arrow_forward_ios),
-          ),
-          ListTile(
-            title: const Text('兰空图床V2'),
-            onTap: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => const HostConfig()));
-            },
-            trailing: const Icon(Icons.arrow_forward_ios),
-          ),
-          ListTile(
-            title: const Text('SM.MS图床'),
-            onTap: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => const SmmsConfig()));
-            },
-            trailing: const Icon(Icons.arrow_forward_ios),
-          ),
-          ListTile(
-            title: const Text('Github图床'),
-            onTap: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const GithubConfig()));
-            },
-            trailing: const Icon(Icons.arrow_forward_ios),
-          ),
-          ListTile(
-            title: const Text('Imgur图床（需翻墙）'),
-            onTap: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => const ImgurConfig()));
-            },
-            trailing: const Icon(Icons.arrow_forward_ios),
-          ),
-          ListTile(
-            title: const Text('七牛云'),
-            onTap: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => const QiniuConfig()));
-            },
-            trailing: const Icon(Icons.arrow_forward_ios),
-          ),
-          ListTile(
-            title: const Text('腾讯云COS'),
-            onTap: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const TencentConfig()));
-            },
-            trailing: const Icon(Icons.arrow_forward_ios),
-          )
-        ]));
+            child: const Icon(
+              Icons.outbox_outlined,
+              size: 30,
+            ),
+          )),
+    );
   }
 }

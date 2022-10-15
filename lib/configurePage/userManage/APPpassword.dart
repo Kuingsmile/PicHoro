@@ -14,6 +14,8 @@ import 'package:horopic/hostconfigure/githubconfig.dart' as githubhostclass;
 import 'package:horopic/hostconfigure/Imgurconfig.dart' as imgurhostclass;
 import 'package:horopic/hostconfigure/qiniuconfig.dart' as qiniuhostclass;
 import 'package:horopic/hostconfigure/tencentconfig.dart' as tencenthostclass;
+import 'package:horopic/hostconfigure/aliyunconfig.dart' as aliyunhostclass;
+import 'package:horopic/hostconfigure/upyunconfig.dart' as upyunhostclass;
 
 class APPPassword extends StatefulWidget {
   const APPPassword({Key? key}) : super(key: key);
@@ -223,7 +225,7 @@ class _APPPasswordState extends State<APPPassword> {
           var tencentresult = await MySqlUtils.queryTencent(username: username);
           if (tencentresult == 'Error') {
             return showAlertDialog(
-                context: context, title: "错误", content: "获取七牛云端信息失败,请重试!");
+                context: context, title: "错误", content: "获取腾讯云端信息失败,请重试!");
           } else if (tencentresult != 'Empty') {
             try {
               final tencenthostConfig = tencenthostclass.TencentConfigModel(
@@ -244,6 +246,57 @@ class _APPPasswordState extends State<APPPassword> {
             } catch (e) {
               return showAlertDialog(
                   context: context, title: "错误", content: "拉取腾讯云配置失败,请重试!");
+            }
+          }
+          //拉取阿里云OSS图床配置
+          var aliyunresult = await MySqlUtils.queryAliyun(username: username);
+          if (aliyunresult == 'Error') {
+            return showAlertDialog(
+                context: context, title: "错误", content: "获取阿里云端信息失败,请重试!");
+          } else if (aliyunresult != 'Empty') {
+            try {
+              final aliyunhostConfig = aliyunhostclass.AliyunConfigModel(
+                aliyunresult['keyId'],
+                aliyunresult['keySecret'],
+                aliyunresult['bucket'],
+                aliyunresult['area'],
+                aliyunresult['path'],
+                aliyunresult['customUrl'],
+                aliyunresult['options'],
+              );
+              final aliyunConfigJson = jsonEncode(aliyunhostConfig);
+              final directory = await getApplicationDocumentsDirectory();
+              File aliyunLocalFile =
+                  File('${directory.path}/${username}_aliyun_config.txt');
+              aliyunLocalFile.writeAsString(aliyunConfigJson);
+            } catch (e) {
+              return showAlertDialog(
+                  context: context, title: "错误", content: "拉取阿里云配置失败,请重试!");
+            }
+          }
+          //拉取又拍云图床配置
+          var upyunresult = await MySqlUtils.queryUpyun(username: username);
+          if (upyunresult == 'Error') {
+            return showAlertDialog(
+                context: context, title: "错误", content: "获取又拍云端信息失败,请重试!");
+          } else if (upyunresult != 'Empty') {
+            try {
+              final upyunhostConfig = upyunhostclass.UpyunConfigModel(
+                upyunresult['bucket'],
+                upyunresult['operator'],
+                upyunresult['password'],
+                upyunresult['url'],
+                upyunresult['options'],
+                upyunresult['path'],
+              );
+              final upyunConfigJson = jsonEncode(upyunhostConfig);
+              final directory = await getApplicationDocumentsDirectory();
+              File upyunLocalFile =
+                  File('${directory.path}/${username}_upyun_config.txt');
+              upyunLocalFile.writeAsString(upyunConfigJson);
+            } catch (e) {
+              return showAlertDialog(
+                  context: context, title: "错误", content: "拉取又拍云配置失败,请重试!");
             }
           }
           //全部拉取完成后，提示用户
