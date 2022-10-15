@@ -36,15 +36,16 @@ class Global {
   static String multiUpload = 'fail';
   static String defaultLKformat = 'rawurl'; //默认链接格式
   static bool isTimeStamp = false; //是否使用时间戳重命名
-  static bool isRandomName = false; //是否使用随机名重命名
+  static bool isRandomName = false; //是否使用随机字符串重命名
   static bool isCopyLink = true; //是否复制链接
   static Database? imageDB; //默认数据库
   static String defaultShowedPBhost = 'lskypro'; //默认显示的图床
   static bool isDeleteLocal = false; //是否删除本地图片
   static bool isDeleteCloud = false; //是否删除远程图片
-  static String customLinkFormat = r'[${fileName}][${url}]'; //自定义链接格式
+  static String customLinkFormat = r'[$fileName]($url)'; //自定义链接格式
   static String qrScanResult = ''; //扫码结果
-
+  static bool iscustomRename = false; //是否自定义重命名
+  static String customRenameFormat = r'{Y}_{m}_{d}_{uuid}'; //自定义重命名格式
 
   static getPShost() async {
     await SpUtil.getInstance();
@@ -118,6 +119,19 @@ class Global {
     return isRandomName;
   }
 
+  static setCustomeRename(bool iscustomRename) async {
+    await SpUtil.getInstance();
+    SpUtil.putBool('key_iscustomRename', iscustomRename);
+    Global.iscustomRename = iscustomRename;
+  }
+
+  static getCustomeRename() async {
+    await SpUtil.getInstance();
+    bool iscustomRename =
+        SpUtil.getBool('key_iscustomRename', defValue: false)!;
+    return iscustomRename;
+  }
+
   static setCopyLink(bool isCopyLink) async {
     await SpUtil.getInstance();
     SpUtil.putBool('key_isCopyLink', isCopyLink);
@@ -172,9 +186,22 @@ class Global {
 
   static getCustomLinkFormat() async {
     await SpUtil.getInstance();
-    String customLinkFormat =
-        SpUtil.getString('key_customLinkFormat', defValue: 'rawurl')!;
+    String customLinkFormat = SpUtil.getString('key_customLinkFormat',
+        defValue: r'[$fileName]($url)')!;
     return customLinkFormat;
+  }
+
+  static setCustomeRenameFormat(String customRenameFormat) async {
+    await SpUtil.getInstance();
+    SpUtil.putString('key_customRenameFormat', customRenameFormat);
+    Global.customRenameFormat = customRenameFormat;
+  }
+
+  static getCustomeRenameFormat() async {
+    await SpUtil.getInstance();
+    String customRenameFormat =
+        SpUtil.getString('key_customRenameFormat', defValue: r'${filename}')!;
+    return customRenameFormat;
   }
 
   static setDeleteCloud(bool isDeleteCloud) async {
