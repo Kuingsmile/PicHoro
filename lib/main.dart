@@ -9,9 +9,9 @@ import 'package:sqflite/sqflite.dart';
 /*
 @Author: Horo
 @e-mail: ma_shiqing@163.com
-@Date: 2022-10-12
-@Description:PicHoro, your mobile PicGo
-@version: 1.6.0
+@Date: 2022-10-15
+@Description:PicHoro, a picture upload tool 
+@version: 1.7.5
 */
 
 void main() async {
@@ -45,6 +45,10 @@ void main() async {
   await Global.setCustomLinkFormat(initCustomLinkFormat);
   bool isDeleteCloud = await Global.getDeleteCloud();
   await Global.setDeleteCloud(isDeleteCloud);
+  bool iscustomRename = await Global.getCustomeRename();
+  await Global.setCustomeRename(iscustomRename);
+  String initCustomRenameFormat = await Global.getCustomeRenameFormat();
+  await Global.setCustomeRenameFormat(initCustomRenameFormat);
 
   //初始化数据库
   Database db = await Global.getDatabase();
