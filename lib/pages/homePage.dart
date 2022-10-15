@@ -13,6 +13,8 @@ import 'package:horopic/album/albumSQL.dart';
 import 'package:horopic/album/albumPage.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:horopic/hostconfigure/PShostSelect.dart';
+import 'package:http/http.dart' as myhttp;
+import 'package:path_provider/path_provider.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -23,7 +25,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final ImagePicker _picker = ImagePicker();
-  List clipbordList = [];
+  List clipboardList = [];
 
   _imageFromCamera() async {
     final XFile? pickedImage =
@@ -48,7 +50,9 @@ class _HomePageState extends State<HomePage> {
     Global.imagesList.clear();
     if (imageConstraint(context: context, image: fileImage)) {
       //图片重命名
-      if (Global.isTimeStamp == true) {
+      if (Global.iscustomRename == true) {
+        Global.imageFile = await renamePictureWithCustomFormat(fileImage);
+      } else if (Global.isTimeStamp == true) {
         Global.imageFile = await renamePictureWithTimestamp(fileImage);
       } else if (Global.isRandomName == true) {
         Global.imageFile = await renamePictureWithRandomString(fileImage);
@@ -61,14 +65,109 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  _imageFromNetwork() async {
+    var url = await flutterServices.Clipboard.getData('text/plain');
+    if (url == null) {
+      Fluttertoast.showToast(
+          msg: "剪贴板为空",
+          toastLength: Toast.LENGTH_SHORT,
+          timeInSecForIosWeb: 2,
+          backgroundColor: Theme.of(context).brightness == Brightness.light
+              ? Colors.black
+              : Colors.white,
+          textColor: Theme.of(context).brightness == Brightness.light
+              ? Colors.white
+              : Colors.black,
+          fontSize: 16.0);
+      return;
+    }
+    try {
+      String urlStr = url.text!;
+      List urlList;
+      urlList = urlStr.split("\n");
+      int successCount = 0;
+      int failCount = 0;
+      Global.imagesList.clear();
+
+      for (var i = 0; i < urlList.length; i++) {
+        try {
+          var response = await myhttp.get(Uri.parse(urlList[i]));
+          String tempPath =
+              await getTemporaryDirectory().then((value) => value.path);
+          String timeStamp = DateTime.now().millisecondsSinceEpoch.toString();
+          String randomString = randomStringGenerator(5);
+          io.File file = io.File('$tempPath/Web$timeStamp$randomString.jpg');
+          await file.writeAsBytes(response.bodyBytes);
+          Global.imageFile = file;
+          if (imageConstraint(context: context, image: file)) {
+            //图片重命名
+            if (Global.iscustomRename == true) {
+              Global.imageFile = await renamePictureWithCustomFormat(file);
+            } else if (Global.isTimeStamp == true) {
+              Global.imageFile = await renamePictureWithTimestamp(file);
+            } else if (Global.isRandomName == true) {
+              Global.imageFile = await renamePictureWithRandomString(file);
+            } else {
+              Global.imageFile = file;
+            }
+            Global.imagesList.add(Global.imageFile!);
+          }
+          successCount++;
+          setState(() {});
+          print(Global.imagesList);
+        } catch (e) {
+          failCount++;
+          continue;
+        }
+      }
+      if (successCount > 0) {
+        Fluttertoast.showToast(
+            msg: "成功$successCount张,失败$failCount张",
+            toastLength: Toast.LENGTH_SHORT,
+            timeInSecForIosWeb: 2,
+            backgroundColor: Theme.of(context).brightness == Brightness.light
+                ? Colors.black
+                : Colors.white,
+            textColor: Theme.of(context).brightness == Brightness.light
+                ? Colors.white
+                : Colors.black,
+            fontSize: 16.0);
+      } else {
+        Fluttertoast.showToast(
+            msg: "剪贴板内无链接",
+            toastLength: Toast.LENGTH_SHORT,
+            timeInSecForIosWeb: 2,
+            backgroundColor: Theme.of(context).brightness == Brightness.light
+                ? Colors.black
+                : Colors.white,
+            textColor: Theme.of(context).brightness == Brightness.light
+                ? Colors.white
+                : Colors.black,
+            fontSize: 16.0);
+      }
+    } catch (e) {
+      Fluttertoast.showToast(
+          msg: "获取图片失败",
+          toastLength: Toast.LENGTH_SHORT,
+          timeInSecForIosWeb: 2,
+          backgroundColor: Theme.of(context).brightness == Brightness.light
+              ? Colors.black
+              : Colors.white,
+          textColor: Theme.of(context).brightness == Brightness.light
+              ? Colors.white
+              : Colors.black,
+          fontSize: 16.0);
+    }
+  }
+
   _cameraAndBack() async {
     XFile? pickedImage =
         await _picker.pickImage(source: ImageSource.camera, imageQuality: 100);
     if (pickedImage == null) {
       if (Global.isCopyLink == true) {
         await flutterServices.Clipboard.setData(
-            flutterServices.ClipboardData(text: clipbordList.toString()));
-        clipbordList.clear();
+            flutterServices.ClipboardData(text: clipboardList.toString()));
+        clipboardList.clear();
       }
       return Fluttertoast.showToast(
           msg: "未选择图片",
@@ -85,7 +184,9 @@ class _HomePageState extends State<HomePage> {
 
     io.File fileImage = io.File(pickedImage.path);
 
-    if (Global.isTimeStamp == true) {
+    if (Global.iscustomRename == true) {
+      Global.imageFile = await renamePictureWithCustomFormat(fileImage);
+    } else if (Global.isTimeStamp == true) {
       Global.imageFile = await renamePictureWithTimestamp(fileImage);
     } else if (Global.isRandomName == true) {
       Global.imageFile = await renamePictureWithRandomString(fileImage);
@@ -106,17 +207,17 @@ class _HomePageState extends State<HomePage> {
 
     if (Global.multiUpload == 'fail') {
       if (Global.isCopyLink == true) {
-        if (clipbordList.length == 1) {
+        if (clipboardList.length == 1) {
           await flutterServices.Clipboard.setData(
-              flutterServices.ClipboardData(text: clipbordList[0]));
+              flutterServices.ClipboardData(text: clipboardList[0]));
         } else {
           await flutterServices.Clipboard.setData(flutterServices.ClipboardData(
-              text: clipbordList
+              text: clipboardList
                   .toString()
-                  .substring(1, clipbordList.toString().length - 1)
+                  .substring(1, clipboardList.toString().length - 1)
                   .replaceAll(',', '\n')));
         }
-        clipbordList.clear();
+        clipboardList.clear();
       }
       return true;
     } else {
@@ -222,12 +323,40 @@ class _HomePageState extends State<HomePage> {
           'hostSpecificArgD': 'test',
           'hostSpecificArgE': 'test',
         };
+      } else if (Global.defaultPShost == 'aliyun') {
+        // ["success", formatedURL, returnUrl, pictureKey,displayUrl]
+        maps = {
+          'path': path,
+          'name': name,
+          'url': uploadResult[2], //aliyun文件原始地址
+          'PBhost': Global.defaultPShost,
+          'pictureKey': uploadResult[3],
+          'hostSpecificArgA': uploadResult[4], //实际展示的是displayUrl
+          'hostSpecificArgB': 'test',
+          'hostSpecificArgC': 'test',
+          'hostSpecificArgD': 'test',
+          'hostSpecificArgE': 'test',
+        };
+      } else if (Global.defaultPShost == 'upyun') {
+        // ["success", formatedURL, returnUrl, pictureKey,displayUrl]
+        maps = {
+          'path': path,
+          'name': name,
+          'url': uploadResult[2], //upyun文件原始地址
+          'PBhost': Global.defaultPShost,
+          'pictureKey': uploadResult[3],
+          'hostSpecificArgA': uploadResult[4], //实际展示的是displayUrl
+          'hostSpecificArgB': 'test',
+          'hostSpecificArgC': 'test',
+          'hostSpecificArgD': 'test',
+          'hostSpecificArgE': 'test',
+        };
       }
 
       int id = await AlbumSQL.insertData(
           Global.imageDB!, PBhostToTableName[Global.defaultPShost]!, maps);
 
-      clipbordList.add(uploadResult[1]); //这里是formatedURL,应该是可以直接访问的地址
+      clipboardList.add(uploadResult[1]); //这里是formatedURL,应该是可以直接访问的地址
       Global.multiUpload = 'success';
       return true;
     } else if (uploadResult[0] == "failed") {
@@ -268,7 +397,9 @@ class _HomePageState extends State<HomePage> {
       io.File? fileImage = await pickedImage[i].originFile;
 
       if (imageConstraint(context: context, image: fileImage!)) {
-        if (Global.isTimeStamp == true) {
+        if (Global.iscustomRename == true) {
+          Global.imageFile = await renamePictureWithCustomFormat(fileImage);
+        } else if (Global.isTimeStamp == true) {
           Global.imageFile = await renamePictureWithTimestamp(fileImage);
         } else if (Global.isRandomName == true) {
           Global.imageFile = await renamePictureWithRandomString(fileImage);
@@ -283,7 +414,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   _upLoadImage() async {
-    clipbordList.clear();
+    clipboardList.clear();
     int successCount = 0;
     int failCount = 0;
 
@@ -386,12 +517,40 @@ class _HomePageState extends State<HomePage> {
             'hostSpecificArgD': 'test',
             'hostSpecificArgE': 'test',
           };
+        } else if (Global.defaultPShost == 'aliyun') {
+          // ["success", formatedURL, returnUrl, pictureKey,displayUrl]
+          maps = {
+            'path': path,
+            'name': name,
+            'url': uploadResult[2], //aliyun文件原始地址
+            'PBhost': Global.defaultPShost,
+            'pictureKey': uploadResult[3],
+            'hostSpecificArgA': uploadResult[4], //实际展示的是displayUrl
+            'hostSpecificArgB': 'test',
+            'hostSpecificArgC': 'test',
+            'hostSpecificArgD': 'test',
+            'hostSpecificArgE': 'test',
+          };
+        } else if (Global.defaultPShost == 'upyun') {
+          // ["success", formatedURL, returnUrl, pictureKey,displayUrl]
+          maps = {
+            'path': path,
+            'name': name,
+            'url': uploadResult[2], //upyun文件原始地址
+            'PBhost': Global.defaultPShost,
+            'pictureKey': uploadResult[3],
+            'hostSpecificArgA': uploadResult[4], //实际展示的是displayUrl
+            'hostSpecificArgB': 'test',
+            'hostSpecificArgC': 'test',
+            'hostSpecificArgD': 'test',
+            'hostSpecificArgE': 'test',
+          };
         }
 
         int id = await AlbumSQL.insertData(
             Global.imageDB!, PBhostToTableName[Global.defaultPShost]!, maps);
 
-        clipbordList.add(uploadResult[1]);
+        clipboardList.add(uploadResult[1]);
       } else if (uploadResult[0] == "failed") {
         failCount++;
         failList.add(name);
@@ -419,10 +578,10 @@ class _HomePageState extends State<HomePage> {
     } else if (failCount == 0) {
       if (Global.isCopyLink == true) {
         await flutterServices.Clipboard.setData(flutterServices.ClipboardData(
-            text: clipbordList
+            text: clipboardList
                 .toString()
-                .substring(1, clipbordList.toString().length - 1)));
-        clipbordList.clear();
+                .substring(1, clipboardList.toString().length - 1)));
+        clipboardList.clear();
       }
       String content = "哇塞，全部上传成功了！\n\n上传成功的图片列表:\n\n";
       for (String successImage in successList) {
@@ -447,11 +606,11 @@ class _HomePageState extends State<HomePage> {
     } else {
       if (Global.isCopyLink == true) {
         await flutterServices.Clipboard.setData(flutterServices.ClipboardData(
-            text: clipbordList
+            text: clipboardList
                 .toString()
-                .substring(1, clipbordList.toString().length - 1)
+                .substring(1, clipboardList.toString().length - 1)
                 .replaceAll(',', '\n')));
-        clipbordList.clear();
+        clipboardList.clear();
       }
 
       String content = "部分上传成功~\n\n上传成功的图片列表:\n\n";
@@ -598,7 +757,7 @@ class _HomePageState extends State<HomePage> {
                           ),
                         ),
                         const SizedBox(
-                          height: 30,
+                          height: 20,
                         ),
                         Container(
                           alignment: FractionalOffset.center,
@@ -631,24 +790,39 @@ class _HomePageState extends State<HomePage> {
                         ),
                         Container(
                           alignment: FractionalOffset.center,
-                          margin: const EdgeInsets.only(
-                            left: 20,
-                            right: 20,
-                          ),
+                          margin: const EdgeInsets.only(left: 20, right: 20),
                           child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              minimumSize: const Size(20, 100),
-                            ),
                             onPressed: _cameraAndBack,
                             child: Padding(
-                              //RenderFlex
-                              padding: const EdgeInsets.all(1.0),
+                              padding: const EdgeInsets.all(12.0),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: const [
                                   Icon(Icons.backup),
                                   Text(
-                                    '  连续上传',
+                                    '连续上传',
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(
+                          height: 20,
+                        ),
+                        Container(
+                          alignment: FractionalOffset.center,
+                          margin: const EdgeInsets.only(left: 20, right: 20),
+                          child: ElevatedButton(
+                            onPressed: _imageFromNetwork,
+                            child: Padding(
+                              padding: const EdgeInsets.all(12.0),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: const [
+                                  Icon(Icons.wifi),
+                                  Text(
+                                    '网络多选',
                                   ),
                                 ],
                               ),
@@ -748,6 +922,32 @@ class _HomePageState extends State<HomePage> {
                 labelStyle: const TextStyle(fontSize: 12.0),
                 onTap: () async {
                   await setdefaultPShostRemoteAndLocal('tencent');
+                },
+              ),
+              SpeedDialChild(
+                shape: const CircleBorder(),
+                child: const Icon(
+                  IconData(0x0041),
+                  color: Colors.white,
+                ),
+                backgroundColor: const Color.fromARGB(255, 97, 180, 248),
+                label: '阿里',
+                labelStyle: const TextStyle(fontSize: 12.0),
+                onTap: () async {
+                  await setdefaultPShostRemoteAndLocal('aliyun');
+                },
+              ),
+              SpeedDialChild(
+                shape: const CircleBorder(),
+                child: const Icon(
+                  IconData(0x0055),
+                  color: Colors.white,
+                ),
+                backgroundColor: const Color.fromARGB(255, 97, 180, 248),
+                label: '又拍',
+                labelStyle: const TextStyle(fontSize: 12.0),
+                onTap: () async {
+                  await setdefaultPShostRemoteAndLocal('upyun');
                 },
               ),
             ],
