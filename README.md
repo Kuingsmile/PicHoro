@@ -11,13 +11,27 @@
 - [x] Github(**V1.55版本添加**) 使用Github仓库作为图床
 - [x] Imgur(**V1.60版本添加**) Imgur国内用户需要配合翻墙使用，个人手机测试配合clash可以正常使用
 - [x] 七牛云存储(**V1.65版本添加**) 七牛云存储
-- [x] 腾讯云COS(**V1.70版本添加**) 腾讯云COS
+- [x] 腾讯云COS V5(**V1.70版本添加**) 腾讯云COS V5
+- [x] 阿里云OSS(**V1.75版本添加**) 阿里云OSS
+- [x] 又拍云存储(**V1.75版本添加**) 又拍云存储
 
-&emsp;&emsp;正在研究添加各种其它图床的支持，个人开发用于学习flutter和替代很久没更新了的[flutter-Picgo](https://github.com/PicGo/flutter-picgo)。
+&emsp;&emsp;个人开发用于学习flutter和替代很久没更新了的[flutter-Picgo](https://github.com/PicGo/flutter-picgo)。
 
 @author: Horosama  
 @website: [https://www.horosama.com](https://www.horosama.com)  
 @email: ma_shiqing@163.com  
+
+## 特色功能
+
+- 连续上传模式，相机拍照后自动上传然后返回拍照页面，可连续拍照上传
+- 可导入剪贴板中的网络图片链接，同时使用换行符分割多个链接可批量导入
+- 相册分图床显示，支持多选管理，复制多张图片链接或删除
+- 相册删除时可选择是否同时删除服务器上的图片，以及选择是否删除本地图片
+- 支持扫描二维码将PicGo(v2.3.0-beta.2以上版本)配置文件直接导入PicHoro
+- 支持将PicHoro的配置导出至剪贴板，导出格式与PicGo配置文件相同，可直接导入PicGo
+- 上传图片后自动复制链接到剪贴板，多图上传时全部复制
+- 支持自定义复制到剪贴板的链接格式，占位符与Picgo一致
+- 上传时可对文件重命名，目前有时间戳，随机字符串和自定义重命名三种方式，自定义重命名可使用多种占位符，如uuid，时间戳，md5等
 
 ## 应用截图
 
@@ -25,11 +39,12 @@
   <tr>
     <td><img src="http://imgx.horosama.com/admin_uploads/2022/10/2022_10_07_633f92429faf6.jpg" width="200" height="400" alt=""/></td>
     <td><img src="http://imgx.horosama.com/admin_uploads/2022/10/2022_10_09_63428bdd8a02c.jpg" width="200" height="400" alt=""/></td>
-    <td><img src="http://imgx.horosama.com/admin_uploads/2022/10/2022_10_14_6349196cca0c2.jpg" width="200" height="400" alt=""/></td>
+    <td><img src="http://imgx.horosama.com/admin_uploads/2022/10/2022_10_15_634a6308a7fe7.jpg" width="200" height="400" alt=""/></td>
   </tr>
    <tr>
-    <td><img src="http://imgx.horosama.com/admin_uploads/2022/10/2022_10_11_63453925be3cb.png" width="200" height="400" alt=""/></td>
-    <td><img src="http://imgx.horosama.com/admin_uploads/2022/10/2022_10_14_6349196be91f3.jpg" width="200" height="400" alt=""/></td>
+    <td><img src="http://imgx.horosama.com/admin_uploads/2022/10/2022_10_15_634a630aa7563.jpg" width="200" height="400" alt=""/></td>
+    <td><img src="http://imgx.horosama.com/admin_uploads/2022/10/2022_10_15_634a63099d33d.jpg" width="200" height="400" alt=""/></td>
+    <td><img src="http://imgx.horosama.com/admin_uploads/2022/10/2022_10_15_634a630b8b481.jpg" width="200" height="400" alt=""/></td>
   </tr>
 </table>
 
@@ -37,6 +52,14 @@
 
   详细更新日志请查看[更新日志](https://github.com/Kuingsmile/PicHoro/blob/main/Version_update_log.md "更新日志")
 
+- 2022-10-15: **V1.75**:
+
+  - 增加了对阿里云OSS的支持
+  - 增加了对又拍云存储的支持
+  - 增加了导出图床配置到剪贴板的功能，导出格式为json
+  - 增加了从剪贴板中的图片链接直接获取图片的功能，并且可以通过换行符分隔多个图片链接来一次性获取多张图片
+  - 增加了上传的时候自定义文件名的功能，使用`{Y}`、`{y}`、`{m}`、`{d}`、`{uuid}`、`{md5}`等占位符，可选年月日，uuid，md5，随机字符串等任意组合来自定义文件名。
+  - 增加了手动清除缓存的功能
 - 2022-10-14: **V1.70**:
   - 增加了对腾讯云COS的支持
   - 修改自定义链接格式的占位符为`$fileName`和`$url`，来和PicGo保持一致，同时修改了默认的自定义链接格式。
@@ -85,19 +108,12 @@
 
 **安卓版**：
 
-[https://www.horosama.com/self_apk/PicHoro_V1.7.0.apk](https://www.horosama.com/self_apk/PicHoro_V1.7.0.apk)
+[https://www.horosama.com/self_apk/PicHoro_V1.7.5.apk](https://www.horosama.com/self_apk/PicHoro_V1.7.5.apk)
 
 ## 开发计划
 
-- 增加对各种图床平台的,已完成
-  - [x] 兰空图床V2版本
-  - [x] SM.MS
-  - [x] Github
-  - [x] Imgur
-  - [x] 七牛云
-  - [x] 腾讯云
-- 增加从剪贴板和网络URL上传图片的功能
-- 增加图片分享到其他APP的功能
+- 增加对各种图床平台的,已完成对PicGo默认支持的7个图床和兰空图床的支持。
+- 增加网络URL上传图片的功能-**已实现**
 - 增加软件更新后保留本地配置的功能-**部分实现，APP内升级可以保留配置**
 - 增加图床仓库管理的功能，增加从相册里删除图片的时候只删除数据库记录的功能-**已实现**
 - 增加自定义复制的链接格式的功能-**已实现**
