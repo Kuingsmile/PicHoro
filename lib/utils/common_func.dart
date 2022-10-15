@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:path/path.dart' as mypath;
 import 'package:horopic/utils/global.dart';
+import 'package:uuid/uuid.dart';
+import 'dart:convert';
+import "package:crypto/crypto.dart";
 
 //defaultLKformat和对应的转换函数
 Map<String, Function> linkGenerateDict = {
@@ -142,8 +145,8 @@ String renameFileWithRandomString(int length) {
 Future<File> renamePictureWithTimestamp(File file) {
   var path = file.path;
   var lastSeparator = path.lastIndexOf(Platform.pathSeparator);
-  var extension = mypath.extension(path);
-  var newFileName = renameFileWithTimestamp() + extension;
+  var fileExtension = mypath.extension(path);
+  var newFileName = renameFileWithTimestamp() + fileExtension;
   var newPath = path.substring(0, lastSeparator + 1) + newFileName;
   return file.rename(newPath);
 }
@@ -152,8 +155,43 @@ Future<File> renamePictureWithTimestamp(File file) {
 Future<File> renamePictureWithRandomString(File file) {
   var path = file.path;
   var lastSeparator = path.lastIndexOf(Platform.pathSeparator);
-  var extension = mypath.extension(path);
-  var newFileName = renameFileWithRandomString(30) + extension;
+  var fileExtension = mypath.extension(path);
+  var newFileName = renameFileWithRandomString(30) + fileExtension;
+  var newPath = path.substring(0, lastSeparator + 1) + newFileName;
+  return file.rename(newPath);
+}
+
+//rename picture with custom format
+Future<File> renamePictureWithCustomFormat(File file) async {
+  String customFormat = await Global.getCustomeRenameFormat();
+  var path = file.path;
+  var lastSeparator = path.lastIndexOf(Platform.pathSeparator);
+  var fileExtension = mypath.extension(path);
+  String yearFourDigit = DateTime.now().year.toString();
+  String yearTwoDigit = yearFourDigit.substring(2, 4);
+  String month = DateTime.now().month.toString();
+  String day = DateTime.now().day.toString();
+  String timestampSecond =
+      (DateTime.now().millisecondsSinceEpoch / 1000).floor().toString();
+  String uuidWithoutDash = Uuid().v4().replaceAll('-', '');
+  String randommd5 = md5.convert(utf8.encode(uuidWithoutDash)).toString();
+  String randommd5Short = randommd5.substring(0, 16);
+  String tenRandomString = randomStringGenerator(10);
+  String twentyRandomString = randomStringGenerator(20);
+  String oldFileName = mypath.basename(path).replaceAll(fileExtension, '');
+  String newFileName = customFormat
+      .replaceAll('{Y}', yearFourDigit)
+      .replaceAll('{y}', yearTwoDigit)
+      .replaceAll('{m}', month)
+      .replaceAll('{d}', day)
+      .replaceAll('{timestamp}', timestampSecond)
+      .replaceAll('{uuid}', uuidWithoutDash)
+      .replaceAll('{md5}', randommd5)
+      .replaceAll('{md5-16}', randommd5Short)
+      .replaceAll('{str-10}', tenRandomString)
+      .replaceAll('{str-20}', twentyRandomString)
+      .replaceAll('{filename}', oldFileName);
+  newFileName = newFileName + fileExtension;
   var newPath = path.substring(0, lastSeparator + 1) + newFileName;
   return file.rename(newPath);
 }
