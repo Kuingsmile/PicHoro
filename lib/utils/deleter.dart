@@ -8,6 +8,8 @@ import 'package:horopic/api/github.dart';
 import 'package:horopic/api/imgur.dart';
 import 'package:horopic/api/qiniu.dart';
 import 'package:horopic/api/tencent.dart';
+import 'package:horopic/api/aliyun.dart';
+import 'package:horopic/api/upyun.dart';
 
 //默认图床参数和配置文件名对应关系
 Map<String, String> pdconfig = {
@@ -30,6 +32,8 @@ Map<String, Function> deleteFunc = {
   'imgur': ImgurImageUploadUtils.deleteApi,
   'qiniu': QiniuImageUploadUtils.deleteApi,
   'tencent': TencentImageUploadUtils.deleteApi,
+  'aliyun': AliyunImageUploadUtils.deleteApi,
+  'upyun': UpyunImageUploadUtils.deleteApi,
 };
 
 //获取图床配置文件
