@@ -15,6 +15,9 @@ import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:horopic/hostconfigure/PShostSelect.dart';
 import 'package:http/http.dart' as myhttp;
 import 'package:path_provider/path_provider.dart';
+import 'package:horopic/router/application.dart';
+import 'package:horopic/router/routes.dart';
+import 'package:fluro/fluro.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -26,6 +29,11 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final ImagePicker _picker = ImagePicker();
   List clipboardList = [];
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
 
   _imageFromCamera() async {
     final XFile? pickedImage =
@@ -114,7 +122,6 @@ class _HomePageState extends State<HomePage> {
           }
           successCount++;
           setState(() {});
-          print(Global.imagesList);
         } catch (e) {
           failCount++;
           continue;
@@ -632,361 +639,327 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Container(
+        /*
         decoration: const BoxDecoration(
             image: DecorationImage(
                 image: AssetImage("assets/background.png"), //丑，有好看的背景了再改
                 fit: BoxFit.cover)),
+                */
         child: Scaffold(
-          backgroundColor: Colors.white,
-          appBar: AppBar(
-            //backgroundColor: Colors.transparent,
-            //elevation: 0,
-
-            centerTitle: true,
-            title: const Text('PicHoro',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 25.0,
-                  fontWeight: FontWeight.bold,
-                )),
-          ),
-          //
-          body: Column(
-            children: [
-              Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 40),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        GestureDetector(
-                          onTap: () {
-                            bottomPickerSheet(context, _imageFromCamera,
-                                _multiImagePickerFromGallery);
-                          },
-                          child: CircleAvatar(
-                            radius: MediaQuery.of(context).size.width / 6,
-                            backgroundColor: Colors.grey,
-                            backgroundImage: Global.imageFile != null
-                                ? FileImage(Global.imageFile!)
-                                : const Image(
-                                        image:
-                                            AssetImage('assets/app_icon.png'))
-                                    .image,
-                          ),
-                        ),
-                        const SizedBox(
-                          height: 20,
-                        ),
-                        ElevatedButton(
-                          onPressed: () {
-                            if (Global.imagesList.isEmpty) {
-                              Fluttertoast.showToast(
-                                  backgroundColor:
-                                      Theme.of(context).brightness ==
-                                              Brightness.light
-                                          ? Colors.black
-                                          : Colors.white,
-                                  textColor: Theme.of(context).brightness ==
-                                          Brightness.light
-                                      ? Colors.white
-                                      : Colors.black,
-                                  msg: '请先选择图片');
-                              return;
-                            } else {
-                              showDialog(
-                                  context: context,
-                                  barrierDismissible: false,
-                                  builder: (context) {
-                                    return NetLoadingDialog(
-                                      outsideDismiss: false,
-                                      loading: true,
-                                      loadingText: "上传中...",
-                                      requestCallBack: _upLoadImage(),
-                                    );
-                                  });
-                            }
-                          }, // Upload Image
-                          child: Padding(
-                            padding: const EdgeInsets.all(18.0),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: const [
-                                Icon(Icons.file_upload),
-                                Text(
-                                  '上传图片',
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              Container(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+      //backgroundColor: Colors.white,
+      appBar: AppBar(
+        //backgroundColor: Colors.transparent,
+        //elevation: 0,
+        centerTitle: true,
+        title: const Text('PicHoro',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 25.0,
+              fontWeight: FontWeight.bold,
+            )),
+      ),
+      //
+      body: Column(
+        children: [
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Padding(
+                padding: const EdgeInsets.only(top: 40),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Column(
-                      children: [
-                        const SizedBox(
-                          height: 20,
-                        ),
-                        Container(
-                          alignment: FractionalOffset.center,
-                          margin: const EdgeInsets.only(left: 20, right: 20),
-                          child: ElevatedButton(
-                            onPressed: _imageFromCamera,
-                            child: Padding(
-                              padding: const EdgeInsets.all(12.0),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: const [
-                                  Icon(Icons.camera_alt),
-                                  Text(
-                                    '单张拍照',
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(
-                          height: 20,
-                        ),
-                        Container(
-                          alignment: FractionalOffset.center,
-                          margin: const EdgeInsets.only(
-                            left: 20,
-                            right: 20,
-                          ),
-                          child: ElevatedButton(
-                            onPressed: _multiImagePickerFromGallery,
-                            child: Padding(
-                              padding: const EdgeInsets.all(12.0),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: const [
-                                  Icon(Icons.photo_library),
-                                  Text(
-                                    '相册多选',
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
+                    GestureDetector(
+                      onTap: () {
+                        bottomPickerSheet(context, _imageFromCamera,
+                            _multiImagePickerFromGallery);
+                      },
+                      child: CircleAvatar(
+                        radius: MediaQuery.of(context).size.width / 6,
+                        backgroundColor: Colors.grey,
+                        backgroundImage: Global.imageFile != null
+                            ? FileImage(Global.imageFile!)
+                            : const Image(
+                                    image: AssetImage('assets/app_icon.png'))
+                                .image,
+                      ),
                     ),
-                    Column(
-                      children: [
-                        const SizedBox(
-                          height: 20,
-                        ),
-                        Container(
-                          alignment: FractionalOffset.center,
-                          margin: const EdgeInsets.only(left: 20, right: 20),
-                          child: ElevatedButton(
-                            onPressed: _cameraAndBack,
-                            child: Padding(
-                              padding: const EdgeInsets.all(12.0),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: const [
-                                  Icon(Icons.backup),
-                                  Text(
-                                    '连续上传',
-                                  ),
-                                ],
-                              ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        if (Global.imagesList.isEmpty) {
+                          Fluttertoast.showToast(
+                              backgroundColor: Theme.of(context).brightness ==
+                                      Brightness.light
+                                  ? Colors.black
+                                  : Colors.white,
+                              textColor: Theme.of(context).brightness ==
+                                      Brightness.light
+                                  ? Colors.white
+                                  : Colors.black,
+                              msg: '请先选择图片');
+                          return;
+                        } else {
+                          showDialog(
+                              context: context,
+                              barrierDismissible: false,
+                              builder: (context) {
+                                return NetLoadingDialog(
+                                  outsideDismiss: false,
+                                  loading: true,
+                                  loadingText: "上传中...",
+                                  requestCallBack: _upLoadImage(),
+                                );
+                              });
+                        }
+                      }, // Upload Image
+                      child: Padding(
+                        padding: const EdgeInsets.all(18.0),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: const [
+                            Icon(Icons.file_upload),
+                            Text(
+                              '上传图片',
                             ),
-                          ),
+                          ],
                         ),
-                        const SizedBox(
-                          height: 20,
-                        ),
-                        Container(
-                          alignment: FractionalOffset.center,
-                          margin: const EdgeInsets.only(left: 20, right: 20),
-                          child: ElevatedButton(
-                            onPressed: _imageFromNetwork,
-                            child: Padding(
-                              padding: const EdgeInsets.all(12.0),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: const [
-                                  Icon(Icons.wifi),
-                                  Text(
-                                    '网络多选',
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
                   ],
                 ),
               ),
-            ],
+            ),
           ),
-          floatingActionButton: SpeedDial(
-            overlayOpacity: 0.5,
-            buttonSize: const Size(45, 45),
-            childrenButtonSize: const Size(40, 40),
-            animatedIcon: AnimatedIcons.menu_close,
-            animatedIconTheme: const IconThemeData(size: 33.0),
-            backgroundColor: Colors.blue,
-            visible: true,
-            curve: Curves.bounceIn,
-            children: [
-              SpeedDialChild(
-                shape: const CircleBorder(),
-                child: const Icon(
-                  IconData(0x004C),
-                  color: Colors.white,
+          Container(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Column(
+                  children: [
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    Container(
+                      alignment: FractionalOffset.center,
+                      margin: const EdgeInsets.only(left: 20, right: 20),
+                      child: ElevatedButton(
+                        onPressed: _imageFromCamera,
+                        child: Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: const [
+                              Icon(Icons.camera_alt),
+                              Text(
+                                '单张拍照',
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    Container(
+                      alignment: FractionalOffset.center,
+                      margin: const EdgeInsets.only(
+                        left: 20,
+                        right: 20,
+                      ),
+                      child: ElevatedButton(
+                        onPressed: _multiImagePickerFromGallery,
+                        child: Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: const [
+                              Icon(Icons.photo_library),
+                              Text(
+                                '相册多选',
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                backgroundColor: const Color.fromARGB(255, 97, 180, 248),
-                label: '兰空',
-                labelStyle: const TextStyle(fontSize: 12.0),
-                onTap: () async {
-                  await setdefaultPShostRemoteAndLocal('lsky.pro');
-                },
-              ),
-              SpeedDialChild(
-                shape: const CircleBorder(),
-                child: const Icon(
-                  IconData(0x0053),
-                  color: Colors.white,
+                Column(
+                  children: [
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    Container(
+                      alignment: FractionalOffset.center,
+                      margin: const EdgeInsets.only(left: 20, right: 20),
+                      child: ElevatedButton(
+                        onPressed: _cameraAndBack,
+                        child: Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: const [
+                              Icon(Icons.backup),
+                              Text(
+                                '连续上传',
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    Container(
+                      alignment: FractionalOffset.center,
+                      margin: const EdgeInsets.only(left: 20, right: 20),
+                      child: ElevatedButton(
+                        onPressed: _imageFromNetwork,
+                        child: Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: const [
+                              Icon(Icons.wifi),
+                              Text(
+                                '网络多选',
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                backgroundColor: const Color.fromARGB(255, 97, 180, 248),
-                label: 'SM.MS',
-                labelStyle: const TextStyle(fontSize: 12.0),
-                onTap: () async {
-                  await setdefaultPShostRemoteAndLocal('sm.ms');
-                },
-              ),
-              SpeedDialChild(
-                shape: const CircleBorder(),
-                child: const Icon(
-                  IconData(0x0047),
-                  color: Colors.white,
-                ),
-                backgroundColor: const Color.fromARGB(255, 97, 180, 248),
-                label: 'Github',
-                labelStyle: const TextStyle(fontSize: 12.0),
-                onTap: () async {
-                  await setdefaultPShostRemoteAndLocal('github');
-                },
-              ),
-              SpeedDialChild(
-                shape: const CircleBorder(),
-                child: const Icon(
-                  IconData(0x0049),
-                  color: Colors.white,
-                ),
-                backgroundColor: const Color.fromARGB(255, 97, 180, 248),
-                label: 'Imgur',
-                labelStyle: const TextStyle(fontSize: 12.0),
-                onTap: () async {
-                  await setdefaultPShostRemoteAndLocal('imgur');
-                },
-              ),
-              SpeedDialChild(
-                shape: const CircleBorder(),
-                child: const Icon(
-                  IconData(0x0051),
-                  color: Colors.white,
-                ),
-                backgroundColor: const Color.fromARGB(255, 97, 180, 248),
-                label: '七牛',
-                labelStyle: const TextStyle(fontSize: 12.0),
-                onTap: () async {
-                  await setdefaultPShostRemoteAndLocal('qiniu');
-                },
-              ),
-              SpeedDialChild(
-                shape: const CircleBorder(),
-                child: const Icon(
-                  IconData(0x0054),
-                  color: Colors.white,
-                ),
-                backgroundColor: const Color.fromARGB(255, 97, 180, 248),
-                label: '腾讯',
-                labelStyle: const TextStyle(fontSize: 12.0),
-                onTap: () async {
-                  await setdefaultPShostRemoteAndLocal('tencent');
-                },
-              ),
-              SpeedDialChild(
-                shape: const CircleBorder(),
-                child: const Icon(
-                  IconData(0x0041),
-                  color: Colors.white,
-                ),
-                backgroundColor: const Color.fromARGB(255, 97, 180, 248),
-                label: '阿里',
-                labelStyle: const TextStyle(fontSize: 12.0),
-                onTap: () async {
-                  await setdefaultPShostRemoteAndLocal('aliyun');
-                },
-              ),
-              SpeedDialChild(
-                shape: const CircleBorder(),
-                child: const Icon(
-                  IconData(0x0055),
-                  color: Colors.white,
-                ),
-                backgroundColor: const Color.fromARGB(255, 97, 180, 248),
-                label: '又拍',
-                labelStyle: const TextStyle(fontSize: 12.0),
-                onTap: () async {
-                  await setdefaultPShostRemoteAndLocal('upyun');
-                },
-              ),
-            ],
+              ],
+            ),
           ),
+        ],
+      ),
 
-          // This trailing comma makes auto-formatting nicer for build methods.
-          //switch wthin upload and hostconfig
-          bottomNavigationBar: BottomNavigationBar(
-            items: const <BottomNavigationBarItem>[
-              BottomNavigationBarItem(
-                icon: Icon(Icons.file_upload),
-                label: '上传',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.photo_outlined),
-                label: '相册',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.settings),
-                label: '设置',
-              ),
-            ],
-            currentIndex: 0,
-            onTap: (int index) {
-              if (index == 1) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => UploadedImages()),
-                );
-              } else if (index == 2) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => ConfigurePage()),
-                );
-              }
+      floatingActionButton: SpeedDial(
+        renderOverlay: true,
+        overlayOpacity: 0.5,
+        buttonSize: const Size(45, 45),
+        childrenButtonSize: const Size(40, 40),
+        animatedIcon: AnimatedIcons.menu_close,
+        animatedIconTheme: const IconThemeData(size: 33.0),
+        backgroundColor: Colors.blue,
+        visible: true,
+        curve: Curves.bounceIn,
+        children: [
+          SpeedDialChild(
+            shape: const CircleBorder(),
+            child: const Icon(
+              IconData(0x004C),
+              color: Colors.white,
+            ),
+            backgroundColor: const Color.fromARGB(255, 97, 180, 248),
+            label: '兰空',
+            labelStyle: const TextStyle(fontSize: 12.0),
+            onTap: () async {
+              await setdefaultPShostRemoteAndLocal('lsky.pro');
             },
           ),
-
-          //,
-        ));
+          SpeedDialChild(
+            shape: const CircleBorder(),
+            child: const Icon(
+              IconData(0x0053),
+              color: Colors.white,
+            ),
+            backgroundColor: const Color.fromARGB(255, 97, 180, 248),
+            label: 'SM.MS',
+            labelStyle: const TextStyle(fontSize: 12.0),
+            onTap: () async {
+              await setdefaultPShostRemoteAndLocal('sm.ms');
+            },
+          ),
+          SpeedDialChild(
+            shape: const CircleBorder(),
+            child: const Icon(
+              IconData(0x0047),
+              color: Colors.white,
+            ),
+            backgroundColor: const Color.fromARGB(255, 97, 180, 248),
+            label: 'Github',
+            labelStyle: const TextStyle(fontSize: 12.0),
+            onTap: () async {
+              await setdefaultPShostRemoteAndLocal('github');
+            },
+          ),
+          SpeedDialChild(
+            shape: const CircleBorder(),
+            child: const Icon(
+              IconData(0x0049),
+              color: Colors.white,
+            ),
+            backgroundColor: const Color.fromARGB(255, 97, 180, 248),
+            label: 'Imgur',
+            labelStyle: const TextStyle(fontSize: 12.0),
+            onTap: () async {
+              await setdefaultPShostRemoteAndLocal('imgur');
+            },
+          ),
+          SpeedDialChild(
+            shape: const CircleBorder(),
+            child: const Icon(
+              IconData(0x0051),
+              color: Colors.white,
+            ),
+            backgroundColor: const Color.fromARGB(255, 97, 180, 248),
+            label: '七牛',
+            labelStyle: const TextStyle(fontSize: 12.0),
+            onTap: () async {
+              await setdefaultPShostRemoteAndLocal('qiniu');
+            },
+          ),
+          SpeedDialChild(
+            shape: const CircleBorder(),
+            child: const Icon(
+              IconData(0x0054),
+              color: Colors.white,
+            ),
+            backgroundColor: const Color.fromARGB(255, 97, 180, 248),
+            label: '腾讯',
+            labelStyle: const TextStyle(fontSize: 12.0),
+            onTap: () async {
+              await setdefaultPShostRemoteAndLocal('tencent');
+            },
+          ),
+          SpeedDialChild(
+            shape: const CircleBorder(),
+            child: const Icon(
+              IconData(0x0041),
+              color: Colors.white,
+            ),
+            backgroundColor: const Color.fromARGB(255, 97, 180, 248),
+            label: '阿里',
+            labelStyle: const TextStyle(fontSize: 12.0),
+            onTap: () async {
+              await setdefaultPShostRemoteAndLocal('aliyun');
+            },
+          ),
+          SpeedDialChild(
+            shape: const CircleBorder(),
+            child: const Icon(
+              IconData(0x0055),
+              color: Colors.white,
+            ),
+            backgroundColor: const Color.fromARGB(255, 97, 180, 248),
+            label: '又拍',
+            labelStyle: const TextStyle(fontSize: 12.0),
+            onTap: () async {
+              await setdefaultPShostRemoteAndLocal('upyun');
+            },
+          ),
+        ],
+      ),
+    ));
   }
 }

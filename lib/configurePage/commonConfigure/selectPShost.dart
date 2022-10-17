@@ -25,6 +25,9 @@ import 'package:horopic/api/tencent.dart';
 import 'package:crypto/crypto.dart';
 import 'package:horopic/hostconfigure/aliyunconfig.dart';
 import 'package:path/path.dart' as mypath;
+import 'package:horopic/router/application.dart';
+import 'package:horopic/router/routes.dart';
+import 'package:fluro/fluro.dart';
 
 //a configure page for user to show configure entry
 class AllPShost extends StatefulWidget {
@@ -1346,74 +1349,72 @@ class _AllPShostState extends State<AllPShost> {
         ListTile(
           title: const Text('默认图床选择'),
           onTap: () {
-            Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => const defaultPShostSelect()));
+            Application.router.navigateTo(context, Routes.defaultPShostSelect,
+                transition: TransitionType.cupertino);
           },
           trailing: const Icon(Icons.arrow_forward_ios),
         ),
         ListTile(
           title: const Text('兰空图床V2'),
           onTap: () {
-            Navigator.push(context,
-                MaterialPageRoute(builder: (context) => const HostConfig()));
+            Application.router.navigateTo(context, Routes.lskyproPShostSelect,
+                transition: TransitionType.cupertino);
           },
           trailing: const Icon(Icons.arrow_forward_ios),
         ),
         ListTile(
           title: const Text('SM.MS图床'),
           onTap: () {
-            Navigator.push(context,
-                MaterialPageRoute(builder: (context) => const SmmsConfig()));
+            Application.router.navigateTo(context, Routes.smmsPShostSelect,
+                transition: TransitionType.cupertino);
           },
           trailing: const Icon(Icons.arrow_forward_ios),
         ),
         ListTile(
           title: const Text('Github图床'),
           onTap: () {
-            Navigator.push(context,
-                MaterialPageRoute(builder: (context) => const GithubConfig()));
+            Application.router.navigateTo(context, Routes.githubPShostSelect,
+                transition: TransitionType.cupertino);
           },
           trailing: const Icon(Icons.arrow_forward_ios),
         ),
         ListTile(
           title: const Text('Imgur图床（需翻墙）'),
           onTap: () {
-            Navigator.push(context,
-                MaterialPageRoute(builder: (context) => const ImgurConfig()));
+            Application.router.navigateTo(context, Routes.imgurPShostSelect,
+                transition: TransitionType.cupertino);
           },
           trailing: const Icon(Icons.arrow_forward_ios),
         ),
         ListTile(
           title: const Text('七牛云'),
           onTap: () {
-            Navigator.push(context,
-                MaterialPageRoute(builder: (context) => const QiniuConfig()));
+            Application.router.navigateTo(context, Routes.qiniuPShostSelect,
+                transition: TransitionType.cupertino);
           },
           trailing: const Icon(Icons.arrow_forward_ios),
         ),
         ListTile(
           title: const Text('腾讯云COS V5'),
           onTap: () {
-            Navigator.push(context,
-                MaterialPageRoute(builder: (context) => const TencentConfig()));
+            Application.router.navigateTo(context, Routes.tencentPShostSelect,
+                transition: TransitionType.cupertino);
           },
           trailing: const Icon(Icons.arrow_forward_ios),
         ),
         ListTile(
           title: const Text('阿里云OSS'),
           onTap: () {
-            Navigator.push(context,
-                MaterialPageRoute(builder: (context) => const AliyunConfig()));
+            Application.router.navigateTo(context, Routes.aliyunPShostSelect,
+                transition: TransitionType.cupertino);
           },
           trailing: const Icon(Icons.arrow_forward_ios),
         ),
         ListTile(
           title: const Text('又拍云'),
           onTap: () {
-            Navigator.push(context,
-                MaterialPageRoute(builder: (context) => const UpyunConfig()));
+            Application.router.navigateTo(context, Routes.upyunPShostSelect,
+                transition: TransitionType.cupertino);
           },
           trailing: const Icon(Icons.arrow_forward_ios),
         ),
