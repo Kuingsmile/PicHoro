@@ -52,6 +52,12 @@
 
   详细更新日志请查看[更新日志](https://github.com/Kuingsmile/PicHoro/blob/main/Version_update_log.md "更新日志")
 
+
+- 2022-10-17: **V1.76**:
+
+  - 重写了路由管理，优化了路由跳转的体验，修改了跳转动画。
+  - 主页/相册/设置页面现在不会左上角出现返回按钮，更加美观。
+  - 优化了主页在深色主题下的显示效果
 - 2022-10-15: **V1.75**:
 
   - 增加了对阿里云OSS的支持
@@ -108,11 +114,12 @@
 
 **安卓版**：
 
-[https://www.horosama.com/self_apk/PicHoro_V1.7.5.apk](https://www.horosama.com/self_apk/PicHoro_V1.7.5.apk)
+[https://www.horosama.com/self_apk/PicHoro_V1.7.6.apk](https://www.horosama.com/self_apk/PicHoro_V1.7.6.apk)
 
 ## 开发计划
 
 - 增加对各种图床平台的,已完成对PicGo默认支持的7个图床和兰空图床的支持。
+- 增加图床管理功能
 - 增加网络URL上传图片的功能-**已实现**
 - 增加软件更新后保留本地配置的功能-**部分实现，APP内升级可以保留配置**
 - 增加图床仓库管理的功能，增加从相册里删除图片的时候只删除数据库记录的功能-**已实现**
