@@ -140,6 +140,12 @@
       "languageVersion": "2.12"
     },
     {
+      "name": "fluro",
+      "rootUri": "file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/fluro-2.0.3",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
       "name": "flustars_flutter3",
       "rootUri": "file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/flustars_flutter3-3.0.0",
       "packageUri": "lib/",
@@ -728,7 +734,7 @@
       "languageVersion": "2.18"
     }
   ],
-  "generated": "2022-10-15T07:52:11.353454Z",
+  "generated": "2022-10-17T03:06:08.517541Z",
   "generator": "pub",
   "generatorVersion": "2.18.0"
 }
