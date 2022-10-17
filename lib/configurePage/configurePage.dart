@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:horopic/configurePage/commonConfigure/selectPShost.dart';
+import 'package:horopic/pages/homePage.dart';
 import 'package:horopic/utils/common_func.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:horopic/configurePage/others/author.dart';
@@ -210,14 +211,14 @@ class _ConfigurePageState extends State<ConfigurePage> {
         currentIndex: 2,
         onTap: (int index) {
           if (index == 0) {
-            Navigator.pop(context);
-          }else if(index == 1){
             Navigator.push(context,
-                MaterialPageRoute(builder: (context) =>  UploadedImages()));
+                MaterialPageRoute(builder: (context) => const HomePage()));
+          } else if (index == 1) {
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => UploadedImages()));
           }
         },
       ),
-      
     );
   }
 }
