@@ -8,11 +8,15 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:horopic/utils/common_func.dart';
 import 'package:horopic/album/albumSQL.dart';
 import 'dart:io';
+import 'dart:convert';
 import 'package:horopic/configurePage/configurePage.dart';
 import 'package:horopic/album/albumPreview.dart';
 import 'package:horopic/album/LoadStateChanged.dart';
 import 'package:msh_checkbox/msh_checkbox.dart';
 import 'package:horopic/utils/deleter.dart';
+import 'package:horopic/router/application.dart';
+import 'package:horopic/router/routes.dart';
+import 'package:fluro/fluro.dart';
 //一小部分代码参考了开源项目flutter-picgo 项目地址https://github.com/PicGo/flutter-picgo
 
 //show uploaded images
@@ -141,11 +145,14 @@ class _UploadedImagesState extends State<UploadedImages> {
                                     return;
                                   } catch (e) {
                                     //跳转一下
-                                    Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) =>
-                                                UploadedImages()));
+                                    //Navigator.push(
+                                    //  context,
+                                    //   MaterialPageRoute(
+                                    //       builder: (context) =>
+                                    //            UploadedImages()));
+                                    Application.router.navigateTo(
+                                        context, Routes.albumUploadedImages,
+                                        transition: TransitionType.none);
                                     showAlertDialog(
                                         barrierDismissible: true,
                                         context: context,
@@ -214,53 +221,36 @@ class _UploadedImagesState extends State<UploadedImages> {
                   if (Global.defaultShowedPBhost == 'lskypro' ||
                       Global.defaultShowedPBhost == 'github' ||
                       Global.defaultShowedPBhost == 'smms') {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => ImagePreview(
-                                  index: index,
-                                  images: currentShowedImagesUrl,
-                                )));
+                    String urlList = currentShowedImagesUrl.join(',');
+                    Application.router.navigateTo(context,
+                        '${Routes.albumImagePreview}?index=$index&images=${Uri.encodeComponent(urlList)}',
+                        transition: TransitionType.none);
                   } else if (Global.defaultShowedPBhost == 'imgur') {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => ImagePreview(
-                                  index: index,
-                                  images: currentShowedImagesDisplayAddressUrl,
-                                )));
+                    String urlList =
+                        currentShowedImagesDisplayAddressUrl.join(',');
+                    Application.router.navigateTo(context,
+                        '${Routes.albumImagePreview}?index=$index&images=${Uri.encodeComponent(urlList)}',
+                        transition: TransitionType.none);
                   } else if (Global.defaultShowedPBhost == 'qiniu') {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => ImagePreview(
-                                  index: index,
-                                  images: currentShowedImagesUrl,
-                                )));
+                    String urlList = currentShowedImagesUrl.join(',');
+                    Application.router.navigateTo(context,
+                        '${Routes.albumImagePreview}?index=$index&images=${Uri.encodeComponent(urlList)}',
+                        transition: TransitionType.none);
                   } else if (Global.defaultShowedPBhost == 'tencent') {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => ImagePreview(
-                                  index: index,
-                                  images: currentShowedImagesUrl,
-                                )));
+                    String urlList = currentShowedImagesUrl.join(',');
+                    Application.router.navigateTo(context,
+                        '${Routes.albumImagePreview}?index=$index&images=${Uri.encodeComponent(urlList)}',
+                        transition: TransitionType.none);
                   } else if (Global.defaultShowedPBhost == 'aliyun') {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => ImagePreview(
-                                  index: index,
-                                  images: currentShowedImagesUrl,
-                                )));
+                    String urlList = currentShowedImagesUrl.join(',');
+                    Application.router.navigateTo(context,
+                        '${Routes.albumImagePreview}?index=$index&images=${Uri.encodeComponent(urlList)}',
+                        transition: TransitionType.none);
                   } else if (Global.defaultShowedPBhost == 'upyun') {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => ImagePreview(
-                                  index: index,
-                                  images: currentShowedImagesUrl,
-                                )));
+                    String urlList = currentShowedImagesUrl.join(',');
+                    Application.router.navigateTo(context,
+                        '${Routes.albumImagePreview}?index=$index&images=${Uri.encodeComponent(urlList)}',
+                        transition: TransitionType.none);
                   }
                 },
                 onDoubleTap: () =>
@@ -576,34 +566,6 @@ class _UploadedImagesState extends State<UploadedImages> {
                 child: const Icon(Icons.check_circle_outline),
               )),
         ],
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.file_upload),
-            label: '上传',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.photo_outlined),
-            label: '相册',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: '设置',
-          ),
-        ],
-        currentIndex: 1,
-        onTap: (int index) {
-          if (index == 0) {
-            Navigator.push(
-                context, MaterialPageRoute(builder: (context) => HomePage()));
-          } else if (index == 2) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => ConfigurePage()),
-            );
-          }
-        },
       ),
     );
   }

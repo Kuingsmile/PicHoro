@@ -13,6 +13,9 @@ import 'package:horopic/utils/sqlUtils.dart';
 import 'package:horopic/configurePage/others/UpdateLog.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:horopic/album/albumPage.dart';
+import 'package:horopic/router/application.dart';
+import 'package:horopic/router/routes.dart';
+import 'package:fluro/fluro.dart';
 
 //a configure page for user to show configure entry
 class ConfigurePage extends StatefulWidget {
@@ -143,35 +146,32 @@ class _ConfigurePageState extends State<ConfigurePage> {
             title: const Text('用户登录'),
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => const APPPassword()));
+              Application.router.navigateTo(this.context, Routes.appPassword,
+                  transition: TransitionType.cupertino);
             },
           ),
           ListTile(
             title: const Text('图床参数设置'),
             onTap: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => const AllPShost()));
+              Application.router.navigateTo(this.context, Routes.allPShost,
+                  transition: TransitionType.cupertino);
             },
             trailing: const Icon(Icons.arrow_forward_ios),
           ),
           ListTile(
             title: const Text('常规设置'),
             onTap: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const CommonConfig()));
+              Application.router.navigateTo(this.context, Routes.commonConfig,
+                  transition: TransitionType.cupertino);
             },
             trailing: const Icon(Icons.arrow_forward_ios),
           ),
           ListTile(
             title: const Text('联系作者'),
             onTap: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const AuthorInformation()));
+              Application.router.navigateTo(
+                  this.context, Routes.authorInformation,
+                  transition: TransitionType.cupertino);
             },
             trailing: const Icon(Icons.arrow_forward_ios),
           ),
@@ -186,38 +186,12 @@ class _ConfigurePageState extends State<ConfigurePage> {
           ListTile(
             title: const Text('更新日志'),
             onTap: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => const UpdateLog()));
+              Application.router.navigateTo(this.context, Routes.updateLog,
+                  transition: TransitionType.cupertino);
             },
             trailing: const Icon(Icons.arrow_forward_ios),
           ),
         ],
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.file_upload),
-            label: '上传',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.photo_outlined),
-            label: '相册',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: '设置',
-          ),
-        ],
-        currentIndex: 2,
-        onTap: (int index) {
-          if (index == 0) {
-            Navigator.push(context,
-                MaterialPageRoute(builder: (context) => const HomePage()));
-          } else if (index == 1) {
-            Navigator.push(context,
-                MaterialPageRoute(builder: (context) => UploadedImages()));
-          }
-        },
       ),
     );
   }

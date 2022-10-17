@@ -6,6 +6,9 @@ import 'package:horopic/configurePage/commonConfigure/selectLinkFormat.dart';
 import 'package:horopic/album/EmptyDatabase.dart';
 import 'package:horopic/utils/clearcache.dart';
 import 'package:horopic/configurePage/commonConfigure/renameFile.dart';
+import 'package:horopic/router/application.dart';
+import 'package:horopic/router/routes.dart';
+import 'package:fluro/fluro.dart';
 
 class CommonConfig extends StatefulWidget {
   const CommonConfig({Key? key}) : super(key: key);
@@ -33,8 +36,8 @@ class _CommonConfigState extends State<CommonConfig> {
             title: const Text('文件重命名方式选项'),
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => const RenameFile()));
+              Application.router.navigateTo(context, Routes.renameFile,
+                  transition: TransitionType.cupertino);
             },
           ),
           ListTile(
@@ -51,10 +54,8 @@ class _CommonConfigState extends State<CommonConfig> {
             title: const Text('默认复制链接格式'),
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const LinkFormatSelect()));
+              Application.router.navigateTo(context, Routes.linkFormatSelect,
+                  transition: TransitionType.cupertino);
             },
           ),
           ListTile(
@@ -83,8 +84,8 @@ class _CommonConfigState extends State<CommonConfig> {
             title: const Text('主题设置'),
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => const ChangeTheme()));
+              Application.router.navigateTo(context, Routes.changeTheme,
+                  transition: TransitionType.cupertino);
             },
           ),
           ListTile(
@@ -127,8 +128,8 @@ class _CommonConfigState extends State<CommonConfig> {
             subtitle: const Text('只会清空上传记录，不会清空任何图片'),
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => EmptyDatabase()));
+              Application.router.navigateTo(context, Routes.emptyDatabase,
+                  transition: TransitionType.cupertino);
             },
           ),
         ],

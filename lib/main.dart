@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:horopic/configurePage/others/themeSet.dart';
-import 'package:horopic/pages/homePage.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:provider/provider.dart';
 import 'package:horopic/utils/themeProvider.dart';
 import 'package:horopic/utils/permission.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:horopic/router/application.dart';
+import 'package:horopic/router/routes.dart';
+import 'package:fluro/fluro.dart';
 /*
 @Author: Horo
 @e-mail: ma_shiqing@163.com
-@Date: 2022-10-15
+@Date: 2022-10-17
 @Description:PicHoro, a picture upload tool 
-@version: 1.7.5
+@version: 1.7.6
 */
 
 void main() async {
@@ -54,6 +56,10 @@ void main() async {
   Database db = await Global.getDatabase();
   await Global.setDatabase(db);
 
+  //初始化路由
+  FluroRouter router = FluroRouter();
+  Application.router = router;
+  Routes.configureRoutes(router);
   runApp(MyApp());
 }
 
@@ -72,11 +78,19 @@ class _MyAppState extends State<MyApp> {
         ChangeNotifierProvider.value(value: AppInfoProvider()),
       ],
       child: Consumer<AppInfoProvider>(builder: (context, appInfo, child) {
-        return MaterialApp(
+        return  appInfo.themeColor == 'light' ?
+        MaterialApp(
           title: 'PicHoro',
           debugShowCheckedModeBanner: false,
-          theme: appInfo.themeColor == 'light' ? lightThemeData : darkThemeData,
-          home: const HomePage(),
+          theme: lightThemeData,
+          initialRoute: '/',
+          onGenerateRoute: Application.router.generator,
+        ) : MaterialApp(
+          title: 'PicHoro',
+          debugShowCheckedModeBanner: false,
+          theme: darkThemeData,
+          initialRoute: '/',
+          onGenerateRoute: Application.router.generator,
         );
       }),
     );
