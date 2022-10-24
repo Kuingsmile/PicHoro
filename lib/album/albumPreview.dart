@@ -27,7 +27,7 @@ class _ImagePreviewState extends State<ImagePreview> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('图片预览'),
+        title: const Text('图片预览'),
       ),
       body: PageView.builder(
         controller: _pageController,
