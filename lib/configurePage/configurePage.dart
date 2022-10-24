@@ -1,21 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:horopic/configurePage/commonConfigure/selectPShost.dart';
-import 'package:horopic/pages/homePage.dart';
-import 'package:horopic/utils/common_func.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:horopic/configurePage/others/author.dart';
-import 'package:horopic/main.dart';
-import 'package:horopic/configurePage/commonConfigure/commonConfig.dart';
-import 'package:horopic/configurePage/userManage/APPpassword.dart';
 import 'package:horopic/utils/permission.dart';
 import 'package:r_upgrade/r_upgrade.dart';
 import 'package:horopic/utils/sqlUtils.dart';
-import 'package:horopic/configurePage/others/UpdateLog.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:horopic/album/albumPage.dart';
 import 'package:horopic/router/application.dart';
 import 'package:horopic/router/routes.dart';
 import 'package:fluro/fluro.dart';
+import 'package:flutter/cupertino.dart';
 
 //a configure page for user to show configure entry
 class ConfigurePage extends StatefulWidget {
@@ -66,25 +58,27 @@ class _ConfigurePageState extends State<ConfigurePage> {
   }
 
   _showUpdateDialog(String version, String remoteVersion) {
-    showDialog(
+    showCupertinoDialog(
         barrierDismissible: true,
         context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: Text('发现新版本$remoteVersion'),
-            content: Text('当前版本$version'),
-            actions: [
-              TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: Text('取消')),
-              TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    _update(remoteVersion);
-                  },
-                  child: Text('更新')),
+        builder: (BuildContext context) {
+          return CupertinoAlertDialog(
+            title: const Text('通知'),
+            content: Text('发现新版本$remoteVersion 当前版本$version'),
+            actions: <Widget>[
+              CupertinoDialogAction(
+                child: const Text('取消', style: TextStyle(color: Colors.blue)),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+              CupertinoDialogAction(
+                child: const Text('确定', style: TextStyle(color: Colors.blue)),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  _update(remoteVersion);
+                },
+              )
             ],
           );
         });
@@ -143,7 +137,9 @@ class _ConfigurePageState extends State<ConfigurePage> {
             ),
           ),
           ListTile(
-            title: const Text('用户登录'),
+            title: const Text(
+              '用户登录',
+            ),
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () {
               Application.router.navigateTo(this.context, Routes.appPassword,
