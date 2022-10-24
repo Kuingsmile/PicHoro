@@ -1,9 +1,8 @@
-import 'package:flutter/material.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-import 'package:path_provider/path_provider.dart';
 import 'dart:io';
+import 'package:external_path/external_path.dart';
 
 //所有的数据库的图床表名
 List<String> allPBhost = [
@@ -56,8 +55,10 @@ class AlbumSQL {
   }
 
   static initDB(String username) async {
-    var externalDirectoryPath = await getExternalStorageDirectory();
-    var persistPath = '${externalDirectoryPath!.path}/horoDB';
+    var externalDirectoryPath =
+        await ExternalPath.getExternalStoragePublicDirectory(
+            ExternalPath.DIRECTORY_DOWNLOADS);
+    var persistPath = '$externalDirectoryPath/PicHoro/Database';
     if (!await Directory(persistPath).exists()) {
       await Directory(persistPath).create(recursive: true);
     }
@@ -155,13 +156,13 @@ class AlbumSQL {
     return allTableData;
   }
 
-  static EmptyAllTable(Database db) async {
+  static emptyAllTable(Database db) async {
     for (var i = 0; i < allPBhost.length; i++) {
       await db.delete(allPBhost[i]);
     }
   }
 
-  static DeleteTable(Database db, String tableName) async {
+  static deleteTable(Database db, String tableName) async {
     await db.delete(tableName);
   }
 
