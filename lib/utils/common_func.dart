@@ -89,8 +89,8 @@ showAlertDialog({
 }
 
 //底部选择框
-void bottomPickerSheet(BuildContext context, Function _imageFromCamera,
-    Function _imageFromGallery) {
+void bottomPickerSheet(
+    BuildContext context, Function imageFromCamera, Function imageFromGallery) {
   showModalBottomSheet(
       context: context,
       builder: (BuildContext bc) {
@@ -101,7 +101,7 @@ void bottomPickerSheet(BuildContext context, Function _imageFromCamera,
               leading: const Icon(Icons.photo_camera),
               title: const Text('拍照'),
               onTap: () {
-                _imageFromCamera();
+                imageFromCamera();
                 Navigator.pop(context);
               },
             ),
@@ -109,7 +109,7 @@ void bottomPickerSheet(BuildContext context, Function _imageFromCamera,
               leading: const Icon(Icons.photo_library),
               title: const Text('相册'),
               onTap: () {
-                _imageFromGallery();
+                imageFromGallery();
                 Navigator.pop(context);
               },
             )
@@ -235,4 +235,38 @@ String generateCustomFormatedUrl(String url, String filename) {
       .replaceAll(r'$fileName', fileName)
       .replaceAll(r'$url', rawUrl);
   return customFormatedUrl;
+}
+
+//计算文件大小
+String getFileSize(int fileSize) {
+  String str = '';
+
+  if (fileSize < 1024) {
+    str = '${fileSize}B';
+  } else if (fileSize < 1024 * 1024) {
+    str = '${(fileSize / 1024).toStringAsFixed(2)}KB';
+  } else if (fileSize < 1024 * 1024 * 1024) {
+    str = '${(fileSize / 1024 / 1024).toStringAsFixed(2)}MB';
+  } else {
+    str = '${(fileSize / 1024 / 1024 / 1024).toStringAsFixed(2)}GB';
+  }
+  return str;
+}
+
+//选择文件图标
+String selectIcon(String ext) {
+  if (ext == '') {
+    return 'assets/icons/unknown.png';
+  } else {
+    String extNoDot = ext.substring(1);
+    String iconPath = 'assets/icons/';
+    if (extNoDot == '') {
+      iconPath += '_blank.png';
+    } else if (Global.iconList.contains(extNoDot)) {
+      iconPath += '$extNoDot.png';
+    } else {
+      iconPath += 'unknown.png';
+    }
+    return iconPath;
+  }
 }
