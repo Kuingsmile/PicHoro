@@ -1,16 +1,12 @@
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 import 'package:horopic/utils/global.dart';
-import 'package:horopic/pages/homePage.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter/services.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:horopic/utils/common_func.dart';
 import 'package:horopic/album/albumSQL.dart';
 import 'dart:io';
-import 'dart:convert';
-import 'package:horopic/configurePage/configurePage.dart';
-import 'package:horopic/album/albumPreview.dart';
 import 'package:horopic/album/LoadStateChanged.dart';
 import 'package:msh_checkbox/msh_checkbox.dart';
 import 'package:horopic/utils/deleter.dart';
@@ -67,7 +63,11 @@ class _UploadedImagesState extends State<UploadedImages> {
     return Scaffold(
       appBar: AppBar(
           title: Text(
-              '${nameToPara[Global.defaultShowedPBhost]}相册 - 第${_currentPage + 1}页'),
+              '${nameToPara[Global.defaultShowedPBhost]}相册 - 第${_currentPage + 1}页',
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              )),
           centerTitle: true,
           actions: [
             IconButton(
@@ -144,12 +144,6 @@ class _UploadedImagesState extends State<UploadedImages> {
                                         msg: '删除完成');
                                     return;
                                   } catch (e) {
-                                    //跳转一下
-                                    //Navigator.push(
-                                    //  context,
-                                    //   MaterialPageRoute(
-                                    //       builder: (context) =>
-                                    //            UploadedImages()));
                                     Application.router.navigateTo(
                                         context, Routes.albumUploadedImages,
                                         transition: TransitionType.none);
@@ -188,7 +182,7 @@ class _UploadedImagesState extends State<UploadedImages> {
       body: SmartRefresher(
           enablePullDown: true,
           enablePullUp: showedImageUrl.length > _perPageItemSize,
-          header: ClassicHeader(
+          header: const ClassicHeader(
             refreshStyle: RefreshStyle.Follow,
             idleText: '下拉刷新',
             refreshingText: '正在刷新',
@@ -196,7 +190,7 @@ class _UploadedImagesState extends State<UploadedImages> {
             failedText: '刷新失败',
             releaseText: '释放刷新',
           ),
-          footer: ClassicFooter(
+          footer: const ClassicFooter(
             loadStyle: LoadStyle.ShowWhenLoading,
             idleText: '上拉加载',
             loadingText: '正在加载',
@@ -208,8 +202,8 @@ class _UploadedImagesState extends State<UploadedImages> {
           onRefresh: _onRefresh,
           onLoading: _onLoading,
           child: GridView.builder(
-            padding: EdgeInsets.all(2),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            padding: const EdgeInsets.all(2),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 3,
                 //mainAxisSpacing: 10,
                 // crossAxisSpacing: 10,
@@ -263,7 +257,7 @@ class _UploadedImagesState extends State<UploadedImages> {
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    Container(
+                    SizedBox(
                       height: 150,
                       child: Card(
                         clipBehavior: Clip.antiAlias,
@@ -282,7 +276,8 @@ class _UploadedImagesState extends State<UploadedImages> {
                                   ? Colors.red
                                   : Colors.transparent,
                               width: 2),
-                          borderRadius: BorderRadius.all(Radius.circular(8)),
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(8)),
                           loadStateChanged: (state) =>
                               defaultLoadStateChanged(state, iconSize: 30),
                         ),
@@ -291,7 +286,7 @@ class _UploadedImagesState extends State<UploadedImages> {
                     Positioned(
                       // ignore: sort_child_properties_last
                       child: Container(
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                             borderRadius: BorderRadius.all(Radius.circular(35)),
                             color: Color.fromARGB(255, 199, 208, 216)),
                         padding: const EdgeInsets.fromLTRB(5, 5, 5, 5),
@@ -324,7 +319,7 @@ class _UploadedImagesState extends State<UploadedImages> {
       floatingActionButton: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Container(
+          SizedBox(
               height: 40,
               width: 40,
               child: FloatingActionButton(
@@ -434,7 +429,7 @@ class _UploadedImagesState extends State<UploadedImages> {
                 ),
               )),
           const SizedBox(width: 10),
-          Container(
+          SizedBox(
               height: 40,
               width: 40,
               child: FloatingActionButton(
@@ -460,7 +455,7 @@ class _UploadedImagesState extends State<UploadedImages> {
                 ),
               )),
           const SizedBox(width: 10),
-          Container(
+          SizedBox(
               height: 40,
               width: 40,
               child: FloatingActionButton(
@@ -525,7 +520,7 @@ class _UploadedImagesState extends State<UploadedImages> {
                 child: const Icon(Icons.copy),
               )),
           const SizedBox(width: 10),
-          Container(
+          SizedBox(
               height: 40,
               width: 40,
               child: FloatingActionButton(
