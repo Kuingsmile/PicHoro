@@ -320,8 +320,9 @@ class _TencentConfigState extends State<TencentConfig> {
       });
       baseoptions.headers = {
         'Host': host,
-        'Content-Type': 'multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW',
-        'Content-Length':  contentLength,
+        'Content-Type':
+            'multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW',
+        'Content-Length': contentLength,
       };
       Dio dio = Dio(baseoptions);
       var response = await dio.post(
@@ -424,7 +425,7 @@ class _TencentConfigState extends State<TencentConfig> {
         'q-signature': singature,
         'file': await MultipartFile.fromFile(assetFilePath, filename: key),
       });
-    
+
       BaseOptions baseoptions = BaseOptions(
         //连接服务器超时时间，单位是毫秒.
         connectTimeout: 30000,
@@ -437,8 +438,9 @@ class _TencentConfigState extends State<TencentConfig> {
       });
       baseoptions.headers = {
         'Host': host,
-        'Content-Type': 'multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW',
-        'Content-Length':  contentLength,
+        'Content-Type':
+            'multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW',
+        'Content-Length': contentLength,
       };
       Dio dio = Dio(baseoptions);
       var response = await dio.post(

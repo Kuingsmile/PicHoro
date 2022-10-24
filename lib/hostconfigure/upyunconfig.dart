@@ -9,7 +9,6 @@ import 'package:horopic/pages/loading.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:horopic/utils/sqlUtils.dart';
 import 'package:horopic/utils/global.dart';
-import 'package:horopic/api/upyun.dart';
 import 'package:path/path.dart' as mypath;
 
 import 'package:crypto/crypto.dart';

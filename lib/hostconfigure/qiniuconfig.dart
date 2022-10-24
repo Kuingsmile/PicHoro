@@ -11,9 +11,7 @@ import 'package:horopic/utils/sqlUtils.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/api/qiniu.dart';
 import 'package:qiniu_flutter_sdk/qiniu_flutter_sdk.dart';
-import 'package:image_picker/image_picker.dart';
 
-//a textfield to get hosts,username,passwd,token and strategy_id
 class QiniuConfig extends StatefulWidget {
   const QiniuConfig({Key? key}) : super(key: key);
 
@@ -194,12 +192,18 @@ class _QiniuConfigState extends State<QiniuConfig> {
 
       if (_optionsController.text.isNotEmpty) {
         options = _optionsController.text;
+        if (!options.startsWith('?')) {
+          options = '?$options';
+        }
       } else {
         options = 'None';
       }
-      
+
       if (!url.startsWith('http') && !url.startsWith('https')) {
         url = 'http://$url';
+      }
+      if (url.endsWith('/')) {
+        url = url.substring(0, url.length - 1);
       }
 
       String path = '';
@@ -227,7 +231,7 @@ class _QiniuConfigState extends State<QiniuConfig> {
       sqlconfig.add(defaultUser);
       var queryQiniu = await MySqlUtils.queryQiniu(username: defaultUser);
       var queryuser = await MySqlUtils.queryUser(username: defaultUser);
-      
+
       if (queryuser == 'Empty') {
         return showAlertDialog(
             context: context, title: '错误', content: '用户不存在,请先登录');
@@ -260,7 +264,7 @@ class _QiniuConfigState extends State<QiniuConfig> {
       ));
       PutResponse putresult =
           await storage.putFile(File(assetFilePath), uploadToken);
-        
+
       if (putresult.key == key || putresult.key == '$path$key') {
         var sqlResult = '';
 
@@ -269,7 +273,7 @@ class _QiniuConfigState extends State<QiniuConfig> {
         } else {
           sqlResult = await MySqlUtils.updateQiniu(content: sqlconfig);
         }
-  
+
         if (sqlResult == "Success") {
           final qiniuConfig = QiniuConfigModel(
               accessKey, secretKey, bucket, url, area, options, path);
@@ -318,10 +322,18 @@ class _QiniuConfigState extends State<QiniuConfig> {
         await assetFile.writeAsBytes(bytes);
       }
       String key = 'PicHoroValidate.jpeg';
-
+      String qiniupath = configMap['path'];
+      if (qiniupath != 'None') {
+        if (qiniupath.startsWith('/')) {
+          qiniupath = qiniupath.substring(1);
+        }
+        if (!qiniupath.endsWith('/')) {
+          qiniupath = '$qiniupath/';
+        }
+      }
       String urlSafeBase64EncodePutPolicy =
           QiniuImageUploadUtils.geturlSafeBase64EncodePutPolicy(
-              configMap['bucket'], key, configMap['path']);
+              configMap['bucket'], key, qiniupath);
       String uploadToken = QiniuImageUploadUtils.getUploadToken(
           configMap['accessKey'],
           configMap['secretKey'],

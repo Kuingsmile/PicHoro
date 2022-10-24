@@ -3,14 +3,14 @@ import 'package:horopic/utils/global.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:horopic/utils/sqlUtils.dart';
 
-class defaultPShostSelect extends StatefulWidget {
-  const defaultPShostSelect({Key? key}) : super(key: key);
+class DefaultPShostSelect extends StatefulWidget {
+  const DefaultPShostSelect({Key? key}) : super(key: key);
 
   @override
-  _defaultPShostSelectState createState() => _defaultPShostSelectState();
+  _DefaultPShostSelectState createState() => _DefaultPShostSelectState();
 }
 
-class _defaultPShostSelectState extends State<defaultPShostSelect> {
+class _DefaultPShostSelectState extends State<DefaultPShostSelect> {
   @override
   void initState() {
     super.initState();
@@ -23,6 +23,8 @@ class _defaultPShostSelectState extends State<defaultPShostSelect> {
     'imgur',
     'qiniu',
     'tencent',
+    'aliyun',
+    'upyun',
   ];
 
   @override
@@ -93,6 +95,26 @@ class _defaultPShostSelectState extends State<defaultPShostSelect> {
               setState(() {});
             },
           ),
+          ListTile(
+            title: const Text('阿里云'),
+            trailing: Global.defaultPShost == 'aliyun'
+                ? const Icon(Icons.check)
+                : null,
+            onTap: () async {
+              await setdefaultPShostRemoteAndLocal('aliyun');
+              setState(() {});
+            },
+          ),
+          ListTile(
+            title: const Text('又拍云'),
+            trailing: Global.defaultPShost == 'upyun'
+                ? const Icon(Icons.check)
+                : null,
+            onTap: () async {
+              await setdefaultPShostRemoteAndLocal('upyun');
+              setState(() {});
+            },
+          ),
         ],
       ),
     );
@@ -108,6 +130,8 @@ setdefaultPShostRemoteAndLocal(String psHost) async {
     'imgur': MySqlUtils.queryImgur,
     'qiniu': MySqlUtils.queryQiniu,
     'tencent': MySqlUtils.queryTencent,
+    'aliyun': MySqlUtils.queryAliyun,
+    'upyun': MySqlUtils.queryUpyun,
   };
 
   try {
@@ -157,6 +181,10 @@ setdefaultPShostRemoteAndLocal(String psHost) async {
         await Global.setShowedPBhost('qiniu');
       } else if (psHost == 'tencent') {
         await Global.setShowedPBhost('tencent');
+      } else if (psHost == 'aliyun') {
+        await Global.setShowedPBhost('aliyun');
+      } else if (psHost == 'upyun') {
+        await Global.setShowedPBhost('upyun');
       }
       return Fluttertoast.showToast(
           msg: "已经是默认配置",
@@ -185,6 +213,10 @@ setdefaultPShostRemoteAndLocal(String psHost) async {
           await Global.setShowedPBhost('qiniu');
         } else if (psHost == 'tencent') {
           await Global.setShowedPBhost('tencent');
+        } else if (psHost == 'aliyun') {
+          await Global.setShowedPBhost('aliyun');
+        } else if (psHost == 'upyun') {
+          await Global.setShowedPBhost('upyun');
         }
         Fluttertoast.showToast(
             msg: "已设置$psHost为默认图床",

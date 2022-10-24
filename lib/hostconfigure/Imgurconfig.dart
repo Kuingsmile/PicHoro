@@ -10,7 +10,6 @@ import 'package:horopic/utils/sqlUtils.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:dio_proxy_adapter/dio_proxy_adapter.dart';
 
-//a textfield to get hosts,username,passwd,token and strategy_id
 class ImgurConfig extends StatefulWidget {
   const ImgurConfig({Key? key}) : super(key: key);
 
@@ -26,6 +25,7 @@ class _ImgurConfigState extends State<ImgurConfig> {
   @override
   void dispose() {
     _clientIdController.dispose();
+    _proxyController.dispose();
     super.dispose();
   }
 
@@ -135,9 +135,10 @@ class _ImgurConfigState extends State<ImgurConfig> {
 
       BaseOptions options = BaseOptions(
         //连接服务器超时时间，单位是毫秒.
-        connectTimeout:  10000,
+        connectTimeout: 30000,
         //响应超时时间。
-        receiveTimeout: 10000,
+        receiveTimeout: 30000,
+        sendTimeout: 30000,
       );
       options.headers = {
         "Authorization": "Client-ID $clientId",
@@ -203,10 +204,10 @@ class _ImgurConfigState extends State<ImgurConfig> {
 
       BaseOptions options = BaseOptions(
         //连接服务器超时时间，单位是毫秒.
-        connectTimeout:  10000,
+        connectTimeout: 30000,
         //响应超时时间。
-        receiveTimeout: 10000,
-
+        receiveTimeout: 30000,
+        sendTimeout: 30000,
       );
       options.headers = {
         "Authorization": "Client-ID ${configMap['clientId']}",

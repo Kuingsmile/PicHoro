@@ -155,9 +155,10 @@ class _HostConfigState extends State<HostConfig> {
     final passwd = _passwdController.text;
     BaseOptions options = BaseOptions(
       //连接服务器超时时间，单位是毫秒.
-        connectTimeout:  10000,
-        //响应超时时间。
-        receiveTimeout: 10000,
+      connectTimeout: 30000,
+      //响应超时时间。
+      receiveTimeout: 30000,
+      sendTimeout: 30000,
     );
     options.headers = {
       "Accept": "application/json",
@@ -177,10 +178,11 @@ class _HostConfigState extends State<HostConfig> {
         token = token + response.data['data']['token'].toString();
         String strategiesUrl = '$host/api/v1/strategies';
         BaseOptions strategiesOptions = BaseOptions(
-            //连接服务器超时时间，单位是毫秒.
-      connectTimeout: 10000,
-      //响应超时时间。
-      receiveTimeout: 10000,
+          //连接服务器超时时间，单位是毫秒.
+          connectTimeout: 30000,
+          //响应超时时间。
+          receiveTimeout: 30000,
+          sendTimeout: 30000,
         );
         strategiesOptions.headers = {
           "Accept": "application/json",
@@ -227,9 +229,10 @@ class _HostConfigState extends State<HostConfig> {
     final strategyId = _strategyIdController.text;
     BaseOptions options = BaseOptions(
       //连接服务器超时时间，单位是毫秒.
-        connectTimeout:  10000,
-        //响应超时时间。
-        receiveTimeout: 10000,
+      connectTimeout: 30000,
+      //响应超时时间。
+      receiveTimeout: 30000,
+      sendTimeout: 30000,
     );
     options.headers = {
       "Accept": "application/json",
@@ -325,9 +328,10 @@ class _HostConfigState extends State<HostConfig> {
       Map configMap = jsonDecode(configData);
       BaseOptions options = BaseOptions(
         //连接服务器超时时间，单位是毫秒.
-        connectTimeout:  10000,
+        connectTimeout: 30000,
         //响应超时时间。
-        receiveTimeout: 10000,
+        receiveTimeout: 30000,
+        sendTimeout: 30000,
       );
       options.headers = {
         "Authorization": configMap["token"],

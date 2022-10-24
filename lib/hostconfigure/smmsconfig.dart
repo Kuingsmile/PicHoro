@@ -9,7 +9,6 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:horopic/utils/sqlUtils.dart';
 import 'package:horopic/utils/global.dart';
 
-//a textfield to get hosts,username,passwd,token and strategy_id
 class SmmsConfig extends StatefulWidget {
   const SmmsConfig({Key? key}) : super(key: key);
 
@@ -107,9 +106,10 @@ class _SmmsConfigState extends State<SmmsConfig> {
       // String validateURL = "https://sm.ms/api/v2/profile";被墙了
       BaseOptions options = BaseOptions(
         //连接服务器超时时间，单位是毫秒.
-        connectTimeout: 10000,
+        connectTimeout: 30000,
         //响应超时时间。
-        receiveTimeout: 10000,
+        receiveTimeout: 30000,
+        sendTimeout: 30000,
       );
       options.headers = {
         "Content-Type": 'multipart/form-data',
@@ -164,9 +164,10 @@ class _SmmsConfigState extends State<SmmsConfig> {
       Map configMap = jsonDecode(configData);
       BaseOptions options = BaseOptions(
         //连接服务器超时时间，单位是毫秒.
-        connectTimeout: 10000,
+        connectTimeout: 30000,
         //响应超时时间。
-        receiveTimeout: 10000,
+        receiveTimeout: 30000,
+        sendTimeout: 30000,
       );
       options.headers = {
         "Authorization": configMap["token"],

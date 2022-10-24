@@ -33,7 +33,8 @@ class _GithubConfigState extends State<GithubConfig> {
     _repoController.dispose();
     _tokenController.dispose();
     _storePathController.dispose();
-
+    _branchController.dispose();
+    _customDomainController.dispose();
     super.dispose();
   }
 
@@ -77,7 +78,6 @@ class _GithubConfigState extends State<GithubConfig> {
             ),
             TextFormField(
               controller: _tokenController,
-              obscureText: true,
               decoration: const InputDecoration(
                 label: Center(child: Text('token')),
                 hintText: '设定Token',
@@ -164,7 +164,11 @@ class _GithubConfigState extends State<GithubConfig> {
       storePath = 'None';
     } else {
       storePath = _storePathController.text;
+      if (!storePath.endsWith('/')) {
+        storePath = '$storePath/';
+      }
     }
+
     String branch = '';
     if (_branchController.text.isEmpty) {
       branch = 'main';
@@ -176,6 +180,13 @@ class _GithubConfigState extends State<GithubConfig> {
       customDomain = 'None';
     } else {
       customDomain = _customDomainController.text;
+      if (!customDomain.startsWith('http') &&
+          !customDomain.startsWith('https')) {
+        customDomain = 'http://$customDomain';
+      }
+      if (customDomain.endsWith('/')) {
+        customDomain = customDomain.substring(0, customDomain.length - 1);
+      }
     }
 
     if (_tokenController.text.startsWith('Bearer ')) {
@@ -205,9 +216,10 @@ class _GithubConfigState extends State<GithubConfig> {
       }
       BaseOptions options = BaseOptions(
         //连接服务器超时时间，单位是毫秒.
-        connectTimeout: 10000,
+        connectTimeout: 30000,
         //响应超时时间。
-        receiveTimeout: 10000,
+        receiveTimeout: 30000,
+        sendTimeout: 30000,
       );
       options.headers = {
         "Accept": 'application/vnd.github+json',
@@ -267,9 +279,10 @@ class _GithubConfigState extends State<GithubConfig> {
       Map configMap = jsonDecode(configData);
       BaseOptions options = BaseOptions(
         //连接服务器超时时间，单位是毫秒.
-        connectTimeout: 10000,
+        connectTimeout: 30000,
         //响应超时时间。
-        receiveTimeout: 10000,
+        receiveTimeout: 30000,
+        sendTimeout: 30000,
       );
       options.headers = {
         "Authorization": configMap["token"],
