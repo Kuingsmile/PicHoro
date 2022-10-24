@@ -18,10 +18,9 @@ class AuthorInformation extends StatelessWidget {
                 'assets/wechat_author.jpg',
                 width: 400,
                 height: 300,
-                
               ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Center(
               child: Image.asset(
                 'assets/qq_author.jpg',

@@ -37,7 +37,7 @@ final ThemeData lightThemeData = ThemeData(
   brightness: Brightness.light,
   primarySwatch: light,
   primaryColor: Colors.orange,
-  fontFamily: "iconfont", 
+  fontFamily: "iconfont",
 );
 
 final ThemeData darkThemeData = ThemeData(

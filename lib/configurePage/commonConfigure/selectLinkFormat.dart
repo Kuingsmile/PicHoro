@@ -19,7 +19,8 @@ class _LinkFormatSelectState extends State<LinkFormatSelect> {
     'html',
     'BBcode',
     'markdown',
-    'markdown_with_link'
+    'markdown_with_link',
+    'custom'
   ];
 
   @override
@@ -102,13 +103,6 @@ class _LinkFormatSelectState extends State<LinkFormatSelect> {
                 ),
                 onChanged: (String value) async {
                   await Global.setCustomLinkFormat(value);
-                },
-                validator: (String? value) {
-                  if (!value!.contains(r'$url') &&
-                      !value.contains(r'$fileName')) {
-                    return '格式错误';
-                  }
-                  return null;
                 },
               ),
             ],

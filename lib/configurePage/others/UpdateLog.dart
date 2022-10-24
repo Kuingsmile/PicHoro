@@ -41,4 +41,3 @@ class _UpdateLogState extends State<UpdateLog> {
     );
   }
 }
-

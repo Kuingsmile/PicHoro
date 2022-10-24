@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:horopic/hostconfigure/lskyproconfig.dart';
 import 'package:horopic/hostconfigure/smmsconfig.dart';
-import 'package:horopic/hostconfigure/PShostSelect.dart';
 import 'package:horopic/hostconfigure/githubconfig.dart';
 import 'package:horopic/hostconfigure/tencentconfig.dart';
 import 'package:horopic/hostconfigure/upyunconfig.dart';
-import 'package:horopic/utils/common_func.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'dart:convert';
