@@ -74,6 +74,10 @@ class GithubImageUploadUtils {
         } else {
           downloadUrl = response.data!['content']['download_url'];
         }
+        if (!downloadUrl.startsWith('http') &&
+            !downloadUrl.startsWith('https')) {
+          downloadUrl = 'http://$downloadUrl';
+        }
         //复制的链接地址应该是downloadUrl
         if (Global.isCopyLink == true) {
           formatedURL =

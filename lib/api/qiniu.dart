@@ -74,9 +74,7 @@ class QiniuImageUploadUtils {
     }
 
     signStr += '\n\n';
-    if (contentType != 'application/octet-stream' &&
-        body != null &&
-        body.isNotEmpty) {
+    if (contentType != 'application/octet-stream' && body.isNotEmpty) {
       signStr += body;
     }
     // 使用SecertKey对上一步生成的原始字符串计算HMAC-SHA1签名：
@@ -102,12 +100,18 @@ class QiniuImageUploadUtils {
     if (!url.startsWith('http') && !url.startsWith('https')) {
       url = 'http://$url';
     }
-
-    if (qiniupath.startsWith('/')) {
-      qiniupath = qiniupath.substring(1);
+    if (url.endsWith('/')) {
+      url = url.substring(0, url.length - 1);
     }
-    if (!qiniupath.endsWith('/')) {
-      qiniupath = '$qiniupath/';
+
+    //不为None才处理
+    if (qiniupath != 'None') {
+      if (qiniupath.startsWith('/')) {
+        qiniupath = qiniupath.substring(1);
+      }
+      if (!qiniupath.endsWith('/')) {
+        qiniupath = '$qiniupath/';
+      }
     }
     String key = name;
 
@@ -123,14 +127,17 @@ class QiniuImageUploadUtils {
       ));
       var uploadResult = await storage.putFile(File(path), uploadToken);
 
-
       if (uploadResult.key == key || uploadResult.key == '$qiniupath$key') {
         String returnUrl = '';
         String displayUrl = '';
+
         if (options == 'None') {
           returnUrl = '$url/${uploadResult.key}';
           displayUrl = '$url/${uploadResult.key}?imageView2/2/w/500/h/500';
         } else {
+          if (!options.startsWith('?')) {
+            options = '?$options';
+          }
           returnUrl = '$url/${uploadResult.key}$options';
           displayUrl = '$url/${uploadResult.key}$options';
         }
@@ -143,6 +150,8 @@ class QiniuImageUploadUtils {
         }
         String pictureKey = 'None';
         return ["success", formatedURL, returnUrl, pictureKey, displayUrl];
+      } else {
+        return ['failed'];
       }
     } catch (e) {
       return [e.toString()];

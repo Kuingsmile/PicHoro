@@ -116,6 +116,8 @@ class UpyunImageUploadUtils {
         }
         String pictureKey = 'None';
         return ["success", formatedURL, returnUrl, pictureKey, displayUrl];
+      } else {
+        return ['failed'];
       }
     } catch (e) {
       return [e.toString()];

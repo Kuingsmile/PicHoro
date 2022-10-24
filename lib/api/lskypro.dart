@@ -14,9 +14,9 @@ class LskyproImageUploadUtils {
       "file": await MultipartFile.fromFile(path, filename: name),
     });
     if (configMap["strategy_id"] == "None") {
-       formdata = FormData.fromMap({});
+      formdata = FormData.fromMap({});
     } else {
-       formdata = FormData.fromMap({
+      formdata = FormData.fromMap({
         "file": await MultipartFile.fromFile(path, filename: name),
         "strategy_id": configMap["strategy_id"],
       });
@@ -24,10 +24,10 @@ class LskyproImageUploadUtils {
 
     BaseOptions options = BaseOptions(
       //连接服务器超时时间，单位是毫秒.
-        connectTimeout:  30000,
-        //响应超时时间。
-        receiveTimeout: 30000,
-        sendTimeout: 30000,
+      connectTimeout: 30000,
+      //响应超时时间。
+      receiveTimeout: 30000,
+      sendTimeout: 30000,
     );
     options.headers = {
       "Authorization": configMap["token"],
@@ -36,7 +36,7 @@ class LskyproImageUploadUtils {
     };
     Dio dio = Dio(options);
     String uploadUrl = configMap["host"] + "/api/v1/upload";
-    
+
     try {
       var response = await dio.post(uploadUrl, data: formdata);
       if (response.statusCode == 200 && response.data!['status'] == true) {
@@ -66,10 +66,10 @@ class LskyproImageUploadUtils {
     };
     BaseOptions options = BaseOptions(
       //连接服务器超时时间，单位是毫秒.
-        connectTimeout:  30000,
-        //响应超时时间。
-        receiveTimeout: 30000,
-        sendTimeout: 30000,
+      connectTimeout: 30000,
+      //响应超时时间。
+      receiveTimeout: 30000,
+      sendTimeout: 30000,
     );
     options.headers = {
       "Authorization": configMap["token"],
