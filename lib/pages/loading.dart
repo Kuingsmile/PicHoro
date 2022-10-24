@@ -1,6 +1,7 @@
 // 参考: https://blog.csdn.net/O_time/article/details/86496537
 
 import 'package:flutter/material.dart';
+import 'package:horopic/utils/global.dart';
 
 // ignore: must_be_immutable
 class NetLoadingDialog extends StatefulWidget {
@@ -29,6 +30,7 @@ class _LoadingDialog extends State<NetLoadingDialog> {
     if (widget.requestCallBack != null) {
       widget.requestCallBack.then((_) {
         _;
+        Global.operateDone = true;
         Navigator.pop(context);
       }).catchError((_) {
         Navigator.pop(context);
