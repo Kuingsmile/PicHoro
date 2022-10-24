@@ -69,7 +69,6 @@ deleterentry(Map deleteConfig) async {
   Map configMap = jsonDecode(configData);
   //获取用户设置的默认图床
   String defaultConfig = await Global.getShowedPBhost();
-
   //调用对应图床的删除接口
   try {
     var result = await deleteFunc[defaultConfig]!(
