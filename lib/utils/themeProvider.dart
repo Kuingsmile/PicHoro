@@ -1,13 +1,23 @@
-import 'package:provider/provider.dart';
 import 'package:flustars_flutter3/flustars_flutter3.dart';
 import 'package:flutter/material.dart';
-import 'package:horopic/pages/themeSet.dart';
 
 class AppInfoProvider with ChangeNotifier {
   String _themeColor = '';
   String get themeColor => _themeColor;
   String _key_theme_color = ' ';
   String get key_theme_color => _key_theme_color;
+
+  AppInfoProvider() {
+    _initAsync();
+  }
+
+  Future<void> _initAsync() async {
+    await SpUtil.getInstance();
+    String colorset = SpUtil.getString('key_theme_color', defValue: 'light')!;
+    _key_theme_color = colorset;
+    setTheme(colorset);
+    // 设置初始化主题颜色
+  }
 
   setTheme(String themeColor) async {
     if (themeColor == 'light') {
@@ -26,17 +36,5 @@ class AppInfoProvider with ChangeNotifier {
     await SpUtil.getInstance();
     SpUtil.putString('key_theme_color', themeColor);
     _key_theme_color = themeColor;
-  }
-
-  AppInfoProvider() {
-    _initAsync();
-  }
-
-  Future<void> _initAsync() async {
-    await SpUtil.getInstance();
-    String colorset = SpUtil.getString('key_theme_color', defValue: 'light')!;
-    _key_theme_color = colorset;
-    setTheme(colorset);
-    // 设置初始化主题颜色
   }
 }
