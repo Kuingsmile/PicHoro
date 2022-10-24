@@ -3,6 +3,8 @@ import 'package:flustars_flutter3/flustars_flutter3.dart';
 //全局共享变量
 import 'package:sqflite/sqflite.dart';
 import 'package:horopic/album/albumSQL.dart';
+import 'package:horopic/PShostFileManage/commonPage/psHostSQL.dart';
+import 'package:external_path/external_path.dart';
 
 class UploadedImage {
   String path;
@@ -38,7 +40,9 @@ class Global {
   static bool isTimeStamp = false; //是否使用时间戳重命名
   static bool isRandomName = false; //是否使用随机字符串重命名
   static bool isCopyLink = true; //是否复制链接
-  static Database? imageDB; //默认数据库
+  static Database? imageDB; //默认相册数据库
+  static Database? uploadDB; //默认上传数据库
+  static Database? downloadDB; //默认下载数据库
   static String defaultShowedPBhost = 'lskypro'; //默认显示的图床
   static bool isDeleteLocal = false; //是否删除本地图片
   static bool isDeleteCloud = false; //是否删除远程图片
@@ -46,6 +50,78 @@ class Global {
   static String qrScanResult = ''; //扫码结果
   static bool iscustomRename = false; //是否自定义重命名
   static String customRenameFormat = r'{Y}_{m}_{d}_{uuid}'; //自定义重命名格式
+  static bool operateDone = false;
+  static String tencentDownloadFilePath = ''; //腾讯云下载文件路径
+  static final List iconList = [
+    "_blank",
+    "_page",
+    "aac",
+    "ai",
+    "aiff",
+    "avi",
+    "bmp",
+    "c",
+    "cpp",
+    "css",
+    "csv",
+    "dat",
+    "dmg",
+    "doc",
+    "dotx",
+    "dwg",
+    "dxf",
+    "eps",
+    "exe",
+    "flv",
+    "gif",
+    "h",
+    "hpp",
+    "html",
+    "ics",
+    "iso",
+    "java",
+    "jpeg",
+    "jpg",
+    "js",
+    "key",
+    "less",
+    "mid",
+    "mp3",
+    "mp4",
+    "mpg",
+    "odf",
+    "ods",
+    "odt",
+    "otp",
+    "ots",
+    "ott",
+    "pdf",
+    "php",
+    "png",
+    "ppt",
+    "psd",
+    "py",
+    "qt",
+    "rar",
+    "rb",
+    "rtf",
+    "sass",
+    "scss",
+    "sql",
+    "tga",
+    "tgz",
+    "tiff",
+    "txt",
+    "wav",
+    "xls",
+    "xlsx",
+    "xml",
+    "yml",
+    "zip",
+    'docx',
+    'pptx',
+    'xlsx',
+  ];
 
   static getPShost() async {
     await SpUtil.getInstance();
@@ -153,6 +229,24 @@ class Global {
     imageDB = db;
   }
 
+  static getUploadDatabase() async {
+    uploadDB = await PSHostSQL.getUploadDatabase();
+    return uploadDB;
+  }
+
+  static setUploadDatabase(Database db) async {
+    uploadDB = db;
+  }
+
+  static getDownloadDatabase() async {
+    downloadDB = await PSHostSQL.getDownloadDatabase();
+    return downloadDB;
+  }
+
+  static setDownloadDatabase(Database db) async {
+    downloadDB = db;
+  }
+
   static setShowedPBhost(String showedPBhost) async {
     await SpUtil.getInstance();
     SpUtil.putString('key_showedPBhost', showedPBhost);
@@ -214,5 +308,35 @@ class Global {
     await SpUtil.getInstance();
     bool isDeleteCloud = SpUtil.getBool('key_isDeleteCloud', defValue: false)!;
     return isDeleteCloud;
+  }
+
+  static setOperateDone(bool operateDone) async {
+    await SpUtil.getInstance();
+    SpUtil.putBool('key_operateDone', operateDone);
+    Global.operateDone = operateDone;
+  }
+
+  static getOperateDone() async {
+    await SpUtil.getInstance();
+    bool operateDone = SpUtil.getBool('key_operateDone', defValue: false)!;
+    return operateDone;
+  }
+
+  static setTencentDownloadFilePath(String tencentDownloadFilePath) async {
+    await SpUtil.getInstance();
+    SpUtil.putString('key_tencentDownloadFilePath', tencentDownloadFilePath);
+    Global.tencentDownloadFilePath = tencentDownloadFilePath;
+  }
+
+  static getTencentDownloadFilePath() async {
+    await SpUtil.getInstance();
+    String externalStorageDirectory =
+        await ExternalPath.getExternalStoragePublicDirectory(
+            ExternalPath.DIRECTORY_DOWNLOADS);
+    externalStorageDirectory =
+        '$externalStorageDirectory/PicHoro/Download/tencent';
+    String tencentDownloadFilePath =
+        SpUtil.getString('key_tencentDownloadFilePath', defValue: externalStorageDirectory)!;
+    return tencentDownloadFilePath;
   }
 }
