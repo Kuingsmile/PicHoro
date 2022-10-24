@@ -1,15 +1,13 @@
 import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
-
+import 'dart:convert';
 import 'package:horopic/pages/pichoroAPP.dart';
 
 import 'package:horopic/pages/homePage.dart';
-import 'package:horopic/pages/loading.dart';
 
 import 'package:horopic/album/albumPage.dart';
 import 'package:horopic/album/albumPreview.dart';
 import 'package:horopic/album/EmptyDatabase.dart';
-import 'package:horopic/album/LoadStateChanged.dart';
 
 import 'package:horopic/configurePage/configurePage.dart';
 import 'package:horopic/configurePage/commonConfigure/commonConfig.dart';
@@ -18,7 +16,6 @@ import 'package:horopic/configurePage/commonConfigure/selectPShost.dart';
 import 'package:horopic/configurePage/commonConfigure/RenameFile.dart';
 import 'package:horopic/configurePage/others/UpdateLog.dart';
 import 'package:horopic/configurePage/others/author.dart';
-import 'package:horopic/configurePage/others/themeSet.dart';
 import 'package:horopic/configurePage/others/selectTheme.dart';
 import 'package:horopic/configurePage/userManage/APPpassword.dart';
 
@@ -32,9 +29,14 @@ import 'package:horopic/hostconfigure/qiniuconfig.dart';
 import 'package:horopic/hostconfigure/upyunconfig.dart';
 import 'package:horopic/hostconfigure/PShostSelect.dart';
 
-import 'package:horopic/utils/clearcache.dart';
+import 'package:horopic/PShostFileManage/tencent/tencentBucketList.dart';
+import 'package:horopic/PShostFileManage/tencent/tencentbucketInformation.dart';
+import 'package:horopic/PShostFileManage/tencent/tencentnewBucketConfig.dart';
+import 'package:horopic/PShostFileManage/tencent/tencentfileExplorer.dart';
+import 'package:horopic/PShostFileManage/tencent/tencentUpDownloadManagePage.dart';
 
-import 'dart:convert';
+import 'package:horopic/PShostFileManage/commonPage/file_explorer/fileExplorer.dart';
+import 'package:horopic/PShostFileManage/commonPage/file_explorer/localImagePreview.dart';
 
 //root
 Handler rootHandler = Handler(
@@ -60,6 +62,17 @@ var albumImagePreviewHandler = Handler(
   var index = params['index']!.first;
   List images = params['images']!.first.split(',');
   return ImagePreview(
+    index: int.parse(index),
+    images: images,
+  );
+});
+
+//本地文件相册预览
+var localImagePreviewHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  var index = params['index']!.first;
+  List images = params['images']!.first.split(',');
+  return LocalImagePreview(
     index: int.parse(index),
     images: images,
   );
@@ -177,4 +190,60 @@ var authorInformationHandler = Handler(
 var updateLogHandler = Handler(
     handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
   return UpdateLog();
+});
+
+//腾讯云存储桶列表页面
+var tencentBucketListHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  return TencentBucketList();
+});
+
+//腾讯云存储桶详情页面
+var tencentBucketInformationHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  var bucketMap = json.decode(params['bucketMap']!.first);
+  return BucketInformation(
+    bucketMap: bucketMap,
+  );
+});
+
+//腾讯云新建存储桶页面
+var newTencentBucketHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  return NewBucketConfig();
+});
+
+//腾讯云存储桶文件列表页面
+var tencentFileExplorerHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  var element = json.decode(params['element']!.first);
+  var bucketPrefix = params['bucketPrefix']!.first;
+  return TencentFileExplorer(
+    element: element,
+    bucketPrefix: bucketPrefix,
+  );
+});
+
+//腾讯云存储下载文件页面
+var tencentDownloadFileHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  var bucketName = params['bucketName']!.first;
+  List<String> downloadList =
+      json.decode(params['downloadList']!.first).cast<String>();
+  String downloadPath = params['downloadPath']!.first;
+  return TencentUpDownloadManagePage(
+      bucketName: bucketName,
+      downloadList: downloadList,
+      downloadPath: downloadPath);
+});
+
+//文件浏览页面
+var fileExplorerHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  var currentDirPath = params['currentDirPath']!.first;
+  var rootPath = params['rootPath']!.first;
+  return FileExplorer(
+    currentDirPath: currentDirPath,
+    rootPath: rootPath,
+  );
 });

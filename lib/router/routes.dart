@@ -7,6 +7,7 @@ class Routes {
   static String homePage = "/homePage";
   static String albumUploadedImages = "/albumUploadedImages";
   static String albumImagePreview = "/albumImagePreview";
+  static String localImagePreview = "/localImagePreview";
   static String configurePage = "/configurePage";
   static String appPassword = "/appPassword";
   static String allPShost = "/allPShost";
@@ -26,6 +27,12 @@ class Routes {
   static String emptyDatabase = "/emptyDatabase";
   static String authorInformation = "/authorInformation";
   static String updateLog = "/updateLog";
+  static String tencentBucketInformation = "/tencentBucketInformation";
+  static String tencentNewBucketConfig = "/tencentNewBucketConfig";
+  static String tencentFileExplorer = "/tencentFileExplorer";
+  static String tencentBucketList = "/tencentBucketList";
+  static String tencentUpDownloadManagePage = "/tencentUpDownloadManagePage";
+  static String fileExplorer = "/fileExplorer";
 
   static void configureRoutes(FluroRouter router) {
     router.notFoundHandler = Handler(
@@ -36,6 +43,7 @@ class Routes {
     router.define(homePage, handler: homePageHandler);
     router.define(albumUploadedImages, handler: albumUploadedImagesHandler);
     router.define(albumImagePreview, handler: albumImagePreviewHandler);
+    router.define(localImagePreview, handler: localImagePreviewHandler);
     router.define(configurePage, handler: configurePageHandler);
     router.define(appPassword, handler: appPasswordHandler);
     router.define(allPShost, handler: allPShostHandler);
@@ -55,5 +63,13 @@ class Routes {
     router.define(emptyDatabase, handler: emptyDatabaseHandler);
     router.define(authorInformation, handler: authorInformationHandler);
     router.define(updateLog, handler: updateLogHandler);
+    router.define(tencentBucketInformation,
+        handler: tencentBucketInformationHandler);
+    router.define(tencentNewBucketConfig, handler: newTencentBucketHandler);
+    router.define(tencentFileExplorer, handler: tencentFileExplorerHandler);
+    router.define(tencentBucketList, handler: tencentBucketListHandler);
+    router.define(tencentUpDownloadManagePage,
+        handler: tencentDownloadFileHandler);
+    router.define(fileExplorer, handler: fileExplorerHandler);
   }
 }
