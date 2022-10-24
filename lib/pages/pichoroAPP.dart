@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-
 import 'package:horopic/pages/homePage.dart';
 import 'package:horopic/album/albumPage.dart';
 import 'package:horopic/configurePage/configurePage.dart';
+import 'package:horopic/PShostFileManage/commonPage/psHostHomePage.dart';
 
 class PicHoroAPP extends StatefulWidget {
   final int selectedIndex;
@@ -21,7 +21,8 @@ class _TabsPageState extends State<PicHoroAPP> {
   final List<Widget> _pageList = [
     HomePage(),
     UploadedImages(),
-    ConfigurePage()
+    PsHostHomePage(),
+    ConfigurePage(),
   ];
 
   @override
@@ -49,6 +50,10 @@ class _TabsPageState extends State<PicHoroAPP> {
           BottomNavigationBarItem(
             icon: Icon(Icons.photo_outlined),
             label: '相册',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(IconData(0xe6ab, fontFamily: 'iconfont')),
+            label: '仓库',
           ),
           BottomNavigationBarItem(icon: Icon(Icons.settings), label: '设置'),
         ],
