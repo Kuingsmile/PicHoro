@@ -4,20 +4,15 @@ import 'package:image_picker/image_picker.dart';
 import 'package:horopic/utils/common_func.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
-import 'package:horopic/configurePage/configurePage.dart';
 import 'package:horopic/pages/loading.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/uploader.dart';
 import 'package:flutter/services.dart' as flutterServices;
 import 'package:horopic/album/albumSQL.dart';
-import 'package:horopic/album/albumPage.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:horopic/hostconfigure/PShostSelect.dart';
 import 'package:http/http.dart' as myhttp;
 import 'package:path_provider/path_provider.dart';
-import 'package:horopic/router/application.dart';
-import 'package:horopic/router/routes.dart';
-import 'package:fluro/fluro.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -33,13 +28,12 @@ class _HomePageState extends State<HomePage> {
   @override
   void dispose() {
     super.dispose();
+    clipboardList.clear();
   }
 
   _imageFromCamera() async {
     final XFile? pickedImage =
         await _picker.pickImage(source: ImageSource.camera, imageQuality: 100);
-    //Database imageDB = await AlbumSQL.getDatabase();
-    //await AlbumSQL.EmptyAllTable(imageDB);
     if (pickedImage == null) {
       Fluttertoast.showToast(
           msg: "未拍摄图片",
@@ -98,6 +92,9 @@ class _HomePageState extends State<HomePage> {
       Global.imagesList.clear();
 
       for (var i = 0; i < urlList.length; i++) {
+        if (urlList[i].isEmpty) {
+          continue;
+        }
         try {
           var response = await myhttp.get(Uri.parse(urlList[i]));
           String tempPath =
@@ -651,9 +648,9 @@ class _HomePageState extends State<HomePage> {
         //backgroundColor: Colors.transparent,
         //elevation: 0,
         centerTitle: true,
+        elevation: 0,
         title: const Text('PicHoro',
             style: TextStyle(
-              color: Colors.white,
               fontSize: 25.0,
               fontWeight: FontWeight.bold,
             )),
