@@ -2,9 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 
-import 'package:horopic/PShostFileManage/tencent/downloadAPI/downloader.dart';
-import 'package:horopic/PShostFileManage/tencent/downloadAPI/download_status.dart';
-import 'package:horopic/PShostFileManage/tencent/downloadAPI/download_request.dart';
+import 'package:horopic/PShostFileManage/tencent/downloadAPI/tencentDownloader.dart';
+import 'package:horopic/PShostFileManage/tencent/downloadAPI/downloadStatus.dart';
+import 'package:horopic/PShostFileManage/tencent/downloadAPI/downloadRequest.dart';
 class DownloadTask {
   final DownloadRequest request;
   ValueNotifier<DownloadStatus> status = ValueNotifier(DownloadStatus.queued);

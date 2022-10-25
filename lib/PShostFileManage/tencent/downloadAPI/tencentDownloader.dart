@@ -6,9 +6,9 @@ import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
-import 'package:horopic/PShostFileManage/tencent/downloadAPI/download_task.dart';
-import 'package:horopic/PShostFileManage/tencent/downloadAPI/download_status.dart';
-import 'package:horopic/PShostFileManage/tencent/downloadAPI/download_request.dart';
+import 'package:horopic/PShostFileManage/tencent/downloadAPI/tencentDownloadTask.dart';
+import 'package:horopic/PShostFileManage/tencent/downloadAPI/downloadStatus.dart';
+import 'package:horopic/PShostFileManage/tencent/downloadAPI/downloadRequest.dart';
 
 import 'package:horopic/PShostFileManage/manageAPI/tencentManage.dart';
 
