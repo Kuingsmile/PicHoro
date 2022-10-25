@@ -195,6 +195,13 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_draggable_gridview:
+    dependency: "direct main"
+    description:
+      name: flutter_draggable_gridview
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "0.0.7"
   flutter_lints:
     dependency: "direct dev"
     description:

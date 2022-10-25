@@ -170,6 +170,12 @@
       "languageVersion": "2.17"
     },
     {
+      "name": "flutter_draggable_gridview",
+      "rootUri": "file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/flutter_draggable_gridview-0.0.7",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
       "name": "flutter_lints",
       "rootUri": "file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/flutter_lints-2.0.1",
       "packageUri": "lib/",
@@ -800,7 +806,7 @@
       "languageVersion": "2.18"
     }
   ],
-  "generated": "2022-10-24T09:09:47.554986Z",
+  "generated": "2022-10-25T13:32:19.011696Z",
   "generator": "pub",
   "generatorVersion": "2.18.0"
 }
