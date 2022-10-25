@@ -52,6 +52,7 @@ class Global {
   static String customRenameFormat = r'{Y}_{m}_{d}_{uuid}'; //自定义重命名格式
   static bool operateDone = false;
   static String tencentDownloadFilePath = ''; //腾讯云下载文件路径
+  static List psHostHomePageOrder = [0, 1, 2, 3, 4, 5, 6, 7, 8];
   static final List iconList = [
     "_blank",
     "_page",
@@ -335,8 +336,22 @@ class Global {
             ExternalPath.DIRECTORY_DOWNLOADS);
     externalStorageDirectory =
         '$externalStorageDirectory/PicHoro/Download/tencent';
-    String tencentDownloadFilePath =
-        SpUtil.getString('key_tencentDownloadFilePath', defValue: externalStorageDirectory)!;
+    String tencentDownloadFilePath = SpUtil.getString(
+        'key_tencentDownloadFilePath',
+        defValue: externalStorageDirectory)!;
     return tencentDownloadFilePath;
+  }
+
+  static setpsHostHomePageOrder(List<String> psHostHomePageOrder) async {
+    await SpUtil.getInstance();
+    SpUtil.putStringList('key_psHostHomePageOrder', psHostHomePageOrder);
+    Global.psHostHomePageOrder = psHostHomePageOrder;
+  }
+
+  static getpsHostHomePageOrder() async {
+    await SpUtil.getInstance();
+    List psHostHomePageOrder = SpUtil.getStringList('key_psHostHomePageOrder',
+        defValue: ['0', '1', '2', '3', '4', '5', '6', '7', '8'])!;
+    return psHostHomePageOrder;
   }
 }
