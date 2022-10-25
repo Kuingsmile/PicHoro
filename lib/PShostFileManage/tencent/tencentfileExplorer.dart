@@ -62,14 +62,19 @@ class _TencentFileExplorerState
     );
     //check if the bucket is empty
     if (res[0] == 'empty') {
-      setState(() {
-        state = loadingState.LoadState.EMPTY;
-      });
+      if (mounted) {
+        setState(() {
+          state = loadingState.LoadState.EMPTY;
+        });
+      }
+
       return;
     } else if (res[0] == 'error') {
-      setState(() {
-        state = loadingState.LoadState.ERROR;
-      });
+      if (mounted) {
+        setState(() {
+          state = loadingState.LoadState.ERROR;
+        });
+      }
       return;
     }
     //get the bucket list
@@ -79,9 +84,11 @@ class _TencentFileExplorerState
     );
 
     if (res2[0] == 'failed') {
-      setState(() {
-        state = loadingState.LoadState.ERROR;
-      });
+      if (mounted) {
+        setState(() {
+          state = loadingState.LoadState.ERROR;
+        });
+      }
       return;
     }
     if (res2[1]['ListBucketResult']['Prefix'] != null) {
@@ -136,17 +143,21 @@ class _TencentFileExplorerState
     _allInfoList.addAll(_dirAllInfoList);
     _allInfoList.addAll(_fileAllInfoList);
     if (_allInfoList.isEmpty) {
-      setState(() {
-        state = loadingState.LoadState.EMPTY;
-      });
+      if (mounted) {
+        setState(() {
+          state = loadingState.LoadState.EMPTY;
+        });
+      }
     } else {
-      setState(() {
-        selectedFilesBool.clear();
-        for (var i = 0; i < _allInfoList.length; i++) {
-          selectedFilesBool.add(false);
-        }
-        state = loadingState.LoadState.SUCCESS;
-      });
+      if (mounted) {
+        setState(() {
+          selectedFilesBool.clear();
+          for (var i = 0; i < _allInfoList.length; i++) {
+            selectedFilesBool.add(false);
+          }
+          state = loadingState.LoadState.SUCCESS;
+        });
+      }
     }
   }
 
@@ -752,7 +763,7 @@ class _TencentFileExplorerState
               state == loadingState.LoadState.EMPTY ||
               state == loadingState.LoadState.LOADING
           ? null
-          : FloatingActionButtonLocation.centerDocked,
+          : FloatingActionButtonLocation.centerFloat,
       floatingActionButton: state == loadingState.LoadState.ERROR ||
               state == loadingState.LoadState.EMPTY ||
               state == loadingState.LoadState.LOADING
@@ -969,6 +980,11 @@ class _TencentFileExplorerState
           });
         }
       }
+      if (_allInfoList.isEmpty) {
+        setState(() {
+          state = loadingState.LoadState.EMPTY;
+        });
+      }
     } catch (e) {
       rethrow;
     }
@@ -1074,7 +1090,7 @@ class _TencentFileExplorerState
                         SlidableAction(
                           onPressed: (BuildContext context) async {
                             showCupertinoDialog(
-                              barrierDismissible: true,
+                                barrierDismissible: true,
                                 context: context,
                                 builder: (BuildContext context) {
                                   return CupertinoAlertDialog(
@@ -1138,6 +1154,7 @@ class _TencentFileExplorerState
                                             setState(() {
                                               _allInfoList.removeAt(index);
                                               _dirAllInfoList.removeAt(index);
+                                              selectedFilesBool.removeAt(index);
                                             });
                                           } else if (dir != null) {
                                             if (dir is! List) {
@@ -1162,6 +1179,8 @@ class _TencentFileExplorerState
                                               setState(() {
                                                 _allInfoList.removeAt(index);
                                                 _dirAllInfoList.removeAt(index);
+                                                selectedFilesBool
+                                                    .removeAt(index);
                                               });
                                             } else {
                                               Fluttertoast.showToast(
@@ -1308,7 +1327,7 @@ class _TencentFileExplorerState
                           SlidableAction(
                             onPressed: (BuildContext context) async {
                               showCupertinoDialog(
-                                barrierDismissible: true,
+                                  barrierDismissible: true,
                                   context: context,
                                   builder: (BuildContext context) {
                                     return CupertinoAlertDialog(
@@ -1342,6 +1361,8 @@ class _TencentFileExplorerState
                                                   fontSize: 16.0);
                                               setState(() {
                                                 _allInfoList.removeAt(index);
+                                                selectedFilesBool
+                                                    .removeAt(index);
                                               });
                                             } else {
                                               Fluttertoast.showToast(
@@ -1403,8 +1424,8 @@ class _TencentFileExplorerState
                                         .last,
                                 style: const TextStyle(fontSize: 14)),
                             subtitle: Text(
-                              '${_allInfoList[index]['LastModified'].toString().replaceAll('T', ' ').replaceAll('Z', '').substring(0,19)}  ${(double.parse(_allInfoList[index]['Size']) / 1024 / 1024 / 1024 > 1 ? '${(double.parse(_allInfoList[index]['Size']) / 1024 / 1024 / 1024).toStringAsFixed(2)}GB' : (double.parse(_allInfoList[index]['Size']) / 1024 / 1024 > 1 ? '${(double.parse(_allInfoList[index]['Size']) / 1024 / 1024).toStringAsFixed(2)}MB' : (double.parse(_allInfoList[index]['Size']) / 1024 > 1 ? '${(double.parse(_allInfoList[index]['Size']) / 1024).toStringAsFixed(2)}KB' : _allInfoList[index]['Size'] + 'B')))}'
-                            ,style: const TextStyle(fontSize: 12)),
+                                '${_allInfoList[index]['LastModified'].toString().replaceAll('T', ' ').replaceAll('Z', '').substring(0, 19)}  ${(double.parse(_allInfoList[index]['Size']) / 1024 / 1024 / 1024 > 1 ? '${(double.parse(_allInfoList[index]['Size']) / 1024 / 1024 / 1024).toStringAsFixed(2)}GB' : (double.parse(_allInfoList[index]['Size']) / 1024 / 1024 > 1 ? '${(double.parse(_allInfoList[index]['Size']) / 1024 / 1024).toStringAsFixed(2)}MB' : (double.parse(_allInfoList[index]['Size']) / 1024 > 1 ? '${(double.parse(_allInfoList[index]['Size']) / 1024).toStringAsFixed(2)}KB' : _allInfoList[index]['Size'] + 'B')))}',
+                                style: const TextStyle(fontSize: 12)),
                             trailing: IconButton(
                               icon: const Icon(Icons.more_horiz),
                               onPressed: () {
@@ -1753,6 +1774,7 @@ class _TencentFileExplorerState
                                 fontSize: 16.0);
                             setState(() {
                               _allInfoList.removeAt(index);
+                              selectedFilesBool.removeAt(index);
                             });
                           } else {
                             Fluttertoast.showToast(
@@ -1900,6 +1922,7 @@ class _TencentFileExplorerState
                               setState(() {
                                 _allInfoList.removeAt(index);
                                 _dirAllInfoList.removeAt(index);
+                                selectedFilesBool.removeAt(index);
                               });
                             } else if (dir != null) {
                               if (dir is! List) {
@@ -1922,6 +1945,7 @@ class _TencentFileExplorerState
                                 setState(() {
                                   _allInfoList.removeAt(index);
                                   _dirAllInfoList.removeAt(index);
+                                  selectedFilesBool.removeAt(index);
                                 });
                               } else {
                                 Fluttertoast.showToast(
