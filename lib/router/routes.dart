@@ -1,5 +1,5 @@
 import 'package:fluro/fluro.dart';
-import 'package:horopic/router/route_handler.dart';
+import 'package:horopic/router/routeHandler.dart';
 import 'package:flutter/material.dart';
 
 class Routes {
@@ -33,6 +33,9 @@ class Routes {
   static String tencentBucketList = "/tencentBucketList";
   static String tencentUpDownloadManagePage = "/tencentUpDownloadManagePage";
   static String fileExplorer = "/fileExplorer";
+  static String smmsManageHomePage = "/smmsManageHomePage";
+  static String smmsFileExplorer = "/smmsFileExplorer";
+  static String smmsUpDownloadManagePage = "/smmsUpDownloadManagePage";
 
   static void configureRoutes(FluroRouter router) {
     router.notFoundHandler = Handler(
@@ -71,5 +74,8 @@ class Routes {
     router.define(tencentUpDownloadManagePage,
         handler: tencentDownloadFileHandler);
     router.define(fileExplorer, handler: fileExplorerHandler);
+    router.define(smmsManageHomePage, handler: smmsManageHomePageHandler);
+    router.define(smmsFileExplorer, handler: smmsFileExplorerHandler);
+    router.define(smmsUpDownloadManagePage, handler: smmsUpDownloadFileHandler);
   }
 }

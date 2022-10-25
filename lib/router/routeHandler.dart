@@ -31,12 +31,16 @@ import 'package:horopic/hostconfigure/PShostSelect.dart';
 
 import 'package:horopic/PShostFileManage/tencent/tencentBucketList.dart';
 import 'package:horopic/PShostFileManage/tencent/tencentbucketInformation.dart';
-import 'package:horopic/PShostFileManage/tencent/tencentnewBucketConfig.dart';
-import 'package:horopic/PShostFileManage/tencent/tencentfileExplorer.dart';
+import 'package:horopic/PShostFileManage/tencent/tencentNewBucketConfig.dart';
+import 'package:horopic/PShostFileManage/tencent/tencentFileExplorer.dart';
 import 'package:horopic/PShostFileManage/tencent/tencentUpDownloadManagePage.dart';
 
 import 'package:horopic/PShostFileManage/commonPage/file_explorer/fileExplorer.dart';
 import 'package:horopic/PShostFileManage/commonPage/file_explorer/localImagePreview.dart';
+
+import 'package:horopic/PShostFileManage/smms/smmsManageHomePage.dart';
+import 'package:horopic/PShostFileManage/smms/smmsFileExplorer.dart';
+import 'package:horopic/PShostFileManage/smms/smmsUpDownloadManagePage.dart';
 
 //root
 Handler rootHandler = Handler(
@@ -246,4 +250,30 @@ var fileExplorerHandler = Handler(
     currentDirPath: currentDirPath,
     rootPath: rootPath,
   );
+});
+
+//SMMS图床管理首页
+var smmsManageHomePageHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  return SmmsManageHomePage();
+});
+
+//SMMS图床管理文件列表页面
+var smmsFileExplorerHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  return SmmsFileExplorer();
+});
+
+//SM.MS存储下载文件页面
+var smmsUpDownloadFileHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  List<String> savedFileNameList =
+      json.decode(params['savedFileNameList']!.first).cast<String>();
+  List<String> downloadList =
+      json.decode(params['downloadList']!.first).cast<String>();
+  String downloadPath = params['downloadPath']!.first;
+  return SmmsUpDownloadManagePage(
+      savedFileNameList: savedFileNameList,
+      downloadList: downloadList,
+      downloadPath: downloadPath);
 });
