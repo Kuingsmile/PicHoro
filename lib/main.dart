@@ -62,6 +62,10 @@ void main() async {
   FluroRouter router = FluroRouter();
   Application.router = router;
   Routes.configureRoutes(router);
+  //初始化图床管理页面排列顺序
+  List<String> psHostHomePageOrder = await Global.getpsHostHomePageOrder();
+  await Global.setpsHostHomePageOrder(psHostHomePageOrder);
+
   runApp(MyApp());
 }
 
