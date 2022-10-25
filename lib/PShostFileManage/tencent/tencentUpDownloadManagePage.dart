@@ -2,9 +2,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:external_path/external_path.dart';
 import 'dart:io';
-import 'package:horopic/PShostFileManage/tencent/downloadAPI/downloader.dart';
-import 'package:horopic/PShostFileManage/tencent/downloadAPI/download_task.dart';
-import 'package:horopic/PShostFileManage/tencent/downloadAPI/download_status.dart';
+import 'package:horopic/PShostFileManage/tencent/downloadAPI/tencentDownloader.dart';
+import 'package:horopic/PShostFileManage/tencent/downloadAPI/tencentDownloadTask.dart';
+import 'package:horopic/PShostFileManage/tencent/downloadAPI/downloadStatus.dart';
 import 'package:fluro/fluro.dart';
 import 'package:horopic/router/application.dart';
 import 'package:horopic/router/routes.dart';
@@ -39,7 +39,6 @@ class _TencentUpDownloadManagePageState
     extends State<TencentUpDownloadManagePage> {
   var downloadManager = DownloadManager();
   var savedDir = '';
-  var showedDir = '';
 
   @override
   void initState() {
@@ -47,7 +46,6 @@ class _TencentUpDownloadManagePageState
     downloadManager = DownloadManager();
     savedDir =
         '${widget.downloadPath}/PicHoro/Download/tencent/${widget.bucketName}';
-    showedDir = '${widget.downloadPath}/PicHoro/Download/tencent';
   }
 
   _createDownloadListItem() {
@@ -76,7 +74,9 @@ class _TencentUpDownloadManagePageState
             var fileName =
                 "$savedDir/${downloadManager.getFileNameFromUrl(url)}";
             var file = File(fileName);
-            file.delete();
+            try {
+              await file.delete();
+            } catch (e) {}
             await downloadManager.removeDownload(url);
             setState(() {});
           },
@@ -294,20 +294,28 @@ class _ListItemState extends State<ListItem> {
                                     await widget.onDownloadPlayPausedPressed(
                                         widget.url);
                                   },
-                                  icon: const Icon(Icons.pause,color: Colors.blue,));
+                                  icon: const Icon(
+                                    Icons.pause,
+                                    color: Colors.blue,
+                                  ));
                             case DownloadStatus.paused:
                               return IconButton(
-                                  onPressed: () async {
-                                    await widget.onDownloadPlayPausedPressed(
-                                        widget.url);
-                                  },
-                                  icon: const Icon(Icons.play_arrow),color: Colors.blue,);
+                                onPressed: () async {
+                                  await widget
+                                      .onDownloadPlayPausedPressed(widget.url);
+                                },
+                                icon: const Icon(Icons.play_arrow),
+                                color: Colors.blue,
+                              );
                             case DownloadStatus.completed:
                               return IconButton(
                                   onPressed: () {
                                     widget.onDelete(widget.url);
                                   },
-                                  icon: const Icon(Icons.delete,color: Colors.red,));
+                                  icon: const Icon(
+                                    Icons.delete,
+                                    color: Colors.red,
+                                  ));
                             case DownloadStatus.failed:
                             case DownloadStatus.canceled:
                               return IconButton(
@@ -315,7 +323,10 @@ class _ListItemState extends State<ListItem> {
                                     await widget.onDownloadPlayPausedPressed(
                                         widget.url);
                                   },
-                                  icon: const Icon(Icons.download,color: Colors.blue,));
+                                  icon: const Icon(
+                                    Icons.download,
+                                    color: Colors.blue,
+                                  ));
                           }
                           return Text("${downloadStatus[value.toString()]}",
                               style: const TextStyle(fontSize: 16));
@@ -324,7 +335,10 @@ class _ListItemState extends State<ListItem> {
                         onPressed: () async {
                           await widget.onDownloadPlayPausedPressed(widget.url);
                         },
-                        icon: const Icon(Icons.download,color: Colors.green,))
+                        icon: const Icon(
+                          Icons.download,
+                          color: Colors.green,
+                        ))
               ],
             ),
             if (widget.downloadTask != null &&
