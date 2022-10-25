@@ -333,7 +333,13 @@ class _FileExplorerState extends State<FileExplorer> {
                               motion: const ScrollMotion(),
                               children: [
                                 SlidableAction(
-                                  onPressed: (BuildContext context) async {},
+                                  onPressed: (BuildContext context) {
+                                    try {
+                                      deleteFile(context, currentFiles[index]);
+                                    } catch (e) {
+                                      Fluttertoast.showToast(msg: '删除失败');
+                                    }
+                                  },
                                   backgroundColor: const Color(0xFFFE4A49),
                                   foregroundColor: Colors.white,
                                   icon: Icons.delete,
@@ -405,7 +411,7 @@ class _FileExplorerState extends State<FileExplorer> {
                                     ),
                                   ),
                                   left: 0,
-                                  top: 15,
+                                  top: 20,
                                 )
                               ],
                             ),
@@ -427,7 +433,14 @@ class _FileExplorerState extends State<FileExplorer> {
                                 motion: const ScrollMotion(),
                                 children: [
                                   SlidableAction(
-                                    onPressed: (BuildContext context) async {},
+                                    onPressed: (BuildContext context) async {
+                                      try {
+                                        deleteFile(
+                                            context, currentFiles[index]);
+                                      } catch (e) {
+                                        Fluttertoast.showToast(msg: '删除失败');
+                                      }
+                                    },
                                     backgroundColor: const Color(0xFFFE4A49),
                                     foregroundColor: Colors.white,
                                     icon: Icons.delete,
@@ -550,15 +563,16 @@ class _FileExplorerState extends State<FileExplorer> {
                 },
               ),
             ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           SizedBox(
-              height: 30,
-              width: 30,
+              height: 35,
+              width: 35,
               child: FloatingActionButton(
                 heroTag: 'select',
-                backgroundColor: const Color.fromARGB(255, 233, 88, 202),
+                backgroundColor: const Color.fromARGB(255, 238, 146, 252),
                 elevation: 50,
                 onPressed: () async {
                   if (currentFiles.isEmpty) {
@@ -614,6 +628,9 @@ class _FileExplorerState extends State<FileExplorer> {
           currentFiles.removeAt(toDelete[i] - i);
           selectedFilesBool.removeAt(toDelete[i] - i);
         });
+      }
+      if (currentFiles.isEmpty) {
+        setState(() {});
       }
     } catch (e) {
       rethrow;
@@ -753,7 +770,7 @@ class _FileExplorerState extends State<FileExplorer> {
       builder: (BuildContext context) {
         return CupertinoAlertDialog(
           title: const Text('通知'),
-          content: const Text('是否确定删除本地文件?'),
+          content: Text('是否确定删除${file.path.split('/').last}?'),
           actions: <Widget>[
             CupertinoDialogAction(
               child: const Text('取消', style: TextStyle(color: Colors.blue)),
