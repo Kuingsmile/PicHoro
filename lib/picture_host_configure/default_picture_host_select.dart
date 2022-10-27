@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:horopic/utils/global.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:horopic/utils/sqlUtils.dart';
+
+import 'package:horopic/utils/common_functions.dart';
+import 'package:horopic/utils/global.dart';
+import 'package:horopic/utils/sql_utils.dart';
 
 class DefaultPShostSelect extends StatefulWidget {
   const DefaultPShostSelect({Key? key}) : super(key: key);
 
   @override
-  _DefaultPShostSelectState createState() => _DefaultPShostSelectState();
+  DefaultPShostSelectState createState() => DefaultPShostSelectState();
 }
 
-class _DefaultPShostSelectState extends State<DefaultPShostSelect> {
+class DefaultPShostSelectState extends State<DefaultPShostSelect> {
   @override
   void initState() {
     super.initState();
@@ -218,24 +220,12 @@ setdefaultPShostRemoteAndLocal(String psHost) async {
         } else if (psHost == 'upyun') {
           await Global.setShowedPBhost('upyun');
         }
-        Fluttertoast.showToast(
-            msg: "已设置$psHost为默认图床",
-            toastLength: Toast.LENGTH_SHORT,
-            timeInSecForIosWeb: 2,
-            fontSize: 16.0);
+        showToast('已设置$psHost为默认图床');
       } else {
-        Fluttertoast.showToast(
-            msg: "写入数据库失败",
-            toastLength: Toast.LENGTH_SHORT,
-            timeInSecForIosWeb: 2,
-            fontSize: 16.0);
+        showToast('写入数据库失败');
       }
     }
   } catch (e) {
-    Fluttertoast.showToast(
-        msg: "Error",
-        toastLength: Toast.LENGTH_SHORT,
-        timeInSecForIosWeb: 2,
-        fontSize: 16.0);
+    showToast('错误');
   }
 }
