@@ -1,21 +1,25 @@
 import 'package:flutter/material.dart';
-import 'package:horopic/configurePage/others/themeSet.dart';
-import 'package:horopic/utils/global.dart';
-import 'package:provider/provider.dart';
-import 'package:horopic/utils/themeProvider.dart';
-import 'package:horopic/utils/permission.dart';
-import 'package:sqflite/sqflite.dart';
-import 'package:horopic/router/application.dart';
-import 'package:horopic/router/routes.dart';
+
+//import 'package:flutter_uploader/flutter_uploader.dart';
 import 'package:fluro/fluro.dart';
+import 'package:provider/provider.dart';
+import 'package:sqflite/sqflite.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
+
+import 'package:horopic/configure_page/others/theme_data.dart';
+
+import 'package:horopic/router/application.dart';
+import 'package:horopic/router/routers.dart';
+import 'package:horopic/utils/global.dart';
+import 'package:horopic/utils/permission.dart';
+import 'package:horopic/utils/theme_provider.dart';
 
 /*
 @Author: Horo
 @e-mail: ma_shiqing@163.com
-@Date: 2022-10-24
+@Date: 2022-10-26
 @Description:PicHoro, a picture upload tool 
-@version: 1.8.0
-
+@version: 1.8.2
 */
 
 void main() async {
@@ -65,18 +69,32 @@ void main() async {
   //初始化图床管理页面排列顺序
   List<String> psHostHomePageOrder = await Global.getpsHostHomePageOrder();
   await Global.setpsHostHomePageOrder(psHostHomePageOrder);
+  //设定loading样式
+  EasyLoading.instance
+    ..displayDuration = const Duration(milliseconds: 2000)
+    ..indicatorType = EasyLoadingIndicatorType.fadingCircle
+    ..loadingStyle = EasyLoadingStyle.custom
+    ..indicatorSize = 45.0
+    ..radius = 10.0
+    ..progressColor = Colors.blue
+    ..backgroundColor = Colors.white
+    ..indicatorColor = Colors.blue
+    ..textColor = Colors.blue
+    ..maskColor = Colors.blue.withOpacity(0.5)
+    ..userInteractions = false
+    ..dismissOnTap = false;
 
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
 
   @override
-  _MyAppState createState() => _MyAppState();
+  MyAppState createState() => MyAppState();
 }
 
-class _MyAppState extends State<MyApp> {
+class MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
@@ -91,6 +109,7 @@ class _MyAppState extends State<MyApp> {
                 theme: lightThemeData,
                 initialRoute: '/',
                 onGenerateRoute: Application.router.generator,
+                builder: EasyLoading.init(),
               )
             : MaterialApp(
                 title: 'PicHoro',
@@ -98,6 +117,7 @@ class _MyAppState extends State<MyApp> {
                 theme: darkThemeData,
                 initialRoute: '/',
                 onGenerateRoute: Application.router.generator,
+                builder: EasyLoading.init(),
               );
       }),
     );
