@@ -1,22 +1,21 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:horopic/PShostFileManage/manageAPI/smmsManage.dart';
 import 'package:fluro/fluro.dart';
+
 import 'package:horopic/router/application.dart';
-import 'package:horopic/router/routes.dart';
-import 'package:horopic/PShostFileManage/commonPage/loadingState.dart'
-    as loadingState;
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:horopic/router/routers.dart';
+import 'package:horopic/picture_host_manage/common_page/loading_state.dart'
+    as loading_state;
+import 'package:horopic/picture_host_manage/manage_api/smms_manage_api.dart';
 
 class SmmsManageHomePage extends StatefulWidget {
-  SmmsManageHomePage({Key? key}) : super(key: key);
+  const SmmsManageHomePage({Key? key}) : super(key: key);
 
   @override
-  _SmmsManageHomePageState createState() => _SmmsManageHomePageState();
+  SmmsManageHomePageState createState() => SmmsManageHomePageState();
 }
 
-class _SmmsManageHomePageState
-    extends loadingState.BaseLoadingPageState<SmmsManageHomePage> {
+class SmmsManageHomePageState
+    extends loading_state.BaseLoadingPageState<SmmsManageHomePage> {
   Map userProfile = {};
 
   @override
@@ -29,9 +28,9 @@ class _SmmsManageHomePageState
     var profileMap = await SmmsManageAPI.getUserProfile();
     if (profileMap[0] == 'success') {
       userProfile = profileMap[1];
-      state = loadingState.LoadState.SUCCESS;
+      state = loading_state.LoadState.SUCCESS;
     } else {
-      state = loadingState.LoadState.ERROR;
+      state = loading_state.LoadState.ERROR;
     }
     if (mounted) {
       setState(() {});
@@ -78,9 +77,8 @@ class _SmmsManageHomePageState
             ),
             onPressed: () {
               setState(() {
-                state = loadingState.LoadState.LOADING;
+                state = loading_state.LoadState.LOADING;
               });
-              // initBucketList();
             },
             child: const Text('重新加载'),
           )
@@ -130,7 +128,6 @@ class _SmmsManageHomePageState
           ),
         ),
       ),
-      //two column one key one value
       Column(
         children: [
           Container(
