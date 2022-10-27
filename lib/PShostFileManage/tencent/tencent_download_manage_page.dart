@@ -1,13 +1,14 @@
+import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:external_path/external_path.dart';
-import 'dart:io';
-import 'package:horopic/PShostFileManage/tencent/downloadAPI/tencentDownloader.dart';
-import 'package:horopic/PShostFileManage/tencent/downloadAPI/tencentDownloadTask.dart';
-import 'package:horopic/PShostFileManage/tencent/downloadAPI/downloadStatus.dart';
 import 'package:fluro/fluro.dart';
+
+import 'package:horopic/picture_host_manage/tencent/download_api/tencent_downloader.dart';
+import 'package:horopic/picture_host_manage/tencent/download_api/tencent_download_task.dart';
+import 'package:horopic/picture_host_manage/tencent/download_api/download_status.dart';
 import 'package:horopic/router/application.dart';
-import 'package:horopic/router/routes.dart';
+import 'package:horopic/router/routers.dart';
 //修改自flutter_download_manager包 https://github.com/nabil6391/flutter_download_manager 作者@nabil6391
 
 Map downloadStatus = {
@@ -31,11 +32,11 @@ class TencentUpDownloadManagePage extends StatefulWidget {
       : super(key: key);
 
   @override
-  _TencentUpDownloadManagePageState createState() =>
-      _TencentUpDownloadManagePageState();
+  TencentUpDownloadManagePageState createState() =>
+      TencentUpDownloadManagePageState();
 }
 
-class _TencentUpDownloadManagePageState
+class TencentUpDownloadManagePageState
     extends State<TencentUpDownloadManagePage> {
   var downloadManager = DownloadManager();
   var savedDir = '';
@@ -238,10 +239,10 @@ class ListItem extends StatefulWidget {
       : super(key: key);
 
   @override
-  _ListItemState createState() => _ListItemState();
+  ListItemState createState() => ListItemState();
 }
 
-class _ListItemState extends State<ListItem> {
+class ListItemState extends State<ListItem> {
   @override
   void initState() {
     super.initState();
