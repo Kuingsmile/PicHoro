@@ -1,35 +1,37 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'dart:io';
-import 'package:horopic/utils/common_func.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+
 import 'package:open_filex/open_filex.dart';
-import 'package:path/path.dart' as mypath;
+import 'package:path/path.dart' as my_path;
 import 'package:fluro/fluro.dart';
-import 'package:horopic/router/application.dart';
-import 'package:horopic/router/routes.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:msh_checkbox/msh_checkbox.dart';
 
+import 'package:horopic/router/application.dart';
+import 'package:horopic/router/routers.dart';
+import 'package:horopic/utils/common_functions.dart';
+
 class FileExplorer extends StatefulWidget {
-  FileExplorer(
+  const FileExplorer(
       {super.key, required this.currentDirPath, required this.rootPath});
 
   final String currentDirPath;
   final String rootPath;
 
   @override
-  _FileExplorerState createState() => _FileExplorerState();
+  FileExplorerState createState() => FileExplorerState();
 }
 
-class _FileExplorerState extends State<FileExplorer> {
+class FileExplorerState extends State<FileExplorer> {
   List<FileSystemEntity> currentFiles = [];
   String rootPath = '';
   List selectedFilesBool = [];
   bool sorted = true;
 
-  RefreshController _refreshController =
+  RefreshController refreshController =
       RefreshController(initialRefresh: false);
 
   @override
@@ -54,7 +56,7 @@ class _FileExplorerState extends State<FileExplorer> {
         ),
         titleSpacing: 0,
         title: Text(
-          mypath.basename(widget.currentDirPath),
+          my_path.basename(widget.currentDirPath),
           style: const TextStyle(
             fontSize: 18,
           ),
@@ -203,78 +205,28 @@ class _FileExplorerState extends State<FileExplorer> {
             onPressed: () async {
               if (!selectedFilesBool.contains(true) ||
                   selectedFilesBool.isEmpty) {
-                Fluttertoast.showToast(
-                    backgroundColor:
-                        Theme.of(context).brightness == Brightness.light
-                            ? Colors.black
-                            : Colors.white,
-                    textColor: Theme.of(context).brightness == Brightness.light
-                        ? Colors.white
-                        : Colors.black,
-                    msg: '没有选择文件');
+                showToastWithContext(context, '没有选择文件');
                 return;
               }
-              return showDialog(
-                barrierDismissible: false,
+              return showCupertinoAlertDialogWithConfirmFunc(
+                title: '删除全部文件',
+                content: '是否删除全部选择的文件？\n请谨慎选择!',
                 context: context,
-                builder: (BuildContext context) {
-                  return AlertDialog(
-                    title: const Text(
-                      '删除全部文件',
-                      textAlign: TextAlign.center,
-                    ),
-                    content: const Text(
-                      '是否删除全部选择的文件？\n请谨慎选择!',
-                      textAlign: TextAlign.center,
-                    ),
-                    actions: [
-                      Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            TextButton(
-                              child: const Text(
-                                '确定',
-                                style: TextStyle(
-                                    fontSize: 20, fontWeight: FontWeight.bold),
-                              ),
-                              onPressed: () async {
-                                try {
-                                  List<int> toDelete = [];
-                                  for (int i = 0;
-                                      i < currentFiles.length;
-                                      i++) {
-                                    if (selectedFilesBool[i]) {
-                                      toDelete.add(i);
-                                    }
-                                  }
-                                  Navigator.pop(context);
-                                  await deleteAll(toDelete);
-                                  Fluttertoast.showToast(msg: '删除完成');
-                                  return;
-                                } catch (e) {
-                                  Fluttertoast.showToast(msg: '删除失败');
-                                }
-                              },
-                            ),
-                            TextButton(
-                              style: TextButton.styleFrom(
-                                alignment: Alignment.center,
-                              ),
-                              child: const Text(
-                                '取消',
-                                style: TextStyle(
-                                    fontSize: 20, fontWeight: FontWeight.bold),
-                              ),
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                              },
-                            ),
-                          ],
-                        ),
-                      )
-                    ],
-                  );
+                onConfirm: () async {
+                  try {
+                    List<int> toDelete = [];
+                    for (int i = 0; i < currentFiles.length; i++) {
+                      if (selectedFilesBool[i]) {
+                        toDelete.add(i);
+                      }
+                    }
+                    Navigator.pop(context);
+                    await deleteAll(toDelete);
+                    showToast('删除完成');
+                    return;
+                  } catch (e) {
+                    showToast('删除失败');
+                  }
                 },
               );
             },
@@ -299,7 +251,7 @@ class _FileExplorerState extends State<FileExplorer> {
               ),
             )
           : SmartRefresher(
-              controller: _refreshController,
+              controller: refreshController,
               onRefresh: _onrefresh,
               enablePullDown: true,
               enablePullUp: false,
@@ -337,7 +289,7 @@ class _FileExplorerState extends State<FileExplorer> {
                                     try {
                                       deleteFile(context, currentFiles[index]);
                                     } catch (e) {
-                                      Fluttertoast.showToast(msg: '删除失败');
+                                      showToast('删除失败');
                                     }
                                   },
                                   backgroundColor: const Color(0xFFFE4A49),
@@ -438,7 +390,7 @@ class _FileExplorerState extends State<FileExplorer> {
                                         deleteFile(
                                             context, currentFiles[index]);
                                       } catch (e) {
-                                        Fluttertoast.showToast(msg: '删除失败');
+                                        showToast('删除失败');
                                       }
                                     },
                                     backgroundColor: const Color(0xFFFE4A49),
@@ -495,13 +447,13 @@ class _FileExplorerState extends State<FileExplorer> {
                                         '.ico',
                                         '.raw',
                                       ];
-                                      if (imageTypeList.contains(mypath
+                                      if (imageTypeList.contains(my_path
                                           .extension(currentFiles[index].path)
                                           .toLowerCase())) {
                                         List<String> imgList = [];
                                         for (var element in currentFiles) {
                                           if (imageTypeList.contains(
-                                              mypath.extension(element.path
+                                              my_path.extension(element.path
                                                   .toLowerCase()))) {
                                             imgList.add(element.path);
                                           }
@@ -576,19 +528,7 @@ class _FileExplorerState extends State<FileExplorer> {
                 elevation: 50,
                 onPressed: () async {
                   if (currentFiles.isEmpty) {
-                    Fluttertoast.showToast(
-                        msg: "目录为空",
-                        toastLength: Toast.LENGTH_SHORT,
-                        timeInSecForIosWeb: 2,
-                        backgroundColor:
-                            Theme.of(context).brightness == Brightness.light
-                                ? Colors.black
-                                : Colors.white,
-                        textColor:
-                            Theme.of(context).brightness == Brightness.light
-                                ? Colors.white
-                                : Colors.black,
-                        fontSize: 16.0);
+                    showToastWithContext(context, '目录为空');
                     return;
                   } else if (selectedFilesBool.contains(true)) {
                     setState(() {
@@ -639,7 +579,7 @@ class _FileExplorerState extends State<FileExplorer> {
 
   _onrefresh() async {
     getCurrentPathFiles(widget.currentDirPath);
-    _refreshController.refreshCompleted();
+    refreshController.refreshCompleted();
   }
 
   fileDateFormat(FileSystemEntity file) {
@@ -664,7 +604,7 @@ class _FileExplorerState extends State<FileExplorer> {
       '.raw',
     ];
     path = path.toLowerCase();
-    String fileExtension = mypath.extension(path);
+    String fileExtension = my_path.extension(path);
     if (imageList.contains(fileExtension)) {
       return Image.file(File(path),
           width: 40.0,
@@ -674,7 +614,7 @@ class _FileExplorerState extends State<FileExplorer> {
           fit: BoxFit.cover,
           filterQuality: FilterQuality.medium);
     } else {
-      return Image.asset(selectIcon(mypath.extension(path)),
+      return Image.asset(selectIcon(my_path.extension(path)),
           width: 40.0, height: 40.0);
     }
   }
@@ -740,7 +680,7 @@ class _FileExplorerState extends State<FileExplorer> {
     List<FileSystemEntity> files = [];
     List<FileSystemEntity> folder = [];
     for (var file in currentDir.listSync()) {
-      if (mypath.basename(file.path).substring(0, 1) == '.') {
+      if (my_path.basename(file.path).substring(0, 1) == '.') {
         continue;
       }
       if (FileSystemEntity.isFileSync(file.path)) {
@@ -792,19 +732,7 @@ class _FileExplorerState extends State<FileExplorer> {
                   getCurrentPathFiles(file.parent.path);
                   setState(() {});
                 } catch (e) {
-                  Fluttertoast.showToast(
-                      msg: '删除失败',
-                      toastLength: Toast.LENGTH_SHORT,
-                      timeInSecForIosWeb: 2,
-                      backgroundColor:
-                          Theme.of(context).brightness == Brightness.light
-                              ? Colors.black
-                              : Colors.white,
-                      textColor:
-                          Theme.of(context).brightness == Brightness.light
-                              ? Colors.white
-                              : Colors.black,
-                      fontSize: 16.0);
+                  showToastWithContext(context, '删除失败');
                 }
                 Navigator.pop(context);
                 setState(() {});
@@ -853,15 +781,15 @@ class _FileExplorerState extends State<FileExplorer> {
                   onPressed: () async {
                     String newName = controller.text;
                     if (newName.trim().isEmpty) {
-                      Fluttertoast.showToast(msg: '文件名不能为空');
+                      showToastWithContext(context, '名称不能为空');
                       return;
                     }
-                    if (newName.endsWith(mypath.extension(file.path))) {
+                    if (newName.endsWith(my_path.extension(file.path))) {
                       newName = newName.substring(0,
-                          newName.length - mypath.extension(file.path).length);
+                          newName.length - my_path.extension(file.path).length);
                     }
                     String newPath =
-                        '${file.parent.path}/$newName${mypath.extension(file.path)}';
+                        '${file.parent.path}/$newName${my_path.extension(file.path)}';
                     file.renameSync(newPath);
                     getCurrentPathFiles(file.parent.path);
                     Navigator.pop(context);
