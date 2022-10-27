@@ -1,16 +1,17 @@
 // ignore_for_file: unnecessary_brace_in_string_interps
+import 'dart:io';
+import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:horopic/utils/global.dart';
-import 'dart:convert';
-import 'dart:io';
 import 'package:crypto/crypto.dart';
 import 'package:xml2json/xml2json.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:horopic/utils/sqlUtils.dart';
-import 'package:horopic/hostconfigure/tencentconfig.dart';
-import 'package:horopic/api/tencent.dart';
+
+import 'package:horopic/utils/global.dart';
+import 'package:horopic/utils/sql_utils.dart';
+import 'package:horopic/picture_host_configure/tencent_configure.dart';
+import 'package:horopic/api/tencent_api.dart';
 
 class TencentManageAPI {
   static Map<String, String> areaCodeName = {
@@ -78,8 +79,8 @@ class TencentManageAPI {
         .toString();
     String lowerMethod = method.toLowerCase();
 
-    String UrlParamList = '';
-    String HttpParameters = '';
+    String urlParamList = '';
+    String httpParameters = '';
 
     if (urlParam != null && urlParam.isNotEmpty) {
       Map uriEncodeUrlParam = {};
@@ -92,20 +93,20 @@ class TencentManageAPI {
       urlParamKeyList.sort();
 
       for (var i = 0; i < urlParamKeyList.length; i++) {
-        UrlParamList = '${UrlParamList + urlParamKeyList[i]};';
-        HttpParameters =
-            '${HttpParameters + urlParamKeyList[i]}=${uriEncodeUrlParam[urlParamKeyList[i]]}&';
+        urlParamList = '${urlParamList + urlParamKeyList[i]};';
+        httpParameters =
+            '${httpParameters + urlParamKeyList[i]}=${uriEncodeUrlParam[urlParamKeyList[i]]}&';
       }
-      if (HttpParameters.isNotEmpty) {
-        HttpParameters = HttpParameters.substring(0, HttpParameters.length - 1);
+      if (httpParameters.isNotEmpty) {
+        httpParameters = httpParameters.substring(0, httpParameters.length - 1);
       }
-      if (UrlParamList.isNotEmpty) {
-        UrlParamList = UrlParamList.substring(0, UrlParamList.length - 1);
+      if (urlParamList.isNotEmpty) {
+        urlParamList = urlParamList.substring(0, urlParamList.length - 1);
       }
     }
 
-    String HeaderList = '';
-    String HttpHeaders = '';
+    String headerList = '';
+    String httpHeaders = '';
     Map uriEncodeHeader = {};
     header.forEach((key, value) {
       uriEncodeHeader[Uri.encodeComponent(key).toLowerCase()] =
@@ -114,19 +115,19 @@ class TencentManageAPI {
     List headerKeyList = uriEncodeHeader.keys.toList();
     headerKeyList.sort();
     for (var i = 0; i < headerKeyList.length; i++) {
-      HeaderList = '${HeaderList + headerKeyList[i]};';
-      HttpHeaders =
-          '${HttpHeaders + headerKeyList[i]}=${uriEncodeHeader[headerKeyList[i]]}&';
+      headerList = '${headerList + headerKeyList[i]};';
+      httpHeaders =
+          '${httpHeaders + headerKeyList[i]}=${uriEncodeHeader[headerKeyList[i]]}&';
     }
-    if (HttpHeaders.isNotEmpty) {
-      HttpHeaders = HttpHeaders.substring(0, HttpHeaders.length - 1);
+    if (httpHeaders.isNotEmpty) {
+      httpHeaders = httpHeaders.substring(0, httpHeaders.length - 1);
     }
-    if (HeaderList.isNotEmpty) {
-      HeaderList = HeaderList.substring(0, HeaderList.length - 1);
+    if (headerList.isNotEmpty) {
+      headerList = headerList.substring(0, headerList.length - 1);
     }
 
     String httpString =
-        '$lowerMethod\n$urlpath\n$HttpParameters\n$HttpHeaders\n';
+        '$lowerMethod\n$urlpath\n$httpParameters\n$httpHeaders\n';
     String stringtosign =
         'sha1\n$keyTime\n${sha1.convert(utf8.encode(httpString)).toString()}\n';
 
@@ -134,7 +135,7 @@ class TencentManageAPI {
         .convert(utf8.encode(stringtosign))
         .toString();
     String authorization =
-        'q-sign-algorithm=sha1&q-ak=$secretId&q-sign-time=$keyTime&q-key-time=$keyTime&q-header-list=$HeaderList&q-url-param-list=$UrlParamList&q-signature=$signature';
+        'q-sign-algorithm=sha1&q-ak=$secretId&q-sign-time=$keyTime&q-key-time=$keyTime&q-header-list=$headerList&q-url-param-list=$urlParamList&q-signature=$signature';
     return authorization;
   }
 
@@ -757,8 +758,6 @@ class TencentManageAPI {
     Map configMap = await getConfigMap();
     String bucket = element['name'];
     String region = element['location'];
-
-    String method = 'PUT';
 
     String secretId = configMap['secretId'];
     String secretKey = configMap['secretKey'];
