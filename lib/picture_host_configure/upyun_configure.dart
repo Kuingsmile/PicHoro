@@ -1,26 +1,26 @@
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'dart:io';
-import 'package:path_provider/path_provider.dart';
-import 'package:dio/dio.dart';
 import 'dart:convert';
-import 'package:horopic/utils/common_func.dart';
-import 'package:horopic/pages/loading.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:horopic/utils/sqlUtils.dart';
-import 'package:horopic/utils/global.dart';
-import 'package:path/path.dart' as mypath;
 
 import 'package:crypto/crypto.dart';
+import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:path_provider/path_provider.dart';
+
+import 'package:horopic/pages/loading.dart';
+import 'package:horopic/utils/common_functions.dart';
+import 'package:horopic/utils/global.dart';
+import 'package:horopic/utils/sql_utils.dart';
 
 class UpyunConfig extends StatefulWidget {
   const UpyunConfig({Key? key}) : super(key: key);
 
   @override
-  _UpyunConfigState createState() => _UpyunConfigState();
+  UpyunConfigState createState() => UpyunConfigState();
 }
 
-class _UpyunConfigState extends State<UpyunConfig> {
+class UpyunConfigState extends State<UpyunConfig> {
   final _formKey = GlobalKey<FormState>();
 
   final _bucketController = TextEditingController();
@@ -213,7 +213,7 @@ class _UpyunConfigState extends State<UpyunConfig> {
       var queryuser = await MySqlUtils.queryUser(username: defaultUser);
 
       if (queryuser == 'Empty') {
-        return showAlertDialog(
+        return showCupertinoAlertDialog(
             context: context, title: '错误', content: '用户不存在,请先登录');
       }
 
@@ -305,17 +305,18 @@ class _UpyunConfigState extends State<UpyunConfig> {
           final upyunConfigJson = jsonEncode(upyunConfig);
           final upyunConfigFile = await _localFile;
           await upyunConfigFile.writeAsString(upyunConfigJson);
-          return showAlertDialog(
+          return showCupertinoAlertDialog(
               context: context, title: '成功', content: '配置成功');
         } else {
-          return showAlertDialog(
+          return showCupertinoAlertDialog(
               context: context, title: '错误', content: '数据库错误');
         }
       } else {
-        return showAlertDialog(context: context, title: '错误', content: '验证失败');
+        return showCupertinoAlertDialog(
+            context: context, title: '错误', content: '验证失败');
       }
     } catch (e) {
-      return showAlertDialog(
+      return showCupertinoAlertDialog(
           context: context, title: '错误', content: e.toString());
     }
   }
@@ -326,7 +327,8 @@ class _UpyunConfigState extends State<UpyunConfig> {
       String configData = await upyunConfigFile.readAsString();
 
       if (configData == "Error") {
-        showAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");
+        showCupertinoAlertDialog(
+            context: context, title: "检查失败!", content: "请先配置上传参数.");
         return;
       }
 
@@ -407,17 +409,19 @@ class _UpyunConfigState extends State<UpyunConfig> {
       );
 
       if (response.statusCode == 200) {
-        showAlertDialog(
+        showCupertinoAlertDialog(
             context: context,
             title: '通知',
             content:
                 '检测通过，您的配置信息为:\nBucket:\n${configMap['bucket']}\nOperator:\n${configMap['operator']}\nPassword:\n${configMap['password']}\nUrl:\n${configMap['url']}\nOptions:\n${configMap['options']}\nPath:\n${configMap['path']}');
       } else {
-        showAlertDialog(context: context, title: '错误', content: '检查失败，请检查配置信息');
+        showCupertinoAlertDialog(
+            context: context, title: '错误', content: '检查失败，请检查配置信息');
         return;
       }
     } catch (e) {
-      showAlertDialog(context: context, title: "检查失败!", content: e.toString());
+      showCupertinoAlertDialog(
+          context: context, title: "检查失败!", content: e.toString());
     }
   }
 
@@ -453,24 +457,12 @@ class _UpyunConfigState extends State<UpyunConfig> {
             msg: "请先注册用户",
             toastLength: Toast.LENGTH_SHORT,
             timeInSecForIosWeb: 2,
-            backgroundColor: Theme.of(context).brightness == Brightness.light
-                ? Colors.black
-                : Colors.white,
-            textColor: Theme.of(context).brightness == Brightness.light
-                ? Colors.white
-                : Colors.black,
             fontSize: 16.0);
       } else if (queryuser['password'] != defaultPassword) {
         return Fluttertoast.showToast(
             msg: "请先登录",
             toastLength: Toast.LENGTH_SHORT,
             timeInSecForIosWeb: 2,
-            backgroundColor: Theme.of(context).brightness == Brightness.light
-                ? Colors.black
-                : Colors.white,
-            textColor: Theme.of(context).brightness == Brightness.light
-                ? Colors.white
-                : Colors.black,
             fontSize: 16.0);
       }
 
@@ -480,12 +472,6 @@ class _UpyunConfigState extends State<UpyunConfig> {
             msg: "请先配置上传参数",
             toastLength: Toast.LENGTH_SHORT,
             timeInSecForIosWeb: 2,
-            backgroundColor: Theme.of(context).brightness == Brightness.light
-                ? Colors.black
-                : Colors.white,
-            textColor: Theme.of(context).brightness == Brightness.light
-                ? Colors.white
-                : Colors.black,
             fontSize: 16.0);
       }
       if (queryUpyun == 'Error') {
@@ -493,12 +479,6 @@ class _UpyunConfigState extends State<UpyunConfig> {
             msg: "Error",
             toastLength: Toast.LENGTH_SHORT,
             timeInSecForIosWeb: 2,
-            backgroundColor: Theme.of(context).brightness == Brightness.light
-                ? Colors.black
-                : Colors.white,
-            textColor: Theme.of(context).brightness == Brightness.light
-                ? Colors.white
-                : Colors.black,
             fontSize: 16.0);
       }
       if (queryuser['defaultPShost'] == 'upyun') {
@@ -508,12 +488,6 @@ class _UpyunConfigState extends State<UpyunConfig> {
             msg: "已经是默认配置",
             toastLength: Toast.LENGTH_SHORT,
             timeInSecForIosWeb: 2,
-            backgroundColor: Theme.of(context).brightness == Brightness.light
-                ? Colors.black
-                : Colors.white,
-            textColor: Theme.of(context).brightness == Brightness.light
-                ? Colors.white
-                : Colors.black,
             fontSize: 16.0);
       } else {
         List sqlconfig = [];
@@ -525,43 +499,13 @@ class _UpyunConfigState extends State<UpyunConfig> {
         if (updateResult == 'Success') {
           await Global.setPShost('upyun');
           await Global.setShowedPBhost('upyun');
-          Fluttertoast.showToast(
-              msg: "已设置又拍云为默认图床",
-              toastLength: Toast.LENGTH_SHORT,
-              timeInSecForIosWeb: 2,
-              backgroundColor: Theme.of(context).brightness == Brightness.light
-                  ? Colors.black
-                  : Colors.white,
-              textColor: Theme.of(context).brightness == Brightness.light
-                  ? Colors.white
-                  : Colors.black,
-              fontSize: 16.0);
+          showToast('已设置又拍云为默认图床');
         } else {
-          Fluttertoast.showToast(
-              msg: "写入数据库失败",
-              toastLength: Toast.LENGTH_SHORT,
-              timeInSecForIosWeb: 2,
-              backgroundColor: Theme.of(context).brightness == Brightness.light
-                  ? Colors.black
-                  : Colors.white,
-              textColor: Theme.of(context).brightness == Brightness.light
-                  ? Colors.white
-                  : Colors.black,
-              fontSize: 16.0);
+          showToast('写入数据库失败');
         }
       }
     } catch (e) {
-      Fluttertoast.showToast(
-          msg: "Error",
-          toastLength: Toast.LENGTH_SHORT,
-          timeInSecForIosWeb: 2,
-          backgroundColor: Theme.of(context).brightness == Brightness.light
-              ? Colors.black
-              : Colors.white,
-          textColor: Theme.of(context).brightness == Brightness.light
-              ? Colors.white
-              : Colors.black,
-          fontSize: 16.0);
+      showToastWithContext(context, '错误');
     }
   }
 }
