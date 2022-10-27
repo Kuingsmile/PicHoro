@@ -1,13 +1,15 @@
+import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:external_path/external_path.dart';
-import 'dart:io';
-import 'package:horopic/PShostFileManage/smms/downloadAPI/smmsdownloader.dart';
-import 'package:horopic/PShostFileManage/smms/downloadAPI/smmsDownload_task.dart';
-import 'package:horopic/PShostFileManage/tencent/downloadAPI/downloadStatus.dart';
+import 'package:flutter/foundation.dart';
 import 'package:fluro/fluro.dart';
+import 'package:external_path/external_path.dart';
+
+import 'package:horopic/picture_host_manage/smms/download_api/smms_downloader.dart';
+import 'package:horopic/picture_host_manage/smms/download_api/smms_download_task.dart';
+import 'package:horopic/picture_host_manage/tencent/download_api/download_status.dart';
 import 'package:horopic/router/application.dart';
-import 'package:horopic/router/routes.dart';
+import 'package:horopic/router/routers.dart';
 //修改自flutter_download_manager包 https://github.com/nabil6391/flutter_download_manager 作者@nabil6391
 
 Map downloadStatus = {
@@ -31,11 +33,11 @@ class SmmsUpDownloadManagePage extends StatefulWidget {
       : super(key: key);
 
   @override
-  _SmmsUpDownloadManagePageState createState() =>
-      _SmmsUpDownloadManagePageState();
+  SmmsUpDownloadManagePageState createState() =>
+      SmmsUpDownloadManagePageState();
 }
 
-class _SmmsUpDownloadManagePageState extends State<SmmsUpDownloadManagePage> {
+class SmmsUpDownloadManagePageState extends State<SmmsUpDownloadManagePage> {
   var downloadManager = DownloadManager();
   var savedDir = '';
 
@@ -74,7 +76,11 @@ class _SmmsUpDownloadManagePageState extends State<SmmsUpDownloadManagePage> {
             var file = File(fileName);
             try {
               await file.delete();
-            } catch (e) {}
+            } catch (e) {
+              if (kDebugMode) {
+                print(e);
+              }
+            }
             await downloadManager.removeDownload(url);
             setState(() {});
           },
@@ -252,10 +258,10 @@ class ListItem extends StatefulWidget {
       : super(key: key);
 
   @override
-  _ListItemState createState() => _ListItemState();
+  ListItemState createState() => ListItemState();
 }
 
-class _ListItemState extends State<ListItem> {
+class ListItemState extends State<ListItem> {
   @override
   void initState() {
     super.initState();
