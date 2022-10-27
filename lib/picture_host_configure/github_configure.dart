@@ -1,23 +1,24 @@
-import 'package:flutter/material.dart';
 import 'dart:io';
-import 'package:path_provider/path_provider.dart';
-import 'package:dio/dio.dart';
 import 'dart:convert';
-import 'package:horopic/utils/common_func.dart';
-import 'package:horopic/pages/loading.dart';
+
+import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:horopic/utils/sqlUtils.dart';
+
+import 'package:horopic/pages/loading.dart';
+import 'package:horopic/utils/common_functions.dart';
+import 'package:horopic/utils/sql_utils.dart';
 import 'package:horopic/utils/global.dart';
 
-//a textfield to get hosts,username,passwd,token and strategy_id
 class GithubConfig extends StatefulWidget {
   const GithubConfig({Key? key}) : super(key: key);
 
   @override
-  _GithubConfigState createState() => _GithubConfigState();
+  GithubConfigState createState() => GithubConfigState();
 }
 
-class _GithubConfigState extends State<GithubConfig> {
+class GithubConfigState extends State<GithubConfig> {
   final _formKey = GlobalKey<FormState>();
 
   final _githubusernameController = TextEditingController();
@@ -211,7 +212,7 @@ class _GithubConfigState extends State<GithubConfig> {
       var queryuser = await MySqlUtils.queryUser(username: defaultUser);
 
       if (queryuser == 'Empty') {
-        return showAlertDialog(
+        return showCupertinoAlertDialog(
             context: context, title: '错误', content: '用户不存在,请先登录');
       }
       BaseOptions options = BaseOptions(
@@ -246,22 +247,22 @@ class _GithubConfigState extends State<GithubConfig> {
             final githubConfigJson = jsonEncode(githubConfig);
             final githubConfigFile = await _localFile;
             await githubConfigFile.writeAsString(githubConfigJson);
-            return showAlertDialog(
+            return showCupertinoAlertDialog(
                 context: context, title: '成功', content: '配置成功');
           } else {
-            return showAlertDialog(
+            return showCupertinoAlertDialog(
                 context: context, title: '错误', content: '数据库错误');
           }
         } else {
-          return showAlertDialog(
+          return showCupertinoAlertDialog(
               context: context, title: '错误', content: 'token错误');
         }
       } catch (e) {
-        return showAlertDialog(
+        return showCupertinoAlertDialog(
             context: context, title: '错误', content: e.toString());
       }
     } catch (e) {
-      return showAlertDialog(
+      return showCupertinoAlertDialog(
           context: context, title: '错误', content: e.toString());
     }
   }
@@ -272,7 +273,8 @@ class _GithubConfigState extends State<GithubConfig> {
       String configData = await githubConfigFile.readAsString();
 
       if (configData == "Error") {
-        showAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");
+        showCupertinoAlertDialog(
+            context: context, title: "检查失败!", content: "请先配置上传参数.");
         return;
       }
 
@@ -295,25 +297,20 @@ class _GithubConfigState extends State<GithubConfig> {
 
       if (response.statusCode == 200 &&
           response.data.toString().contains("email")) {
-        showAlertDialog(
-            context: context,
-            title: '通知',
-            content: '检测通过，您的配置信息为:\n用户名: ' +
-                configMap["githubusername"] +
-                '\n仓库名: ' +
-                configMap["repo"] +
-                '\n存储路径: ' +
-                configMap["storePath"] +
-                '\n分支: ' +
-                configMap["branch"] +
-                '\n自定义域名: ' +
-                configMap["customDomain"]);
+        showCupertinoAlertDialog(
+          context: context,
+          title: '通知',
+          content:
+              '检测通过，您的配置信息为:\n用户名:\n${configMap["githubusername"]}\n仓库名:\n${configMap["repo"]}\n存储路径:\n${configMap["storePath"]}\n分支:\n${configMap["branch"]}\n自定义域名:\n${configMap["customDomain"]}',
+        );
       } else {
-        showAlertDialog(context: context, title: '错误', content: '检查失败，请检查配置信息');
+        showCupertinoAlertDialog(
+            context: context, title: '错误', content: '检查失败，请检查配置信息');
         return;
       }
     } catch (e) {
-      showAlertDialog(context: context, title: "检查失败!", content: e.toString());
+      showCupertinoAlertDialog(
+          context: context, title: "检查失败!", content: e.toString());
     }
   }
 
@@ -349,24 +346,12 @@ class _GithubConfigState extends State<GithubConfig> {
             msg: "请先注册用户",
             toastLength: Toast.LENGTH_SHORT,
             timeInSecForIosWeb: 2,
-            backgroundColor: Theme.of(context).brightness == Brightness.light
-                ? Colors.black
-                : Colors.white,
-            textColor: Theme.of(context).brightness == Brightness.light
-                ? Colors.white
-                : Colors.black,
             fontSize: 16.0);
       } else if (queryuser['password'] != defaultPassword) {
         return Fluttertoast.showToast(
             msg: "请先登录",
             toastLength: Toast.LENGTH_SHORT,
             timeInSecForIosWeb: 2,
-            backgroundColor: Theme.of(context).brightness == Brightness.light
-                ? Colors.black
-                : Colors.white,
-            textColor: Theme.of(context).brightness == Brightness.light
-                ? Colors.white
-                : Colors.black,
             fontSize: 16.0);
       }
 
@@ -376,12 +361,6 @@ class _GithubConfigState extends State<GithubConfig> {
             msg: "请先配置上传参数",
             toastLength: Toast.LENGTH_SHORT,
             timeInSecForIosWeb: 2,
-            backgroundColor: Theme.of(context).brightness == Brightness.light
-                ? Colors.black
-                : Colors.white,
-            textColor: Theme.of(context).brightness == Brightness.light
-                ? Colors.white
-                : Colors.black,
             fontSize: 16.0);
       }
       if (queryGithub == 'Error') {
@@ -389,12 +368,6 @@ class _GithubConfigState extends State<GithubConfig> {
             msg: "Error",
             toastLength: Toast.LENGTH_SHORT,
             timeInSecForIosWeb: 2,
-            backgroundColor: Theme.of(context).brightness == Brightness.light
-                ? Colors.black
-                : Colors.white,
-            textColor: Theme.of(context).brightness == Brightness.light
-                ? Colors.white
-                : Colors.black,
             fontSize: 16.0);
       }
       if (queryuser['defaultPShost'] == 'github') {
@@ -404,12 +377,6 @@ class _GithubConfigState extends State<GithubConfig> {
             msg: "已经是默认配置",
             toastLength: Toast.LENGTH_SHORT,
             timeInSecForIosWeb: 2,
-            backgroundColor: Theme.of(context).brightness == Brightness.light
-                ? Colors.black
-                : Colors.white,
-            textColor: Theme.of(context).brightness == Brightness.light
-                ? Colors.white
-                : Colors.black,
             fontSize: 16.0);
       } else {
         List sqlconfig = [];
@@ -421,43 +388,13 @@ class _GithubConfigState extends State<GithubConfig> {
         if (updateResult == 'Success') {
           await Global.setPShost('github');
           await Global.setShowedPBhost('github');
-          Fluttertoast.showToast(
-              msg: "已设置Github为默认图床",
-              toastLength: Toast.LENGTH_SHORT,
-              timeInSecForIosWeb: 2,
-              backgroundColor: Theme.of(context).brightness == Brightness.light
-                  ? Colors.black
-                  : Colors.white,
-              textColor: Theme.of(context).brightness == Brightness.light
-                  ? Colors.white
-                  : Colors.black,
-              fontSize: 16.0);
+          showToast('已设置Github为默认图床');
         } else {
-          Fluttertoast.showToast(
-              msg: "写入数据库失败",
-              toastLength: Toast.LENGTH_SHORT,
-              timeInSecForIosWeb: 2,
-              backgroundColor: Theme.of(context).brightness == Brightness.light
-                  ? Colors.black
-                  : Colors.white,
-              textColor: Theme.of(context).brightness == Brightness.light
-                  ? Colors.white
-                  : Colors.black,
-              fontSize: 16.0);
+          showToast('写入数据库失败');
         }
       }
     } catch (e) {
-      Fluttertoast.showToast(
-          msg: "Error",
-          toastLength: Toast.LENGTH_SHORT,
-          timeInSecForIosWeb: 2,
-          backgroundColor: Theme.of(context).brightness == Brightness.light
-              ? Colors.black
-              : Colors.white,
-          textColor: Theme.of(context).brightness == Brightness.light
-              ? Colors.white
-              : Colors.black,
-          fontSize: 16.0);
+      showToastWithContext(context, '错误');
     }
   }
 }

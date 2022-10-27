@@ -1,26 +1,26 @@
+import 'dart:io';
+import 'dart:convert';
+
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'dart:io';
-import 'package:path_provider/path_provider.dart';
-import 'package:dio/dio.dart';
-import 'dart:convert';
-import 'package:horopic/utils/common_func.dart';
-import 'package:horopic/pages/loading.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:horopic/utils/sqlUtils.dart';
-import 'package:horopic/utils/global.dart';
-import 'package:horopic/api/tencent.dart';
+import 'package:path_provider/path_provider.dart';
 
-import 'package:crypto/crypto.dart';
+import 'package:horopic/api/tencent_api.dart';
+import 'package:horopic/pages/loading.dart';
+import 'package:horopic/utils/common_functions.dart';
+import 'package:horopic/utils/sql_utils.dart';
+import 'package:horopic/utils/global.dart';
 
 class TencentConfig extends StatefulWidget {
   const TencentConfig({Key? key}) : super(key: key);
 
   @override
-  _TencentConfigState createState() => _TencentConfigState();
+  TencentConfigState createState() => TencentConfigState();
 }
 
-class _TencentConfigState extends State<TencentConfig> {
+class TencentConfigState extends State<TencentConfig> {
   final _formKey = GlobalKey<FormState>();
 
   final _secretIdController = TextEditingController();
@@ -252,7 +252,7 @@ class _TencentConfigState extends State<TencentConfig> {
       var queryuser = await MySqlUtils.queryUser(username: defaultUser);
 
       if (queryuser == 'Empty') {
-        return showAlertDialog(
+        return showCupertinoAlertDialog(
             context: context, title: '错误', content: '用户不存在,请先登录');
       }
 
@@ -345,17 +345,18 @@ class _TencentConfigState extends State<TencentConfig> {
           final tencentConfigJson = jsonEncode(tencentConfig);
           final tencentConfigFile = await _localFile;
           await tencentConfigFile.writeAsString(tencentConfigJson);
-          return showAlertDialog(
+          return showCupertinoAlertDialog(
               context: context, title: '成功', content: '配置成功');
         } else {
-          return showAlertDialog(
+          return showCupertinoAlertDialog(
               context: context, title: '错误', content: '数据库错误');
         }
       } else {
-        return showAlertDialog(context: context, title: '错误', content: '验证失败');
+        return showCupertinoAlertDialog(
+            context: context, title: '错误', content: '验证失败');
       }
     } catch (e) {
-      return showAlertDialog(
+      return showCupertinoAlertDialog(
           context: context, title: '错误', content: e.toString());
     }
   }
@@ -366,7 +367,8 @@ class _TencentConfigState extends State<TencentConfig> {
       String configData = await tencentConfigFile.readAsString();
 
       if (configData == "Error") {
-        showAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");
+        showCupertinoAlertDialog(
+            context: context, title: "检查失败!", content: "请先配置上传参数.");
         return;
       }
 
@@ -449,17 +451,19 @@ class _TencentConfigState extends State<TencentConfig> {
       );
 
       if (response.statusCode == 204) {
-        showAlertDialog(
+        showCupertinoAlertDialog(
             context: context,
             title: '通知',
             content:
                 '检测通过，您的配置信息为:\nsecretId:\n${configMap['secretId']}\nsecretKey:\n${configMap['secretKey']}\nbucket:\n${configMap['bucket']}\nappId:\n${configMap['appId']}\narea:\n${configMap['area']}\npath:\n${configMap['path']}\ncustomUrl:\n${configMap['customUrl']}\noptions:\n${configMap['options']}');
       } else {
-        showAlertDialog(context: context, title: '错误', content: '检查失败，请检查配置信息');
+        showCupertinoAlertDialog(
+            context: context, title: '错误', content: '检查失败，请检查配置信息');
         return;
       }
     } catch (e) {
-      showAlertDialog(context: context, title: "检查失败!", content: e.toString());
+      showCupertinoAlertDialog(
+          context: context, title: "检查失败!", content: e.toString());
     }
   }
 
@@ -495,24 +499,12 @@ class _TencentConfigState extends State<TencentConfig> {
             msg: "请先注册用户",
             toastLength: Toast.LENGTH_SHORT,
             timeInSecForIosWeb: 2,
-            backgroundColor: Theme.of(context).brightness == Brightness.light
-                ? Colors.black
-                : Colors.white,
-            textColor: Theme.of(context).brightness == Brightness.light
-                ? Colors.white
-                : Colors.black,
             fontSize: 16.0);
       } else if (queryuser['password'] != defaultPassword) {
         return Fluttertoast.showToast(
             msg: "请先登录",
             toastLength: Toast.LENGTH_SHORT,
             timeInSecForIosWeb: 2,
-            backgroundColor: Theme.of(context).brightness == Brightness.light
-                ? Colors.black
-                : Colors.white,
-            textColor: Theme.of(context).brightness == Brightness.light
-                ? Colors.white
-                : Colors.black,
             fontSize: 16.0);
       }
 
@@ -522,12 +514,6 @@ class _TencentConfigState extends State<TencentConfig> {
             msg: "请先配置上传参数",
             toastLength: Toast.LENGTH_SHORT,
             timeInSecForIosWeb: 2,
-            backgroundColor: Theme.of(context).brightness == Brightness.light
-                ? Colors.black
-                : Colors.white,
-            textColor: Theme.of(context).brightness == Brightness.light
-                ? Colors.white
-                : Colors.black,
             fontSize: 16.0);
       }
       if (queryTencent == 'Error') {
@@ -535,12 +521,6 @@ class _TencentConfigState extends State<TencentConfig> {
             msg: "Error",
             toastLength: Toast.LENGTH_SHORT,
             timeInSecForIosWeb: 2,
-            backgroundColor: Theme.of(context).brightness == Brightness.light
-                ? Colors.black
-                : Colors.white,
-            textColor: Theme.of(context).brightness == Brightness.light
-                ? Colors.white
-                : Colors.black,
             fontSize: 16.0);
       }
       if (queryuser['defaultPShost'] == 'tencent') {
@@ -550,12 +530,6 @@ class _TencentConfigState extends State<TencentConfig> {
             msg: "已经是默认配置",
             toastLength: Toast.LENGTH_SHORT,
             timeInSecForIosWeb: 2,
-            backgroundColor: Theme.of(context).brightness == Brightness.light
-                ? Colors.black
-                : Colors.white,
-            textColor: Theme.of(context).brightness == Brightness.light
-                ? Colors.white
-                : Colors.black,
             fontSize: 16.0);
       } else {
         List sqlconfig = [];
@@ -567,43 +541,13 @@ class _TencentConfigState extends State<TencentConfig> {
         if (updateResult == 'Success') {
           await Global.setPShost('tencent');
           await Global.setShowedPBhost('tencent');
-          Fluttertoast.showToast(
-              msg: "已设置腾讯云为默认图床",
-              toastLength: Toast.LENGTH_SHORT,
-              timeInSecForIosWeb: 2,
-              backgroundColor: Theme.of(context).brightness == Brightness.light
-                  ? Colors.black
-                  : Colors.white,
-              textColor: Theme.of(context).brightness == Brightness.light
-                  ? Colors.white
-                  : Colors.black,
-              fontSize: 16.0);
+          showToast('已设置腾讯云为默认图床');
         } else {
-          Fluttertoast.showToast(
-              msg: "写入数据库失败",
-              toastLength: Toast.LENGTH_SHORT,
-              timeInSecForIosWeb: 2,
-              backgroundColor: Theme.of(context).brightness == Brightness.light
-                  ? Colors.black
-                  : Colors.white,
-              textColor: Theme.of(context).brightness == Brightness.light
-                  ? Colors.white
-                  : Colors.black,
-              fontSize: 16.0);
+          showToast('写入数据库失败');
         }
       }
     } catch (e) {
-      Fluttertoast.showToast(
-          msg: "Error",
-          toastLength: Toast.LENGTH_SHORT,
-          timeInSecForIosWeb: 2,
-          backgroundColor: Theme.of(context).brightness == Brightness.light
-              ? Colors.black
-              : Colors.white,
-          textColor: Theme.of(context).brightness == Brightness.light
-              ? Colors.white
-              : Colors.black,
-          fontSize: 16.0);
+      showToastWithContext(context, '错误');
     }
   }
 }

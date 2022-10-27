@@ -1,22 +1,24 @@
-import 'package:flutter/material.dart';
 import 'dart:io';
-import 'package:path_provider/path_provider.dart';
-import 'package:dio/dio.dart';
 import 'dart:convert';
-import 'package:horopic/utils/common_func.dart';
-import 'package:horopic/pages/loading.dart';
+
+import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:horopic/utils/sqlUtils.dart';
+
+import 'package:horopic/pages/loading.dart';
+import 'package:horopic/utils/common_functions.dart';
+import 'package:horopic/utils/sql_utils.dart';
 import 'package:horopic/utils/global.dart';
 
 class SmmsConfig extends StatefulWidget {
   const SmmsConfig({Key? key}) : super(key: key);
 
   @override
-  _SmmsConfigState createState() => _SmmsConfigState();
+  SmmsConfigState createState() => SmmsConfigState();
 }
 
-class _SmmsConfigState extends State<SmmsConfig> {
+class SmmsConfigState extends State<SmmsConfig> {
   final _formKey = GlobalKey<FormState>();
   final _tokenController = TextEditingController();
 
@@ -99,7 +101,7 @@ class _SmmsConfigState extends State<SmmsConfig> {
       var queryuser = await MySqlUtils.queryUser(username: defaultUser);
 
       if (queryuser == 'Empty') {
-        return showAlertDialog(
+        return showCupertinoAlertDialog(
             context: context, title: '错误', content: '用户不存在,请先登录');
       }
       String validateURL = "https://smms.app/api/v2/profile";
@@ -133,22 +135,22 @@ class _SmmsConfigState extends State<SmmsConfig> {
             final smmsConfigJson = jsonEncode(smmsConfig);
             final smmsConfigFile = await _localFile;
             await smmsConfigFile.writeAsString(smmsConfigJson);
-            return showAlertDialog(
+            return showCupertinoAlertDialog(
                 context: context, title: '成功', content: '配置成功');
           } else {
-            return showAlertDialog(
+            return showCupertinoAlertDialog(
                 context: context, title: '错误', content: '数据库错误');
           }
         } else {
-          return showAlertDialog(
+          return showCupertinoAlertDialog(
               context: context, title: '错误', content: 'token错误');
         }
       } catch (e) {
-        return showAlertDialog(
+        return showCupertinoAlertDialog(
             context: context, title: '错误', content: e.toString());
       }
     } catch (e) {
-      return showAlertDialog(
+      return showCupertinoAlertDialog(
           context: context, title: '错误', content: e.toString());
     }
   }
@@ -158,7 +160,8 @@ class _SmmsConfigState extends State<SmmsConfig> {
       final smmsConfigFile = await _localFile;
       String configData = await smmsConfigFile.readAsString();
       if (configData == "Error") {
-        showAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");
+        showCupertinoAlertDialog(
+            context: context, title: "检查失败!", content: "请先配置上传参数.");
         return;
       }
       Map configMap = jsonDecode(configData);
@@ -178,20 +181,22 @@ class _SmmsConfigState extends State<SmmsConfig> {
       Dio dio = Dio(options);
       var response = await dio.post(validateURL, data: formData);
       if (response.statusCode == 200 && response.data['success'] == true) {
-        showAlertDialog(
+        showCupertinoAlertDialog(
             context: context,
             title: '通知',
             content: '检测通过，您的配置信息为:\ntoken:\n${configMap["token"]}');
       } else if (response.data['status'] == false) {
-        showAlertDialog(
+        showCupertinoAlertDialog(
             context: context, title: '错误', content: response.data['message']);
         return;
       } else {
-        showAlertDialog(context: context, title: '错误', content: '未知错误');
+        showCupertinoAlertDialog(
+            context: context, title: '错误', content: '未知错误');
         return;
       }
     } catch (e) {
-      showAlertDialog(context: context, title: "检查失败!", content: e.toString());
+      showCupertinoAlertDialog(
+          context: context, title: "检查失败!", content: e.toString());
     }
   }
 
@@ -226,24 +231,12 @@ class _SmmsConfigState extends State<SmmsConfig> {
             msg: "请先注册用户",
             toastLength: Toast.LENGTH_SHORT,
             timeInSecForIosWeb: 2,
-            backgroundColor: Theme.of(context).brightness == Brightness.light
-                ? Colors.black
-                : Colors.white,
-            textColor: Theme.of(context).brightness == Brightness.light
-                ? Colors.white
-                : Colors.black,
             fontSize: 16.0);
       } else if (queryuser['password'] != defaultPassword) {
         return Fluttertoast.showToast(
             msg: "请先登录",
             toastLength: Toast.LENGTH_SHORT,
             timeInSecForIosWeb: 2,
-            backgroundColor: Theme.of(context).brightness == Brightness.light
-                ? Colors.black
-                : Colors.white,
-            textColor: Theme.of(context).brightness == Brightness.light
-                ? Colors.white
-                : Colors.black,
             fontSize: 16.0);
       }
       var querysmms = await MySqlUtils.querySmms(username: defaultUser);
@@ -252,12 +245,6 @@ class _SmmsConfigState extends State<SmmsConfig> {
             msg: "请先配置上传参数",
             toastLength: Toast.LENGTH_SHORT,
             timeInSecForIosWeb: 2,
-            backgroundColor: Theme.of(context).brightness == Brightness.light
-                ? Colors.black
-                : Colors.white,
-            textColor: Theme.of(context).brightness == Brightness.light
-                ? Colors.white
-                : Colors.black,
             fontSize: 16.0);
       }
       if (querysmms == 'Error') {
@@ -265,12 +252,6 @@ class _SmmsConfigState extends State<SmmsConfig> {
             msg: "Error",
             toastLength: Toast.LENGTH_SHORT,
             timeInSecForIosWeb: 2,
-            backgroundColor: Theme.of(context).brightness == Brightness.light
-                ? Colors.black
-                : Colors.white,
-            textColor: Theme.of(context).brightness == Brightness.light
-                ? Colors.white
-                : Colors.black,
             fontSize: 16.0);
       }
       if (queryuser['defaultPShost'] == 'sm.ms') {
@@ -280,12 +261,6 @@ class _SmmsConfigState extends State<SmmsConfig> {
             msg: "已经是默认配置",
             toastLength: Toast.LENGTH_SHORT,
             timeInSecForIosWeb: 2,
-            backgroundColor: Theme.of(context).brightness == Brightness.light
-                ? Colors.black
-                : Colors.white,
-            textColor: Theme.of(context).brightness == Brightness.light
-                ? Colors.white
-                : Colors.black,
             fontSize: 16.0);
       } else {
         List sqlconfig = [];
@@ -296,43 +271,13 @@ class _SmmsConfigState extends State<SmmsConfig> {
         if (updateResult == 'Success') {
           await Global.setPShost('sm.ms');
           await Global.setShowedPBhost('smms');
-          Fluttertoast.showToast(
-              msg: "已设置sm.ms为默认图床",
-              toastLength: Toast.LENGTH_SHORT,
-              timeInSecForIosWeb: 2,
-              backgroundColor: Theme.of(context).brightness == Brightness.light
-                  ? Colors.black
-                  : Colors.white,
-              textColor: Theme.of(context).brightness == Brightness.light
-                  ? Colors.white
-                  : Colors.black,
-              fontSize: 16.0);
+          showToast("已设置sm.ms为默认图床");
         } else {
-          Fluttertoast.showToast(
-              msg: "写入数据库失败",
-              toastLength: Toast.LENGTH_SHORT,
-              timeInSecForIosWeb: 2,
-              backgroundColor: Theme.of(context).brightness == Brightness.light
-                  ? Colors.black
-                  : Colors.white,
-              textColor: Theme.of(context).brightness == Brightness.light
-                  ? Colors.white
-                  : Colors.black,
-              fontSize: 16.0);
+          showToast("写入数据库失败");
         }
       }
     } catch (e) {
-      Fluttertoast.showToast(
-          msg: "Error",
-          toastLength: Toast.LENGTH_SHORT,
-          timeInSecForIosWeb: 2,
-          backgroundColor: Theme.of(context).brightness == Brightness.light
-              ? Colors.black
-              : Colors.white,
-          textColor: Theme.of(context).brightness == Brightness.light
-              ? Colors.white
-              : Colors.black,
-          fontSize: 16.0);
+      showToastWithContext(context, '错误');
     }
   }
 }

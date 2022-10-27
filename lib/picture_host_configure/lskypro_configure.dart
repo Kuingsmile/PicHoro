@@ -1,12 +1,14 @@
-import 'package:flutter/material.dart';
 import 'dart:io';
-import 'package:path_provider/path_provider.dart';
-import 'package:dio/dio.dart';
 import 'dart:convert';
-import 'package:horopic/utils/common_func.dart';
-import 'package:horopic/pages/loading.dart';
+
+import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:horopic/utils/sqlUtils.dart';
+import 'package:path_provider/path_provider.dart';
+
+import 'package:horopic/utils/common_functions.dart';
+import 'package:horopic/pages/loading.dart';
+import 'package:horopic/utils/sql_utils.dart';
 import 'package:horopic/utils/global.dart';
 
 //a textfield to get hosts,username,passwd,token and strategy_id
@@ -14,10 +16,10 @@ class HostConfig extends StatefulWidget {
   const HostConfig({Key? key}) : super(key: key);
 
   @override
-  _HostConfigState createState() => _HostConfigState();
+  HostConfigState createState() => HostConfigState();
 }
 
-class _HostConfigState extends State<HostConfig> {
+class HostConfigState extends State<HostConfig> {
   final _formKey = GlobalKey<FormState>();
   final _hostController = TextEditingController();
   final _usernameController = TextEditingController();
@@ -26,7 +28,6 @@ class _HostConfigState extends State<HostConfig> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
   }
 
@@ -191,33 +192,38 @@ class _HostConfigState extends State<HostConfig> {
         dio = Dio(strategiesOptions);
         response = await dio.get(strategiesUrl);
 
-        showAlertDialog(
+        showCupertinoAlertDialog(
             barrierDismissible: false,
             context: context,
             title: '储存策略Id列表',
             content: response.data['data']['strategies'].toString());
       } else {
         if (response.statusCode == 403) {
-          showAlertDialog(context: context, title: '错误', content: '管理员关闭了接口功能');
+          showCupertinoAlertDialog(
+              context: context, title: '错误', content: '管理员关闭了接口功能');
           return;
         } else if (response.statusCode == 401) {
-          showAlertDialog(context: context, title: '错误', content: '授权失败');
+          showCupertinoAlertDialog(
+              context: context, title: '错误', content: '授权失败');
           return;
         } else if (response.statusCode == 500) {
-          showAlertDialog(context: context, title: '错误', content: '服务器异常');
+          showCupertinoAlertDialog(
+              context: context, title: '错误', content: '服务器异常');
           return;
         } else if (response.statusCode == 404) {
-          showAlertDialog(context: context, title: '错误', content: '接口不存在');
+          showCupertinoAlertDialog(
+              context: context, title: '错误', content: '接口不存在');
           return;
         }
         if (response.data['status'] == false) {
-          showAlertDialog(
+          showCupertinoAlertDialog(
               context: context, title: '错误', content: response.data['message']);
           return;
         }
       }
     } catch (e) {
-      showAlertDialog(context: context, title: '错误', content: e.toString());
+      showCupertinoAlertDialog(
+          context: context, title: '错误', content: e.toString());
     }
   }
 
@@ -262,7 +268,7 @@ class _HostConfigState extends State<HostConfig> {
               await MySqlUtils.queryLankong(username: defaultUser);
           var queryuser = await MySqlUtils.queryUser(username: defaultUser);
           if (queryuser == 'Empty') {
-            return showAlertDialog(
+            return showCupertinoAlertDialog(
                 context: context, title: '错误', content: '用户不存在,请先登录');
           } else if (querylankong == 'Empty') {
             sqlResult = await MySqlUtils.insertLankong(content: sqlconfig);
@@ -270,7 +276,7 @@ class _HostConfigState extends State<HostConfig> {
             sqlResult = await MySqlUtils.updateLankong(content: sqlconfig);
           }
         } catch (e) {
-          return showAlertDialog(
+          return showCupertinoAlertDialog(
               context: context, title: '错误', content: e.toString());
         }
         if (sqlResult == "Success") {
@@ -280,13 +286,13 @@ class _HostConfigState extends State<HostConfig> {
           final hostConfigFile = await _localFile;
           hostConfigFile.writeAsString(hostConfigJson);
 
-          return showAlertDialog(
+          return showCupertinoAlertDialog(
               context: context,
               barrierDismissible: false,
               title: '配置成功',
               content: '您的密钥为：$token,\n请妥善保管，不要泄露给他人');
         } else {
-          return showAlertDialog(
+          return showCupertinoAlertDialog(
               context: context,
               barrierDismissible: false,
               title: '配置失败',
@@ -294,25 +300,25 @@ class _HostConfigState extends State<HostConfig> {
         }
       } else {
         if (response.statusCode == 403) {
-          return showAlertDialog(
+          return showCupertinoAlertDialog(
               context: context, title: '错误', content: '管理员关闭了接口功能');
         } else if (response.statusCode == 401) {
-          return showAlertDialog(
+          return showCupertinoAlertDialog(
               context: context, title: '错误', content: '授权失败');
         } else if (response.statusCode == 500) {
-          return showAlertDialog(
+          return showCupertinoAlertDialog(
               context: context, title: '错误', content: '服务器异常');
         } else if (response.statusCode == 404) {
-          return showAlertDialog(
+          return showCupertinoAlertDialog(
               context: context, title: '错误', content: '接口不存在');
         }
         if (response.data['status'] == false) {
-          return showAlertDialog(
+          return showCupertinoAlertDialog(
               context: context, title: '错误', content: response.data['message']);
         }
       }
     } catch (e) {
-      return showAlertDialog(
+      return showCupertinoAlertDialog(
           context: context, title: '错误', content: e.toString());
     }
   }
@@ -322,7 +328,8 @@ class _HostConfigState extends State<HostConfig> {
       final hostConfigFile = await _localFile;
       String configData = await hostConfigFile.readAsString();
       if (configData == "Error") {
-        showAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");
+        showCupertinoAlertDialog(
+            context: context, title: "检查失败!", content: "请先配置上传参数.");
         return;
       }
       Map configMap = jsonDecode(configData);
@@ -343,33 +350,38 @@ class _HostConfigState extends State<HostConfig> {
         profileUrl,
       );
       if (response.statusCode == 200 && response.data['status'] == true) {
-        showAlertDialog(
+        showCupertinoAlertDialog(
             context: context,
             title: '通知',
             content:
                 '检测通过，您的配置信息为：\nhost:\n${configMap["host"]}\nstrategyId:\n${configMap["strategy_id"]}\ntoken:\n${configMap["token"]}');
       } else {
         if (response.statusCode == 403) {
-          showAlertDialog(context: context, title: '错误', content: '管理员关闭了接口功能');
+          showCupertinoAlertDialog(
+              context: context, title: '错误', content: '管理员关闭了接口功能');
           return;
         } else if (response.statusCode == 401) {
-          showAlertDialog(context: context, title: '错误', content: '授权失败');
+          showCupertinoAlertDialog(
+              context: context, title: '错误', content: '授权失败');
           return;
         } else if (response.statusCode == 500) {
-          showAlertDialog(context: context, title: '错误', content: '服务器异常');
+          showCupertinoAlertDialog(
+              context: context, title: '错误', content: '服务器异常');
           return;
         } else if (response.statusCode == 404) {
-          showAlertDialog(context: context, title: '错误', content: '接口不存在');
+          showCupertinoAlertDialog(
+              context: context, title: '错误', content: '接口不存在');
           return;
         }
         if (response.data['status'] == false) {
-          showAlertDialog(
+          showCupertinoAlertDialog(
               context: context, title: '错误', content: response.data['message']);
           return;
         }
       }
     } catch (e) {
-      showAlertDialog(context: context, title: "检查失败!", content: e.toString());
+      showCupertinoAlertDialog(
+          context: context, title: "检查失败!", content: e.toString());
     }
   }
 
@@ -404,24 +416,12 @@ class _HostConfigState extends State<HostConfig> {
             msg: "请先注册用户",
             toastLength: Toast.LENGTH_SHORT,
             timeInSecForIosWeb: 2,
-            backgroundColor: Theme.of(context).brightness == Brightness.light
-                ? Colors.black
-                : Colors.white,
-            textColor: Theme.of(context).brightness == Brightness.light
-                ? Colors.white
-                : Colors.black,
             fontSize: 16.0);
       } else if (queryuser['password'] != defaultPassword) {
         return Fluttertoast.showToast(
             msg: "请先登录",
             toastLength: Toast.LENGTH_SHORT,
             timeInSecForIosWeb: 2,
-            backgroundColor: Theme.of(context).brightness == Brightness.light
-                ? Colors.black
-                : Colors.white,
-            textColor: Theme.of(context).brightness == Brightness.light
-                ? Colors.white
-                : Colors.black,
             fontSize: 16.0);
       }
       var querylankong = await MySqlUtils.queryLankong(username: defaultUser);
@@ -430,12 +430,6 @@ class _HostConfigState extends State<HostConfig> {
             msg: "请先配置上传参数",
             toastLength: Toast.LENGTH_SHORT,
             timeInSecForIosWeb: 2,
-            backgroundColor: Theme.of(context).brightness == Brightness.light
-                ? Colors.black
-                : Colors.white,
-            textColor: Theme.of(context).brightness == Brightness.light
-                ? Colors.white
-                : Colors.black,
             fontSize: 16.0);
       }
       if (querylankong == 'Error') {
@@ -443,12 +437,6 @@ class _HostConfigState extends State<HostConfig> {
             msg: "Error",
             toastLength: Toast.LENGTH_SHORT,
             timeInSecForIosWeb: 2,
-            backgroundColor: Theme.of(context).brightness == Brightness.light
-                ? Colors.black
-                : Colors.white,
-            textColor: Theme.of(context).brightness == Brightness.light
-                ? Colors.white
-                : Colors.black,
             fontSize: 16.0);
       }
       if (queryuser['defaultPShost'] == 'lsky.pro') {
@@ -458,12 +446,6 @@ class _HostConfigState extends State<HostConfig> {
             msg: "已经是默认配置",
             toastLength: Toast.LENGTH_SHORT,
             timeInSecForIosWeb: 2,
-            backgroundColor: Theme.of(context).brightness == Brightness.light
-                ? Colors.black
-                : Colors.white,
-            textColor: Theme.of(context).brightness == Brightness.light
-                ? Colors.white
-                : Colors.black,
             fontSize: 16.0);
       } else {
         List sqlconfig = [];
@@ -474,43 +456,13 @@ class _HostConfigState extends State<HostConfig> {
         if (updateResult == 'Success') {
           await Global.setPShost('lsky.pro');
           await Global.setShowedPBhost('lskypro');
-          Fluttertoast.showToast(
-              msg: "已设置兰空图床为默认图床",
-              toastLength: Toast.LENGTH_SHORT,
-              timeInSecForIosWeb: 2,
-              backgroundColor: Theme.of(context).brightness == Brightness.light
-                  ? Colors.black
-                  : Colors.white,
-              textColor: Theme.of(context).brightness == Brightness.light
-                  ? Colors.white
-                  : Colors.black,
-              fontSize: 16.0);
+          showToast('已设置兰空图床为默认图床');
         } else {
-          Fluttertoast.showToast(
-              msg: "写入数据库失败",
-              toastLength: Toast.LENGTH_SHORT,
-              timeInSecForIosWeb: 2,
-              backgroundColor: Theme.of(context).brightness == Brightness.light
-                  ? Colors.black
-                  : Colors.white,
-              textColor: Theme.of(context).brightness == Brightness.light
-                  ? Colors.white
-                  : Colors.black,
-              fontSize: 16.0);
+          showToast('写入数据库失败');
         }
       }
     } catch (e) {
-      Fluttertoast.showToast(
-          msg: "Error",
-          toastLength: Toast.LENGTH_SHORT,
-          timeInSecForIosWeb: 2,
-          backgroundColor: Theme.of(context).brightness == Brightness.light
-              ? Colors.black
-              : Colors.white,
-          textColor: Theme.of(context).brightness == Brightness.light
-              ? Colors.white
-              : Colors.black,
-          fontSize: 16.0);
+      showToastWithContext(context, '错误');
     }
   }
 }

@@ -1,27 +1,28 @@
+import 'dart:io';
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'dart:io';
-import 'package:path_provider/path_provider.dart';
-import 'package:dio/dio.dart';
-import 'dart:convert';
-import 'package:horopic/utils/common_func.dart';
-import 'package:horopic/pages/loading.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:horopic/utils/sqlUtils.dart';
-import 'package:horopic/utils/global.dart';
-import 'package:horopic/api/aliyun.dart';
-import 'package:path/path.dart' as mypath;
 
 import 'package:crypto/crypto.dart';
+import 'package:dio/dio.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as my_path;
+
+import 'package:horopic/utils/common_functions.dart';
+import 'package:horopic/pages/loading.dart';
+import 'package:horopic/utils/sql_utils.dart';
+import 'package:horopic/utils/global.dart';
 
 class AliyunConfig extends StatefulWidget {
   const AliyunConfig({Key? key}) : super(key: key);
 
   @override
-  _AliyunConfigState createState() => _AliyunConfigState();
+  AliyunConfigState createState() => AliyunConfigState();
 }
 
-class _AliyunConfigState extends State<AliyunConfig> {
+class AliyunConfigState extends State<AliyunConfig> {
   final _formKey = GlobalKey<FormState>();
 
   final _keyIdController = TextEditingController();
@@ -234,7 +235,7 @@ class _AliyunConfigState extends State<AliyunConfig> {
       var queryuser = await MySqlUtils.queryUser(username: defaultUser);
 
       if (queryuser == 'Empty') {
-        return showAlertDialog(
+        return showCupertinoAlertDialog(
             context: context, title: '错误', content: '用户不存在,请先登录');
       }
 
@@ -281,7 +282,7 @@ class _AliyunConfigState extends State<AliyunConfig> {
         'Signature': singature,
         //阿里默认的content-type是application/octet-stream，这里改成image/xxx
         'x-oss-content-type':
-            'image/${mypath.extension(assetFilePath).replaceFirst('.', '')}',
+            'image/${my_path.extension(assetFilePath).replaceFirst('.', '')}',
         'file': await MultipartFile.fromFile(assetFilePath, filename: key),
       });
 
@@ -322,17 +323,18 @@ class _AliyunConfigState extends State<AliyunConfig> {
           final aliyunConfigJson = jsonEncode(aliyunConfig);
           final aliyunConfigFile = await _localFile;
           await aliyunConfigFile.writeAsString(aliyunConfigJson);
-          return showAlertDialog(
+          return showCupertinoAlertDialog(
               context: context, title: '成功', content: '配置成功');
         } else {
-          return showAlertDialog(
+          return showCupertinoAlertDialog(
               context: context, title: '错误', content: '数据库错误');
         }
       } else {
-        return showAlertDialog(context: context, title: '错误', content: '验证失败');
+        return showCupertinoAlertDialog(
+            context: context, title: '错误', content: '验证失败');
       }
     } catch (e) {
-      return showAlertDialog(
+      return showCupertinoAlertDialog(
           context: context, title: '错误', content: e.toString());
     }
   }
@@ -343,7 +345,8 @@ class _AliyunConfigState extends State<AliyunConfig> {
       String configData = await aliyunConfigFile.readAsString();
 
       if (configData == "Error") {
-        showAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");
+        showCupertinoAlertDialog(
+            context: context, title: "检查失败!", content: "请先配置上传参数.");
         return;
       }
 
@@ -393,7 +396,7 @@ class _AliyunConfigState extends State<AliyunConfig> {
         'Signature': singature,
         //阿里默认的content-type是application/octet-stream，这里改成image/xxx
         'x-oss-content-type':
-            'image/${mypath.extension(assetFilePath).replaceFirst('.', '')}',
+            'image/${my_path.extension(assetFilePath).replaceFirst('.', '')}',
         'file': await MultipartFile.fromFile(assetFilePath, filename: key),
       });
       BaseOptions baseoptions = BaseOptions(
@@ -419,17 +422,19 @@ class _AliyunConfigState extends State<AliyunConfig> {
       );
 
       if (response.statusCode == 204) {
-        showAlertDialog(
+        showCupertinoAlertDialog(
             context: context,
             title: '通知',
             content:
                 '检测通过，您的配置信息为:\n\nAccessKeyId:\n${configMap['keyId']}\nAccessKeySecret:\n${configMap['keySecret']}\nBucket:\n${configMap['bucket']}\nArea:\n${configMap['area']}\nPath:\n${configMap['path']}\nCustomUrl:\n${configMap['customUrl']}\nOptions:\n${configMap['options']}');
       } else {
-        showAlertDialog(context: context, title: '错误', content: '检查失败，请检查配置信息');
+        showCupertinoAlertDialog(
+            context: context, title: '错误', content: '检查失败，请检查配置信息');
         return;
       }
     } catch (e) {
-      showAlertDialog(context: context, title: "检查失败!", content: e.toString());
+      showCupertinoAlertDialog(
+          context: context, title: "检查失败!", content: e.toString());
     }
   }
 
@@ -465,24 +470,12 @@ class _AliyunConfigState extends State<AliyunConfig> {
             msg: "请先注册用户",
             toastLength: Toast.LENGTH_SHORT,
             timeInSecForIosWeb: 2,
-            backgroundColor: Theme.of(context).brightness == Brightness.light
-                ? Colors.black
-                : Colors.white,
-            textColor: Theme.of(context).brightness == Brightness.light
-                ? Colors.white
-                : Colors.black,
             fontSize: 16.0);
       } else if (queryuser['password'] != defaultPassword) {
         return Fluttertoast.showToast(
             msg: "请先登录",
             toastLength: Toast.LENGTH_SHORT,
             timeInSecForIosWeb: 2,
-            backgroundColor: Theme.of(context).brightness == Brightness.light
-                ? Colors.black
-                : Colors.white,
-            textColor: Theme.of(context).brightness == Brightness.light
-                ? Colors.white
-                : Colors.black,
             fontSize: 16.0);
       }
 
@@ -492,12 +485,6 @@ class _AliyunConfigState extends State<AliyunConfig> {
             msg: "请先配置上传参数",
             toastLength: Toast.LENGTH_SHORT,
             timeInSecForIosWeb: 2,
-            backgroundColor: Theme.of(context).brightness == Brightness.light
-                ? Colors.black
-                : Colors.white,
-            textColor: Theme.of(context).brightness == Brightness.light
-                ? Colors.white
-                : Colors.black,
             fontSize: 16.0);
       }
       if (queryAliyun == 'Error') {
@@ -505,12 +492,6 @@ class _AliyunConfigState extends State<AliyunConfig> {
             msg: "Error",
             toastLength: Toast.LENGTH_SHORT,
             timeInSecForIosWeb: 2,
-            backgroundColor: Theme.of(context).brightness == Brightness.light
-                ? Colors.black
-                : Colors.white,
-            textColor: Theme.of(context).brightness == Brightness.light
-                ? Colors.white
-                : Colors.black,
             fontSize: 16.0);
       }
       if (queryuser['defaultPShost'] == 'aliyun') {
@@ -520,12 +501,6 @@ class _AliyunConfigState extends State<AliyunConfig> {
             msg: "已经是默认配置",
             toastLength: Toast.LENGTH_SHORT,
             timeInSecForIosWeb: 2,
-            backgroundColor: Theme.of(context).brightness == Brightness.light
-                ? Colors.black
-                : Colors.white,
-            textColor: Theme.of(context).brightness == Brightness.light
-                ? Colors.white
-                : Colors.black,
             fontSize: 16.0);
       } else {
         List sqlconfig = [];
@@ -537,43 +512,13 @@ class _AliyunConfigState extends State<AliyunConfig> {
         if (updateResult == 'Success') {
           await Global.setPShost('aliyun');
           await Global.setShowedPBhost('aliyun');
-          Fluttertoast.showToast(
-              msg: "已设置阿里云为默认图床",
-              toastLength: Toast.LENGTH_SHORT,
-              timeInSecForIosWeb: 2,
-              backgroundColor: Theme.of(context).brightness == Brightness.light
-                  ? Colors.black
-                  : Colors.white,
-              textColor: Theme.of(context).brightness == Brightness.light
-                  ? Colors.white
-                  : Colors.black,
-              fontSize: 16.0);
+          showToast('已设置阿里云为默认图床');
         } else {
-          Fluttertoast.showToast(
-              msg: "写入数据库失败",
-              toastLength: Toast.LENGTH_SHORT,
-              timeInSecForIosWeb: 2,
-              backgroundColor: Theme.of(context).brightness == Brightness.light
-                  ? Colors.black
-                  : Colors.white,
-              textColor: Theme.of(context).brightness == Brightness.light
-                  ? Colors.white
-                  : Colors.black,
-              fontSize: 16.0);
+          showToast('写入数据库失败');
         }
       }
     } catch (e) {
-      Fluttertoast.showToast(
-          msg: "Error",
-          toastLength: Toast.LENGTH_SHORT,
-          timeInSecForIosWeb: 2,
-          backgroundColor: Theme.of(context).brightness == Brightness.light
-              ? Colors.black
-              : Colors.white,
-          textColor: Theme.of(context).brightness == Brightness.light
-              ? Colors.white
-              : Colors.black,
-          fontSize: 16.0);
+      showToastWithContext(context, '错误');
     }
   }
 }
