@@ -1,15 +1,17 @@
-import 'package:horopic/utils/global.dart';
 import 'dart:io';
 import 'dart:convert';
+
 import 'package:path_provider/path_provider.dart';
-import 'package:horopic/api/lskypro.dart';
-import 'package:horopic/api/smms.dart';
-import 'package:horopic/api/github.dart';
-import 'package:horopic/api/imgur.dart';
-import 'package:horopic/api/qiniu.dart';
-import 'package:horopic/api/tencent.dart';
-import 'package:horopic/api/aliyun.dart';
-import 'package:horopic/api/upyun.dart';
+
+import 'package:horopic/api/aliyun_api.dart';
+import 'package:horopic/api/lskypro_api.dart';
+import 'package:horopic/api/smms_api.dart';
+import 'package:horopic/api/github_api.dart';
+import 'package:horopic/api/imgur_api.dart';
+import 'package:horopic/api/qiniu_api.dart';
+import 'package:horopic/api/tencent_api.dart';
+import 'package:horopic/api/upyun_api.dart';
+import 'package:horopic/utils/global.dart';
 
 //默认图床参数和配置文件名对应关系
 Map<String, String> pdconfig = {
