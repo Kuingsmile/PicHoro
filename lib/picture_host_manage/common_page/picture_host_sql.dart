@@ -1,8 +1,10 @@
-import 'package:horopic/utils/global.dart';
+import 'dart:io';
+
+import 'package:external_path/external_path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-import 'dart:io';
-import 'package:external_path/external_path.dart';
+
+import 'package:horopic/utils/global.dart';
 
 //所有的数据库的图床表名
 List<String> allPBhostUpDown = [
@@ -21,7 +23,7 @@ List<String> allPBhostUpDown = [
   'PBhost3', //自定义图床3
 ];
 // XXX 重要，默认上传图床名和数据库表名对应关系
-Map<String, String> PBhostToTableNameUpDown = {
+Map<String, String> pictureHostToTableNameUpDown = {
   "lsky.pro": "lskypro",
   "sm.ms": "smms",
   'github': 'github',
@@ -64,7 +66,7 @@ class PSHostSQL {
     return db;
   }
 
-  static initUpDownDB(String username,String type) async {
+  static initUpDownDB(String username, String type) async {
     var externalDirectoryPath =
         await ExternalPath.getExternalStoragePublicDirectory(
             ExternalPath.DIRECTORY_DOWNLOADS);
