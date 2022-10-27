@@ -1,6 +1,9 @@
-import 'package:fluro/fluro.dart';
-import 'package:horopic/router/routeHandler.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+
+import 'package:fluro/fluro.dart';
+
+import 'package:horopic/router/router_handler.dart';
 
 class Routes {
   static String root = "/";
@@ -40,7 +43,10 @@ class Routes {
   static void configureRoutes(FluroRouter router) {
     router.notFoundHandler = Handler(
         handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
-      print("ROUTE WAS NOT FOUND !!!");
+      if (kDebugMode) {
+        print("ROUTE WAS NOT FOUND !!!");
+      }
+      return null;
     });
     router.define(root, handler: rootHandler);
     router.define(homePage, handler: homePageHandler);
