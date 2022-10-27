@@ -1,11 +1,16 @@
 import 'dart:io';
-import 'package:flutter/material.dart';
 import 'dart:math';
-import 'package:path/path.dart' as mypath;
-import 'package:horopic/utils/global.dart';
-import 'package:uuid/uuid.dart';
 import 'dart:convert';
+
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+
+import 'package:path/path.dart' as my_path;
+import 'package:uuid/uuid.dart';
 import "package:crypto/crypto.dart";
+import 'package:fluttertoast/fluttertoast.dart';
+
+import 'package:horopic/utils/global.dart';
 
 //defaultLKformat和对应的转换函数
 Map<String, Function> linkGenerateDict = {
@@ -55,7 +60,7 @@ showAlertDialog({
           shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(20)),
           ),
-          content: Container(
+          content: SizedBox(
             height: 200,
             width: 300,
             child: ListView(
@@ -86,6 +91,109 @@ showAlertDialog({
           ],
         );
       });
+}
+
+//cupertino风格的alertDialog
+showCupertinoAlertDialog({
+  bool? barrierDismissible,
+  required BuildContext context,
+  required String title,
+  required String content,
+}) {
+  return showCupertinoDialog(
+      context: context,
+      barrierDismissible: barrierDismissible == true ? true : false,
+      builder: (BuildContext context) {
+        return CupertinoAlertDialog(
+          title: Center(
+            child: Text(
+              title,
+              style: const TextStyle(
+                fontSize: 23.0,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          content: SizedBox(
+            height: 150,
+            width: 300,
+            child: ListView(
+              children: [Text(content)],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Center(
+                child: Text(
+                  '确定',
+                  style: TextStyle(
+                    color: Colors.blue,
+                    fontSize: 20.0,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      });
+}
+
+//cupertino风格的alertDialog Style 2
+showCupertinoAlertDialogWithConfirmFunc({
+  required BuildContext context,
+  required String title,
+  required String content,
+  required onConfirm,
+}) {
+  return showCupertinoDialog(
+      barrierDismissible: true,
+      context: context,
+      builder: (BuildContext context) {
+        return CupertinoAlertDialog(
+          title: Text(title),
+          content: Text(content),
+          actions: <Widget>[
+            CupertinoDialogAction(
+              child: const Text('取消', style: TextStyle(color: Colors.blue)),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+            CupertinoDialogAction(
+              onPressed: onConfirm,
+              child: const Text('确定', style: TextStyle(color: Colors.blue)),
+            ),
+          ],
+        );
+      });
+}
+
+//弹出toast
+showToast(String msg) {
+  Fluttertoast.showToast(
+      msg: msg,
+      toastLength: Toast.LENGTH_SHORT,
+      timeInSecForIosWeb: 2,
+      fontSize: 16.0);
+}
+
+//带context的toast
+showToastWithContext(BuildContext context, String msg) {
+  Fluttertoast.showToast(
+      msg: msg,
+      toastLength: Toast.LENGTH_SHORT,
+      timeInSecForIosWeb: 2,
+      backgroundColor: Theme.of(context).brightness == Brightness.light
+          ? Colors.black
+          : Colors.white,
+      textColor: Theme.of(context).brightness == Brightness.light
+          ? Colors.white
+          : Colors.black,
+      fontSize: 16.0);
 }
 
 //底部选择框
@@ -145,7 +253,7 @@ String renameFileWithRandomString(int length) {
 Future<File> renamePictureWithTimestamp(File file) {
   var path = file.path;
   var lastSeparator = path.lastIndexOf(Platform.pathSeparator);
-  var fileExtension = mypath.extension(path);
+  var fileExtension = my_path.extension(path);
   var newFileName = renameFileWithTimestamp() + fileExtension;
   var newPath = path.substring(0, lastSeparator + 1) + newFileName;
   return file.rename(newPath);
@@ -155,7 +263,7 @@ Future<File> renamePictureWithTimestamp(File file) {
 Future<File> renamePictureWithRandomString(File file) {
   var path = file.path;
   var lastSeparator = path.lastIndexOf(Platform.pathSeparator);
-  var fileExtension = mypath.extension(path);
+  var fileExtension = my_path.extension(path);
   var newFileName = renameFileWithRandomString(30) + fileExtension;
   var newPath = path.substring(0, lastSeparator + 1) + newFileName;
   return file.rename(newPath);
@@ -166,7 +274,7 @@ Future<File> renamePictureWithCustomFormat(File file) async {
   String customFormat = await Global.getCustomeRenameFormat();
   var path = file.path;
   var lastSeparator = path.lastIndexOf(Platform.pathSeparator);
-  var fileExtension = mypath.extension(path);
+  var fileExtension = my_path.extension(path);
   String yearFourDigit = DateTime.now().year.toString();
   String yearTwoDigit = yearFourDigit.substring(2, 4);
   String month = DateTime.now().month.toString();
@@ -178,7 +286,7 @@ Future<File> renamePictureWithCustomFormat(File file) async {
   String randommd5Short = randommd5.substring(0, 16);
   String tenRandomString = randomStringGenerator(10);
   String twentyRandomString = randomStringGenerator(20);
-  String oldFileName = mypath.basename(path).replaceAll(fileExtension, '');
+  String oldFileName = my_path.basename(path).replaceAll(fileExtension, '');
   String newFileName = customFormat
       .replaceAll('{Y}', yearFourDigit)
       .replaceAll('{y}', yearTwoDigit)
