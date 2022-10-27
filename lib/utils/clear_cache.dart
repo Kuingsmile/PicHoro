@@ -22,13 +22,12 @@ class CacheUtil {
 
     if (file is Directory) {
       final List<FileSystemEntity> children = file.listSync();
-
       int total = 0;
-
-      if (children.isNotEmpty)
+      if (children.isNotEmpty) {
         for (final FileSystemEntity child in children) {
           total += await _reduce(child);
         }
+      }
       return total;
     }
     return 0;
