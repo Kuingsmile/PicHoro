@@ -1,29 +1,37 @@
 import 'dart:io' as io;
+
 import 'package:flutter/material.dart';
+
 import 'package:image_picker/image_picker.dart';
-import 'package:horopic/utils/common_func.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
+import 'package:flutter/services.dart' as flutter_services;
+import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'package:http/http.dart' as my_http;
+import 'package:path_provider/path_provider.dart';
+
+import 'package:horopic/album/album_sql.dart';
 import 'package:horopic/pages/loading.dart';
+import 'package:horopic/picture_host_configure/default_picture_host_select.dart';
+
+import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/uploader.dart';
-import 'package:flutter/services.dart' as flutterServices;
-import 'package:horopic/album/albumSQL.dart';
-import 'package:flutter_speed_dial/flutter_speed_dial.dart';
-import 'package:horopic/hostconfigure/PShostSelect.dart';
-import 'package:http/http.dart' as myhttp;
-import 'package:path_provider/path_provider.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   @override
-  _HomePageState createState() => _HomePageState();
+  HomePageState createState() => HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class HomePageState extends State<HomePage>
+    with AutomaticKeepAliveClientMixin<HomePage> {
   final ImagePicker _picker = ImagePicker();
   List clipboardList = [];
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void dispose() {
@@ -35,17 +43,7 @@ class _HomePageState extends State<HomePage> {
     final XFile? pickedImage =
         await _picker.pickImage(source: ImageSource.camera, imageQuality: 100);
     if (pickedImage == null) {
-      Fluttertoast.showToast(
-          msg: "未拍摄图片",
-          toastLength: Toast.LENGTH_SHORT,
-          timeInSecForIosWeb: 2,
-          backgroundColor: Theme.of(context).brightness == Brightness.light
-              ? Colors.black
-              : Colors.white,
-          textColor: Theme.of(context).brightness == Brightness.light
-              ? Colors.white
-              : Colors.black,
-          fontSize: 16.0);
+      showToast('未拍摄图片');
       return;
     }
     final io.File fileImage = io.File(pickedImage.path);
@@ -68,19 +66,9 @@ class _HomePageState extends State<HomePage> {
   }
 
   _imageFromNetwork() async {
-    var url = await flutterServices.Clipboard.getData('text/plain');
+    var url = await flutter_services.Clipboard.getData('text/plain');
     if (url == null) {
-      Fluttertoast.showToast(
-          msg: "剪贴板为空",
-          toastLength: Toast.LENGTH_SHORT,
-          timeInSecForIosWeb: 2,
-          backgroundColor: Theme.of(context).brightness == Brightness.light
-              ? Colors.black
-              : Colors.white,
-          textColor: Theme.of(context).brightness == Brightness.light
-              ? Colors.white
-              : Colors.black,
-          fontSize: 16.0);
+      showToast('剪贴板为空');
       return;
     }
     try {
@@ -96,7 +84,7 @@ class _HomePageState extends State<HomePage> {
           continue;
         }
         try {
-          var response = await myhttp.get(Uri.parse(urlList[i]));
+          var response = await my_http.get(Uri.parse(urlList[i]));
           String tempPath =
               await getTemporaryDirectory().then((value) => value.path);
           String timeStamp = DateTime.now().millisecondsSinceEpoch.toString();
@@ -125,42 +113,12 @@ class _HomePageState extends State<HomePage> {
         }
       }
       if (successCount > 0) {
-        Fluttertoast.showToast(
-            msg: "成功$successCount张,失败$failCount张",
-            toastLength: Toast.LENGTH_SHORT,
-            timeInSecForIosWeb: 2,
-            backgroundColor: Theme.of(context).brightness == Brightness.light
-                ? Colors.black
-                : Colors.white,
-            textColor: Theme.of(context).brightness == Brightness.light
-                ? Colors.white
-                : Colors.black,
-            fontSize: 16.0);
+        showToast('成功$successCount张,失败$failCount张');
       } else {
-        Fluttertoast.showToast(
-            msg: "剪贴板内无链接",
-            toastLength: Toast.LENGTH_SHORT,
-            timeInSecForIosWeb: 2,
-            backgroundColor: Theme.of(context).brightness == Brightness.light
-                ? Colors.black
-                : Colors.white,
-            textColor: Theme.of(context).brightness == Brightness.light
-                ? Colors.white
-                : Colors.black,
-            fontSize: 16.0);
+        showToast('剪贴板内无链接');
       }
     } catch (e) {
-      Fluttertoast.showToast(
-          msg: "获取图片失败",
-          toastLength: Toast.LENGTH_SHORT,
-          timeInSecForIosWeb: 2,
-          backgroundColor: Theme.of(context).brightness == Brightness.light
-              ? Colors.black
-              : Colors.white,
-          textColor: Theme.of(context).brightness == Brightness.light
-              ? Colors.white
-              : Colors.black,
-          fontSize: 16.0);
+      showToast('获取图片失败');
     }
   }
 
@@ -169,20 +127,14 @@ class _HomePageState extends State<HomePage> {
         await _picker.pickImage(source: ImageSource.camera, imageQuality: 100);
     if (pickedImage == null) {
       if (Global.isCopyLink == true) {
-        await flutterServices.Clipboard.setData(
-            flutterServices.ClipboardData(text: clipboardList.toString()));
+        await flutter_services.Clipboard.setData(
+            flutter_services.ClipboardData(text: clipboardList.toString()));
         clipboardList.clear();
       }
       return Fluttertoast.showToast(
           msg: "未选择图片",
           toastLength: Toast.LENGTH_SHORT,
           timeInSecForIosWeb: 2,
-          backgroundColor: Theme.of(context).brightness == Brightness.light
-              ? Colors.black
-              : Colors.white,
-          textColor: Theme.of(context).brightness == Brightness.light
-              ? Colors.white
-              : Colors.black,
           fontSize: 16.0);
     }
 
@@ -212,14 +164,15 @@ class _HomePageState extends State<HomePage> {
     if (Global.multiUpload == 'fail') {
       if (Global.isCopyLink == true) {
         if (clipboardList.length == 1) {
-          await flutterServices.Clipboard.setData(
-              flutterServices.ClipboardData(text: clipboardList[0]));
+          await flutter_services.Clipboard.setData(
+              flutter_services.ClipboardData(text: clipboardList[0]));
         } else {
-          await flutterServices.Clipboard.setData(flutterServices.ClipboardData(
-              text: clipboardList
-                  .toString()
-                  .substring(1, clipboardList.toString().length - 1)
-                  .replaceAll(',', '\n')));
+          await flutter_services.Clipboard.setData(
+              flutter_services.ClipboardData(
+                  text: clipboardList
+                      .toString()
+                      .substring(1, clipboardList.toString().length - 1)
+                      .replaceAll(',', '\n')));
         }
         clipboardList.clear();
       }
@@ -237,7 +190,7 @@ class _HomePageState extends State<HomePage> {
     var uploadResult = await uploaderentry(path: path, name: name);
     if (uploadResult[0] == "Error") {
       Global.multiUpload = 'fail';
-      return showAlertDialog(
+      return showCupertinoAlertDialog(
           context: context, title: "上传失败!", content: "请先配置上传参数.");
     } else if (uploadResult[0] == "success") {
       Map<String, dynamic> maps = {};
@@ -357,19 +310,19 @@ class _HomePageState extends State<HomePage> {
         };
       }
 
-      int id = await AlbumSQL.insertData(
-          Global.imageDB!, PBhostToTableName[Global.defaultPShost]!, maps);
+      await AlbumSQL.insertData(
+          Global.imageDB!, pBhostToTableName[Global.defaultPShost]!, maps);
 
       clipboardList.add(uploadResult[1]); //这里是formatedURL,应该是可以直接访问的地址
       Global.multiUpload = 'success';
       return true;
     } else if (uploadResult[0] == "failed") {
       Global.multiUpload = 'fail';
-      return showAlertDialog(
+      return showCupertinoAlertDialog(
           context: context, title: "上传失败!", content: "上传参数有误.");
     } else {
       Global.multiUpload = 'fail';
-      return showAlertDialog(
+      return showCupertinoAlertDialog(
           context: context, title: "上传失败!", content: uploadResult);
     }
   }
@@ -383,17 +336,7 @@ class _HomePageState extends State<HomePage> {
         await AssetPicker.pickAssets(context, pickerConfig: config);
 
     if (pickedImage == null) {
-      Fluttertoast.showToast(
-          msg: "未选择任何图片",
-          toastLength: Toast.LENGTH_SHORT,
-          timeInSecForIosWeb: 2,
-          backgroundColor: Theme.of(context).brightness == Brightness.light
-              ? Colors.black
-              : Colors.white,
-          textColor: Theme.of(context).brightness == Brightness.light
-              ? Colors.white
-              : Colors.black,
-          fontSize: 16.0);
+      showToast("未选择图片");
       return;
     }
 
@@ -433,7 +376,7 @@ class _HomePageState extends State<HomePage> {
 
       var uploadResult = await uploaderentry(path: path, name: name);
       if (uploadResult[0] == "Error") {
-        return showAlertDialog(
+        return showCupertinoAlertDialog(
             context: context, title: "上传失败!", content: "请先配置上传参数.");
       } else if (uploadResult[0] == "success") {
         successCount++;
@@ -551,8 +494,8 @@ class _HomePageState extends State<HomePage> {
           };
         }
 
-        int id = await AlbumSQL.insertData(
-            Global.imageDB!, PBhostToTableName[Global.defaultPShost]!, maps);
+        await AlbumSQL.insertData(
+            Global.imageDB!, pBhostToTableName[Global.defaultPShost]!, maps);
 
         clipboardList.add(uploadResult[1]);
       } else if (uploadResult[0] == "failed") {
@@ -574,34 +517,27 @@ class _HomePageState extends State<HomePage> {
       for (String failImage in failList) {
         content += "$failImage\n";
       }
-      return showAlertDialog(
+      return showCupertinoAlertDialog(
           barrierDismissible: true,
           context: context,
           title: "上传失败!",
           content: content);
     } else if (failCount == 0) {
       if (Global.isCopyLink == true) {
-        await flutterServices.Clipboard.setData(flutterServices.ClipboardData(
+        await flutter_services.Clipboard.setData(flutter_services.ClipboardData(
             text: clipboardList
                 .toString()
                 .substring(1, clipboardList.toString().length - 1)));
         clipboardList.clear();
       }
-      String content = "哇塞，全部上传成功了！\n\n上传成功的图片列表:\n\n";
+      String content = "哇塞，全部上传成功了！\n上传成功的图片列表:\n";
       for (String successImage in successList) {
         content += "$successImage\n";
       }
       if (successList.length == 1) {
-        return Fluttertoast.showToast(
-            backgroundColor: Theme.of(context).brightness == Brightness.light
-                ? Colors.black
-                : Colors.white,
-            textColor: Theme.of(context).brightness == Brightness.light
-                ? Colors.white
-                : Colors.black,
-            msg: '上传成功');
+        return Fluttertoast.showToast(msg: '上传成功');
       } else {
-        return showAlertDialog(
+        return showCupertinoAlertDialog(
             barrierDismissible: true,
             context: context,
             title: "上传成功!",
@@ -609,7 +545,7 @@ class _HomePageState extends State<HomePage> {
       }
     } else {
       if (Global.isCopyLink == true) {
-        await flutterServices.Clipboard.setData(flutterServices.ClipboardData(
+        await flutter_services.Clipboard.setData(flutter_services.ClipboardData(
             text: clipboardList
                 .toString()
                 .substring(1, clipboardList.toString().length - 1)
@@ -625,7 +561,7 @@ class _HomePageState extends State<HomePage> {
       for (String failImage in failList) {
         content += "$failImage\n";
       }
-      return showAlertDialog(
+      return showCupertinoAlertDialog(
           barrierDismissible: true,
           context: context,
           title: "上传完成!",
@@ -635,18 +571,9 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-        /*
-        decoration: const BoxDecoration(
-            image: DecorationImage(
-                image: AssetImage("assets/background.png"), //丑，有好看的背景了再改
-                fit: BoxFit.cover)),
-                */
-        child: Scaffold(
-      //backgroundColor: Colors.white,
+    super.build(context);
+    return Scaffold(
       appBar: AppBar(
-        //backgroundColor: Colors.transparent,
-        //elevation: 0,
         centerTitle: true,
         elevation: 0,
         title: const Text('PicHoro',
@@ -655,7 +582,6 @@ class _HomePageState extends State<HomePage> {
               fontWeight: FontWeight.bold,
             )),
       ),
-      //
       body: Column(
         children: [
           Center(
@@ -688,16 +614,7 @@ class _HomePageState extends State<HomePage> {
                     ElevatedButton(
                       onPressed: () {
                         if (Global.imagesList.isEmpty) {
-                          Fluttertoast.showToast(
-                              backgroundColor: Theme.of(context).brightness ==
-                                      Brightness.light
-                                  ? Colors.black
-                                  : Colors.white,
-                              textColor: Theme.of(context).brightness ==
-                                      Brightness.light
-                                  ? Colors.white
-                                  : Colors.black,
-                              msg: '请先选择图片');
+                          showToastWithContext(context, '请先选择图片');
                           return;
                         } else {
                           showDialog(
@@ -731,115 +648,112 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
           ),
-          Container(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Column(
-                  children: [
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    Container(
-                      alignment: FractionalOffset.center,
-                      margin: const EdgeInsets.only(left: 20, right: 20),
-                      child: ElevatedButton(
-                        onPressed: _imageFromCamera,
-                        child: Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: const [
-                              Icon(Icons.camera_alt),
-                              Text(
-                                '单张拍照',
-                              ),
-                            ],
-                          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Column(
+                children: [
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  Container(
+                    alignment: FractionalOffset.center,
+                    margin: const EdgeInsets.only(left: 20, right: 20),
+                    child: ElevatedButton(
+                      onPressed: _imageFromCamera,
+                      child: Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: const [
+                            Icon(Icons.camera_alt),
+                            Text(
+                              '单张拍照',
+                            ),
+                          ],
                         ),
                       ),
                     ),
-                    const SizedBox(
-                      height: 20,
+                  ),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  Container(
+                    alignment: FractionalOffset.center,
+                    margin: const EdgeInsets.only(
+                      left: 20,
+                      right: 20,
                     ),
-                    Container(
-                      alignment: FractionalOffset.center,
-                      margin: const EdgeInsets.only(
-                        left: 20,
-                        right: 20,
-                      ),
-                      child: ElevatedButton(
-                        onPressed: _multiImagePickerFromGallery,
-                        child: Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: const [
-                              Icon(Icons.photo_library),
-                              Text(
-                                '相册多选',
-                              ),
-                            ],
-                          ),
+                    child: ElevatedButton(
+                      onPressed: _multiImagePickerFromGallery,
+                      child: Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: const [
+                            Icon(Icons.photo_library),
+                            Text(
+                              '相册多选',
+                            ),
+                          ],
                         ),
                       ),
                     ),
-                  ],
-                ),
-                Column(
-                  children: [
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    Container(
-                      alignment: FractionalOffset.center,
-                      margin: const EdgeInsets.only(left: 20, right: 20),
-                      child: ElevatedButton(
-                        onPressed: _cameraAndBack,
-                        child: Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: const [
-                              Icon(Icons.backup),
-                              Text(
-                                '连续上传',
-                              ),
-                            ],
-                          ),
+                  ),
+                ],
+              ),
+              Column(
+                children: [
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  Container(
+                    alignment: FractionalOffset.center,
+                    margin: const EdgeInsets.only(left: 20, right: 20),
+                    child: ElevatedButton(
+                      onPressed: _cameraAndBack,
+                      child: Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: const [
+                            Icon(Icons.backup),
+                            Text(
+                              '连续上传',
+                            ),
+                          ],
                         ),
                       ),
                     ),
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    Container(
-                      alignment: FractionalOffset.center,
-                      margin: const EdgeInsets.only(left: 20, right: 20),
-                      child: ElevatedButton(
-                        onPressed: _imageFromNetwork,
-                        child: Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: const [
-                              Icon(Icons.wifi),
-                              Text(
-                                '网络多选',
-                              ),
-                            ],
-                          ),
+                  ),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  Container(
+                    alignment: FractionalOffset.center,
+                    margin: const EdgeInsets.only(left: 20, right: 20),
+                    child: ElevatedButton(
+                      onPressed: _imageFromNetwork,
+                      child: Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: const [
+                            Icon(Icons.wifi),
+                            Text(
+                              '网络多选',
+                            ),
+                          ],
                         ),
                       ),
                     ),
-                  ],
-                ),
-              ],
-            ),
+                  ),
+                ],
+              ),
+            ],
           ),
         ],
       ),
-
       floatingActionButton: SpeedDial(
         renderOverlay: true,
         overlayOpacity: 0.5,
@@ -857,11 +771,14 @@ class _HomePageState extends State<HomePage> {
               IconData(0x004C),
               color: Colors.white,
             ),
-            backgroundColor: const Color.fromARGB(255, 97, 180, 248),
+            backgroundColor: Global.defaultPShost == 'lsky.pro'
+                ? Colors.amber
+                : const Color.fromARGB(255, 97, 180, 248),
             label: '兰空',
             labelStyle: const TextStyle(fontSize: 12.0),
             onTap: () async {
               await setdefaultPShostRemoteAndLocal('lsky.pro');
+              setState(() {});
             },
           ),
           SpeedDialChild(
@@ -870,11 +787,14 @@ class _HomePageState extends State<HomePage> {
               IconData(0x0053),
               color: Colors.white,
             ),
-            backgroundColor: const Color.fromARGB(255, 97, 180, 248),
+            backgroundColor: Global.defaultPShost == 'sm.ms'
+                ? Colors.amber
+                : const Color.fromARGB(255, 97, 180, 248),
             label: 'SM.MS',
             labelStyle: const TextStyle(fontSize: 12.0),
             onTap: () async {
               await setdefaultPShostRemoteAndLocal('sm.ms');
+              setState(() {});
             },
           ),
           SpeedDialChild(
@@ -883,11 +803,14 @@ class _HomePageState extends State<HomePage> {
               IconData(0x0047),
               color: Colors.white,
             ),
-            backgroundColor: const Color.fromARGB(255, 97, 180, 248),
+            backgroundColor: Global.defaultPShost == 'github'
+                ? Colors.amber
+                : const Color.fromARGB(255, 97, 180, 248),
             label: 'Github',
             labelStyle: const TextStyle(fontSize: 12.0),
             onTap: () async {
               await setdefaultPShostRemoteAndLocal('github');
+              setState(() {});
             },
           ),
           SpeedDialChild(
@@ -896,11 +819,14 @@ class _HomePageState extends State<HomePage> {
               IconData(0x0049),
               color: Colors.white,
             ),
-            backgroundColor: const Color.fromARGB(255, 97, 180, 248),
+            backgroundColor: Global.defaultPShost == 'imgur'
+                ? Colors.amber
+                : const Color.fromARGB(255, 97, 180, 248),
             label: 'Imgur',
             labelStyle: const TextStyle(fontSize: 12.0),
             onTap: () async {
               await setdefaultPShostRemoteAndLocal('imgur');
+              setState(() {});
             },
           ),
           SpeedDialChild(
@@ -909,11 +835,14 @@ class _HomePageState extends State<HomePage> {
               IconData(0x0051),
               color: Colors.white,
             ),
-            backgroundColor: const Color.fromARGB(255, 97, 180, 248),
+            backgroundColor: Global.defaultPShost == 'qiniu'
+                ? Colors.amber
+                : const Color.fromARGB(255, 97, 180, 248),
             label: '七牛',
             labelStyle: const TextStyle(fontSize: 12.0),
             onTap: () async {
               await setdefaultPShostRemoteAndLocal('qiniu');
+              setState(() {});
             },
           ),
           SpeedDialChild(
@@ -922,11 +851,14 @@ class _HomePageState extends State<HomePage> {
               IconData(0x0054),
               color: Colors.white,
             ),
-            backgroundColor: const Color.fromARGB(255, 97, 180, 248),
+            backgroundColor: Global.defaultPShost == 'tencent'
+                ? Colors.amber
+                : const Color.fromARGB(255, 97, 180, 248),
             label: '腾讯',
             labelStyle: const TextStyle(fontSize: 12.0),
             onTap: () async {
               await setdefaultPShostRemoteAndLocal('tencent');
+              setState(() {});
             },
           ),
           SpeedDialChild(
@@ -935,11 +867,14 @@ class _HomePageState extends State<HomePage> {
               IconData(0x0041),
               color: Colors.white,
             ),
-            backgroundColor: const Color.fromARGB(255, 97, 180, 248),
+            backgroundColor: Global.defaultPShost == 'aliyun'
+                ? Colors.amber
+                : const Color.fromARGB(255, 97, 180, 248),
             label: '阿里',
             labelStyle: const TextStyle(fontSize: 12.0),
             onTap: () async {
               await setdefaultPShostRemoteAndLocal('aliyun');
+              setState(() {});
             },
           ),
           SpeedDialChild(
@@ -948,15 +883,18 @@ class _HomePageState extends State<HomePage> {
               IconData(0x0055),
               color: Colors.white,
             ),
-            backgroundColor: const Color.fromARGB(255, 97, 180, 248),
+            backgroundColor: Global.defaultPShost == 'upyun'
+                ? Colors.amber
+                : const Color.fromARGB(255, 97, 180, 248),
             label: '又拍',
             labelStyle: const TextStyle(fontSize: 12.0),
             onTap: () async {
               await setdefaultPShostRemoteAndLocal('upyun');
+              setState(() {});
             },
           ),
         ],
       ),
-    ));
+    );
   }
 }
