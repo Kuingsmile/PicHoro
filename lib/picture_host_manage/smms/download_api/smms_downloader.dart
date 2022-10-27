@@ -6,11 +6,9 @@ import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
-import 'package:horopic/PShostFileManage/smms/downloadAPI/smmsDownload_task.dart';
-import 'package:horopic/PShostFileManage/tencent/downloadAPI/downloadStatus.dart';
-import 'package:horopic/PShostFileManage/tencent/downloadAPI/downloadRequest.dart';
-
-import 'package:horopic/PShostFileManage/manageAPI/smmsManage.dart';
+import 'package:horopic/picture_host_manage/smms/download_api/smms_download_task.dart';
+import 'package:horopic/picture_host_manage/tencent/download_api/download_status.dart';
+import 'package:horopic/picture_host_manage/tencent/download_api/download_request.dart';
 
 class DownloadManager {
   final Map<String, DownloadTask> _cache = <String, DownloadTask>{};
@@ -77,16 +75,15 @@ class DownloadManager {
 
         if (response.statusCode == HttpStatus.partialContent) {
           var ioSink = partialFile.openWrite(mode: FileMode.writeOnlyAppend);
-          var _f = File(partialFilePath + tempExtension);
-          await ioSink.addStream(_f.openRead());
-          await _f.delete();
+          var f = File(partialFilePath + tempExtension);
+          await ioSink.addStream(f.openRead());
+          await f.delete();
           await ioSink.close();
           await partialFile.rename(savePath);
 
           setStatus(task, DownloadStatus.completed);
         }
       } else {
-        
         var response = await dio.download(
           url,
           partialFilePath,
@@ -94,8 +91,7 @@ class DownloadManager {
           cancelToken: cancelToken,
           deleteOnError: false,
           options: Options(
-            headers: {
-            },
+            headers: {},
           ),
         );
 
@@ -324,7 +320,7 @@ class DownloadManager {
     var completed = 0;
     var total = urls.length;
 
-    urls.forEach((url) {
+    for (var url in urls) {
       DownloadTask? task = getDownload(url);
 
       if (task != null) {
@@ -356,7 +352,7 @@ class DownloadManager {
           completer.complete(null);
         }
       }
-    });
+    }
 
     return completer.future.timeout(timeout);
   }
