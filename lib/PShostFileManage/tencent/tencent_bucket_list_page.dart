@@ -1,34 +1,42 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:horopic/PShostFileManage/manageAPI/tencentManage.dart';
+
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:grouped_list/grouped_list.dart';
 import 'package:fluro/fluro.dart';
+
 import 'package:horopic/router/application.dart';
-import 'package:horopic/router/routes.dart';
-import 'package:horopic/PShostFileManage/commonPage/loadingState.dart'
-    as loadingState;
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:horopic/router/routers.dart';
+import 'package:horopic/picture_host_manage/common_page/loading_state.dart'
+    as loading_state;
+import 'package:horopic/picture_host_manage/manage_api/tencent_manage_api.dart';
+import 'package:horopic/utils/common_functions.dart';
 
 class TencentBucketList extends StatefulWidget {
-  TencentBucketList({Key? key}) : super(key: key);
+  const TencentBucketList({Key? key}) : super(key: key);
 
   @override
-  _TencentBucketListState createState() => _TencentBucketListState();
+  TencentBucketListState createState() => TencentBucketListState();
 }
 
-class _TencentBucketListState
-    extends loadingState.BaseLoadingPageState<TencentBucketList> {
+class TencentBucketListState
+    extends loading_state.BaseLoadingPageState<TencentBucketList> {
   List bucketMap = [];
   Map<String, String> aclState = {'aclState': '未获取'};
 
-  final RefreshController _refreshController =
+  RefreshController refreshController =
       RefreshController(initialRefresh: false);
 
   @override
   void initState() {
     super.initState();
     _onRefresh();
+  }
+
+  @override
+  dispose() {
+    refreshController.dispose();
+    super.dispose();
   }
 
   //下拉刷新
@@ -43,17 +51,21 @@ class _TencentBucketListState
       var bucketListResponse = await TencentManageAPI.getBucketList();
       //判断是否获取成功
       if (bucketListResponse[0] != 'success') {
-        setState(() {
-          state = loadingState.LoadState.ERROR;
-        });
-        _refreshController.refreshCompleted();
+        if (mounted) {
+          setState(() {
+            state = loading_state.LoadState.ERROR;
+          });
+        }
+        refreshController.refreshCompleted();
         return;
       }
       if (bucketListResponse[1]['ListAllMyBucketsResult']['Buckets'] == null) {
-        setState(() {
-          state = loadingState.LoadState.EMPTY;
-        });
-        _refreshController.refreshCompleted();
+        if (mounted) {
+          setState(() {
+            state = loading_state.LoadState.EMPTY;
+          });
+        }
+        refreshController.refreshCompleted();
         return;
       }
       var allBucketList =
@@ -75,20 +87,24 @@ class _TencentBucketListState
           'CreationDate': formatedTime,
         });
       }
-      setState(() {
-        if (bucketMap.isEmpty) {
-          state = loadingState.LoadState.EMPTY;
-        } else {
-          state = loadingState.LoadState.SUCCESS;
-        }
-        _refreshController.refreshCompleted();
-      });
+      if (mounted) {
+        setState(() {
+          if (bucketMap.isEmpty) {
+            state = loading_state.LoadState.EMPTY;
+          } else {
+            state = loading_state.LoadState.SUCCESS;
+          }
+          refreshController.refreshCompleted();
+        });
+      }
     } catch (e) {
-      setState(() {
-        state = loadingState.LoadState.ERROR;
-      });
-      Fluttertoast.showToast(msg: '请先登录');
-      _refreshController.refreshCompleted();
+      if (mounted) {
+        setState(() {
+          state = loading_state.LoadState.ERROR;
+        });
+      }
+      showToast('请先登录');
+      refreshController.refreshCompleted();
     }
   }
 
@@ -157,7 +173,7 @@ class _TencentBucketListState
             ),
             onPressed: () {
               setState(() {
-                state = loadingState.LoadState.LOADING;
+                state = loading_state.LoadState.LOADING;
               });
               initBucketList();
             },
@@ -204,7 +220,7 @@ class _TencentBucketListState
           failedText: '没有更多了',
           canLoadingText: '释放加载',
         ),
-        controller: _refreshController,
+        controller: refreshController,
         onRefresh: _onRefresh,
         child: GroupedListView(
           shrinkWrap: true,
@@ -351,28 +367,18 @@ class _TencentBucketListState
             onTap: () async {
               if (aclState['aclState'] == '未获取' ||
                   aclState['aclState'] == 'private') {
-                Fluttertoast.showToast(
-                    msg: '请先修改存储桶权限',
-                    toastLength: Toast.LENGTH_SHORT,
-                    timeInSecForIosWeb: 2,
-                    fontSize: 16.0);
+                showToast('请先修改存储桶权限');
                 return;
               } else {
                 var result =
                     await TencentManageAPI.setDefaultBucket(element, null);
                 if (result[0] == 'success') {
-                  Fluttertoast.showToast(
-                      msg: '设置成功',
-                      toastLength: Toast.LENGTH_SHORT,
-                      timeInSecForIosWeb: 2,
-                      fontSize: 16.0);
-                  Navigator.pop(context);
+                  showToast('设置成功');
+                  if (mounted) {
+                    Navigator.pop(context);
+                  }
                 } else {
-                  Fluttertoast.showToast(
-                      msg: '设置失败',
-                      toastLength: Toast.LENGTH_SHORT,
-                      timeInSecForIosWeb: 2,
-                      fontSize: 16.0);
+                  showToast('设置失败');
                 }
               }
             },
@@ -439,21 +445,14 @@ class _TencentBucketListState
                   var response =
                       await TencentManageAPI.changeACLPolicy(element, value!);
                   if (response[0] == 'success') {
-                    Fluttertoast.showToast(
-                        msg: '修改完毕',
-                        toastLength: Toast.LENGTH_SHORT,
-                        timeInSecForIosWeb: 2,
-                        fontSize: 16.0);
-                    setState(() {
-                      aclState['aclState'] = value;
-                    });
-                    Navigator.pop(context);
+                    showToast('修改成功');
+                    aclState['aclState'] = value;
+                    if (mounted) {
+                      setState(() {});
+                      Navigator.pop(context);
+                    }
                   } else {
-                    Fluttertoast.showToast(
-                        msg: '修改失败',
-                        toastLength: Toast.LENGTH_SHORT,
-                        timeInSecForIosWeb: 2,
-                        fontSize: 16.0);
+                    showToast('修改失败');
                   }
                 }
               },
@@ -464,95 +463,38 @@ class _TencentBucketListState
             color: Color.fromARGB(255, 230, 230, 230),
           ),
           ListTile(
-              // dense: true,
-              leading: const Icon(
-                Icons.dangerous_outlined,
-                color: Color.fromARGB(255, 240, 85, 131),
-              ),
-              //  visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
-              minLeadingWidth: 0,
-              title: const Text('删除存储桶', style: TextStyle(fontSize: 15)),
-              onTap: () async {
-                return showDialog(
-                  barrierDismissible: false,
-                  context: context,
-                  builder: (BuildContext context) {
-                    return AlertDialog(
-                      title: const Text(
-                        '删除存储桶',
-                        textAlign: TextAlign.center,
-                      ),
-                      content: const Text(
-                        '是否删除存储桶？\n删除前请清空该存储桶!',
-                        textAlign: TextAlign.center,
-                      ),
-                      actions: [
-                        Center(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              TextButton(
-                                child: const Text(
-                                  '确定',
-                                  style: TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                                onPressed: () async {
-                                  try {
-                                    Navigator.of(context).pop();
-                                    Navigator.of(context).pop();
-                                    var result =
-                                        await TencentManageAPI.deleteBucket(
-                                            element);
-                                    if (result[0] == 'success') {
-                                      Fluttertoast.showToast(
-                                          msg: '删除成功',
-                                          toastLength: Toast.LENGTH_SHORT,
-                                          timeInSecForIosWeb: 2,
-                                          fontSize: 16.0);
-                                      _onRefresh();
-                                      return;
-                                    } else {
-                                      Fluttertoast.showToast(
-                                          msg: '删除失败',
-                                          toastLength: Toast.LENGTH_SHORT,
-                                          timeInSecForIosWeb: 2,
-                                          fontSize: 16.0);
-                                    }
-                                    return;
-                                  } catch (e) {
-                                    Fluttertoast.showToast(
-                                        msg: '删除失败',
-                                        toastLength: Toast.LENGTH_SHORT,
-                                        timeInSecForIosWeb: 2,
-                                        fontSize: 16.0);
-                                    Navigator.of(context).pop();
-                                  }
-                                },
-                              ),
-                              TextButton(
-                                style: TextButton.styleFrom(
-                                  alignment: Alignment.center,
-                                ),
-                                child: const Text(
-                                  '取消',
-                                  style: TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                              ),
-                            ],
-                          ),
-                        )
-                      ],
-                    );
-                  },
-                );
-              }),
+            leading: const Icon(
+              Icons.dangerous_outlined,
+              color: Color.fromARGB(255, 240, 85, 131),
+            ),
+            minLeadingWidth: 0,
+            title: const Text('删除存储桶', style: TextStyle(fontSize: 15)),
+            onTap: () async {
+              return showCupertinoAlertDialogWithConfirmFunc(
+                title: '删除存储桶',
+                content: '是否删除存储桶？\n删除前请清空该存储桶!',
+                context: context,
+                onConfirm: () async {
+                  try {
+                    Navigator.of(context).pop();
+                    Navigator.of(context).pop();
+                    var result = await TencentManageAPI.deleteBucket(element);
+                    if (result[0] == 'success') {
+                      showToast('删除成功');
+                      _onRefresh();
+                      return;
+                    } else {
+                      showToast('删除失败');
+                    }
+                    return;
+                  } catch (e) {
+                    showToast('删除失败');
+                    Navigator.of(context).pop();
+                  }
+                },
+              );
+            },
+          ),
         ],
       ),
     );
