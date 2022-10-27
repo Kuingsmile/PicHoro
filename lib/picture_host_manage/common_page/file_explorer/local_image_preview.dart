@@ -1,19 +1,20 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:extended_image/extended_image.dart';
-import 'dart:io';
 
 class LocalImagePreview extends StatefulWidget {
   final int index;
   final List images;
 
-  LocalImagePreview({Key? key, required this.index, required this.images})
+  const LocalImagePreview({Key? key, required this.index, required this.images})
       : super(key: key);
 
   @override
-  _LocalImagePreviewState createState() => _LocalImagePreviewState();
+  LocalImagePreviewState createState() => LocalImagePreviewState();
 }
 
-class _LocalImagePreviewState extends State<LocalImagePreview> {
+class LocalImagePreviewState extends State<LocalImagePreview> {
   int _index = 0;
   late PageController _pageController;
 
