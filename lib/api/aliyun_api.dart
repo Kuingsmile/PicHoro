@@ -1,10 +1,11 @@
-import 'package:dio/dio.dart';
-import 'package:horopic/utils/common_func.dart';
-import 'package:horopic/utils/global.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'package:crypto/crypto.dart';
-import 'package:path/path.dart' as mypath;
+import 'package:dio/dio.dart';
+import 'package:path/path.dart' as my_path;
+
+import 'package:horopic/utils/common_functions.dart';
+import 'package:horopic/utils/global.dart';
 
 class AliyunImageUploadUtils {
   //上传接口
@@ -62,7 +63,7 @@ class AliyunImageUploadUtils {
       'policy': base64Policy,
       'Signature': singature,
       'x-oss-content-type':
-          'image/${mypath.extension(path).replaceFirst('.', '')}',
+          'image/${my_path.extension(path).replaceFirst('.', '')}',
       'file': await MultipartFile.fromFile(path, filename: name),
     });
     BaseOptions baseoptions = BaseOptions(

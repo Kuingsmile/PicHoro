@@ -1,8 +1,8 @@
-import 'package:dio/dio.dart';
-import 'package:horopic/utils/common_func.dart';
-import 'package:horopic/utils/global.dart';
 import 'dart:convert';
 import 'dart:io';
+import 'package:dio/dio.dart';
+import 'package:horopic/utils/common_functions.dart';
+import 'package:horopic/utils/global.dart';
 
 class GithubImageUploadUtils {
   //上传接口

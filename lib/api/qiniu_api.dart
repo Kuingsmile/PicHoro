@@ -1,10 +1,11 @@
-import 'package:dio/dio.dart';
-import 'package:horopic/utils/common_func.dart';
-import 'package:horopic/utils/global.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'package:crypto/crypto.dart';
+import 'package:dio/dio.dart';
 import 'package:qiniu_flutter_sdk/qiniu_flutter_sdk.dart';
+
+import 'package:horopic/utils/common_functions.dart';
+import 'package:horopic/utils/global.dart';
 
 class QiniuImageUploadUtils {
   //没用到，先留着
@@ -93,7 +94,6 @@ class QiniuImageUploadUtils {
     String secretKey = configMap['secretKey'];
     String bucket = configMap['bucket'];
     String url = configMap['url'];
-    String area = configMap['area'];
     String options = configMap['options'];
     String qiniupath = configMap['path'];
 
@@ -164,9 +164,6 @@ class QiniuImageUploadUtils {
     String accessKey = configMap['accessKey'];
     String secretKey = configMap['secretKey'];
     String bucket = configMap['bucket'];
-    String url = configMap['url'];
-    String area = configMap['area'];
-    String options = configMap['options'];
     String qiniupath = configMap['path'];
     String key = '';
     if (qiniupath.startsWith('/')) {

@@ -1,9 +1,9 @@
-import 'package:dio/dio.dart';
-import 'package:horopic/utils/common_func.dart';
-import 'package:horopic/utils/global.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'package:crypto/crypto.dart';
+import 'package:dio/dio.dart';
+import 'package:horopic/utils/common_functions.dart';
+import 'package:horopic/utils/global.dart';
 
 class TencentImageUploadUtils {
   //表单上传的signature
@@ -29,27 +29,27 @@ class TencentImageUploadUtils {
         .convert(utf8.encode(keyTime))
         .toString();
     String lowerMethod = method.toLowerCase();
-    String HeaderList = '';
-    String HttpHeaders = '';
+    String headerList = '';
+    String httpHeaders = '';
     header.forEach((key, value) {
-      HeaderList += '${Uri.encodeComponent(key).toLowerCase()};';
-      HttpHeaders +=
+      headerList += '${Uri.encodeComponent(key).toLowerCase()};';
+      httpHeaders +=
           '${Uri.encodeComponent(key).toLowerCase()}=${Uri.encodeComponent(value)}&';
     });
-    if (HeaderList.isNotEmpty) {
-      HeaderList = HeaderList.substring(0, HeaderList.length - 1);
+    if (headerList.isNotEmpty) {
+      headerList = headerList.substring(0, headerList.length - 1);
     }
-    if (HttpHeaders.isNotEmpty) {
-      HttpHeaders = HttpHeaders.substring(0, HttpHeaders.length - 1);
+    if (httpHeaders.isNotEmpty) {
+      httpHeaders = httpHeaders.substring(0, httpHeaders.length - 1);
     }
-    String httpString = '$lowerMethod\n$urlpath\n\n$HttpHeaders\n';
+    String httpString = '$lowerMethod\n$urlpath\n\n$httpHeaders\n';
     String stringtosign =
         'sha1\n$keyTime\n${sha1.convert(utf8.encode(httpString)).toString()}\n';
     String signature = Hmac(sha1, utf8.encode(signKey))
         .convert(utf8.encode(stringtosign))
         .toString();
     String authorization =
-        'q-sign-algorithm=sha1&q-ak=$secretId&q-sign-time=$keyTime&q-key-time=$keyTime&q-header-list=$HeaderList&q-url-param-list=&q-signature=$signature';
+        'q-sign-algorithm=sha1&q-ak=$secretId&q-sign-time=$keyTime&q-key-time=$keyTime&q-header-list=$headerList&q-url-param-list=&q-signature=$signature';
     return authorization;
   }
 
@@ -61,7 +61,6 @@ class TencentImageUploadUtils {
     String secretId = configMap['secretId'];
     String secretKey = configMap['secretKey'];
     String bucket = configMap['bucket'];
-    String appId = configMap['appId'];
     String area = configMap['area'];
     String tencentpath = configMap['path'];
     String customUrl = configMap['customUrl'];
@@ -195,11 +194,8 @@ class TencentImageUploadUtils {
     String secretId = configMap['secretId'];
     String secretKey = configMap['secretKey'];
     String bucket = configMap['bucket'];
-    String appId = configMap['appId'];
     String area = configMap['area'];
     String tencentpath = configMap['path'];
-    String customUrl = configMap['customUrl'];
-    String options = configMap['options'];
     String deleteHost = 'https://$bucket.cos.$area.myqcloud.com';
     String urlpath = '';
     if (tencentpath != 'None') {

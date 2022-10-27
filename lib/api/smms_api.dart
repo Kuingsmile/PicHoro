@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import 'package:horopic/utils/common_func.dart';
+import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/global.dart';
 
 class SmmsImageUploadUtils {

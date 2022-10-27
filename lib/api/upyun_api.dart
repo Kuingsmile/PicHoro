@@ -1,10 +1,9 @@
-import 'package:dio/dio.dart';
-import 'package:horopic/utils/common_func.dart';
-import 'package:horopic/utils/global.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'package:crypto/crypto.dart';
-import 'package:path/path.dart' as mypath;
+import 'package:dio/dio.dart';
+import 'package:horopic/utils/common_functions.dart';
+import 'package:horopic/utils/global.dart';
 
 class UpyunImageUploadUtils {
   //上传接口

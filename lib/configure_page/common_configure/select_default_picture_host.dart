@@ -1,41 +1,47 @@
-import 'package:flutter/material.dart';
-import 'package:horopic/hostconfigure/lskyproconfig.dart';
-import 'package:horopic/hostconfigure/smmsconfig.dart';
-import 'package:horopic/hostconfigure/githubconfig.dart';
-import 'package:horopic/hostconfigure/tencentconfig.dart';
-import 'package:horopic/hostconfigure/upyunconfig.dart';
-import 'package:horopic/utils/global.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'dart:convert';
 import 'dart:io';
-import 'package:horopic/utils/sqlUtils.dart';
-import 'package:dio/dio.dart';
-import 'package:horopic/pages/loading.dart';
+
 import 'package:barcode_scan2/barcode_scan2.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:horopic/hostconfigure/Imgurconfig.dart';
-import 'package:dio_proxy_adapter/dio_proxy_adapter.dart';
-import 'package:horopic/hostconfigure/qiniuconfig.dart';
-import 'package:horopic/api/qiniu.dart';
-import 'package:flutter/services.dart';
-import 'package:qiniu_flutter_sdk/qiniu_flutter_sdk.dart';
-import 'package:horopic/api/tencent.dart';
 import 'package:crypto/crypto.dart';
-import 'package:horopic/hostconfigure/aliyunconfig.dart';
-import 'package:path/path.dart' as mypath;
-import 'package:horopic/router/application.dart';
-import 'package:horopic/router/routes.dart';
+import 'package:dio/dio.dart';
+import 'package:dio_proxy_adapter/dio_proxy_adapter.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:fluro/fluro.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:qiniu_flutter_sdk/qiniu_flutter_sdk.dart';
+import 'package:path/path.dart' as mypath;
+
+import 'package:horopic/utils/global.dart';
+import 'package:horopic/utils/sql_utils.dart';
+import 'package:horopic/utils/common_functions.dart';
+
+import 'package:horopic/picture_host_configure/lskypro_configure.dart';
+import 'package:horopic/picture_host_configure/smms_configure.dart';
+import 'package:horopic/picture_host_configure/github_configure.dart';
+import 'package:horopic/picture_host_configure/tencent_configure.dart';
+import 'package:horopic/picture_host_configure/upyun_configure.dart';
+import 'package:horopic/picture_host_configure/imgur_configure.dart';
+import 'package:horopic/picture_host_configure/qiniu_configure.dart';
+import 'package:horopic/picture_host_configure/aliyun_configure.dart';
+
+import 'package:horopic/pages/loading.dart';
+
+import 'package:horopic/api/qiniu_api.dart';
+import 'package:horopic/api/tencent_api.dart';
+import 'package:horopic/router/application.dart';
+import 'package:horopic/router/routers.dart';
 
 //a configure page for user to show configure entry
 class AllPShost extends StatefulWidget {
   const AllPShost({Key? key}) : super(key: key);
 
   @override
-  _AllPShostState createState() => _AllPShostState();
+  AllPShostState createState() => AllPShostState();
 }
 
-class _AllPShostState extends State<AllPShost> {
+class AllPShostState extends State<AllPShost> {
   _scan() async {
     try {
       final result = await BarcodeScanner.scan(
@@ -149,17 +155,9 @@ class _AllPShostState extends State<AllPShost> {
       configJson = configJson.replaceAll('keyId', 'accessKeyId');
       configJson = configJson.replaceAll('keySecret', 'accessKeySecret');
       await Clipboard.setData(ClipboardData(text: configJson));
-      Fluttertoast.showToast(
-          msg: "$pshost配置已复制到剪贴板",
-          toastLength: Toast.LENGTH_SHORT,
-          timeInSecForIosWeb: 2,
-          fontSize: 16.0);
+      showToast("$pshost配置已复制到剪贴板");
     } catch (e) {
-      Fluttertoast.showToast(
-          msg: "导出失败",
-          toastLength: Toast.LENGTH_SHORT,
-          timeInSecForIosWeb: 2,
-          fontSize: 16.0);
+      showToast("导出失败");
     }
   }
 
@@ -192,18 +190,12 @@ class _AllPShostState extends State<AllPShost> {
         var querysmms = await MySqlUtils.querySmms(username: defaultUser);
         var queryuser = await MySqlUtils.queryUser(username: defaultUser);
         if (queryuser == 'Empty') {
-          Fluttertoast.showToast(
-              msg: "请先登录",
-              toastLength: Toast.LENGTH_SHORT,
-              timeInSecForIosWeb: 2,
-              fontSize: 16.0);
+          showToast("请先登录");
         }
         String validateURL = "https://smms.app/api/v2/profile";
         // String validateURL = "https://sm.ms/api/v2/profile";被墙了
         BaseOptions options = BaseOptions(
-          //连接服务器超时时间，单位是毫秒.
           connectTimeout: 30000,
-          //响应超时时间。
           receiveTimeout: 30000,
           sendTimeout: 30000,
         );
@@ -229,34 +221,18 @@ class _AllPShostState extends State<AllPShost> {
               final smmsConfigJson = jsonEncode(smmsConfig);
               final smmsConfigFile = await smmsFile;
               await smmsConfigFile.writeAsString(smmsConfigJson);
-              Fluttertoast.showToast(
-                  msg: "smms配置成功",
-                  toastLength: Toast.LENGTH_SHORT,
-                  timeInSecForIosWeb: 2,
-                  fontSize: 16.0);
+              showToast("sm.ms配置成功");
             } else {
-              Fluttertoast.showToast(
-                  msg: "smms数据库错误",
-                  toastLength: Toast.LENGTH_SHORT,
-                  timeInSecForIosWeb: 2,
-                  fontSize: 16.0);
+              showToast("sm.ms数据库错误");
             }
           } else {
-            Fluttertoast.showToast(
-                msg: "Smms验证失败",
-                toastLength: Toast.LENGTH_SHORT,
-                timeInSecForIosWeb: 2,
-                fontSize: 16.0);
+            showToast("sm.ms验证失败");
           }
         } catch (e) {
           rethrow;
         }
       } catch (e) {
-        Fluttertoast.showToast(
-            msg: "SM.MS配置错误",
-            toastLength: Toast.LENGTH_SHORT,
-            timeInSecForIosWeb: 2,
-            fontSize: 16.0);
+        showToast("sm.ms配置错误");
       }
     }
 
@@ -269,19 +245,17 @@ class _AllPShostState extends State<AllPShost> {
             usernameRepo.substring(0, usernameRepo.indexOf('/'));
         String repo = usernameRepo.substring(usernameRepo.indexOf('/') + 1);
         String storePath = jsonResult['github']['path'];
-        if (storePath == null || storePath == '' || storePath.isEmpty) {
+        if (storePath == '' || storePath.isEmpty) {
           storePath = 'None';
         } else if (!storePath.endsWith('/')) {
           storePath = '$storePath/';
         }
         String branch = jsonResult['github']['branch'];
-        if (branch == '' || branch == null || branch.isEmpty) {
+        if (branch == '' || branch.isEmpty) {
           branch = 'main';
         }
         String customDomain = jsonResult['github']['customUrl'];
-        if (customDomain == '' ||
-            customDomain == null ||
-            customDomain.isEmpty) {
+        if (customDomain == '' || customDomain.isEmpty) {
           customDomain = 'None';
         }
         if (customDomain != 'None') {
@@ -315,11 +289,7 @@ class _AllPShostState extends State<AllPShost> {
           var queryuser = await MySqlUtils.queryUser(username: defaultUser);
 
           if (queryuser == 'Empty') {
-            Fluttertoast.showToast(
-                msg: "请先登录",
-                toastLength: Toast.LENGTH_SHORT,
-                timeInSecForIosWeb: 2,
-                fontSize: 16.0);
+            showToast("请先登录");
           }
           BaseOptions options = BaseOptions(
             //连接服务器超时时间，单位是毫秒.
@@ -353,45 +323,21 @@ class _AllPShostState extends State<AllPShost> {
                 final githubConfigJson = jsonEncode(githubConfig);
                 final githubConfigFile = await githubFile;
                 await githubConfigFile.writeAsString(githubConfigJson);
-                Fluttertoast.showToast(
-                    msg: "Github配置成功",
-                    toastLength: Toast.LENGTH_SHORT,
-                    timeInSecForIosWeb: 2,
-                    fontSize: 16.0);
+                showToast("Github配置成功");
               } else {
-                Fluttertoast.showToast(
-                    msg: "Github数据库错误",
-                    toastLength: Toast.LENGTH_SHORT,
-                    timeInSecForIosWeb: 2,
-                    fontSize: 16.0);
+                showToast("Github数据库错误");
               }
             } else {
-              Fluttertoast.showToast(
-                  msg: "Github验证失败",
-                  toastLength: Toast.LENGTH_SHORT,
-                  timeInSecForIosWeb: 2,
-                  fontSize: 16.0);
+              showToast("Github验证失败");
             }
           } catch (e) {
-            Fluttertoast.showToast(
-                msg: "Github验证失败",
-                toastLength: Toast.LENGTH_SHORT,
-                timeInSecForIosWeb: 2,
-                fontSize: 16.0);
+            showToast("Github验证失败");
           }
         } catch (e) {
-          Fluttertoast.showToast(
-              msg: "Github配置错误",
-              toastLength: Toast.LENGTH_SHORT,
-              timeInSecForIosWeb: 2,
-              fontSize: 16.0);
+          showToast("Github配置错误");
         }
       } catch (e) {
-        Fluttertoast.showToast(
-            msg: "Github配置错误",
-            toastLength: Toast.LENGTH_SHORT,
-            timeInSecForIosWeb: 2,
-            fontSize: 16.0);
+        showToast("Github配置错误");
       }
 
       if (jsonResult['lankong'] != null) {
@@ -409,9 +355,7 @@ class _AllPShostState extends State<AllPShost> {
               lankongToken = 'Bearer $lankongToken';
             }
             String lanKongstrategyId = jsonResult['lankong']['strategyId'];
-            if (lanKongstrategyId == '' ||
-                lanKongstrategyId == null ||
-                lanKongstrategyId.isEmpty) {
+            if (lanKongstrategyId == '' || lanKongstrategyId.isEmpty) {
               lanKongstrategyId = 'None';
             }
 
@@ -450,11 +394,7 @@ class _AllPShostState extends State<AllPShost> {
                       await MySqlUtils.queryUser(username: defaultUser);
 
                   if (queryuser == 'Empty') {
-                    Fluttertoast.showToast(
-                        msg: "请先登录",
-                        toastLength: Toast.LENGTH_SHORT,
-                        timeInSecForIosWeb: 2,
-                        fontSize: 16.0);
+                    showToast("请先登录");
                   } else if (querylankong == 'Empty') {
                     sqlResult =
                         await MySqlUtils.insertLankong(content: sqlconfig);
@@ -463,11 +403,7 @@ class _AllPShostState extends State<AllPShost> {
                         await MySqlUtils.updateLankong(content: sqlconfig);
                   }
                 } catch (e) {
-                  Fluttertoast.showToast(
-                      msg: "LanKong数据库错误",
-                      toastLength: Toast.LENGTH_SHORT,
-                      timeInSecForIosWeb: 2,
-                      fontSize: 16.0);
+                  showToast("兰空数据库错误");
                 }
                 if (sqlResult == "Success") {
                   HostConfigModel hostConfig = HostConfigModel(
@@ -475,46 +411,21 @@ class _AllPShostState extends State<AllPShost> {
                   final hostConfigJson = jsonEncode(hostConfig);
                   final hostConfigFile = await lskyFile;
                   hostConfigFile.writeAsString(hostConfigJson);
-
-                  Fluttertoast.showToast(
-                      msg: "LanKong配置成功",
-                      toastLength: Toast.LENGTH_SHORT,
-                      timeInSecForIosWeb: 2,
-                      fontSize: 16.0);
+                  showToast("兰空配置成功");
                 } else {
-                  Fluttertoast.showToast(
-                      msg: "LanKong数据库错误",
-                      toastLength: Toast.LENGTH_SHORT,
-                      timeInSecForIosWeb: 2,
-                      fontSize: 16.0);
+                  showToast("兰空数据库错误");
                 }
               } else {
-                Fluttertoast.showToast(
-                    msg: "LanKong验证失败",
-                    toastLength: Toast.LENGTH_SHORT,
-                    timeInSecForIosWeb: 2,
-                    fontSize: 16.0);
+                showToast("兰空验证失败");
               }
             } catch (e) {
-              Fluttertoast.showToast(
-                  msg: "LanKong配置错误",
-                  toastLength: Toast.LENGTH_SHORT,
-                  timeInSecForIosWeb: 2,
-                  fontSize: 16.0);
+              showToast("兰空配置错误");
             }
           } else {
-            Fluttertoast.showToast(
-                msg: "不支持兰空V1",
-                toastLength: Toast.LENGTH_SHORT,
-                timeInSecForIosWeb: 2,
-                fontSize: 16.0);
+            showToast("不支持兰空V1");
           }
         } catch (e) {
-          Fluttertoast.showToast(
-              msg: "兰空配置错误",
-              toastLength: Toast.LENGTH_SHORT,
-              timeInSecForIosWeb: 2,
-              fontSize: 16.0);
+          showToast("兰空配置错误");
         }
       }
     }
@@ -522,7 +433,7 @@ class _AllPShostState extends State<AllPShost> {
     if (jsonResult['imgur'] != null) {
       final imgurclientId = jsonResult['imgur']['clientId'];
       String imgurProxy = jsonResult['imgur']['proxy'];
-      if (imgurProxy.isEmpty || imgurProxy == null) {
+      if (imgurProxy.isEmpty) {
         imgurProxy = 'None';
       }
       try {
@@ -536,11 +447,7 @@ class _AllPShostState extends State<AllPShost> {
         var queryuser = await MySqlUtils.queryUser(username: defaultUser);
 
         if (queryuser == 'Empty') {
-          Fluttertoast.showToast(
-              msg: "请先登录",
-              toastLength: Toast.LENGTH_SHORT,
-              timeInSecForIosWeb: 2,
-              fontSize: 16.0);
+          showToast("请先登录");
         }
         String baiduPicUrl =
             "https://dss0.bdstatic.com/5aV1bjqh_Q23odCf/static/superman/img/logo/logo_white-d0c9fe2af5.png";
@@ -588,34 +495,18 @@ class _AllPShostState extends State<AllPShost> {
               final imgurConfigJson = jsonEncode(imgurConfig);
               final imgurConfigFile = await smmsFile;
               await imgurConfigFile.writeAsString(imgurConfigJson);
-              Fluttertoast.showToast(
-                  msg: "Imgur配置成功",
-                  toastLength: Toast.LENGTH_SHORT,
-                  timeInSecForIosWeb: 2,
-                  fontSize: 16.0);
+              showToast("Imgur配置成功");
             } else {
-              Fluttertoast.showToast(
-                  msg: "Imgur数据库错误",
-                  toastLength: Toast.LENGTH_SHORT,
-                  timeInSecForIosWeb: 2,
-                  fontSize: 16.0);
+              showToast("Imgur数据库错误");
             }
           } else {
-            Fluttertoast.showToast(
-                msg: "Imgur验证失败",
-                toastLength: Toast.LENGTH_SHORT,
-                timeInSecForIosWeb: 2,
-                fontSize: 16.0);
+            showToast("Imgur验证失败");
           }
         } catch (e) {
           rethrow;
         }
       } catch (e) {
-        Fluttertoast.showToast(
-            msg: "Imgur配置错误",
-            toastLength: Toast.LENGTH_SHORT,
-            timeInSecForIosWeb: 2,
-            fontSize: 16.0);
+        showToast("Imgur配置错误");
       }
     }
 
@@ -634,11 +525,7 @@ class _AllPShostState extends State<AllPShost> {
         var queryuser = await MySqlUtils.queryUser(username: defaultUser);
 
         if (queryuser == 'Empty') {
-          Fluttertoast.showToast(
-              msg: "请先登录",
-              toastLength: Toast.LENGTH_SHORT,
-              timeInSecForIosWeb: 2,
-              fontSize: 16.0);
+          showToast("请先登录");
         }
 
         if (!qiniuUrl.startsWith('http') && !qiniuUrl.startsWith('https')) {
@@ -648,7 +535,7 @@ class _AllPShostState extends State<AllPShost> {
           qiniuUrl = qiniuUrl.substring(0, qiniuUrl.length - 1);
         }
 
-        if (qiniuPath.isEmpty || qiniuPath == null) {
+        if (qiniuPath.isEmpty) {
           qiniuPath = 'None';
         } else {
           if (qiniuPath.startsWith('/')) {
@@ -659,7 +546,7 @@ class _AllPShostState extends State<AllPShost> {
           }
         }
 
-        if (qiniuOptions.isEmpty || qiniuOptions == null) {
+        if (qiniuOptions.isEmpty) {
           qiniuOptions = 'None';
         } else {
           if (!qiniuOptions.startsWith('?')) {
@@ -723,34 +610,18 @@ class _AllPShostState extends State<AllPShost> {
               final qiniuConfigJson = jsonEncode(qiniuConfig);
               final qiniuConfigFile = await qiniuFile;
               await qiniuConfigFile.writeAsString(qiniuConfigJson);
-              Fluttertoast.showToast(
-                  msg: "七牛云配置成功",
-                  toastLength: Toast.LENGTH_SHORT,
-                  timeInSecForIosWeb: 2,
-                  fontSize: 16.0);
+              showToast("七牛配置成功");
             } else {
-              Fluttertoast.showToast(
-                  msg: "七牛云数据库错误",
-                  toastLength: Toast.LENGTH_SHORT,
-                  timeInSecForIosWeb: 2,
-                  fontSize: 16.0);
+              showToast("七牛数据库错误");
             }
           } else {
-            Fluttertoast.showToast(
-                msg: "七牛云验证失败",
-                toastLength: Toast.LENGTH_SHORT,
-                timeInSecForIosWeb: 2,
-                fontSize: 16.0);
+            showToast("七牛验证失败");
           }
         } catch (e) {
           rethrow;
         }
       } catch (e) {
-        Fluttertoast.showToast(
-            msg: "七牛云配置错误",
-            toastLength: Toast.LENGTH_SHORT,
-            timeInSecForIosWeb: 2,
-            fontSize: 16.0);
+        showToast("七牛配置错误");
       }
     }
 
@@ -773,11 +644,7 @@ class _AllPShostState extends State<AllPShost> {
           var queryuser = await MySqlUtils.queryUser(username: defaultUser);
 
           if (queryuser == 'Empty') {
-            Fluttertoast.showToast(
-                msg: "请先登录",
-                toastLength: Toast.LENGTH_SHORT,
-                timeInSecForIosWeb: 2,
-                fontSize: 16.0);
+            showToast("请先登录");
           }
           if (tencentCustomUrl.isNotEmpty) {
             if (!tencentCustomUrl.startsWith('http') &&
@@ -792,7 +659,7 @@ class _AllPShostState extends State<AllPShost> {
             tencentCustomUrl = 'None';
           }
 
-          if (tencentPath.isEmpty || tencentPath == null) {
+          if (tencentPath.isEmpty) {
             tencentPath = 'None';
           } else {
             if (tencentPath.startsWith('/')) {
@@ -803,7 +670,7 @@ class _AllPShostState extends State<AllPShost> {
             }
           }
 
-          if (tencentOptions.isEmpty || tencentOptions == null) {
+          if (tencentOptions.isEmpty) {
             tencentOptions = 'None';
           } else {
             if (!tencentOptions.startsWith('?')) {
@@ -920,38 +787,18 @@ class _AllPShostState extends State<AllPShost> {
               final tencentConfigJson = jsonEncode(tencentConfig);
               final tencentConfigFile = await tencentFile;
               await tencentConfigFile.writeAsString(tencentConfigJson);
-              Fluttertoast.showToast(
-                  msg: "腾讯云配置成功",
-                  toastLength: Toast.LENGTH_SHORT,
-                  timeInSecForIosWeb: 2,
-                  fontSize: 16.0);
+              showToast("腾讯云配置成功");
             } else {
-              Fluttertoast.showToast(
-                  msg: "腾讯云数据库错误",
-                  toastLength: Toast.LENGTH_SHORT,
-                  timeInSecForIosWeb: 2,
-                  fontSize: 16.0);
+              showToast("腾讯云数据库错误");
             }
           } else {
-            Fluttertoast.showToast(
-                msg: "腾讯云验证失败",
-                toastLength: Toast.LENGTH_SHORT,
-                timeInSecForIosWeb: 2,
-                fontSize: 16.0);
+            showToast("腾讯云验证失败");
           }
         } catch (e) {
-          Fluttertoast.showToast(
-              msg: "腾讯云配置错误",
-              toastLength: Toast.LENGTH_SHORT,
-              timeInSecForIosWeb: 2,
-              fontSize: 16.0);
+          showToast("腾讯云配置错误");
         }
       } else {
-        Fluttertoast.showToast(
-            msg: "不支持腾讯V4",
-            toastLength: Toast.LENGTH_SHORT,
-            timeInSecForIosWeb: 2,
-            fontSize: 16.0);
+        showToast("不支持腾讯V4");
       }
     }
 
@@ -970,11 +817,7 @@ class _AllPShostState extends State<AllPShost> {
         var queryuser = await MySqlUtils.queryUser(username: defaultUser);
 
         if (queryuser == 'Empty') {
-          Fluttertoast.showToast(
-              msg: "请先登录",
-              toastLength: Toast.LENGTH_SHORT,
-              timeInSecForIosWeb: 2,
-              fontSize: 16.0);
+          showToast("请先登录");
         }
         if (aliyunCustomUrl.isNotEmpty) {
           if (!aliyunCustomUrl.startsWith('http') &&
@@ -989,7 +832,7 @@ class _AllPShostState extends State<AllPShost> {
           aliyunCustomUrl = 'None';
         }
 
-        if (aliyunPath.isEmpty || aliyunPath == null) {
+        if (aliyunPath.isEmpty) {
           aliyunPath = 'None';
         } else {
           if (aliyunPath.startsWith('/')) {
@@ -1000,7 +843,7 @@ class _AllPShostState extends State<AllPShost> {
           }
         }
 
-        if (aliyunOptions.isEmpty || aliyunOptions == null) {
+        if (aliyunOptions.isEmpty) {
           aliyunOptions = 'None';
         } else {
           if (!aliyunOptions.startsWith('?')) {
@@ -1106,31 +949,15 @@ class _AllPShostState extends State<AllPShost> {
             final aliyunConfigJson = jsonEncode(aliyunConfig);
             final aliyunConfigFile = await aliyunFile;
             await aliyunConfigFile.writeAsString(aliyunConfigJson);
-            Fluttertoast.showToast(
-                msg: "阿里云配置成功",
-                toastLength: Toast.LENGTH_SHORT,
-                timeInSecForIosWeb: 2,
-                fontSize: 16.0);
+            showToast("阿里云配置成功");
           } else {
-            Fluttertoast.showToast(
-                msg: "阿里云数据库错误",
-                toastLength: Toast.LENGTH_SHORT,
-                timeInSecForIosWeb: 2,
-                fontSize: 16.0);
+            showToast("阿里云数据库错误");
           }
         } else {
-          Fluttertoast.showToast(
-              msg: "阿里云验证失败",
-              toastLength: Toast.LENGTH_SHORT,
-              timeInSecForIosWeb: 2,
-              fontSize: 16.0);
+          showToast("阿里云验证失败");
         }
       } catch (e) {
-        Fluttertoast.showToast(
-            msg: "阿里云配置错误",
-            toastLength: Toast.LENGTH_SHORT,
-            timeInSecForIosWeb: 2,
-            fontSize: 16.0);
+        showToast("阿里云配置错误");
       }
     }
 
@@ -1147,11 +974,7 @@ class _AllPShostState extends State<AllPShost> {
         var queryuser = await MySqlUtils.queryUser(username: defaultUser);
 
         if (queryuser == 'Empty') {
-          Fluttertoast.showToast(
-              msg: "请先登录",
-              toastLength: Toast.LENGTH_SHORT,
-              timeInSecForIosWeb: 2,
-              fontSize: 16.0);
+          showToast("请先登录");
         }
         if (!upyunUrl.startsWith('http') && !upyunUrl.startsWith('https')) {
           upyunUrl = 'http://$upyunUrl';
@@ -1161,7 +984,7 @@ class _AllPShostState extends State<AllPShost> {
           upyunUrl = upyunUrl.substring(0, upyunUrl.length - 1);
         }
 
-        if (upyunPath.isEmpty || upyunPath == null) {
+        if (upyunPath.isEmpty) {
           upyunPath = 'None';
         } else {
           if (upyunPath.startsWith('/')) {
@@ -1274,31 +1097,15 @@ class _AllPShostState extends State<AllPShost> {
             final upyunConfigJson = jsonEncode(upyunConfig);
             final upyunConfigFile = await upyunFile;
             await upyunConfigFile.writeAsString(upyunConfigJson);
-            Fluttertoast.showToast(
-                msg: "又拍云配置成功",
-                toastLength: Toast.LENGTH_SHORT,
-                timeInSecForIosWeb: 2,
-                fontSize: 16.0);
+            showToast("又拍云配置成功");
           } else {
-            Fluttertoast.showToast(
-                msg: "又拍云数据库错误",
-                toastLength: Toast.LENGTH_SHORT,
-                timeInSecForIosWeb: 2,
-                fontSize: 16.0);
+            showToast("又拍云数据库错误");
           }
         } else {
-          Fluttertoast.showToast(
-              msg: "又拍云验证失败",
-              toastLength: Toast.LENGTH_SHORT,
-              timeInSecForIosWeb: 2,
-              fontSize: 16.0);
+          showToast("又拍云验证失败");
         }
       } catch (e) {
-        Fluttertoast.showToast(
-            msg: "又拍云配置错误",
-            toastLength: Toast.LENGTH_SHORT,
-            timeInSecForIosWeb: 2,
-            fontSize: 16.0);
+        showToast("又拍云配置错误");
       }
     }
 
@@ -1377,7 +1184,7 @@ class _AllPShostState extends State<AllPShost> {
           trailing: const Icon(Icons.arrow_forward_ios),
         ),
         ListTile(
-          title: const Text('Imgur图床（需翻墙）'),
+          title: const Text('Imgur图床(需翻墙)'),
           onTap: () {
             Application.router.navigateTo(context, Routes.imgurPShostSelect,
                 transition: TransitionType.cupertino);
@@ -1417,12 +1224,12 @@ class _AllPShostState extends State<AllPShost> {
           trailing: const Icon(Icons.arrow_forward_ios),
         ),
       ]),
-      floatingActionButton: Container(
+      floatingActionButton: SizedBox(
           height: 40,
           width: 40,
           child: FloatingActionButton(
             heroTag: 'copyConfig',
-            backgroundColor: Color.fromARGB(255, 198, 135, 235),
+            backgroundColor: const Color.fromARGB(255, 198, 135, 235),
             //select host menu
             onPressed: () async {
               await showDialog(
