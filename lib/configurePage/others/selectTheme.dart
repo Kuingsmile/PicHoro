@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flustars_flutter3/flustars_flutter3.dart';
 import 'package:provider/provider.dart';
-import 'package:horopic/utils/themeProvider.dart';
+import 'package:horopic/utils/theme_provider.dart';
 
 class ChangeTheme extends StatefulWidget {
   const ChangeTheme({Key? key}) : super(key: key);

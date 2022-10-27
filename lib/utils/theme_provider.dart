@@ -1,11 +1,12 @@
-import 'package:flustars_flutter3/flustars_flutter3.dart';
 import 'package:flutter/material.dart';
+import 'package:flustars_flutter3/flustars_flutter3.dart';
 
 class AppInfoProvider with ChangeNotifier {
   String _themeColor = '';
   String get themeColor => _themeColor;
-  String _key_theme_color = ' ';
-  String get key_theme_color => _key_theme_color;
+
+  String _keyThemeColor = ' ';
+  String get keyThemeColor => _keyThemeColor;
 
   AppInfoProvider() {
     _initAsync();
@@ -14,7 +15,7 @@ class AppInfoProvider with ChangeNotifier {
   Future<void> _initAsync() async {
     await SpUtil.getInstance();
     String colorset = SpUtil.getString('key_theme_color', defValue: 'light')!;
-    _key_theme_color = colorset;
+    _keyThemeColor = colorset;
     setTheme(colorset);
     // 设置初始化主题颜色
   }
@@ -35,6 +36,6 @@ class AppInfoProvider with ChangeNotifier {
     notifyListeners();
     await SpUtil.getInstance();
     SpUtil.putString('key_theme_color', themeColor);
-    _key_theme_color = themeColor;
+    _keyThemeColor = themeColor;
   }
 }
