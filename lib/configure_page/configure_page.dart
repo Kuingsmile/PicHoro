@@ -21,12 +21,9 @@ class ConfigurePage extends StatefulWidget {
 class ConfigurePageState extends State<ConfigurePage>
     with AutomaticKeepAliveClientMixin<ConfigurePage> {
   String version = ' ';
-  String cancelTag = "";
-  String apkFilePath = "";
-  String currentDownloadStateCH = "当前下载状态：还未开始";
 
   @override
-  bool get wantKeepAlive => true;
+  bool get wantKeepAlive => false;
 
   @override
   void initState() {
@@ -72,7 +69,7 @@ class ConfigurePageState extends State<ConfigurePage>
   _update(String remoteVersion) async {
     String url =
         'https://www.horosama.com/self_apk/PicHoro_V$remoteVersion.apk';
-    await RUpgrade.upgrade(url,
+    RUpgrade.upgrade(url,
         fileName: 'PicHoro_V$remoteVersion.apk',
         isAutoRequestInstall: true,
         notificationStyle: NotificationStyle.speechAndPlanTime);
