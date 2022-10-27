@@ -2,9 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 
-import 'package:horopic/PShostFileManage/tencent/downloadAPI/tencentDownloader.dart';
-import 'package:horopic/PShostFileManage/tencent/downloadAPI/downloadStatus.dart';
-import 'package:horopic/PShostFileManage/tencent/downloadAPI/downloadRequest.dart';
+import 'package:horopic/picture_host_manage/tencent/download_api/download_status.dart';
+import 'package:horopic/picture_host_manage/tencent/download_api/download_request.dart';
+
 class DownloadTask {
   final DownloadRequest request;
   ValueNotifier<DownloadStatus> status = ValueNotifier(DownloadStatus.queued);
@@ -25,10 +25,10 @@ class DownloadTask {
     var listener;
     listener = () {
       if (status.value.isCompleted) {
-        try{
-        completer.complete(status.value);
-        status.removeListener(listener);
-        } catch(e){
+        try {
+          completer.complete(status.value);
+          status.removeListener(listener);
+        } catch (e) {
           status.removeListener(listener);
         }
       }
