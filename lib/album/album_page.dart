@@ -1,18 +1,23 @@
-import 'package:extended_image/extended_image.dart';
+import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:horopic/utils/global.dart';
+import 'package:flutter/foundation.dart';
+
+import 'package:extended_image/extended_image.dart';
+import 'package:fluro/fluro.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter/services.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
-import 'package:horopic/utils/common_func.dart';
-import 'package:horopic/album/albumSQL.dart';
-import 'dart:io';
-import 'package:horopic/album/LoadStateChanged.dart';
 import 'package:msh_checkbox/msh_checkbox.dart';
+
+import 'package:horopic/album/load_state_change.dart';
+import 'package:horopic/album/album_sql.dart';
+
+import 'package:horopic/utils/common_functions.dart';
+import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/deleter.dart';
 import 'package:horopic/router/application.dart';
-import 'package:horopic/router/routes.dart';
-import 'package:fluro/fluro.dart';
+import 'package:horopic/router/routers.dart';
+
 //一小部分代码参考了开源项目flutter-picgo 项目地址https://github.com/PicGo/flutter-picgo
 
 //show uploaded images
@@ -20,10 +25,11 @@ class UploadedImages extends StatefulWidget {
   const UploadedImages({super.key});
 
   @override
-  _UploadedImagesState createState() => _UploadedImagesState();
+  UploadedImagesState createState() => UploadedImagesState();
 }
 
-class _UploadedImagesState extends State<UploadedImages> {
+class UploadedImagesState extends State<UploadedImages>
+    with AutomaticKeepAliveClientMixin<UploadedImages> {
   List showedImages = []; //全部图片
   List showedImageUrl = []; //showedImages的url
   List showedImagePaths = []; //showedImages的路径
@@ -37,7 +43,7 @@ class _UploadedImagesState extends State<UploadedImages> {
   List currentShowedImagesDisplayAddressUrl = []; //当前显示的图片用来显示到相册里的url
 
   int _currentPage = 0;
-  RefreshController _refreshController =
+  RefreshController refreshController =
       RefreshController(initialRefresh: false);
   List selectedImages = [];
   List<bool> selectedImagesBool = List.filled(12, false);
@@ -53,6 +59,9 @@ class _UploadedImagesState extends State<UploadedImages> {
   };
 
   @override
+  bool get wantKeepAlive => false;
+
+  @override
   void initState() {
     super.initState();
     _onRefresh();
@@ -60,6 +69,7 @@ class _UploadedImagesState extends State<UploadedImages> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
       appBar: AppBar(
           title: Text(
@@ -79,101 +89,36 @@ class _UploadedImagesState extends State<UploadedImages> {
               onPressed: () async {
                 if (!selectedImagesBool.contains(true) ||
                     currentShowedImagesUrl.isEmpty) {
-                  Fluttertoast.showToast(
-                      backgroundColor:
-                          Theme.of(context).brightness == Brightness.light
-                              ? Colors.black
-                              : Colors.white,
-                      textColor:
-                          Theme.of(context).brightness == Brightness.light
-                              ? Colors.white
-                              : Colors.black,
-                      msg: '没有选择图片');
+                  showToastWithContext(context, '没有选择图片');
                   return;
                 }
-                return showDialog(
-                  barrierDismissible: false,
+                return showCupertinoAlertDialogWithConfirmFunc(
                   context: context,
-                  builder: (BuildContext context) {
-                    return AlertDialog(
-                      title: const Text(
-                        '删除全部图片',
-                        textAlign: TextAlign.center,
-                      ),
-                      content: const Text(
-                        '是否删除全部选择的图片？\n请注意检查删除本地和删除云端两项设置!',
-                        textAlign: TextAlign.center,
-                      ),
-                      actions: [
-                        Center(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              TextButton(
-                                child: const Text(
-                                  '确定',
-                                  style: TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                                onPressed: () async {
-                                  try {
-                                    List<int> toDelete = [];
-                                    for (int i = 0;
-                                        i < currentShowedImagesUrl.length;
-                                        i++) {
-                                      if (selectedImagesBool[i]) {
-                                        toDelete.add(i);
-                                      }
-                                    }
-                                    selectedImagesBool =
-                                        List.filled(_perPageItemSize, false);
-                                    Navigator.pop(context);
-                                    await deleteImageAll(toDelete);
-                                    Fluttertoast.showToast(
-                                        backgroundColor:
-                                            Theme.of(this.context).brightness ==
-                                                    Brightness.light
-                                                ? Colors.black
-                                                : Colors.white,
-                                        textColor:
-                                            Theme.of(this.context).brightness ==
-                                                    Brightness.light
-                                                ? Colors.white
-                                                : Colors.black,
-                                        msg: '删除完成');
-                                    return;
-                                  } catch (e) {
-                                    Application.router.navigateTo(
-                                        context, Routes.albumUploadedImages,
-                                        transition: TransitionType.none);
-                                    showAlertDialog(
-                                        barrierDismissible: true,
-                                        context: context,
-                                        title: '错误',
-                                        content: e.toString());
-                                  }
-                                },
-                              ),
-                              TextButton(
-                                style: TextButton.styleFrom(
-                                  alignment: Alignment.center,
-                                ),
-                                child: const Text(
-                                  '取消',
-                                  style: TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                              ),
-                            ],
-                          ),
-                        )
-                      ],
-                    );
+                  title: '删除全部图片',
+                  content: '是否删除全部选择的图片？\n请注意检查删除本地和删除云端两项设置!',
+                  onConfirm: () async {
+                    try {
+                      List<int> toDelete = [];
+                      for (int i = 0; i < currentShowedImagesUrl.length; i++) {
+                        if (selectedImagesBool[i]) {
+                          toDelete.add(i);
+                        }
+                      }
+                      selectedImagesBool = List.filled(_perPageItemSize, false);
+                      Navigator.pop(context);
+                      await deleteImageAll(toDelete);
+                      showToast('删除完成');
+                      return;
+                    } catch (e) {
+                      Application.router.navigateTo(
+                          context, Routes.albumUploadedImages,
+                          transition: TransitionType.none);
+                      showCupertinoAlertDialog(
+                          barrierDismissible: true,
+                          context: context,
+                          title: '错误',
+                          content: e.toString());
+                    }
                   },
                 );
               },
@@ -198,7 +143,7 @@ class _UploadedImagesState extends State<UploadedImages> {
             failedText: '没有更多图片啦',
             canLoadingText: '释放加载',
           ),
-          controller: _refreshController,
+          controller: refreshController,
           onRefresh: _onRefresh,
           onLoading: _onLoading,
           child: GridView.builder(
@@ -445,7 +390,7 @@ class _UploadedImagesState extends State<UploadedImages> {
                       _perPageItemSize,
                       false,
                     );
-                    _refreshController.resetNoData();
+                    refreshController.resetNoData();
                   });
                   initLoadUploadedImages();
                 },
@@ -501,19 +446,7 @@ class _UploadedImagesState extends State<UploadedImages> {
                             .toString()
                             .substring(1, multiUrls.toString().length - 1)
                             .replaceAll(',', '\n')));
-                    Fluttertoast.showToast(
-                        msg: "已复制全部链接",
-                        toastLength: Toast.LENGTH_SHORT,
-                        timeInSecForIosWeb: 2,
-                        backgroundColor:
-                            Theme.of(context).brightness == Brightness.light
-                                ? Colors.black
-                                : Colors.white,
-                        textColor:
-                            Theme.of(context).brightness == Brightness.light
-                                ? Colors.white
-                                : Colors.black,
-                        fontSize: 16.0);
+                    showToast('已复制全部链接');
                     return;
                   }
                 },
@@ -525,24 +458,12 @@ class _UploadedImagesState extends State<UploadedImages> {
               width: 40,
               child: FloatingActionButton(
                 heroTag: 'select',
-                backgroundColor: Color.fromARGB(255, 248, 196, 237),
+                backgroundColor: const Color.fromARGB(255, 248, 196, 237),
                 elevation: 5,
                 //select host menu
                 onPressed: () async {
                   if (currentShowedImagesUrl.isEmpty) {
-                    Fluttertoast.showToast(
-                        msg: "相册为空",
-                        toastLength: Toast.LENGTH_SHORT,
-                        timeInSecForIosWeb: 2,
-                        backgroundColor:
-                            Theme.of(context).brightness == Brightness.light
-                                ? Colors.black
-                                : Colors.white,
-                        textColor:
-                            Theme.of(context).brightness == Brightness.light
-                                ? Colors.white
-                                : Colors.black,
-                        fontSize: 16.0);
+                    showToastWithContext(context, '相册为空');
                     return;
                   } else if (selectedImagesBool.contains(true)) {
                     setState(() {
@@ -571,11 +492,7 @@ class _UploadedImagesState extends State<UploadedImages> {
     String formatedLink = '';
     formatedLink = linkGenerateDict[format]!(link, filename);
     Clipboard.setData(ClipboardData(text: formatedLink));
-    Fluttertoast.showToast(
-        msg: "$format已复制",
-        toastLength: Toast.LENGTH_SHORT,
-        timeInSecForIosWeb: 2,
-        fontSize: 16.0);
+    showToast('$format已复制');
   }
 
   handleOnLongPress(BuildContext context, double dx, double dy, int index) {
@@ -712,18 +629,7 @@ class _UploadedImagesState extends State<UploadedImages> {
             await deleteImage(index);
             break;
           } catch (e) {
-            Fluttertoast.showToast(
-                msg: "删除失败",
-                toastLength: Toast.LENGTH_SHORT,
-                timeInSecForIosWeb: 2,
-                backgroundColor:
-                    Theme.of(context).brightness == Brightness.light
-                        ? Colors.black
-                        : Colors.white,
-                textColor: Theme.of(context).brightness == Brightness.light
-                    ? Colors.white
-                    : Colors.black,
-                fontSize: 16.0);
+            showToastWithContext(context, '删除失败');
           }
       }
     });
@@ -753,7 +659,11 @@ class _UploadedImagesState extends State<UploadedImages> {
             await File(showedImagePaths[
                     imagesIndex[i] + (_currentPage * _perPageItemSize) - i])
                 .delete();
-          } catch (e) {}
+          } catch (e) {
+            if (kDebugMode) {
+              print(e);
+            }
+          }
         }
         showedImageId
             .removeAt(imagesIndex[i] + (_currentPage * _perPageItemSize) - i);
@@ -808,7 +718,11 @@ class _UploadedImagesState extends State<UploadedImages> {
         try {
           await File(showedImagePaths[index + _currentPage * _perPageItemSize])
               .delete();
-        } catch (e) {}
+        } catch (e) {
+          if (kDebugMode) {
+            print(e);
+          }
+        }
       }
       setState(() {
         showedImageId.removeAt(index + _perPageItemSize * _currentPage);
@@ -868,7 +782,7 @@ class _UploadedImagesState extends State<UploadedImages> {
           _perPageItemSize,
           false,
         );
-        _refreshController.resetNoData();
+        refreshController.resetNoData();
       });
       initLoadUploadedImages();
     } else {
@@ -882,7 +796,6 @@ class _UploadedImagesState extends State<UploadedImages> {
   }
 
   void initLoadUploadedImages() async {
-    String defaultUser = await Global.getUser();
     //所有的图床的图片ID
     Map<String, dynamic> imageList =
         await AlbumSQL.getAllTableData(Global.imageDB!, 'id');
@@ -913,6 +826,7 @@ class _UploadedImagesState extends State<UploadedImages> {
       } else if (Global.defaultShowedPBhost == 'github') {
         if (!maps[0]['url'].toString().startsWith('https://') &&
             !maps[0]['url'].toString().startsWith('http://')) {
+          // ignore: prefer_interpolation_to_compose_strings
           showedImageUrl.add('http://' + maps[0]['url']);
         } else {
           showedImageUrl.add(maps[0]['url']);
@@ -921,6 +835,7 @@ class _UploadedImagesState extends State<UploadedImages> {
         if (!maps[0]['hostSpecificArgA'].toString().startsWith('https://') &&
             !maps[0]['hostSpecificArgA'].toString().startsWith('http://')) {
           showedImageDisplayAddressUrl
+              // ignore: prefer_interpolation_to_compose_strings
               .add('http://' + maps[0]['hostSpecificArgA']);
         } else {
           showedImageDisplayAddressUrl.add(maps[0]['hostSpecificArgA']);
@@ -940,6 +855,7 @@ class _UploadedImagesState extends State<UploadedImages> {
       } else if (Global.defaultShowedPBhost == 'qiniu') {
         if (!maps[0]['url'].toString().startsWith('https://') &&
             !maps[0]['url'].toString().startsWith('http://')) {
+          // ignore: prefer_interpolation_to_compose_strings
           showedImageUrl.add('http://' + maps[0]['url']);
         } else {
           showedImageUrl.add(maps[0]['url']);
@@ -947,6 +863,7 @@ class _UploadedImagesState extends State<UploadedImages> {
         if (!maps[0]['hostSpecificArgA'].toString().startsWith('https://') &&
             !maps[0]['hostSpecificArgA'].toString().startsWith('http://')) {
           showedImageDisplayAddressUrl
+              // ignore: prefer_interpolation_to_compose_strings
               .add('http://' + maps[0]['hostSpecificArgA']);
         } else {
           showedImageDisplayAddressUrl.add(maps[0]['hostSpecificArgA']);
@@ -957,6 +874,7 @@ class _UploadedImagesState extends State<UploadedImages> {
       } else if (Global.defaultShowedPBhost == 'tencent') {
         if (!maps[0]['url'].toString().startsWith('https://') &&
             !maps[0]['url'].toString().startsWith('http://')) {
+          // ignore: prefer_interpolation_to_compose_strings
           showedImageUrl.add('http://' + maps[0]['url']);
         } else {
           showedImageUrl.add(maps[0]['url']);
@@ -964,6 +882,7 @@ class _UploadedImagesState extends State<UploadedImages> {
         if (!maps[0]['hostSpecificArgA'].toString().startsWith('https://') &&
             !maps[0]['hostSpecificArgA'].toString().startsWith('http://')) {
           showedImageDisplayAddressUrl
+              // ignore: prefer_interpolation_to_compose_strings
               .add('http://' + maps[0]['hostSpecificArgA']);
         } else {
           showedImageDisplayAddressUrl.add(maps[0]['hostSpecificArgA']);
@@ -974,6 +893,7 @@ class _UploadedImagesState extends State<UploadedImages> {
       } else if (Global.defaultShowedPBhost == 'aliyun') {
         if (!maps[0]['url'].toString().startsWith('https://') &&
             !maps[0]['url'].toString().startsWith('http://')) {
+          // ignore: prefer_interpolation_to_compose_strings
           showedImageUrl.add('http://' + maps[0]['url']);
         } else {
           showedImageUrl.add(maps[0]['url']);
@@ -981,6 +901,7 @@ class _UploadedImagesState extends State<UploadedImages> {
         if (!maps[0]['hostSpecificArgA'].toString().startsWith('https://') &&
             !maps[0]['hostSpecificArgA'].toString().startsWith('http://')) {
           showedImageDisplayAddressUrl
+              // ignore: prefer_interpolation_to_compose_strings
               .add('http://' + maps[0]['hostSpecificArgA']);
         } else {
           showedImageDisplayAddressUrl.add(maps[0]['hostSpecificArgA']);
@@ -991,6 +912,7 @@ class _UploadedImagesState extends State<UploadedImages> {
       } else if (Global.defaultShowedPBhost == 'upyun') {
         if (!maps[0]['url'].toString().startsWith('https://') &&
             !maps[0]['url'].toString().startsWith('http://')) {
+          // ignore: prefer_interpolation_to_compose_strings
           showedImageUrl.add('http://' + maps[0]['url']);
         } else {
           showedImageUrl.add(maps[0]['url']);
@@ -998,6 +920,7 @@ class _UploadedImagesState extends State<UploadedImages> {
         if (!maps[0]['hostSpecificArgA'].toString().startsWith('https://') &&
             !maps[0]['hostSpecificArgA'].toString().startsWith('http://')) {
           showedImageDisplayAddressUrl
+              // ignore: prefer_interpolation_to_compose_strings
               .add('http://' + maps[0]['hostSpecificArgA']);
         } else {
           showedImageDisplayAddressUrl.add(maps[0]['hostSpecificArgA']);
@@ -1020,7 +943,7 @@ class _UploadedImagesState extends State<UploadedImages> {
             : _perPageItemSize);
 
     setState(() {
-      _refreshController.refreshCompleted();
+      refreshController.refreshCompleted();
     });
   }
 
@@ -1044,20 +967,20 @@ class _UploadedImagesState extends State<UploadedImages> {
                   : showedImageDisplayAddressUrl.length);
       selectedImagesBool = List.filled(_perPageItemSize, false);
     }
-    LoadUploadedImages();
+    loadUploadedImages();
   }
 
-  void LoadUploadedImages() async {
+  void loadUploadedImages() async {
     setState(() {
       if (currentShowedImagesUrl.isEmpty || showedImageUrl.isEmpty) {
-        _refreshController.loadNoData();
+        refreshController.loadNoData();
       } else if (_currentPage == 0) {
-        _refreshController.refreshCompleted();
+        refreshController.refreshCompleted();
       } else if (showedImageUrl.length <
           _perPageItemSize * (_currentPage + 1)) {
-        _refreshController.loadNoData();
+        refreshController.loadNoData();
       } else {
-        _refreshController.loadComplete();
+        refreshController.loadComplete();
       }
     });
   }
@@ -1073,12 +996,12 @@ class _UploadedImagesState extends State<UploadedImages> {
         (_currentPage) * _perPageItemSize,
         _perPageItemSize * (_currentPage + 1));
     selectedImagesBool = List.filled(_perPageItemSize, false);
-    BackUploadedImages();
+    backUploadedImages();
   }
 
-  void BackUploadedImages() async {
+  void backUploadedImages() async {
     setState(() {
-      _refreshController.refreshCompleted();
+      refreshController.refreshCompleted();
     });
   }
 }

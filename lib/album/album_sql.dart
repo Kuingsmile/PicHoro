@@ -20,8 +20,9 @@ List<String> allPBhost = [
   'PBhost2', //自定义图床2
   'PBhost3', //自定义图床3
 ];
+
 // XXX 重要，默认上传图床名和数据库表名对应关系
-Map<String, String> PBhostToTableName = {
+Map<String, String> pBhostToTableName = {
   "lsky.pro": "lskypro",
   "sm.ms": "smms",
   'github': 'github',
@@ -92,7 +93,7 @@ class AlbumSQL {
   static isTableExist(Database db, String tableName) async {
     var res = await db.rawQuery(
         "SELECT name FROM sqlite_master WHERE type='table' AND name='$tableName'");
-    return res != null && res.isNotEmpty;
+    return res.isNotEmpty;
   }
 
   static createTable(Database db, String tableName) async {

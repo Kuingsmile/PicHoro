@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:extended_image/extended_image.dart';
+import 'package:horopic/album/load_state_change.dart';
 
 class ImagePreview extends StatefulWidget {
   final int index;
@@ -9,10 +10,10 @@ class ImagePreview extends StatefulWidget {
       : super(key: key);
 
   @override
-  _ImagePreviewState createState() => _ImagePreviewState();
+  ImagePreviewState createState() => ImagePreviewState();
 }
 
-class _ImagePreviewState extends State<ImagePreview> {
+class ImagePreviewState extends State<ImagePreview> {
   int _index = 0;
   late PageController _pageController;
 
@@ -36,13 +37,15 @@ class _ImagePreviewState extends State<ImagePreview> {
             _index = index;
           });
         },
-        physics: BouncingScrollPhysics(),
+        physics: const BouncingScrollPhysics(),
         itemBuilder: (context, index) {
           return ExtendedImage.network(
             widget.images[index],
             fit: BoxFit.contain,
             mode: ExtendedImageMode.gesture,
             cache: true,
+            loadStateChanged: (state) =>
+                defaultLoadStateChanged(state, iconSize: 60),
             initGestureConfigHandler: (state) {
               return GestureConfig(
                   minScale: 0.9,

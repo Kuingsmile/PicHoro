@@ -10,7 +10,7 @@ Widget? defaultLoadStateChanged(ExtendedImageState state,
           child: SizedBox(
             width: iconSize,
             height: iconSize,
-            child: CircularProgressIndicator(
+            child: const CircularProgressIndicator(
               strokeWidth: 2.0,
             ),
           ),
