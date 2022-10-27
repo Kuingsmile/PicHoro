@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:horopic/PShostFileManage/manageAPI/tencentManage.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+
+import 'package:horopic/picture_host_manage/manage_api/tencent_manage_api.dart';
+import 'package:horopic/utils/common_functions.dart';
 
 class NewBucketConfig extends StatefulWidget {
-  NewBucketConfig({
+  const NewBucketConfig({
     Key? key,
   }) : super(key: key);
 
   @override
-  _NewBucketConfigState createState() => _NewBucketConfigState();
+  NewBucketConfigState createState() => NewBucketConfigState();
 }
 
-class _NewBucketConfigState extends State<NewBucketConfig> {
+class NewBucketConfigState extends State<NewBucketConfig> {
   Map newBucketConfig = {
     'bucketName': '',
     'region': 'ap-nanjing',
@@ -120,48 +121,18 @@ class _NewBucketConfigState extends State<NewBucketConfig> {
                     await TencentManageAPI.createBucket(newBucketConfig);
                 if (result[0] == 'success') {
                   resetBucketConfig();
-                  Fluttertoast.showToast(
-                      msg: "创建成功",
-                      toastLength: Toast.LENGTH_SHORT,
-                      timeInSecForIosWeb: 2,
-                      backgroundColor:
-                          Theme.of(context).brightness == Brightness.light
-                              ? Colors.black
-                              : Colors.white,
-                      textColor:
-                          Theme.of(context).brightness == Brightness.light
-                              ? Colors.white
-                              : Colors.black,
-                      fontSize: 16.0);
-                  Navigator.pop(context);
+                  if (mounted) {
+                    showToastWithContext(context, "创建成功");
+                    Navigator.pop(context);
+                  }
                 } else if (result[0] == 'multiAZ error') {
-                  Fluttertoast.showToast(
-                      msg: '区域不支持多AZ特性',
-                      toastLength: Toast.LENGTH_SHORT,
-                      timeInSecForIosWeb: 2,
-                      backgroundColor:
-                          Theme.of(context).brightness == Brightness.light
-                              ? Colors.black
-                              : Colors.white,
-                      textColor:
-                          Theme.of(context).brightness == Brightness.light
-                              ? Colors.white
-                              : Colors.black,
-                      fontSize: 16.0);
+                  if (mounted) {
+                    showToastWithContext(context, "区域不支持多AZ特性");
+                  }
                 } else {
-                  Fluttertoast.showToast(
-                      msg: '创建失败',
-                      toastLength: Toast.LENGTH_SHORT,
-                      timeInSecForIosWeb: 2,
-                      backgroundColor:
-                          Theme.of(context).brightness == Brightness.light
-                              ? Colors.black
-                              : Colors.white,
-                      textColor:
-                          Theme.of(context).brightness == Brightness.light
-                              ? Colors.white
-                              : Colors.black,
-                      fontSize: 16.0);
+                  if (mounted) {
+                    showToastWithContext(context, "创建失败");
+                  }
                 }
               },
               child: const Text('创建'),
