@@ -1,58 +1,60 @@
 import 'dart:io';
 import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:horopic/PShostFileManage/manageAPI/tencentManage.dart';
-import 'package:horopic/utils/global.dart';
-import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:flutter/services.dart' as flutter_services;
+
+import 'package:external_path/external_path.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:fluro/fluro.dart';
-import 'package:horopic/router/application.dart';
-import 'package:horopic/router/routes.dart';
-import 'package:horopic/PShostFileManage/commonPage/loadingState.dart'
-    as loadingState;
-import 'package:horopic/utils/common_func.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:flutter/services.dart' as flutterServices;
-import 'package:path/path.dart' as myPath;
-import 'package:horopic/pages/loading.dart';
-import 'package:external_path/external_path.dart';
+import 'package:path/path.dart' as my_path;
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:msh_checkbox/msh_checkbox.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
+
+import 'package:horopic/router/application.dart';
+import 'package:horopic/router/routers.dart';
+import 'package:horopic/picture_host_manage/manage_api/tencent_manage_api.dart';
+import 'package:horopic/picture_host_manage/common_page/loading_state.dart'
+    as loading_state;
+import 'package:horopic/utils/global.dart';
+import 'package:horopic/utils/common_functions.dart';
+import 'package:horopic/pages/loading.dart';
 
 bool isCoverFile = false;
 
 class TencentFileExplorer extends StatefulWidget {
   final Map element;
   final String bucketPrefix;
-  TencentFileExplorer(
+  const TencentFileExplorer(
       {Key? key, required this.element, required this.bucketPrefix})
       : super(key: key);
 
   @override
-  _TencentFileExplorerState createState() => _TencentFileExplorerState();
+  TencentFileExplorerState createState() => TencentFileExplorerState();
 }
 
-class _TencentFileExplorerState
-    extends loadingState.BaseLoadingPageState<TencentFileExplorer> {
-  List _fileAllInfoList = [];
-  List _dirAllInfoList = [];
-  List _allInfoList = [];
+class TencentFileExplorerState
+    extends loading_state.BaseLoadingPageState<TencentFileExplorer> {
+  List fileAllInfoList = [];
+  List dirAllInfoList = [];
+  List allInfoList = [];
 
   List selectedFilesBool = [];
-  RefreshController _refreshController =
+  RefreshController refreshController =
       RefreshController(initialRefresh: false);
-  TextEditingController _vc = TextEditingController();
-  TextEditingController _newFolder = TextEditingController();
-  TextEditingController _fileLink = TextEditingController();
+  TextEditingController vc = TextEditingController();
+  TextEditingController newFolder = TextEditingController();
+  TextEditingController fileLink = TextEditingController();
   bool sorted = true;
 
   @override
   void initState() {
     super.initState();
-    _fileAllInfoList.clear();
+    fileAllInfoList.clear();
     _getBucketList();
   }
 
@@ -64,15 +66,14 @@ class _TencentFileExplorerState
     if (res[0] == 'empty') {
       if (mounted) {
         setState(() {
-          state = loadingState.LoadState.EMPTY;
+          state = loading_state.LoadState.EMPTY;
         });
       }
-
       return;
     } else if (res[0] == 'error') {
       if (mounted) {
         setState(() {
-          state = loadingState.LoadState.ERROR;
+          state = loading_state.LoadState.ERROR;
         });
       }
       return;
@@ -86,7 +87,7 @@ class _TencentFileExplorerState
     if (res2[0] == 'failed') {
       if (mounted) {
         setState(() {
-          state = loadingState.LoadState.ERROR;
+          state = loading_state.LoadState.ERROR;
         });
       }
       return;
@@ -109,53 +110,53 @@ class _TencentFileExplorerState
       if (files is! List) {
         files = [files];
       }
-      _fileAllInfoList.clear();
+      fileAllInfoList.clear();
       for (var element in files) {
-        _fileAllInfoList.add(element);
+        fileAllInfoList.add(element);
       }
       //convert last modified time to datetime format
-      for (var i = 0; i < _fileAllInfoList.length; i++) {
-        _fileAllInfoList[i]['LastModified'] = DateTime.parse(
-          _fileAllInfoList[i]['LastModified'],
+      for (var i = 0; i < fileAllInfoList.length; i++) {
+        fileAllInfoList[i]['LastModified'] = DateTime.parse(
+          fileAllInfoList[i]['LastModified'],
         );
       }
       //sort the list by last modified time
-      _fileAllInfoList.sort((a, b) {
+      fileAllInfoList.sort((a, b) {
         return b['LastModified'].compareTo(a['LastModified']);
       });
     } else {
-      _fileAllInfoList.clear();
+      fileAllInfoList.clear();
     }
 
     if (dir != null) {
       if (dir is! List) {
         dir = [dir];
       }
-      _dirAllInfoList.clear();
+      dirAllInfoList.clear();
       for (var element in dir) {
-        _dirAllInfoList.add(element);
+        dirAllInfoList.add(element);
       }
     } else {
-      _dirAllInfoList.clear();
+      dirAllInfoList.clear();
     }
 
-    _allInfoList.clear();
-    _allInfoList.addAll(_dirAllInfoList);
-    _allInfoList.addAll(_fileAllInfoList);
-    if (_allInfoList.isEmpty) {
+    allInfoList.clear();
+    allInfoList.addAll(dirAllInfoList);
+    allInfoList.addAll(fileAllInfoList);
+    if (allInfoList.isEmpty) {
       if (mounted) {
         setState(() {
-          state = loadingState.LoadState.EMPTY;
+          state = loading_state.LoadState.EMPTY;
         });
       }
     } else {
       if (mounted) {
         setState(() {
           selectedFilesBool.clear();
-          for (var i = 0; i < _allInfoList.length; i++) {
+          for (var i = 0; i < allInfoList.length; i++) {
             selectedFilesBool.add(false);
           }
-          state = loadingState.LoadState.SUCCESS;
+          state = loading_state.LoadState.SUCCESS;
         });
       }
     }
@@ -163,14 +164,12 @@ class _TencentFileExplorerState
 
   _onrefresh() async {
     _getBucketList();
-    _refreshController.refreshCompleted();
+    refreshController.refreshCompleted();
   }
 
   @override
   void dispose() {
-    _fileAllInfoList.clear();
-    _dirAllInfoList.clear();
-    _allInfoList.clear();
+    refreshController.dispose();
     super.dispose();
   }
 
@@ -215,37 +214,37 @@ class _TencentFileExplorerState
                   )),
                   onTap: () {
                     if (sorted == true) {
-                      if (_dirAllInfoList.isEmpty) {
-                        _allInfoList.sort((a, b) {
+                      if (dirAllInfoList.isEmpty) {
+                        allInfoList.sort((a, b) {
                           return b['LastModified'].compareTo(a['LastModified']);
                         });
                       } else {
-                        List temp = _allInfoList.sublist(
-                            _dirAllInfoList.length, _allInfoList.length);
+                        List temp = allInfoList.sublist(
+                            dirAllInfoList.length, allInfoList.length);
                         temp.sort((a, b) {
                           return b['LastModified'].compareTo(a['LastModified']);
                         });
-                        _allInfoList.clear();
-                        _allInfoList.addAll(_dirAllInfoList);
-                        _allInfoList.addAll(temp);
+                        allInfoList.clear();
+                        allInfoList.addAll(dirAllInfoList);
+                        allInfoList.addAll(temp);
                       }
                       setState(() {
                         sorted = false;
                       });
                     } else {
-                      if (_dirAllInfoList.isEmpty) {
-                        _allInfoList.sort((a, b) {
+                      if (dirAllInfoList.isEmpty) {
+                        allInfoList.sort((a, b) {
                           return a['LastModified'].compareTo(b['LastModified']);
                         });
                       } else {
-                        List temp = _allInfoList.sublist(
-                            _dirAllInfoList.length, _allInfoList.length);
+                        List temp = allInfoList.sublist(
+                            dirAllInfoList.length, allInfoList.length);
                         temp.sort((a, b) {
                           return a['LastModified'].compareTo(b['LastModified']);
                         });
-                        _allInfoList.clear();
-                        _allInfoList.addAll(_dirAllInfoList);
-                        _allInfoList.addAll(temp);
+                        allInfoList.clear();
+                        allInfoList.addAll(dirAllInfoList);
+                        allInfoList.addAll(temp);
                       }
                       setState(() {
                         sorted = true;
@@ -264,37 +263,37 @@ class _TencentFileExplorerState
                   )),
                   onTap: () {
                     if (sorted == true) {
-                      if (_dirAllInfoList.isEmpty) {
-                        _allInfoList.sort((a, b) {
+                      if (dirAllInfoList.isEmpty) {
+                        allInfoList.sort((a, b) {
                           return a['Key'].compareTo(b['Key']);
                         });
                       } else {
-                        List temp = _allInfoList.sublist(
-                            _dirAllInfoList.length, _allInfoList.length);
+                        List temp = allInfoList.sublist(
+                            dirAllInfoList.length, allInfoList.length);
                         temp.sort((a, b) {
                           return a['Key'].compareTo(b['Key']);
                         });
-                        _allInfoList.clear();
-                        _allInfoList.addAll(_dirAllInfoList);
-                        _allInfoList.addAll(temp);
+                        allInfoList.clear();
+                        allInfoList.addAll(dirAllInfoList);
+                        allInfoList.addAll(temp);
                       }
                       setState(() {
                         sorted = false;
                       });
                     } else {
-                      if (_dirAllInfoList.isEmpty) {
-                        _allInfoList.sort((a, b) {
+                      if (dirAllInfoList.isEmpty) {
+                        allInfoList.sort((a, b) {
                           return b['Key'].compareTo(a['Key']);
                         });
                       } else {
-                        List temp = _allInfoList.sublist(
-                            _dirAllInfoList.length, _allInfoList.length);
+                        List temp = allInfoList.sublist(
+                            dirAllInfoList.length, allInfoList.length);
                         temp.sort((a, b) {
                           return b['Key'].compareTo(a['Key']);
                         });
-                        _allInfoList.clear();
-                        _allInfoList.addAll(_dirAllInfoList);
-                        _allInfoList.addAll(temp);
+                        allInfoList.clear();
+                        allInfoList.addAll(dirAllInfoList);
+                        allInfoList.addAll(temp);
                       }
                       setState(() {
                         sorted = true;
@@ -313,37 +312,37 @@ class _TencentFileExplorerState
                   )),
                   onTap: () {
                     if (sorted == true) {
-                      if (_dirAllInfoList.isEmpty) {
-                        _allInfoList.sort((a, b) {
+                      if (dirAllInfoList.isEmpty) {
+                        allInfoList.sort((a, b) {
                           return b['Size'].compareTo(a['Size']);
                         });
                       } else {
-                        List temp = _allInfoList.sublist(
-                            _dirAllInfoList.length, _allInfoList.length);
+                        List temp = allInfoList.sublist(
+                            dirAllInfoList.length, allInfoList.length);
                         temp.sort((a, b) {
                           return b['Size'].compareTo(a['Size']);
                         });
-                        _allInfoList.clear();
-                        _allInfoList.addAll(_dirAllInfoList);
-                        _allInfoList.addAll(temp);
+                        allInfoList.clear();
+                        allInfoList.addAll(dirAllInfoList);
+                        allInfoList.addAll(temp);
                       }
                       setState(() {
                         sorted = false;
                       });
                     } else {
-                      if (_dirAllInfoList.isEmpty) {
-                        _allInfoList.sort((a, b) {
+                      if (dirAllInfoList.isEmpty) {
+                        allInfoList.sort((a, b) {
                           return a['Size'].compareTo(b['Size']);
                         });
                       } else {
-                        List temp = _allInfoList.sublist(
-                            _dirAllInfoList.length, _allInfoList.length);
+                        List temp = allInfoList.sublist(
+                            dirAllInfoList.length, allInfoList.length);
                         temp.sort((a, b) {
                           return a['Size'].compareTo(b['Size']);
                         });
-                        _allInfoList.clear();
-                        _allInfoList.addAll(_dirAllInfoList);
-                        _allInfoList.addAll(temp);
+                        allInfoList.clear();
+                        allInfoList.addAll(dirAllInfoList);
+                        allInfoList.addAll(temp);
                       }
                       setState(() {
                         sorted = true;
@@ -362,8 +361,8 @@ class _TencentFileExplorerState
                   )),
                   onTap: () {
                     if (sorted == true) {
-                      if (_dirAllInfoList.isEmpty) {
-                        _allInfoList.sort((a, b) {
+                      if (dirAllInfoList.isEmpty) {
+                        allInfoList.sort((a, b) {
                           String type = a['Key'].split('.').last;
                           String type2 = b['Key'].split('.').last;
                           if (type.isEmpty) {
@@ -375,8 +374,8 @@ class _TencentFileExplorerState
                           }
                         });
                       } else {
-                        List temp = _allInfoList.sublist(
-                            _dirAllInfoList.length, _allInfoList.length);
+                        List temp = allInfoList.sublist(
+                            dirAllInfoList.length, allInfoList.length);
                         temp.sort((a, b) {
                           String type = a['Key'].split('.').last;
                           String type2 = b['Key'].split('.').last;
@@ -388,16 +387,16 @@ class _TencentFileExplorerState
                             return type.compareTo(type2);
                           }
                         });
-                        _allInfoList.clear();
-                        _allInfoList.addAll(_dirAllInfoList);
-                        _allInfoList.addAll(temp);
+                        allInfoList.clear();
+                        allInfoList.addAll(dirAllInfoList);
+                        allInfoList.addAll(temp);
                       }
                       setState(() {
                         sorted = false;
                       });
                     } else {
-                      if (_dirAllInfoList.isEmpty) {
-                        _allInfoList.sort((a, b) {
+                      if (dirAllInfoList.isEmpty) {
+                        allInfoList.sort((a, b) {
                           String type = a['Key'].split('.').last;
                           String type2 = b['Key'].split('.').last;
                           if (type.isEmpty) {
@@ -409,8 +408,8 @@ class _TencentFileExplorerState
                           }
                         });
                       } else {
-                        List temp = _allInfoList.sublist(
-                            _dirAllInfoList.length, _allInfoList.length);
+                        List temp = allInfoList.sublist(
+                            dirAllInfoList.length, allInfoList.length);
                         temp.sort((a, b) {
                           String type = a['Key'].split('.').last;
                           String type2 = b['Key'].split('.').last;
@@ -422,9 +421,9 @@ class _TencentFileExplorerState
                             return type2.compareTo(type);
                           }
                         });
-                        _allInfoList.clear();
-                        _allInfoList.addAll(_dirAllInfoList);
-                        _allInfoList.addAll(temp);
+                        allInfoList.clear();
+                        allInfoList.addAll(dirAllInfoList);
+                        allInfoList.addAll(temp);
                       }
                       setState(() {
                         sorted = true;
@@ -455,11 +454,7 @@ class _TencentFileExplorerState
                                 allowMultiple: true,
                               );
                               if (pickresult == null) {
-                                Fluttertoast.showToast(
-                                    msg: '未选择文件',
-                                    toastLength: Toast.LENGTH_SHORT,
-                                    timeInSecForIosWeb: 2,
-                                    fontSize: 16.0);
+                                showToast('未选择文件');
                               } else {
                                 List<File> files = pickresult.paths
                                     .map((path) => File(path!))
@@ -500,11 +495,7 @@ class _TencentFileExplorerState
                                       pickerConfig: config);
 
                               if (pickedImage == null) {
-                                Fluttertoast.showToast(
-                                    msg: '未选择照片',
-                                    toastLength: Toast.LENGTH_SHORT,
-                                    timeInSecForIosWeb: 2,
-                                    fontSize: 16.0);
+                                showToast('未选择照片');
                               } else {
                                 List<File> files = [];
                                 for (var i = 0; i < pickedImage.length; i++) {
@@ -539,25 +530,15 @@ class _TencentFileExplorerState
                             title: const Text('上传剪贴板内链接(换行分隔多个)'),
                             onTap: () async {
                               Navigator.pop(context);
-                              var url = await flutterServices.Clipboard.getData(
-                                  'text/plain');
+                              var url =
+                                  await flutter_services.Clipboard.getData(
+                                      'text/plain');
                               if (url == null ||
                                   url.text == null ||
                                   url.text!.isEmpty) {
-                                Fluttertoast.showToast(
-                                    msg: "剪贴板为空",
-                                    toastLength: Toast.LENGTH_SHORT,
-                                    timeInSecForIosWeb: 2,
-                                    backgroundColor:
-                                        Theme.of(context).brightness ==
-                                                Brightness.light
-                                            ? Colors.black
-                                            : Colors.white,
-                                    textColor: Theme.of(context).brightness ==
-                                            Brightness.light
-                                        ? Colors.white
-                                        : Colors.black,
-                                    fontSize: 16.0);
+                                if (mounted) {
+                                  showToastWithContext(context, "剪贴板为空");
+                                }
                                 return;
                               }
                               try {
@@ -580,20 +561,9 @@ class _TencentFileExplorerState
                                     });
                                 _getBucketList();
                               } catch (e) {
-                                Fluttertoast.showToast(
-                                    msg: "错误",
-                                    toastLength: Toast.LENGTH_SHORT,
-                                    timeInSecForIosWeb: 2,
-                                    backgroundColor:
-                                        Theme.of(context).brightness ==
-                                                Brightness.light
-                                            ? Colors.black
-                                            : Colors.white,
-                                    textColor: Theme.of(context).brightness ==
-                                            Brightness.light
-                                        ? Colors.white
-                                        : Colors.black,
-                                    fontSize: 16.0);
+                                if (mounted) {
+                                  showToastWithContext(context, "错误");
+                                }
                                 return;
                               }
                             },
@@ -611,11 +581,11 @@ class _TencentFileExplorerState
                                   barrierDismissible: false,
                                   context: context,
                                   builder: (context) {
-                                    return newFolderDialog(
-                                      contentWidget: newFolderDialogContent(
+                                    return NewFolderDialog(
+                                      contentWidget: NewFolderDialogContent(
                                         title: "  请输入新文件夹名\n / 分隔创建嵌套文件夹",
                                         okBtnTap: () async {
-                                          String newName = _newFolder.text;
+                                          String newName = newFolder.text;
                                           var copyResult =
                                               await TencentManageAPI
                                                   .createFolder(
@@ -623,21 +593,13 @@ class _TencentFileExplorerState
                                                       widget.bucketPrefix,
                                                       newName);
                                           if (copyResult[0] == 'success') {
-                                            Fluttertoast.showToast(
-                                                msg: '创建成功',
-                                                toastLength: Toast.LENGTH_SHORT,
-                                                timeInSecForIosWeb: 2,
-                                                fontSize: 16.0);
+                                            showToast('创建成功');
                                             _getBucketList();
                                           } else {
-                                            Fluttertoast.showToast(
-                                                msg: '创建失败',
-                                                toastLength: Toast.LENGTH_SHORT,
-                                                timeInSecForIosWeb: 2,
-                                                fontSize: 16.0);
+                                            showToast('创建失败');
                                           }
                                         },
-                                        vc: _newFolder,
+                                        vc: newFolder,
                                         cancelBtnTap: () {},
                                       ),
                                     );
@@ -658,6 +620,7 @@ class _TencentFileExplorerState
                 String downloadPath =
                     await ExternalPath.getExternalStoragePublicDirectory(
                         ExternalPath.DIRECTORY_DOWNLOADS);
+                // ignore: use_build_context_synchronously
                 Application.router.navigateTo(context,
                     '/tencentUpDownloadManagePage?bucketName=${widget.element['name']}&downloadList=${Uri.encodeComponent(jsonEncode(downloadList))}&downloadPath=${Uri.encodeComponent(downloadPath)}',
                     transition: TransitionType.inFromRight);
@@ -675,78 +638,28 @@ class _TencentFileExplorerState
             onPressed: () async {
               if (!selectedFilesBool.contains(true) ||
                   selectedFilesBool.isEmpty) {
-                Fluttertoast.showToast(
-                    backgroundColor:
-                        Theme.of(context).brightness == Brightness.light
-                            ? Colors.black
-                            : Colors.white,
-                    textColor: Theme.of(context).brightness == Brightness.light
-                        ? Colors.white
-                        : Colors.black,
-                    msg: '没有选择文件');
+                showToastWithContext(context, '没有选择文件');
                 return;
               }
-              return showDialog(
-                barrierDismissible: false,
+              return showCupertinoAlertDialogWithConfirmFunc(
+                title: '删除全部文件',
+                content: '是否删除全部选择的文件？\n请谨慎选择!',
                 context: context,
-                builder: (BuildContext context) {
-                  return AlertDialog(
-                    title: const Text(
-                      '删除全部文件',
-                      textAlign: TextAlign.center,
-                    ),
-                    content: const Text(
-                      '是否删除全部选择的文件？\n请谨慎选择!',
-                      textAlign: TextAlign.center,
-                    ),
-                    actions: [
-                      Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            TextButton(
-                              child: const Text(
-                                '确定',
-                                style: TextStyle(
-                                    fontSize: 20, fontWeight: FontWeight.bold),
-                              ),
-                              onPressed: () async {
-                                try {
-                                  List<int> toDelete = [];
-                                  for (int i = 0;
-                                      i < _allInfoList.length;
-                                      i++) {
-                                    if (selectedFilesBool[i]) {
-                                      toDelete.add(i);
-                                    }
-                                  }
-                                  Navigator.pop(context);
-                                  await deleteAll(toDelete);
-                                  Fluttertoast.showToast(msg: '删除完成');
-                                  return;
-                                } catch (e) {
-                                  Fluttertoast.showToast(msg: '删除失败');
-                                }
-                              },
-                            ),
-                            TextButton(
-                              style: TextButton.styleFrom(
-                                alignment: Alignment.center,
-                              ),
-                              child: const Text(
-                                '取消',
-                                style: TextStyle(
-                                    fontSize: 20, fontWeight: FontWeight.bold),
-                              ),
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                              },
-                            ),
-                          ],
-                        ),
-                      )
-                    ],
-                  );
+                onConfirm: () async {
+                  try {
+                    List<int> toDelete = [];
+                    for (int i = 0; i < allInfoList.length; i++) {
+                      if (selectedFilesBool[i]) {
+                        toDelete.add(i);
+                      }
+                    }
+                    Navigator.pop(context);
+                    await deleteAll(toDelete);
+                    showToast('删除完成');
+                    return;
+                  } catch (e) {
+                    showToast('删除失败');
+                  }
                 },
               );
             },
@@ -759,14 +672,14 @@ class _TencentFileExplorerState
     return Scaffold(
       appBar: appBar,
       body: buildStateWidget,
-      floatingActionButtonLocation: state == loadingState.LoadState.ERROR ||
-              state == loadingState.LoadState.EMPTY ||
-              state == loadingState.LoadState.LOADING
+      floatingActionButtonLocation: state == loading_state.LoadState.ERROR ||
+              state == loading_state.LoadState.EMPTY ||
+              state == loading_state.LoadState.LOADING
           ? null
           : FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: state == loadingState.LoadState.ERROR ||
-              state == loadingState.LoadState.EMPTY ||
-              state == loadingState.LoadState.LOADING
+      floatingActionButton: state == loading_state.LoadState.ERROR ||
+              state == loading_state.LoadState.EMPTY ||
+              state == loading_state.LoadState.LOADING
           ? null
           : floatingActionButton,
     );
@@ -786,35 +699,17 @@ class _TencentFileExplorerState
                 onPressed: () async {
                   if (!selectedFilesBool.contains(true) ||
                       selectedFilesBool.isEmpty) {
-                    Fluttertoast.showToast(
-                        backgroundColor:
-                            Theme.of(context).brightness == Brightness.light
-                                ? Colors.black
-                                : Colors.white,
-                        textColor:
-                            Theme.of(context).brightness == Brightness.light
-                                ? Colors.white
-                                : Colors.black,
-                        msg: '没有选择文件');
+                    showToastWithContext(context, '没有选择文件');
                     return;
                   }
                   List downloadList = [];
-                  for (int i = 0; i < _allInfoList.length; i++) {
-                    if (selectedFilesBool[i] && i >= _dirAllInfoList.length) {
-                      downloadList.add(_allInfoList[i]);
+                  for (int i = 0; i < allInfoList.length; i++) {
+                    if (selectedFilesBool[i] && i >= dirAllInfoList.length) {
+                      downloadList.add(allInfoList[i]);
                     }
                   }
                   if (downloadList.isEmpty) {
-                    Fluttertoast.showToast(
-                        backgroundColor:
-                            Theme.of(context).brightness == Brightness.light
-                                ? Colors.black
-                                : Colors.white,
-                        textColor:
-                            Theme.of(context).brightness == Brightness.light
-                                ? Colors.white
-                                : Colors.black,
-                        msg: '没有选择文件');
+                    showToast('没有选择文件');
                     return;
                   }
                   String hostPrefix =
@@ -826,6 +721,7 @@ class _TencentFileExplorerState
                   String downloadPath =
                       await ExternalPath.getExternalStoragePublicDirectory(
                           ExternalPath.DIRECTORY_DOWNLOADS);
+                  // ignore: use_build_context_synchronously
                   Application.router.navigateTo(context,
                       '/tencentUpDownloadManagePage?bucketName=${widget.element['name']}&downloadList=${Uri.encodeComponent(jsonEncode(urlList))}&downloadPath=${Uri.encodeComponent(downloadPath)}',
                       transition: TransitionType.inFromRight);
@@ -847,36 +743,24 @@ class _TencentFileExplorerState
                 elevation: 5,
                 onPressed: () async {
                   if (!selectedFilesBool.contains(true)) {
-                    Fluttertoast.showToast(
-                        msg: "请先选择文件",
-                        toastLength: Toast.LENGTH_SHORT,
-                        timeInSecForIosWeb: 2,
-                        backgroundColor:
-                            Theme.of(context).brightness == Brightness.light
-                                ? Colors.black
-                                : Colors.white,
-                        textColor:
-                            Theme.of(context).brightness == Brightness.light
-                                ? Colors.white
-                                : Colors.black,
-                        fontSize: 16.0);
+                    showToastWithContext(context, '请先选择文件');
                     return;
                   } else {
                     List multiUrls = [];
-                    for (int i = 0; i < _allInfoList.length; i++) {
+                    for (int i = 0; i < allInfoList.length; i++) {
                       if (selectedFilesBool[i]) {
                         String finalFormatedurl = ' ';
                         String rawurl = '';
                         String fileName = '';
-                        if (i < _dirAllInfoList.length) {
+                        if (i < dirAllInfoList.length) {
                           rawurl =
-                              'https://${widget.element['name']}.cos.${widget.element['location']}.myqcloud.com/${_allInfoList[i]['Prefix']}';
-                          fileName = _allInfoList[i]['Prefix'];
+                              'https://${widget.element['name']}.cos.${widget.element['location']}.myqcloud.com/${allInfoList[i]['Prefix']}';
+                          fileName = allInfoList[i]['Prefix'];
                         } else {
                           rawurl =
-                              'https://${widget.element['name']}.cos.${widget.element['location']}.myqcloud.com/${_allInfoList[i]['Key']}';
-                          fileName = _allInfoList[i]['Key'].substring(
-                              _allInfoList[i]['Key'].lastIndexOf('/') + 1);
+                              'https://${widget.element['name']}.cos.${widget.element['location']}.myqcloud.com/${allInfoList[i]['Key']}';
+                          fileName = allInfoList[i]['Key'].substring(
+                              allInfoList[i]['Key'].lastIndexOf('/') + 1);
                         }
                         finalFormatedurl =
                             linkGenerateDict[Global.defaultLKformat]!(
@@ -885,26 +769,15 @@ class _TencentFileExplorerState
                         multiUrls.add(finalFormatedurl);
                       }
                     }
-                    await flutterServices.Clipboard.setData(
-                        flutterServices.ClipboardData(
+                    await flutter_services.Clipboard.setData(
+                        flutter_services.ClipboardData(
                             text: multiUrls
                                 .toString()
                                 .substring(1, multiUrls.toString().length - 1)
                                 .replaceAll(',', '\n')));
-                    Fluttertoast.showToast(
-                        msg: "已复制全部链接",
-                        toastLength: Toast.LENGTH_SHORT,
-                        timeInSecForIosWeb: 2,
-                        backgroundColor:
-                            Theme.of(context).brightness == Brightness.light
-                                ? Colors.black
-                                : Colors.white,
-                        textColor:
-                            Theme.of(context).brightness == Brightness.light
-                                ? Colors.white
-                                : Colors.black,
-                        fontSize: 16.0);
-                    return;
+                    if (mounted) {
+                      showToastWithContext(context, '已复制全部链接');
+                    }
                   }
                 },
                 child: const Icon(
@@ -922,20 +795,8 @@ class _TencentFileExplorerState
                 elevation: 50,
                 //select host menu
                 onPressed: () async {
-                  if (_allInfoList.isEmpty) {
-                    Fluttertoast.showToast(
-                        msg: "目录为空",
-                        toastLength: Toast.LENGTH_SHORT,
-                        timeInSecForIosWeb: 2,
-                        backgroundColor:
-                            Theme.of(context).brightness == Brightness.light
-                                ? Colors.black
-                                : Colors.white,
-                        textColor:
-                            Theme.of(context).brightness == Brightness.light
-                                ? Colors.white
-                                : Colors.black,
-                        fontSize: 16.0);
+                  if (allInfoList.isEmpty) {
+                    showToastWithContext(context, '目录为空');
                     return;
                   } else if (selectedFilesBool.contains(true)) {
                     setState(() {
@@ -962,27 +823,27 @@ class _TencentFileExplorerState
   deleteAll(List toDelete) async {
     try {
       for (int i = 0; i < toDelete.length; i++) {
-        if ((toDelete[i] - i) < _dirAllInfoList.length) {
+        if ((toDelete[i] - i) < dirAllInfoList.length) {
           await TencentManageAPI.deleteFolder(
-              widget.element, _allInfoList[toDelete[i] - i]['Prefix']);
+              widget.element, allInfoList[toDelete[i] - i]['Prefix']);
           setState(() {
-            _allInfoList.removeAt(toDelete[i] - i);
-            _dirAllInfoList.removeAt(toDelete[i] - i);
+            allInfoList.removeAt(toDelete[i] - i);
+            dirAllInfoList.removeAt(toDelete[i] - i);
             selectedFilesBool.removeAt(toDelete[i] - i);
           });
         } else {
           await TencentManageAPI.deleteFile(
-              widget.element, _allInfoList[toDelete[i] - i]['Key']);
+              widget.element, allInfoList[toDelete[i] - i]['Key']);
           setState(() {
-            _allInfoList.removeAt(toDelete[i] - i);
-            _fileAllInfoList.removeAt(toDelete[i] - i - _dirAllInfoList.length);
+            allInfoList.removeAt(toDelete[i] - i);
+            fileAllInfoList.removeAt(toDelete[i] - i - dirAllInfoList.length);
             selectedFilesBool.removeAt(toDelete[i] - i);
           });
         }
       }
-      if (_allInfoList.isEmpty) {
+      if (allInfoList.isEmpty) {
         setState(() {
-          state = loadingState.LoadState.EMPTY;
+          state = loading_state.LoadState.EMPTY;
         });
       }
     } catch (e) {
@@ -1024,7 +885,7 @@ class _TencentFileExplorerState
             ),
             onPressed: () {
               setState(() {
-                state = loadingState.LoadState.LOADING;
+                state = loading_state.LoadState.LOADING;
               });
               _getBucketList();
             },
@@ -1054,7 +915,7 @@ class _TencentFileExplorerState
   @override
   Widget buildSuccess() {
     return SmartRefresher(
-      controller: _refreshController,
+      controller: refreshController,
       enablePullDown: true,
       enablePullUp: false,
       header: const ClassicHeader(
@@ -1075,9 +936,9 @@ class _TencentFileExplorerState
       ),
       onRefresh: _onrefresh,
       child: ListView.builder(
-        itemCount: _allInfoList.length,
+        itemCount: allInfoList.length,
         itemBuilder: (context, index) {
-          if (index < _dirAllInfoList.length) {
+          if (index < dirAllInfoList.length) {
             return Container(
               padding: const EdgeInsets.only(left: 10, right: 10),
               child: Column(
@@ -1096,7 +957,7 @@ class _TencentFileExplorerState
                                   return CupertinoAlertDialog(
                                     title: const Text('通知'),
                                     content: Text(
-                                        '确定要删除${_allInfoList[index]['Prefix']}吗？'),
+                                        '确定要删除${allInfoList[index]['Prefix']}吗？'),
                                     actions: <Widget>[
                                       CupertinoDialogAction(
                                         child: const Text('取消',
@@ -1125,8 +986,7 @@ class _TencentFileExplorerState
                                                       TencentManageAPI
                                                           .deleteFolder(
                                                               widget.element,
-                                                              _allInfoList[
-                                                                      index]
+                                                              allInfoList[index]
                                                                   ['Prefix']),
                                                 );
                                               });
@@ -1146,14 +1006,10 @@ class _TencentFileExplorerState
                                                   ['ListBucketResult']
                                               ['CommonPrefixes'];
                                           if (dir == null) {
-                                            Fluttertoast.showToast(
-                                                msg: '删除成功',
-                                                toastLength: Toast.LENGTH_SHORT,
-                                                timeInSecForIosWeb: 2,
-                                                fontSize: 16.0);
+                                            showToast('删除成功');
                                             setState(() {
-                                              _allInfoList.removeAt(index);
-                                              _dirAllInfoList.removeAt(index);
+                                              allInfoList.removeAt(index);
+                                              dirAllInfoList.removeAt(index);
                                               selectedFilesBool.removeAt(index);
                                             });
                                           } else if (dir != null) {
@@ -1162,7 +1018,7 @@ class _TencentFileExplorerState
                                             }
                                             bool deleted = true;
                                             for (var element in dir) {
-                                              if (_allInfoList[index]
+                                              if (allInfoList[index]
                                                       ['Prefix'] ==
                                                   element['Prefix']) {
                                                 deleted = false;
@@ -1170,25 +1026,15 @@ class _TencentFileExplorerState
                                               }
                                             }
                                             if (deleted == true) {
-                                              Fluttertoast.showToast(
-                                                  msg: '删除成功',
-                                                  toastLength:
-                                                      Toast.LENGTH_SHORT,
-                                                  timeInSecForIosWeb: 2,
-                                                  fontSize: 16.0);
+                                              showToast('删除成功');
                                               setState(() {
-                                                _allInfoList.removeAt(index);
-                                                _dirAllInfoList.removeAt(index);
+                                                allInfoList.removeAt(index);
+                                                dirAllInfoList.removeAt(index);
                                                 selectedFilesBool
                                                     .removeAt(index);
                                               });
                                             } else {
-                                              Fluttertoast.showToast(
-                                                  msg: '删除失败',
-                                                  toastLength:
-                                                      Toast.LENGTH_SHORT,
-                                                  timeInSecForIosWeb: 2,
-                                                  fontSize: 16.0);
+                                              showToast('删除失败');
                                             }
                                           }
                                         },
@@ -1222,11 +1068,9 @@ class _TencentFileExplorerState
                               height: 32,
                             ),
                             title: Text(
-                                _allInfoList[index]['Prefix']
-                                    .substring(
-                                        0,
-                                        _allInfoList[index]['Prefix'].length -
-                                            1)
+                                allInfoList[index]['Prefix']
+                                    .substring(0,
+                                        allInfoList[index]['Prefix'].length - 1)
                                     .split('/')
                                     .last,
                                 style: const TextStyle(fontSize: 16)),
@@ -1244,7 +1088,7 @@ class _TencentFileExplorerState
                               },
                             ),
                             onTap: () {
-                              String prefix = _allInfoList[index]['Prefix'];
+                              String prefix = allInfoList[index]['Prefix'];
                               Application.router.navigateTo(context,
                                   '${Routes.tencentFileExplorer}?element=${Uri.encodeComponent(jsonEncode(widget.element))}&bucketPrefix=${Uri.encodeComponent(prefix)}',
                                   transition: TransitionType.cupertino);
@@ -1289,7 +1133,7 @@ class _TencentFileExplorerState
               ),
             );
           } else {
-            String fileExtension = _allInfoList[index]['Key'].split('.').last;
+            String fileExtension = allInfoList[index]['Key'].split('.').last;
             String iconPath = 'assets/icons/';
             if (fileExtension == '') {
               iconPath += '_blank.png';
@@ -1303,7 +1147,7 @@ class _TencentFileExplorerState
               child: Column(
                 children: [
                   Slidable(
-                      key: Key(_allInfoList[index]['Key']),
+                      key: Key(allInfoList[index]['Key']),
                       direction: Axis.horizontal,
                       endActionPane: ActionPane(
                         // A motion is a widget used to control how the pane animates.
@@ -1313,7 +1157,7 @@ class _TencentFileExplorerState
                           SlidableAction(
                             onPressed: (BuildContext context) {
                               String shareUrl =
-                                  'https://${widget.element['name']}.cos.${widget.element['location']}.myqcloud.com/${_allInfoList[index]['Key']}';
+                                  'https://${widget.element['name']}.cos.${widget.element['location']}.myqcloud.com/${allInfoList[index]['Key']}';
                               Share.share(shareUrl);
                             },
                             autoClose: true,
@@ -1333,7 +1177,7 @@ class _TencentFileExplorerState
                                     return CupertinoAlertDialog(
                                       title: const Text('通知'),
                                       content: Text(
-                                          '确定要删除${_allInfoList[index]['Key']}吗？'),
+                                          '确定要删除${allInfoList[index]['Key']}吗？'),
                                       actions: <Widget>[
                                         CupertinoDialogAction(
                                           child: const Text('取消',
@@ -1351,26 +1195,16 @@ class _TencentFileExplorerState
                                             Navigator.pop(context);
                                             var result = await TencentManageAPI
                                                 .deleteFile(widget.element,
-                                                    _allInfoList[index]['Key']);
+                                                    allInfoList[index]['Key']);
                                             if (result[0] == 'success') {
-                                              Fluttertoast.showToast(
-                                                  msg: '删除成功',
-                                                  toastLength:
-                                                      Toast.LENGTH_SHORT,
-                                                  timeInSecForIosWeb: 2,
-                                                  fontSize: 16.0);
+                                              showToast('删除成功');
                                               setState(() {
-                                                _allInfoList.removeAt(index);
+                                                allInfoList.removeAt(index);
                                                 selectedFilesBool
                                                     .removeAt(index);
                                               });
                                             } else {
-                                              Fluttertoast.showToast(
-                                                  msg: '删除失败',
-                                                  toastLength:
-                                                      Toast.LENGTH_SHORT,
-                                                  timeInSecForIosWeb: 2,
-                                                  fontSize: 16.0);
+                                              showToast('删除失败');
                                             }
                                           },
                                         ),
@@ -1400,31 +1234,28 @@ class _TencentFileExplorerState
                               height: 30,
                             ),
                             title: Text(
-                                _allInfoList[index]['Key']
+                                allInfoList[index]['Key']
                                             .split('/')
                                             .last
                                             .length >
                                         20
-                                    ? _allInfoList[index]['Key']
+                                    ? allInfoList[index]['Key']
                                             .split('/')
                                             .last
                                             .substring(0, 10) +
                                         '...' +
-                                        _allInfoList[index]['Key']
+                                        allInfoList[index]['Key']
                                             .split('/')
                                             .last
-                                            .substring(_allInfoList[index]
-                                                        ['Key']
+                                            .substring(allInfoList[index]['Key']
                                                     .split('/')
                                                     .last
                                                     .length -
                                                 10)
-                                    : _allInfoList[index]['Key']
-                                        .split('/')
-                                        .last,
+                                    : allInfoList[index]['Key'].split('/').last,
                                 style: const TextStyle(fontSize: 14)),
                             subtitle: Text(
-                                '${_allInfoList[index]['LastModified'].toString().replaceAll('T', ' ').replaceAll('Z', '').substring(0, 19)}  ${(double.parse(_allInfoList[index]['Size']) / 1024 / 1024 / 1024 > 1 ? '${(double.parse(_allInfoList[index]['Size']) / 1024 / 1024 / 1024).toStringAsFixed(2)}GB' : (double.parse(_allInfoList[index]['Size']) / 1024 / 1024 > 1 ? '${(double.parse(_allInfoList[index]['Size']) / 1024 / 1024).toStringAsFixed(2)}MB' : (double.parse(_allInfoList[index]['Size']) / 1024 > 1 ? '${(double.parse(_allInfoList[index]['Size']) / 1024).toStringAsFixed(2)}KB' : _allInfoList[index]['Size'] + 'B')))}',
+                                '${allInfoList[index]['LastModified'].toString().replaceAll('T', ' ').replaceAll('Z', '').substring(0, 19)}  ${(double.parse(allInfoList[index]['Size']) / 1024 / 1024 / 1024 > 1 ? '${(double.parse(allInfoList[index]['Size']) / 1024 / 1024 / 1024).toStringAsFixed(2)}GB' : (double.parse(allInfoList[index]['Size']) / 1024 / 1024 > 1 ? '${(double.parse(allInfoList[index]['Size']) / 1024 / 1024).toStringAsFixed(2)}MB' : (double.parse(allInfoList[index]['Size']) / 1024 > 1 ? '${(double.parse(allInfoList[index]['Size']) / 1024).toStringAsFixed(2)}KB' : allInfoList[index]['Size'] + 'B')))}',
                                 style: const TextStyle(fontSize: 12)),
                             trailing: IconButton(
                               icon: const Icon(Icons.more_horiz),
@@ -1455,15 +1286,11 @@ class _TencentFileExplorerState
                                 'heif',
                               ];
                               //判断是否为图片
-                              if (!imageExt.contains(_allInfoList[index]['Key']
+                              if (!imageExt.contains(allInfoList[index]['Key']
                                   .split('.')
                                   .last
                                   .toLowerCase())) {
-                                Fluttertoast.showToast(
-                                    msg: '只支持图片预览',
-                                    toastLength: Toast.LENGTH_SHORT,
-                                    timeInSecForIosWeb: 2,
-                                    fontSize: 16.0);
+                                showToast('只支持图片预览');
                                 return;
                               }
                               //判断权限
@@ -1487,33 +1314,24 @@ class _TencentFileExplorerState
                                   }
                                 }
                                 if (publicRead != true) {
-                                  Fluttertoast.showToast(
-                                      msg: '请先设置公有读权限',
-                                      toastLength: Toast.LENGTH_SHORT,
-                                      timeInSecForIosWeb: 2,
-                                      fontSize: 16.0);
+                                  showToast('请先设置公有读权限');
                                   return;
                                 }
                               } else {
-                                Fluttertoast.showToast(
-                                    msg: '获取权限失败',
-                                    toastLength: Toast.LENGTH_SHORT,
-                                    timeInSecForIosWeb: 2,
-                                    fontSize: 16.0);
+                                showToast('获取权限失败');
                                 return;
                               }
                               //预览图片
-                              int newImageIndex =
-                                  index - _dirAllInfoList.length;
-                              for (int i = _dirAllInfoList.length;
-                                  i < _allInfoList.length;
+                              int newImageIndex = index - dirAllInfoList.length;
+                              for (int i = dirAllInfoList.length;
+                                  i < allInfoList.length;
                                   i++) {
-                                if (imageExt.contains(_allInfoList[i]['Key']
+                                if (imageExt.contains(allInfoList[i]['Key']
                                     .split('.')
                                     .last
                                     .toLowerCase())) {
                                   urlList +=
-                                      'https://${widget.element['name']}.cos.${widget.element['location']}.myqcloud.com/${_allInfoList[i]['Key']},';
+                                      'https://${widget.element['name']}.cos.${widget.element['location']}.myqcloud.com/${allInfoList[i]['Key']},';
                                 } else if (i < index) {
                                   newImageIndex--;
                                 }
@@ -1580,15 +1398,15 @@ class _TencentFileExplorerState
             visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
             minLeadingWidth: 0,
             title: Text(
-                _allInfoList[index]['Key'].length > 20
-                    ? _allInfoList[index]['Key'].substring(0, 10) +
+                allInfoList[index]['Key'].length > 20
+                    ? allInfoList[index]['Key'].substring(0, 10) +
                         '...' +
-                        _allInfoList[index]['Key']
-                            .substring(_allInfoList[index]['Key'].length - 10)
-                    : _allInfoList[index]['Key'],
+                        allInfoList[index]['Key']
+                            .substring(allInfoList[index]['Key'].length - 10)
+                    : allInfoList[index]['Key'],
                 style: const TextStyle(fontSize: 14)),
             subtitle: Text(
-                _allInfoList[index]['LastModified']
+                allInfoList[index]['LastModified']
                     .toString()
                     .replaceAll('T', ' ')
                     .replaceAll('Z', '')
@@ -1611,18 +1429,16 @@ class _TencentFileExplorerState
             onTap: () async {
               String format = await Global.getLKformat();
               String shareUrl =
-                  'https://${widget.element['name']}.cos.${widget.element['location']}.myqcloud.com/${_allInfoList[index]['Key']}';
-              String filename = myPath.basename(_allInfoList[index]['Key']);
+                  'https://${widget.element['name']}.cos.${widget.element['location']}.myqcloud.com/${allInfoList[index]['Key']}';
+              String filename = my_path.basename(allInfoList[index]['Key']);
               String formatedLink =
                   linkGenerateDict[format]!(shareUrl, filename);
-              await flutterServices.Clipboard.setData(
-                  flutterServices.ClipboardData(text: formatedLink));
-              Navigator.pop(context);
-              Fluttertoast.showToast(
-                  msg: '复制完毕',
-                  toastLength: Toast.LENGTH_SHORT,
-                  timeInSecForIosWeb: 2,
-                  fontSize: 16.0);
+              await flutter_services.Clipboard.setData(
+                  flutter_services.ClipboardData(text: formatedLink));
+              if (mounted) {
+                Navigator.pop(context);
+              }
+              showToast('复制完毕');
             },
           ),
           const Divider(
@@ -1630,12 +1446,10 @@ class _TencentFileExplorerState
             color: Color.fromARGB(255, 230, 230, 230),
           ),
           ListTile(
-              //dense: true,
               leading: const Icon(
                 Icons.edit_note_rounded,
                 color: Color.fromARGB(255, 97, 141, 236),
               ),
-              //visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
               minLeadingWidth: 0,
               title: const Text('重命名'),
               onTap: () async {
@@ -1648,81 +1462,57 @@ class _TencentFileExplorerState
                         contentWidget: RenameDialogContent(
                           title: "请输入新的文件名",
                           okBtnTap: () async {
-                            String newName = _vc.text;
+                            String newName = vc.text;
                             if (isCoverFile) {
                               var copyResult = await TencentManageAPI.copyFile(
                                   widget.element,
-                                  _allInfoList[index]['Key'],
+                                  allInfoList[index]['Key'],
                                   newName);
                               if (copyResult[0] == 'success') {
                                 var deleteResult =
                                     await TencentManageAPI.deleteFile(
                                         widget.element,
-                                        _allInfoList[index]['Key']);
+                                        allInfoList[index]['Key']);
                                 if (deleteResult[0] == 'success') {
-                                  Fluttertoast.showToast(
-                                      msg: '重命名成功',
-                                      toastLength: Toast.LENGTH_SHORT,
-                                      timeInSecForIosWeb: 2,
-                                      fontSize: 16.0);
+                                  showToast('重命名成功');
                                   _getBucketList();
                                 } else {
-                                  Fluttertoast.showToast(
-                                      msg: '重命名失败',
-                                      toastLength: Toast.LENGTH_SHORT,
-                                      timeInSecForIosWeb: 2,
-                                      fontSize: 16.0);
+                                  showToast('重命名失败');
                                 }
                               } else {
-                                Fluttertoast.showToast(
-                                    msg: '拷贝失败',
-                                    toastLength: Toast.LENGTH_SHORT,
-                                    timeInSecForIosWeb: 2,
-                                    fontSize: 16.0);
+                                showToast('拷贝失败');
                               }
                             } else {
                               var checkDuplicate =
                                   await TencentManageAPI.queryDuplicateName(
                                       widget.element,
                                       widget.bucketPrefix,
-                                      _vc.text);
+                                      vc.text);
                               if (checkDuplicate[0] == 'duplicate' ||
                                   checkDuplicate[0] == 'error') {
-                                Fluttertoast.showToast(
-                                    msg: '已存在同名文件',
-                                    toastLength: Toast.LENGTH_SHORT,
-                                    timeInSecForIosWeb: 2,
-                                    fontSize: 16.0);
+                                showToast('文件名重复');
                               } else {
                                 var copyResult =
                                     await TencentManageAPI.copyFile(
                                         widget.element,
-                                        _allInfoList[index]['Key'],
+                                        allInfoList[index]['Key'],
                                         newName);
                                 if (copyResult[0] == 'success') {
                                   var deleteResult =
                                       await TencentManageAPI.deleteFile(
                                           widget.element,
-                                          _allInfoList[index]['Key']);
+                                          allInfoList[index]['Key']);
                                   if (deleteResult[0] == 'success') {
-                                    Fluttertoast.showToast(
-                                        msg: '重命名成功',
-                                        toastLength: Toast.LENGTH_SHORT,
-                                        timeInSecForIosWeb: 2,
-                                        fontSize: 16.0);
+                                    showToast('重命名成功');
                                     _getBucketList();
                                   }
                                 } else {
-                                  Fluttertoast.showToast(
-                                      msg: '重命名失败',
-                                      toastLength: Toast.LENGTH_SHORT,
-                                      timeInSecForIosWeb: 2,
-                                      fontSize: 16.0);
+                                  showToast('重命名失败');
                                 }
                               }
                             }
                           },
-                          vc: _vc,
+                          vc: vc,
                           cancelBtnTap: () {},
                           stateBoolText: '是否覆盖同名文件',
                         ),
@@ -1750,7 +1540,7 @@ class _TencentFileExplorerState
                 builder: (BuildContext context) {
                   return CupertinoAlertDialog(
                     title: const Text('通知'),
-                    content: Text('确定要删除${_allInfoList[index]['Key']}吗？'),
+                    content: Text('确定要删除${allInfoList[index]['Key']}吗？'),
                     actions: <Widget>[
                       CupertinoDialogAction(
                         child: const Text('取消',
@@ -1765,23 +1555,15 @@ class _TencentFileExplorerState
                         onPressed: () async {
                           Navigator.pop(context);
                           var result = await TencentManageAPI.deleteFile(
-                              widget.element, _allInfoList[index]['Key']);
+                              widget.element, allInfoList[index]['Key']);
                           if (result[0] == 'success') {
-                            Fluttertoast.showToast(
-                                msg: '删除成功',
-                                toastLength: Toast.LENGTH_SHORT,
-                                timeInSecForIosWeb: 2,
-                                fontSize: 16.0);
+                            showToast('删除成功');
                             setState(() {
-                              _allInfoList.removeAt(index);
+                              allInfoList.removeAt(index);
                               selectedFilesBool.removeAt(index);
                             });
                           } else {
-                            Fluttertoast.showToast(
-                                msg: '删除失败',
-                                toastLength: Toast.LENGTH_SHORT,
-                                timeInSecForIosWeb: 2,
-                                fontSize: 16.0);
+                            showToast('删除失败');
                           }
                         },
                       ),
@@ -1811,8 +1593,8 @@ class _TencentFileExplorerState
             // visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
             minLeadingWidth: 0,
             title: Text(
-                _allInfoList[index]['Prefix']
-                    .substring(0, _allInfoList[index]['Prefix'].length - 1)
+                allInfoList[index]['Prefix']
+                    .substring(0, allInfoList[index]['Prefix'].length - 1)
                     .split('/')
                     .last,
                 style: const TextStyle(fontSize: 15)),
@@ -1832,20 +1614,14 @@ class _TencentFileExplorerState
             title: const Text('设为图床默认目录'),
             onTap: () async {
               var result = await TencentManageAPI.setDefaultBucket(
-                  widget.element, _allInfoList[index]['Prefix']);
+                  widget.element, allInfoList[index]['Prefix']);
               if (result[0] == 'success') {
-                Fluttertoast.showToast(
-                    msg: '设置成功',
-                    toastLength: Toast.LENGTH_SHORT,
-                    timeInSecForIosWeb: 2,
-                    fontSize: 16.0);
-                Navigator.pop(context);
+                showToast('设置成功');
+                if (mounted) {
+                  Navigator.pop(context);
+                }
               } else {
-                Fluttertoast.showToast(
-                    msg: '设置失败',
-                    toastLength: Toast.LENGTH_SHORT,
-                    timeInSecForIosWeb: 2,
-                    fontSize: 16.0);
+                showToast('设置失败');
               }
             },
           ),
@@ -1870,7 +1646,7 @@ class _TencentFileExplorerState
                   builder: (BuildContext context) {
                     return CupertinoAlertDialog(
                       title: const Text('通知'),
-                      content: Text('确定要删除${_allInfoList[index]['Prefix']}吗？'),
+                      content: Text('确定要删除${allInfoList[index]['Prefix']}吗？'),
                       actions: <Widget>[
                         CupertinoDialogAction(
                           child: const Text('取消',
@@ -1896,7 +1672,7 @@ class _TencentFileExplorerState
                                     requestCallBack:
                                         TencentManageAPI.deleteFolder(
                                             widget.element,
-                                            _allInfoList[index]['Prefix']),
+                                            allInfoList[index]['Prefix']),
                                   );
                                 });
                             while (!Global.operateDone) {
@@ -1912,16 +1688,11 @@ class _TencentFileExplorerState
                             });
                             var dir = queryResult[1]['ListBucketResult']
                                 ['CommonPrefixes'];
-
                             if (dir == null) {
-                              Fluttertoast.showToast(
-                                  msg: '删除成功',
-                                  toastLength: Toast.LENGTH_SHORT,
-                                  timeInSecForIosWeb: 2,
-                                  fontSize: 16.0);
+                              showToast('删除成功');
                               setState(() {
-                                _allInfoList.removeAt(index);
-                                _dirAllInfoList.removeAt(index);
+                                allInfoList.removeAt(index);
+                                dirAllInfoList.removeAt(index);
                                 selectedFilesBool.removeAt(index);
                               });
                             } else if (dir != null) {
@@ -1930,29 +1701,21 @@ class _TencentFileExplorerState
                               }
                               bool deleted = true;
                               for (var element in dir) {
-                                if (_allInfoList[index]['Prefix'] ==
+                                if (allInfoList[index]['Prefix'] ==
                                     element['Prefix']) {
                                   deleted = false;
                                   break;
                                 }
                               }
                               if (deleted == true) {
-                                Fluttertoast.showToast(
-                                    msg: '删除成功',
-                                    toastLength: Toast.LENGTH_SHORT,
-                                    timeInSecForIosWeb: 2,
-                                    fontSize: 16.0);
+                                showToast('删除成功');
                                 setState(() {
-                                  _allInfoList.removeAt(index);
-                                  _dirAllInfoList.removeAt(index);
+                                  allInfoList.removeAt(index);
+                                  dirAllInfoList.removeAt(index);
                                   selectedFilesBool.removeAt(index);
                                 });
                               } else {
-                                Fluttertoast.showToast(
-                                    msg: '删除失败',
-                                    toastLength: Toast.LENGTH_SHORT,
-                                    timeInSecForIosWeb: 2,
-                                    fontSize: 16.0);
+                                showToast('删除失败');
                               }
                             }
                           },
@@ -1993,7 +1756,8 @@ class RenameDialogContent extends StatefulWidget {
   TextEditingController vc;
   String stateBoolText;
   RenameDialogContent(
-      {required this.title,
+      {super.key,
+      required this.title,
       this.cancelBtnTitle = "取消",
       this.okBtnTitle = "确定",
       required this.cancelBtnTap,
@@ -2002,10 +1766,10 @@ class RenameDialogContent extends StatefulWidget {
       required this.stateBoolText});
 
   @override
-  _RenameDialogContentState createState() => _RenameDialogContentState();
+  RenameDialogContentState createState() => RenameDialogContentState();
 }
 
-class _RenameDialogContentState extends State<RenameDialogContent> {
+class RenameDialogContentState extends State<RenameDialogContent> {
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -2117,8 +1881,8 @@ class _RenameDialogContentState extends State<RenameDialogContent> {
   }
 }
 
-class newFolderDialog extends AlertDialog {
-  newFolderDialog({super.key, required Widget contentWidget})
+class NewFolderDialog extends AlertDialog {
+  NewFolderDialog({super.key, required Widget contentWidget})
       : super(
           content: contentWidget,
           contentPadding: EdgeInsets.zero,
@@ -2131,14 +1895,15 @@ class newFolderDialog extends AlertDialog {
 
 //弹出框 修改自https://www.jianshu.com/p/4144837a789b
 
-class newFolderDialogContent extends StatefulWidget {
+class NewFolderDialogContent extends StatefulWidget {
   String title;
   String cancelBtnTitle;
   String okBtnTitle;
   VoidCallback cancelBtnTap;
   VoidCallback okBtnTap;
   TextEditingController vc;
-  newFolderDialogContent({
+  NewFolderDialogContent({
+    super.key,
     required this.title,
     this.cancelBtnTitle = "取消",
     this.okBtnTitle = "确定",
@@ -2148,10 +1913,10 @@ class newFolderDialogContent extends StatefulWidget {
   });
 
   @override
-  _newFolderDialogContentState createState() => _newFolderDialogContentState();
+  NewFolderDialogContentState createState() => NewFolderDialogContentState();
 }
 
-class _newFolderDialogContentState extends State<newFolderDialogContent> {
+class NewFolderDialogContentState extends State<NewFolderDialogContent> {
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -2177,7 +1942,7 @@ class _newFolderDialogContentState extends State<newFolderDialogContent> {
                 style: const TextStyle(color: Colors.black87),
                 controller: widget.vc,
                 validator: (value) {
-                  if (value!.isEmpty || value == null) {
+                  if (value!.isEmpty) {
                     return '不能为空';
                   }
                   return null;
