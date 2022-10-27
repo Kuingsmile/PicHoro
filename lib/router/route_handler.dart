@@ -1,57 +1,58 @@
-import 'package:fluro/fluro.dart';
-import 'package:flutter/material.dart';
 import 'dart:convert';
-import 'package:horopic/pages/pichoroAPP.dart';
+import 'package:flutter/material.dart';
 
-import 'package:horopic/pages/homePage.dart';
+import 'package:fluro/fluro.dart';
+import 'package:horopic/pages/pichoro_app.dart';
 
-import 'package:horopic/album/albumPage.dart';
-import 'package:horopic/album/albumPreview.dart';
-import 'package:horopic/album/EmptyDatabase.dart';
+import 'package:horopic/pages/home_page.dart';
 
-import 'package:horopic/configurePage/configurePage.dart';
-import 'package:horopic/configurePage/commonConfigure/commonConfig.dart';
-import 'package:horopic/configurePage/commonConfigure/selectLinkFormat.dart';
-import 'package:horopic/configurePage/commonConfigure/selectPShost.dart';
-import 'package:horopic/configurePage/commonConfigure/RenameFile.dart';
-import 'package:horopic/configurePage/others/UpdateLog.dart';
-import 'package:horopic/configurePage/others/author.dart';
-import 'package:horopic/configurePage/others/selectTheme.dart';
-import 'package:horopic/configurePage/userManage/APPpassword.dart';
+import 'package:horopic/album/album_page.dart';
+import 'package:horopic/album/network_pic_preview.dart';
+import 'package:horopic/album/empty_database.dart';
 
-import 'package:horopic/hostconfigure/Imgurconfig.dart';
-import 'package:horopic/hostconfigure/smmsconfig.dart';
-import 'package:horopic/hostconfigure/lskyproconfig.dart';
-import 'package:horopic/hostconfigure/githubconfig.dart';
-import 'package:horopic/hostconfigure/aliyunconfig.dart';
-import 'package:horopic/hostconfigure/tencentconfig.dart';
-import 'package:horopic/hostconfigure/qiniuconfig.dart';
-import 'package:horopic/hostconfigure/upyunconfig.dart';
-import 'package:horopic/hostconfigure/PShostSelect.dart';
+import 'package:horopic/configure_page/configure_page.dart';
+import 'package:horopic/configure_page/common_configure/common_configure.dart';
+import 'package:horopic/configure_page/common_configure/select_link_format.dart';
+import 'package:horopic/configure_page/common_configure/select_default_picture_host.dart';
+import 'package:horopic/configure_page/common_configure/rename_uploaded_file.dart';
+import 'package:horopic/configure_page/others/update_log.dart';
+import 'package:horopic/configure_page/others/author.dart';
+import 'package:horopic/configure_page/others/select_theme.dart';
+import 'package:horopic/configure_page/user_manage/login_page.dart';
 
-import 'package:horopic/PShostFileManage/tencent/tencentBucketList.dart';
-import 'package:horopic/PShostFileManage/tencent/tencentbucketInformation.dart';
-import 'package:horopic/PShostFileManage/tencent/tencentNewBucketConfig.dart';
-import 'package:horopic/PShostFileManage/tencent/tencentFileExplorer.dart';
-import 'package:horopic/PShostFileManage/tencent/tencentUpDownloadManagePage.dart';
+import 'package:horopic/picture_host_configure/imgur_configure.dart';
+import 'package:horopic/picture_host_configure/smms_configure.dart';
+import 'package:horopic/picture_host_configure/lskypro_configure.dart';
+import 'package:horopic/picture_host_configure/github_configure.dart';
+import 'package:horopic/picture_host_configure/aliyun_configure.dart';
+import 'package:horopic/picture_host_configure/tencent_configure.dart';
+import 'package:horopic/picture_host_configure/qiniu_configure.dart';
+import 'package:horopic/picture_host_configure/upyun_configure.dart';
+import 'package:horopic/picture_host_configure/default_picture_host_select.dart';
 
-import 'package:horopic/PShostFileManage/commonPage/file_explorer/fileExplorer.dart';
-import 'package:horopic/PShostFileManage/commonPage/file_explorer/localImagePreview.dart';
+import 'package:horopic/picture_host_manage/tencent/tencent_bucket_list_page.dart';
+import 'package:horopic/picture_host_manage/tencent/tencent_bucket_information_page.dart';
+import 'package:horopic/picture_host_manage/tencent/tencent_new_bucket_configure.dart';
+import 'package:horopic/picture_host_manage/tencent/tencent_file_explorer.dart';
+import 'package:horopic/picture_host_manage/tencent/tencent_download_manage_page.dart';
 
-import 'package:horopic/PShostFileManage/smms/smmsManageHomePage.dart';
-import 'package:horopic/PShostFileManage/smms/smmsFileExplorer.dart';
-import 'package:horopic/PShostFileManage/smms/smmsUpDownloadManagePage.dart';
+import 'package:horopic/picture_host_manage/common_page/file_explorer/file_explorer.dart';
+import 'package:horopic/picture_host_manage/common_page/file_explorer/local_image_preview.dart';
+
+import 'package:horopic/picture_host_manage/smms/smms_manage_home_page.dart';
+import 'package:horopic/picture_host_manage/smms/smms_file_explorer.dart';
+import 'package:horopic/picture_host_manage/smms/smms_download_manage_page.dart';
 
 //root
 Handler rootHandler = Handler(
     handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
-  return PicHoroAPP();
+  return const PicHoroAPP();
 });
 
 //主页
 var homePageHandler = Handler(
     handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
-  return HomePage();
+  return const HomePage();
 });
 
 //相册
@@ -85,7 +86,7 @@ var localImagePreviewHandler = Handler(
 //配置页面
 var configurePageHandler = Handler(
     handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
-  return ConfigurePage();
+  return const ConfigurePage();
 });
 
 //用户登录页面
@@ -187,13 +188,13 @@ var emptyDatabaseHandler = Handler(
 //作者页面
 var authorInformationHandler = Handler(
     handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
-  return AuthorInformation();
+  return const AuthorInformation();
 });
 
 //更新日志页面
 var updateLogHandler = Handler(
     handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
-  return UpdateLog();
+  return const UpdateLog();
 });
 
 //腾讯云存储桶列表页面
