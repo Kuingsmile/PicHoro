@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:horopic/pages/homePage.dart';
-import 'package:horopic/album/albumPage.dart';
-import 'package:horopic/configurePage/configurePage.dart';
-import 'package:horopic/PShostFileManage/commonPage/psHostHomePage.dart';
+import 'package:horopic/pages/home_page.dart';
+import 'package:horopic/album/album_page.dart';
+import 'package:horopic/configure_page/configure_page.dart';
+import 'package:horopic/picture_host_manage/common_page/picture_host_manage_entry.dart';
 
 class PicHoroAPP extends StatefulWidget {
   final int selectedIndex;
@@ -10,35 +10,49 @@ class PicHoroAPP extends StatefulWidget {
   const PicHoroAPP({super.key, this.selectedIndex = 0});
 
   @override
-  _TabsPageState createState() => _TabsPageState(this.selectedIndex);
+  // ignore: no_logic_in_create_state
+  TabsPageState createState() => TabsPageState(selectedIndex);
 }
 
-class _TabsPageState extends State<PicHoroAPP> {
+class TabsPageState extends State<PicHoroAPP> {
   int _selectedIndex;
 
-  _TabsPageState(this._selectedIndex);
+  TabsPageState(this._selectedIndex);
+  late PageController _pageController;
 
   final List<Widget> _pageList = [
-    HomePage(),
-    UploadedImages(),
-    PsHostHomePage(),
-    ConfigurePage(),
+    const HomePage(),
+    const UploadedImages(),
+    const PsHostHomePage(),
+    const ConfigurePage(),
   ];
 
   @override
   void initState() {
     super.initState();
+    _pageController = PageController(initialPage: _selectedIndex);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _pageList[_selectedIndex],
+      body: PageView(
+        controller: _pageController,
+        physics: const NeverScrollableScrollPhysics(),
+        children: _pageList,
+      ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: (value) {
           setState(() {
             _selectedIndex = value;
+            _pageController.jumpToPage(value);
           });
         },
         type: BottomNavigationBarType.fixed,
