@@ -1,25 +1,32 @@
 import 'package:flutter/material.dart';
-import 'package:package_info_plus/package_info_plus.dart';
-import 'package:horopic/utils/permission.dart';
-import 'package:r_upgrade/r_upgrade.dart';
-import 'package:horopic/utils/sqlUtils.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:horopic/router/application.dart';
-import 'package:horopic/router/routes.dart';
-import 'package:fluro/fluro.dart';
-import 'package:flutter/cupertino.dart';
 
-//a configure page for user to show configure entry
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:r_upgrade/r_upgrade.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:fluro/fluro.dart';
+
+import 'package:horopic/utils/sql_utils.dart';
+import 'package:horopic/utils/permission.dart';
+import 'package:horopic/router/application.dart';
+import 'package:horopic/router/routers.dart';
+import 'package:horopic/utils/common_functions.dart';
+
 class ConfigurePage extends StatefulWidget {
   const ConfigurePage({Key? key}) : super(key: key);
 
   @override
-  _ConfigurePageState createState() => _ConfigurePageState();
+  ConfigurePageState createState() => ConfigurePageState();
 }
 
-class _ConfigurePageState extends State<ConfigurePage> {
+class ConfigurePageState extends State<ConfigurePage>
+    with AutomaticKeepAliveClientMixin<ConfigurePage> {
   String version = ' ';
-  final Uri uri = Uri.parse('https://github.com/Kuingsmile/PicHoro');
+  String cancelTag = "";
+  String apkFilePath = "";
+  String currentDownloadStateCH = "当前下载状态：还未开始";
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
@@ -37,7 +44,6 @@ class _ConfigurePageState extends State<ConfigurePage> {
   _checkUpdate() async {
     PackageInfo packageInfo = await PackageInfo.fromPlatform();
     String version = packageInfo.version;
-    String buildNumber = packageInfo.buildNumber;
 
     String remoteVersion = await MySqlUtils.getCurrentVersion();
     if (version != remoteVersion) {
@@ -47,47 +53,26 @@ class _ConfigurePageState extends State<ConfigurePage> {
           msg: "已是最新版本",
           toastLength: Toast.LENGTH_SHORT,
           timeInSecForIosWeb: 2,
-          backgroundColor: Theme.of(context).brightness == Brightness.light
-              ? Colors.black
-              : Colors.white,
-          textColor: Theme.of(context).brightness == Brightness.light
-              ? Colors.white
-              : Colors.black,
           fontSize: 16.0);
     }
   }
 
   _showUpdateDialog(String version, String remoteVersion) {
-    showCupertinoDialog(
-        barrierDismissible: true,
-        context: context,
-        builder: (BuildContext context) {
-          return CupertinoAlertDialog(
-            title: const Text('通知'),
-            content: Text('发现新版本$remoteVersion 当前版本$version'),
-            actions: <Widget>[
-              CupertinoDialogAction(
-                child: const Text('取消', style: TextStyle(color: Colors.blue)),
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-              ),
-              CupertinoDialogAction(
-                child: const Text('确定', style: TextStyle(color: Colors.blue)),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  _update(remoteVersion);
-                },
-              )
-            ],
-          );
-        });
+    showCupertinoAlertDialogWithConfirmFunc(
+      title: '通知',
+      content: '发现新版本$remoteVersion,当前版本$version,是否更新?',
+      context: context,
+      onConfirm: () async {
+        Navigator.of(context).pop();
+        _update(remoteVersion);
+      },
+    );
   }
 
   _update(String remoteVersion) async {
     String url =
         'https://www.horosama.com/self_apk/PicHoro_V$remoteVersion.apk';
-    int? id = await RUpgrade.upgrade(url,
+    await RUpgrade.upgrade(url,
         fileName: 'PicHoro_V$remoteVersion.apk',
         isAutoRequestInstall: true,
         notificationStyle: NotificationStyle.speechAndPlanTime);
@@ -96,6 +81,7 @@ class _ConfigurePageState extends State<ConfigurePage> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -118,14 +104,12 @@ class _ConfigurePageState extends State<ConfigurePage> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Container(
-                      child: CircleAvatar(
-                        radius: MediaQuery.of(context).size.width / 10,
-                        backgroundColor: Colors.grey,
-                        backgroundImage: const Image(
-                                image: AssetImage('assets/app_icon.png'))
-                            .image,
-                      ),
+                    CircleAvatar(
+                      radius: MediaQuery.of(context).size.width / 10,
+                      backgroundColor: Colors.grey,
+                      backgroundImage:
+                          const Image(image: AssetImage('assets/app_icon.png'))
+                              .image,
                     ),
                     const SizedBox(height: 20),
                     Center(
@@ -174,7 +158,7 @@ class _ConfigurePageState extends State<ConfigurePage> {
           ListTile(
             title: const Text('立即更新'),
             onTap: () async {
-              Permissionutils.askPermissionRequestInstallPackage();
+              await Permissionutils.askPermissionRequestInstallPackage();
               _checkUpdate();
             },
             trailing: const Icon(Icons.arrow_forward_ios),

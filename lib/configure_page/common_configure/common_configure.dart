@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:horopic/utils/global.dart';
-import 'package:horopic/utils/clearcache.dart';
-import 'package:horopic/router/application.dart';
-import 'package:horopic/router/routes.dart';
 import 'package:fluro/fluro.dart';
-import 'package:flutter/cupertino.dart';
+
+import 'package:horopic/utils/global.dart';
+import 'package:horopic/utils/clear_cache.dart';
+import 'package:horopic/router/application.dart';
+import 'package:horopic/router/routers.dart';
+import 'package:horopic/utils/common_functions.dart';
 
 class CommonConfig extends StatefulWidget {
   const CommonConfig({Key? key}) : super(key: key);
 
   @override
-  _CommonConfigState createState() => _CommonConfigState();
+  CommonConfigState createState() => CommonConfigState();
 }
 
-class _CommonConfigState extends State<CommonConfig> {
+class CommonConfigState extends State<CommonConfig> {
   @override
   void initState() {
     super.initState();
@@ -91,37 +91,18 @@ class _CommonConfigState extends State<CommonConfig> {
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () async {
               String currentCacheMemory = await CacheUtil.total();
-              showCupertinoDialog(
-                  barrierDismissible: true,
-                  context: context,
-                  builder: (BuildContext context) {
-                    return CupertinoAlertDialog(
-                      title: const Text('通知'),
-                      content: Text('当前缓存大小为$currentCacheMemory MB,是否清空?'),
-                      actions: <Widget>[
-                        CupertinoDialogAction(
-                          child: const Text('取消',
-                              style: TextStyle(color: Colors.blue)),
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                        ),
-                        CupertinoDialogAction(
-                          child: const Text('确定',
-                              style: TextStyle(color: Colors.blue)),
-                          onPressed: () async {
-                            await CacheUtil.clear();
-                            Fluttertoast.showToast(
-                                msg: "清理成功",
-                                toastLength: Toast.LENGTH_SHORT,
-                                timeInSecForIosWeb: 2,
-                                fontSize: 16.0);
-                            Navigator.pop(context);
-                          },
-                        )
-                      ],
-                    );
-                  });
+              showCupertinoAlertDialogWithConfirmFunc(
+                title: '通知',
+                content: '当前缓存大小为$currentCacheMemory MB,是否清空?',
+                context: context,
+                onConfirm: () async {
+                  await CacheUtil.clear();
+                  showToast('清理成功');
+                  if (mounted) {
+                    Navigator.pop(context);
+                  }
+                },
+              );
             },
           ),
           ListTile(

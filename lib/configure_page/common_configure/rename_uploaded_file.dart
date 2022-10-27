@@ -5,10 +5,10 @@ class RenameFile extends StatefulWidget {
   const RenameFile({Key? key}) : super(key: key);
 
   @override
-  _RenameFileState createState() => _RenameFileState();
+  RenameFileState createState() => RenameFileState();
 }
 
-class _RenameFileState extends State<RenameFile> {
+class RenameFileState extends State<RenameFile> {
   @override
   void initState() {
     super.initState();

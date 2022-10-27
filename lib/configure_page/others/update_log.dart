@@ -6,10 +6,10 @@ class UpdateLog extends StatefulWidget {
   const UpdateLog({Key? key}) : super(key: key);
 
   @override
-  _UpdateLogState createState() => _UpdateLogState();
+  UpdateLogState createState() => UpdateLogState();
 }
 
-class _UpdateLogState extends State<UpdateLog> {
+class UpdateLogState extends State<UpdateLog> {
   late Future<String> _future;
 
   @override

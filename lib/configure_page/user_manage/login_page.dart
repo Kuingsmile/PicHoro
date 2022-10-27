@@ -1,30 +1,40 @@
-import 'package:flutter/material.dart';
-import 'package:horopic/utils/global.dart';
-import 'package:horopic/utils/common_func.dart';
-import 'package:horopic/utils/sqlUtils.dart';
-import 'package:horopic/pages/loading.dart';
 import 'dart:convert';
 import 'dart:io';
+
+import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:horopic/hostconfigure/lskyproconfig.dart' as lskyhost;
-import 'package:horopic/hostconfigure/smmsconfig.dart' as smmshostclass;
-import 'package:horopic/hostconfigure/githubconfig.dart' as githubhostclass;
-import 'package:horopic/hostconfigure/Imgurconfig.dart' as imgurhostclass;
-import 'package:horopic/hostconfigure/qiniuconfig.dart' as qiniuhostclass;
-import 'package:horopic/hostconfigure/tencentconfig.dart' as tencenthostclass;
-import 'package:horopic/hostconfigure/aliyunconfig.dart' as aliyunhostclass;
-import 'package:horopic/hostconfigure/upyunconfig.dart' as upyunhostclass;
+
+import 'package:horopic/utils/global.dart';
+import 'package:horopic/utils/common_functions.dart';
+import 'package:horopic/utils/sql_utils.dart';
+import 'package:horopic/pages/loading.dart';
+import 'package:horopic/picture_host_configure/lskypro_configure.dart'
+    as lskyhost;
+import 'package:horopic/picture_host_configure/smms_configure.dart'
+    as smmshostclass;
+import 'package:horopic/picture_host_configure/github_configure.dart'
+    as githubhostclass;
+import 'package:horopic/picture_host_configure/imgur_configure.dart'
+    as imgurhostclass;
+import 'package:horopic/picture_host_configure/qiniu_configure.dart'
+    as qiniuhostclass;
+import 'package:horopic/picture_host_configure/tencent_configure.dart'
+    as tencenthostclass;
+import 'package:horopic/picture_host_configure/aliyun_configure.dart'
+    as aliyunhostclass;
+import 'package:horopic/picture_host_configure/upyun_configure.dart'
+    as upyunhostclass;
 
 class APPPassword extends StatefulWidget {
   const APPPassword({Key? key}) : super(key: key);
 
   @override
-  _APPPasswordState createState() => _APPPasswordState();
+  APPPasswordState createState() => APPPasswordState();
 }
 
-class _APPPasswordState extends State<APPPassword> {
+class APPPasswordState extends State<APPPassword> {
   final _formKey = GlobalKey<FormState>();
   final _userNametext = TextEditingController();
   final _passwordcontroller = TextEditingController();
@@ -53,16 +63,16 @@ class _APPPasswordState extends State<APPPassword> {
           Global.defaultPShost,
         ]);
         if (result == 'Success') {
-          return showAlertDialog(
+          return showCupertinoAlertDialog(
               context: context,
               title: '通知',
               content: '已成功注册，您的密码是：\n${_passwordcontroller.text}\n请妥善保管');
         } else {
-          return showAlertDialog(
+          return showCupertinoAlertDialog(
               context: context, title: '通知', content: '注册失败，请重试');
         }
       } else if (usernamecheck == 'Error') {
-        return showAlertDialog(
+        return showCupertinoAlertDialog(
             context: context, title: "错误", content: "设置失败,请重试!");
       } else {
         if (usernamecheck['password'] == _passwordcontroller.text) {
@@ -74,19 +84,19 @@ class _APPPasswordState extends State<APPPassword> {
                 _passwordcontroller.text.toString());
             Database db = await Global.getDatabase();
             await Global.setDatabase(db);
-            return showAlertDialog(
+            return showCupertinoAlertDialog(
                 context: context, title: '通知', content: '已成功切换用户');
           } else {
-            return showAlertDialog(
+            return showCupertinoAlertDialog(
                 context: context, title: '通知', content: '您已登录，请勿重复登录');
           }
         } else {
-          return showAlertDialog(
+          return showCupertinoAlertDialog(
               context: context, title: '通知', content: '密码错误，请重试');
         }
       }
     } catch (e) {
-      return showAlertDialog(
+      return showCupertinoAlertDialog(
           context: context, title: "错误", content: "设置失败,请重试!");
     }
   }
@@ -95,10 +105,10 @@ class _APPPasswordState extends State<APPPassword> {
     try {
       var usernamecheck = await MySqlUtils.queryUser(username: username);
       if (usernamecheck == 'Empty') {
-        return showAlertDialog(
+        return showCupertinoAlertDialog(
             context: context, title: '通知', content: '用户不存在，请重试');
       } else if (usernamecheck == 'Error') {
-        return showAlertDialog(
+        return showCupertinoAlertDialog(
             context: context, title: "错误", content: "获取登录信息失败,请重试!");
       } else {
         if (usernamecheck['password'] == password) {
@@ -109,7 +119,7 @@ class _APPPasswordState extends State<APPPassword> {
           var lskyhostresult =
               await MySqlUtils.queryLankong(username: username);
           if (lskyhostresult == 'Error') {
-            return showAlertDialog(
+            return showCupertinoAlertDialog(
                 context: context, title: "错误", content: "获取兰空云端信息失败,请重试!");
           } else if (lskyhostresult != 'Empty') {
             try {
@@ -124,14 +134,14 @@ class _APPPasswordState extends State<APPPassword> {
                   File('${directory.path}/${username}_host_config.txt');
               lskyLocalFile.writeAsString(hostConfigJson);
             } catch (e) {
-              return showAlertDialog(
+              return showCupertinoAlertDialog(
                   context: context, title: "错误", content: "拉取兰空图床配置失败,请重试!");
             }
           }
           //拉取SM.MS图床配置
           var smmshostresult = await MySqlUtils.querySmms(username: username);
           if (smmshostresult == 'Error') {
-            return showAlertDialog(
+            return showCupertinoAlertDialog(
                 context: context, title: "错误", content: "获取SM.MS云端信息失败,请重试!");
           } else if (smmshostresult != 'Empty') {
             try {
@@ -144,14 +154,14 @@ class _APPPasswordState extends State<APPPassword> {
                   File('${directory.path}/${username}_smms_config.txt');
               smmsLocalFile.writeAsString(smmsConfigJson);
             } catch (e) {
-              return showAlertDialog(
+              return showCupertinoAlertDialog(
                   context: context, title: "错误", content: "拉取SM.MS图床配置失败,请重试!");
             }
           }
           //拉取Github图床配置
           var githubresult = await MySqlUtils.queryGithub(username: username);
           if (githubresult == 'Error') {
-            return showAlertDialog(
+            return showCupertinoAlertDialog(
                 context: context, title: "错误", content: "获取Github云端信息失败,请重试!");
           } else if (githubresult != 'Empty') {
             try {
@@ -168,7 +178,7 @@ class _APPPasswordState extends State<APPPassword> {
                   File('${directory.path}/${username}_github_config.txt');
               githubLocalFile.writeAsString(githubConfigJson);
             } catch (e) {
-              return showAlertDialog(
+              return showCupertinoAlertDialog(
                   context: context,
                   title: "错误",
                   content: "拉取github图床配置失败,请重试!");
@@ -177,7 +187,7 @@ class _APPPasswordState extends State<APPPassword> {
           //拉取Imgur图床配置
           var imgurresult = await MySqlUtils.queryImgur(username: username);
           if (imgurresult == 'Error') {
-            return showAlertDialog(
+            return showCupertinoAlertDialog(
                 context: context, title: "错误", content: "获取Imgur云端信息失败,请重试!");
           } else if (imgurresult != 'Empty') {
             try {
@@ -191,14 +201,14 @@ class _APPPasswordState extends State<APPPassword> {
                   File('${directory.path}/${username}_imgur_config.txt');
               imgurLocalFile.writeAsString(imgurConfigJson);
             } catch (e) {
-              return showAlertDialog(
+              return showCupertinoAlertDialog(
                   context: context, title: "错误", content: "拉取Imgur图床配置失败,请重试!");
             }
           }
           //拉取七牛图床配置
           var qiniuresult = await MySqlUtils.queryQiniu(username: username);
           if (qiniuresult == 'Error') {
-            return showAlertDialog(
+            return showCupertinoAlertDialog(
                 context: context, title: "错误", content: "获取七牛云端信息失败,请重试!");
           } else if (qiniuresult != 'Empty') {
             try {
@@ -217,14 +227,14 @@ class _APPPasswordState extends State<APPPassword> {
                   File('${directory.path}/${username}_qiniu_config.txt');
               qiniuLocalFile.writeAsString(qiniuConfigJson);
             } catch (e) {
-              return showAlertDialog(
+              return showCupertinoAlertDialog(
                   context: context, title: "错误", content: "拉取七牛云配置失败,请重试!");
             }
           }
           //拉取腾讯云COS图床配置
           var tencentresult = await MySqlUtils.queryTencent(username: username);
           if (tencentresult == 'Error') {
-            return showAlertDialog(
+            return showCupertinoAlertDialog(
                 context: context, title: "错误", content: "获取腾讯云端信息失败,请重试!");
           } else if (tencentresult != 'Empty') {
             try {
@@ -244,14 +254,14 @@ class _APPPasswordState extends State<APPPassword> {
                   File('${directory.path}/${username}_tencent_config.txt');
               tencentLocalFile.writeAsString(tencentConfigJson);
             } catch (e) {
-              return showAlertDialog(
+              return showCupertinoAlertDialog(
                   context: context, title: "错误", content: "拉取腾讯云配置失败,请重试!");
             }
           }
           //拉取阿里云OSS图床配置
           var aliyunresult = await MySqlUtils.queryAliyun(username: username);
           if (aliyunresult == 'Error') {
-            return showAlertDialog(
+            return showCupertinoAlertDialog(
                 context: context, title: "错误", content: "获取阿里云端信息失败,请重试!");
           } else if (aliyunresult != 'Empty') {
             try {
@@ -270,14 +280,14 @@ class _APPPasswordState extends State<APPPassword> {
                   File('${directory.path}/${username}_aliyun_config.txt');
               aliyunLocalFile.writeAsString(aliyunConfigJson);
             } catch (e) {
-              return showAlertDialog(
+              return showCupertinoAlertDialog(
                   context: context, title: "错误", content: "拉取阿里云配置失败,请重试!");
             }
           }
           //拉取又拍云图床配置
           var upyunresult = await MySqlUtils.queryUpyun(username: username);
           if (upyunresult == 'Error') {
-            return showAlertDialog(
+            return showCupertinoAlertDialog(
                 context: context, title: "错误", content: "获取又拍云端信息失败,请重试!");
           } else if (upyunresult != 'Empty') {
             try {
@@ -295,7 +305,7 @@ class _APPPasswordState extends State<APPPassword> {
                   File('${directory.path}/${username}_upyun_config.txt');
               upyunLocalFile.writeAsString(upyunConfigJson);
             } catch (e) {
-              return showAlertDialog(
+              return showCupertinoAlertDialog(
                   context: context, title: "错误", content: "拉取又拍云配置失败,请重试!");
             }
           }
@@ -304,20 +314,14 @@ class _APPPasswordState extends State<APPPassword> {
               msg: "已拉取云端配置",
               toastLength: Toast.LENGTH_SHORT,
               timeInSecForIosWeb: 2,
-              backgroundColor: Theme.of(context).brightness == Brightness.light
-                  ? Colors.black
-                  : Colors.white,
-              textColor: Theme.of(context).brightness == Brightness.light
-                  ? Colors.white
-                  : Colors.black,
               fontSize: 16.0);
         } else {
-          return showAlertDialog(
+          return showCupertinoAlertDialog(
               context: context, title: '通知', content: '密码错误，请重试');
         }
       }
     } catch (e) {
-      return showAlertDialog(
+      return showCupertinoAlertDialog(
           context: context, title: "错误", content: "拉取失败,请重试!");
     }
   }
