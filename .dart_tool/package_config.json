@@ -176,6 +176,12 @@
       "languageVersion": "2.12"
     },
     {
+      "name": "flutter_easyloading",
+      "rootUri": "file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/flutter_easyloading-3.0.5",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
       "name": "flutter_lints",
       "rootUri": "file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/flutter_lints-2.0.1",
       "packageUri": "lib/",
@@ -202,6 +208,12 @@
     {
       "name": "flutter_speed_dial",
       "rootUri": "file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/flutter_speed_dial-6.1.0+1",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "flutter_spinkit",
+      "rootUri": "file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/flutter_spinkit-5.1.0",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
@@ -806,7 +818,7 @@
       "languageVersion": "2.18"
     }
   ],
-  "generated": "2022-10-25T13:32:19.011696Z",
+  "generated": "2022-10-27T03:06:21.958347Z",
   "generator": "pub",
   "generatorVersion": "2.18.0"
 }
