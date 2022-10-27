@@ -27,6 +27,7 @@ class _LoadingDialog extends State<NetLoadingDialog> {
   @override
   void initState() {
     super.initState();
+    // ignore: unnecessary_null_comparison
     if (widget.requestCallBack != null) {
       widget.requestCallBack.then((_) {
         _;
