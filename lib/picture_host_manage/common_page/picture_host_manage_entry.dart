@@ -1,18 +1,26 @@
 import 'package:flutter/material.dart';
-import 'package:horopic/router/application.dart';
-import 'package:horopic/router/routes.dart';
+
 import 'package:fluro/fluro.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter_draggable_gridview/flutter_draggable_gridview.dart';
+
 import 'package:horopic/utils/global.dart';
+import 'package:horopic/router/application.dart';
+import 'package:horopic/router/routers.dart';
+import 'package:horopic/utils/common_functions.dart';
 
 class PsHostHomePage extends StatefulWidget {
+  const PsHostHomePage({super.key});
+
   @override
-  _PsHostHomePageState createState() => _PsHostHomePageState();
+  PsHostHomePageState createState() => PsHostHomePageState();
 }
 
-class _PsHostHomePageState extends State<PsHostHomePage> {
-  List _psHostHomePageOrder = [];
+class PsHostHomePageState extends State<PsHostHomePage>
+    with AutomaticKeepAliveClientMixin<PsHostHomePage> {
+  List psHostHomePageOrder = [];
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
@@ -21,17 +29,18 @@ class _PsHostHomePageState extends State<PsHostHomePage> {
   }
 
   initOrder() {
-    List psHostHomePageOrder = Global.psHostHomePageOrder;
+    List temppsHostHomePageOrder = Global.psHostHomePageOrder;
     setState(() {
-      for (var i = 0; i < psHostHomePageOrder.length; i++) {
-        _psHostHomePageOrder.add(int.parse(psHostHomePageOrder[i]));
+      for (var i = 0; i < temppsHostHomePageOrder.length; i++) {
+        psHostHomePageOrder.add(int.parse(temppsHostHomePageOrder[i]));
       }
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    List<DraggableGridItem> _listOfDraggableGridItem = [
+    super.build(context);
+    List<DraggableGridItem> listOfDraggableGridItem = [
       DraggableGridItem(
         child: Card(
           borderOnForeground: true,
@@ -127,11 +136,7 @@ class _PsHostHomePageState extends State<PsHostHomePage> {
               Center(
                 child: InkWell(
                   onTap: () {
-                    Fluttertoast.showToast(
-                        msg: '暂未开放',
-                        toastLength: Toast.LENGTH_SHORT,
-                        timeInSecForIosWeb: 2,
-                        fontSize: 16.0);
+                    showToastWithContext(context, '暂未开放');
                   },
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -171,11 +176,7 @@ class _PsHostHomePageState extends State<PsHostHomePage> {
               Center(
                 child: InkWell(
                   onTap: () {
-                    Fluttertoast.showToast(
-                        msg: '暂未开放',
-                        toastLength: Toast.LENGTH_SHORT,
-                        timeInSecForIosWeb: 2,
-                        fontSize: 16.0);
+                    showToastWithContext(context, '暂未开放');
                   },
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -215,11 +216,7 @@ class _PsHostHomePageState extends State<PsHostHomePage> {
               Center(
                   child: InkWell(
                 onTap: () {
-                  Fluttertoast.showToast(
-                      msg: '暂未开放',
-                      toastLength: Toast.LENGTH_SHORT,
-                      timeInSecForIosWeb: 2,
-                      fontSize: 16.0);
+                  showToastWithContext(context, '暂未开放');
                 },
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -258,11 +255,7 @@ class _PsHostHomePageState extends State<PsHostHomePage> {
               Center(
                 child: InkWell(
                   onTap: () {
-                    Fluttertoast.showToast(
-                        msg: '暂未开放',
-                        toastLength: Toast.LENGTH_SHORT,
-                        timeInSecForIosWeb: 2,
-                        fontSize: 16.0);
+                    showToastWithContext(context, '暂未开放');
                   },
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -302,11 +295,7 @@ class _PsHostHomePageState extends State<PsHostHomePage> {
               Center(
                 child: InkWell(
                   onTap: () {
-                    Fluttertoast.showToast(
-                        msg: '暂未开放',
-                        toastLength: Toast.LENGTH_SHORT,
-                        timeInSecForIosWeb: 2,
-                        fontSize: 16.0);
+                    showToastWithContext(context, '暂未开放');
                   },
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -346,11 +335,7 @@ class _PsHostHomePageState extends State<PsHostHomePage> {
               Center(
                 child: InkWell(
                   onTap: () {
-                    Fluttertoast.showToast(
-                        msg: '暂未开放',
-                        toastLength: Toast.LENGTH_SHORT,
-                        timeInSecForIosWeb: 2,
-                        fontSize: 16.0);
+                    showToastWithContext(context, '暂未开放');
                   },
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -385,8 +370,8 @@ class _PsHostHomePageState extends State<PsHostHomePage> {
       ),
     ];
     List<DraggableGridItem> newItems = [];
-    for (int i = 0; i < _listOfDraggableGridItem.length; i++) {
-      newItems.add(_listOfDraggableGridItem[_psHostHomePageOrder[i]]);
+    for (int i = 0; i < listOfDraggableGridItem.length; i++) {
+      newItems.add(listOfDraggableGridItem[psHostHomePageOrder[i]]);
     }
     return Scaffold(
       appBar: AppBar(
@@ -411,7 +396,7 @@ class _PsHostHomePageState extends State<PsHostHomePage> {
             int afterIndex) async {
           List<String> newOrder = [];
           for (int i = 0; i < list.length; i++) {
-            newOrder.add(_listOfDraggableGridItem.indexOf(list[i]).toString());
+            newOrder.add(listOfDraggableGridItem.indexOf(list[i]).toString());
           }
           await Global.setpsHostHomePageOrder(newOrder);
         },
