@@ -35,7 +35,6 @@ class APPPassword extends StatefulWidget {
 }
 
 class APPPasswordState extends State<APPPassword> {
-  final _formKey = GlobalKey<FormState>();
   final _userNametext = TextEditingController();
   final _passwordcontroller = TextEditingController();
 
@@ -63,17 +62,12 @@ class APPPasswordState extends State<APPPassword> {
           Global.defaultPShost,
         ]);
         if (result == 'Success') {
-          return showCupertinoAlertDialog(
-              context: context,
-              title: '通知',
-              content: '已成功注册，您的密码是：\n${_passwordcontroller.text}\n请妥善保管');
+          return showToast('创建用户成功');
         } else {
-          return showCupertinoAlertDialog(
-              context: context, title: '通知', content: '注册失败，请重试');
+          return showToast('创建用户失败');
         }
       } else if (usernamecheck == 'Error') {
-        return showCupertinoAlertDialog(
-            context: context, title: "错误", content: "设置失败,请重试!");
+        return showToast('数据库错误');
       } else {
         if (usernamecheck['password'] == _passwordcontroller.text) {
           if (Global.defaultUser != _userNametext.text) {
@@ -84,20 +78,16 @@ class APPPasswordState extends State<APPPassword> {
                 _passwordcontroller.text.toString());
             Database db = await Global.getDatabase();
             await Global.setDatabase(db);
-            return showCupertinoAlertDialog(
-                context: context, title: '通知', content: '已成功切换用户');
+            return showToast('登录成功');
           } else {
-            return showCupertinoAlertDialog(
-                context: context, title: '通知', content: '您已登录，请勿重复登录');
+            return showToast('已经登录');
           }
         } else {
-          return showCupertinoAlertDialog(
-              context: context, title: '通知', content: '密码错误，请重试');
+          return showToast('密码错误');
         }
       }
     } catch (e) {
-      return showCupertinoAlertDialog(
-          context: context, title: "错误", content: "设置失败,请重试!");
+      return showToast('未知错误');
     }
   }
 
@@ -331,17 +321,36 @@ class APPPasswordState extends State<APPPassword> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text(
-            Global.defaultUser == ' ' ? '未登录' : '已登录为${Global.defaultUser}'),
+        elevation: 0,
+        title: const Text('登录'),
       ),
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          children: [
-            TextFormField(
+      body: signUpPage(),
+    );
+  }
+
+  Widget signUpPage() {
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 60),
+            child: Container(
+              width: 200,
+              height: 150,
+              decoration: BoxDecoration(
+                color: Colors.transparent,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Image.asset('assets/app_icon.png'),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 15),
+            child: TextFormField(
               controller: _userNametext,
               decoration: const InputDecoration(
                 hintText: '请输入用户名',
+                hintStyle: TextStyle(color: Colors.grey, fontSize: 14.0),
               ),
               textAlign: TextAlign.center,
               validator: (value) {
@@ -351,11 +360,15 @@ class APPPasswordState extends State<APPPassword> {
                 return null;
               },
             ),
-            TextFormField(
-              obscureText: true,
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 15, right: 15, top: 15),
+            child: TextFormField(
               controller: _passwordcontroller,
+              obscureText: true,
               decoration: const InputDecoration(
                 hintText: '请输入8位数字密码,用于数据库加密',
+                hintStyle: TextStyle(color: Colors.grey, fontSize: 14.0),
               ),
               textAlign: TextAlign.center,
               validator: (value) {
@@ -373,10 +386,26 @@ class APPPasswordState extends State<APPPassword> {
                 return null;
               },
             ),
-            ElevatedButton(
-              onPressed: () {
-                if (_formKey.currentState!.validate()) {
-                  showDialog(
+          ),
+          const Divider(
+            height: 20,
+            color: Colors.transparent,
+          ),
+          Container(
+            height: 50,
+            width: 250,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(25),
+              gradient: const LinearGradient(
+                colors: [
+                  Color(0xFF17ead9),
+                  Color.fromARGB(255, 144, 161, 245),
+                ],
+              ),
+            ),
+            child: TextButton(
+                onPressed: () async {
+                  await showDialog(
                       context: context,
                       barrierDismissible: false,
                       builder: (context) {
@@ -387,53 +416,17 @@ class APPPasswordState extends State<APPPassword> {
                           requestCallBack: _saveuserpasswd(),
                         );
                       });
-                }
-              },
-              child: Text(Global.defaultUser == ' ' ? '注册或登录' : '切换用户'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                String currentusername = await Global.getUser();
-                var usernamecheck =
-                    await MySqlUtils.queryUser(username: currentusername);
-                String currentpassword = await Global.getPassword();
-                try {
-                  if (usernamecheck['password'] == currentpassword) {
-                    showDialog(
-                        context: context,
-                        barrierDismissible: false,
-                        builder: (context) {
-                          return NetLoadingDialog(
-                            outsideDismiss: false,
-                            loading: true,
-                            loadingText: "配置中...",
-                            requestCallBack:
-                                _fetchconfig(currentusername, currentpassword),
-                          );
-                        });
+                  if (mounted) {
+                    Navigator.pop(context);
                   }
-                } catch (e) {
-                  if (_formKey.currentState!.validate()) {
-                    showDialog(
-                        context: context,
-                        barrierDismissible: false,
-                        builder: (context) {
-                          return NetLoadingDialog(
-                            outsideDismiss: false,
-                            loading: true,
-                            loadingText: "配置中...",
-                            requestCallBack: _fetchconfig(
-                                _userNametext.text.toString(),
-                                _passwordcontroller.text.toString()),
-                          );
-                        });
-                  }
-                }
-              },
-              child: const Text('拉取云端配置'),
-            ),
-          ],
-        ),
+                },
+                child: const Text(
+                  '注册或登录',
+                  style: TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.bold),
+                )),
+          ),
+        ],
       ),
     );
   }
