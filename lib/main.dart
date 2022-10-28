@@ -17,9 +17,9 @@ import 'package:horopic/utils/theme_provider.dart';
 /*
 @Author: Horo
 @e-mail: ma_shiqing@163.com
-@Date: 2022-10-26
+@Date: 2022-10-28
 @Description:PicHoro, a picture upload tool 
-@version: 1.8.2
+@version: 1.8.3
 */
 
 void main() async {
