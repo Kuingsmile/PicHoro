@@ -1,22 +1,43 @@
 import 'dart:io' as io;
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
+
+import 'package:external_path/external_path.dart';
 
 import 'package:image_picker/image_picker.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 import 'package:flutter/services.dart' as flutter_services;
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'package:fluro/fluro.dart';
 import 'package:http/http.dart' as my_http;
 import 'package:path_provider/path_provider.dart';
 
 import 'package:horopic/album/album_sql.dart';
+import 'package:horopic/utils/event_bus_utils.dart';
 import 'package:horopic/pages/loading.dart';
 import 'package:horopic/picture_host_configure/default_picture_host_select.dart';
-
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/uploader.dart';
+
+import 'package:horopic/router/application.dart';
+import 'package:horopic/router/routers.dart';
+import 'package:horopic/pages/upload_pages/upload_task.dart';
+import 'package:horopic/pages/upload_pages/upload_utils.dart';
+import 'package:horopic/pages/upload_pages/upload_status.dart';
+
+Map uploadStatus = {
+  'UploadStatus.uploading': "上传中",
+  'UploadStatus.canceled': "取消",
+  'UploadStatus.failed': "失败",
+  'UploadStatus.completed': "完成",
+  'UploadStatus.queued': "排队中",
+  'UploadStatus.paused': "暂停",
+};
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -29,14 +50,121 @@ class HomePageState extends State<HomePage>
     with AutomaticKeepAliveClientMixin<HomePage> {
   final ImagePicker _picker = ImagePicker();
   List clipboardList = [];
+  List<String> uploadList = [];
+  var uploadManager = UploadManager();
 
   @override
   bool get wantKeepAlive => true;
 
   @override
+  void initState() {
+    super.initState();
+    uploadManager = UploadManager();
+  }
+
+  clearAllList() {
+    setState(() {
+      uploadList.clear();
+      Global.imagesList.clear();
+      Global.imageFile = null;
+    });
+  }
+
+  @override
   void dispose() {
     super.dispose();
     clipboardList.clear();
+  }
+
+  _createUploadListItem() {
+    List<Widget> list = [];
+    for (var i = 0; i < uploadList.length; i++) {
+      list.add(ListItem(
+          onUploadPlayPausedPressed: (path) async {
+            var task = uploadManager.getUpload(uploadList[i]);
+            if (task != null && !task.status.value.isCompleted) {
+              switch (task.status.value) {
+                case UploadStatus.uploading:
+                  await uploadManager.pauseUpload(path);
+                  break;
+                case UploadStatus.paused:
+                  await uploadManager.resumeUpload(path);
+                  break;
+              }
+              setState(() {});
+            } else {
+              await uploadManager.addUpload(path);
+              setState(() {});
+            }
+          },
+          onDelete: (path) async {
+            await uploadManager.removeUpload(path);
+            setState(() {});
+          },
+          path: uploadList[i],
+          uploadTask: uploadManager.getUpload(uploadList[i])));
+    }
+    List<Widget> list2 = [
+      const Divider(
+        height: 5,
+        color: Colors.transparent,
+      ),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          TextButton(
+              onPressed: () async {
+                await uploadManager.addBatchUploads(uploadList);
+                setState(() {});
+              },
+              child: const Text(
+                "全部开始",
+                style: TextStyle(
+                    color: Colors.blue,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold),
+              )),
+          TextButton(
+              onPressed: () async {
+                await uploadManager.cancelBatchUploads(uploadList);
+              },
+              child: const Text(
+                "全部取消",
+                style: TextStyle(
+                    color: Colors.blue,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold),
+              )),
+          TextButton(
+              onPressed: () async {
+                await clearAllList();
+                setState(() {});
+              },
+              child: const Text(
+                "全部清空",
+                style: TextStyle(
+                    color: Colors.blue,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold),
+              )),
+        ],
+      ),
+      ValueListenableBuilder(
+          valueListenable: uploadManager.getBatchUploadProgress(uploadList),
+          builder: (context, value, child) {
+            return Container(
+              color: const Color.fromARGB(255, 219, 239, 255),
+              height: 10,
+              margin: const EdgeInsets.symmetric(vertical: 4),
+              child: LinearProgressIndicator(
+                value: value,
+              ),
+            );
+          }),
+    ];
+    list2.addAll(list);
+
+    return list2;
   }
 
   _imageFromCamera() async {
@@ -59,9 +187,7 @@ class HomePageState extends State<HomePage>
       } else {
         Global.imageFile = fileImage;
       }
-      setState(() {
-        Global.imagesList.add(Global.imageFile!);
-      });
+      Global.imagesList.add(Global.imageFile!);
     }
   }
 
@@ -106,14 +232,13 @@ class HomePageState extends State<HomePage>
             Global.imagesList.add(Global.imageFile!);
           }
           successCount++;
-          setState(() {});
         } catch (e) {
           failCount++;
           continue;
         }
       }
       if (successCount > 0) {
-        showToast('成功$successCount张,失败$failCount张');
+        showToast('获取成功$successCount张,失败$failCount张');
       } else {
         showToast('剪贴板内无链接');
       }
@@ -193,6 +318,7 @@ class HomePageState extends State<HomePage>
       return showCupertinoAlertDialog(
           context: context, title: "上传失败!", content: "请先配置上传参数.");
     } else if (uploadResult[0] == "success") {
+      eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
       Map<String, dynamic> maps = {};
       //
       if (Global.defaultPShost == 'sm.ms') {
@@ -353,9 +479,7 @@ class HomePageState extends State<HomePage>
         } else {
           Global.imageFile = fileImage;
         }
-        setState(() {
-          Global.imagesList.add(Global.imageFile!);
-        });
+        Global.imagesList.add(Global.imageFile!);
       }
     }
   }
@@ -508,6 +632,7 @@ class HomePageState extends State<HomePage>
     }
 
     setState(() {
+      uploadList.clear();
       Global.imagesList.clear();
       Global.imageFile = null;
     });
@@ -523,6 +648,7 @@ class HomePageState extends State<HomePage>
           title: "上传失败!",
           content: content);
     } else if (failCount == 0) {
+      eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
       if (Global.isCopyLink == true) {
         await flutter_services.Clipboard.setData(flutter_services.ClipboardData(
             text: clipboardList
@@ -544,6 +670,7 @@ class HomePageState extends State<HomePage>
             content: content);
       }
     } else {
+      eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
       if (Global.isCopyLink == true) {
         await flutter_services.Clipboard.setData(flutter_services.ClipboardData(
             text: clipboardList
@@ -573,327 +700,468 @@ class HomePageState extends State<HomePage>
   Widget build(BuildContext context) {
     super.build(context);
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        elevation: 0,
-        title: const Text('PicHoro',
-            style: TextStyle(
-              fontSize: 25.0,
-              fontWeight: FontWeight.bold,
-            )),
-      ),
-      body: Column(
-        children: [
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Padding(
-                padding: const EdgeInsets.only(top: 40),
+        appBar: AppBar(
+          centerTitle: true,
+          systemOverlayStyle: const SystemUiOverlayStyle(
+            statusBarColor: Colors.transparent,
+          ),
+          shadowColor: Colors.transparent,
+          elevation: 0,
+          actions: [
+            IconButton(
+              icon: const Icon(
+                Icons.cleaning_services_sharp,
+                color: Colors.white,
+                size: 30,
+              ),
+              onPressed: () {
+                uploadList.clear();
+                setState(() {
+                  Global.imagesList.clear();
+                  Global.imageFile = null;
+                });
+              },
+            ),
+          ],
+          title: const Text('PicHoro',
+              style: TextStyle(
+                fontSize: 22.0,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              )),
+        ),
+        body: uploadList.isEmpty
+            ? Center(
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    GestureDetector(
-                      onTap: () {
-                        bottomPickerSheet(context, _imageFromCamera,
-                            _multiImagePickerFromGallery);
-                      },
-                      child: CircleAvatar(
-                        radius: MediaQuery.of(context).size.width / 6,
-                        backgroundColor: Colors.grey,
-                        backgroundImage: Global.imageFile != null
-                            ? FileImage(Global.imageFile!)
-                            : const Image(
-                                    image: AssetImage('assets/app_icon.png'))
-                                .image,
-                      ),
+                    Image.asset(
+                      'assets/images/empty.png',
+                      width: 150,
+                      height: 150,
                     ),
                     const SizedBox(
-                      height: 20,
+                      height: 10,
                     ),
-                    ElevatedButton(
-                      onPressed: () {
-                        if (Global.imagesList.isEmpty) {
-                          showToastWithContext(context, '请先选择图片');
-                          return;
-                        } else {
-                          showDialog(
-                              context: context,
-                              barrierDismissible: false,
-                              builder: (context) {
-                                return NetLoadingDialog(
-                                  outsideDismiss: false,
-                                  loading: true,
-                                  loadingText: "上传中...",
-                                  requestCallBack: _upLoadImage(),
-                                );
-                              });
-                        }
-                      }, // Upload Image
-                      child: Padding(
-                        padding: const EdgeInsets.all(18.0),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: const [
-                            Icon(Icons.file_upload),
-                            Text(
-                              '上传图片',
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
+                    const Text('空空如也哦 点击下方按钮上传',
+                        style: TextStyle(
+                            fontSize: 20,
+                            color: Color.fromARGB(136, 121, 118, 118)))
                   ],
                 ),
+              )
+            : SingleChildScrollView(
+                child: Column(
+                  children: _createUploadListItem(),
+                ),
               ),
-            ),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+        floatingActionButton:
+            Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+          SizedBox(
+              height: 40,
+              width: 40,
+              child: FloatingActionButton(
+                heroTag: 'camera',
+                backgroundColor: const Color.fromARGB(255, 180, 236, 182),
+                onPressed: () async {
+                  await _imageFromCamera();
+                  for (int i = 0; i < Global.imagesList.length; i++) {
+                    uploadList.add(Global.imagesList[i].path);
+                  }
+                  if (uploadList.isNotEmpty) {
+                    showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (context) {
+                          return NetLoadingDialog(
+                            outsideDismiss: false,
+                            loading: true,
+                            loadingText: "上传中...",
+                            requestCallBack: _upLoadImage(),
+                          );
+                        });
+                  }
+                },
+                child: const Icon(
+                  Icons.camera_alt_outlined,
+                  size: 30,
+                ),
+              )),
+          const SizedBox(width: 10),
+          SizedBox(
+              height: 40,
+              width: 40,
+              child: FloatingActionButton(
+                heroTag: 'picture',
+                backgroundColor: const Color.fromARGB(255, 112, 215, 247),
+                onPressed: () async {
+                  await _multiImagePickerFromGallery();
+                  if (Global.imagesList.isNotEmpty) {
+                    for (int i = 0; i < Global.imagesList.length; i++) {
+                      uploadList.add(Global.imagesList[i].path);
+                    }
+                  }
+                  setState(() {
+                    Global.imagesList.clear();
+                    Global.imageFile = null;
+                  });
+                },
+                child: const Icon(
+                  Icons.image_outlined,
+                  size: 30,
+                ),
+              )),
+          const SizedBox(width: 10),
+          SizedBox(
+              height: 40,
+              width: 40,
+              child: FloatingActionButton(
+                heroTag: 'multi',
+                backgroundColor: const Color.fromARGB(255, 237, 201, 241),
+                onPressed: () {
+                  _cameraAndBack();
+                },
+                child: const Icon(
+                  Icons.camera,
+                  size: 30,
+                ),
+              )),
+          const SizedBox(width: 10),
+          SizedBox(
+              height: 40,
+              width: 40,
+              child: FloatingActionButton(
+                heroTag: 'network',
+                backgroundColor: const Color.fromARGB(255, 248, 231, 136),
+                onPressed: () async {
+                  await _imageFromNetwork();
+                  if (Global.imagesList.isNotEmpty) {
+                    for (int i = 0; i < Global.imagesList.length; i++) {
+                      uploadList.add(Global.imagesList[i].path);
+                    }
+                  }
+                  setState(() {
+                    Global.imagesList.clear();
+                    Global.imageFile = null;
+                  });
+                },
+                child: const Icon(
+                  Icons.wifi,
+                  size: 30,
+                ),
+              )),
+          const SizedBox(width: 10),
+          SpeedDial(
+            renderOverlay: true,
+            overlayOpacity: 0.5,
+            buttonSize: const Size(41, 41),
+            childrenButtonSize: const Size(40, 40),
+            animatedIcon: AnimatedIcons.menu_close,
+            animatedIconTheme: const IconThemeData(size: 33.0),
+            backgroundColor: Colors.blue,
+            visible: true,
+            curve: Curves.bounceIn,
             children: [
-              Column(
-                children: [
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  Container(
-                    alignment: FractionalOffset.center,
-                    margin: const EdgeInsets.only(left: 20, right: 20),
-                    child: ElevatedButton(
-                      onPressed: _imageFromCamera,
-                      child: Padding(
-                        padding: const EdgeInsets.all(12.0),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: const [
-                            Icon(Icons.camera_alt),
-                            Text(
-                              '单张拍照',
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  Container(
-                    alignment: FractionalOffset.center,
-                    margin: const EdgeInsets.only(
-                      left: 20,
-                      right: 20,
-                    ),
-                    child: ElevatedButton(
-                      onPressed: _multiImagePickerFromGallery,
-                      child: Padding(
-                        padding: const EdgeInsets.all(12.0),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: const [
-                            Icon(Icons.photo_library),
-                            Text(
-                              '相册多选',
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+              SpeedDialChild(
+                shape: const CircleBorder(),
+                child: const Icon(
+                  IconData(0x004C),
+                  color: Colors.white,
+                ),
+                backgroundColor: Global.defaultPShost == 'lsky.pro'
+                    ? Colors.amber
+                    : const Color.fromARGB(255, 97, 180, 248),
+                label: '兰空',
+                labelStyle: const TextStyle(fontSize: 12.0),
+                onTap: () async {
+                  await setdefaultPShostRemoteAndLocal('lsky.pro');
+                  eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
+                  setState(() {});
+                },
               ),
-              Column(
-                children: [
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  Container(
-                    alignment: FractionalOffset.center,
-                    margin: const EdgeInsets.only(left: 20, right: 20),
-                    child: ElevatedButton(
-                      onPressed: _cameraAndBack,
-                      child: Padding(
-                        padding: const EdgeInsets.all(12.0),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: const [
-                            Icon(Icons.backup),
-                            Text(
-                              '连续上传',
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  Container(
-                    alignment: FractionalOffset.center,
-                    margin: const EdgeInsets.only(left: 20, right: 20),
-                    child: ElevatedButton(
-                      onPressed: _imageFromNetwork,
-                      child: Padding(
-                        padding: const EdgeInsets.all(12.0),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: const [
-                            Icon(Icons.wifi),
-                            Text(
-                              '网络多选',
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+              SpeedDialChild(
+                shape: const CircleBorder(),
+                child: const Icon(
+                  IconData(0x0053),
+                  color: Colors.white,
+                ),
+                backgroundColor: Global.defaultPShost == 'sm.ms'
+                    ? Colors.amber
+                    : const Color.fromARGB(255, 97, 180, 248),
+                label: 'SM.MS',
+                labelStyle: const TextStyle(fontSize: 12.0),
+                onTap: () async {
+                  await setdefaultPShostRemoteAndLocal('sm.ms');
+                  eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
+                  setState(() {});
+                },
+              ),
+              SpeedDialChild(
+                shape: const CircleBorder(),
+                child: const Icon(
+                  IconData(0x0047),
+                  color: Colors.white,
+                ),
+                backgroundColor: Global.defaultPShost == 'github'
+                    ? Colors.amber
+                    : const Color.fromARGB(255, 97, 180, 248),
+                label: 'Github',
+                labelStyle: const TextStyle(fontSize: 12.0),
+                onTap: () async {
+                  await setdefaultPShostRemoteAndLocal('github');
+                  eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
+                  setState(() {});
+                },
+              ),
+              SpeedDialChild(
+                shape: const CircleBorder(),
+                child: const Icon(
+                  IconData(0x0049),
+                  color: Colors.white,
+                ),
+                backgroundColor: Global.defaultPShost == 'imgur'
+                    ? Colors.amber
+                    : const Color.fromARGB(255, 97, 180, 248),
+                label: 'Imgur',
+                labelStyle: const TextStyle(fontSize: 12.0),
+                onTap: () async {
+                  await setdefaultPShostRemoteAndLocal('imgur');
+                  eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
+                  setState(() {});
+                },
+              ),
+              SpeedDialChild(
+                shape: const CircleBorder(),
+                child: const Icon(
+                  IconData(0x0051),
+                  color: Colors.white,
+                ),
+                backgroundColor: Global.defaultPShost == 'qiniu'
+                    ? Colors.amber
+                    : const Color.fromARGB(255, 97, 180, 248),
+                label: '七牛',
+                labelStyle: const TextStyle(fontSize: 12.0),
+                onTap: () async {
+                  await setdefaultPShostRemoteAndLocal('qiniu');
+                  eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
+                  setState(() {});
+                },
+              ),
+              SpeedDialChild(
+                shape: const CircleBorder(),
+                child: const Icon(
+                  IconData(0x0054),
+                  color: Colors.white,
+                ),
+                backgroundColor: Global.defaultPShost == 'tencent'
+                    ? Colors.amber
+                    : const Color.fromARGB(255, 97, 180, 248),
+                label: '腾讯',
+                labelStyle: const TextStyle(fontSize: 12.0),
+                onTap: () async {
+                  await setdefaultPShostRemoteAndLocal('tencent');
+                  eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
+                  setState(() {});
+                },
+              ),
+              SpeedDialChild(
+                shape: const CircleBorder(),
+                child: const Icon(
+                  IconData(0x0041),
+                  color: Colors.white,
+                ),
+                backgroundColor: Global.defaultPShost == 'aliyun'
+                    ? Colors.amber
+                    : const Color.fromARGB(255, 97, 180, 248),
+                label: '阿里',
+                labelStyle: const TextStyle(fontSize: 12.0),
+                onTap: () async {
+                  await setdefaultPShostRemoteAndLocal('aliyun');
+                  eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
+                  setState(() {});
+                },
+              ),
+              SpeedDialChild(
+                shape: const CircleBorder(),
+                child: const Icon(
+                  IconData(0x0055),
+                  color: Colors.white,
+                ),
+                backgroundColor: Global.defaultPShost == 'upyun'
+                    ? Colors.amber
+                    : const Color.fromARGB(255, 97, 180, 248),
+                label: '又拍',
+                labelStyle: const TextStyle(fontSize: 12.0),
+                onTap: () async {
+                  await setdefaultPShostRemoteAndLocal('upyun');
+                  eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
+                  setState(() {});
+                },
               ),
             ],
           ),
-        ],
-      ),
-      floatingActionButton: SpeedDial(
-        renderOverlay: true,
-        overlayOpacity: 0.5,
-        buttonSize: const Size(45, 45),
-        childrenButtonSize: const Size(40, 40),
-        animatedIcon: AnimatedIcons.menu_close,
-        animatedIconTheme: const IconThemeData(size: 33.0),
-        backgroundColor: Colors.blue,
-        visible: true,
-        curve: Curves.bounceIn,
-        children: [
-          SpeedDialChild(
-            shape: const CircleBorder(),
-            child: const Icon(
-              IconData(0x004C),
-              color: Colors.white,
+        ]));
+  }
+}
+
+class ListItem extends StatefulWidget {
+  Function(String) onUploadPlayPausedPressed;
+  Function(String) onDelete;
+  UploadTask? uploadTask;
+  String path;
+  ListItem(
+      {Key? key,
+      required this.onUploadPlayPausedPressed,
+      required this.onDelete,
+      required this.path,
+      this.uploadTask})
+      : super(key: key);
+
+  @override
+  ListItemState createState() => ListItemState();
+}
+
+class ListItemState extends State<ListItem> {
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(1.0),
+      child: Container(
+        decoration: BoxDecoration(
+            border: Border.all(
+              color: const Color.fromARGB(255, 203, 237, 253),
             ),
-            backgroundColor: Global.defaultPShost == 'lsky.pro'
-                ? Colors.amber
-                : const Color.fromARGB(255, 97, 180, 248),
-            label: '兰空',
-            labelStyle: const TextStyle(fontSize: 12.0),
-            onTap: () async {
-              await setdefaultPShostRemoteAndLocal('lsky.pro');
-              setState(() {});
-            },
-          ),
-          SpeedDialChild(
-            shape: const CircleBorder(),
-            child: const Icon(
-              IconData(0x0053),
-              color: Colors.white,
+            borderRadius: const BorderRadius.all(Radius.circular(20))),
+        padding: const EdgeInsets.all(1.0),
+        child: Column(
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Image(
+                    image: FileImage(io.File(widget.path)),
+                    width: 30,
+                    height: 30,
+                    fit: BoxFit.cover),
+                Expanded(
+                    child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '文件名:${widget.path.split('/').last}',
+                    ),
+                    if (widget.uploadTask != null)
+                      ValueListenableBuilder(
+                          valueListenable: widget.uploadTask!.status,
+                          builder: (context, value, child) {
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              child: Text(
+                                  "状态: ${uploadStatus[value.toString()]}",
+                                  style: const TextStyle(fontSize: 14)),
+                            );
+                          }),
+                  ],
+                )),
+                widget.uploadTask != null
+                    ? ValueListenableBuilder(
+                        valueListenable: widget.uploadTask!.status,
+                        builder: (context, value, child) {
+                          switch (widget.uploadTask!.status.value) {
+                            case UploadStatus.uploading:
+                              return IconButton(
+                                  onPressed: () async {
+                                    await widget
+                                        .onUploadPlayPausedPressed(widget.path);
+                                  },
+                                  icon: const Icon(
+                                    Icons.pause,
+                                    color: Colors.blue,
+                                  ));
+                            case UploadStatus.paused:
+                              return IconButton(
+                                onPressed: () async {
+                                  await widget
+                                      .onUploadPlayPausedPressed(widget.path);
+                                },
+                                icon: const Icon(Icons.play_arrow),
+                                color: Colors.blue,
+                              );
+                            case UploadStatus.completed:
+                              return IconButton(
+                                  onPressed: () {
+                                    widget.onDelete(widget.path);
+                                  },
+                                  icon: const Icon(
+                                    Icons.delete,
+                                    color: Colors.red,
+                                  ));
+                            case UploadStatus.failed:
+                            case UploadStatus.canceled:
+                              return IconButton(
+                                  onPressed: () async {
+                                    await widget
+                                        .onUploadPlayPausedPressed(widget.path);
+                                  },
+                                  icon: const Icon(
+                                    Icons.cloud_upload_outlined,
+                                    color: Colors.blue,
+                                  ));
+                          }
+                          return Text("${uploadStatus[value.toString()]}",
+                              style: const TextStyle(fontSize: 16));
+                        })
+                    : IconButton(
+                        onPressed: () async {
+                          await widget.onUploadPlayPausedPressed(widget.path);
+                        },
+                        icon: const Icon(
+                          Icons.cloud_upload_outlined,
+                          color: Colors.green,
+                        ))
+              ],
             ),
-            backgroundColor: Global.defaultPShost == 'sm.ms'
-                ? Colors.amber
-                : const Color.fromARGB(255, 97, 180, 248),
-            label: 'SM.MS',
-            labelStyle: const TextStyle(fontSize: 12.0),
-            onTap: () async {
-              await setdefaultPShostRemoteAndLocal('sm.ms');
-              setState(() {});
-            },
-          ),
-          SpeedDialChild(
-            shape: const CircleBorder(),
-            child: const Icon(
-              IconData(0x0047),
-              color: Colors.white,
-            ),
-            backgroundColor: Global.defaultPShost == 'github'
-                ? Colors.amber
-                : const Color.fromARGB(255, 97, 180, 248),
-            label: 'Github',
-            labelStyle: const TextStyle(fontSize: 12.0),
-            onTap: () async {
-              await setdefaultPShostRemoteAndLocal('github');
-              setState(() {});
-            },
-          ),
-          SpeedDialChild(
-            shape: const CircleBorder(),
-            child: const Icon(
-              IconData(0x0049),
-              color: Colors.white,
-            ),
-            backgroundColor: Global.defaultPShost == 'imgur'
-                ? Colors.amber
-                : const Color.fromARGB(255, 97, 180, 248),
-            label: 'Imgur',
-            labelStyle: const TextStyle(fontSize: 12.0),
-            onTap: () async {
-              await setdefaultPShostRemoteAndLocal('imgur');
-              setState(() {});
-            },
-          ),
-          SpeedDialChild(
-            shape: const CircleBorder(),
-            child: const Icon(
-              IconData(0x0051),
-              color: Colors.white,
-            ),
-            backgroundColor: Global.defaultPShost == 'qiniu'
-                ? Colors.amber
-                : const Color.fromARGB(255, 97, 180, 248),
-            label: '七牛',
-            labelStyle: const TextStyle(fontSize: 12.0),
-            onTap: () async {
-              await setdefaultPShostRemoteAndLocal('qiniu');
-              setState(() {});
-            },
-          ),
-          SpeedDialChild(
-            shape: const CircleBorder(),
-            child: const Icon(
-              IconData(0x0054),
-              color: Colors.white,
-            ),
-            backgroundColor: Global.defaultPShost == 'tencent'
-                ? Colors.amber
-                : const Color.fromARGB(255, 97, 180, 248),
-            label: '腾讯',
-            labelStyle: const TextStyle(fontSize: 12.0),
-            onTap: () async {
-              await setdefaultPShostRemoteAndLocal('tencent');
-              setState(() {});
-            },
-          ),
-          SpeedDialChild(
-            shape: const CircleBorder(),
-            child: const Icon(
-              IconData(0x0041),
-              color: Colors.white,
-            ),
-            backgroundColor: Global.defaultPShost == 'aliyun'
-                ? Colors.amber
-                : const Color.fromARGB(255, 97, 180, 248),
-            label: '阿里',
-            labelStyle: const TextStyle(fontSize: 12.0),
-            onTap: () async {
-              await setdefaultPShostRemoteAndLocal('aliyun');
-              setState(() {});
-            },
-          ),
-          SpeedDialChild(
-            shape: const CircleBorder(),
-            child: const Icon(
-              IconData(0x0055),
-              color: Colors.white,
-            ),
-            backgroundColor: Global.defaultPShost == 'upyun'
-                ? Colors.amber
-                : const Color.fromARGB(255, 97, 180, 248),
-            label: '又拍',
-            labelStyle: const TextStyle(fontSize: 12.0),
-            onTap: () async {
-              await setdefaultPShostRemoteAndLocal('upyun');
-              setState(() {});
-            },
-          ),
-        ],
+            if (widget.uploadTask != null &&
+                !widget.uploadTask!.status.value.isCompleted)
+              ValueListenableBuilder(
+                  valueListenable: widget.uploadTask!.progress,
+                  builder: (context, value, child) {
+                    return Container(
+                      margin: const EdgeInsets.symmetric(vertical: 4),
+                      child: LinearProgressIndicator(
+                        value: value,
+                        color: widget.uploadTask!.status.value ==
+                                UploadStatus.paused
+                            ? Colors.grey
+                            : Colors.amber,
+                      ),
+                    );
+                  }),
+            if (widget.uploadTask != null)
+              FutureBuilder<UploadStatus>(
+                  future: widget.uploadTask!.whenUploadComplete(),
+                  builder: (BuildContext context,
+                      AsyncSnapshot<UploadStatus> snapshot) {
+                    switch (snapshot.connectionState) {
+                      case ConnectionState.waiting:
+                        return const Text('请等待上传完成');
+                      default:
+                        if (snapshot.hasError) {
+                          return Text('错误: ${snapshot.error}');
+                        } else {
+                          return Text(
+                              '结果: ${uploadStatus[snapshot.data.toString()]}');
+                        }
+                    }
+                  })
+          ],
+        ),
       ),
     );
   }
