@@ -175,6 +175,7 @@ class TencentFileExplorerState
 
   @override
   AppBar get appBar => AppBar(
+        elevation: 0,
         leading: IconButton(
           icon: const Icon(
             Icons.arrow_back_ios,
@@ -1398,12 +1399,16 @@ class TencentFileExplorerState
             visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
             minLeadingWidth: 0,
             title: Text(
-                allInfoList[index]['Key'].length > 20
-                    ? allInfoList[index]['Key'].substring(0, 10) +
+                allInfoList[index]['Key'].split('/').last.length > 20
+                    ? allInfoList[index]['Key']
+                            .split('/')
+                            .last
+                            .substring(0, 10) +
                         '...' +
-                        allInfoList[index]['Key']
-                            .substring(allInfoList[index]['Key'].length - 10)
-                    : allInfoList[index]['Key'],
+                        allInfoList[index]['Key'].split('/').last.substring(
+                            allInfoList[index]['Key'].split('/').last.length -
+                                10)
+                    : allInfoList[index]['Key'].split('/').last,
                 style: const TextStyle(fontSize: 14)),
             subtitle: Text(
                 allInfoList[index]['LastModified']
