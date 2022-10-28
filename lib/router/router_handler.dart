@@ -5,6 +5,7 @@ import 'package:fluro/fluro.dart';
 import 'package:horopic/pages/pichoro_app.dart';
 
 import 'package:horopic/pages/home_page.dart';
+import 'package:horopic/pages/upload_pages/upload_page.dart';
 
 import 'package:horopic/album/album_page.dart';
 import 'package:horopic/album/network_pic_preview.dart';
@@ -19,6 +20,8 @@ import 'package:horopic/configure_page/others/update_log.dart';
 import 'package:horopic/configure_page/others/author.dart';
 import 'package:horopic/configure_page/others/select_theme.dart';
 import 'package:horopic/configure_page/user_manage/login_page.dart';
+import 'package:horopic/configure_page/user_manage/user_information_page.dart';
+import 'package:horopic/configure_page/user_manage/picture_host_info_page.dart';
 
 import 'package:horopic/picture_host_configure/imgur_configure.dart';
 import 'package:horopic/picture_host_configure/smms_configure.dart';
@@ -277,4 +280,24 @@ var smmsUpDownloadFileHandler = Handler(
       savedFileNameList: savedFileNameList,
       downloadList: downloadList,
       downloadPath: downloadPath);
+});
+
+//上传管理页面
+var uploadManagePageHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  List<String> uploadList =
+      json.decode(params['uploadList']!.first).cast<String>();
+  return UploadManagePage(uploadList: uploadList);
+});
+
+//用户信息页面
+var userInformationPageHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  return UserInformationPage();
+});
+
+//用户图床信息页面
+var pictureHostInfoPageHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  return PictureHostInfoPage();
 });
