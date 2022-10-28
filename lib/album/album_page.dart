@@ -11,6 +11,7 @@ import 'package:msh_checkbox/msh_checkbox.dart';
 
 import 'package:horopic/album/load_state_change.dart';
 import 'package:horopic/album/album_sql.dart';
+import 'package:horopic/utils/event_bus_utils.dart';
 
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/global.dart';
@@ -58,13 +59,29 @@ class UploadedImagesState extends State<UploadedImages>
     'upyun': '又拍云',
   };
 
+  bool albumKeepAlive = true;
+  // ignore: prefer_typing_uninitialized_variables
+  var actionEventBus;
+
   @override
-  bool get wantKeepAlive => false;
+  bool get wantKeepAlive => albumKeepAlive;
 
   @override
   void initState() {
+    actionEventBus = eventBus.on<AlbumRefreshEvent>().listen(
+      (event) {
+        albumKeepAlive = false;
+        updateKeepAlive();
+      },
+    );
     super.initState();
     _onRefresh();
+  }
+
+  @override
+  void dispose() {
+    actionEventBus.cancel();
+    super.dispose();
   }
 
   @override
@@ -76,9 +93,15 @@ class UploadedImagesState extends State<UploadedImages>
               '${nameToPara[Global.defaultShowedPBhost]}相册 - 第${_currentPage + 1}页',
               style: const TextStyle(
                 fontSize: 20,
+                color: Colors.white,
                 fontWeight: FontWeight.bold,
               )),
           centerTitle: true,
+          systemOverlayStyle: const SystemUiOverlayStyle(
+            statusBarColor: Colors.transparent,
+          ),
+          shadowColor: Colors.transparent,
+          elevation: 0,
           actions: [
             IconButton(
               icon: selectedImagesBool.contains(true)
@@ -158,13 +181,13 @@ class UploadedImagesState extends State<UploadedImages>
               return GestureDetector(
                 onTap: () {
                   if (Global.defaultShowedPBhost == 'lskypro' ||
-                      Global.defaultShowedPBhost == 'github' ||
                       Global.defaultShowedPBhost == 'smms') {
                     String urlList = currentShowedImagesUrl.join(',');
                     Application.router.navigateTo(context,
                         '${Routes.albumImagePreview}?index=$index&images=${Uri.encodeComponent(urlList)}',
                         transition: TransitionType.none);
-                  } else if (Global.defaultShowedPBhost == 'imgur') {
+                  } else if (Global.defaultShowedPBhost == 'imgur' ||
+                      Global.defaultShowedPBhost == 'github') {
                     String urlList =
                         currentShowedImagesDisplayAddressUrl.join(',');
                     Application.router.navigateTo(context,
@@ -824,12 +847,12 @@ class UploadedImagesState extends State<UploadedImages>
         showedImagePictureKey.add(maps[0]['pictureKey']);
         showedImagePaths.add(maps[0]['path']);
       } else if (Global.defaultShowedPBhost == 'github') {
-        if (!maps[0]['url'].toString().startsWith('https://') &&
-            !maps[0]['url'].toString().startsWith('http://')) {
+        if (!maps[0]['hostSpecificArgA'].toString().startsWith('https://') &&
+            !maps[0]['hostSpecificArgA'].toString().startsWith('http://')) {
           // ignore: prefer_interpolation_to_compose_strings
-          showedImageUrl.add('http://' + maps[0]['url']);
+          showedImageUrl.add('http://' + maps[0]['hostSpecificArgA']);
         } else {
-          showedImageUrl.add(maps[0]['url']);
+          showedImageUrl.add(maps[0]['hostSpecificArgA']);
         }
         // showedImageUrl.add(maps[0]['hostSpecificArgA']); //用来复制的url
         if (!maps[0]['hostSpecificArgA'].toString().startsWith('https://') &&
