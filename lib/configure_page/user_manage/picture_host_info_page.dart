@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:fluro/fluro.dart';
@@ -75,6 +76,7 @@ class PictureHostInfoPageState
       ];
 
       for (var i = 0; i < pictureHostInfoList.length; i++) {
+        try{
         String config =
             await File(configFilePath[pictureHostInfoList[i]]!).readAsString();
         Map<String, dynamic> configMap = jsonDecode(config);
@@ -83,7 +85,12 @@ class PictureHostInfoPageState
         configJson = configJson.replaceAll('None', '');
         configJson = configJson.replaceAll('keyId', 'accessKeyId');
         configJson = configJson.replaceAll('keySecret', 'accessKeySecret');
-        configList.add(configJson);
+        configList.add(configJson);}
+        catch(e){
+          if (kDebugMode){
+            print(e);
+          }
+        }
       }
       if (configList.isEmpty) {
         state = loading_state.LoadState.EMPTY;
