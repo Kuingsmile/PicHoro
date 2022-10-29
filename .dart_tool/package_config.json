@@ -104,6 +104,12 @@
       "languageVersion": "2.12"
     },
     {
+      "name": "event_bus",
+      "rootUri": "file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/event_bus-2.0.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
       "name": "extended_image",
       "rootUri": "file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/extended_image-6.3.1",
       "packageUri": "lib/",
@@ -818,7 +824,7 @@
       "languageVersion": "2.18"
     }
   ],
-  "generated": "2022-10-27T03:06:21.958347Z",
+  "generated": "2022-10-29T10:24:02.963547Z",
   "generator": "pub",
   "generatorVersion": "2.18.0"
 }
