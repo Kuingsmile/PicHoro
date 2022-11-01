@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:f_logs/f_logs.dart';
 
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/common_functions.dart';
@@ -87,6 +88,11 @@ class APPPasswordState extends State<APPPassword> {
         }
       }
     } catch (e) {
+      FLog.error(
+          className: 'APPPasswordState',
+          methodName: '_saveuserpasswd',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
       return showToast('未知错误');
     }
   }
@@ -124,6 +130,13 @@ class APPPasswordState extends State<APPPassword> {
                   File('${directory.path}/${username}_host_config.txt');
               lskyLocalFile.writeAsString(hostConfigJson);
             } catch (e) {
+              FLog.error(
+                  className: 'APPPasswordState',
+                  methodName: '_fetchconfig_lsky',
+                  text: formatErrorMessage({
+                    'username': username,
+                  }, e.toString()),
+                  dataLogType: DataLogType.ERRORS.toString());
               return showCupertinoAlertDialog(
                   context: context, title: "错误", content: "拉取兰空图床配置失败,请重试!");
             }
@@ -144,6 +157,13 @@ class APPPasswordState extends State<APPPassword> {
                   File('${directory.path}/${username}_smms_config.txt');
               smmsLocalFile.writeAsString(smmsConfigJson);
             } catch (e) {
+              FLog.error(
+                  className: 'APPPasswordState',
+                  methodName: '_fetchconfig_smms',
+                  text: formatErrorMessage({
+                    'username': username,
+                  }, e.toString()),
+                  dataLogType: DataLogType.ERRORS.toString());
               return showCupertinoAlertDialog(
                   context: context, title: "错误", content: "拉取SM.MS图床配置失败,请重试!");
             }
@@ -168,6 +188,13 @@ class APPPasswordState extends State<APPPassword> {
                   File('${directory.path}/${username}_github_config.txt');
               githubLocalFile.writeAsString(githubConfigJson);
             } catch (e) {
+              FLog.error(
+                  className: 'APPPasswordState',
+                  methodName: '_fetchconfig_github',
+                  text: formatErrorMessage({
+                    'username': username,
+                  }, e.toString()),
+                  dataLogType: DataLogType.ERRORS.toString());
               return showCupertinoAlertDialog(
                   context: context,
                   title: "错误",
@@ -191,6 +218,13 @@ class APPPasswordState extends State<APPPassword> {
                   File('${directory.path}/${username}_imgur_config.txt');
               imgurLocalFile.writeAsString(imgurConfigJson);
             } catch (e) {
+              FLog.error(
+                  className: 'APPPasswordState',
+                  methodName: '_fetchconfig_imgur',
+                  text: formatErrorMessage({
+                    'username': username,
+                  }, e.toString()),
+                  dataLogType: DataLogType.ERRORS.toString());
               return showCupertinoAlertDialog(
                   context: context, title: "错误", content: "拉取Imgur图床配置失败,请重试!");
             }
@@ -217,6 +251,13 @@ class APPPasswordState extends State<APPPassword> {
                   File('${directory.path}/${username}_qiniu_config.txt');
               qiniuLocalFile.writeAsString(qiniuConfigJson);
             } catch (e) {
+              FLog.error(
+                  className: 'APPPasswordState',
+                  methodName: '_fetchconfig_qiniu',
+                  text: formatErrorMessage({
+                    'username': username,
+                  }, e.toString()),
+                  dataLogType: DataLogType.ERRORS.toString());
               return showCupertinoAlertDialog(
                   context: context, title: "错误", content: "拉取七牛云配置失败,请重试!");
             }
@@ -244,6 +285,13 @@ class APPPasswordState extends State<APPPassword> {
                   File('${directory.path}/${username}_tencent_config.txt');
               tencentLocalFile.writeAsString(tencentConfigJson);
             } catch (e) {
+              FLog.error(
+                  className: 'APPPasswordState',
+                  methodName: '_fetchconfig_tencent',
+                  text: formatErrorMessage({
+                    'username': username,
+                  }, e.toString()),
+                  dataLogType: DataLogType.ERRORS.toString());
               return showCupertinoAlertDialog(
                   context: context, title: "错误", content: "拉取腾讯云配置失败,请重试!");
             }
@@ -270,6 +318,13 @@ class APPPasswordState extends State<APPPassword> {
                   File('${directory.path}/${username}_aliyun_config.txt');
               aliyunLocalFile.writeAsString(aliyunConfigJson);
             } catch (e) {
+              FLog.error(
+                  className: 'APPPasswordState',
+                  methodName: '_fetchconfig_aliyun',
+                  text: formatErrorMessage({
+                    'username': username,
+                  }, e.toString()),
+                  dataLogType: DataLogType.ERRORS.toString());
               return showCupertinoAlertDialog(
                   context: context, title: "错误", content: "拉取阿里云配置失败,请重试!");
             }
@@ -295,6 +350,13 @@ class APPPasswordState extends State<APPPassword> {
                   File('${directory.path}/${username}_upyun_config.txt');
               upyunLocalFile.writeAsString(upyunConfigJson);
             } catch (e) {
+              FLog.error(
+                  className: 'APPPasswordState',
+                  methodName: '_fetchconfig_upyun',
+                  text: formatErrorMessage({
+                    'username': username,
+                  }, e.toString()),
+                  dataLogType: DataLogType.ERRORS.toString());
               return showCupertinoAlertDialog(
                   context: context, title: "错误", content: "拉取又拍云配置失败,请重试!");
             }
@@ -311,6 +373,13 @@ class APPPasswordState extends State<APPPassword> {
         }
       }
     } catch (e) {
+      FLog.error(
+          className: 'APPPasswordState',
+          methodName: '_fetchconfig_all',
+          text: formatErrorMessage({
+            'username': username,
+          }, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
       return showCupertinoAlertDialog(
           context: context, title: "错误", content: "拉取失败,请重试!");
     }
@@ -353,6 +422,7 @@ class APPPasswordState extends State<APPPassword> {
                 hintStyle: TextStyle(color: Colors.grey, fontSize: 14.0),
               ),
               textAlign: TextAlign.center,
+              autovalidateMode: AutovalidateMode.onUserInteraction,
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return "用户名不能为空";
@@ -366,22 +436,16 @@ class APPPasswordState extends State<APPPassword> {
             child: TextFormField(
               controller: _passwordcontroller,
               obscureText: true,
+              obscuringCharacter: '*',
               decoration: const InputDecoration(
-                hintText: '请输入8位数字密码,用于数据库加密',
+                hintText: '请输入密码',
                 hintStyle: TextStyle(color: Colors.grey, fontSize: 14.0),
               ),
               textAlign: TextAlign.center,
+              autovalidateMode: AutovalidateMode.onUserInteraction,
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return '密码不能为空';
-                }
-                if (value.length != 8) {
-                  return '密码长度必须为8位';
-                }
-                try {
-                  int.parse(value);
-                } catch (e) {
-                  return '密码必须为数字';
                 }
                 return null;
               },
@@ -405,6 +469,19 @@ class APPPasswordState extends State<APPPassword> {
             ),
             child: TextButton(
                 onPressed: () async {
+                  if (_userNametext.text.isEmpty) {
+                    return showToastWithContext(context, '用户名不能为空');
+                  }
+                  if (_passwordcontroller.text.isEmpty) {
+                    return showToastWithContext(context, '密码不能为空');
+                  }
+                  RegExp blank = RegExp(r"\s");
+                  if (blank.hasMatch(_userNametext.text)) {
+                    return showToastWithContext(context, '用户名不能包含空白字符');
+                  }
+                  if (blank.hasMatch(_passwordcontroller.text)) {
+                    return showToastWithContext(context, '密码不能包含空白字符');
+                  }
                   await showDialog(
                       context: context,
                       barrierDismissible: false,
