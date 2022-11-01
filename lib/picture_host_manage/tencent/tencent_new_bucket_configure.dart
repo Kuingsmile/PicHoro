@@ -39,6 +39,8 @@ class NewBucketConfigState extends State<NewBucketConfig> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        elevation: 0,
+        centerTitle: true,
         title: const Text('新建存储桶'),
       ),
       body: ListView(
