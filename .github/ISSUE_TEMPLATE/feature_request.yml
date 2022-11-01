@@ -1,0 +1,40 @@
+name: "Feature Request"
+description: 功能请求 
+title: "[Feature]: "
+labels: ["feature request"]
+assignees:
+  - molunerfinn
+body:
+  - type: markdown
+    attributes:
+      value: |+
+        ## PicGo Issue 模板
+
+        请依照该模板来提交，否则将会被关闭。
+
+  - type: input
+    id: version
+    attributes:
+      label: PicHoro的版本 
+      placeholder: 例如 V1.8.3
+    validations:
+      required: true
+  - type: input
+    id: platform
+    attributes:
+      label: 系统信息 
+      placeholder: 例如 ViVo X60 Pro
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: 功能请求 
+      description: 详细描述你所预想的功能或者是现有功能的改进 
+    validations:
+      required: true
+  - type: markdown
+    attributes:
+      value: |
+        最后，喜欢 PicGo 的话不妨给它点个 star~
+       
