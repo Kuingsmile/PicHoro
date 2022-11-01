@@ -39,6 +39,7 @@ class SmmsManageHomePageState
 
   @override
   AppBar get appBar => AppBar(
+        elevation: 0,
         centerTitle: true,
         title: const Text('SM.MS图床信息'),
       );
