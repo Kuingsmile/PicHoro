@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:path/path.dart' as my_path;
 import 'package:fluro/fluro.dart';
+import 'package:f_logs/f_logs.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:msh_checkbox/msh_checkbox.dart';
@@ -45,6 +46,8 @@ class FileExplorerState extends State<FileExplorer> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        elevation: 0,
+        centerTitle: true,
         leading: IconButton(
           icon: const Icon(
             Icons.arrow_back_ios,
@@ -225,6 +228,11 @@ class FileExplorerState extends State<FileExplorer> {
                     showToast('删除完成');
                     return;
                   } catch (e) {
+                    FLog.error(
+                        className: 'FileListPage',
+                        methodName: 'deleteAll',
+                        text: formatErrorMessage({}, e.toString()),
+                        dataLogType: DataLogType.ERRORS.toString());
                     showToast('删除失败');
                   }
                 },
@@ -289,6 +297,13 @@ class FileExplorerState extends State<FileExplorer> {
                                     try {
                                       deleteFile(context, currentFiles[index]);
                                     } catch (e) {
+                                      FLog.error(
+                                          className: 'FileListPage',
+                                          methodName: 'deleteFile_folder',
+                                          text: formatErrorMessage(
+                                              {}, e.toString()),
+                                          dataLogType:
+                                              DataLogType.ERRORS.toString());
                                       showToast('删除失败');
                                     }
                                   },
@@ -390,6 +405,13 @@ class FileExplorerState extends State<FileExplorer> {
                                         deleteFile(
                                             context, currentFiles[index]);
                                       } catch (e) {
+                                        FLog.error(
+                                            className: 'FileListPage',
+                                            methodName: 'deleteFile_file',
+                                            text: formatErrorMessage(
+                                                {}, e.toString()),
+                                            dataLogType:
+                                                DataLogType.ERRORS.toString());
                                         showToast('删除失败');
                                       }
                                     },
@@ -573,6 +595,13 @@ class FileExplorerState extends State<FileExplorer> {
         setState(() {});
       }
     } catch (e) {
+      FLog.error(
+          className: 'LocalFilePage',
+          methodName: 'deleteAll',
+          text: formatErrorMessage({
+            'toDelete': toDelete,
+          }, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
       rethrow;
     }
   }
@@ -732,6 +761,11 @@ class FileExplorerState extends State<FileExplorer> {
                   getCurrentPathFiles(file.parent.path);
                   setState(() {});
                 } catch (e) {
+                  FLog.error(
+                      className: 'FilePage',
+                      methodName: 'deleteFile',
+                      text: formatErrorMessage({}, e.toString()),
+                      dataLogType: DataLogType.ERRORS.toString());
                   showToastWithContext(context, '删除失败');
                 }
                 Navigator.pop(context);
