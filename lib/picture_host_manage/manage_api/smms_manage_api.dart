@@ -3,9 +3,11 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:f_logs/f_logs.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'package:horopic/utils/global.dart';
+import 'package:horopic/utils/common_functions.dart';
 
 class SmmsManageAPI {
   static const String smmsAPIUrl = 'https://smms.app/api/v2/';
@@ -27,6 +29,11 @@ class SmmsManageAPI {
       String contents = await file.readAsString();
       return contents;
     } catch (e) {
+      FLog.error(
+          className: 'SmmsManageAPI',
+          methodName: 'readSmmsConfig',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
       return "Error";
     }
   }
@@ -62,6 +69,20 @@ class SmmsManageAPI {
         return ['failed'];
       }
     } catch (e) {
+      if (e is DioError) {
+        FLog.error(
+            className: "SmmsManageAPI",
+            methodName: "getUserProfile",
+            text: formatErrorMessage({}, e.toString(),
+                isDioError: true, dioErrorMessage: e),
+            dataLogType: DataLogType.ERRORS.toString());
+      } else {
+        FLog.error(
+            className: "SmmsManageAPI",
+            methodName: "getUserProfile",
+            text: formatErrorMessage({}, e.toString()),
+            dataLogType: DataLogType.ERRORS.toString());
+      }
       return [e.toString()];
     }
   }
@@ -94,6 +115,20 @@ class SmmsManageAPI {
         return ['failed'];
       }
     } catch (e) {
+      if (e is DioError) {
+        FLog.error(
+            className: "SmmsManageAPI",
+            methodName: "getFileList",
+            text: formatErrorMessage({'page': page}, e.toString(),
+                isDioError: true, dioErrorMessage: e),
+            dataLogType: DataLogType.ERRORS.toString());
+      } else {
+        FLog.error(
+            className: "SmmsManageAPI",
+            methodName: "getFileList",
+            text: formatErrorMessage({'page': page}, e.toString()),
+            dataLogType: DataLogType.ERRORS.toString());
+      }
       return [e.toString()];
     }
   }
@@ -124,6 +159,22 @@ class SmmsManageAPI {
         return ["failed"];
       }
     } catch (e) {
+      if (e is DioError) {
+        FLog.error(
+            className: "SmmsManageAPI",
+            methodName: "uploadFile",
+            text: formatErrorMessage(
+                {'filename': filename, 'path': path}, e.toString(),
+                isDioError: true, dioErrorMessage: e),
+            dataLogType: DataLogType.ERRORS.toString());
+      } else {
+        FLog.error(
+            className: "SmmsManageAPI",
+            methodName: "uploadFile",
+            text: formatErrorMessage(
+                {'filename': filename, 'path': path}, e.toString()),
+            dataLogType: DataLogType.ERRORS.toString());
+      }
       return ['error'];
     }
   }
@@ -180,6 +231,7 @@ class SmmsManageAPI {
     try {
       String filename =
           fileLink.substring(fileLink.lastIndexOf("/") + 1, fileLink.length);
+      filename = filename.substring(0, filename.indexOf("?"));
       String savePath = await getTemporaryDirectory().then((value) {
         return value.path;
       });
@@ -200,6 +252,20 @@ class SmmsManageAPI {
         return ['failed'];
       }
     } catch (e) {
+      if (e is DioError) {
+        FLog.error(
+            className: "SmmsManageAPI",
+            methodName: "uploadNetworkFile",
+            text: formatErrorMessage({'fileLink': fileLink}, e.toString(),
+                isDioError: true, dioErrorMessage: e),
+            dataLogType: DataLogType.ERRORS.toString());
+      } else {
+        FLog.error(
+            className: "SmmsManageAPI",
+            methodName: "uploadNetworkFile",
+            text: formatErrorMessage({'fileLink': fileLink}, e.toString()),
+            dataLogType: DataLogType.ERRORS.toString());
+      }
       return ['failed'];
     }
   }
@@ -268,6 +334,20 @@ class SmmsManageAPI {
         return ["failed"];
       }
     } catch (e) {
+      if (e is DioError) {
+        FLog.error(
+            className: "SmmsManageAPI",
+            methodName: "deleteFile",
+            text: formatErrorMessage({'hash': hash}, e.toString(),
+                isDioError: true, dioErrorMessage: e),
+            dataLogType: DataLogType.ERRORS.toString());
+      } else {
+        FLog.error(
+            className: "SmmsManageAPI",
+            methodName: "deleteFile",
+            text: formatErrorMessage({'hash': hash}, e.toString()),
+            dataLogType: DataLogType.ERRORS.toString());
+      }
       return [e.toString()];
     }
   }

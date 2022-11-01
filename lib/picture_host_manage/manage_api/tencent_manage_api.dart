@@ -4,12 +4,14 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:f_logs/f_logs.dart';
 import 'package:crypto/crypto.dart';
 import 'package:xml2json/xml2json.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/sql_utils.dart';
+import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/picture_host_configure/tencent_configure.dart';
 import 'package:horopic/api/tencent_api.dart';
 
@@ -57,6 +59,11 @@ class TencentManageAPI {
       String contents = await file.readAsString();
       return contents;
     } catch (e) {
+      FLog.error(
+          className: "TencentImageUploadUtils",
+          methodName: "readTencentConfig",
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
       return "Error";
     }
   }
@@ -178,6 +185,20 @@ class TencentManageAPI {
         return ['failed'];
       }
     } catch (e) {
+      if (e is DioError) {
+        FLog.error(
+            className: "TencentImageUploadUtils",
+            methodName: "getBucketList",
+            text: formatErrorMessage({}, e.toString(),
+                isDioError: true, dioErrorMessage: e),
+            dataLogType: DataLogType.ERRORS.toString());
+      } else {
+        FLog.error(
+            className: "TencentImageUploadUtils",
+            methodName: "getBucketList",
+            text: formatErrorMessage({}, e.toString()),
+            dataLogType: DataLogType.ERRORS.toString());
+      }
       return [e.toString()];
     }
   }
@@ -247,6 +268,22 @@ class TencentManageAPI {
         return ['failed'];
       }
     } catch (e) {
+      if (e is DioError) {
+        FLog.error(
+            className: "TencentImageUploadUtils",
+            methodName: "createBucket",
+            text: formatErrorMessage(
+                {'newBucketConfigMap': newBucketConfigMap}, e.toString(),
+                isDioError: true, dioErrorMessage: e),
+            dataLogType: DataLogType.ERRORS.toString());
+      } else {
+        FLog.error(
+            className: "TencentImageUploadUtils",
+            methodName: "createBucket",
+            text: formatErrorMessage(
+                {'newBucketConfigMap': newBucketConfigMap}, e.toString()),
+            dataLogType: DataLogType.ERRORS.toString());
+      }
       return [e.toString()];
     }
   }
@@ -285,6 +322,20 @@ class TencentManageAPI {
         return ['failed'];
       }
     } catch (e) {
+      if (e is DioError) {
+        FLog.error(
+            className: "TencentImageUploadUtils",
+            methodName: "deleteBucket",
+            text: formatErrorMessage({'element': element}, e.toString(),
+                isDioError: true, dioErrorMessage: e),
+            dataLogType: DataLogType.ERRORS.toString());
+      } else {
+        FLog.error(
+            className: "TencentImageUploadUtils",
+            methodName: "deleteBucket",
+            text: formatErrorMessage({'element': element}, e.toString()),
+            dataLogType: DataLogType.ERRORS.toString());
+      }
       return [e.toString()];
     }
   }
@@ -328,6 +379,20 @@ class TencentManageAPI {
         return ['failed'];
       }
     } catch (e) {
+      if (e is DioError) {
+        FLog.error(
+            className: "TencentImageUploadUtils",
+            methodName: "queryACLPolicy",
+            text: formatErrorMessage({'element': element}, e.toString(),
+                isDioError: true, dioErrorMessage: e),
+            dataLogType: DataLogType.ERRORS.toString());
+      } else {
+        FLog.error(
+            className: "TencentImageUploadUtils",
+            methodName: "queryACLPolicy",
+            text: formatErrorMessage({'element': element}, e.toString()),
+            dataLogType: DataLogType.ERRORS.toString());
+      }
       return [e.toString()];
     }
   }
@@ -367,6 +432,22 @@ class TencentManageAPI {
         return ['failed'];
       }
     } catch (e) {
+      if (e is DioError) {
+        FLog.error(
+            className: "TencentImageUploadUtils",
+            methodName: "changeACLPolicy",
+            text: formatErrorMessage(
+                {'element': element, 'newACL': newACL}, e.toString(),
+                isDioError: true, dioErrorMessage: e),
+            dataLogType: DataLogType.ERRORS.toString());
+      } else {
+        FLog.error(
+            className: "TencentImageUploadUtils",
+            methodName: "changeACLPolicy",
+            text: formatErrorMessage(
+                {'element': element, 'newACL': newACL}, e.toString()),
+            dataLogType: DataLogType.ERRORS.toString());
+      }
       return [e.toString()];
     }
   }
@@ -425,6 +506,12 @@ class TencentManageAPI {
         return ['failed'];
       }
     } catch (e) {
+      FLog.error(
+          className: "TencentImageUploadUtils",
+          methodName: "setDefaultBucket",
+          text: formatErrorMessage(
+              {'element': element, 'folder': folder}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
       return ['failed'];
     }
   }
@@ -468,6 +555,22 @@ class TencentManageAPI {
         return ['failed'];
       }
     } catch (e) {
+      if (e is DioError) {
+        FLog.error(
+            className: "TencentImageUploadUtils",
+            methodName: "queryBucketFiles",
+            text: formatErrorMessage(
+                {'element': element, 'query': query}, e.toString(),
+                isDioError: true, dioErrorMessage: e),
+            dataLogType: DataLogType.ERRORS.toString());
+      } else {
+        FLog.error(
+            className: "TencentImageUploadUtils",
+            methodName: "queryBucketFiles",
+            text: formatErrorMessage(
+                {'element': element, 'query': query}, e.toString()),
+            dataLogType: DataLogType.ERRORS.toString());
+      }
       return [e.toString()];
     }
   }
@@ -521,6 +624,22 @@ class TencentManageAPI {
         return ['failed'];
       }
     } catch (e) {
+      if (e is DioError) {
+        FLog.error(
+            className: "TencentImageUploadUtils",
+            methodName: "deleteFile",
+            text: formatErrorMessage(
+                {'element': element, 'key': key}, e.toString(),
+                isDioError: true, dioErrorMessage: e),
+            dataLogType: DataLogType.ERRORS.toString());
+      } else {
+        FLog.error(
+            className: "TencentImageUploadUtils",
+            methodName: "deleteFile",
+            text: formatErrorMessage(
+                {'element': element, 'key': key}, e.toString()),
+            dataLogType: DataLogType.ERRORS.toString());
+      }
       return [e.toString()];
     }
   }
@@ -618,6 +737,25 @@ class TencentManageAPI {
         return ['failed'];
       }
     } catch (e) {
+      if (e is DioError) {
+        FLog.error(
+            className: "TencentImageUploadUtils",
+            methodName: "copyFile",
+            text: formatErrorMessage({
+              'element': element,
+              'key': key,
+              'newKey': newKey
+            }, e.toString(), isDioError: true, dioErrorMessage: e),
+            dataLogType: DataLogType.ERRORS.toString());
+      } else {
+        FLog.error(
+            className: "TencentImageUploadUtils",
+            methodName: "copyFile",
+            text: formatErrorMessage(
+                {'element': element, 'key': key, 'newKey': newKey},
+                e.toString()),
+            dataLogType: DataLogType.ERRORS.toString());
+      }
       return [e.toString()];
     }
   }
@@ -701,6 +839,22 @@ class TencentManageAPI {
         return ['failed'];
       }
     } catch (e) {
+      if (e is DioError) {
+        FLog.error(
+            className: "TencentImageUploadUtils",
+            methodName: "downloadFile",
+            text: formatErrorMessage(
+                {'element': element, 'key': key, 'path': path}, e.toString(),
+                isDioError: true, dioErrorMessage: e),
+            dataLogType: DataLogType.ERRORS.toString());
+      } else {
+        FLog.error(
+            className: "TencentImageUploadUtils",
+            methodName: "downloadFile",
+            text: formatErrorMessage(
+                {'element': element, 'key': key, 'path': path}, e.toString()),
+            dataLogType: DataLogType.ERRORS.toString());
+      }
       return [e.toString()];
     }
   }
@@ -744,6 +898,25 @@ class TencentManageAPI {
         return ['failed'];
       }
     } catch (e) {
+      if (e is DioError) {
+        FLog.error(
+            className: "TencentImageUploadUtils",
+            methodName: "createFolder",
+            text: formatErrorMessage({
+              'element': element,
+              'prefix': prefix,
+              'newfolder': newfolder
+            }, e.toString(), isDioError: true, dioErrorMessage: e),
+            dataLogType: DataLogType.ERRORS.toString());
+      } else {
+        FLog.error(
+            className: "TencentImageUploadUtils",
+            methodName: "createFolder",
+            text: formatErrorMessage(
+                {'element': element, 'prefix': prefix, 'newfolder': newfolder},
+                e.toString()),
+            dataLogType: DataLogType.ERRORS.toString());
+      }
       return [e.toString()];
     }
   }
@@ -821,6 +994,29 @@ class TencentManageAPI {
         return ['failed'];
       }
     } catch (e) {
+      if (e is DioError) {
+        FLog.error(
+            className: "TencentImageUploadUtils",
+            methodName: "uploadFile",
+            text: formatErrorMessage({
+              'element': element,
+              'filename': filename,
+              'filepath': filepath,
+              'prefix': prefix
+            }, e.toString(), isDioError: true, dioErrorMessage: e),
+            dataLogType: DataLogType.ERRORS.toString());
+      } else {
+        FLog.error(
+            className: "TencentImageUploadUtils",
+            methodName: "uploadFile",
+            text: formatErrorMessage({
+              'element': element,
+              'filename': filename,
+              'filepath': filepath,
+              'prefix': prefix
+            }, e.toString()),
+            dataLogType: DataLogType.ERRORS.toString());
+      }
       return ['error'];
     }
   }
@@ -879,6 +1075,7 @@ class TencentManageAPI {
     try {
       String filename =
           fileLink.substring(fileLink.lastIndexOf("/") + 1, fileLink.length);
+      filename = filename.substring(0, filename.indexOf("?"));
       String savePath = await getTemporaryDirectory().then((value) {
         return value.path;
       });
@@ -901,6 +1098,25 @@ class TencentManageAPI {
         return ['failed'];
       }
     } catch (e) {
+      if (e is DioError) {
+        FLog.error(
+            className: "TencentImageUploadUtils",
+            methodName: "uploadNetworkFile",
+            text: formatErrorMessage({
+              'fileLink': fileLink,
+              'element': element,
+              'prefix': prefix
+            }, e.toString(), isDioError: true, dioErrorMessage: e),
+            dataLogType: DataLogType.ERRORS.toString());
+      } else {
+        FLog.error(
+            className: "TencentImageUploadUtils",
+            methodName: "uploadNetworkFile",
+            text: formatErrorMessage(
+                {'fileLink': fileLink, 'element': element, 'prefix': prefix},
+                e.toString()),
+            dataLogType: DataLogType.ERRORS.toString());
+      }
       return ['failed'];
     }
   }
