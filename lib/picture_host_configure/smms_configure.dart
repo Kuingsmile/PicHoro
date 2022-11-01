@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:f_logs/f_logs.dart';
 
 import 'package:horopic/pages/loading.dart';
 import 'package:horopic/utils/common_functions.dart';
@@ -32,6 +33,8 @@ class SmmsConfigState extends State<SmmsConfig> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        elevation: 0,
+        centerTitle: true,
         title: const Text('SM.MS参数配置'),
       ),
       body: Form(
@@ -146,10 +149,20 @@ class SmmsConfigState extends State<SmmsConfig> {
               context: context, title: '错误', content: 'token错误');
         }
       } catch (e) {
+        FLog.error(
+            className: 'SmmsConfigState',
+            methodName: '_saveSmmsConfig_1',
+            text: formatErrorMessage({}, e.toString()),
+            dataLogType: DataLogType.ERRORS.toString());
         return showCupertinoAlertDialog(
             context: context, title: '错误', content: e.toString());
       }
     } catch (e) {
+      FLog.error(
+          className: 'SmmsConfigState',
+          methodName: '_saveSmmsConfig_2',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
       return showCupertinoAlertDialog(
           context: context, title: '错误', content: e.toString());
     }
@@ -195,6 +208,11 @@ class SmmsConfigState extends State<SmmsConfig> {
         return;
       }
     } catch (e) {
+      FLog.error(
+          className: 'SmmsConfigState',
+          methodName: 'checkSmmsConfig',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
       showCupertinoAlertDialog(
           context: context, title: "检查失败!", content: e.toString());
     }
@@ -217,6 +235,11 @@ class SmmsConfigState extends State<SmmsConfig> {
       String contents = await file.readAsString();
       return contents;
     } catch (e) {
+      FLog.error(
+          className: 'SmmsConfigState',
+          methodName: 'readHostConfig',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
       return "Error";
     }
   }
@@ -277,6 +300,11 @@ class SmmsConfigState extends State<SmmsConfig> {
         }
       }
     } catch (e) {
+      FLog.error(
+          className: 'SmmsConfigState',
+          methodName: '_setdefault',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
       showToastWithContext(context, '错误');
     }
   }

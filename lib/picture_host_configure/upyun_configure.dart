@@ -5,6 +5,7 @@ import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:f_logs/f_logs.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -45,6 +46,8 @@ class UpyunConfigState extends State<UpyunConfig> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        elevation: 0,
+        centerTitle: true,
         title: const Text('又拍云参数配置'),
       ),
       body: Form(
@@ -180,7 +183,7 @@ class UpyunConfigState extends State<UpyunConfig> {
       String path = _pathController.text;
 
       //格式化路径为以/结尾，不以/开头
-      if (path.isEmpty) {
+      if (path.isEmpty || path.replaceAll(' ', '').isEmpty) {
         path = 'None';
       } else {
         if (!path.endsWith('/')) {
@@ -316,6 +319,11 @@ class UpyunConfigState extends State<UpyunConfig> {
             context: context, title: '错误', content: '验证失败');
       }
     } catch (e) {
+      FLog.error(
+          className: 'UpyunConfigPageState',
+          methodName: 'saveConfig',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
       return showCupertinoAlertDialog(
           context: context, title: '错误', content: e.toString());
     }
@@ -420,6 +428,11 @@ class UpyunConfigState extends State<UpyunConfig> {
         return;
       }
     } catch (e) {
+      FLog.error(
+          className: 'UpyunConfigPageState',
+          methodName: 'checkUpyunConfig',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
       showCupertinoAlertDialog(
           context: context, title: "检查失败!", content: e.toString());
     }
@@ -442,6 +455,11 @@ class UpyunConfigState extends State<UpyunConfig> {
       String contents = await file.readAsString();
       return contents;
     } catch (e) {
+      FLog.error(
+          className: 'UpyunConfigPageState',
+          methodName: 'readUpyunConfig',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
       return "Error";
     }
   }
@@ -505,6 +523,11 @@ class UpyunConfigState extends State<UpyunConfig> {
         }
       }
     } catch (e) {
+      FLog.error(
+          className: 'UpyunConfigPageState',
+          methodName: '_setdefault',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
       showToastWithContext(context, '错误');
     }
   }

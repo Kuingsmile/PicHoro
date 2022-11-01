@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:f_logs/f_logs.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'package:horopic/api/tencent_api.dart';
@@ -50,6 +51,8 @@ class TencentConfigState extends State<TencentConfig> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        elevation: 0,
+        centerTitle: true,
         title: const Text('腾讯云参数配置'),
       ),
       body: Form(
@@ -205,7 +208,7 @@ class TencentConfigState extends State<TencentConfig> {
       String customUrl = _customUrlController.text;
       String options = _optionsController.text;
       //格式化路径为以/结尾，不以/开头
-      if (path.isEmpty) {
+      if (path.isEmpty || path.replaceAll(' ', '').isEmpty) {
         path = 'None';
       } else {
         if (!path.endsWith('/')) {
@@ -356,6 +359,11 @@ class TencentConfigState extends State<TencentConfig> {
             context: context, title: '错误', content: '验证失败');
       }
     } catch (e) {
+      FLog.error(
+          className: 'TencentConfigPage',
+          methodName: 'saveConfig',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
       return showCupertinoAlertDialog(
           context: context, title: '错误', content: e.toString());
     }
@@ -462,6 +470,11 @@ class TencentConfigState extends State<TencentConfig> {
         return;
       }
     } catch (e) {
+      FLog.error(
+          className: 'TencentConfigPage',
+          methodName: 'checkTencentConfig',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
       showCupertinoAlertDialog(
           context: context, title: "检查失败!", content: e.toString());
     }
@@ -484,6 +497,11 @@ class TencentConfigState extends State<TencentConfig> {
       String contents = await file.readAsString();
       return contents;
     } catch (e) {
+      FLog.error(
+          className: 'TencentConfigPage',
+          methodName: 'readTencentConfig',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
       return "Error";
     }
   }
@@ -547,6 +565,11 @@ class TencentConfigState extends State<TencentConfig> {
         }
       }
     } catch (e) {
+      FLog.error(
+          className: 'TencentConfigPage',
+          methodName: '_setdefault',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
       showToastWithContext(context, '错误');
     }
   }

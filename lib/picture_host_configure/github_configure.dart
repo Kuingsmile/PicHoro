@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:f_logs/f_logs.dart';
 
 import 'package:horopic/pages/loading.dart';
 import 'package:horopic/utils/common_functions.dart';
@@ -43,6 +44,8 @@ class GithubConfigState extends State<GithubConfig> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        elevation: 0,
+        centerTitle: true,
         title: const Text('Github参数配置'),
       ),
       body: Form(
@@ -161,7 +164,8 @@ class GithubConfigState extends State<GithubConfig> {
     final String githubusername = _githubusernameController.text;
     final String repo = _repoController.text;
     String storePath = '';
-    if (_storePathController.text.isEmpty) {
+    if (_storePathController.text.isEmpty ||
+        _storePathController.text.replaceAll(' ', '').isEmpty) {
       storePath = 'None';
     } else {
       storePath = _storePathController.text;
@@ -258,10 +262,20 @@ class GithubConfigState extends State<GithubConfig> {
               context: context, title: '错误', content: 'token错误');
         }
       } catch (e) {
+        FLog.error(
+            className: 'GithubConfigPage',
+            methodName: '_saveGithubConfig_1',
+            text: formatErrorMessage({}, e.toString()),
+            dataLogType: DataLogType.ERRORS.toString());
         return showCupertinoAlertDialog(
             context: context, title: '错误', content: e.toString());
       }
     } catch (e) {
+      FLog.error(
+          className: 'GithubConfigPage',
+          methodName: '_saveGithubConfig_2',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
       return showCupertinoAlertDialog(
           context: context, title: '错误', content: e.toString());
     }
@@ -309,6 +323,11 @@ class GithubConfigState extends State<GithubConfig> {
         return;
       }
     } catch (e) {
+      FLog.error(
+          className: 'GithubConfigPage',
+          methodName: 'checkGithubConfig',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
       showCupertinoAlertDialog(
           context: context, title: "检查失败!", content: e.toString());
     }
@@ -331,6 +350,11 @@ class GithubConfigState extends State<GithubConfig> {
       String contents = await file.readAsString();
       return contents;
     } catch (e) {
+      FLog.error(
+          className: 'GithubConfigPage',
+          methodName: 'readGithubConfig',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
       return "Error";
     }
   }
@@ -394,6 +418,11 @@ class GithubConfigState extends State<GithubConfig> {
         }
       }
     } catch (e) {
+      FLog.error(
+          className: 'GithubConfigPage',
+          methodName: '_setdefault',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
       showToastWithContext(context, '错误');
     }
   }

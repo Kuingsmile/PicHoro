@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:f_logs/f_logs.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'package:horopic/utils/common_functions.dart';
@@ -44,7 +45,9 @@ class HostConfigState extends State<HostConfig> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('图床参数配置'),
+        elevation: 0,
+        centerTitle: true,
+        title: const Text('兰空图床参数配置'),
       ),
       body: Form(
         key: _formKey,
@@ -222,6 +225,11 @@ class HostConfigState extends State<HostConfig> {
         }
       }
     } catch (e) {
+      FLog.error(
+          className: 'HostConfigPage',
+          methodName: '_getStrategyId',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
       showCupertinoAlertDialog(
           context: context, title: '错误', content: e.toString());
     }
@@ -276,6 +284,11 @@ class HostConfigState extends State<HostConfig> {
             sqlResult = await MySqlUtils.updateLankong(content: sqlconfig);
           }
         } catch (e) {
+          FLog.error(
+              className: 'LankongConfigPage',
+              methodName: '_saveHostConfig',
+              text: formatErrorMessage({}, e.toString()),
+              dataLogType: DataLogType.ERRORS.toString());
           return showCupertinoAlertDialog(
               context: context, title: '错误', content: e.toString());
         }
@@ -318,6 +331,11 @@ class HostConfigState extends State<HostConfig> {
         }
       }
     } catch (e) {
+      FLog.error(
+          className: 'HostConfigPage',
+          methodName: '_saveHostConfig',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
       return showCupertinoAlertDialog(
           context: context, title: '错误', content: e.toString());
     }
@@ -380,6 +398,11 @@ class HostConfigState extends State<HostConfig> {
         }
       }
     } catch (e) {
+      FLog.error(
+          className: 'ConfigPage',
+          methodName: 'checkHostConfig',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
       showCupertinoAlertDialog(
           context: context, title: "检查失败!", content: e.toString());
     }
@@ -402,6 +425,11 @@ class HostConfigState extends State<HostConfig> {
       String contents = await file.readAsString();
       return contents;
     } catch (e) {
+      FLog.error(
+          className: 'HostConfigPage',
+          methodName: 'readHostConfig',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
       return "Error";
     }
   }
@@ -462,6 +490,11 @@ class HostConfigState extends State<HostConfig> {
         }
       }
     } catch (e) {
+      FLog.error(
+          className: 'LskyproPage',
+          methodName: '_setdefault',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
       showToastWithContext(context, '错误');
     }
   }

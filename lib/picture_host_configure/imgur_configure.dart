@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_proxy_adapter/dio_proxy_adapter.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:f_logs/f_logs.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'package:horopic/pages/loading.dart';
@@ -35,6 +36,8 @@ class ImgurConfigState extends State<ImgurConfig> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        elevation: 0,
+        centerTitle: true,
         title: const Text('Imgur参数配置'),
       ),
       body: Form(
@@ -183,10 +186,20 @@ class ImgurConfigState extends State<ImgurConfig> {
               context: context, title: '错误', content: 'clientId错误');
         }
       } catch (e) {
+        FLog.error(
+            className: 'ImgurConfigPage',
+            methodName: '_saveImgurConfig_1',
+            text: formatErrorMessage({}, e.toString()),
+            dataLogType: DataLogType.ERRORS.toString());
         return showCupertinoAlertDialog(
             context: context, title: '错误', content: e.toString());
       }
     } catch (e) {
+      FLog.error(
+          className: 'ImgurConfigPage',
+          methodName: '_saveImgurConfig_2',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
       return showCupertinoAlertDialog(
           context: context, title: '错误', content: e.toString());
     }
@@ -244,6 +257,11 @@ class ImgurConfigState extends State<ImgurConfig> {
         return;
       }
     } catch (e) {
+      FLog.error(
+          className: 'ImgurConfigPage',
+          methodName: 'checkImgurConfig',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
       showCupertinoAlertDialog(
           context: context, title: "检查失败!", content: e.toString());
     }
@@ -266,6 +284,11 @@ class ImgurConfigState extends State<ImgurConfig> {
       String contents = await file.readAsString();
       return contents;
     } catch (e) {
+      FLog.error(
+          className: 'ImgurConfigPage',
+          methodName: 'readHostConfig',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
       return "Error";
     }
   }
@@ -327,6 +350,11 @@ class ImgurConfigState extends State<ImgurConfig> {
         }
       }
     } catch (e) {
+      FLog.error(
+          className: 'ImgurConfigPage',
+          methodName: '_setdefault',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
       showToastWithContext(context, '错误');
     }
   }

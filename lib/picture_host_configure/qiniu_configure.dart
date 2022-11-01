@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:f_logs/f_logs.dart';
 import 'package:qiniu_flutter_sdk/qiniu_flutter_sdk.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -48,6 +49,8 @@ class QiniuConfigState extends State<QiniuConfig> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        elevation: 0,
+        centerTitle: true,
         title: const Text('七牛云参数配置'),
       ),
       body: Form(
@@ -208,7 +211,8 @@ class QiniuConfigState extends State<QiniuConfig> {
       }
 
       String path = '';
-      if (_pathController.text.isNotEmpty) {
+      if (_pathController.text.isNotEmpty &&
+          _pathController.text.replaceAll(' ', '').isNotEmpty) {
         path = _pathController.text;
         if (path.startsWith('/')) {
           path = path.substring(1);
@@ -292,6 +296,11 @@ class QiniuConfigState extends State<QiniuConfig> {
             context: context, title: '错误', content: '验证失败');
       }
     } catch (e) {
+      FLog.error(
+          className: 'QiniuConfigPage',
+          methodName: '_saveQiniuConfig',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
       return showCupertinoAlertDialog(
           context: context, title: '错误', content: e.toString());
     }
@@ -326,6 +335,7 @@ class QiniuConfigState extends State<QiniuConfig> {
       }
       String key = 'PicHoroValidate.jpeg';
       String qiniupath = configMap['path'];
+
       if (qiniupath != 'None') {
         if (qiniupath.startsWith('/')) {
           qiniupath = qiniupath.substring(1);
@@ -360,6 +370,11 @@ class QiniuConfigState extends State<QiniuConfig> {
         return;
       }
     } catch (e) {
+      FLog.error(
+          className: 'QiniuConfigPage',
+          methodName: 'checkQiniuConfig',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
       showCupertinoAlertDialog(
           context: context, title: "检查失败!", content: e.toString());
     }
@@ -382,6 +397,11 @@ class QiniuConfigState extends State<QiniuConfig> {
       String contents = await file.readAsString();
       return contents;
     } catch (e) {
+      FLog.error(
+          className: 'QiniuConfigPage',
+          methodName: 'readQiniuConfig',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
       return "Error";
     }
   }
@@ -445,6 +465,11 @@ class QiniuConfigState extends State<QiniuConfig> {
         }
       }
     } catch (e) {
+      FLog.error(
+          className: 'QiniuConfigPage',
+          methodName: '_setdefault',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
       showToastWithContext(context, '错误');
     }
   }

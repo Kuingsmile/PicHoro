@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:f_logs/f_logs.dart';
 
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/global.dart';
@@ -33,6 +34,8 @@ class DefaultPShostSelectState extends State<DefaultPShostSelect> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        elevation: 0,
+        centerTitle: true,
         title: const Text('默认图床选择'),
       ),
       body: ListView(
@@ -226,6 +229,13 @@ setdefaultPShostRemoteAndLocal(String psHost) async {
       }
     }
   } catch (e) {
+    FLog.error(
+        className: 'setdefaultPShostRemoteAndLocal',
+        methodName: 'setdefaultPShostRemoteAndLocal',
+        text: formatErrorMessage({
+          'psHost': psHost,
+        }, e.toString()),
+        dataLogType: DataLogType.ERRORS.toString());
     showToast('错误');
   }
 }
