@@ -32,8 +32,10 @@ class UploadedImage {
 }
 
 class Global {
-  static File? imageFile;
-  static List<File> imagesList = [];
+  static String? imageFile;
+  static File? imageOriginalFile;
+  static List<String> imagesList = [];
+  static List<File> imagesFileList = [];
   static String defaultPShost = 'lsky.pro'; //默认图床选择
   static String defaultUser = ' '; //默认用户名
   static String defaultPassword = ' '; //默认密码
