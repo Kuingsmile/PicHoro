@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:convert';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -250,30 +251,25 @@ String renameFileWithRandomString(int length) {
 }
 
 //rename picture with timestamp
-Future<File> renamePictureWithTimestamp(File file) {
+renamePictureWithTimestamp(File file) {
   var path = file.path;
-  var lastSeparator = path.lastIndexOf(Platform.pathSeparator);
   var fileExtension = my_path.extension(path);
   var newFileName = renameFileWithTimestamp() + fileExtension;
-  var newPath = path.substring(0, lastSeparator + 1) + newFileName;
-  return file.rename(newPath);
+  return newFileName;
 }
 
 //rename picture with random string
-Future<File> renamePictureWithRandomString(File file) {
+renamePictureWithRandomString(File file) {
   var path = file.path;
-  var lastSeparator = path.lastIndexOf(Platform.pathSeparator);
   var fileExtension = my_path.extension(path);
   var newFileName = renameFileWithRandomString(30) + fileExtension;
-  var newPath = path.substring(0, lastSeparator + 1) + newFileName;
-  return file.rename(newPath);
+  return newFileName;
 }
 
 //rename picture with custom format
-Future<File> renamePictureWithCustomFormat(File file) async {
+renamePictureWithCustomFormat(File file) async {
   String customFormat = await Global.getCustomeRenameFormat();
   var path = file.path;
-  var lastSeparator = path.lastIndexOf(Platform.pathSeparator);
   var fileExtension = my_path.extension(path);
   String yearFourDigit = DateTime.now().year.toString();
   String yearTwoDigit = yearFourDigit.substring(2, 4);
@@ -300,8 +296,7 @@ Future<File> renamePictureWithCustomFormat(File file) async {
       .replaceAll('{str-20}', twentyRandomString)
       .replaceAll('{filename}', oldFileName);
   newFileName = newFileName + fileExtension;
-  var newPath = path.substring(0, lastSeparator + 1) + newFileName;
-  return file.rename(newPath);
+  return newFileName;
 }
 
 //generate url formated url by raw url
@@ -377,4 +372,56 @@ String selectIcon(String ext) {
     }
     return iconPath;
   }
+}
+
+//获得content-type
+String? getContentType(String ext) {
+  if (!ext.startsWith('.')) {
+    ext = '.$ext';
+  }
+  Map imageContentType = {
+    '.fax': 'image/fax',
+    '.gif': 'image/gif',
+    '.ico': 'image/x-icon',
+    '.jpg': 'image/jpeg',
+    '.jpeg': 'image/jpeg',
+    '.jpe': 'image/jpeg',
+    '.jfif': 'image/jpeg',
+    '.tif': 'image/tiff',
+    '.net': 'image/pnetvue',
+    '.png': 'image/png',
+    '.rp': 'image/vnd.rn-realpix',
+    '.tiff': 'image/tiff',
+    '.wbmp': 'image/vnd.wap.wbmp',
+  };
+  return imageContentType[ext];
+}
+
+//格式化错误信息
+formatErrorMessage(
+  Map parameters,
+  String error, {
+  bool isDioError = false,
+  DioError? dioErrorMessage = null,
+}) {
+  String formatedParameters = '';
+  String formatedError = '';
+  String formatedDioError = '';
+
+  if (parameters.isNotEmpty) {
+    parameters.forEach((key, value) {
+      formatedParameters += '$key: $value\n';
+    });
+  }
+  if (error.isNotEmpty) {
+    formatedError = error;
+  }
+  if (dioErrorMessage != null) {
+    formatedDioError = dioErrorMessage.response != null
+        ? '${dioErrorMessage.message}\n${dioErrorMessage.response!.data}'
+        : dioErrorMessage.message;
+  }
+  String formateTemplate =
+      '参数:\n\n$formatedParameters\n错误信息:\n$formatedError\n\n是否DIO错误:\n$isDioError\n\nDIO报错信息:\n$formatedDioError';
+  return formateTemplate;
 }
