@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:horopic/utils/global.dart';
 
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:r_upgrade/r_upgrade.dart';
@@ -81,6 +82,7 @@ class ConfigurePageState extends State<ConfigurePage>
     super.build(context);
     return Scaffold(
       appBar: AppBar(
+        elevation: 0,
         centerTitle: true,
         title: const Text(
           '设置页面',
@@ -118,15 +120,39 @@ class ConfigurePageState extends State<ConfigurePage>
             ),
           ),
           ListTile(
-            title: const Text(
-              '用户登录',
-            ),
-            trailing: const Icon(Icons.arrow_forward_ios),
-            onTap: () {
-              Application.router.navigateTo(this.context, Routes.appPassword,
-                  transition: TransitionType.cupertino);
-            },
-          ),
+              title: const Text(
+                '用户登录',
+              ),
+              trailing: const Icon(Icons.arrow_forward_ios),
+              onTap: () async {
+                String currentUser = await Global.getUser();
+                String password = await Global.getPassword();
+                if (currentUser.isEmpty || currentUser == ' ') {
+                  if (mounted) {
+                    Application.router.navigateTo(context, Routes.appPassword,
+                        transition: TransitionType.inFromRight);
+                  }
+                  return;
+                }
+                var usernamecheck =
+                    await MySqlUtils.queryUser(username: currentUser);
+                if (usernamecheck == 'Empty') {
+                  if (mounted) {
+                    Application.router.navigateTo(context, Routes.appPassword,
+                        transition: TransitionType.inFromRight);
+                  }
+                } else if (usernamecheck == 'Error') {
+                  showToast('网络错误');
+                } else {
+                  if (usernamecheck['password'] == password) {
+                    if (mounted) {
+                      Application.router.navigateTo(
+                          context, Routes.userInformationPage,
+                          transition: TransitionType.inFromRight);
+                    }
+                  }
+                }
+              }),
           ListTile(
             title: const Text('图床参数设置'),
             onTap: () {
@@ -148,6 +174,15 @@ class ConfigurePageState extends State<ConfigurePage>
             onTap: () {
               Application.router.navigateTo(
                   this.context, Routes.authorInformation,
+                  transition: TransitionType.cupertino);
+            },
+            trailing: const Icon(Icons.arrow_forward_ios),
+          ),
+          ListTile(
+            title: const Text('软件日志'),
+            onTap: () {
+              Application.router.navigateTo(
+                  this.context, Routes.configurePageLogger,
                   transition: TransitionType.cupertino);
             },
             trailing: const Icon(Icons.arrow_forward_ios),
