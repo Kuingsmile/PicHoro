@@ -1,20 +1,17 @@
 import 'dart:io' as io;
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
-
-import 'package:external_path/external_path.dart';
 
 import 'package:image_picker/image_picker.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 import 'package:flutter/services.dart' as flutter_services;
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
-import 'package:fluro/fluro.dart';
+import 'package:f_logs/f_logs.dart';
 import 'package:http/http.dart' as my_http;
 import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as my_path;
 
 import 'package:horopic/album/album_sql.dart';
 import 'package:horopic/utils/event_bus_utils.dart';
@@ -24,8 +21,6 @@ import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/uploader.dart';
 
-import 'package:horopic/router/application.dart';
-import 'package:horopic/router/routers.dart';
 import 'package:horopic/pages/upload_pages/upload_task.dart';
 import 'package:horopic/pages/upload_pages/upload_utils.dart';
 import 'package:horopic/pages/upload_pages/upload_status.dart';
@@ -50,7 +45,9 @@ class HomePageState extends State<HomePage>
     with AutomaticKeepAliveClientMixin<HomePage> {
   final ImagePicker _picker = ImagePicker();
   List clipboardList = [];
-  List<String> uploadList = [];
+  List uploadList = [];
+  List<String> uploadPathList = [];
+  List<String> uploadFileNameList = [];
   var uploadManager = UploadManager();
 
   @override
@@ -65,8 +62,12 @@ class HomePageState extends State<HomePage>
   clearAllList() {
     setState(() {
       uploadList.clear();
+      uploadPathList.clear();
+      uploadFileNameList.clear();
       Global.imagesList.clear();
+      Global.imagesFileList.clear();
       Global.imageFile = null;
+      Global.imageOriginalFile = null;
     });
   }
 
@@ -80,29 +81,30 @@ class HomePageState extends State<HomePage>
     List<Widget> list = [];
     for (var i = 0; i < uploadList.length; i++) {
       list.add(ListItem(
-          onUploadPlayPausedPressed: (path) async {
-            var task = uploadManager.getUpload(uploadList[i]);
+          onUploadPlayPausedPressed: (path, fileName) async {
+            var task = uploadManager.getUpload(uploadList[i][1]);
             if (task != null && !task.status.value.isCompleted) {
               switch (task.status.value) {
                 case UploadStatus.uploading:
-                  await uploadManager.pauseUpload(path);
+                  await uploadManager.pauseUpload(path, fileName);
                   break;
                 case UploadStatus.paused:
-                  await uploadManager.resumeUpload(path);
+                  await uploadManager.resumeUpload(path, fileName);
                   break;
               }
               setState(() {});
             } else {
-              await uploadManager.addUpload(path);
+              await uploadManager.addUpload(path, fileName);
               setState(() {});
             }
           },
-          onDelete: (path) async {
-            await uploadManager.removeUpload(path);
+          onDelete: (path, fileName) async {
+            await uploadManager.removeUpload(path, fileName);
             setState(() {});
           },
-          path: uploadList[i],
-          uploadTask: uploadManager.getUpload(uploadList[i])));
+          path: uploadList[i][0],
+          fileName: uploadList[i][1],
+          uploadTask: uploadManager.getUpload(uploadList[i][1])));
     }
     List<Widget> list2 = [
       const Divider(
@@ -114,7 +116,8 @@ class HomePageState extends State<HomePage>
         children: [
           TextButton(
               onPressed: () async {
-                await uploadManager.addBatchUploads(uploadList);
+                await uploadManager.addBatchUploads(
+                    uploadPathList, uploadFileNameList);
                 setState(() {});
               },
               child: const Text(
@@ -126,7 +129,8 @@ class HomePageState extends State<HomePage>
               )),
           TextButton(
               onPressed: () async {
-                await uploadManager.cancelBatchUploads(uploadList);
+                await uploadManager.cancelBatchUploads(
+                    uploadPathList, uploadFileNameList);
               },
               child: const Text(
                 "全部取消",
@@ -150,7 +154,8 @@ class HomePageState extends State<HomePage>
         ],
       ),
       ValueListenableBuilder(
-          valueListenable: uploadManager.getBatchUploadProgress(uploadList),
+          valueListenable: uploadManager.getBatchUploadProgress(
+              uploadPathList, uploadFileNameList),
           builder: (context, value, child) {
             return Container(
               color: const Color.fromARGB(255, 219, 239, 255),
@@ -176,18 +181,20 @@ class HomePageState extends State<HomePage>
     }
     final io.File fileImage = io.File(pickedImage.path);
     Global.imagesList.clear();
+    Global.imagesFileList.clear();
     if (imageConstraint(context: context, image: fileImage)) {
       //图片重命名
       if (Global.iscustomRename == true) {
         Global.imageFile = await renamePictureWithCustomFormat(fileImage);
       } else if (Global.isTimeStamp == true) {
-        Global.imageFile = await renamePictureWithTimestamp(fileImage);
+        Global.imageFile = renamePictureWithTimestamp(fileImage);
       } else if (Global.isRandomName == true) {
-        Global.imageFile = await renamePictureWithRandomString(fileImage);
+        Global.imageFile = renamePictureWithRandomString(fileImage);
       } else {
-        Global.imageFile = fileImage;
+        Global.imageFile = my_path.basename(fileImage.path);
       }
       Global.imagesList.add(Global.imageFile!);
+      Global.imagesFileList.add(fileImage);
     }
   }
 
@@ -195,7 +202,7 @@ class HomePageState extends State<HomePage>
     var url = await flutter_services.Clipboard.getData('text/plain');
     if (url == null) {
       showToast('剪贴板为空');
-      return;
+      return true;
     }
     try {
       String urlStr = url.text!;
@@ -204,6 +211,7 @@ class HomePageState extends State<HomePage>
       int successCount = 0;
       int failCount = 0;
       Global.imagesList.clear();
+      Global.imagesFileList.clear();
 
       for (var i = 0; i < urlList.length; i++) {
         if (urlList[i].isEmpty) {
@@ -217,7 +225,7 @@ class HomePageState extends State<HomePage>
           String randomString = randomStringGenerator(5);
           io.File file = io.File('$tempPath/Web$timeStamp$randomString.jpg');
           await file.writeAsBytes(response.bodyBytes);
-          Global.imageFile = file;
+          Global.imageFile = file.path;
           if (imageConstraint(context: context, image: file)) {
             //图片重命名
             if (Global.iscustomRename == true) {
@@ -227,23 +235,38 @@ class HomePageState extends State<HomePage>
             } else if (Global.isRandomName == true) {
               Global.imageFile = await renamePictureWithRandomString(file);
             } else {
-              Global.imageFile = file;
+              Global.imageFile = my_path.basename(file.path);
             }
             Global.imagesList.add(Global.imageFile!);
+            Global.imagesFileList.add(file);
           }
           successCount++;
         } catch (e) {
+          FLog.error(
+              className: 'ImagePage',
+              methodName: '_imageFromNetwork',
+              text: formatErrorMessage({
+                'url': urlList[i],
+              }, e.toString()),
+              dataLogType: DataLogType.ERRORS.toString());
           failCount++;
           continue;
         }
       }
       if (successCount > 0) {
-        showToast('获取成功$successCount张,失败$failCount张');
+        return showToast('获取成功$successCount张,失败$failCount张');
       } else {
-        showToast('剪贴板内无链接');
+        return showToast('剪贴板内无链接');
       }
     } catch (e) {
-      showToast('获取图片失败');
+      FLog.error(
+          className: 'ImagePage',
+          methodName: '_imageFromNetwork',
+          text: formatErrorMessage({
+            'url': url,
+          }, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
+      return showToast('获取图片失败');
     }
   }
 
@@ -272,8 +295,9 @@ class HomePageState extends State<HomePage>
     } else if (Global.isRandomName == true) {
       Global.imageFile = await renamePictureWithRandomString(fileImage);
     } else {
-      Global.imageFile = fileImage;
+      Global.imageFile = my_path.basename(fileImage.path);
     }
+    Global.imageOriginalFile = fileImage;
     await showDialog(
         context: context,
         barrierDismissible: false,
@@ -308,9 +332,11 @@ class HomePageState extends State<HomePage>
   }
 
   _uploadAndBackToCamera() async {
-    String path = Global.imageFile!.path;
-    String name = path.substring(path.lastIndexOf("/") + 1, path.length);
+    String path = Global.imageOriginalFile!.path;
+    String name = Global.imageFile!.split('/').last;
+    // String name = path.substring(path.lastIndexOf("/") + 1, path.length);
     Global.imageFile = null;
+    Global.imageOriginalFile = null;
 
     var uploadResult = await uploaderentry(path: path, name: name);
     if (uploadResult[0] == "Error") {
@@ -477,9 +503,11 @@ class HomePageState extends State<HomePage>
         } else if (Global.isRandomName == true) {
           Global.imageFile = await renamePictureWithRandomString(fileImage);
         } else {
-          Global.imageFile = fileImage;
+          Global.imageFile = my_path.basename(fileImage.path);
         }
+
         Global.imagesList.add(Global.imageFile!);
+        Global.imagesFileList.add(fileImage);
       }
     }
   }
@@ -494,9 +522,9 @@ class HomePageState extends State<HomePage>
     failList.clear();
     successList.clear();
 
-    for (io.File imageToTread in Global.imagesList) {
-      String path = imageToTread.path;
-      var name = path.substring(path.lastIndexOf("/") + 1, path.length);
+    for (var i = 0; i < Global.imagesFileList.length; i++) {
+      String path = Global.imagesFileList[i].path;
+      String name = Global.imagesList[i].split('/').last;
 
       var uploadResult = await uploaderentry(path: path, name: name);
       if (uploadResult[0] == "Error") {
@@ -633,8 +661,12 @@ class HomePageState extends State<HomePage>
 
     setState(() {
       uploadList.clear();
+      uploadPathList.clear();
+      uploadFileNameList.clear();
       Global.imagesList.clear();
+      Global.imagesFileList.clear();
       Global.imageFile = null;
+      Global.imageOriginalFile = null;
     });
 
     if (successCount == 0) {
@@ -716,9 +748,13 @@ class HomePageState extends State<HomePage>
               ),
               onPressed: () {
                 uploadList.clear();
+                uploadPathList.clear();
+                uploadFileNameList.clear();
                 setState(() {
                   Global.imagesList.clear();
+                  Global.imagesFileList.clear();
                   Global.imageFile = null;
+                  Global.imageOriginalFile = null;
                 });
               },
             ),
@@ -767,7 +803,10 @@ class HomePageState extends State<HomePage>
                 onPressed: () async {
                   await _imageFromCamera();
                   for (int i = 0; i < Global.imagesList.length; i++) {
-                    uploadList.add(Global.imagesList[i].path);
+                    uploadList.add(
+                        [Global.imagesFileList[i].path, Global.imagesList[i]]);
+                    uploadPathList.add(Global.imagesFileList[i].path);
+                    uploadFileNameList.add(Global.imagesList[i]);
                   }
                   if (uploadList.isNotEmpty) {
                     showDialog(
@@ -799,12 +838,19 @@ class HomePageState extends State<HomePage>
                   await _multiImagePickerFromGallery();
                   if (Global.imagesList.isNotEmpty) {
                     for (int i = 0; i < Global.imagesList.length; i++) {
-                      uploadList.add(Global.imagesList[i].path);
+                      uploadList.add([
+                        Global.imagesFileList[i].path,
+                        Global.imagesList[i]
+                      ]);
+                      uploadPathList.add(Global.imagesFileList[i].path);
+                      uploadFileNameList.add(Global.imagesList[i]);
                     }
                   }
                   setState(() {
                     Global.imagesList.clear();
+                    Global.imagesFileList.clear();
                     Global.imageFile = null;
+                    Global.imageOriginalFile = null;
                   });
                 },
                 child: const Icon(
@@ -835,15 +881,32 @@ class HomePageState extends State<HomePage>
                 heroTag: 'network',
                 backgroundColor: const Color.fromARGB(255, 248, 231, 136),
                 onPressed: () async {
-                  await _imageFromNetwork();
+                  await showDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (context) {
+                        return NetLoadingDialog(
+                          outsideDismiss: false,
+                          loading: true,
+                          loadingText: "获取中...",
+                          requestCallBack: _imageFromNetwork(),
+                        );
+                      });
                   if (Global.imagesList.isNotEmpty) {
                     for (int i = 0; i < Global.imagesList.length; i++) {
-                      uploadList.add(Global.imagesList[i].path);
+                      uploadList.add([
+                        Global.imagesFileList[i].path,
+                        Global.imagesList[i]
+                      ]);
+                      uploadPathList.add(Global.imagesFileList[i].path);
+                      uploadFileNameList.add(Global.imagesList[i]);
                     }
                   }
                   setState(() {
                     Global.imagesList.clear();
+                    Global.imagesFileList.clear();
                     Global.imageFile = null;
+                    Global.imageOriginalFile = null;
                   });
                 },
                 child: const Icon(
@@ -1006,15 +1069,17 @@ class HomePageState extends State<HomePage>
 }
 
 class ListItem extends StatefulWidget {
-  Function(String) onUploadPlayPausedPressed;
-  Function(String) onDelete;
+  Function(String, String) onUploadPlayPausedPressed;
+  Function(String, String) onDelete;
   UploadTask? uploadTask;
   String path;
+  String fileName;
   ListItem(
       {Key? key,
       required this.onUploadPlayPausedPressed,
       required this.onDelete,
       required this.path,
+      required this.fileName,
       this.uploadTask})
       : super(key: key);
 
@@ -1054,7 +1119,7 @@ class ListItemState extends State<ListItem> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '文件名:${widget.path.split('/').last}',
+                      '文件名:${widget.fileName}',
                     ),
                     if (widget.uploadTask != null)
                       ValueListenableBuilder(
@@ -1077,8 +1142,8 @@ class ListItemState extends State<ListItem> {
                             case UploadStatus.uploading:
                               return IconButton(
                                   onPressed: () async {
-                                    await widget
-                                        .onUploadPlayPausedPressed(widget.path);
+                                    await widget.onUploadPlayPausedPressed(
+                                        widget.path, widget.fileName);
                                   },
                                   icon: const Icon(
                                     Icons.pause,
@@ -1087,8 +1152,8 @@ class ListItemState extends State<ListItem> {
                             case UploadStatus.paused:
                               return IconButton(
                                 onPressed: () async {
-                                  await widget
-                                      .onUploadPlayPausedPressed(widget.path);
+                                  await widget.onUploadPlayPausedPressed(
+                                      widget.path, widget.fileName);
                                 },
                                 icon: const Icon(Icons.play_arrow),
                                 color: Colors.blue,
@@ -1096,7 +1161,8 @@ class ListItemState extends State<ListItem> {
                             case UploadStatus.completed:
                               return IconButton(
                                   onPressed: () {
-                                    widget.onDelete(widget.path);
+                                    widget.onDelete(
+                                        widget.path, widget.fileName);
                                   },
                                   icon: const Icon(
                                     Icons.delete,
@@ -1106,8 +1172,8 @@ class ListItemState extends State<ListItem> {
                             case UploadStatus.canceled:
                               return IconButton(
                                   onPressed: () async {
-                                    await widget
-                                        .onUploadPlayPausedPressed(widget.path);
+                                    await widget.onUploadPlayPausedPressed(
+                                        widget.path, widget.fileName);
                                   },
                                   icon: const Icon(
                                     Icons.cloud_upload_outlined,
@@ -1119,7 +1185,8 @@ class ListItemState extends State<ListItem> {
                         })
                     : IconButton(
                         onPressed: () async {
-                          await widget.onUploadPlayPausedPressed(widget.path);
+                          await widget.onUploadPlayPausedPressed(
+                              widget.path, widget.fileName);
                         },
                         icon: const Icon(
                           Icons.cloud_upload_outlined,
