@@ -7,6 +7,7 @@ import 'package:flutter/services.dart' as flutter_services;
 
 import 'package:external_path/external_path.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:f_logs/f_logs.dart';
 import 'package:fluro/fluro.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:share_plus/share_plus.dart';
@@ -315,13 +316,15 @@ class TencentFileExplorerState
                     if (sorted == true) {
                       if (dirAllInfoList.isEmpty) {
                         allInfoList.sort((a, b) {
-                          return b['Size'].compareTo(a['Size']);
+                          return double.parse(a['Size'])
+                              .compareTo(double.parse(b['Size']));
                         });
                       } else {
                         List temp = allInfoList.sublist(
                             dirAllInfoList.length, allInfoList.length);
                         temp.sort((a, b) {
-                          return b['Size'].compareTo(a['Size']);
+                          return double.parse(a['Size'])
+                              .compareTo(double.parse(b['Size']));
                         });
                         allInfoList.clear();
                         allInfoList.addAll(dirAllInfoList);
@@ -333,13 +336,15 @@ class TencentFileExplorerState
                     } else {
                       if (dirAllInfoList.isEmpty) {
                         allInfoList.sort((a, b) {
-                          return a['Size'].compareTo(b['Size']);
+                          return double.parse(b['Size'])
+                              .compareTo(double.parse(a['Size']));
                         });
                       } else {
                         List temp = allInfoList.sublist(
                             dirAllInfoList.length, allInfoList.length);
                         temp.sort((a, b) {
-                          return a['Size'].compareTo(b['Size']);
+                          return double.parse(b['Size'])
+                              .compareTo(double.parse(a['Size']));
                         });
                         allInfoList.clear();
                         allInfoList.addAll(dirAllInfoList);
@@ -562,6 +567,13 @@ class TencentFileExplorerState
                                     });
                                 _getBucketList();
                               } catch (e) {
+                                FLog.error(
+                                    className: "TencentManagePage",
+                                    methodName: "uploadNetworkFileEntry",
+                                    text: formatErrorMessage({
+                                      'url': url,
+                                    }, e.toString()),
+                                    dataLogType: DataLogType.ERRORS.toString());
                                 if (mounted) {
                                   showToastWithContext(context, "错误");
                                 }
@@ -659,6 +671,11 @@ class TencentFileExplorerState
                     showToast('删除完成');
                     return;
                   } catch (e) {
+                    FLog.error(
+                        className: 'TencentBucketPage',
+                        methodName: 'deleteAll',
+                        text: formatErrorMessage({}, e.toString()),
+                        dataLogType: DataLogType.ERRORS.toString());
                     showToast('删除失败');
                   }
                 },
@@ -848,6 +865,13 @@ class TencentFileExplorerState
         });
       }
     } catch (e) {
+      FLog.error(
+          className: "TencentManagePage",
+          methodName: "uploadNetworkFileEntry",
+          text: formatErrorMessage({
+            'toDelete': toDelete,
+          }, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
       rethrow;
     }
   }
@@ -1279,11 +1303,10 @@ class TencentFileExplorerState
                                 'gif',
                                 'bmp',
                                 'webp',
-                                'psd',
                                 'svg',
+                                'tif',
                                 'tiff',
                                 'ico',
-                                'raw',
                                 'heif',
                               ];
                               //判断是否为图片
@@ -1465,7 +1488,7 @@ class TencentFileExplorerState
                     builder: (context) {
                       return RenameDialog(
                         contentWidget: RenameDialogContent(
-                          title: "请输入新的文件名",
+                          title: "新文件名 '/'分割文件夹",
                           okBtnTap: () async {
                             String newName = vc.text;
                             if (isCoverFile) {
