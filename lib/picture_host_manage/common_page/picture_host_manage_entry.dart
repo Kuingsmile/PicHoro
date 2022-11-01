@@ -20,7 +20,7 @@ class PsHostHomePageState extends State<PsHostHomePage>
   List psHostHomePageOrder = [];
 
   @override
-  bool get wantKeepAlive => true;
+  bool get wantKeepAlive => false;
 
   @override
   void initState() {
@@ -136,7 +136,11 @@ class PsHostHomePageState extends State<PsHostHomePage>
               Center(
                 child: InkWell(
                   onTap: () {
-                    showToastWithContext(context, '暂未开放');
+                    Application.router.navigateTo(
+                      context,
+                      Routes.aliyunBucketList,
+                      transition: TransitionType.inFromRight,
+                    );
                   },
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -156,12 +160,10 @@ class PsHostHomePageState extends State<PsHostHomePage>
                   right: 0,
                   child: Container(
                     color: Colors.transparent,
-                    child: const Text(
-                      '',
-                      style: TextStyle(
-                        color: Color.fromARGB(255, 128, 125, 125),
-                        fontSize: 12,
-                      ),
+                    child: const Icon(
+                      Icons.check_circle,
+                      color: Colors.green,
+                      size: 20,
                     ),
                   )),
             ],
@@ -341,7 +343,7 @@ class PsHostHomePageState extends State<PsHostHomePage>
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       Image.asset(
-                        'assets/icons/Imgur.png',
+                        'assets/icons/fakesmms.png',
                         width: 70,
                         height: 80,
                       ),
@@ -376,6 +378,7 @@ class PsHostHomePageState extends State<PsHostHomePage>
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
+        elevation: 0,
         title: const Text(
           '图床管理-拖动排序',
           style: TextStyle(
