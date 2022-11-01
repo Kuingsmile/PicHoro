@@ -8,7 +8,7 @@ body:
   - type: markdown
     attributes:
       value: |+
-        ## PicGo Issue 模板
+        ## PicHoro Issue 模板
 
         请依照该模板来提交，否则将会被关闭。
 
@@ -36,5 +36,5 @@ body:
   - type: markdown
     attributes:
       value: |
-        最后，喜欢 PicGo 的话不妨给它点个 star~
+        最后，喜欢 PicHoro 的话不妨给它点个 star~
        
