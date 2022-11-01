@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:fluro/fluro.dart';
+import 'package:f_logs/f_logs.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:flutter/services.dart' as flutter_services;
@@ -83,6 +84,11 @@ class SmmsFileExplorerState
         state = loading_state.LoadState.ERROR;
       }
     } catch (e) {
+      FLog.error(
+          className: 'SmmsFileExplorer',
+          methodName: '_getFileList',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
       state = loading_state.LoadState.ERROR;
     }
     if (mounted) {
@@ -103,6 +109,7 @@ class SmmsFileExplorerState
 
   @override
   AppBar get appBar => AppBar(
+        elevation: 0,
         leading: IconButton(
           icon: const Icon(
             Icons.arrow_back_ios,
@@ -325,6 +332,13 @@ class SmmsFileExplorerState
                               _getFileList();
                               setState(() {});
                             } catch (e) {
+                              FLog.error(
+                                  className: 'SmmsManagePage',
+                                  methodName: 'uploadNetworkFileEntry',
+                                  text: formatErrorMessage({
+                                    'url': url,
+                                  }, e.toString()),
+                                  dataLogType: DataLogType.ERRORS.toString());
                               if (mounted) {
                                 showToastWithContext(context, '错误');
                               }
@@ -387,6 +401,11 @@ class SmmsFileExplorerState
                     showToast('删除完成');
                     return;
                   } catch (e) {
+                    FLog.error(
+                        className: 'SmmsManagePage',
+                        methodName: 'deleteAll_button',
+                        text: formatErrorMessage({}, e.toString()),
+                        dataLogType: DataLogType.ERRORS.toString());
                     showToast('删除失败');
                   }
                 },
@@ -411,6 +430,11 @@ class SmmsFileExplorerState
         }
       }
     } catch (e) {
+      FLog.error(
+          className: 'SmmsManagePage',
+          methodName: 'deleteAll',
+          text: formatErrorMessage({'toDelete': toDelete}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
       rethrow;
     }
   }
@@ -727,7 +751,6 @@ class SmmsFileExplorerState
                         child: ListTile(
                           minLeadingWidth: 0,
                           minVerticalPadding: 0,
-                          //dense: true,
                           leading: SizedBox(
                             width: 50,
                             height: 50,
@@ -830,6 +853,11 @@ class SmmsFileExplorerState
             defaultLoadStateChanged(state, iconSize: 30),
       );
     } catch (e) {
+      FLog.error(
+          className: 'SmmsFileExplorer',
+          methodName: 'iconImageLoad',
+          text: formatErrorMessage({'index': index}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
       String fileExtension = allInfoList[index]['url'].split('.').last;
       String iconPath = 'assets/icons/';
       if (fileExtension == '') {
@@ -879,12 +907,10 @@ class SmmsFileExplorerState
             color: Color.fromARGB(255, 230, 230, 230),
           ),
           ListTile(
-            //dense: true,
             leading: const Icon(
               Icons.link_rounded,
               color: Color.fromARGB(255, 97, 141, 236),
             ),
-            // visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
             minLeadingWidth: 0,
             title: const Text('复制链接(设置中的默认格式)'),
             onTap: () async {
