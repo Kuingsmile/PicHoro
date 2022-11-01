@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:horopic/album/album_sql.dart';
 import 'package:horopic/utils/global.dart';
+import 'package:horopic/utils/event_bus_utils.dart';
 import 'package:horopic/utils/common_functions.dart';
 
 class EmptyDatabase extends StatefulWidget {
@@ -35,7 +36,7 @@ class EmptyDatabaseState extends State<EmptyDatabase> {
 
   Widget getListTile(BuildContext context, int index) {
     return ListTile(
-        title: Text(_psHostNameList[index]),
+        title: Center(child: Text(_psHostNameList[index])),
         onTap: () async {
           showCupertinoAlertDialogWithConfirmFunc(
             title: '通知',
@@ -46,6 +47,7 @@ class EmptyDatabaseState extends State<EmptyDatabase> {
               await AlbumSQL.deleteTable(
                   Global.imageDB!, _tableNameList[index]);
               showToast('已清空${_psHostNameList[index]}数据库');
+              eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
             },
           );
         });
@@ -57,7 +59,7 @@ class EmptyDatabaseState extends State<EmptyDatabase> {
       listTiles.add(getListTile(context, i));
     }
     ListTile allEmpty = ListTile(
-        title: const Text('所有数据库'),
+        title: const Center(child: Text('所有数据库')),
         onTap: () async {
           showCupertinoAlertDialogWithConfirmFunc(
             title: '通知',
@@ -69,6 +71,7 @@ class EmptyDatabaseState extends State<EmptyDatabase> {
                 Global.imageDB!,
               );
               showToast('已清空所有数据库');
+              eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
             },
           );
         });
@@ -80,6 +83,7 @@ class EmptyDatabaseState extends State<EmptyDatabase> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        elevation: 0,
         centerTitle: true,
         title: const Text('选择需要清空的数据库'),
       ),
