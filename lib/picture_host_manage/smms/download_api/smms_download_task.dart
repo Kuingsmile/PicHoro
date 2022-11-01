@@ -1,9 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:f_logs/f_logs.dart';
 
 import 'package:horopic/picture_host_manage/tencent/download_api/download_status.dart';
 import 'package:horopic/picture_host_manage/tencent/download_api/download_request.dart';
+import 'package:horopic/utils/common_functions.dart';
 
 class DownloadTask {
   final DownloadRequest request;
@@ -29,6 +31,11 @@ class DownloadTask {
           completer.complete(status.value);
           status.removeListener(listener);
         } catch (e) {
+          FLog.error(
+              className: 'smmsDownloadTask',
+              methodName: 'whenDownloadComplete',
+              text: formatErrorMessage({}, e.toString()),
+              dataLogType: DataLogType.ERRORS.toString());
           status.removeListener(listener);
         }
       }

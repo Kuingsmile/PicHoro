@@ -1,14 +1,17 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:io';
+// ignore: depend_on_referenced_packages
 import 'package:collection/collection.dart';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:f_logs/f_logs.dart';
 
 import 'package:horopic/picture_host_manage/smms/download_api/smms_download_task.dart';
 import 'package:horopic/picture_host_manage/tencent/download_api/download_status.dart';
 import 'package:horopic/picture_host_manage/tencent/download_api/download_request.dart';
+import 'package:horopic/utils/common_functions.dart';
 
 class DownloadManager {
   final Map<String, DownloadTask> _cache = <String, DownloadTask>{};
@@ -101,6 +104,25 @@ class DownloadManager {
         }
       }
     } catch (e) {
+      if (e is DioError) {
+        FLog.error(
+            className: 'DownloadManager',
+            methodName: 'download',
+            text: formatErrorMessage({
+              'url': url,
+              'savePath': savePath,
+            }, e.toString(), isDioError: true, dioErrorMessage: e),
+            dataLogType: DataLogType.ERRORS.toString());
+      } else {
+        FLog.error(
+            className: 'DownloadManager',
+            methodName: 'download',
+            text: formatErrorMessage({
+              'url': url,
+              'savePath': savePath,
+            }, e.toString()),
+            dataLogType: DataLogType.ERRORS.toString());
+      }
       var task = getDownload(url)!;
       if (task.status.value != DownloadStatus.canceled &&
           task.status.value != DownloadStatus.paused) {
