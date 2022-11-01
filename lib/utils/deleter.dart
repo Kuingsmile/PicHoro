@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:convert';
 
+import 'package:f_logs/f_logs.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'package:horopic/api/aliyun_api.dart';
@@ -12,6 +13,7 @@ import 'package:horopic/api/qiniu_api.dart';
 import 'package:horopic/api/tencent_api.dart';
 import 'package:horopic/api/upyun_api.dart';
 import 'package:horopic/utils/global.dart';
+import 'package:horopic/utils/common_functions.dart';
 
 //默认图床参数和配置文件名对应关系
 Map<String, String> pdconfig = {
@@ -59,6 +61,11 @@ Future<String> readHostConfig() async {
     String contents = await file.readAsString();
     return contents;
   } catch (e) {
+    FLog.error(
+        className: "Deleter",
+        methodName: "readHostConfig",
+        text: formatErrorMessage({}, e.toString()),
+        dataLogType: DataLogType.ERRORS.toString());
     return "Error";
   }
 }
@@ -78,6 +85,13 @@ deleterentry(Map deleteConfig) async {
 
     return result;
   } catch (e) {
+    FLog.error(
+        className: "Deleter",
+        methodName: "deleterentry",
+        text: formatErrorMessage({
+          'deleteConfig': deleteConfig,
+        }, e.toString()),
+        dataLogType: DataLogType.ERRORS.toString());
     return ["Error"];
   }
 }
