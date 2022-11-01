@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
-
-//import 'package:flutter_uploader/flutter_uploader.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:fluro/fluro.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:flutter_easyloading/flutter_easyloading.dart';
 
 import 'package:horopic/configure_page/others/theme_data.dart';
-
 import 'package:horopic/router/application.dart';
 import 'package:horopic/router/routers.dart';
 import 'package:horopic/utils/global.dart';
@@ -17,9 +14,9 @@ import 'package:horopic/utils/theme_provider.dart';
 /*
 @Author: Horo
 @e-mail: ma_shiqing@163.com
-@Date: 2022-10-28
+@Date: 2022-11-01
 @Description:PicHoro, a picture upload tool 
-@version: 1.8.3
+@version: 1.8.4
 */
 
 void main() async {
@@ -69,8 +66,8 @@ void main() async {
   //初始化图床管理页面排列顺序
   List<String> psHostHomePageOrder = await Global.getpsHostHomePageOrder();
   await Global.setpsHostHomePageOrder(psHostHomePageOrder);
-  //设定loading样式
-  EasyLoading.instance
+  //设定loading样式 备用 先注释掉了
+  /* EasyLoading.instance
     ..displayDuration = const Duration(milliseconds: 2000)
     ..indicatorType = EasyLoadingIndicatorType.fadingCircle
     ..loadingStyle = EasyLoadingStyle.custom
@@ -82,7 +79,7 @@ void main() async {
     ..textColor = Colors.blue
     ..maskColor = Colors.blue.withOpacity(0.5)
     ..userInteractions = false
-    ..dismissOnTap = false;
+    ..dismissOnTap = false;*/
 
   runApp(const MyApp());
 }
