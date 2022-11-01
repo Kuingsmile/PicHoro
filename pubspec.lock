@@ -99,6 +99,13 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "1.0.2"
+  data_table_2:
+    dependency: "direct main"
+    description:
+      name: data_table_2
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "2.3.8"
   decimal:
     dependency: transitive
     description:
@@ -148,6 +155,13 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "1.0.3"
+  f_logs:
+    dependency: "direct main"
+    description:
+      name: f_logs
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "2.0.1"
   fake_async:
     dependency: transitive
     description:
@@ -345,6 +359,13 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "2.6.2"
+  intl:
+    dependency: transitive
+    description:
+      name: intl
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "0.17.0"
   js:
     dependency: transitive
     description:
@@ -653,13 +674,20 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "2.2.0"
+  sembast:
+    dependency: transitive
+    description:
+      name: sembast
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "3.3.1"
   share_plus:
     dependency: "direct main"
     description:
       name: share_plus
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "6.0.1"
+    version: "6.0.0"
   share_plus_platform_interface:
     dependency: transitive
     description:
@@ -945,6 +973,13 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "5.3.5"
+  xxtea:
+    dependency: transitive
+    description:
+      name: xxtea
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "2.1.0"
 sdks:
   dart: ">=2.18.0 <3.0.0"
   flutter: ">=3.3.0"

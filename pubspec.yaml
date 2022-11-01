@@ -17,7 +17,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.8.3+1
+version: 1.8.4+1
 
 environment:
   sdk: '>=2.18.0 <3.0.0'
@@ -31,43 +31,45 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  image_picker: ^0.8.5+3
-  dio: ^4.0.6
-  http: ^0.13.5
-  fluttertoast: ^8.0.9
-  path_provider: ^2.0.11
-  path: ^1.8.2
-  permission_handler: ^10.0.2
-  wechat_assets_picker: ^8.1.1
-  package_info_plus: ^1.4.3+1
-  url_launcher: ^6.1.6
-  provider: ^6.0.3
-  flustars_flutter3: ^3.0.0
-  mysql1: ^0.20.0
-  dart_des: ^1.0.2
-  flutter_markdown: ^0.6.12
-  r_upgrade: ^0.3.8+2
+  image_picker: 0.8.5+3
+  dio: 4.0.6
+  http: 0.13.5
+  fluttertoast: 8.0.9
+  path_provider: 2.0.11
+  path: 1.8.2
+  permission_handler: 10.0.2
+  wechat_assets_picker: 8.1.1
+  package_info_plus: 1.4.3+1
+  url_launcher: 6.1.6
+  provider: 6.0.3
+  flustars_flutter3: 3.0.0
+  mysql1: 0.20.0
+  dart_des: 1.0.2
+  flutter_markdown: 0.6.12
+  r_upgrade: 0.3.8+2
   extended_image: 6.3.1
-  pull_to_refresh: ^2.0.0
-  sqflite: ^2.1.0+1
-  msh_checkbox: ^1.1.1
-  flutter_speed_dial: ^6.1.0+1
-  barcode_scan2: ^4.2.1
-  dio_proxy_adapter: ^1.0.1
-  qiniu_flutter_sdk: ^0.4.0
-  crypto: ^3.0.2
-  uuid: ^3.0.6
-  fluro: ^2.0.3
-  xml2json: ^5.3.5
-  grouped_list: ^5.1.2
-  flutter_slidable: ^2.0.0
-  share_plus: ^6.0.0
-  external_path: ^1.0.3
-  file_picker: ^5.2.2
-  open_filex: ^4.1.1
-  flutter_draggable_gridview: ^0.0.7
+  pull_to_refresh: 2.0.0
+  sqflite: 2.1.0+1
+  msh_checkbox: 1.1.1
+  flutter_speed_dial: 6.1.0+1
+  barcode_scan2: 4.2.1
+  dio_proxy_adapter: 1.0.1
+  qiniu_flutter_sdk: 0.4.0
+  crypto: 3.0.2
+  uuid: 3.0.6
+  fluro: 2.0.3
+  xml2json: 5.3.5
+  grouped_list: 5.1.2
+  flutter_slidable: 2.0.0
+  share_plus: 6.0.0
+  external_path: 1.0.3
+  file_picker: 5.2.2
+  open_filex: 4.1.1
+  flutter_draggable_gridview: 0.0.7
   flutter_easyloading: ^3.0.5
-  event_bus: ^2.0.0
+  event_bus: 2.0.0
+  f_logs: 2.0.1
+  data_table_2: 2.3.8
   #flutter_uploader: ^3.0.0-beta.4
 
   # The following adds the Cupertino Icons font to your application.

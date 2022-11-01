@@ -86,6 +86,12 @@
       "languageVersion": "2.12"
     },
     {
+      "name": "data_table_2",
+      "rootUri": "file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/data_table_2-2.3.8",
+      "packageUri": "lib/",
+      "languageVersion": "2.17"
+    },
+    {
       "name": "decimal",
       "rootUri": "file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/decimal-2.3.0",
       "packageUri": "lib/",
@@ -124,6 +130,12 @@
     {
       "name": "external_path",
       "rootUri": "file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/external_path-1.0.3",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "f_logs",
+      "rootUri": "file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/f_logs-2.0.1",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
@@ -298,6 +310,12 @@
     {
       "name": "image_picker_platform_interface",
       "rootUri": "file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/image_picker_platform_interface-2.6.2",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "intl",
+      "rootUri": "file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/intl-0.17.0",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
@@ -566,8 +584,14 @@
       "languageVersion": "2.14"
     },
     {
+      "name": "sembast",
+      "rootUri": "file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/sembast-3.3.1",
+      "packageUri": "lib/",
+      "languageVersion": "2.16"
+    },
+    {
       "name": "share_plus",
-      "rootUri": "file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/share_plus-6.0.1",
+      "rootUri": "file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/share_plus-6.0.0",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
@@ -818,13 +842,19 @@
       "languageVersion": "2.12"
     },
     {
+      "name": "xxtea",
+      "rootUri": "file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/xxtea-2.1.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
       "name": "horopic",
       "rootUri": "../",
       "packageUri": "lib/",
       "languageVersion": "2.18"
     }
   ],
-  "generated": "2022-10-29T10:24:02.963547Z",
+  "generated": "2022-11-01T08:27:40.578726Z",
   "generator": "pub",
   "generatorVersion": "2.18.0"
 }
