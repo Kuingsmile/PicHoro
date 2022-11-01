@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:fluro/fluro.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:f_logs/f_logs.dart';
 import 'package:flutter/services.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:msh_checkbox/msh_checkbox.dart';
@@ -133,6 +134,11 @@ class UploadedImagesState extends State<UploadedImages>
                       showToast('删除完成');
                       return;
                     } catch (e) {
+                      FLog.error(
+                          className: 'UploadedImagesState',
+                          methodName: 'build_delete_button',
+                          text: formatErrorMessage({}, e.toString()),
+                          dataLogType: DataLogType.ERRORS.toString());
                       Application.router.navigateTo(
                           context, Routes.albumUploadedImages,
                           transition: TransitionType.none);
@@ -652,6 +658,11 @@ class UploadedImagesState extends State<UploadedImages>
             await deleteImage(index);
             break;
           } catch (e) {
+            FLog.error(
+                className: 'ImagePage',
+                methodName: 'handleOnLongPress_delete',
+                text: formatErrorMessage({}, e.toString()),
+                dataLogType: DataLogType.ERRORS.toString());
             showToastWithContext(context, '删除失败');
           }
       }
@@ -683,9 +694,11 @@ class UploadedImagesState extends State<UploadedImages>
                     imagesIndex[i] + (_currentPage * _perPageItemSize) - i])
                 .delete();
           } catch (e) {
-            if (kDebugMode) {
-              print(e);
-            }
+            FLog.error(
+                className: 'ImagePage',
+                methodName: 'deleteImageAll',
+                text: formatErrorMessage({}, e.toString()),
+                dataLogType: DataLogType.ERRORS.toString());
           }
         }
         showedImageId
@@ -715,6 +728,11 @@ class UploadedImagesState extends State<UploadedImages>
                       : (_currentPage + 1) * _perPageItemSize);
         });
       } catch (e) {
+        FLog.error(
+            className: 'ImagePage',
+            methodName: 'deleteImageAll',
+            text: formatErrorMessage({}, e.toString()),
+            dataLogType: DataLogType.ERRORS.toString());
         rethrow;
       }
     }
@@ -742,9 +760,11 @@ class UploadedImagesState extends State<UploadedImages>
           await File(showedImagePaths[index + _currentPage * _perPageItemSize])
               .delete();
         } catch (e) {
-          if (kDebugMode) {
-            print(e);
-          }
+          FLog.error(
+              className: 'ImagePage',
+              methodName: 'deleteImage',
+              text: formatErrorMessage({}, e.toString()),
+              dataLogType: DataLogType.ERRORS.toString());
         }
       }
       setState(() {
@@ -790,6 +810,11 @@ class UploadedImagesState extends State<UploadedImages>
         }
       });
     } catch (e) {
+      FLog.error(
+          className: 'ImagePage',
+          methodName: 'deleteImage',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
       rethrow;
     }
   }
