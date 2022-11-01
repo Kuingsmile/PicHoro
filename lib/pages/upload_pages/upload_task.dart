@@ -1,9 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:f_logs/f_logs.dart';
 
 import 'package:horopic/pages/upload_pages/upload_request.dart';
 import 'package:horopic/pages/upload_pages/upload_status.dart';
+import 'package:horopic/utils/common_functions.dart';
 
 class UploadTask {
   final UploadRequest request;
@@ -25,10 +27,15 @@ class UploadTask {
     var listener;
     listener = () {
       if (status.value.isCompleted) {
-        try{
-        completer.complete(status.value);
-        status.removeListener(listener);
-        } catch(e){
+        try {
+          completer.complete(status.value);
+          status.removeListener(listener);
+        } catch (e) {
+          FLog.error(
+              className: 'UploadTask',
+              methodName: 'whenUploadComplete',
+              text: formatErrorMessage({}, e.toString()),
+              dataLogType: DataLogType.ERRORS.toString());
           status.removeListener(listener);
         }
       }
@@ -38,5 +45,4 @@ class UploadTask {
 
     return completer.future.timeout(timeout);
   }
-
 }

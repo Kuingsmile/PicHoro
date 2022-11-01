@@ -9,6 +9,7 @@ import 'package:dio/dio.dart';
 import 'package:dio_proxy_adapter/dio_proxy_adapter.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:f_logs/f_logs.dart';
 import 'package:path/path.dart' as my_path;
 
 import 'package:horopic/pages/upload_pages/upload_request.dart';
@@ -41,24 +42,21 @@ class UploadManager {
     return _instance;
   }
 
-  void Function(int, int) createCallback(
-    String path,
-  ) {
+  void Function(int, int) createCallback(String path, String name) {
     return (int sent, int total) {
-      getUpload(path)?.progress.value = sent / total;
+      getUpload(name)?.progress.value = sent / total;
     };
   }
 
-  Future<void> upload(String path, canceltoken) async {
+  Future<void> upload(String path, String fileName, canceltoken) async {
     try {
-      var task = getUpload(path);
+      var task = getUpload(fileName);
 
       if (task == null || task.status.value == UploadStatus.canceled) {
         return;
       }
       setStatus(task, UploadStatus.uploading);
 
-      String fileName = path.split('/').last;
       String configData = await readPictureHostConfig();
       Map configMap = jsonDecode(configData);
       String defaultPH = await Global.getPShost();
@@ -119,7 +117,8 @@ class UploadManager {
           'q-key-time': keyTime,
           'q-sign-time': keyTime,
           'q-signature': singature,
-          'file': await MultipartFile.fromFile(path, filename: fileName),
+          'file': await MultipartFile.fromFile(path,
+              filename: my_path.basename(path)),
         });
         BaseOptions baseoptions = BaseOptions(
           //连接服务器超时时间，单位是毫秒.
@@ -141,7 +140,7 @@ class UploadManager {
         response = await dio.post(
           'https://$host',
           data: formData,
-          onSendProgress: createCallback(path),
+          onSendProgress: createCallback(path, fileName),
           cancelToken: canceltoken,
         );
         if (response.statusCode == HttpStatus.noContent) {
@@ -254,7 +253,8 @@ class UploadManager {
           'Signature': singature,
           'x-oss-content-type':
               'image/${my_path.extension(path).replaceFirst('.', '')}',
-          'file': await MultipartFile.fromFile(path, filename: fileName),
+          'file': await MultipartFile.fromFile(path,
+              filename: my_path.basename(path)),
         });
         BaseOptions baseoptions = BaseOptions(
           //连接服务器超时时间，单位是毫秒.
@@ -277,7 +277,7 @@ class UploadManager {
         response = await dio.post(
           'https://$host',
           data: formData,
-          onSendProgress: createCallback(path),
+          onSendProgress: createCallback(path, fileName),
           cancelToken: canceltoken,
         );
         if (response.statusCode == HttpStatus.noContent) {
@@ -377,7 +377,8 @@ class UploadManager {
           "key": urlpath,
           "fileName": fileName,
           "token": uploadToken,
-          "file": await MultipartFile.fromFile(path, filename: fileName),
+          "file": await MultipartFile.fromFile(path,
+              filename: my_path.basename(path)),
         });
         BaseOptions baseoptions = BaseOptions(
           connectTimeout: 30000,
@@ -392,7 +393,7 @@ class UploadManager {
         response = await dio.post(
           host,
           data: formData,
-          onSendProgress: createCallback(path),
+          onSendProgress: createCallback(path, fileName),
           cancelToken: canceltoken,
         );
 
@@ -492,7 +493,8 @@ class UploadManager {
         FormData formData = FormData.fromMap({
           'authorization': authorization,
           'policy': base64Policy,
-          'file': await MultipartFile.fromFile(path, filename: fileName),
+          'file': await MultipartFile.fromFile(path,
+              filename: my_path.basename(path)),
         });
         BaseOptions baseoptions = BaseOptions(
           connectTimeout: 30000,
@@ -515,7 +517,7 @@ class UploadManager {
         response = await dio.post(
           '$host/$bucket',
           data: formData,
-          onSendProgress: createCallback(path),
+          onSendProgress: createCallback(path, fileName),
           cancelToken: canceltoken,
         );
         if (response.statusCode == HttpStatus.ok) {
@@ -563,13 +565,15 @@ class UploadManager {
         }
       } else if (defaultPH == 'lsky.pro') {
         FormData formdata = FormData.fromMap({
-          "file": await MultipartFile.fromFile(path, filename: fileName),
+          "file": await MultipartFile.fromFile(path,
+              filename: my_path.basename(path)),
         });
         if (configMap["strategy_id"] == "None") {
           formdata = FormData.fromMap({});
         } else {
           formdata = FormData.fromMap({
-            "file": await MultipartFile.fromFile(path, filename: fileName),
+            "file": await MultipartFile.fromFile(path,
+                filename: my_path.basename(path)),
             "strategy_id": configMap["strategy_id"],
           });
         }
@@ -588,7 +592,7 @@ class UploadManager {
         response = await dio.post(
           uploadUrl,
           data: formdata,
-          onSendProgress: createCallback(path),
+          onSendProgress: createCallback(path, fileName),
           cancelToken: canceltoken,
         );
         if (response.statusCode == HttpStatus.ok &&
@@ -626,7 +630,8 @@ class UploadManager {
         }
       } else if (defaultPH == 'sm.ms') {
         FormData formdata = FormData.fromMap({
-          "smfile": await MultipartFile.fromFile(path, filename: fileName),
+          "smfile": await MultipartFile.fromFile(path,
+              filename: my_path.basename(path)),
           "format": "json",
         });
         BaseOptions options = BaseOptions(
@@ -643,7 +648,7 @@ class UploadManager {
         response = await dio.post(
           uploadUrl,
           data: formdata,
-          onSendProgress: createCallback(path),
+          onSendProgress: createCallback(path, fileName),
           cancelToken: canceltoken,
         );
         if (response.statusCode == HttpStatus.ok &&
@@ -713,7 +718,7 @@ class UploadManager {
         response = await dio.put(
           uploadUrl,
           data: jsonEncode(queryBody),
-          onSendProgress: createCallback(path),
+          onSendProgress: createCallback(path, fileName),
         );
         if (response.statusCode == HttpStatus.ok ||
             response.statusCode == HttpStatus.created) {
@@ -801,7 +806,7 @@ class UploadManager {
         response = await dio.post(
           uploadUrl,
           data: formdata,
-          onSendProgress: createCallback(path),
+          onSendProgress: createCallback(path, fileName),
           cancelToken: canceltoken,
         );
         if (response.statusCode == HttpStatus.ok ||
@@ -841,7 +846,15 @@ class UploadManager {
         }
       }
     } catch (e) {
-      var task = getUpload(path)!;
+      FLog.error(
+          className: 'UploadTask',
+          methodName: 'start',
+          text: formatErrorMessage({
+            'path': path,
+            'fileName': fileName,
+          }, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
+      var task = getUpload(fileName)!;
       if (task.status.value != UploadStatus.canceled &&
           task.status.value != UploadStatus.completed) {
         setStatus(task, UploadStatus.failed);
@@ -866,13 +879,14 @@ class UploadManager {
     while (_queue.isNotEmpty && runningTasks < maxConcurrentTasks) {
       runningTasks++;
       var currentRequest = _queue.removeFirst();
-      upload(currentRequest.path, currentRequest.cancelToken);
+      upload(
+          currentRequest.path, currentRequest.name, currentRequest.cancelToken);
       await Future.delayed(const Duration(milliseconds: 500), null);
     }
   }
 
-  UploadTask? getUpload(String path) {
-    return _cache[path];
+  UploadTask? getUpload(String fileName) {
+    return _cache[fileName];
   }
 
   void setStatus(UploadTask? task, UploadStatus status) {
@@ -881,31 +895,31 @@ class UploadManager {
     }
   }
 
-  Future<UploadTask?> addUpload(String path) async {
-    if (path.isNotEmpty) {
-      return await _addUploadRequest(UploadRequest(path));
+  Future<UploadTask?> addUpload(String path, String fileName) async {
+    if (path.isNotEmpty && fileName.isNotEmpty) {
+      return await _addUploadRequest(UploadRequest(path, fileName));
     }
     return null;
   }
 
   Future<UploadTask> _addUploadRequest(UploadRequest uploadRequest) async {
-    if (_cache[uploadRequest.path] != null) {
-      if (!_cache[uploadRequest.path]!.status.value.isCompleted &&
-          _cache[uploadRequest.path]!.request == uploadRequest) {
-        return _cache[uploadRequest.path]!;
+    if (_cache[uploadRequest.name] != null) {
+      if (!_cache[uploadRequest.name]!.status.value.isCompleted &&
+          _cache[uploadRequest.name]!.request == uploadRequest) {
+        return _cache[uploadRequest.name]!;
       } else {
-        _queue.remove(_cache[uploadRequest.path]);
+        _queue.remove(_cache[uploadRequest.name]);
       }
     }
-    _queue.add(UploadRequest(uploadRequest.path));
+    _queue.add(UploadRequest(uploadRequest.path, uploadRequest.name));
     var task = UploadTask(_queue.last);
-    _cache[uploadRequest.path] = task;
+    _cache[uploadRequest.name] = task;
     _startExecution();
     return task;
   }
 
-  Future<void> pauseUpload(String path) async {
-    var task = getUpload(path);
+  Future<void> pauseUpload(String path, String fileName) async {
+    var task = getUpload(fileName);
     if (task != null) {
       setStatus(task, UploadStatus.paused);
       _queue.remove(task.request);
@@ -913,8 +927,8 @@ class UploadManager {
     }
   }
 
-  Future<void> cancelUpload(String path) async {
-    var task = getUpload(path);
+  Future<void> cancelUpload(String path, String fileName) async {
+    var task = getUpload(fileName);
     if (task != null) {
       setStatus(task, UploadStatus.canceled);
       _queue.remove(task.request);
@@ -922,8 +936,8 @@ class UploadManager {
     }
   }
 
-  Future<void> resumeUpload(String path) async {
-    var task = getUpload(path);
+  Future<void> resumeUpload(String path, String fileName) async {
+    var task = getUpload(fileName);
     if (task != null) {
       setStatus(task, UploadStatus.uploading);
       task.request.cancelToken = CancelToken();
@@ -932,14 +946,14 @@ class UploadManager {
     _startExecution();
   }
 
-  Future<void> removeUpload(String path) async {
-    await cancelUpload(path);
+  Future<void> removeUpload(String path, String fileName) async {
+    await cancelUpload(path, fileName);
     _cache.remove(path);
   }
 
-  Future<UploadStatus> whenUploadComplete(String path,
+  Future<UploadStatus> whenUploadComplete(String path, String fileName,
       {Duration timeout = const Duration(hours: 2)}) async {
-    UploadTask? task = getUpload(path);
+    UploadTask? task = getUpload(fileName);
 
     if (task != null) {
       return task.whenUploadComplete(timeout: timeout);
@@ -952,35 +966,38 @@ class UploadManager {
     return _cache.values as List<UploadTask>;
   }
 
-  Future<void> addBatchUploads(List<String> paths) async {
-    for (var path in paths) {
-      await addUpload(path);
+  Future<void> addBatchUploads(List<String> paths, List<String> names) async {
+    for (var i = 0; i < paths.length; i++) {
+      await addUpload(paths[i], names[i]);
     }
   }
 
-  List<UploadTask?> getBatchUploads(List<String> paths) {
-    return paths.map((e) => _cache[e]).toList();
+  List<UploadTask?> getBatchUploads(List<String> paths, List<String> names) {
+    return names.map((e) => _cache[e]).toList();
   }
 
-  Future<void> pauseBatchUploads(List<String> paths) async {
-    for (var element in paths) {
-      await pauseUpload(element);
+  Future<void> pauseBatchUploads(List<String> paths, List<String> names) async {
+    for (var i = 0; i < paths.length; i++) {
+      await pauseUpload(paths[i], names[i]);
     }
   }
 
-  Future<void> cancelBatchUploads(List<String> paths) async {
-    for (var element in paths) {
-      await cancelUpload(element);
+  Future<void> cancelBatchUploads(
+      List<String> paths, List<String> names) async {
+    for (var i = 0; i < paths.length; i++) {
+      await cancelUpload(paths[i], names[i]);
     }
   }
 
-  Future<void> resumeBatchUploads(List<String> paths) async {
-    for (var element in paths) {
-      await resumeUpload(element);
+  Future<void> resumeBatchUploads(
+      List<String> paths, List<String> names) async {
+    for (var i = 0; i < paths.length; i++) {
+      await resumeUpload(paths[i], names[i]);
     }
   }
 
-  ValueNotifier<double> getBatchUploadProgress(List<String> paths) {
+  ValueNotifier<double> getBatchUploadProgress(
+      List<String> paths, List<String> names) {
     ValueNotifier<double> progress = ValueNotifier(0);
     var total = paths.length;
 
@@ -989,23 +1006,23 @@ class UploadManager {
     }
 
     if (total == 1) {
-      return getUpload(paths.first)?.progress ?? progress;
+      return getUpload(names.first)?.progress ?? progress;
     }
 
     var progressMap = <String, double>{};
 
-    for (var path in paths) {
-      UploadTask? task = getUpload(path);
+    for (var i = 0; i < paths.length; i++) {
+      UploadTask? task = getUpload(names[i]);
       if (task != null) {
-        progressMap[path] = 0.0;
+        progressMap[paths[i]] = 0.0;
         if (task.status.value.isCompleted) {
-          progressMap[path] = 1.0;
+          progressMap[paths[i]] = 1.0;
           progress.value = progressMap.values.sum / total;
         }
 
         var progressListener;
         progressListener = () {
-          progressMap[path] = task.progress.value;
+          progressMap[paths[i]] = task.progress.value;
           progress.value = progressMap.values.sum / total;
         };
 
@@ -1013,7 +1030,7 @@ class UploadManager {
         var listener;
         listener = () {
           if (task.status.value.isCompleted) {
-            progressMap[path] = 1.0;
+            progressMap[paths[i]] = 1.0;
             progress.value = progressMap.values.sum / total;
             task.progress.removeListener(progressListener);
             task.status.removeListener(listener);
@@ -1027,20 +1044,21 @@ class UploadManager {
     return progress;
   }
 
-  Future<List<UploadTask?>?> whenBatchUploadsComplete(List<String> paths,
+  Future<List<UploadTask?>?> whenBatchUploadsComplete(
+      List<String> paths, List<String> names,
       {Duration timeout = const Duration(hours: 2)}) async {
     var completer = Completer<List<UploadTask?>?>();
     var completed = 0;
     var total = paths.length;
-    for (var path in paths) {
-      UploadTask? task = getUpload(path);
+    for (var i = 0; i < paths.length; i++) {
+      UploadTask? task = getUpload(names[i]);
 
       if (task != null) {
         if (task.status.value.isCompleted) {
           completed++;
 
           if (completed == total) {
-            completer.complete(getBatchUploads(paths));
+            completer.complete(getBatchUploads(paths, names));
           }
         }
 
@@ -1050,7 +1068,7 @@ class UploadManager {
             completed++;
 
             if (completed == total) {
-              completer.complete(getBatchUploads(paths));
+              completer.complete(getBatchUploads(paths, names));
               task.status.removeListener(listener);
             }
           }
