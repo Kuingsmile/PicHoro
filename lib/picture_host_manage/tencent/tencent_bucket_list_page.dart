@@ -1,9 +1,10 @@
 import 'dart:convert';
-import 'package:flutter/material.dart';
 
+import 'package:flutter/material.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:grouped_list/grouped_list.dart';
 import 'package:fluro/fluro.dart';
+import 'package:f_logs/f_logs.dart';
 
 import 'package:horopic/router/application.dart';
 import 'package:horopic/router/routers.dart';
@@ -98,12 +99,17 @@ class TencentBucketListState
         });
       }
     } catch (e) {
+      FLog.error(
+          className: 'TencentBucketListState',
+          methodName: 'initBucketList',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
       if (mounted) {
         setState(() {
           state = loading_state.LoadState.ERROR;
         });
       }
-      showToast('请先登录');
+      showToast('请先登录或添加配置');
       refreshController.refreshCompleted();
     }
   }
@@ -123,6 +129,7 @@ class TencentBucketListState
 
   @override
   AppBar get appBar => AppBar(
+        elevation: 0,
         centerTitle: true,
         title: const Text('腾讯云存储桶列表'),
         actions: [
@@ -316,6 +323,13 @@ class TencentBucketListState
                         aclState['aclState'] = '未获取';
                       }
                     } catch (e) {
+                      FLog.error(
+                          className: 'TencentBucketListPage',
+                          methodName: 'buildSuccess_trailing_onPressed',
+                          text: formatErrorMessage({
+                            'element': element,
+                          }, e.toString()),
+                          dataLogType: DataLogType.ERRORS.toString());
                       aclState['aclState'] = '未获取';
                     }
                     setState(() {});
@@ -488,6 +502,13 @@ class TencentBucketListState
                     }
                     return;
                   } catch (e) {
+                    FLog.error(
+                        className: 'TencentBucketListPage',
+                        methodName: 'buildBottomSheetWidget_deleteBucket',
+                        text: formatErrorMessage({
+                          'element': element,
+                        }, e.toString()),
+                        dataLogType: DataLogType.ERRORS.toString());
                     showToast('删除失败');
                     Navigator.of(context).pop();
                   }

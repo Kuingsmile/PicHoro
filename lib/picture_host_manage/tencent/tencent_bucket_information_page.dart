@@ -20,27 +20,30 @@ class BucketInformationState extends State<BucketInformation> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        elevation: 0,
+        centerTitle: true,
         title: const Text('基本信息'),
       ),
       body: ListView(
         children: [
           ListTile(
             title: const Text('存储桶名称'),
-            subtitle: Text(widget.bucketMap['name']),
+            subtitle: SelectableText(widget.bucketMap['name']),
           ),
           ListTile(
             title: const Text('所属地域'),
-            subtitle: Text(
+            subtitle: SelectableText(
                 '${widget.bucketMap['location']}(${TencentManageAPI.areaCodeName[widget.bucketMap['location']]})'),
           ),
           ListTile(
             title: const Text('创建时间'),
-            subtitle: Text(widget.bucketMap['CreationDate']),
+            subtitle: SelectableText(
+                widget.bucketMap['CreationDate'].substring(0, 19)),
           ),
           ListTile(
             isThreeLine: true,
             title: const Text('访问域名'),
-            subtitle: Text(
+            subtitle: SelectableText(
                 'https://${widget.bucketMap['name']}.cos.${widget.bucketMap['location']}.myqcloud.com'),
           ),
         ],

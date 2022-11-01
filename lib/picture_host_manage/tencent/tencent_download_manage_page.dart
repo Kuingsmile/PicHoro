@@ -1,7 +1,9 @@
 import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:external_path/external_path.dart';
+import 'package:f_logs/f_logs.dart';
 import 'package:fluro/fluro.dart';
 
 import 'package:horopic/picture_host_manage/tencent/download_api/tencent_downloader.dart';
@@ -9,6 +11,7 @@ import 'package:horopic/picture_host_manage/tencent/download_api/tencent_downloa
 import 'package:horopic/picture_host_manage/tencent/download_api/download_status.dart';
 import 'package:horopic/router/application.dart';
 import 'package:horopic/router/routers.dart';
+import 'package:horopic/utils/common_functions.dart';
 //修改自flutter_download_manager包 https://github.com/nabil6391/flutter_download_manager 作者@nabil6391
 
 Map downloadStatus = {
@@ -77,7 +80,16 @@ class TencentUpDownloadManagePageState
             var file = File(fileName);
             try {
               await file.delete();
-            } catch (e) {}
+            } catch (e) {
+              FLog.error(
+                  className: 'TencentUpDownloadManagePageState',
+                  methodName: '_createDownloadListItem_delete',
+                  text: formatErrorMessage({
+                    'url': url,
+                    'fileName': fileName,
+                  }, e.toString()),
+                  dataLogType: DataLogType.ERRORS.toString());
+            }
             await downloadManager.removeDownload(url);
             setState(() {});
           },
@@ -214,6 +226,7 @@ class TencentUpDownloadManagePageState
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
+          elevation: 0,
           centerTitle: true,
           title: const Text("下载管理页面"),
         ),
