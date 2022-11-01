@@ -1,7 +1,8 @@
 import 'dart:io';
 import 'dart:convert';
-
+import 'package:f_logs/f_logs.dart';
 import 'package:path_provider/path_provider.dart';
+
 import 'package:horopic/api/lskypro_api.dart';
 import 'package:horopic/api/smms_api.dart';
 import 'package:horopic/api/github_api.dart';
@@ -11,6 +12,7 @@ import 'package:horopic/api/tencent_api.dart';
 import 'package:horopic/api/aliyun_api.dart';
 import 'package:horopic/api/upyun_api.dart';
 import 'package:horopic/utils/global.dart';
+import 'package:horopic/utils/common_functions.dart';
 
 //默认图床参数和配置文件名对应关系
 Map<String, String> pdconfig = {
@@ -55,6 +57,11 @@ Future<String> readPictureHostConfig() async {
     String contents = await file.readAsString();
     return contents;
   } catch (e) {
+    FLog.error(
+        className: 'Uploader',
+        methodName: 'readPictureHostConfig',
+        text: formatErrorMessage({}, e.toString()),
+        dataLogType: DataLogType.ERRORS.toString());
     return "Error";
   }
 }
@@ -73,6 +80,11 @@ uploaderentry({required String path, required String name}) async {
         path: path, name: name, configMap: configMap);
     return result;
   } catch (e) {
+    FLog.error(
+        className: 'Uploader',
+        methodName: 'uploaderentry',
+        text: formatErrorMessage({'path': path, 'name': name}, e.toString()),
+        dataLogType: DataLogType.ERRORS.toString());
     return ["Error"];
   }
 }
