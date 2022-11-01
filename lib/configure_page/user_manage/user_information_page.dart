@@ -1,21 +1,22 @@
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
-import 'package:fluro/fluro.dart';
-
-import 'package:horopic/router/application.dart';
-import 'package:horopic/router/routers.dart';
-import 'package:horopic/utils/global.dart';
-import 'package:horopic/picture_host_manage/common_page/loading_state.dart'
-    as loading_state;
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:fluro/fluro.dart';
+import 'package:f_logs/f_logs.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
+import 'package:horopic/pages/loading.dart';
+import 'package:horopic/router/application.dart';
+import 'package:horopic/router/routers.dart';
+import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/sql_utils.dart';
-import 'package:horopic/pages/loading.dart';
+
+import 'package:horopic/picture_host_manage/common_page/loading_state.dart'
+    as loading_state;
 import 'package:horopic/picture_host_configure/lskypro_configure.dart'
     as lskyhost;
 import 'package:horopic/picture_host_configure/smms_configure.dart'
@@ -103,6 +104,13 @@ class UserInformationPageState
                   File('${directory.path}/${username}_host_config.txt');
               lskyLocalFile.writeAsString(hostConfigJson);
             } catch (e) {
+              FLog.error(
+                  className: 'UserInformationPageState',
+                  methodName: '_fetchconfig_lskyhost',
+                  text: formatErrorMessage({
+                    'username': username,
+                  }, e.toString()),
+                  dataLogType: DataLogType.ERRORS.toString());
               return showCupertinoAlertDialog(
                   context: context, title: "错误", content: "拉取兰空图床配置失败,请重试!");
             }
@@ -123,6 +131,13 @@ class UserInformationPageState
                   File('${directory.path}/${username}_smms_config.txt');
               smmsLocalFile.writeAsString(smmsConfigJson);
             } catch (e) {
+              FLog.error(
+                  className: 'UserInformationPageState',
+                  methodName: '_fetchconfig_smmshost',
+                  text: formatErrorMessage({
+                    'username': username,
+                  }, e.toString()),
+                  dataLogType: DataLogType.ERRORS.toString());
               return showCupertinoAlertDialog(
                   context: context, title: "错误", content: "拉取SM.MS图床配置失败,请重试!");
             }
@@ -147,6 +162,13 @@ class UserInformationPageState
                   File('${directory.path}/${username}_github_config.txt');
               githubLocalFile.writeAsString(githubConfigJson);
             } catch (e) {
+              FLog.error(
+                  className: 'UserInformationPageState',
+                  methodName: '_fetchconfig_githubhost',
+                  text: formatErrorMessage({
+                    'username': username,
+                  }, e.toString()),
+                  dataLogType: DataLogType.ERRORS.toString());
               return showCupertinoAlertDialog(
                   context: context,
                   title: "错误",
@@ -170,6 +192,13 @@ class UserInformationPageState
                   File('${directory.path}/${username}_imgur_config.txt');
               imgurLocalFile.writeAsString(imgurConfigJson);
             } catch (e) {
+              FLog.error(
+                  className: 'UserInformationPageState',
+                  methodName: '_fetchconfig_imgurhost',
+                  text: formatErrorMessage({
+                    'username': username,
+                  }, e.toString()),
+                  dataLogType: DataLogType.ERRORS.toString());
               return showCupertinoAlertDialog(
                   context: context, title: "错误", content: "拉取Imgur图床配置失败,请重试!");
             }
@@ -196,6 +225,13 @@ class UserInformationPageState
                   File('${directory.path}/${username}_qiniu_config.txt');
               qiniuLocalFile.writeAsString(qiniuConfigJson);
             } catch (e) {
+              FLog.error(
+                  className: 'UserInformationPageState',
+                  methodName: '_fetchconfig_qiniuhost',
+                  text: formatErrorMessage({
+                    'username': username,
+                  }, e.toString()),
+                  dataLogType: DataLogType.ERRORS.toString());
               return showCupertinoAlertDialog(
                   context: context, title: "错误", content: "拉取七牛云配置失败,请重试!");
             }
@@ -223,6 +259,13 @@ class UserInformationPageState
                   File('${directory.path}/${username}_tencent_config.txt');
               tencentLocalFile.writeAsString(tencentConfigJson);
             } catch (e) {
+              FLog.error(
+                  className: 'UserInformationPageState',
+                  methodName: '_fetchconfig_tencenthos',
+                  text: formatErrorMessage({
+                    'username': username,
+                  }, e.toString()),
+                  dataLogType: DataLogType.ERRORS.toString());
               return showCupertinoAlertDialog(
                   context: context, title: "错误", content: "拉取腾讯云配置失败,请重试!");
             }
@@ -249,6 +292,13 @@ class UserInformationPageState
                   File('${directory.path}/${username}_aliyun_config.txt');
               aliyunLocalFile.writeAsString(aliyunConfigJson);
             } catch (e) {
+              FLog.error(
+                  className: 'UserInformationPageState',
+                  methodName: '_fetchconfig_aliyunhost',
+                  text: formatErrorMessage({
+                    'username': username,
+                  }, e.toString()),
+                  dataLogType: DataLogType.ERRORS.toString());
               return showCupertinoAlertDialog(
                   context: context, title: "错误", content: "拉取阿里云配置失败,请重试!");
             }
@@ -274,6 +324,13 @@ class UserInformationPageState
                   File('${directory.path}/${username}_upyun_config.txt');
               upyunLocalFile.writeAsString(upyunConfigJson);
             } catch (e) {
+              FLog.error(
+                  className: 'UserInformationPageState',
+                  methodName: '_fetchconfig_upyunhost',
+                  text: formatErrorMessage({
+                    'username': username,
+                  }, e.toString()),
+                  dataLogType: DataLogType.ERRORS.toString());
               return showCupertinoAlertDialog(
                   context: context, title: "错误", content: "拉取又拍云配置失败,请重试!");
             }
@@ -290,6 +347,13 @@ class UserInformationPageState
         }
       }
     } catch (e) {
+      FLog.error(
+          className: 'UserInformationPageState',
+          methodName: '_fetchconfig_all',
+          text: formatErrorMessage({
+            'username': username,
+          }, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
       return showCupertinoAlertDialog(
           context: context, title: "错误", content: "拉取失败,请重试!");
     }
@@ -419,52 +483,59 @@ class UserInformationPageState
             ),
           ),
           const SizedBox(height: 20),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [CupertinoButton(
-            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-            color: const Color.fromARGB(255, 11, 148, 240),
-            child: const Text('云端拉取'),
-            onPressed: () async {
-              String currentusername = await Global.getUser();
-              var usernamecheck =
-                  await MySqlUtils.queryUser(username: currentusername);
-              String currentpassword = await Global.getPassword();
-              try {
-                if (usernamecheck['password'] == currentpassword) {
-                  showDialog(
-                      context: context,
-                      barrierDismissible: false,
-                      builder: (context) {
-                        return NetLoadingDialog(
-                          outsideDismiss: false,
-                          loading: true,
-                          loadingText: "配置中...",
-                          requestCallBack:
-                              _fetchconfig(currentusername, currentpassword),
-                        );
-                      });
+          Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+            CupertinoButton(
+              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+              color: const Color.fromARGB(255, 11, 148, 240),
+              child: const Text('云端拉取'),
+              onPressed: () async {
+                String currentusername = await Global.getUser();
+                var usernamecheck =
+                    await MySqlUtils.queryUser(username: currentusername);
+                String currentpassword = await Global.getPassword();
+                try {
+                  if (usernamecheck['password'] == currentpassword) {
+                    showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (context) {
+                          return NetLoadingDialog(
+                            outsideDismiss: false,
+                            loading: true,
+                            loadingText: "配置中...",
+                            requestCallBack:
+                                _fetchconfig(currentusername, currentpassword),
+                          );
+                        });
+                  }
+                } catch (e) {
+                  FLog.error(
+                      className: 'UserInformationPageState',
+                      methodName: '云端拉取',
+                      text: formatErrorMessage({
+                        'username': currentusername,
+                      }, e.toString()),
+                      dataLogType: DataLogType.ERRORS.toString());
+                  return showCupertinoAlertDialog(
+                      context: context, title: "错误", content: "拉取失败,请重试!");
                 }
-              } catch (e) {
-                return showCupertinoAlertDialog(
-                    context: context, title: "错误", content: "拉取失败,请重试!");
-              }
-            },
-          ),
-          const SizedBox(width: 20),
-          //logout button
-          CupertinoButton(
-            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-            color: const Color.fromARGB(255, 187, 197, 202),
-            child: const Text('注销登录'),
-            onPressed: () async {
-              await Global.setUser(' ');
-              await Global.setPassword(' ');
-              if (mounted) {
-                Navigator.pop(context);
-              }
-            },
-          ),]),
+              },
+            ),
+            const SizedBox(width: 20),
+            //logout button
+            CupertinoButton(
+              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+              color: const Color.fromARGB(255, 187, 197, 202),
+              child: const Text('注销登录'),
+              onPressed: () async {
+                await Global.setUser(' ');
+                await Global.setPassword(' ');
+                if (mounted) {
+                  Navigator.pop(context);
+                }
+              },
+            ),
+          ]),
         ],
       ),
     ]);

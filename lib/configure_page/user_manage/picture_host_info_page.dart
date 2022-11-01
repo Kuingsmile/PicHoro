@@ -4,10 +4,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:fluro/fluro.dart';
+import 'package:f_logs/f_logs.dart';
 
 import 'package:horopic/router/application.dart';
 import 'package:horopic/router/routers.dart';
 import 'package:horopic/utils/global.dart';
+import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/picture_host_manage/common_page/loading_state.dart'
     as loading_state;
 
@@ -76,20 +78,24 @@ class PictureHostInfoPageState
       ];
 
       for (var i = 0; i < pictureHostInfoList.length; i++) {
-        try{
-        String config =
-            await File(configFilePath[pictureHostInfoList[i]]!).readAsString();
-        Map<String, dynamic> configMap = jsonDecode(config);
-        Map configMap2 = {pictureHostInfoList[i]: configMap};
-        String configJson = jsonEncode(configMap2);
-        configJson = configJson.replaceAll('None', '');
-        configJson = configJson.replaceAll('keyId', 'accessKeyId');
-        configJson = configJson.replaceAll('keySecret', 'accessKeySecret');
-        configList.add(configJson);}
-        catch(e){
-          if (kDebugMode){
-            print(e);
-          }
+        try {
+          String config = await File(configFilePath[pictureHostInfoList[i]]!)
+              .readAsString();
+          Map<String, dynamic> configMap = jsonDecode(config);
+          Map configMap2 = {pictureHostInfoList[i]: configMap};
+          String configJson = jsonEncode(configMap2);
+          configJson = configJson.replaceAll('None', '');
+          configJson = configJson.replaceAll('keyId', 'accessKeyId');
+          configJson = configJson.replaceAll('keySecret', 'accessKeySecret');
+          configList.add(configJson);
+        } catch (e) {
+          FLog.error(
+              className: 'PictureHostInfoPageState',
+              methodName: 'initPictureHostInfo_1',
+              text: formatErrorMessage({
+                'pictureHostInfoList': pictureHostInfoList[i],
+              }, e.toString()),
+              dataLogType: DataLogType.ERRORS.toString());
         }
       }
       if (configList.isEmpty) {
@@ -99,6 +105,11 @@ class PictureHostInfoPageState
       }
       setState(() {});
     } catch (e) {
+      FLog.error(
+          className: 'PictureHostInfoPageState',
+          methodName: 'initPictureHostInfo_2',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
       if (mounted) {
         setState(() {
           state = loading_state.LoadState.ERROR;
