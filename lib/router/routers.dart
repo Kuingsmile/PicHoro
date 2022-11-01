@@ -12,6 +12,7 @@ class Routes {
   static String albumImagePreview = "/albumImagePreview";
   static String localImagePreview = "/localImagePreview";
   static String configurePage = "/configurePage";
+  static String configurePageLogger = "/configurePageLogger";
   static String appPassword = "/appPassword";
   static String allPShost = "/allPShost";
   static String defaultPShostSelect = "/defaultPShostSelect";
@@ -39,9 +40,13 @@ class Routes {
   static String smmsManageHomePage = "/smmsManageHomePage";
   static String smmsFileExplorer = "/smmsFileExplorer";
   static String smmsUpDownloadManagePage = "/smmsUpDownloadManagePage";
-  static String uploadManagePage = '/uploadManagePage';
   static String userInformationPage = '/userInformationPage';
   static String pictureHostInfoPage = '/pictureHostInfoPage';
+  static String aliyunBucketList = '/aliyunBucketList';
+  static String aliyunNewBucketConfig = "/aliyunNewBucketConfig";
+  static String aliyunBucketInformation = "/aliyunBucketInformation";
+  static String aliyunFileExplorer = "/aliyunFileExplorer";
+  static String aliyunUpDownloadManagePage = "/aliyunUpDownloadManagePage";
 
   static void configureRoutes(FluroRouter router) {
     router.notFoundHandler = Handler(
@@ -86,8 +91,15 @@ class Routes {
     router.define(smmsManageHomePage, handler: smmsManageHomePageHandler);
     router.define(smmsFileExplorer, handler: smmsFileExplorerHandler);
     router.define(smmsUpDownloadManagePage, handler: smmsUpDownloadFileHandler);
-    router.define(uploadManagePage, handler: uploadManagePageHandler);
     router.define(userInformationPage, handler: userInformationPageHandler);
     router.define(pictureHostInfoPage, handler: pictureHostInfoPageHandler);
+    router.define(aliyunBucketList, handler: aliyunBucketListHandler);
+    router.define(aliyunNewBucketConfig, handler: newAliyunBucketHandler);
+    router.define(aliyunBucketInformation,
+        handler: aliyunBucketInformationHandler);
+    router.define(aliyunFileExplorer, handler: aliyunFileExplorerHandler);
+    router.define(configurePageLogger, handler: logsHandler);
+    router.define(aliyunUpDownloadManagePage,
+        handler: aliyunDownloadFileHandler);
   }
 }
