@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
+import 'package:f_logs/f_logs.dart';
+
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/global.dart';
 
@@ -119,6 +121,25 @@ class UpyunImageUploadUtils {
         return ['failed'];
       }
     } catch (e) {
+      if (e is DioError) {
+        FLog.error(
+            className: "UpyunImageUploadUtils",
+            methodName: "uploadApi",
+            text: formatErrorMessage({
+              'path': path,
+              'name': name,
+            }, e.toString(), isDioError: true, dioErrorMessage: e),
+            dataLogType: DataLogType.ERRORS.toString());
+      } else {
+        FLog.error(
+            className: "UpyunImageUploadUtils",
+            methodName: "uploadApi",
+            text: formatErrorMessage({
+              'path': path,
+              'name': name,
+            }, e.toString()),
+            dataLogType: DataLogType.ERRORS.toString());
+      }
       return [e.toString()];
     }
   }
@@ -181,6 +202,23 @@ class UpyunImageUploadUtils {
         return ["failed"];
       }
     } catch (e) {
+      if (e is DioError) {
+        FLog.error(
+            className: "UpyunImageUploadUtils",
+            methodName: "deleteApi",
+            text: formatErrorMessage({
+              'fileName': fileName,
+            }, e.toString(), isDioError: true, dioErrorMessage: e),
+            dataLogType: DataLogType.ERRORS.toString());
+      } else {
+        FLog.error(
+            className: "UpyunImageUploadUtils",
+            methodName: "deleteApi",
+            text: formatErrorMessage({
+              'fileName': fileName,
+            }, e.toString()),
+            dataLogType: DataLogType.ERRORS.toString());
+      }
       return [e.toString()];
     }
   }

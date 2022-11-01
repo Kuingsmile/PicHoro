@@ -3,12 +3,12 @@ import 'dart:io';
 import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
 import 'package:qiniu_flutter_sdk/qiniu_flutter_sdk.dart';
+import 'package:f_logs/f_logs.dart';
 
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/global.dart';
 
 class QiniuImageUploadUtils {
-  //没用到，先留着
   static Map<String, String> areaHostMap = {
     'z0': 'https://upload.qiniup.com', //华东
     'cn-east-2': 'https://upload-cn-east-2.qiniup.com', //华东 浙江2
@@ -154,6 +154,25 @@ class QiniuImageUploadUtils {
         return ['failed'];
       }
     } catch (e) {
+      if (e is DioError) {
+        FLog.error(
+            className: "QiniuUpload",
+            methodName: "uploadApi",
+            text: formatErrorMessage({
+              'path': path,
+              'name': name,
+            }, e.toString(), isDioError: true, dioErrorMessage: e),
+            dataLogType: DataLogType.ERRORS.toString());
+      } else {
+        FLog.error(
+            className: "QiniuUpload",
+            methodName: "uploadApi",
+            text: formatErrorMessage({
+              'path': path,
+              'name': name,
+            }, e.toString()),
+            dataLogType: DataLogType.ERRORS.toString());
+      }
       return [e.toString()];
     }
   }
@@ -216,6 +235,23 @@ class QiniuImageUploadUtils {
         return ["failed"];
       }
     } catch (e) {
+      if (e is DioError) {
+        FLog.error(
+            className: "QiniuUpload",
+            methodName: "deleteApi",
+            text: formatErrorMessage({
+              'fileName': fileName,
+            }, e.toString(), isDioError: true, dioErrorMessage: e),
+            dataLogType: DataLogType.ERRORS.toString());
+      } else {
+        FLog.error(
+            className: "QiniuUpload",
+            methodName: "deleteApi",
+            text: formatErrorMessage({
+              'fileName': fileName,
+            }, e.toString()),
+            dataLogType: DataLogType.ERRORS.toString());
+      }
       return [e.toString()];
     }
   }

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:f_logs/f_logs.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/global.dart';
 
@@ -90,6 +91,25 @@ class GithubImageUploadUtils {
         return ["failed"];
       }
     } catch (e) {
+      if (e is DioError) {
+        FLog.error(
+            className: "GithubImageUploadUtils",
+            methodName: "uploadApi",
+            text: formatErrorMessage({
+              'path': path,
+              'name': name,
+            }, e.toString(), isDioError: true, dioErrorMessage: e),
+            dataLogType: DataLogType.ERRORS.toString());
+      } else {
+        FLog.error(
+            className: "GithubImageUploadUtils",
+            methodName: "uploadApi",
+            text: formatErrorMessage({
+              'path': path,
+              'name': name,
+            }, e.toString()),
+            dataLogType: DataLogType.ERRORS.toString());
+      }
       return [e.toString()];
     }
   }
@@ -138,6 +158,20 @@ class GithubImageUploadUtils {
         return ["failed"];
       }
     } catch (e) {
+      if (e is DioError) {
+        FLog.error(
+            className: "GithubImageUploadUtils",
+            methodName: "deleteApi",
+            text: formatErrorMessage({}, e.toString(),
+                isDioError: true, dioErrorMessage: e),
+            dataLogType: DataLogType.ERRORS.toString());
+      } else {
+        FLog.error(
+            className: "GithubImageUploadUtils",
+            methodName: "deleteApi",
+            text: formatErrorMessage({}, e.toString()),
+            dataLogType: DataLogType.ERRORS.toString());
+      }
       return [e.toString()];
     }
   }

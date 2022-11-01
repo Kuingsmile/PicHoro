@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
+import 'package:f_logs/f_logs.dart';
 import 'package:path/path.dart' as my_path;
 
 import 'package:horopic/utils/common_functions.dart';
@@ -26,7 +28,7 @@ class AliyunImageUploadUtils {
         customUrl = 'http://$customUrl';
       }
     }
-    //格式haul
+    //格式化
     if (aliyunpath != 'None') {
       if (aliyunpath.startsWith('/')) {
         aliyunpath = aliyunpath.substring(1);
@@ -57,19 +59,19 @@ class AliyunImageUploadUtils {
     String singature = base64.encode(Hmac(sha1, utf8.encode(keySecret))
         .convert(utf8.encode(base64Policy))
         .bytes);
-    FormData formData = FormData.fromMap({
+    Map<String, dynamic> formMap = {
       'key': urlpath,
       'OSSAccessKeyId': keyId,
       'policy': base64Policy,
       'Signature': singature,
-      'x-oss-content-type':
-          'image/${my_path.extension(path).replaceFirst('.', '')}',
       'file': await MultipartFile.fromFile(path, filename: name),
-    });
+    };
+    if (getContentType(my_path.extension(path)) != null) {
+      formMap['x-oss-content-type'] = getContentType(my_path.extension(path));
+    }
+    FormData formData = FormData.fromMap(formMap);
     BaseOptions baseoptions = BaseOptions(
-      //连接服务器超时时间，单位是毫秒.
       connectTimeout: 30000,
-      //响应超时时间。
       receiveTimeout: 30000,
       sendTimeout: 30000,
     );
@@ -133,6 +135,25 @@ class AliyunImageUploadUtils {
         return ['failed'];
       }
     } catch (e) {
+      if (e is DioError) {
+        FLog.error(
+            className: "AliyunImageUploadUtils",
+            methodName: "uploadApi",
+            text: formatErrorMessage({
+              'path': path,
+              'name': name,
+            }, e.toString(), isDioError: true, dioErrorMessage: e),
+            dataLogType: DataLogType.ERRORS.toString());
+      } else {
+        FLog.error(
+            className: "AliyunImageUploadUtils",
+            methodName: "uploadApi",
+            text: formatErrorMessage({
+              'path': path,
+              'name': name,
+            }, e.toString()),
+            dataLogType: DataLogType.ERRORS.toString());
+      }
       return [e.toString()];
     }
   }
@@ -199,6 +220,23 @@ class AliyunImageUploadUtils {
         return ["failed"];
       }
     } catch (e) {
+      if (e is DioError) {
+        FLog.error(
+            className: "AliyunImageUploadUtils",
+            methodName: "deleteApi",
+            text: formatErrorMessage({
+              'fileName': fileName,
+            }, e.toString(), isDioError: true, dioErrorMessage: e),
+            dataLogType: DataLogType.ERRORS.toString());
+      } else {
+        FLog.error(
+            className: "AliyunImageUploadUtils",
+            methodName: "deleteApi",
+            text: formatErrorMessage({
+              'fileName': fileName,
+            }, e.toString()),
+            dataLogType: DataLogType.ERRORS.toString());
+      }
       return [e.toString()];
     }
   }
