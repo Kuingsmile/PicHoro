@@ -3,9 +3,7 @@
   <h1>PicHoro</h1>
 </div>
 
-&emsp;&emsp;一款基于flutter的移动端图片上传和图床管理工具，最新版本**V1.8.3**，与PicGo配置互通，可直接扫码导入，主要功能包括上传，查看，删除图片和直接管理图床仓库。
-
-&emsp;&emsp;**请注意，注册新用户时，密码必须是8位纯数字！**
+&emsp;&emsp;一款基于flutter的移动端图片上传和图床管理工具，最新版本**V1.8.4**，与PicGo配置互通，可直接扫码导入，主要功能包括上传，查看，删除图片和直接管理图床仓库。
 
 &emsp;&emsp;已支持如下图床：
 
@@ -36,6 +34,7 @@
 - **支持直接管理图床仓库，目前已实现对腾讯云COS的管理，相当于内置了一个精简版的腾讯COSbrowser**
 - **支持扫描二维码将PicGo(v2.3.0-beta.2以上版本)配置文件直接导入PicHoro**
 - 支持将PicHoro的配置导出至剪贴板，导出格式与PicGo配置文件相同，可直接导入PicGo
+- 可查看和导出软件日志，快捷查找问题和报告bug
 
 ## 应用截图
 
@@ -43,7 +42,7 @@
   <tr>
     <td><img src="http://imgx.horosama.com/admin_uploads/2022/10/2022_10_28_635bdaa1381c4.jpg" width="200" height="400" alt=""/></td>
     <td><img src="http://imgx.horosama.com/admin_uploads/2022/10/2022_10_28_635bdbc4b1817.jpg" width="200" height="400" alt=""/></td>
-    <td><img src="http://imgx.horosama.com/admin_uploads/2022/10/2022_10_24_63566d00767ac.jpg" width="200" height="400" alt=""/></td>
+    <td><img src="http://imgx.horosama.com/admin_uploads/2022/11/2022_11_01_6360d77d9ffde.jpg" width="200" height="400" alt=""/></td>
   </tr>
    <tr>
     <td><img src="http://imgx.horosama.com/admin_uploads/2022/10/2022_10_15_634a630aa7563.jpg" width="200" height="400" alt=""/></td>
@@ -51,7 +50,7 @@
     <td><img src="http://imgx.horosama.com/admin_uploads/2022/10/2022_10_15_634a630b8b481.jpg" width="200" height="400" alt=""/></td>
   </tr>
    <tr>
-    <td><img src="http://imgx.horosama.com/admin_uploads/2022/10/2022_10_25_6357e3ec2d390.jpg" width="200" height="400" alt=""/></td>
+    <td><img src="http://imgx.horosama.com/admin_uploads/2022/11/2022_11_01_6360d77d9cfd4.jpg" width="200" height="400" alt=""/></td>
     <td><img src="http://imgx.horosama.com/admin_uploads/2022/10/2022_10_24_6356546ee6731.jpg" width="200" height="400" alt=""/></td>
     <td><img src="http://imgx.horosama.com/admin_uploads/2022/10/2022_10_24_6356548f45f14.jpg" width="200" height="400" alt=""/></td>
   </tr>
@@ -66,6 +65,17 @@
 
   详细更新日志请查看[更新日志](https://github.com/Kuingsmile/PicHoro/blob/main/Version_update_log.md "更新日志")
 
+- 2022-11-01: **V1.84**:
+  - 新增：图床仓库管理功能增加了对**阿里云**的支持。
+  - 新增：修改了上传文件时重命名的逻辑，现在不会同步重命名本地文件了。**感谢@Yurzi的建议**。
+  - 新增：自定义文件重命名现在增加了异常处理，并且由于重命名逻辑的修改，现在可以使用'/'来同步新建文件夹了。**感谢@Yurzi的建议**。
+  - 新增：增加了异常错误的日志记录和查看功能，并支持导出为txt文件和同步复制到剪贴板。**感谢@Yurzi的建议**。
+  - 新增：优化了用户注册时用户名和密码的输入规则，现在不强求必须是8位纯数字了，仅要求不包括空白字符，同时优化了不合法输入的提示信息。**感谢@chancat87的建议**。
+  - 新增：增加了当用户密码不是8位纯数字时的加密和解密规则，已注册用户不受影响。
+  - 新增：上传界面从网络链接获取图片时，加入了loading窗口提示，防止用户误以为程序卡死。
+  - 优化：修改了部分窗口的提示语使其更加清晰。
+  - 修复：修复了在图床管理界面，从剪贴板获取文件的时候，链接中带有?查询字符串时，无法正确获取文件名的问题。
+  - 修复：修复了图床管理文件浏览界面，按文件大小排序时，排序结果不正确的问题。
 - 2022-10-27: **V1.83**: *本次更新后重点将放在剩余6个图床的管理功能的添加上*
 
   - 新增：上传页面重新设计，将主要功能放在了浮动按钮上，主页面用来显示上传列表，避免上传照片比较多时，一直卡在没有进度提示的loading窗口，单张拍照和连续上传两个功能仍沿用旧的上传方式。
@@ -114,14 +124,6 @@
   - 重写了路由管理，优化了路由跳转的体验，修改了跳转动画。
   - 主页/相册/设置页面现在不会左上角出现返回按钮，更加美观。
   - 优化了主页在深色主题下的显示效果
-- 2022-10-15: **V1.75**:
-
-  - 增加了对阿里云OSS的支持
-  - 增加了对又拍云存储的支持
-  - 增加了导出图床配置到剪贴板的功能，导出格式为json
-  - 增加了从剪贴板中的图片链接直接获取图片的功能，并且可以通过换行符分隔多个图片链接来一次性获取多张图片
-  - 增加了上传的时候自定义文件名的功能，使用 `{Y}`、`{y}`、`{m}`、`{d}`、`{uuid}`、`{md5}`等占位符，可选年月日，uuid，md5，随机字符串等任意组合来自定义文件名。
-  - 增加了手动清除缓存的功能
 - 2022-10-02: **V1.00**:
 
   - 项目初始化，完成基本的上传功能，目前仅支持兰空图床，需要手动授予存储和相机权限
@@ -130,13 +132,14 @@
 
 **安卓版**：
 
-[https://www.horosama.com/self_apk/PicHoro_V1.8.3.apk](https://www.horosama.com/self_apk/PicHoro_V1.8.3.apk)
+[https://www.horosama.com/self_apk/PicHoro_V1.8.4.apk](https://www.horosama.com/self_apk/PicHoro_V1.8.4.apk)
 
 ## 开发计划
 
 - 增加图床管理功能，完成全部图床管理功能的实现后升至2.0版本，目前已支持管理:
   - [X] 腾讯云COS
   - [X] SM.MS
+  - [X] 阿里云OSS
 - 增加对各种图床平台的,已完成对PicGo默认支持的7个图床和兰空图床的支持。-**已实现**
 - 增加网络URL上传图片的功能-**已实现**
 - 增加软件更新后保留本地配置的功能-**部分实现，APP内升级可以保留配置**
