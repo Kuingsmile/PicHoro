@@ -4,6 +4,8 @@ title: "[Feature]: "
 labels: ["feature request"]
 assignees:
   - Kuingsmile
+labels:
+  - enhancement
 body:
   - type: markdown
     attributes:
