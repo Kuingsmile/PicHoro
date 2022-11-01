@@ -1,7 +1,10 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:f_logs/f_logs.dart';
 import 'package:extended_image/extended_image.dart';
+
+import 'package:horopic/utils/common_functions.dart';
 
 class LocalImagePreview extends StatefulWidget {
   final int index;
@@ -29,6 +32,8 @@ class LocalImagePreviewState extends State<LocalImagePreview> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        elevation: 0,
+        centerTitle: true,
         title: const Text('图片预览'),
       ),
       body: PageView.builder(
@@ -41,11 +46,11 @@ class LocalImagePreviewState extends State<LocalImagePreview> {
         physics: const BouncingScrollPhysics(),
         itemBuilder: (context, index) {
           try {
-            return ExtendedImage.file(
+            return Image.file(
               File(widget.images[index]),
               fit: BoxFit.contain,
-              mode: ExtendedImageMode.gesture,
-              initGestureConfigHandler: (state) {
+              //mode: ExtendedImageMode.gesture,
+              /* initGestureConfigHandler: (state) {
                 return GestureConfig(
                     minScale: 0.9,
                     animationMinScale: 0.7,
@@ -55,9 +60,15 @@ class LocalImagePreviewState extends State<LocalImagePreview> {
                     inertialSpeed: 100.0,
                     initialScale: 1.0,
                     inPageView: true);
-              },
+              },*/
             );
           } catch (e) {
+            FLog.error(
+                className: 'LocalImagePreviewState',
+                methodName: 'build',
+                text: formatErrorMessage({}, e.toString()),
+                dataLogType: DataLogType.ERRORS.toString());
+
             return Container();
           }
         },
