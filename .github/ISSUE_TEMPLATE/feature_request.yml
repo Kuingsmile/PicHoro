@@ -3,12 +3,12 @@ description: 功能请求
 title: "[Feature]: "
 labels: ["feature request"]
 assignees:
-  - molunerfinn
+  - Kuingsmile
 body:
   - type: markdown
     attributes:
       value: |+
-        ## PicHoro Issue 模板
+        ## PicHoro Feature 模板
 
         请依照该模板来提交，否则将会被关闭。
 

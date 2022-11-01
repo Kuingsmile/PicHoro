@@ -1,5 +1,5 @@
 name: " Bug Report"
-description: 提交一个问题 / Report a bug
+description: 提交一个问题 
 title: "[Bug]: "
 labels: ["bug"]
 assignees:
@@ -8,7 +8,7 @@ body:
   - type: markdown
     attributes:
       value: |+
-        ## PicHoro Issue 模板
+        ## PicHoro Bug Report 模板
 
         请依照该模板来提交，否则将会被关闭。
 
