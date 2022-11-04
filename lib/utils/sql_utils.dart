@@ -913,4 +913,239 @@ class MySqlUtils {
       await conn.close();
     }
   }
+
+  static queryUpyunManage({required String username}) async {
+    var conn = await MySqlConnection.connect(settings);
+    try {
+      var results = await conn
+          .query('select * from upyunmanage where username = ?', [username]);
+
+      if (results.isEmpty) {
+        return "Empty";
+      }
+      Map<String, dynamic> resultsMap = {};
+      resultsMap.clear();
+      for (var row in results) {
+        //第一列是id
+        String email = await decryptSelf(row[1].toString());
+        String password = await decryptSelf(row[2].toString());
+        String token = await decryptSelf(row[3].toString());
+        String tokenname = await decryptSelf(row[4].toString());
+        resultsMap['email'] = email;
+        resultsMap['password'] = password;
+        resultsMap['token'] = token;
+        resultsMap['tokenname'] = tokenname;
+      }
+      return resultsMap;
+    } catch (e) {
+      FLog.error(
+          className: 'MySqlUtils',
+          methodName: 'queryUpyunManage',
+          text: formatErrorMessage({'username': username}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
+      return "Error";
+    } finally {
+      await conn.close();
+    }
+  }
+
+  static insertUpyunManage({required List content}) async {
+    var conn = await MySqlConnection.connect(settings);
+    try {
+      String email = content[0].toString();
+      String password = content[1].toString();
+      String token = content[2].toString();
+      String tokenName = content[3].toString();
+      String username = content[4].toString();
+
+      String encryptedEmail = await encryptSelf(email);
+      String encryptedPassword = await encryptSelf(password);
+      String encryptedToken = await encryptSelf(token);
+      String encryptedTokenName = await encryptSelf(tokenName);
+
+      await conn.query(
+          "insert into upyunmanage (email,password,token,tokenname,username) values (?,?,?,?,?)",
+          [
+            encryptedEmail,
+            encryptedPassword,
+            encryptedToken,
+            encryptedTokenName,
+            username
+          ]);
+      return 'Success';
+    } catch (e) {
+      FLog.error(
+          className: 'MySqlUtils',
+          methodName: 'insertUpyunManage',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
+      return "Error";
+    } finally {
+      await conn.close();
+    }
+  }
+
+  static updateUpyunManage({required List content}) async {
+    var conn = await MySqlConnection.connect(settings);
+
+    try {
+      String email = content[0].toString();
+      String password = content[1].toString();
+      String token = content[2].toString();
+      String tokenName = content[3].toString();
+      String username = content[4].toString();
+
+      String encryptedEmail = await encryptSelf(email);
+      String encryptedPassword = await encryptSelf(password);
+      String encryptedToken = await encryptSelf(token);
+      String encryptedTokenName = await encryptSelf(tokenName);
+
+      await conn.query(
+          "update upyunmanage set email = ?,password = ?,token = ?,tokenname = ? where username = ?",
+          [
+            encryptedEmail,
+            encryptedPassword,
+            encryptedToken,
+            encryptedTokenName,
+            username
+          ]);
+      return 'Success';
+    } catch (e) {
+      FLog.error(
+          className: 'MySqlUtils',
+          methodName: 'updateUpyunManage',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
+      return "Error";
+    } finally {
+      await conn.close();
+    }
+  }
+
+  static queryUpyunOperator({required String username}) async {
+    var conn = await MySqlConnection.connect(settings);
+    try {
+      var results = await conn
+          .query('select * from upyunoperator where username = ?', [username]);
+
+      if (results.isEmpty) {
+        return "Empty";
+      }
+      Map<String, dynamic> resultsMap = {};
+      resultsMap.clear();
+      for (var row in results) {
+        //第一列是id
+        int id = row[0];
+        String bucket = await decryptSelf(row[1].toString());
+        String email = await decryptSelf(row[2].toString());
+        String operator = await decryptSelf(row[3].toString());
+        String password = await decryptSelf(row[4].toString());
+        resultsMap['id'] = id;
+        resultsMap['bucket'] = bucket;
+        resultsMap['email'] = email;
+        resultsMap['operator'] = operator;
+        resultsMap['password'] = password;
+      }
+      return resultsMap;
+    } catch (e) {
+      FLog.error(
+          className: 'MySqlUtils',
+          methodName: 'queryUpyunOperator',
+          text: formatErrorMessage({'username': username}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
+      return "Error";
+    } finally {
+      await conn.close();
+    }
+  }
+
+  static insertUpyunOperator({required List content}) async {
+    var conn = await MySqlConnection.connect(settings);
+    try {
+      String bucket = content[0].toString();
+      String email = content[1].toString();
+      String operator = content[2].toString();
+      String password = content[3].toString();
+      String username = content[4].toString();
+
+      String encryptedBucket = await encryptSelf(bucket);
+      String encryptedEmail = await encryptSelf(email);
+      String encryptedOperator = await encryptSelf(operator);
+      String encryptedPassword = await encryptSelf(password);
+
+      await conn.query(
+          "insert into upyunoperator (bucket,email,operator,password,username) values (?,?,?,?,?)",
+          [
+            encryptedBucket,
+            encryptedEmail,
+            encryptedOperator,
+            encryptedPassword,
+            username
+          ]);
+      return 'Success';
+    } catch (e) {
+      FLog.error(
+          className: 'MySqlUtils',
+          methodName: 'insertUpyunOperator',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
+      return "Error";
+    } finally {
+      await conn.close();
+    }
+  }
+
+  static updateUpyunOperator({required List content}) async {
+    var conn = await MySqlConnection.connect(settings);
+
+    try {
+      String bucket = content[0].toString();
+      String email = content[1].toString();
+      String operator = content[2].toString();
+      String password = content[3].toString();
+      String username = content[4].toString();
+
+      String encryptedBucket = await encryptSelf(bucket);
+      String encryptedEmail = await encryptSelf(email);
+      String encryptedOperator = await encryptSelf(operator);
+      String encryptedPassword = await encryptSelf(password);
+
+      await conn.query(
+          "update upyunoperator set bucket = ?,email = ?,operator = ?,password = ? where username = ?",
+          [
+            encryptedBucket,
+            encryptedEmail,
+            encryptedOperator,
+            encryptedPassword,
+            username
+          ]);
+      return 'Success';
+    } catch (e) {
+      FLog.error(
+          className: 'MySqlUtils',
+          methodName: 'updateUpyunOperator',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
+      return "Error";
+    } finally {
+      await conn.close();
+    }
+  }
+
+  static deleteUpyunOperator({required int id}) async {
+    var conn = await MySqlConnection.connect(settings);
+    try {
+      await conn.query('delete from upyunoperator where id = ?', [id]);
+      return 'Success';
+    } catch (e) {
+      FLog.error(
+          className: 'MySqlUtils',
+          methodName: 'deleteUpyunOperator',
+          text: formatErrorMessage({'id': id}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
+      return "Error";
+    } finally {
+      await conn.close();
+    }
+  }
 }
