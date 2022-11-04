@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:fluro/fluro.dart';
+import 'package:f_logs/f_logs.dart';
 
 import 'package:horopic/router/application.dart';
 import 'package:horopic/router/routers.dart';
 import 'package:horopic/picture_host_manage/common_page/loading_state.dart'
     as loading_state;
 import 'package:horopic/picture_host_manage/manage_api/smms_manage_api.dart';
+import 'package:horopic/utils/global.dart';
+import 'package:horopic/utils/sql_utils.dart';
+import 'package:horopic/utils/common_functions.dart';
 
 class SmmsManageHomePage extends StatefulWidget {
   const SmmsManageHomePage({Key? key}) : super(key: key);
@@ -25,15 +29,50 @@ class SmmsManageHomePageState
   }
 
   initProfile() async {
-    var profileMap = await SmmsManageAPI.getUserProfile();
-    if (profileMap[0] == 'success') {
-      userProfile = profileMap[1];
-      state = loading_state.LoadState.SUCCESS;
-    } else {
-      state = loading_state.LoadState.ERROR;
-    }
-    if (mounted) {
-      setState(() {});
+    try {
+      String currentUser = await Global.getUser();
+      String defaultPassword = await Global.getPassword();
+      var queryuser = await MySqlUtils.queryUser(username: currentUser);
+      if (queryuser == 'Empty') {
+        setState(() {
+          state = loading_state.LoadState.ERROR;
+        });
+        return showToast('请先登录');
+      } else if (queryuser['password'] != defaultPassword) {
+        setState(() {
+          state = loading_state.LoadState.ERROR;
+        });
+        return showToast('请先登录');
+      }
+      var querySmms = await MySqlUtils.querySmms(username: currentUser);
+      if (querySmms == 'Empty') {
+        setState(() {
+          state = loading_state.LoadState.ERROR;
+        });
+        return showToast('请先去配置SM.MS');
+      }
+      var profileMap = await SmmsManageAPI.getUserProfile();
+      if (profileMap[0] == 'success') {
+        userProfile = profileMap[1];
+        state = loading_state.LoadState.SUCCESS;
+      } else {
+        state = loading_state.LoadState.ERROR;
+      }
+      if (mounted) {
+        setState(() {});
+      }
+    } catch (e) {
+      FLog.error(
+          className: 'SmmsManageHomePageState',
+          methodName: 'initProfile',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
+      if (mounted) {
+        setState(() {
+          state = loading_state.LoadState.ERROR;
+        });
+      }
+      showToast('获取用户信息失败');
     }
   }
 
@@ -140,8 +179,12 @@ class SmmsManageHomePageState
               title: const Text('文件管理'),
               trailing: const Icon(Icons.arrow_forward_ios),
               onTap: () {
-                Application.router.navigateTo(context, Routes.smmsFileExplorer,
-                    transition: TransitionType.native);
+                Application.router
+                    .navigateTo(context, Routes.smmsFileExplorer,
+                        transition: TransitionType.cupertino)
+                    .then((value) => setState(() {
+                          initProfile();
+                        }));
               },
             ),
           ),
