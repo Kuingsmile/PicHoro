@@ -106,7 +106,7 @@ class DownloadManager {
     } catch (e) {
       if (e is DioError) {
         FLog.error(
-            className: 'DownloadManager',
+            className: 'smmsDownloadManager',
             methodName: 'download',
             text: formatErrorMessage({
               'url': url,
@@ -115,7 +115,7 @@ class DownloadManager {
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
-            className: 'DownloadManager',
+            className: 'smmsDownloadManager',
             methodName: 'download',
             text: formatErrorMessage({
               'url': url,
