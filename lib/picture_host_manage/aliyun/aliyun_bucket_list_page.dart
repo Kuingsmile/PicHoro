@@ -12,6 +12,8 @@ import 'package:horopic/picture_host_manage/common_page/loading_state.dart'
     as loading_state;
 import 'package:horopic/picture_host_manage/manage_api/aliyun_manage_api.dart';
 import 'package:horopic/utils/common_functions.dart';
+import 'package:horopic/utils/global.dart';
+import 'package:horopic/utils/sql_utils.dart';
 
 class AliyunBucketList extends StatefulWidget {
   const AliyunBucketList({Key? key}) : super(key: key);
@@ -49,6 +51,28 @@ class AliyunBucketListState
   initBucketList() async {
     bucketMap.clear();
     try {
+      String currentUser = await Global.getUser();
+      String defaultPassword = await Global.getPassword();
+      var queryuser = await MySqlUtils.queryUser(username: currentUser);
+      if (queryuser == 'Empty') {
+        setState(() {
+          state = loading_state.LoadState.ERROR;
+        });
+        return showToast('请先登录');
+      } else if (queryuser['password'] != defaultPassword) {
+        setState(() {
+          state = loading_state.LoadState.ERROR;
+        });
+        return showToast('请先登录');
+      }
+      var queryAliyun = await MySqlUtils.queryAliyun(username: currentUser);
+      if (queryAliyun == 'Empty') {
+        setState(() {
+          state = loading_state.LoadState.ERROR;
+        });
+        return showToast('请先去配置阿里云');
+      }
+
       var bucketListResponse = await AliyunManageAPI.getBucketList();
 
       //判断是否获取成功
@@ -57,6 +81,7 @@ class AliyunBucketListState
           setState(() {
             state = loading_state.LoadState.ERROR;
           });
+          showToast('获取失败');
         }
         refreshController.refreshCompleted();
         return;
@@ -112,7 +137,7 @@ class AliyunBucketListState
           state = loading_state.LoadState.ERROR;
         });
       }
-      showToast('请先登录或添加配置');
+      showToast('获取失败');
       refreshController.refreshCompleted();
     }
   }
