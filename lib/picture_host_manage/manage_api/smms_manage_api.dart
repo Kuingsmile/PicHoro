@@ -231,7 +231,8 @@ class SmmsManageAPI {
     try {
       String filename =
           fileLink.substring(fileLink.lastIndexOf("/") + 1, fileLink.length);
-      filename = filename.substring(0, filename.indexOf("?"));
+      filename = filename.substring(
+          0, !filename.contains("?") ? filename.length : filename.indexOf("?"));
       String savePath = await getTemporaryDirectory().then((value) {
         return value.path;
       });
