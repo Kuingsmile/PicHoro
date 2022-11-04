@@ -4,17 +4,18 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:extended_image/extended_image.dart';
+import 'package:external_path/external_path.dart';
 import 'package:fluro/fluro.dart';
 import 'package:f_logs/f_logs.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:flutter/services.dart' as flutter_services;
 import 'package:path/path.dart' as my_path;
-import 'package:external_path/external_path.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
+
 import 'package:msh_checkbox/msh_checkbox.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
-import 'package:extended_image/extended_image.dart';
 
 import 'package:horopic/album/load_state_change.dart';
 import 'package:horopic/picture_host_manage/manage_api/smms_manage_api.dart';
@@ -278,21 +279,32 @@ class SmmsFileExplorerState
                                   files.add(fileImage);
                                 }
                               }
-                              await showDialog(
-                                  context: context,
-                                  barrierDismissible: false,
-                                  builder: (context) {
-                                    return NetLoadingDialog(
-                                      outsideDismiss: false,
-                                      loading: true,
-                                      loadingText: "上传中...",
-                                      requestCallBack:
-                                          SmmsManageAPI.upLoadFileEntry(
-                                        files,
-                                      ),
-                                    );
-                                  });
-                              _getFileList();
+                              Map configMap =
+                                  await SmmsManageAPI.getConfigMap();
+                              String token = configMap['token'];
+                              for (int i = 0; i < files.length; i++) {
+                                List uploadList = [
+                                  files[i].path,
+                                  my_path.basename(files[i].path),
+                                  token
+                                ];
+                                String uploadListStr = jsonEncode(uploadList);
+                                Global.smmsUploadList.add(uploadListStr);
+                              }
+                              await Global.setSmmsUploadList(
+                                  Global.smmsUploadList);
+                              String downloadPath = await ExternalPath
+                                  .getExternalStoragePublicDirectory(
+                                      ExternalPath.DIRECTORY_DOWNLOADS);
+                              if (mounted) {
+                                Application.router
+                                    .navigateTo(context,
+                                        '/smmsUpDownloadManagePage?downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=0',
+                                        transition: TransitionType.inFromRight)
+                                    .then((value) {
+                                  _getFileList();
+                                });
+                              }
                             }
                           },
                         ),
@@ -357,19 +369,21 @@ class SmmsFileExplorerState
           ),
           IconButton(
               onPressed: () async {
-                List downloadList = [];
-                List savedFileNameList = [];
                 String downloadPath =
                     await ExternalPath.getExternalStoragePublicDirectory(
                         ExternalPath.DIRECTORY_DOWNLOADS);
+                int index = 1;
+                if (Global.smmsDownloadList.isEmpty) {
+                  index = 0;
+                }
                 if (mounted) {
                   Application.router.navigateTo(context,
-                      '/smmsUpDownloadManagePage?savedFileNameList=${Uri.encodeComponent(jsonEncode(savedFileNameList))}&downloadList=${Uri.encodeComponent(jsonEncode(downloadList))}&downloadPath=${Uri.encodeComponent(downloadPath)}',
+                      '/smmsUpDownloadManagePage?downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=$index',
                       transition: TransitionType.inFromRight);
                 }
               },
               icon: const Icon(
-                Icons.system_update_tv_outlined,
+                Icons.import_export,
                 size: 25,
               )),
           IconButton(
@@ -474,31 +488,31 @@ class SmmsFileExplorerState
                     showToastWithContext(context, '没有选择文件');
                     return;
                   }
-
                   List downloadList = [];
                   for (int i = 0; i < allInfoList.length; i++) {
                     if (selectedFilesBool[i]) {
                       downloadList.add(allInfoList[i]);
                     }
                   }
-
-                  List urlList = [];
+                  if (downloadList.isEmpty) {
+                    showToast('没有选择文件');
+                    return;
+                  }
                   for (int i = 0; i < downloadList.length; i++) {
-                    urlList.add(downloadList[i]['url']);
+                    Global.smmsDownloadList.add(downloadList[i]['url']);
                   }
 
-                  List savedFileNameList = [];
                   for (int i = 0; i < downloadList.length; i++) {
-                    savedFileNameList.add(downloadList[i]['filename']);
+                    Global.smmsSavedNameList.add(downloadList[i]['filename']);
                   }
-
                   String downloadPath =
                       await ExternalPath.getExternalStoragePublicDirectory(
                           ExternalPath.DIRECTORY_DOWNLOADS);
-                  // ignore: use_build_context_synchronously
-                  Application.router.navigateTo(context,
-                      '/smmsUpDownloadManagePage?savedFileNameList=${Uri.encodeComponent(jsonEncode(savedFileNameList))}&downloadList=${Uri.encodeComponent(jsonEncode(urlList))}&downloadPath=${Uri.encodeComponent(downloadPath)}',
-                      transition: TransitionType.inFromRight);
+                  if (mounted) {
+                    Application.router.navigateTo(context,
+                        '/smmsUpDownloadManagePage?downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=1',
+                        transition: TransitionType.inFromRight);
+                  }
                 },
                 child: const Icon(
                   Icons.download,
@@ -587,21 +601,44 @@ class SmmsFileExplorerState
 
   @override
   Widget buildEmpty() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Image.asset(
-            'assets/images/empty.png',
-            width: 100,
-            height: 100,
+    return SmartRefresher(
+        controller: refreshController,
+        enablePullDown: true,
+        enablePullUp: false,
+        header: const ClassicHeader(
+          refreshStyle: RefreshStyle.Follow,
+          idleText: '下拉刷新',
+          refreshingText: '正在刷新',
+          completeText: '刷新完成',
+          failedText: '刷新失败',
+          releaseText: '释放刷新',
+        ),
+        footer: const ClassicFooter(
+          loadStyle: LoadStyle.ShowWhenLoading,
+          idleText: '上拉加载',
+          loadingText: '正在加载',
+          noDataText: '没有更多啦',
+          failedText: '没有更多啦',
+          canLoadingText: '释放加载',
+        ),
+        onRefresh: _onrefresh,
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Image.asset(
+                'assets/images/empty.png',
+                width: 100,
+                height: 100,
+              ),
+              const Center(
+                  child: Text('        没有文件哦，点击右上角添加吧\n刚上传的文件可能需要一段时间才能显示',
+                      style: TextStyle(
+                          fontSize: 20,
+                          color: Color.fromARGB(136, 121, 118, 118))))
+            ],
           ),
-          const Text('没有文件哦，点击右上角添加吧',
-              style: TextStyle(
-                  fontSize: 20, color: Color.fromARGB(136, 121, 118, 118)))
-        ],
-      ),
-    );
+        ));
   }
 
   @override
@@ -647,195 +684,202 @@ class SmmsFileExplorerState
 
   @override
   Widget buildSuccess() {
-    return SmartRefresher(
-      controller: refreshController,
-      enablePullDown: true,
-      enablePullUp: false,
-      header: const ClassicHeader(
-        refreshStyle: RefreshStyle.Follow,
-        idleText: '下拉刷新',
-        refreshingText: '正在刷新',
-        completeText: '刷新完成',
-        failedText: '刷新失败',
-        releaseText: '释放刷新',
-      ),
-      footer: const ClassicFooter(
-        loadStyle: LoadStyle.ShowWhenLoading,
-        idleText: '上拉加载',
-        loadingText: '正在加载',
-        noDataText: '没有更多啦',
-        failedText: '没有更多啦',
-        canLoadingText: '释放加载',
-      ),
-      onRefresh: _onrefresh,
-      child: ListView.builder(
-        itemCount: allInfoList.length,
-        itemBuilder: (context, index) {
-          return Container(
-            padding: const EdgeInsets.only(left: 10, right: 10),
-            child: Column(
-              children: [
-                Slidable(
-                    direction: Axis.horizontal,
-                    endActionPane: ActionPane(
-                      motion: const ScrollMotion(),
-                      children: [
-                        SlidableAction(
-                          onPressed: (BuildContext context) {
-                            String shareUrl = allInfoList[index]['url'];
-                            Share.share(shareUrl);
-                          },
-                          autoClose: true,
-                          padding: EdgeInsets.zero,
-                          backgroundColor:
-                              const Color.fromARGB(255, 109, 196, 116),
-                          foregroundColor: Colors.white,
-                          icon: Icons.share,
-                          label: '分享',
-                        ),
-                        SlidableAction(
-                          onPressed: (BuildContext context) async {
-                            showCupertinoDialog(
-                                barrierDismissible: true,
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return CupertinoAlertDialog(
-                                    title: const Text('通知'),
-                                    content: Text(
-                                        '确定要删除${allInfoList[index]['filename']}吗？'),
-                                    actions: <Widget>[
-                                      CupertinoDialogAction(
-                                        child: const Text('取消',
-                                            style:
-                                                TextStyle(color: Colors.blue)),
-                                        onPressed: () {
-                                          Navigator.pop(context);
-                                        },
-                                      ),
-                                      CupertinoDialogAction(
-                                        child: const Text('确定',
-                                            style:
-                                                TextStyle(color: Colors.blue)),
-                                        onPressed: () async {
-                                          Navigator.pop(context);
-                                          var result =
-                                              await SmmsManageAPI.deleteFile(
-                                                  allInfoList[index]['hash']);
-                                          if (result[0] == 'success') {
-                                            showToast('删除成功');
-                                            setState(() {
-                                              allInfoList.removeAt(index);
-                                              selectedFilesBool.removeAt(index);
-                                            });
-                                          } else {
-                                            showToast('删除失败');
-                                          }
-                                        },
-                                      ),
-                                    ],
-                                  );
-                                });
-                          },
-                          backgroundColor: const Color(0xFFFE4A49),
-                          foregroundColor: Colors.white,
-                          icon: Icons.delete,
-                          label: '删除',
-                        ),
-                      ],
-                    ),
-                    child: Stack(fit: StackFit.loose, children: [
-                      Container(
-                        color: selectedFilesBool[index]
-                            ? const Color(0x311192F3)
-                            : Colors.transparent,
-                        child: ListTile(
-                          minLeadingWidth: 0,
-                          minVerticalPadding: 0,
-                          leading: SizedBox(
-                            width: 50,
-                            height: 50,
-                            child: iconImageLoad(index),
+    if (allInfoList.isEmpty) {
+      return buildEmpty();
+    } else {
+      return SmartRefresher(
+        controller: refreshController,
+        enablePullDown: true,
+        enablePullUp: false,
+        header: const ClassicHeader(
+          refreshStyle: RefreshStyle.Follow,
+          idleText: '下拉刷新',
+          refreshingText: '正在刷新',
+          completeText: '刷新完成',
+          failedText: '刷新失败',
+          releaseText: '释放刷新',
+        ),
+        footer: const ClassicFooter(
+          loadStyle: LoadStyle.ShowWhenLoading,
+          idleText: '上拉加载',
+          loadingText: '正在加载',
+          noDataText: '没有更多啦',
+          failedText: '没有更多啦',
+          canLoadingText: '释放加载',
+        ),
+        onRefresh: _onrefresh,
+        child: ListView.builder(
+          itemCount: allInfoList.length,
+          itemBuilder: (context, index) {
+            return Container(
+              padding: const EdgeInsets.only(left: 10, right: 10),
+              child: Column(
+                children: [
+                  Slidable(
+                      direction: Axis.horizontal,
+                      endActionPane: ActionPane(
+                        motion: const ScrollMotion(),
+                        children: [
+                          SlidableAction(
+                            onPressed: (BuildContext context) {
+                              String shareUrl = allInfoList[index]['url'];
+                              Share.share(shareUrl);
+                            },
+                            autoClose: true,
+                            padding: EdgeInsets.zero,
+                            backgroundColor:
+                                const Color.fromARGB(255, 109, 196, 116),
+                            foregroundColor: Colors.white,
+                            icon: Icons.share,
+                            label: '分享',
                           ),
-                          title: Text(
-                              allInfoList[index]['filename'].length > 20
-                                  ? allInfoList[index]['filename']
-                                          .substring(0, 10) +
-                                      '...' +
-                                      allInfoList[index]['filename'].substring(
-                                          allInfoList[index]['filename']
-                                                  .length -
-                                              10)
-                                  : allInfoList[index]['filename'],
-                              style: const TextStyle(fontSize: 14)),
-                          subtitle: Text(
-                            allInfoList[index]['created_at'] +
-                                '   ' +
-                                getFileSize(allInfoList[index]['size']),
-                            style: const TextStyle(fontSize: 12),
-                          ),
-                          trailing: IconButton(
-                            icon: const Icon(Icons.more_horiz),
-                            onPressed: () {
-                              showModalBottomSheet(
-                                  isScrollControlled: true,
+                          SlidableAction(
+                            onPressed: (BuildContext context) async {
+                              showCupertinoDialog(
+                                  barrierDismissible: true,
                                   context: context,
-                                  builder: (context) {
-                                    return buildBottomSheetWidget(
-                                      context,
-                                      index,
+                                  builder: (BuildContext context) {
+                                    return CupertinoAlertDialog(
+                                      title: const Text('通知'),
+                                      content: Text(
+                                          '确定要删除${allInfoList[index]['filename']}吗？'),
+                                      actions: <Widget>[
+                                        CupertinoDialogAction(
+                                          child: const Text('取消',
+                                              style: TextStyle(
+                                                  color: Colors.blue)),
+                                          onPressed: () {
+                                            Navigator.pop(context);
+                                          },
+                                        ),
+                                        CupertinoDialogAction(
+                                          child: const Text('确定',
+                                              style: TextStyle(
+                                                  color: Colors.blue)),
+                                          onPressed: () async {
+                                            Navigator.pop(context);
+                                            var result =
+                                                await SmmsManageAPI.deleteFile(
+                                                    allInfoList[index]['hash']);
+                                            if (result[0] == 'success') {
+                                              showToast('删除成功');
+                                              setState(() {
+                                                allInfoList.removeAt(index);
+                                                selectedFilesBool
+                                                    .removeAt(index);
+                                              });
+                                            } else {
+                                              showToast('删除失败');
+                                            }
+                                          },
+                                        ),
+                                      ],
                                     );
                                   });
                             },
+                            backgroundColor: const Color(0xFFFE4A49),
+                            foregroundColor: Colors.white,
+                            icon: Icons.delete,
+                            label: '删除',
                           ),
-                          onTap: () async {
-                            String urlList = '';
-                            for (var i = 0; i < allInfoList.length; i++) {
-                              urlList += allInfoList[i]['url'] + ',';
-                            }
-                            Application.router.navigateTo(this.context,
-                                '${Routes.albumImagePreview}?index=$index&images=${Uri.encodeComponent(urlList)}',
-                                transition: TransitionType.none);
-                          },
-                        ),
+                        ],
                       ),
-                      Positioned(
-                        // ignore: sort_child_properties_last
-                        child: Container(
-                          decoration: const BoxDecoration(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(55)),
-                              color: Color.fromARGB(255, 235, 242, 248)),
-                          padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-                          child: MSHCheckbox(
-                            uncheckedColor: Colors.blue,
-                            size: 16,
-                            checkedColor: Colors.blue,
-                            value: selectedFilesBool[index],
-                            style: MSHCheckboxStyle.fillScaleCheck,
-                            onChanged: (selected) {
-                              setState(() {
-                                if (selected) {
-                                  selectedFilesBool[index] = true;
-                                } else {
-                                  selectedFilesBool[index] = false;
-                                }
-                              });
+                      child: Stack(fit: StackFit.loose, children: [
+                        Container(
+                          color: selectedFilesBool[index]
+                              ? const Color(0x311192F3)
+                              : Colors.transparent,
+                          child: ListTile(
+                            minLeadingWidth: 0,
+                            minVerticalPadding: 0,
+                            leading: SizedBox(
+                              width: 50,
+                              height: 50,
+                              child: iconImageLoad(index),
+                            ),
+                            title: Text(
+                                allInfoList[index]['filename'].length > 20
+                                    ? allInfoList[index]['filename']
+                                            .substring(0, 10) +
+                                        '...' +
+                                        allInfoList[index]['filename']
+                                            .substring(allInfoList[index]
+                                                        ['filename']
+                                                    .length -
+                                                10)
+                                    : allInfoList[index]['filename'],
+                                style: const TextStyle(fontSize: 14)),
+                            subtitle: Text(
+                              allInfoList[index]['created_at'] +
+                                  '   ' +
+                                  getFileSize(allInfoList[index]['size']),
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                            trailing: IconButton(
+                              icon: const Icon(Icons.more_horiz),
+                              onPressed: () {
+                                showModalBottomSheet(
+                                    isScrollControlled: true,
+                                    context: context,
+                                    builder: (context) {
+                                      return buildBottomSheetWidget(
+                                        context,
+                                        index,
+                                      );
+                                    });
+                              },
+                            ),
+                            onTap: () async {
+                              String urlList = '';
+                              for (var i = 0; i < allInfoList.length; i++) {
+                                urlList += allInfoList[i]['url'] + ',';
+                              }
+
+                              Application.router.navigateTo(this.context,
+                                  '${Routes.albumImagePreview}?index=$index&images=${Uri.encodeComponent(urlList)}',
+                                  transition: TransitionType.none);
                             },
                           ),
                         ),
-                        left: 0,
-                        top: 25,
-                      ),
-                    ])),
-                const Divider(
-                  height: 1,
-                )
-              ],
-            ),
-          );
-        },
-      ),
-    );
+                        Positioned(
+                          // ignore: sort_child_properties_last
+                          child: Container(
+                            decoration: const BoxDecoration(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(55)),
+                                color: Color.fromARGB(255, 235, 242, 248)),
+                            padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+                            child: MSHCheckbox(
+                              uncheckedColor: Colors.blue,
+                              size: 16,
+                              checkedColor: Colors.blue,
+                              value: selectedFilesBool[index],
+                              style: MSHCheckboxStyle.fillScaleCheck,
+                              onChanged: (selected) {
+                                setState(() {
+                                  if (selected) {
+                                    selectedFilesBool[index] = true;
+                                  } else {
+                                    selectedFilesBool[index] = false;
+                                  }
+                                });
+                              },
+                            ),
+                          ),
+                          left: 0,
+                          top: 25,
+                        ),
+                      ])),
+                  const Divider(
+                    height: 1,
+                  )
+                ],
+              ),
+            );
+          },
+        ),
+      );
+    }
   }
 
   iconImageLoad(int index) {
