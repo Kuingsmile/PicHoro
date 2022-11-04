@@ -95,6 +95,9 @@ class UpyunImageUploadUtils {
       if (response.statusCode == 200) {
         String returnUrl = '';
         String displayUrl = '';
+        if (urlpath.startsWith('/')) {
+          urlpath = urlpath.substring(1);
+        }
 
         if (!url.endsWith('/')) {
           returnUrl = '$url/$urlpath';
@@ -176,8 +179,9 @@ class UpyunImageUploadUtils {
     );
     var date = HttpDate.format(DateTime.now());
     String method = 'DELETE';
-    String canonicalizedResource = '/$bucket/$urlpath';
-    String stringToSign = '$method&$canonicalizedResource&$date';
+    String uri = '/$bucket/$urlpath';
+    String codedUri = Uri.encodeFull(uri);
+    String stringToSign = '$method&$codedUri&$date';
     String passwordMd5 = md5.convert(utf8.encode(password)).toString();
     String signature = base64.encode(Hmac(sha1, utf8.encode(passwordMd5))
         .convert(utf8.encode(stringToSign))
