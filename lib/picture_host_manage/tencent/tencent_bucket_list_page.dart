@@ -12,6 +12,8 @@ import 'package:horopic/picture_host_manage/common_page/loading_state.dart'
     as loading_state;
 import 'package:horopic/picture_host_manage/manage_api/tencent_manage_api.dart';
 import 'package:horopic/utils/common_functions.dart';
+import 'package:horopic/utils/global.dart';
+import 'package:horopic/utils/sql_utils.dart';
 
 class TencentBucketList extends StatefulWidget {
   const TencentBucketList({Key? key}) : super(key: key);
@@ -49,6 +51,27 @@ class TencentBucketListState
   initBucketList() async {
     bucketMap.clear();
     try {
+      String currentUser = await Global.getUser();
+      String defaultPassword = await Global.getPassword();
+      var queryuser = await MySqlUtils.queryUser(username: currentUser);
+      if (queryuser == 'Empty') {
+        setState(() {
+          state = loading_state.LoadState.ERROR;
+        });
+        return showToast('请先登录');
+      } else if (queryuser['password'] != defaultPassword) {
+        setState(() {
+          state = loading_state.LoadState.ERROR;
+        });
+        return showToast('请先登录');
+      }
+      var queryTencent = await MySqlUtils.queryTencent(username: currentUser);
+      if (queryTencent == 'Empty') {
+        setState(() {
+          state = loading_state.LoadState.ERROR;
+        });
+        return showToast('请先去配置腾讯云');
+      }
       var bucketListResponse = await TencentManageAPI.getBucketList();
       //判断是否获取成功
       if (bucketListResponse[0] != 'success') {
@@ -109,7 +132,7 @@ class TencentBucketListState
           state = loading_state.LoadState.ERROR;
         });
       }
-      showToast('请先登录或添加配置');
+      showToast('获取失败');
       refreshController.refreshCompleted();
     }
   }
@@ -267,10 +290,8 @@ class TencentBucketListState
           ),
           itemBuilder: (context, element) {
             return ListTile(
-                //dense: true,
                 minLeadingWidth: 0,
                 contentPadding: const EdgeInsets.only(left: 20, right: 20),
-                // visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
                 leading: const Icon(
                   IconData(0xe6ab, fontFamily: 'iconfont'),
                   color: Colors.blue,
@@ -292,11 +313,9 @@ class TencentBucketListState
                       if (result[0] == 'success') {
                         var granteeURI = result[1]['AccessControlPolicy']
                             ['AccessControlList']['Grant'];
-
                         if (granteeURI is! List) {
                           granteeURI = [granteeURI];
                         }
-
                         bool publicRead = false;
                         bool publicWrite = false;
                         for (int i = 0; i < granteeURI.length; i++) {
