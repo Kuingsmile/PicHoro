@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 
 import 'package:extended_image/extended_image.dart';
 import 'package:fluro/fluro.dart';
@@ -336,7 +335,7 @@ class UploadedImagesState extends State<UploadedImages>
                             child: const Text('Github',
                                 textAlign: TextAlign.center),
                             onPressed: () {
-                              Global.defaultShowedPBhost = 'github';
+                              Global.setShowedPBhost('github');
                               Navigator.pop(context);
                               _currentPage = 0;
                               _onRefresh();
@@ -346,7 +345,7 @@ class UploadedImagesState extends State<UploadedImages>
                             child: const Text('Imgur',
                                 textAlign: TextAlign.center),
                             onPressed: () {
-                              Global.defaultShowedPBhost = 'imgur';
+                              Global.setShowedPBhost('imgur');
                               Navigator.pop(context);
                               _currentPage = 0;
                               _onRefresh();
@@ -356,7 +355,7 @@ class UploadedImagesState extends State<UploadedImages>
                             child:
                                 const Text('七牛云', textAlign: TextAlign.center),
                             onPressed: () {
-                              Global.defaultShowedPBhost = 'qiniu';
+                              Global.setShowedPBhost('qiniu');
                               Navigator.pop(context);
                               _currentPage = 0;
                               _onRefresh();
@@ -366,7 +365,7 @@ class UploadedImagesState extends State<UploadedImages>
                             child:
                                 const Text('腾讯云', textAlign: TextAlign.center),
                             onPressed: () {
-                              Global.defaultShowedPBhost = 'tencent';
+                              Global.setShowedPBhost('tencent');
                               Navigator.pop(context);
                               _currentPage = 0;
                               _onRefresh();
@@ -376,7 +375,7 @@ class UploadedImagesState extends State<UploadedImages>
                             child:
                                 const Text('阿里云', textAlign: TextAlign.center),
                             onPressed: () {
-                              Global.defaultShowedPBhost = 'aliyun';
+                              Global.setShowedPBhost('aliyun');
                               Navigator.pop(context);
                               _currentPage = 0;
                               _onRefresh();
@@ -386,7 +385,7 @@ class UploadedImagesState extends State<UploadedImages>
                             child:
                                 const Text('又拍云', textAlign: TextAlign.center),
                             onPressed: () {
-                              Global.defaultShowedPBhost = 'upyun';
+                              Global.setShowedPBhost('upyun');
                               Navigator.pop(context);
                               _currentPage = 0;
                               _onRefresh();
@@ -680,9 +679,15 @@ class UploadedImagesState extends State<UploadedImages>
           "name": showedImageName[
               imagesIndex[i] + (_currentPage * _perPageItemSize) - i],
         };
+
         if (deleteCloud) {
-          await deleterentry(deleteConfig);
+          var result = await deleterentry(deleteConfig);
+          if (result[0] != 'success') {
+            showToast('云端删除失败');
+            return;
+          }
         }
+
         await AlbumSQL.deleteData(
             Global.imageDB!,
             Global.defaultShowedPBhost,
@@ -749,7 +754,11 @@ class UploadedImagesState extends State<UploadedImages>
         "name": showedImageName[index + (_currentPage * _perPageItemSize)],
       };
       if (deleteCloud) {
-        await deleterentry(deleteConfig);
+        var result = await deleterentry(deleteConfig);
+        if (result[0] != 'success') {
+          showToast('云端删除失败');
+          return;
+        }
       }
 
       await AlbumSQL.deleteData(Global.imageDB!, Global.defaultShowedPBhost,
