@@ -79,7 +79,6 @@ class TencentFileExplorerState
       }
       return;
     }
-    //get the bucket list
     var res2 = await TencentManageAPI.queryBucketFiles(
       widget.element,
       {'prefix': widget.bucketPrefix, 'delimiter': '/'},
@@ -465,22 +464,35 @@ class TencentFileExplorerState
                                 List<File> files = pickresult.paths
                                     .map((path) => File(path!))
                                     .toList();
-                                await showDialog(
-                                    context: context,
-                                    barrierDismissible: false,
-                                    builder: (context) {
-                                      return NetLoadingDialog(
-                                        outsideDismiss: false,
-                                        loading: true,
-                                        loadingText: "上传中...",
-                                        requestCallBack:
-                                            TencentManageAPI.upLoadFileEntry(
-                                                files,
-                                                widget.element,
-                                                widget.bucketPrefix),
-                                      );
-                                    });
-                                _getBucketList();
+                                Map configMap =
+                                    await TencentManageAPI.getConfigMap();
+                                configMap['bucket'] = widget.element['name'];
+                                configMap['area'] = widget.element['location'];
+                                configMap['path'] = widget.bucketPrefix;
+                                for (int i = 0; i < files.length; i++) {
+                                  List uploadList = [
+                                    files[i].path,
+                                    my_path.basename(files[i].path),
+                                    configMap
+                                  ];
+                                  String uploadListStr = jsonEncode(uploadList);
+                                  Global.tencentUploadList.add(uploadListStr);
+                                }
+                                await Global.setTencentUploadList(
+                                    Global.tencentUploadList);
+                                String downloadPath = await ExternalPath
+                                    .getExternalStoragePublicDirectory(
+                                        ExternalPath.DIRECTORY_DOWNLOADS);
+                                if (mounted) {
+                                  Application.router
+                                      .navigateTo(context,
+                                          '/tencentUpDownloadManagePage?bucketName=${widget.element['name']}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=0',
+                                          transition:
+                                              TransitionType.inFromRight)
+                                      .then((value) {
+                                    _getBucketList();
+                                  });
+                                }
                               }
                             },
                           ),
@@ -511,22 +523,35 @@ class TencentFileExplorerState
                                     files.add(fileImage);
                                   }
                                 }
-                                await showDialog(
-                                    context: context,
-                                    barrierDismissible: false,
-                                    builder: (context) {
-                                      return NetLoadingDialog(
-                                        outsideDismiss: false,
-                                        loading: true,
-                                        loadingText: "上传中...",
-                                        requestCallBack:
-                                            TencentManageAPI.upLoadFileEntry(
-                                                files,
-                                                widget.element,
-                                                widget.bucketPrefix),
-                                      );
-                                    });
-                                _getBucketList();
+                                Map configMap =
+                                    await TencentManageAPI.getConfigMap();
+                                configMap['bucket'] = widget.element['name'];
+                                configMap['area'] = widget.element['location'];
+                                configMap['path'] = widget.bucketPrefix;
+                                for (int i = 0; i < files.length; i++) {
+                                  List uploadList = [
+                                    files[i].path,
+                                    my_path.basename(files[i].path),
+                                    configMap
+                                  ];
+                                  String uploadListStr = jsonEncode(uploadList);
+                                  Global.tencentUploadList.add(uploadListStr);
+                                }
+                                await Global.setTencentUploadList(
+                                    Global.tencentUploadList);
+                                String downloadPath = await ExternalPath
+                                    .getExternalStoragePublicDirectory(
+                                        ExternalPath.DIRECTORY_DOWNLOADS);
+                                if (mounted) {
+                                  Application.router
+                                      .navigateTo(context,
+                                          '/tencentUpDownloadManagePage?bucketName=${widget.element['name']}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=0',
+                                          transition:
+                                              TransitionType.inFromRight)
+                                      .then((value) {
+                                    _getBucketList();
+                                  });
+                                }
                               }
                             },
                           ),
@@ -629,17 +654,26 @@ class TencentFileExplorerState
               )),
           IconButton(
               onPressed: () async {
-                List downloadList = [];
                 String downloadPath =
                     await ExternalPath.getExternalStoragePublicDirectory(
                         ExternalPath.DIRECTORY_DOWNLOADS);
                 // ignore: use_build_context_synchronously
-                Application.router.navigateTo(context,
-                    '/tencentUpDownloadManagePage?bucketName=${widget.element['name']}&downloadList=${Uri.encodeComponent(jsonEncode(downloadList))}&downloadPath=${Uri.encodeComponent(downloadPath)}',
-                    transition: TransitionType.inFromRight);
+                int index = 1;
+                if (Global.tencentDownloadList.isEmpty) {
+                  index = 0;
+                }
+                if (mounted) {
+                  Application.router
+                      .navigateTo(context,
+                          '/tencentUpDownloadManagePage?bucketName=${widget.element['name']}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=$index',
+                          transition: TransitionType.inFromRight)
+                      .then((value) {
+                    _getBucketList();
+                  });
+                }
               },
               icon: const Icon(
-                Icons.system_update_tv_outlined,
+                Icons.import_export,
                 size: 25,
               )),
           IconButton(
@@ -732,16 +766,19 @@ class TencentFileExplorerState
                   }
                   String hostPrefix =
                       'https://${widget.element['name']}.cos.${widget.element['location']}.myqcloud.com/';
-                  List urlList = [];
+                  List<String> urlList = [];
                   for (int i = 0; i < downloadList.length; i++) {
                     urlList.add(hostPrefix + downloadList[i]['Key']);
                   }
+                  Global.tencentDownloadList.addAll(urlList);
+                  await Global.setTencentDownloadList(
+                      Global.tencentDownloadList);
                   String downloadPath =
                       await ExternalPath.getExternalStoragePublicDirectory(
                           ExternalPath.DIRECTORY_DOWNLOADS);
                   // ignore: use_build_context_synchronously
                   Application.router.navigateTo(context,
-                      '/tencentUpDownloadManagePage?bucketName=${widget.element['name']}&downloadList=${Uri.encodeComponent(jsonEncode(urlList))}&downloadPath=${Uri.encodeComponent(downloadPath)}',
+                      '/tencentUpDownloadManagePage?bucketName=${widget.element['name']}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=1',
                       transition: TransitionType.inFromRight);
                 },
                 child: const Icon(
@@ -867,7 +904,7 @@ class TencentFileExplorerState
     } catch (e) {
       FLog.error(
           className: "TencentManagePage",
-          methodName: "uploadNetworkFileEntry",
+          methodName: "deleteAll",
           text: formatErrorMessage({
             'toDelete': toDelete,
           }, e.toString()),
@@ -939,260 +976,43 @@ class TencentFileExplorerState
   //build the file list with filetype icon ，name and last modified time
   @override
   Widget buildSuccess() {
-    return SmartRefresher(
-      controller: refreshController,
-      enablePullDown: true,
-      enablePullUp: false,
-      header: const ClassicHeader(
-        refreshStyle: RefreshStyle.Follow,
-        idleText: '下拉刷新',
-        refreshingText: '正在刷新',
-        completeText: '刷新完成',
-        failedText: '刷新失败',
-        releaseText: '释放刷新',
-      ),
-      footer: const ClassicFooter(
-        loadStyle: LoadStyle.ShowWhenLoading,
-        idleText: '上拉加载',
-        loadingText: '正在加载',
-        noDataText: '没有更多啦',
-        failedText: '没有更多啦',
-        canLoadingText: '释放加载',
-      ),
-      onRefresh: _onrefresh,
-      child: ListView.builder(
-        itemCount: allInfoList.length,
-        itemBuilder: (context, index) {
-          if (index < dirAllInfoList.length) {
-            return Container(
-              padding: const EdgeInsets.only(left: 10, right: 10),
-              child: Column(
-                children: [
-                  Slidable(
-                    direction: Axis.horizontal,
-                    endActionPane: ActionPane(
-                      motion: const ScrollMotion(),
-                      children: [
-                        SlidableAction(
-                          onPressed: (BuildContext context) async {
-                            showCupertinoDialog(
-                                barrierDismissible: true,
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return CupertinoAlertDialog(
-                                    title: const Text('通知'),
-                                    content: Text(
-                                        '确定要删除${allInfoList[index]['Prefix']}吗？'),
-                                    actions: <Widget>[
-                                      CupertinoDialogAction(
-                                        child: const Text('取消',
-                                            style:
-                                                TextStyle(color: Colors.blue)),
-                                        onPressed: () {
-                                          Navigator.pop(context);
-                                        },
-                                      ),
-                                      CupertinoDialogAction(
-                                        child: const Text('确定',
-                                            style:
-                                                TextStyle(color: Colors.blue)),
-                                        onPressed: () async {
-                                          Navigator.pop(context);
-                                          Global.operateDone = false;
-                                          await showDialog(
-                                              context: context,
-                                              barrierDismissible: false,
-                                              builder: (context) {
-                                                return NetLoadingDialog(
-                                                  outsideDismiss: false,
-                                                  loading: true,
-                                                  loadingText: "删除中...",
-                                                  requestCallBack:
-                                                      TencentManageAPI
-                                                          .deleteFolder(
-                                                              widget.element,
-                                                              allInfoList[index]
-                                                                  ['Prefix']),
-                                                );
-                                              });
-                                          while (!Global.operateDone) {
-                                            await Future.delayed(const Duration(
-                                                milliseconds: 250));
-                                          }
-                                          Global.operateDone = false;
-                                          var queryResult =
-                                              await TencentManageAPI
-                                                  .queryBucketFiles(
-                                                      widget.element, {
-                                            'prefix': widget.bucketPrefix,
-                                            'delimiter': '/'
-                                          });
-                                          var dir = queryResult[1]
-                                                  ['ListBucketResult']
-                                              ['CommonPrefixes'];
-                                          if (dir == null) {
-                                            showToast('删除成功');
-                                            setState(() {
-                                              allInfoList.removeAt(index);
-                                              dirAllInfoList.removeAt(index);
-                                              selectedFilesBool.removeAt(index);
-                                            });
-                                          } else if (dir != null) {
-                                            if (dir is! List) {
-                                              dir = [dir];
-                                            }
-                                            bool deleted = true;
-                                            for (var element in dir) {
-                                              if (allInfoList[index]
-                                                      ['Prefix'] ==
-                                                  element['Prefix']) {
-                                                deleted = false;
-                                                break;
-                                              }
-                                            }
-                                            if (deleted == true) {
-                                              showToast('删除成功');
-                                              setState(() {
-                                                allInfoList.removeAt(index);
-                                                dirAllInfoList.removeAt(index);
-                                                selectedFilesBool
-                                                    .removeAt(index);
-                                              });
-                                            } else {
-                                              showToast('删除失败');
-                                            }
-                                          }
-                                        },
-                                      ),
-                                    ],
-                                  );
-                                });
-                          },
-                          backgroundColor: const Color(0xFFFE4A49),
-                          foregroundColor: Colors.white,
-                          spacing: 0,
-                          icon: Icons.delete,
-                          label: '删除',
-                        ),
-                      ],
-                    ),
-                    child: Stack(
-                      fit: StackFit.loose,
-                      children: [
-                        Container(
-                          color: selectedFilesBool[index]
-                              ? const Color(0x311192F3)
-                              : Colors.transparent,
-                          child: ListTile(
-                            minLeadingWidth: 0,
-                            minVerticalPadding: 0,
-                            // dense: true,
-                            leading: Image.asset(
-                              'assets/icons/folder.png',
-                              width: 30,
-                              height: 32,
-                            ),
-                            title: Text(
-                                allInfoList[index]['Prefix']
-                                    .substring(0,
-                                        allInfoList[index]['Prefix'].length - 1)
-                                    .split('/')
-                                    .last,
-                                style: const TextStyle(fontSize: 16)),
-                            trailing: IconButton(
-                              icon: const Icon(Icons.more_horiz),
-                              onPressed: () {
-                                String iconPath = 'assets/icons/folder.png';
-                                showModalBottomSheet(
-                                    isScrollControlled: true,
-                                    context: context,
-                                    builder: (context) {
-                                      return buildFolderBottomSheetWidget(
-                                          context, index, iconPath);
-                                    });
-                              },
-                            ),
-                            onTap: () {
-                              String prefix = allInfoList[index]['Prefix'];
-                              Application.router.navigateTo(context,
-                                  '${Routes.tencentFileExplorer}?element=${Uri.encodeComponent(jsonEncode(widget.element))}&bucketPrefix=${Uri.encodeComponent(prefix)}',
-                                  transition: TransitionType.cupertino);
-                            },
-                          ),
-                        ),
-                        Positioned(
-                          // ignore: sort_child_properties_last
-                          child: Container(
-                            decoration: const BoxDecoration(
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(55)),
-                                color: Color.fromARGB(255, 235, 242, 248)),
-                            padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-                            child: MSHCheckbox(
-                              uncheckedColor: Colors.blue,
-                              size: 17,
-                              checkedColor: Colors.blue,
-                              value: selectedFilesBool[index],
-                              style: MSHCheckboxStyle.fillScaleCheck,
-                              onChanged: (selected) {
-                                setState(() {
-                                  if (selected) {
-                                    selectedFilesBool[index] = true;
-                                  } else {
-                                    selectedFilesBool[index] = false;
-                                  }
-                                });
-                              },
-                            ),
-                          ),
-                          left: -0.5,
-                          top: 20,
-                        )
-                      ],
-                    ),
-                  ),
-                  const Divider(
-                    height: 1,
-                  )
-                ],
-              ),
-            );
-          } else {
-            String fileExtension = allInfoList[index]['Key'].split('.').last;
-            String iconPath = 'assets/icons/';
-            if (fileExtension == '') {
-              iconPath += '_blank.png';
-            } else if (Global.iconList.contains(fileExtension)) {
-              iconPath += '$fileExtension.png';
-            } else {
-              iconPath += 'unknown.png';
-            }
-            return Container(
-              padding: const EdgeInsets.only(left: 10, right: 10),
-              child: Column(
-                children: [
-                  Slidable(
-                      key: Key(allInfoList[index]['Key']),
+    if (allInfoList.isEmpty) {
+      return buildEmpty();
+    } else {
+      return SmartRefresher(
+        controller: refreshController,
+        enablePullDown: true,
+        enablePullUp: false,
+        header: const ClassicHeader(
+          refreshStyle: RefreshStyle.Follow,
+          idleText: '下拉刷新',
+          refreshingText: '正在刷新',
+          completeText: '刷新完成',
+          failedText: '刷新失败',
+          releaseText: '释放刷新',
+        ),
+        footer: const ClassicFooter(
+          loadStyle: LoadStyle.ShowWhenLoading,
+          idleText: '上拉加载',
+          loadingText: '正在加载',
+          noDataText: '没有更多啦',
+          failedText: '没有更多啦',
+          canLoadingText: '释放加载',
+        ),
+        onRefresh: _onrefresh,
+        child: ListView.builder(
+          itemCount: allInfoList.length,
+          itemBuilder: (context, index) {
+            if (index < dirAllInfoList.length) {
+              return Container(
+                padding: const EdgeInsets.only(left: 10, right: 10),
+                child: Column(
+                  children: [
+                    Slidable(
                       direction: Axis.horizontal,
                       endActionPane: ActionPane(
-                        // A motion is a widget used to control how the pane animates.
                         motion: const ScrollMotion(),
-                        // A pane can dismiss the Slidable.
                         children: [
-                          SlidableAction(
-                            onPressed: (BuildContext context) {
-                              String shareUrl =
-                                  'https://${widget.element['name']}.cos.${widget.element['location']}.myqcloud.com/${allInfoList[index]['Key']}';
-                              Share.share(shareUrl);
-                            },
-                            autoClose: true,
-                            padding: EdgeInsets.zero,
-                            backgroundColor:
-                                const Color.fromARGB(255, 109, 196, 116),
-                            foregroundColor: Colors.white,
-                            icon: Icons.share,
-                            label: '分享',
-                          ),
                           SlidableAction(
                             onPressed: (BuildContext context) async {
                               showCupertinoDialog(
@@ -1202,7 +1022,7 @@ class TencentFileExplorerState
                                     return CupertinoAlertDialog(
                                       title: const Text('通知'),
                                       content: Text(
-                                          '确定要删除${allInfoList[index]['Key']}吗？'),
+                                          '确定要删除${allInfoList[index]['Prefix']}吗？'),
                                       actions: <Widget>[
                                         CupertinoDialogAction(
                                           child: const Text('取消',
@@ -1218,18 +1038,73 @@ class TencentFileExplorerState
                                                   color: Colors.blue)),
                                           onPressed: () async {
                                             Navigator.pop(context);
-                                            var result = await TencentManageAPI
-                                                .deleteFile(widget.element,
-                                                    allInfoList[index]['Key']);
-                                            if (result[0] == 'success') {
+                                            Global.operateDone = false;
+                                            await showDialog(
+                                                context: context,
+                                                barrierDismissible: false,
+                                                builder: (context) {
+                                                  return NetLoadingDialog(
+                                                    outsideDismiss: false,
+                                                    loading: true,
+                                                    loadingText: "删除中...",
+                                                    requestCallBack:
+                                                        TencentManageAPI
+                                                            .deleteFolder(
+                                                                widget.element,
+                                                                allInfoList[
+                                                                        index]
+                                                                    ['Prefix']),
+                                                  );
+                                                });
+                                            while (!Global.operateDone) {
+                                              await Future.delayed(
+                                                  const Duration(
+                                                      milliseconds: 250));
+                                            }
+                                            Global.operateDone = false;
+                                            var queryResult =
+                                                await TencentManageAPI
+                                                    .queryBucketFiles(
+                                                        widget.element, {
+                                              'prefix': widget.bucketPrefix,
+                                              'delimiter': '/'
+                                            });
+                                            var dir = queryResult[1]
+                                                    ['ListBucketResult']
+                                                ['CommonPrefixes'];
+                                            if (dir == null) {
                                               showToast('删除成功');
                                               setState(() {
                                                 allInfoList.removeAt(index);
+                                                dirAllInfoList.removeAt(index);
                                                 selectedFilesBool
                                                     .removeAt(index);
                                               });
-                                            } else {
-                                              showToast('删除失败');
+                                            } else if (dir != null) {
+                                              if (dir is! List) {
+                                                dir = [dir];
+                                              }
+                                              bool deleted = true;
+                                              for (var element in dir) {
+                                                if (allInfoList[index]
+                                                        ['Prefix'] ==
+                                                    element['Prefix']) {
+                                                  deleted = false;
+                                                  break;
+                                                }
+                                              }
+                                              if (deleted == true) {
+                                                showToast('删除成功');
+                                                setState(() {
+                                                  allInfoList.removeAt(index);
+                                                  dirAllInfoList
+                                                      .removeAt(index);
+                                                  selectedFilesBool
+                                                      .removeAt(index);
+                                                });
+                                              } else {
+                                                showToast('删除失败');
+                                              }
                                             }
                                           },
                                         ),
@@ -1239,172 +1114,350 @@ class TencentFileExplorerState
                             },
                             backgroundColor: const Color(0xFFFE4A49),
                             foregroundColor: Colors.white,
+                            spacing: 0,
                             icon: Icons.delete,
                             label: '删除',
                           ),
                         ],
                       ),
-                      child: Stack(fit: StackFit.loose, children: [
-                        Container(
-                          color: selectedFilesBool[index]
-                              ? const Color(0x311192F3)
-                              : Colors.transparent,
-                          child: ListTile(
-                            minLeadingWidth: 0,
-                            minVerticalPadding: 0,
-                            //dense: true,
-                            leading: Image.asset(
-                              iconPath,
-                              width: 30,
-                              height: 30,
-                            ),
-                            title: Text(
-                                allInfoList[index]['Key']
-                                            .split('/')
-                                            .last
-                                            .length >
-                                        20
-                                    ? allInfoList[index]['Key']
-                                            .split('/')
-                                            .last
-                                            .substring(0, 10) +
-                                        '...' +
-                                        allInfoList[index]['Key']
-                                            .split('/')
-                                            .last
-                                            .substring(allInfoList[index]['Key']
-                                                    .split('/')
-                                                    .last
-                                                    .length -
-                                                10)
-                                    : allInfoList[index]['Key'].split('/').last,
-                                style: const TextStyle(fontSize: 14)),
-                            subtitle: Text(
-                                '${allInfoList[index]['LastModified'].toString().replaceAll('T', ' ').replaceAll('Z', '').substring(0, 19)}  ${(double.parse(allInfoList[index]['Size']) / 1024 / 1024 / 1024 > 1 ? '${(double.parse(allInfoList[index]['Size']) / 1024 / 1024 / 1024).toStringAsFixed(2)}GB' : (double.parse(allInfoList[index]['Size']) / 1024 / 1024 > 1 ? '${(double.parse(allInfoList[index]['Size']) / 1024 / 1024).toStringAsFixed(2)}MB' : (double.parse(allInfoList[index]['Size']) / 1024 > 1 ? '${(double.parse(allInfoList[index]['Size']) / 1024).toStringAsFixed(2)}KB' : allInfoList[index]['Size'] + 'B')))}',
-                                style: const TextStyle(fontSize: 12)),
-                            trailing: IconButton(
-                              icon: const Icon(Icons.more_horiz),
-                              onPressed: () {
-                                showModalBottomSheet(
-                                    isScrollControlled: true,
-                                    context: context,
-                                    builder: (context) {
-                                      return buildBottomSheetWidget(
-                                          context, index, iconPath);
-                                    });
+                      child: Stack(
+                        fit: StackFit.loose,
+                        children: [
+                          Container(
+                            color: selectedFilesBool[index]
+                                ? const Color(0x311192F3)
+                                : Colors.transparent,
+                            child: ListTile(
+                              minLeadingWidth: 0,
+                              minVerticalPadding: 0,
+                              // dense: true,
+                              leading: Image.asset(
+                                'assets/icons/folder.png',
+                                width: 30,
+                                height: 32,
+                              ),
+                              title: Text(
+                                  allInfoList[index]['Prefix']
+                                      .substring(
+                                          0,
+                                          allInfoList[index]['Prefix'].length -
+                                              1)
+                                      .split('/')
+                                      .last,
+                                  style: const TextStyle(fontSize: 16)),
+                              trailing: IconButton(
+                                icon: const Icon(Icons.more_horiz),
+                                onPressed: () {
+                                  String iconPath = 'assets/icons/folder.png';
+                                  showModalBottomSheet(
+                                      isScrollControlled: true,
+                                      context: context,
+                                      builder: (context) {
+                                        return buildFolderBottomSheetWidget(
+                                            context, index, iconPath);
+                                      });
+                                },
+                              ),
+                              onTap: () {
+                                String prefix = allInfoList[index]['Prefix'];
+                                Application.router.navigateTo(context,
+                                    '${Routes.tencentFileExplorer}?element=${Uri.encodeComponent(jsonEncode(widget.element))}&bucketPrefix=${Uri.encodeComponent(prefix)}',
+                                    transition: TransitionType.cupertino);
                               },
                             ),
-                            onTap: () async {
-                              String urlList = '';
-                              List imageExt = [
-                                'jpg',
-                                'jpeg',
-                                'png',
-                                'gif',
-                                'bmp',
-                                'webp',
-                                'svg',
-                                'tif',
-                                'tiff',
-                                'ico',
-                                'heif',
-                              ];
-                              //判断是否为图片
-                              if (!imageExt.contains(allInfoList[index]['Key']
-                                  .split('.')
-                                  .last
-                                  .toLowerCase())) {
-                                showToast('只支持图片预览');
-                                return;
-                              }
-                              //判断权限
-                              var result =
-                                  await TencentManageAPI.queryACLPolicy(
-                                      widget.element);
-                              if (result[0] == 'success') {
-                                var granteeURI = result[1]
-                                        ['AccessControlPolicy']
-                                    ['AccessControlList']['Grant'];
-                                if (granteeURI is! List) {
-                                  granteeURI = [granteeURI];
-                                }
-                                bool publicRead = false;
-                                for (int i = 0; i < granteeURI.length; i++) {
-                                  String temp = granteeURI[i].toString();
-                                  if (temp.contains(
-                                          "http://cam.qcloud.com/groups/global/AllUsers") &&
-                                      temp.contains('READ')) {
-                                    publicRead = true;
-                                  }
-                                }
-                                if (publicRead != true) {
-                                  showToast('请先设置公有读权限');
-                                  return;
-                                }
-                              } else {
-                                showToast('获取权限失败');
-                                return;
-                              }
-                              //预览图片
-                              int newImageIndex = index - dirAllInfoList.length;
-                              for (int i = dirAllInfoList.length;
-                                  i < allInfoList.length;
-                                  i++) {
-                                if (imageExt.contains(allInfoList[i]['Key']
+                          ),
+                          Positioned(
+                            // ignore: sort_child_properties_last
+                            child: Container(
+                              decoration: const BoxDecoration(
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(55)),
+                                  color: Color.fromARGB(255, 235, 242, 248)),
+                              padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+                              child: MSHCheckbox(
+                                uncheckedColor: Colors.blue,
+                                size: 17,
+                                checkedColor: Colors.blue,
+                                value: selectedFilesBool[index],
+                                style: MSHCheckboxStyle.fillScaleCheck,
+                                onChanged: (selected) {
+                                  setState(() {
+                                    if (selected) {
+                                      selectedFilesBool[index] = true;
+                                    } else {
+                                      selectedFilesBool[index] = false;
+                                    }
+                                  });
+                                },
+                              ),
+                            ),
+                            left: -0.5,
+                            top: 20,
+                          )
+                        ],
+                      ),
+                    ),
+                    const Divider(
+                      height: 1,
+                    )
+                  ],
+                ),
+              );
+            } else {
+              String fileExtension = allInfoList[index]['Key'].split('.').last;
+              String iconPath = 'assets/icons/';
+              if (fileExtension == '') {
+                iconPath += '_blank.png';
+              } else if (Global.iconList.contains(fileExtension)) {
+                iconPath += '$fileExtension.png';
+              } else {
+                iconPath += 'unknown.png';
+              }
+              return Container(
+                padding: const EdgeInsets.only(left: 10, right: 10),
+                child: Column(
+                  children: [
+                    Slidable(
+                        key: Key(allInfoList[index]['Key']),
+                        direction: Axis.horizontal,
+                        endActionPane: ActionPane(
+                          // A motion is a widget used to control how the pane animates.
+                          motion: const ScrollMotion(),
+                          // A pane can dismiss the Slidable.
+                          children: [
+                            SlidableAction(
+                              onPressed: (BuildContext context) {
+                                String shareUrl =
+                                    'https://${widget.element['name']}.cos.${widget.element['location']}.myqcloud.com/${allInfoList[index]['Key']}';
+                                Share.share(shareUrl);
+                              },
+                              autoClose: true,
+                              padding: EdgeInsets.zero,
+                              backgroundColor:
+                                  const Color.fromARGB(255, 109, 196, 116),
+                              foregroundColor: Colors.white,
+                              icon: Icons.share,
+                              label: '分享',
+                            ),
+                            SlidableAction(
+                              onPressed: (BuildContext context) async {
+                                showCupertinoDialog(
+                                    barrierDismissible: true,
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return CupertinoAlertDialog(
+                                        title: const Text('通知'),
+                                        content: Text(
+                                            '确定要删除${allInfoList[index]['Key']}吗？'),
+                                        actions: <Widget>[
+                                          CupertinoDialogAction(
+                                            child: const Text('取消',
+                                                style: TextStyle(
+                                                    color: Colors.blue)),
+                                            onPressed: () {
+                                              Navigator.pop(context);
+                                            },
+                                          ),
+                                          CupertinoDialogAction(
+                                            child: const Text('确定',
+                                                style: TextStyle(
+                                                    color: Colors.blue)),
+                                            onPressed: () async {
+                                              Navigator.pop(context);
+                                              var result =
+                                                  await TencentManageAPI
+                                                      .deleteFile(
+                                                          widget.element,
+                                                          allInfoList[index]
+                                                              ['Key']);
+                                              if (result[0] == 'success') {
+                                                showToast('删除成功');
+                                                setState(() {
+                                                  allInfoList.removeAt(index);
+                                                  selectedFilesBool
+                                                      .removeAt(index);
+                                                });
+                                              } else {
+                                                showToast('删除失败');
+                                              }
+                                            },
+                                          ),
+                                        ],
+                                      );
+                                    });
+                              },
+                              backgroundColor: const Color(0xFFFE4A49),
+                              foregroundColor: Colors.white,
+                              icon: Icons.delete,
+                              label: '删除',
+                            ),
+                          ],
+                        ),
+                        child: Stack(fit: StackFit.loose, children: [
+                          Container(
+                            color: selectedFilesBool[index]
+                                ? const Color(0x311192F3)
+                                : Colors.transparent,
+                            child: ListTile(
+                              minLeadingWidth: 0,
+                              minVerticalPadding: 0,
+                              leading: Image.asset(
+                                iconPath,
+                                width: 30,
+                                height: 30,
+                              ),
+                              title: Text(
+                                  allInfoList[index]['Key']
+                                              .split('/')
+                                              .last
+                                              .length >
+                                          20
+                                      ? allInfoList[index]['Key']
+                                              .split('/')
+                                              .last
+                                              .substring(0, 10) +
+                                          '...' +
+                                          allInfoList[index]['Key']
+                                              .split('/')
+                                              .last
+                                              .substring(allInfoList[index]
+                                                          ['Key']
+                                                      .split('/')
+                                                      .last
+                                                      .length -
+                                                  10)
+                                      : allInfoList[index]['Key']
+                                          .split('/')
+                                          .last,
+                                  style: const TextStyle(fontSize: 14)),
+                              subtitle: Text(
+                                  '${allInfoList[index]['LastModified'].toString().replaceAll('T', ' ').replaceAll('Z', '').substring(0, 19)}  ${(double.parse(allInfoList[index]['Size']) / 1024 / 1024 / 1024 > 1 ? '${(double.parse(allInfoList[index]['Size']) / 1024 / 1024 / 1024).toStringAsFixed(2)}GB' : (double.parse(allInfoList[index]['Size']) / 1024 / 1024 > 1 ? '${(double.parse(allInfoList[index]['Size']) / 1024 / 1024).toStringAsFixed(2)}MB' : (double.parse(allInfoList[index]['Size']) / 1024 > 1 ? '${(double.parse(allInfoList[index]['Size']) / 1024).toStringAsFixed(2)}KB' : allInfoList[index]['Size'] + 'B')))}',
+                                  style: const TextStyle(fontSize: 12)),
+                              trailing: IconButton(
+                                icon: const Icon(Icons.more_horiz),
+                                onPressed: () {
+                                  showModalBottomSheet(
+                                      isScrollControlled: true,
+                                      context: context,
+                                      builder: (context) {
+                                        return buildBottomSheetWidget(
+                                            context, index, iconPath);
+                                      });
+                                },
+                              ),
+                              onTap: () async {
+                                String urlList = '';
+                                List imageExt = [
+                                  'jpg',
+                                  'jpeg',
+                                  'png',
+                                  'gif',
+                                  'bmp',
+                                  'webp',
+                                  'svg',
+                                  'tif',
+                                  'tiff',
+                                  'ico',
+                                  'heif',
+                                ];
+                                //判断是否为图片
+                                if (!imageExt.contains(allInfoList[index]['Key']
                                     .split('.')
                                     .last
                                     .toLowerCase())) {
-                                  urlList +=
-                                      'https://${widget.element['name']}.cos.${widget.element['location']}.myqcloud.com/${allInfoList[i]['Key']},';
-                                } else if (i < index) {
-                                  newImageIndex--;
+                                  showToast('只支持图片预览');
+                                  return;
                                 }
-                              }
-                              Application.router.navigateTo(this.context,
-                                  '${Routes.albumImagePreview}?index=$newImageIndex&images=${Uri.encodeComponent(urlList)}',
-                                  transition: TransitionType.none);
-                            },
-                          ),
-                        ),
-                        Positioned(
-                          // ignore: sort_child_properties_last
-                          child: Container(
-                            decoration: const BoxDecoration(
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(55)),
-                                color: Color.fromARGB(255, 235, 242, 248)),
-                            padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-                            child: MSHCheckbox(
-                              uncheckedColor: Colors.blue,
-                              size: 17,
-                              checkedColor: Colors.blue,
-                              value: selectedFilesBool[index],
-                              style: MSHCheckboxStyle.fillScaleCheck,
-                              onChanged: (selected) {
-                                setState(() {
-                                  if (selected) {
-                                    selectedFilesBool[index] = true;
-                                  } else {
-                                    selectedFilesBool[index] = false;
+                                //判断权限
+                                var result =
+                                    await TencentManageAPI.queryACLPolicy(
+                                        widget.element);
+                                if (result[0] == 'success') {
+                                  var granteeURI = result[1]
+                                          ['AccessControlPolicy']
+                                      ['AccessControlList']['Grant'];
+                                  if (granteeURI is! List) {
+                                    granteeURI = [granteeURI];
                                   }
-                                });
+                                  bool publicRead = false;
+                                  for (int i = 0; i < granteeURI.length; i++) {
+                                    String temp = granteeURI[i].toString();
+                                    if (temp.contains(
+                                            "http://cam.qcloud.com/groups/global/AllUsers") &&
+                                        temp.contains('READ')) {
+                                      publicRead = true;
+                                    }
+                                  }
+                                  if (publicRead != true) {
+                                    showToast('请先设置公有读权限');
+                                    return;
+                                  }
+                                } else {
+                                  showToast('获取权限失败');
+                                  return;
+                                }
+                                //预览图片
+                                int newImageIndex =
+                                    index - dirAllInfoList.length;
+                                for (int i = dirAllInfoList.length;
+                                    i < allInfoList.length;
+                                    i++) {
+                                  if (imageExt.contains(allInfoList[i]['Key']
+                                      .split('.')
+                                      .last
+                                      .toLowerCase())) {
+                                    urlList +=
+                                        'https://${widget.element['name']}.cos.${widget.element['location']}.myqcloud.com/${allInfoList[i]['Key']},';
+                                  } else if (i < index) {
+                                    newImageIndex--;
+                                  }
+                                }
+                                Application.router.navigateTo(this.context,
+                                    '${Routes.albumImagePreview}?index=$newImageIndex&images=${Uri.encodeComponent(urlList)}',
+                                    transition: TransitionType.none);
                               },
                             ),
                           ),
-                          left: 0,
-                          top: 22,
-                        ),
-                      ])),
-                  const Divider(
-                    height: 1,
-                  )
-                ],
-              ),
-            );
-          }
-        },
-      ),
-    );
+                          Positioned(
+                            // ignore: sort_child_properties_last
+                            child: Container(
+                              decoration: const BoxDecoration(
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(55)),
+                                  color: Color.fromARGB(255, 235, 242, 248)),
+                              padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+                              child: MSHCheckbox(
+                                uncheckedColor: Colors.blue,
+                                size: 17,
+                                checkedColor: Colors.blue,
+                                value: selectedFilesBool[index],
+                                style: MSHCheckboxStyle.fillScaleCheck,
+                                onChanged: (selected) {
+                                  setState(() {
+                                    if (selected) {
+                                      selectedFilesBool[index] = true;
+                                    } else {
+                                      selectedFilesBool[index] = false;
+                                    }
+                                  });
+                                },
+                              ),
+                            ),
+                            left: 0,
+                            top: 22,
+                          ),
+                        ])),
+                    const Divider(
+                      height: 1,
+                    )
+                  ],
+                ),
+              );
+            }
+          },
+        ),
+      );
+    }
   }
 
   Widget buildBottomSheetWidget(
@@ -1413,7 +1466,6 @@ class TencentFileExplorerState
       child: Column(
         children: [
           ListTile(
-            //  dense: true,
             leading: Image.asset(
               iconPath,
               width: 30,
@@ -1446,12 +1498,10 @@ class TencentFileExplorerState
             color: Color.fromARGB(255, 230, 230, 230),
           ),
           ListTile(
-            //dense: true,
             leading: const Icon(
               Icons.link_rounded,
               color: Color.fromARGB(255, 97, 141, 236),
             ),
-            // visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
             minLeadingWidth: 0,
             title: const Text('复制链接(设置中的默认格式)'),
             onTap: () async {
@@ -1552,12 +1602,10 @@ class TencentFileExplorerState
             color: Color.fromARGB(255, 230, 230, 230),
           ),
           ListTile(
-            // dense: true,
             leading: const Icon(
               Icons.delete_outline,
               color: Color.fromARGB(255, 240, 85, 131),
             ),
-            // visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
             minLeadingWidth: 0,
             title: const Text('删除'),
             onTap: () async {
@@ -1612,13 +1660,11 @@ class TencentFileExplorerState
       child: Column(
         children: [
           ListTile(
-            //dense: true,
             leading: Image.asset(
               iconPath,
               width: 30,
               height: 30,
             ),
-            // visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
             minLeadingWidth: 0,
             title: Text(
                 allInfoList[index]['Prefix']
@@ -1632,12 +1678,10 @@ class TencentFileExplorerState
             color: Color.fromARGB(255, 230, 230, 230),
           ),
           ListTile(
-            // dense: true,
             leading: const Icon(
               Icons.beenhere_outlined,
               color: Color.fromARGB(255, 97, 141, 236),
             ),
-            // visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
             minLeadingWidth: 0,
             title: const Text('设为图床默认目录'),
             onTap: () async {
@@ -1658,12 +1702,10 @@ class TencentFileExplorerState
             color: Color.fromARGB(255, 230, 230, 230),
           ),
           ListTile(
-              //  dense: true,
               leading: const Icon(
                 Icons.delete_outline,
                 color: Color.fromARGB(255, 240, 85, 131),
               ),
-              //   visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
               minLeadingWidth: 0,
               title: const Text('删除'),
               onTap: () async {
