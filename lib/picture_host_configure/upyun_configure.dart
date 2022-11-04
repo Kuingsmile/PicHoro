@@ -120,12 +120,6 @@ class UpyunConfigState extends State<UpyunConfig> {
                 hintStyle: TextStyle(fontSize: 13),
               ),
               textAlign: TextAlign.center,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return '请输入网站后缀';
-                }
-                return null;
-              },
             ),
             TextFormField(
               controller: _pathController,
