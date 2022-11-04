@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:external_path/external_path.dart';
 import 'package:flustars_flutter3/flustars_flutter3.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -55,8 +54,26 @@ class Global {
   static bool iscustomRename = false; //是否自定义重命名
   static String customRenameFormat = r'{Y}_{m}_{d}_{uuid}'; //自定义重命名格式
   static bool operateDone = false;
-  static String tencentDownloadFilePath = ''; //腾讯云下载文件路径
   static List psHostHomePageOrder = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+  //图床管理上传下载页面的任务保存列表
+  static List<String> tencentDownloadList = [];
+  static List<String> tencentUploadList = [];
+  static List<String> qiniuDownloadList = [];
+  static List<String> qiniuUploadList = [];
+  static List<String> smmsDownloadList = [];
+  static List<String> smmsSavedNameList = [];
+  static List<String> smmsUploadList = [];
+  static List<String> upyunDownloadList = [];
+  static List<String> upyunUploadList = [];
+  static List<String> imgurDownloadList = [];
+  static List<String> imgurUploadList = [];
+  static List<String> githubDownloadList = [];
+  static List<String> githubUploadList = [];
+  static List<String> lskyproDownloadList = [];
+  static List<String> lskyproUploadList = [];
+  static List<String> aliyunDownloadList = [];
+  static List<String> aliyunUploadList = [];
+
   static final List iconList = [
     "_blank",
     "_page",
@@ -299,7 +316,7 @@ class Global {
   static getCustomeRenameFormat() async {
     await SpUtil.getInstance();
     String customRenameFormat =
-        SpUtil.getString('key_customRenameFormat', defValue: r'${filename}')!;
+        SpUtil.getString('key_customRenameFormat', defValue: r'{filename}')!;
     return customRenameFormat;
   }
 
@@ -327,25 +344,6 @@ class Global {
     return operateDone;
   }
 
-  static setTencentDownloadFilePath(String tencentDownloadFilePath) async {
-    await SpUtil.getInstance();
-    SpUtil.putString('key_tencentDownloadFilePath', tencentDownloadFilePath);
-    Global.tencentDownloadFilePath = tencentDownloadFilePath;
-  }
-
-  static getTencentDownloadFilePath() async {
-    await SpUtil.getInstance();
-    String externalStorageDirectory =
-        await ExternalPath.getExternalStoragePublicDirectory(
-            ExternalPath.DIRECTORY_DOWNLOADS);
-    externalStorageDirectory =
-        '$externalStorageDirectory/PicHoro/Download/tencent';
-    String tencentDownloadFilePath = SpUtil.getString(
-        'key_tencentDownloadFilePath',
-        defValue: externalStorageDirectory)!;
-    return tencentDownloadFilePath;
-  }
-
   static setpsHostHomePageOrder(List<String> psHostHomePageOrder) async {
     await SpUtil.getInstance();
     SpUtil.putStringList('key_psHostHomePageOrder', psHostHomePageOrder);
@@ -357,5 +355,226 @@ class Global {
     List psHostHomePageOrder = SpUtil.getStringList('key_psHostHomePageOrder',
         defValue: ['0', '1', '2', '3', '4', '5', '6', '7', '8'])!;
     return psHostHomePageOrder;
+  }
+
+  static setTencentUploadList(List<String> tencentUploadList) async {
+    await SpUtil.getInstance();
+    SpUtil.putStringList('key_tencentUploadList', tencentUploadList);
+    Global.tencentUploadList = tencentUploadList;
+  }
+
+  static getTencentUploadList() async {
+    await SpUtil.getInstance();
+    List tencentUploadList =
+        SpUtil.getStringList('key_tencentUploadList', defValue: [])!;
+    return tencentUploadList;
+  }
+
+  static setTencentDownloadList(List<String> tencentDownloadList) async {
+    await SpUtil.getInstance();
+    SpUtil.putStringList('key_tencentDownloadList', tencentDownloadList);
+    Global.tencentDownloadList = tencentDownloadList;
+  }
+
+  static getTencentDownloadList() async {
+    await SpUtil.getInstance();
+    List tencentDownloadList =
+        SpUtil.getStringList('key_tencentDownloadList', defValue: [])!;
+    return tencentDownloadList;
+  }
+
+  static setAliyunUploadList(List<String> aliyunUploadList) async {
+    await SpUtil.getInstance();
+    SpUtil.putStringList('key_aliyunUploadList', aliyunUploadList);
+    Global.aliyunUploadList = aliyunUploadList;
+  }
+
+  static getAliyunUploadList() async {
+    await SpUtil.getInstance();
+    List aliyunUploadList =
+        SpUtil.getStringList('key_aliyunUploadList', defValue: [])!;
+    return aliyunUploadList;
+  }
+
+  static setAliyunDownloadList(List<String> aliyunDownloadList) async {
+    await SpUtil.getInstance();
+    SpUtil.putStringList('key_aliyunDownloadList', aliyunDownloadList);
+    Global.aliyunDownloadList = aliyunDownloadList;
+  }
+
+  static getAliyunDownloadList() async {
+    await SpUtil.getInstance();
+    List aliyunDownloadList =
+        SpUtil.getStringList('key_aliyunDownloadList', defValue: [])!;
+    return aliyunDownloadList;
+  }
+
+  static setUpyunUploadList(List<String> upyunUploadList) async {
+    await SpUtil.getInstance();
+    SpUtil.putStringList('key_upyunUploadList', upyunUploadList);
+    Global.upyunUploadList = upyunUploadList;
+  }
+
+  static getUpyunUploadList() async {
+    await SpUtil.getInstance();
+    List upyunUploadList =
+        SpUtil.getStringList('key_upyunUploadList', defValue: [])!;
+    return upyunUploadList;
+  }
+
+  static setUpyunDownloadList(List<String> upyunDownloadList) async {
+    await SpUtil.getInstance();
+    SpUtil.putStringList('key_upyunDownloadList', upyunDownloadList);
+    Global.upyunDownloadList = upyunDownloadList;
+  }
+
+  static getUpyunDownloadList() async {
+    await SpUtil.getInstance();
+    List upyunDownloadList =
+        SpUtil.getStringList('key_upyunDownloadList', defValue: [])!;
+    return upyunDownloadList;
+  }
+
+  static setQiniuUploadList(List<String> qiniuUploadList) async {
+    await SpUtil.getInstance();
+    SpUtil.putStringList('key_qiniuUploadList', qiniuUploadList);
+    Global.qiniuUploadList = qiniuUploadList;
+  }
+
+  static getQiniuUploadList() async {
+    await SpUtil.getInstance();
+    List qiniuUploadList =
+        SpUtil.getStringList('key_qiniuUploadList', defValue: [])!;
+    return qiniuUploadList;
+  }
+
+  static setQiniuDownloadList(List<String> qiniuDownloadList) async {
+    await SpUtil.getInstance();
+    SpUtil.putStringList('key_qiniuDownloadList', qiniuDownloadList);
+    Global.qiniuDownloadList = qiniuDownloadList;
+  }
+
+  static getQiniuDownloadList() async {
+    await SpUtil.getInstance();
+    List qiniuDownloadList =
+        SpUtil.getStringList('key_qiniuDownloadList', defValue: [])!;
+    return qiniuDownloadList;
+  }
+
+  static setImgurUploadList(List<String> imgurUploadList) async {
+    await SpUtil.getInstance();
+    SpUtil.putStringList('key_imgurUploadList', imgurUploadList);
+    Global.imgurUploadList = imgurUploadList;
+  }
+
+  static getImgurUploadList() async {
+    await SpUtil.getInstance();
+    List imgurUploadList =
+        SpUtil.getStringList('key_imgurUploadList', defValue: [])!;
+    return imgurUploadList;
+  }
+
+  static setImgurDownloadList(List<String> imgurDownloadList) async {
+    await SpUtil.getInstance();
+    SpUtil.putStringList('key_imgurDownloadList', imgurDownloadList);
+    Global.imgurDownloadList = imgurDownloadList;
+  }
+
+  static getImgurDownloadList() async {
+    await SpUtil.getInstance();
+    List imgurDownloadList =
+        SpUtil.getStringList('key_imgurDownloadList', defValue: [])!;
+    return imgurDownloadList;
+  }
+
+  static setSmmsUploadList(List<String> smmsUploadList) async {
+    await SpUtil.getInstance();
+    SpUtil.putStringList('key_smmsUploadList', smmsUploadList);
+    Global.smmsUploadList = smmsUploadList;
+  }
+
+  static getSmmsUploadList() async {
+    await SpUtil.getInstance();
+    List smmsUploadList =
+        SpUtil.getStringList('key_smmsUploadList', defValue: [])!;
+    return smmsUploadList;
+  }
+
+  static setSmmsDownloadList(List<String> smmsDownloadList) async {
+    await SpUtil.getInstance();
+    SpUtil.putStringList('key_smmsDownloadList', smmsDownloadList);
+    Global.smmsDownloadList = smmsDownloadList;
+  }
+
+  static getSmmsDownloadList() async {
+    await SpUtil.getInstance();
+    List smmsDownloadList =
+        SpUtil.getStringList('key_smmsDownloadList', defValue: [])!;
+    return smmsDownloadList;
+  }
+
+  static setSmmsSavedNameList(List<String> smmsSavedNameList) async {
+    await SpUtil.getInstance();
+    SpUtil.putStringList('key_smmsSavedNameList', smmsSavedNameList);
+    Global.smmsSavedNameList = smmsSavedNameList;
+  }
+
+  static getSmmsSavedNameList() async {
+    await SpUtil.getInstance();
+    List smmsSavedNameList =
+        SpUtil.getStringList('key_smmsSavedNameList', defValue: [])!;
+    return smmsSavedNameList;
+  }
+
+  static setGithubUploadList(List<String> githubUploadList) async {
+    await SpUtil.getInstance();
+    SpUtil.putStringList('key_githubUploadList', githubUploadList);
+    Global.githubUploadList = githubUploadList;
+  }
+
+  static getGithubUploadList() async {
+    await SpUtil.getInstance();
+    List githubUploadList =
+        SpUtil.getStringList('key_githubUploadList', defValue: [])!;
+    return githubUploadList;
+  }
+
+  static setGithubDownloadList(List<String> githubDownloadList) async {
+    await SpUtil.getInstance();
+    SpUtil.putStringList('key_githubDownloadList', githubDownloadList);
+    Global.githubDownloadList = githubDownloadList;
+  }
+
+  static getGithubDownloadList() async {
+    await SpUtil.getInstance();
+    List githubDownloadList =
+        SpUtil.getStringList('key_githubDownloadList', defValue: [])!;
+    return githubDownloadList;
+  }
+
+  static setLskyproUploadList(List<String> lskyproUploadList) async {
+    await SpUtil.getInstance();
+    SpUtil.putStringList('key_lskyproUploadList', lskyproUploadList);
+    Global.lskyproUploadList = lskyproUploadList;
+  }
+
+  static getLskyproUploadList() async {
+    await SpUtil.getInstance();
+    List lskyproUploadList =
+        SpUtil.getStringList('key_lskyproUploadList', defValue: [])!;
+    return lskyproUploadList;
+  }
+
+  static setLskyproDownloadList(List<String> lskyproDownloadList) async {
+    await SpUtil.getInstance();
+    SpUtil.putStringList('key_lskyproDownloadList', lskyproDownloadList);
+    Global.lskyproDownloadList = lskyproDownloadList;
+  }
+
+  static getLskyproDownloadList() async {
+    await SpUtil.getInstance();
+    List lskyproDownloadList =
+        SpUtil.getStringList('key_lskyproDownloadList', defValue: [])!;
+    return lskyproDownloadList;
   }
 }
