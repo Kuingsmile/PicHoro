@@ -4,9 +4,11 @@ import 'package:fluro/fluro.dart';
 import 'package:flutter_draggable_gridview/flutter_draggable_gridview.dart';
 
 import 'package:horopic/utils/global.dart';
+import 'package:horopic/utils/sql_utils.dart';
 import 'package:horopic/router/application.dart';
 import 'package:horopic/router/routers.dart';
 import 'package:horopic/utils/common_functions.dart';
+import 'package:horopic/picture_host_manage/manage_api/upyun_manage_api.dart';
 
 class PsHostHomePage extends StatefulWidget {
   const PsHostHomePage({super.key});
@@ -217,8 +219,53 @@ class PsHostHomePageState extends State<PsHostHomePage>
             children: [
               Center(
                   child: InkWell(
-                onTap: () {
-                  showToastWithContext(context, '暂未开放');
+                onTap: () async {
+                  String currentPicHoroUser = await Global.getUser();
+                  String currentPicHoroPasswd = await Global.getPassword();
+                  var usernamecheck =
+                      await MySqlUtils.queryUser(username: currentPicHoroUser);
+
+                  if (usernamecheck == 'Empty') {
+                    return showToast('请先去设置页面注册');
+                  } else if (currentPicHoroPasswd !=
+                      usernamecheck['password']) {
+                    return showToast('请先去设置页面登录');
+                  }
+                  var queryUpyunManage = await MySqlUtils.queryUpyunManage(
+                      username: currentPicHoroUser);
+                  if (queryUpyunManage == 'Empty') {
+                    if (mounted) {
+                      Application.router.navigateTo(
+                        context,
+                        Routes.upyunLogIn,
+                        transition: TransitionType.inFromRight,
+                      );
+                    }
+                  } else if (queryUpyunManage == 'Error') {
+                    return showToast('获取数据库错误');
+                  } else {
+                    showToast('开始校验');
+                    String token = queryUpyunManage['token'];
+                    var checkTokenResult =
+                        await UpyunManageAPI.checkToken(token);
+                    if (checkTokenResult[0] == 'success') {
+                      if (mounted) {
+                        Application.router.navigateTo(
+                          context,
+                          Routes.upyunBucketList,
+                          transition: TransitionType.inFromRight,
+                        );
+                      }
+                    } else {
+                      if (mounted) {
+                        Application.router.navigateTo(
+                          context,
+                          Routes.upyunLogIn,
+                          transition: TransitionType.inFromRight,
+                        );
+                      }
+                    }
+                  }
                 },
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -237,12 +284,10 @@ class PsHostHomePageState extends State<PsHostHomePage>
                   right: 0,
                   child: Container(
                     color: Colors.transparent,
-                    child: const Text(
-                      '',
-                      style: TextStyle(
-                        color: Color.fromARGB(255, 128, 125, 125),
-                        fontSize: 12,
-                      ),
+                    child: const Icon(
+                      Icons.check_circle,
+                      color: Colors.green,
+                      size: 20,
                     ),
                   )),
             ],
