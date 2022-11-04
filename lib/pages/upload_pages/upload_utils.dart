@@ -525,6 +525,9 @@ class UploadManager {
           Map<String, dynamic> maps = {};
           String returnUrl = '';
           String displayUrl = '';
+          if (urlpath.startsWith('/')) {
+            urlpath = urlpath.substring(1);
+          }
 
           if (!url.endsWith('/')) {
             returnUrl = '$url/$urlpath';
