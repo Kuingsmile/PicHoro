@@ -52,6 +52,14 @@ import 'package:horopic/picture_host_manage/aliyun/aliyun_bucket_information_pag
 import 'package:horopic/picture_host_manage/aliyun/aliyun_file_explorer.dart';
 import 'package:horopic/picture_host_manage/aliyun/aliyun_download_manage_page.dart';
 
+import 'package:horopic/picture_host_manage/upyun/upyun_login.dart';
+import 'package:horopic/picture_host_manage/upyun/upyun_file_explorer.dart';
+import 'package:horopic/picture_host_manage/upyun/upyun_bucket_list_page.dart';
+import 'package:horopic/picture_host_manage/upyun/upyun_bucket_information_page.dart';
+import 'package:horopic/picture_host_manage/upyun/upyun_token_manage_page.dart';
+import 'package:horopic/picture_host_manage/upyun/upyun_new_bucket_configure.dart';
+import 'package:horopic/picture_host_manage/upyun/upyun_download_manage_page.dart';
+
 //root
 Handler rootHandler = Handler(
     handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
@@ -247,13 +255,10 @@ var tencentFileExplorerHandler = Handler(
 var tencentDownloadFileHandler = Handler(
     handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
   var bucketName = params['bucketName']!.first;
-  List<String> downloadList =
-      json.decode(params['downloadList']!.first).cast<String>();
   String downloadPath = params['downloadPath']!.first;
+  String tabIndex = params['tabIndex']!.first;
   return TencentUpDownloadManagePage(
-      bucketName: bucketName,
-      downloadList: downloadList,
-      downloadPath: downloadPath);
+      bucketName: bucketName, downloadPath: downloadPath, tabIndex: tabIndex);
 });
 
 //文件浏览页面
@@ -282,15 +287,10 @@ var smmsFileExplorerHandler = Handler(
 //SM.MS存储下载文件页面
 var smmsUpDownloadFileHandler = Handler(
     handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
-  List<String> savedFileNameList =
-      json.decode(params['savedFileNameList']!.first).cast<String>();
-  List<String> downloadList =
-      json.decode(params['downloadList']!.first).cast<String>();
   String downloadPath = params['downloadPath']!.first;
+  String tabIndex = params['tabIndex']!.first;
   return SmmsUpDownloadManagePage(
-      savedFileNameList: savedFileNameList,
-      downloadList: downloadList,
-      downloadPath: downloadPath);
+      downloadPath: downloadPath, tabIndex: tabIndex);
 });
 
 //用户信息页面
@@ -337,15 +337,66 @@ var aliyunFileExplorerHandler = Handler(
   );
 });
 
-//腾讯云存储下载文件页面
+//阿里云存储下载文件页面
 var aliyunDownloadFileHandler = Handler(
     handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
   var bucketName = params['bucketName']!.first;
-  List<String> downloadList =
-      json.decode(params['downloadList']!.first).cast<String>();
   String downloadPath = params['downloadPath']!.first;
+  String tabIndex = params['tabIndex']!.first;
   return AliyunUpDownloadManagePage(
-      bucketName: bucketName,
-      downloadList: downloadList,
-      downloadPath: downloadPath);
+      bucketName: bucketName, downloadPath: downloadPath, tabIndex: tabIndex);
+});
+
+//又拍云登录页面
+var upyunLogInHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  return const UpyunLogIn();
+});
+
+//又拍云存储桶文件列表页面
+var upyunFileExplorerHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  var element = json.decode(params['element']!.first);
+  var bucketPrefix = params['bucketPrefix']!.first;
+  return UpyunFileExplorer(
+    element: element,
+    bucketPrefix: bucketPrefix,
+  );
+});
+
+//拍云存储桶列表页面
+var upyunBucketListHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  return const UpyunBucketList();
+});
+
+//又拍云存储桶详情页面
+var upyunBucketInformationHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  var bucketMap = json.decode(params['bucketMap']!.first);
+  return UpyunBucketInformation(
+    bucketMap: bucketMap,
+  );
+});
+
+//又拍云Token管理页面
+var upyunTokenManageHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  return const UpyunTokenManage();
+});
+
+//又拍云新建存储桶页面
+var newUpyunBucketHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  return const UpyunNewBucketConfig();
+});
+
+//又拍云存储下载文件页面
+var upyunDownloadFileHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  var bucketName = params['bucketName']!.first;
+  String downloadPath = params['downloadPath']!.first;
+  String tabIndex = params['tabIndex']!.first;
+  return UpyunUpDownloadManagePage(
+      bucketName: bucketName, downloadPath: downloadPath, tabIndex: tabIndex);
 });

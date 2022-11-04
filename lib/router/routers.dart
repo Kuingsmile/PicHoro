@@ -47,7 +47,13 @@ class Routes {
   static String aliyunBucketInformation = "/aliyunBucketInformation";
   static String aliyunFileExplorer = "/aliyunFileExplorer";
   static String aliyunUpDownloadManagePage = "/aliyunUpDownloadManagePage";
-
+  static String upyunLogIn = '/upyunLogIn';
+  static String upyunFileExplorer = "/upyunFileExplorer";
+  static String upyunBucketList = "/upyunBucketList";
+  static String upyunBucketInformation = "/upyunBucketInformation";
+  static String upyunTokenManagePage = "/upyunTokenManagePage";
+  static String upyunNewBucketConfig = "/upyunNewBucketConfig";
+  static String upyunUpDownloadManagePage = "/upyunUpDownloadManagePage";
   static void configureRoutes(FluroRouter router) {
     router.notFoundHandler = Handler(
         handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
@@ -101,5 +107,13 @@ class Routes {
     router.define(configurePageLogger, handler: logsHandler);
     router.define(aliyunUpDownloadManagePage,
         handler: aliyunDownloadFileHandler);
+    router.define(upyunFileExplorer, handler: upyunFileExplorerHandler);
+    router.define(upyunLogIn, handler: upyunLogInHandler);
+    router.define(upyunBucketList, handler: upyunBucketListHandler);
+    router.define(upyunBucketInformation,
+        handler: upyunBucketInformationHandler);
+    router.define(upyunTokenManagePage, handler: upyunTokenManageHandler);
+    router.define(upyunNewBucketConfig, handler: newUpyunBucketHandler);
+    router.define(upyunUpDownloadManagePage, handler: upyunDownloadFileHandler);
   }
 }
