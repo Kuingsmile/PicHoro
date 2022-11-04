@@ -3,7 +3,6 @@ import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:f_logs/f_logs.dart';
 import 'package:path_provider/path_provider.dart';
@@ -14,7 +13,6 @@ import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/sql_utils.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/picture_host_configure/aliyun_configure.dart';
-import 'package:horopic/api/aliyun_api.dart';
 
 class AliyunManageAPI {
   static Map<String, String> areaCodeName = {
@@ -67,7 +65,7 @@ class AliyunManageAPI {
     } catch (e) {
       FLog.error(
           className: 'AliyunManageAPI',
-          methodName: 'readTencentConfig',
+          methodName: 'readAliyunConfig',
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
       return "Error";
@@ -204,9 +202,6 @@ class AliyunManageAPI {
             methodName: "getBucketList",
             text: formatErrorMessage({}, e.toString()),
             dataLogType: DataLogType.ERRORS.toString());
-      }
-      if (kDebugMode) {
-        print(e);
       }
       return [e.toString()];
     }
@@ -1030,7 +1025,8 @@ class AliyunManageAPI {
     try {
       String filename =
           fileLink.substring(fileLink.lastIndexOf("/") + 1, fileLink.length);
-      filename = filename.substring(0, filename.indexOf("?"));
+      filename = filename.substring(
+          0, !filename.contains("?") ? filename.length : filename.indexOf("?"));
       String savePath = await getTemporaryDirectory().then((value) {
         return value.path;
       });
@@ -1055,7 +1051,7 @@ class AliyunManageAPI {
     } catch (e) {
       if (e is DioError) {
         FLog.error(
-            className: "TencentImageUploadUtils",
+            className: "AliyunManageAPI",
             methodName: "uploadNetworkFile",
             text: formatErrorMessage({
               'fileLink': fileLink,
@@ -1065,7 +1061,7 @@ class AliyunManageAPI {
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
-            className: "TencentImageUploadUtils",
+            className: "AliyunManageAPI",
             methodName: "uploadNetworkFile",
             text: formatErrorMessage(
                 {'fileLink': fileLink, 'element': element, 'prefix': prefix},
@@ -1075,7 +1071,6 @@ class AliyunManageAPI {
       return ['failed'];
     }
   }
-
 
   static uploadNetworkFileEntry(
       List fileList, Map element, String prefix) async {
