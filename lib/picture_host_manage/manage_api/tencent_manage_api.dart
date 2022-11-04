@@ -60,7 +60,7 @@ class TencentManageAPI {
       return contents;
     } catch (e) {
       FLog.error(
-          className: "TencentImageUploadUtils",
+          className: "TencentManageAPI",
           methodName: "readTencentConfig",
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
@@ -187,14 +187,14 @@ class TencentManageAPI {
     } catch (e) {
       if (e is DioError) {
         FLog.error(
-            className: "TencentImageUploadUtils",
+            className: "TencentManageAPI",
             methodName: "getBucketList",
             text: formatErrorMessage({}, e.toString(),
                 isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
-            className: "TencentImageUploadUtils",
+            className: "TencentManageAPI",
             methodName: "getBucketList",
             text: formatErrorMessage({}, e.toString()),
             dataLogType: DataLogType.ERRORS.toString());
@@ -270,7 +270,7 @@ class TencentManageAPI {
     } catch (e) {
       if (e is DioError) {
         FLog.error(
-            className: "TencentImageUploadUtils",
+            className: "TencentManageAPI",
             methodName: "createBucket",
             text: formatErrorMessage(
                 {'newBucketConfigMap': newBucketConfigMap}, e.toString(),
@@ -278,7 +278,7 @@ class TencentManageAPI {
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
-            className: "TencentImageUploadUtils",
+            className: "TencentManageAPI",
             methodName: "createBucket",
             text: formatErrorMessage(
                 {'newBucketConfigMap': newBucketConfigMap}, e.toString()),
@@ -324,14 +324,14 @@ class TencentManageAPI {
     } catch (e) {
       if (e is DioError) {
         FLog.error(
-            className: "TencentImageUploadUtils",
+            className: "TencentManageAPI",
             methodName: "deleteBucket",
             text: formatErrorMessage({'element': element}, e.toString(),
                 isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
-            className: "TencentImageUploadUtils",
+            className: "TencentManageAPI",
             methodName: "deleteBucket",
             text: formatErrorMessage({'element': element}, e.toString()),
             dataLogType: DataLogType.ERRORS.toString());
@@ -381,14 +381,14 @@ class TencentManageAPI {
     } catch (e) {
       if (e is DioError) {
         FLog.error(
-            className: "TencentImageUploadUtils",
+            className: "TencentManageAPI",
             methodName: "queryACLPolicy",
             text: formatErrorMessage({'element': element}, e.toString(),
                 isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
-            className: "TencentImageUploadUtils",
+            className: "TencentManageAPI",
             methodName: "queryACLPolicy",
             text: formatErrorMessage({'element': element}, e.toString()),
             dataLogType: DataLogType.ERRORS.toString());
@@ -434,7 +434,7 @@ class TencentManageAPI {
     } catch (e) {
       if (e is DioError) {
         FLog.error(
-            className: "TencentImageUploadUtils",
+            className: "TencentManageAPI",
             methodName: "changeACLPolicy",
             text: formatErrorMessage(
                 {'element': element, 'newACL': newACL}, e.toString(),
@@ -442,7 +442,7 @@ class TencentManageAPI {
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
-            className: "TencentImageUploadUtils",
+            className: "TencentManageAPI",
             methodName: "changeACLPolicy",
             text: formatErrorMessage(
                 {'element': element, 'newACL': newACL}, e.toString()),
@@ -507,7 +507,7 @@ class TencentManageAPI {
       }
     } catch (e) {
       FLog.error(
-          className: "TencentImageUploadUtils",
+          className: "TencentManageAPI",
           methodName: "setDefaultBucket",
           text: formatErrorMessage(
               {'element': element, 'folder': folder}, e.toString()),
@@ -557,7 +557,7 @@ class TencentManageAPI {
     } catch (e) {
       if (e is DioError) {
         FLog.error(
-            className: "TencentImageUploadUtils",
+            className: "TencentManageAPI",
             methodName: "queryBucketFiles",
             text: formatErrorMessage(
                 {'element': element, 'query': query}, e.toString(),
@@ -565,7 +565,7 @@ class TencentManageAPI {
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
-            className: "TencentImageUploadUtils",
+            className: "TencentManageAPI",
             methodName: "queryBucketFiles",
             text: formatErrorMessage(
                 {'element': element, 'query': query}, e.toString()),
@@ -626,7 +626,7 @@ class TencentManageAPI {
     } catch (e) {
       if (e is DioError) {
         FLog.error(
-            className: "TencentImageUploadUtils",
+            className: "TencentManageAPI",
             methodName: "deleteFile",
             text: formatErrorMessage(
                 {'element': element, 'key': key}, e.toString(),
@@ -634,7 +634,7 @@ class TencentManageAPI {
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
-            className: "TencentImageUploadUtils",
+            className: "TencentManageAPI",
             methodName: "deleteFile",
             text: formatErrorMessage(
                 {'element': element, 'key': key}, e.toString()),
@@ -739,7 +739,7 @@ class TencentManageAPI {
     } catch (e) {
       if (e is DioError) {
         FLog.error(
-            className: "TencentImageUploadUtils",
+            className: "TencentManageAPI",
             methodName: "copyFile",
             text: formatErrorMessage({
               'element': element,
@@ -749,7 +749,7 @@ class TencentManageAPI {
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
-            className: "TencentImageUploadUtils",
+            className: "TencentManageAPI",
             methodName: "copyFile",
             text: formatErrorMessage(
                 {'element': element, 'key': key, 'newKey': newKey},
@@ -841,7 +841,7 @@ class TencentManageAPI {
     } catch (e) {
       if (e is DioError) {
         FLog.error(
-            className: "TencentImageUploadUtils",
+            className: "TencentManageAPI",
             methodName: "downloadFile",
             text: formatErrorMessage(
                 {'element': element, 'key': key, 'path': path}, e.toString(),
@@ -849,7 +849,7 @@ class TencentManageAPI {
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
-            className: "TencentImageUploadUtils",
+            className: "TencentManageAPI",
             methodName: "downloadFile",
             text: formatErrorMessage(
                 {'element': element, 'key': key, 'path': path}, e.toString()),
@@ -900,7 +900,7 @@ class TencentManageAPI {
     } catch (e) {
       if (e is DioError) {
         FLog.error(
-            className: "TencentImageUploadUtils",
+            className: "TencentManageAPI",
             methodName: "createFolder",
             text: formatErrorMessage({
               'element': element,
@@ -910,7 +910,7 @@ class TencentManageAPI {
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
-            className: "TencentImageUploadUtils",
+            className: "TencentManageAPI",
             methodName: "createFolder",
             text: formatErrorMessage(
                 {'element': element, 'prefix': prefix, 'newfolder': newfolder},
@@ -996,7 +996,7 @@ class TencentManageAPI {
     } catch (e) {
       if (e is DioError) {
         FLog.error(
-            className: "TencentImageUploadUtils",
+            className: "TencentManageAPI",
             methodName: "uploadFile",
             text: formatErrorMessage({
               'element': element,
@@ -1007,7 +1007,7 @@ class TencentManageAPI {
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
-            className: "TencentImageUploadUtils",
+            className: "TencentManageAPI",
             methodName: "uploadFile",
             text: formatErrorMessage({
               'element': element,
@@ -1075,7 +1075,8 @@ class TencentManageAPI {
     try {
       String filename =
           fileLink.substring(fileLink.lastIndexOf("/") + 1, fileLink.length);
-      filename = filename.substring(0, filename.indexOf("?"));
+      filename = filename.substring(
+          0, !filename.contains("?") ? filename.length : filename.indexOf("?"));
       String savePath = await getTemporaryDirectory().then((value) {
         return value.path;
       });
@@ -1100,7 +1101,7 @@ class TencentManageAPI {
     } catch (e) {
       if (e is DioError) {
         FLog.error(
-            className: "TencentImageUploadUtils",
+            className: "TencentManageAPI",
             methodName: "uploadNetworkFile",
             text: formatErrorMessage({
               'fileLink': fileLink,
@@ -1110,7 +1111,7 @@ class TencentManageAPI {
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
-            className: "TencentImageUploadUtils",
+            className: "TencentManageAPI",
             methodName: "uploadNetworkFile",
             text: formatErrorMessage(
                 {'fileLink': fileLink, 'element': element, 'prefix': prefix},
