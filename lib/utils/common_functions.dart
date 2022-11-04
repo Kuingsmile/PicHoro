@@ -10,8 +10,31 @@ import 'package:path/path.dart' as my_path;
 import 'package:uuid/uuid.dart';
 import "package:crypto/crypto.dart";
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:sqflite/sqflite.dart';
+import 'package:fluro/fluro.dart';
 
 import 'package:horopic/utils/global.dart';
+import 'package:horopic/router/application.dart';
+import 'package:horopic/router/routers.dart';
+import 'package:horopic/utils/permission.dart';
+
+Map downloadStatus = {
+  'DownloadStatus.downloading': "下载中",
+  'DownloadStatus.paused': "暂停",
+  'DownloadStatus.canceled': "取消",
+  'DownloadStatus.failed': "失败",
+  'DownloadStatus.completed': "完成",
+  'DownloadStatus.queued': "排队中",
+};
+
+Map uploadStatus = {
+  'UploadStatus.uploading': "上传中",
+  'UploadStatus.canceled': "取消",
+  'UploadStatus.failed': "失败",
+  'UploadStatus.completed': "完成",
+  'UploadStatus.queued': "排队中",
+  'UploadStatus.paused': "暂停",
+};
 
 //defaultLKformat和对应的转换函数
 Map<String, Function> linkGenerateDict = {
@@ -424,4 +447,124 @@ formatErrorMessage(
   String formateTemplate =
       '参数:\n\n$formatedParameters\n错误信息:\n$formatedError\n\n是否DIO错误:\n$isDioError\n\nDIO报错信息:\n$formatedDioError';
   return formateTemplate;
+}
+
+//APPinit
+mainInit() async {
+  await Permissionutils.askPermission();
+  await Permissionutils.askPermissionCamera();
+  await Permissionutils.askPermissionGallery();
+  await Permissionutils.askPermissionManageExternalStorage();
+  await Permissionutils.askPermissionMediaLibrary();
+  //初始化全局信息，会在APP启动时执行
+  String initUser = await Global.getUser();
+  await Global.setUser(initUser);
+  String initPassword = await Global.getPassword();
+  await Global.setPassword(initPassword);
+  String initPShost = await Global.getPShost();
+  await Global.setPShost(initPShost);
+  String initLKformat = await Global.getLKformat();
+  await Global.setLKformat(initLKformat);
+  bool initIsTimeStamp = await Global.getTimeStamp();
+  await Global.setTimeStamp(initIsTimeStamp);
+  bool initIsRandomName = await Global.getRandomName();
+  await Global.setRandomName(initIsRandomName);
+  bool initIsCopyLink = await Global.getCopyLink();
+  await Global.setCopyLink(initIsCopyLink);
+  String initShowedPBhost = await Global.getShowedPBhost();
+  await Global.setShowedPBhost(initShowedPBhost);
+  bool isDeleteLocal = await Global.getDeleteLocal();
+  await Global.setDeleteLocal(isDeleteLocal);
+  String initCustomLinkFormat = await Global.getCustomLinkFormat();
+  await Global.setCustomLinkFormat(initCustomLinkFormat);
+  bool isDeleteCloud = await Global.getDeleteCloud();
+  await Global.setDeleteCloud(isDeleteCloud);
+  bool iscustomRename = await Global.getCustomeRename();
+  await Global.setCustomeRename(iscustomRename);
+  String initCustomRenameFormat = await Global.getCustomeRenameFormat();
+  await Global.setCustomeRenameFormat(initCustomRenameFormat);
+
+  //初始化图床相册数据库
+  Database db = await Global.getDatabase();
+  await Global.setDatabase(db);
+
+  //初始化路由
+  FluroRouter router = FluroRouter();
+  Application.router = router;
+  Routes.configureRoutes(router);
+  //初始化图床管理页面排列顺序
+  List<String> psHostHomePageOrder = await Global.getpsHostHomePageOrder();
+  await Global.setpsHostHomePageOrder(psHostHomePageOrder);
+  //设定loading样式 备用 先注释掉了
+  /* EasyLoading.instance
+    ..displayDuration = const Duration(milliseconds: 2000)
+    ..indicatorType = EasyLoadingIndicatorType.fadingCircle
+    ..loadingStyle = EasyLoadingStyle.custom
+    ..indicatorSize = 45.0
+    ..radius = 10.0
+    ..progressColor = Colors.blue
+    ..backgroundColor = Colors.white
+    ..indicatorColor = Colors.blue
+    ..textColor = Colors.blue
+    ..maskColor = Colors.blue.withOpacity(0.5)
+    ..userInteractions = false
+    ..dismissOnTap = false;*/
+  //初始化上传下载列表
+  List<String> tencentUploadList = await Global.getTencentUploadList();
+  await Global.setTencentUploadList(tencentUploadList);
+  List<String> tencentDownloadList = await Global.getTencentDownloadList();
+  await Global.setTencentDownloadList(tencentDownloadList);
+  List<String> aliyunUploadList = await Global.getAliyunUploadList();
+  await Global.setAliyunUploadList(aliyunUploadList);
+  List<String> aliyunDownloadList = await Global.getAliyunDownloadList();
+  await Global.setAliyunDownloadList(aliyunDownloadList);
+  List<String> qiniuUploadList = await Global.getQiniuUploadList();
+  await Global.setQiniuUploadList(qiniuUploadList);
+  List<String> qiniuDownloadList = await Global.getQiniuDownloadList();
+  await Global.setQiniuDownloadList(qiniuDownloadList);
+  List<String> upyunUploadList = await Global.getUpyunUploadList();
+  await Global.setUpyunUploadList(upyunUploadList);
+  List<String> upyunDownloadList = await Global.getUpyunDownloadList();
+  await Global.setUpyunDownloadList(upyunDownloadList);
+  List<String> smmsUploadList = await Global.getSmmsUploadList();
+  await Global.setSmmsUploadList(smmsUploadList);
+  List<String> smmsDownloadList = await Global.getSmmsDownloadList();
+  await Global.setSmmsDownloadList(smmsDownloadList);
+  List<String> smmsSavedNameList = await Global.getSmmsSavedNameList();
+  await Global.setSmmsSavedNameList(smmsSavedNameList);
+  List<String> imgurUploadList = await Global.getImgurUploadList();
+  await Global.setImgurUploadList(imgurUploadList);
+  List<String> imgurDownloadList = await Global.getImgurDownloadList();
+  await Global.setImgurDownloadList(imgurDownloadList);
+  List<String> githubUploadList = await Global.getGithubUploadList();
+  await Global.setGithubUploadList(githubUploadList);
+  List<String> githubDownloadList = await Global.getGithubDownloadList();
+  await Global.setGithubDownloadList(githubDownloadList);
+  List<String> lskyproUploadList = await Global.getLskyproUploadList();
+  await Global.setLskyproUploadList(lskyproUploadList);
+  List<String> lskyproDownloadList = await Global.getLskyproDownloadList();
+  await Global.setLskyproDownloadList(lskyproDownloadList);
+}
+
+//获得小图标，图片预览
+Widget getImageIcon(String path) {
+  try {
+    List imageType = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp'];
+    if (imageType.contains(path.substring(path.lastIndexOf('.')))) {
+      return Image.file(File(path), width: 30, height: 30, fit: BoxFit.cover);
+    } else if (Global.iconList.contains(my_path.extension(path).substring(1))) {
+      return Image.asset(
+        'assets/icons/${my_path.extension(path).substring(1)}.png',
+        width: 30,
+        height: 30,
+        fit: BoxFit.cover,
+      );
+    } else {
+      return Image.asset('assets/icons/unknown.png',
+          width: 30, height: 30, fit: BoxFit.cover);
+    }
+  } catch (e) {
+    return Image.asset('assets/icons/unknown.png',
+        width: 30, height: 30, fit: BoxFit.cover);
+  }
 }
