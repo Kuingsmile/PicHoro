@@ -34,11 +34,13 @@ class Routes {
   static String tencentBucketInformation = "/tencentBucketInformation";
   static String tencentNewBucketConfig = "/tencentNewBucketConfig";
   static String tencentFileExplorer = "/tencentFileExplorer";
+  static String tencentFileInformation = "/tencentFileInformation";
   static String tencentBucketList = "/tencentBucketList";
   static String tencentUpDownloadManagePage = "/tencentUpDownloadManagePage";
   static String fileExplorer = "/fileExplorer";
   static String smmsManageHomePage = "/smmsManageHomePage";
   static String smmsFileExplorer = "/smmsFileExplorer";
+  static String smmsFileInformation = "/smmsFileInformation";
   static String smmsUpDownloadManagePage = "/smmsUpDownloadManagePage";
   static String userInformationPage = '/userInformationPage';
   static String pictureHostInfoPage = '/pictureHostInfoPage';
@@ -46,6 +48,7 @@ class Routes {
   static String aliyunNewBucketConfig = "/aliyunNewBucketConfig";
   static String aliyunBucketInformation = "/aliyunBucketInformation";
   static String aliyunFileExplorer = "/aliyunFileExplorer";
+  static String aliyunFileInformation = "/aliyunFileInformation";
   static String aliyunUpDownloadManagePage = "/aliyunUpDownloadManagePage";
   static String upyunLogIn = '/upyunLogIn';
   static String upyunFileExplorer = "/upyunFileExplorer";
@@ -54,6 +57,14 @@ class Routes {
   static String upyunTokenManagePage = "/upyunTokenManagePage";
   static String upyunNewBucketConfig = "/upyunNewBucketConfig";
   static String upyunUpDownloadManagePage = "/upyunUpDownloadManagePage";
+  static String upyunFileInformationPage = "/upyunFileInformationPage";
+  static String qiniuBucketList = "/qiniuBucketList";
+  static String qiniuNewBucketConfig = "/qiniuNewBucketConfig";
+  static String qiniuBucketDomainAreaConfig = "/qiniuBucketDomainAreaConfig";
+  static String qiniuFileExplorer = "/qiniuFileExplorer";
+  static String qiniuFileInformation = "/qiniuFileInformation";
+  static String qiniuUpDownloadManagePage = "/qiniuUpDownloadManagePage";
+
   static void configureRoutes(FluroRouter router) {
     router.notFoundHandler = Handler(
         handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
@@ -90,12 +101,15 @@ class Routes {
         handler: tencentBucketInformationHandler);
     router.define(tencentNewBucketConfig, handler: newTencentBucketHandler);
     router.define(tencentFileExplorer, handler: tencentFileExplorerHandler);
+    router.define(tencentFileInformation,
+        handler: tencentFileInformationHandler);
     router.define(tencentBucketList, handler: tencentBucketListHandler);
     router.define(tencentUpDownloadManagePage,
         handler: tencentDownloadFileHandler);
     router.define(fileExplorer, handler: fileExplorerHandler);
     router.define(smmsManageHomePage, handler: smmsManageHomePageHandler);
     router.define(smmsFileExplorer, handler: smmsFileExplorerHandler);
+    router.define(smmsFileInformation, handler: smmsFileInformationHandler);
     router.define(smmsUpDownloadManagePage, handler: smmsUpDownloadFileHandler);
     router.define(userInformationPage, handler: userInformationPageHandler);
     router.define(pictureHostInfoPage, handler: pictureHostInfoPageHandler);
@@ -104,6 +118,7 @@ class Routes {
     router.define(aliyunBucketInformation,
         handler: aliyunBucketInformationHandler);
     router.define(aliyunFileExplorer, handler: aliyunFileExplorerHandler);
+    router.define(aliyunFileInformation, handler: aliyunFileInformationHandler);
     router.define(configurePageLogger, handler: logsHandler);
     router.define(aliyunUpDownloadManagePage,
         handler: aliyunDownloadFileHandler);
@@ -115,5 +130,14 @@ class Routes {
     router.define(upyunTokenManagePage, handler: upyunTokenManageHandler);
     router.define(upyunNewBucketConfig, handler: newUpyunBucketHandler);
     router.define(upyunUpDownloadManagePage, handler: upyunDownloadFileHandler);
+    router.define(upyunFileInformationPage,
+        handler: upyunFileInformationHandler);
+    router.define(qiniuBucketList, handler: qiniuBucketListHandler);
+    router.define(qiniuNewBucketConfig, handler: newQiniuBucketHandler);
+    router.define(qiniuBucketDomainAreaConfig,
+        handler: qiniuBucketDomainAreaConfigHandler);
+    router.define(qiniuFileExplorer, handler: qiniuFileExplorerHandler);
+    router.define(qiniuFileInformation, handler: qiniuFileInformationHandler);
+    router.define(qiniuUpDownloadManagePage, handler: qiniuDownloadFileHandler);
   }
 }

@@ -38,6 +38,7 @@ import 'package:horopic/picture_host_manage/tencent/tencent_bucket_information_p
 import 'package:horopic/picture_host_manage/tencent/tencent_new_bucket_configure.dart';
 import 'package:horopic/picture_host_manage/tencent/tencent_file_explorer.dart';
 import 'package:horopic/picture_host_manage/tencent/tencent_download_manage_page.dart';
+import 'package:horopic/picture_host_manage/tencent/tencent_file_information_page.dart';
 
 import 'package:horopic/picture_host_manage/common_page/file_explorer/file_explorer.dart';
 import 'package:horopic/picture_host_manage/common_page/file_explorer/local_image_preview.dart';
@@ -45,12 +46,14 @@ import 'package:horopic/picture_host_manage/common_page/file_explorer/local_imag
 import 'package:horopic/picture_host_manage/smms/smms_manage_home_page.dart';
 import 'package:horopic/picture_host_manage/smms/smms_file_explorer.dart';
 import 'package:horopic/picture_host_manage/smms/smms_download_manage_page.dart';
+import 'package:horopic/picture_host_manage/smms/smms_file_information_page.dart';
 
 import 'package:horopic/picture_host_manage/aliyun/aliyun_bucket_list_page.dart';
 import 'package:horopic/picture_host_manage/aliyun/aliyun_new_bucket_configure.dart';
 import 'package:horopic/picture_host_manage/aliyun/aliyun_bucket_information_page.dart';
 import 'package:horopic/picture_host_manage/aliyun/aliyun_file_explorer.dart';
 import 'package:horopic/picture_host_manage/aliyun/aliyun_download_manage_page.dart';
+import 'package:horopic/picture_host_manage/aliyun/aliyun_file_information_page.dart';
 
 import 'package:horopic/picture_host_manage/upyun/upyun_login.dart';
 import 'package:horopic/picture_host_manage/upyun/upyun_file_explorer.dart';
@@ -59,6 +62,14 @@ import 'package:horopic/picture_host_manage/upyun/upyun_bucket_information_page.
 import 'package:horopic/picture_host_manage/upyun/upyun_token_manage_page.dart';
 import 'package:horopic/picture_host_manage/upyun/upyun_new_bucket_configure.dart';
 import 'package:horopic/picture_host_manage/upyun/upyun_download_manage_page.dart';
+import 'package:horopic/picture_host_manage/upyun/upyun_file_information_page.dart';
+
+import 'package:horopic/picture_host_manage/qiniu/qiniu_bucket_list_page.dart';
+import 'package:horopic/picture_host_manage/qiniu/qiniu_new_bucket_configure.dart';
+import 'package:horopic/picture_host_manage/qiniu/qiniu_bucket_domain_area_set.dart';
+import 'package:horopic/picture_host_manage/qiniu/qiniu_file_explorer.dart';
+import 'package:horopic/picture_host_manage/qiniu/qiniu_file_information_page.dart';
+import 'package:horopic/picture_host_manage/qiniu/qiniu_download_manage_page.dart';
 
 //root
 Handler rootHandler = Handler(
@@ -261,6 +272,15 @@ var tencentDownloadFileHandler = Handler(
       bucketName: bucketName, downloadPath: downloadPath, tabIndex: tabIndex);
 });
 
+//阿里云文件详情页面
+var tencentFileInformationHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  var fileMap = json.decode(params['fileMap']!.first);
+  return TencentFileInformation(
+    fileMap: fileMap,
+  );
+});
+
 //文件浏览页面
 var fileExplorerHandler = Handler(
     handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
@@ -282,6 +302,15 @@ var smmsManageHomePageHandler = Handler(
 var smmsFileExplorerHandler = Handler(
     handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
   return const SmmsFileExplorer();
+});
+
+//SMMS文件详情页面
+var smmsFileInformationHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  var fileMap = json.decode(params['fileMap']!.first);
+  return SmmsFileInformation(
+    fileMap: fileMap,
+  );
 });
 
 //SM.MS存储下载文件页面
@@ -337,6 +366,15 @@ var aliyunFileExplorerHandler = Handler(
   );
 });
 
+//阿里云文件详情页面
+var aliyunFileInformationHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  var fileMap = json.decode(params['fileMap']!.first);
+  return AliyunFileInformation(
+    fileMap: fileMap,
+  );
+});
+
 //阿里云存储下载文件页面
 var aliyunDownloadFileHandler = Handler(
     handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
@@ -379,6 +417,15 @@ var upyunBucketInformationHandler = Handler(
   );
 });
 
+//又拍云文件详情页面
+var upyunFileInformationHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  var fileMap = json.decode(params['fileMap']!.first);
+  return UpyunFileInformation(
+    fileMap: fileMap,
+  );
+});
+
 //又拍云Token管理页面
 var upyunTokenManageHandler = Handler(
     handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
@@ -398,5 +445,56 @@ var upyunDownloadFileHandler = Handler(
   String downloadPath = params['downloadPath']!.first;
   String tabIndex = params['tabIndex']!.first;
   return UpyunUpDownloadManagePage(
+      bucketName: bucketName, downloadPath: downloadPath, tabIndex: tabIndex);
+});
+
+//七牛云存储桶列表页面
+var qiniuBucketListHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  return const QiniuBucketList();
+});
+
+//七牛云新建存储桶页面
+var newQiniuBucketHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  return const QiniuNewBucketConfig();
+});
+
+//七牛云存储桶设置页面
+var qiniuBucketDomainAreaConfigHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  var element = json.decode(params['element']!.first);
+  return QiniuBucketDomainAreaConfig(
+    element: element,
+  );
+});
+
+//七牛云存储桶文件列表页面
+var qiniuFileExplorerHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  var element = json.decode(params['element']!.first);
+  var bucketPrefix = params['bucketPrefix']!.first;
+  return QiniuFileExplorer(
+    element: element,
+    bucketPrefix: bucketPrefix,
+  );
+});
+
+//七牛云文件详情页面
+var qiniuFileInformationHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  var fileMap = json.decode(params['fileMap']!.first);
+  return QiniuFileInformation(
+    fileMap: fileMap,
+  );
+});
+
+//七牛云存储下载文件页面
+var qiniuDownloadFileHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  var bucketName = params['bucketName']!.first;
+  String downloadPath = params['downloadPath']!.first;
+  String tabIndex = params['tabIndex']!.first;
+  return QiniuUpDownloadManagePage(
       bucketName: bucketName, downloadPath: downloadPath, tabIndex: tabIndex);
 });
