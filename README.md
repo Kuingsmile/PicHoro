@@ -50,7 +50,7 @@
   <tr>
     <td><img src="http://imgx.horosama.com/admin_uploads/2022/10/2022_10_28_635bdaa1381c4.jpg" width="200" height="400" alt=""/></td>
     <td><img src="http://imgx.horosama.com/admin_uploads/2022/10/2022_10_28_635bdbc4b1817.jpg" width="200" height="400" alt=""/></td>
-    <td><img src="http://imgx.horosama.com/admin_uploads/2022/11/2022_11_01_6360d77d9ffde.jpg" width="200" height="400" alt=""/></td>
+    <td><img src="http://imgx.horosama.com/admin_uploads/2022/11/2022_11_08_636a348b8d3e0.jpg" width="200" height="400" alt=""/></td>
   </tr>
    <tr>
     <td><img src="http://imgx.horosama.com/admin_uploads/2022/10/2022_10_15_634a630aa7563.jpg" width="200" height="400" alt=""/></td>
@@ -65,7 +65,7 @@
   <tr>
     <td><img src="http://imgx.horosama.com/admin_uploads/2022/10/2022_10_24_6356546e1bc43.jpg" width="200" height="400" alt=""/></td>
     <td><img src="http://imgx.horosama.com/admin_uploads/2022/10/2022_10_24_6356548e77bfb.jpg" width="200" height="400" alt=""/></td>
-    <td><img src="http://imgx.horosama.com/admin_uploads/2022/10/2022_10_24_6356546d138ff.jpg" width="200" height="400" alt=""/></td>
+    <td><img src="http://imgx.horosama.com/admin_uploads/2022/11/2022_11_08_636a348b8ec26.jpg" width="200" height="400" alt=""/></td>
   </tr>
 </table>
 
