@@ -1,7 +1,14 @@
-import 'package:horopic/utils/global.dart';
-import 'package:mysql1/mysql1.dart';
-import 'package:dart_des/dart_des.dart';
+import 'dart:convert';
+
+// ignore: depend_on_referenced_packages
 import 'package:convert/convert.dart';
+import 'package:crypto/crypto.dart';
+import 'package:dart_des/dart_des.dart';
+import 'package:f_logs/f_logs.dart';
+import 'package:mysql1/mysql1.dart';
+
+import 'package:horopic/utils/global.dart';
+import 'package:horopic/utils/common_functions.dart';
 
 class MySqlUtils {
   static List<int> iv = "保密占位符";
@@ -1142,6 +1149,98 @@ class MySqlUtils {
           className: 'MySqlUtils',
           methodName: 'deleteUpyunOperator',
           text: formatErrorMessage({'id': id}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
+      return "Error";
+    } finally {
+      await conn.close();
+    }
+  }
+
+  static queryQiniuManage({required String username}) async {
+    var conn = await MySqlConnection.connect(settings);
+    try {
+      var results = await conn
+          .query('select * from qiniumanage where username = ?', [username]);
+
+      if (results.isEmpty) {
+        return "Empty";
+      }
+      Map<String, dynamic> resultsMap = {};
+      resultsMap.clear();
+      for (var row in results) {
+        //第一列是id
+        int id = row[0];
+        String bucket = await decryptSelf(row[1].toString());
+        String domain = await decryptSelf(row[2].toString());
+        String area = await decryptSelf(row[3].toString());
+        resultsMap['id'] = id;
+        resultsMap['bucket'] = bucket;
+        resultsMap['domain'] = domain;
+        resultsMap['area'] = area;
+      }
+      return resultsMap;
+    } catch (e) {
+      FLog.error(
+          className: 'MySqlUtils',
+          methodName: 'queryQiniuManage',
+          text: formatErrorMessage({'username': username}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
+      return "Error";
+    } finally {
+      await conn.close();
+    }
+  }
+
+  static insertQiniuManage({required List content}) async {
+    var conn = await MySqlConnection.connect(settings);
+    try {
+      String bucket = content[0].toString();
+      String domain = content[1].toString();
+      String area = content[2].toString();
+      String username = content[3].toString();
+
+      String encryptedBucket = await encryptSelf(bucket);
+      String encryptedDomain = await encryptSelf(domain);
+      String encryptedArea = await encryptSelf(area);
+
+      await conn.query(
+          "insert into qiniumanage (bucket,domain,area,username) values (?,?,?,?)",
+          [encryptedBucket, encryptedDomain, encryptedArea, username]);
+      return 'Success';
+    } catch (e) {
+      FLog.error(
+          className: 'MySqlUtils',
+          methodName: 'insertQiniuManage',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
+      return "Error";
+    } finally {
+      await conn.close();
+    }
+  }
+
+  static updateQiniuManage({required List content}) async {
+    var conn = await MySqlConnection.connect(settings);
+
+    try {
+      String bucket = content[0].toString();
+      String domain = content[1].toString();
+      String area = content[2].toString();
+      String username = content[3].toString();
+
+      String encryptedBucket = await encryptSelf(bucket);
+      String encryptedDomain = await encryptSelf(domain);
+      String encryptedArea = await encryptSelf(area);
+
+      await conn.query(
+          "update qiniumanage set bucket = ?,domain = ?,area = ? where username = ?",
+          [encryptedBucket, encryptedDomain, encryptedArea, username]);
+      return 'Success';
+    } catch (e) {
+      FLog.error(
+          className: 'MySqlUtils',
+          methodName: 'updateQiniuManage',
+          text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
       return "Error";
     } finally {
