@@ -98,7 +98,7 @@ class LogPageState extends loading_state.BaseLoadingPageState<LogPage> {
                 child: SelectableText(
                   showedLogMap[index]['记录时间'],
                   style: const TextStyle(
-                    fontSize: 14,
+                    fontSize: 12,
                     color: Colors.blue,
                   ),
                   textAlign: TextAlign.center,
