@@ -139,7 +139,7 @@
 
 **安卓版**：
 
-[https://www.horosama.com/self_apk/PicHoro_V1.8.6.apk](https://www.horosama.com/self_apk/PicHoro_V1.8.6.apk)
+[https://www.horosama.com/self_apk/PicHoro_V1.8.7.apk](https://www.horosama.com/self_apk/PicHoro_V1.8.7.apk)
 
 ## 开发计划
 
