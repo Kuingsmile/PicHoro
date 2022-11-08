@@ -83,7 +83,7 @@ class AliyunFileExplorerState
       {'prefix': widget.bucketPrefix, 'delimiter': '/'},
     );
 
-    if (res2[0] == 'failed') {
+    if (res2[0] != 'success') {
       if (mounted) {
         setState(() {
           state = loading_state.LoadState.ERROR;
@@ -593,7 +593,7 @@ class AliyunFileExplorerState
                                     className: 'AliyunFileExplorer',
                                     methodName: 'uploadNetworkFileEntry',
                                     text: formatErrorMessage({
-                                      'url': url,
+                                      'url': url.text,
                                     }, e.toString()),
                                     dataLogType: DataLogType.ERRORS.toString());
                                 if (mounted) {
@@ -621,6 +621,18 @@ class AliyunFileExplorerState
                                         title: "  请输入新文件夹名\n / 分隔创建嵌套文件夹",
                                         okBtnTap: () async {
                                           String newName = newFolder.text;
+                                          if (newName.isEmpty) {
+                                            showToastWithContext(
+                                                context, "文件夹名不能为空");
+                                            return;
+                                          }
+                                          if (newName.startsWith('/')) {
+                                            newName = newName.substring(1);
+                                          }
+                                          if (newName.endsWith('/')) {
+                                            newName = newName.substring(
+                                                0, newName.length - 1);
+                                          }
                                           var copyResult = await AliyunManageAPI
                                               .createFolder(widget.element,
                                                   widget.bucketPrefix, newName);
@@ -1473,6 +1485,29 @@ class AliyunFileExplorerState
                     .substring(0, 19),
                 style: const TextStyle(fontSize: 12)),
           ),
+          const Divider(
+            height: 0.1,
+            color: Color.fromARGB(255, 230, 230, 230),
+          ),
+          ListTile(
+              leading: const Icon(
+                Icons.info_outline_rounded,
+                color: Color.fromARGB(255, 97, 141, 236),
+              ),
+              minLeadingWidth: 0,
+              title: const Text('文件详情'),
+              onTap: () async {
+                Navigator.pop(context);
+                Map<String, dynamic> fileMap = allInfoList[index];
+                fileMap['LastModified'] = fileMap['LastModified']
+                    .toString()
+                    .replaceAll('T', ' ')
+                    .replaceAll('Z', '');
+
+                Application.router.navigateTo(context,
+                    '${Routes.aliyunFileInformation}?fileMap=${Uri.encodeComponent(jsonEncode(fileMap))}',
+                    transition: TransitionType.cupertino);
+              }),
           const Divider(
             height: 0.1,
             color: Color.fromARGB(255, 230, 230, 230),
