@@ -16,7 +16,7 @@ class QiniuImageUploadUtils {
     'z2': 'https://upload-z2.qiniup.com', //华南
     'na0': 'https://upload-na0.qiniup.com', //北美
     'as0': 'https://upload-as0.qiniup.com', //东南亚
-    'ap-northeast-1': 'http(s)://upload-ap-northeast-1.qiniup.com', //亚太首尔
+    'ap-northeast-1': 'https://upload-ap-northeast-1.qiniup.com', //亚太首尔
   };
   //url安全的base64编码
   static String urlSafeBase64Encode(List<int> bytes) {
@@ -188,14 +188,14 @@ class QiniuImageUploadUtils {
     if (qiniupath.startsWith('/')) {
       qiniupath = qiniupath.substring(1);
     }
-    if (!qiniupath.endsWith('/')) {
-      qiniupath = '$qiniupath/';
+    if (fileName.startsWith('/')) {
+      fileName = fileName.substring(1);
     }
 
     if (qiniupath == 'None') {
       key = fileName;
     } else {
-      key = '$qiniupath$fileName';
+      key = '$qiniupath/$fileName';
     }
 
     String encodedEntryURI = urlSafeBase64Encode(utf8.encode('$bucket:$key'));
