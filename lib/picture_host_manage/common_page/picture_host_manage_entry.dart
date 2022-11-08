@@ -179,8 +179,12 @@ class PsHostHomePageState extends State<PsHostHomePage>
             children: [
               Center(
                 child: InkWell(
-                  onTap: () {
-                    showToastWithContext(context, '暂未开放');
+                  onTap: () async {
+                    Application.router.navigateTo(
+                      context,
+                      Routes.qiniuBucketList,
+                      transition: TransitionType.inFromRight,
+                    );
                   },
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -200,12 +204,10 @@ class PsHostHomePageState extends State<PsHostHomePage>
                   right: 0,
                   child: Container(
                     color: Colors.transparent,
-                    child: const Text(
-                      '',
-                      style: TextStyle(
-                        color: Color.fromARGB(255, 128, 125, 125),
-                        fontSize: 12,
-                      ),
+                    child: const Icon(
+                      Icons.check_circle,
+                      color: Colors.green,
+                      size: 20,
                     ),
                   )),
             ],
