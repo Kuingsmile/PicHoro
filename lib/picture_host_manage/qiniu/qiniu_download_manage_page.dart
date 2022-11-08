@@ -51,7 +51,7 @@ class QiniuUpDownloadManagePageState extends State<QiniuUpDownloadManagePage> {
     downloadManager = DownloadManager();
     uploadManager = UploadManager();
     savedDir =
-        '${widget.downloadPath}/PicHoro/Download/qiniu/${widget.bucketName}';
+        '${widget.downloadPath}/PicHoro/Download/qiniu/${widget.bucketName}/';
     if (Global.qiniuUploadList.isNotEmpty) {
       for (var i = 0; i < Global.qiniuUploadList.length; i++) {
         var currentElement = jsonDecode(Global.qiniuUploadList[i]);
@@ -206,13 +206,13 @@ class QiniuUpDownloadManagePageState extends State<QiniuUpDownloadManagePage> {
                   setState(() {});
                 } else {
                   await downloadManager.addDownload(url,
-                      "$savedDir/${downloadManager.getFileNameFromUrl(url)}");
+                      "$savedDir${downloadManager.getFileNameFromUrl(url)}");
                   setState(() {});
                 }
               },
               onDelete: (url) async {
                 var fileName =
-                    "$savedDir/${downloadManager.getFileNameFromUrl(url)}";
+                    "$savedDir${downloadManager.getFileNameFromUrl(url)}";
                 var file = File(fileName);
                 try {
                   await file.delete();
@@ -454,7 +454,7 @@ class ListItemState extends State<ListItem> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '存储桶:${widget.url.split('/')[2].split('.')[0]}\n文件名:${widget.url.split('/').last}',
+                      '文件名:${widget.url.split('/').last}',
                     ),
                     if (widget.downloadTask != null)
                       ValueListenableBuilder(

@@ -51,7 +51,7 @@ class AliyunUpDownloadManagePageState
     downloadManager = DownloadManager();
     uploadManager = UploadManager();
     savedDir =
-        '${widget.downloadPath}/PicHoro/Download/aliyun/${widget.bucketName}';
+        '${widget.downloadPath}/PicHoro/Download/aliyun/${widget.bucketName}/';
     if (Global.aliyunUploadList.isNotEmpty) {
       for (var i = 0; i < Global.aliyunUploadList.length; i++) {
         var currentElement = jsonDecode(Global.aliyunUploadList[i]);
@@ -207,13 +207,13 @@ class AliyunUpDownloadManagePageState
                   setState(() {});
                 } else {
                   await downloadManager.addDownload(url,
-                      "$savedDir/${downloadManager.getFileNameFromUrl(url)}");
+                      "$savedDir${downloadManager.getFileNameFromUrl(url)}");
                   setState(() {});
                 }
               },
               onDelete: (url) async {
                 var fileName =
-                    "$savedDir/${downloadManager.getFileNameFromUrl(url)}";
+                    "$savedDir${downloadManager.getFileNameFromUrl(url)}";
                 var file = File(fileName);
                 try {
                   await file.delete();

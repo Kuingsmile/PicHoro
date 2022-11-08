@@ -53,7 +53,7 @@ class SmmsUpDownloadManagePageState extends State<SmmsUpDownloadManagePage> {
     super.initState();
     downloadManager = DownloadManager();
     uploadManager = UploadManager();
-    savedDir = '${widget.downloadPath}/PicHoro/Download/smms';
+    savedDir = '${widget.downloadPath}/PicHoro/Download/smms/';
     if (Global.smmsUploadList.isNotEmpty) {
       for (var i = 0; i < Global.smmsUploadList.length; i++) {
         var currentElement = jsonDecode(Global.smmsUploadList[i]);
@@ -209,13 +209,13 @@ class SmmsUpDownloadManagePageState extends State<SmmsUpDownloadManagePage> {
                   setState(() {});
                 } else {
                   await downloadManager.addDownload(
-                      url, "$savedDir/${Global.smmsSavedNameList[i]}");
+                      url, "$savedDir${Global.smmsSavedNameList[i]}");
                   setState(() {});
                 }
               },
               onDelete: (url) async {
                 var fileName =
-                    "$savedDir/${Global.smmsSavedNameList[Global.smmsDownloadList.indexOf(url)]}";
+                    "$savedDir${Global.smmsSavedNameList[Global.smmsDownloadList.indexOf(url)]}";
                 var file = File(fileName);
                 try {
                   await file.delete();

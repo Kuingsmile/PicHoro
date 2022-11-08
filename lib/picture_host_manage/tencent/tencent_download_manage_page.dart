@@ -50,7 +50,7 @@ class TencentUpDownloadManagePageState
     downloadManager = DownloadManager();
     uploadManager = UploadManager();
     savedDir =
-        '${widget.downloadPath}/PicHoro/Download/tencent/${widget.bucketName}';
+        '${widget.downloadPath}/PicHoro/Download/tencent/${widget.bucketName}/';
     if (Global.tencentUploadList.isNotEmpty) {
       for (var i = 0; i < Global.tencentUploadList.length; i++) {
         var currentElement = jsonDecode(Global.tencentUploadList[i]);
@@ -207,13 +207,13 @@ class TencentUpDownloadManagePageState
                   setState(() {});
                 } else {
                   await downloadManager.addDownload(url,
-                      "$savedDir/${downloadManager.getFileNameFromUrl(url)}");
+                      "$savedDir${downloadManager.getFileNameFromUrl(url)}");
                   setState(() {});
                 }
               },
               onDelete: (url) async {
                 var fileName =
-                    "$savedDir/${downloadManager.getFileNameFromUrl(url)}";
+                    "$savedDir${downloadManager.getFileNameFromUrl(url)}";
                 var file = File(fileName);
                 try {
                   await file.delete();

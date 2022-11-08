@@ -168,9 +168,12 @@ class DownloadManager {
         savedDir = ".";
       }
 
-      var isDirectory = await Directory(savedDir).exists();
-      var downloadFilename =
-          isDirectory ? "$savedDir/${getFileNameFromUrl(url)}" : savedDir;
+      String downloadFilename = '';
+      if (savedDir.endsWith("/")) {
+        downloadFilename = savedDir + getFileNameFromUrl(url);
+      } else {
+        downloadFilename = savedDir;
+      }
 
       return await _addDownloadRequest(DownloadRequest(url, downloadFilename));
     }
