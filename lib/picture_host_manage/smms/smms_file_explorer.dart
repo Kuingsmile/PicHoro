@@ -632,7 +632,8 @@ class SmmsFileExplorerState
                 height: 100,
               ),
               const Center(
-                  child: Text('        没有文件哦，点击右上角添加吧\n刚上传的文件可能需要一段时间才能显示',
+                  child: Text('没有文件哦，点击右上角添加吧\n刚上传的文件\n可能需要一段时间才能显示',
+                      textAlign: TextAlign.center,
                       style: TextStyle(
                           fontSize: 20,
                           color: Color.fromARGB(136, 121, 118, 118))))
@@ -927,7 +928,6 @@ class SmmsFileExplorerState
       child: Column(
         children: [
           ListTile(
-            //  dense: true,
             leading: iconImageLoad(index),
             visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
             minLeadingWidth: 0,
@@ -946,6 +946,23 @@ class SmmsFileExplorerState
               style: const TextStyle(fontSize: 12),
             ),
           ),
+          const Divider(
+            height: 0.1,
+            color: Color.fromARGB(255, 230, 230, 230),
+          ),
+          ListTile(
+              leading: const Icon(
+                Icons.info_outline_rounded,
+                color: Color.fromARGB(255, 97, 141, 236),
+              ),
+              minLeadingWidth: 0,
+              title: const Text('文件详情'),
+              onTap: () async {
+                Navigator.pop(context);
+                Application.router.navigateTo(context,
+                    '${Routes.smmsFileInformation}?fileMap=${Uri.encodeComponent(jsonEncode(allInfoList[index]))}',
+                    transition: TransitionType.cupertino);
+              }),
           const Divider(
             height: 0.1,
             color: Color.fromARGB(255, 230, 230, 230),
