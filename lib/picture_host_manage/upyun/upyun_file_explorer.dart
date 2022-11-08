@@ -80,7 +80,7 @@ class UpyunFileExplorerState
       var res2 = await UpyunManageAPI.queryBucketFiles(
           widget.element, widget.bucketPrefix);
 
-      if (res2[0] == 'failed') {
+      if (res2[0] != 'success') {
         if (mounted) {
           setState(() {
             state = loading_state.LoadState.ERROR;
@@ -595,7 +595,7 @@ class UpyunFileExplorerState
                                     className: 'UpyunFileExplorer',
                                     methodName: 'uploadNetworkFileEntry',
                                     text: formatErrorMessage({
-                                      'url': url,
+                                      'url': url.text,
                                     }, e.toString()),
                                     dataLogType: DataLogType.ERRORS.toString());
                                 if (mounted) {
@@ -623,6 +623,11 @@ class UpyunFileExplorerState
                                         title: "  请输入新文件夹名\n / 分隔创建嵌套文件夹",
                                         okBtnTap: () async {
                                           String newName = newFolder.text;
+                                          if (newName.isEmpty) {
+                                            showToastWithContext(
+                                                context, "文件夹名不能为空");
+                                            return;
+                                          }
                                           var copyResult =
                                               await UpyunManageAPI.createFolder(
                                                   widget.element,
@@ -875,8 +880,6 @@ class UpyunFileExplorerState
     try {
       for (int i = 0; i < toDelete.length; i++) {
         if ((toDelete[i] - i) < dirAllInfoList.length) {
-          print('delete dir');
-          print(allInfoList[toDelete[i] - i]['name']);
           await UpyunManageAPI.deleteFolder(widget.element,
               '${widget.bucketPrefix}${allInfoList[toDelete[i] - i]['name']}');
           setState(() {
@@ -1439,6 +1442,23 @@ class UpyunFileExplorerState
             subtitle: Text(allInfoList[index]['last_modified'].toString(),
                 style: const TextStyle(fontSize: 12)),
           ),
+          const Divider(
+            height: 0.1,
+            color: Color.fromARGB(255, 230, 230, 230),
+          ),
+          ListTile(
+              leading: const Icon(
+                Icons.info_outline_rounded,
+                color: Color.fromARGB(255, 97, 141, 236),
+              ),
+              minLeadingWidth: 0,
+              title: const Text('文件详情'),
+              onTap: () async {
+                Navigator.pop(context);
+                Application.router.navigateTo(context,
+                    '${Routes.upyunFileInformationPage}?fileMap=${Uri.encodeComponent(jsonEncode(allInfoList[index]))}',
+                    transition: TransitionType.cupertino);
+              }),
           const Divider(
             height: 0.1,
             color: Color.fromARGB(255, 230, 230, 230),
