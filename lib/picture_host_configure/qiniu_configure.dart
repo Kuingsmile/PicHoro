@@ -13,6 +13,7 @@ import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/sql_utils.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/api/qiniu_api.dart';
+import 'package:horopic/picture_host_manage/manage_api/qiniu_manage_api.dart';
 
 class QiniuConfig extends StatefulWidget {
   const QiniuConfig({Key? key}) : super(key: key);
@@ -31,6 +32,35 @@ class QiniuConfigState extends State<QiniuConfig> {
   final _areaController = TextEditingController();
   final _optionsController = TextEditingController();
   final _pathController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _initConfig();
+  }
+
+  _initConfig() async {
+    try {
+      Map configMap = await QiniuManageAPI.getConfigMap();
+      _accessKeyController.text = configMap['accessKey'];
+      _secretKeyController.text = configMap['secretKey'];
+      _bucketController.text = configMap['bucket'];
+      _urlController.text = configMap['url'];
+      _areaController.text = configMap['area'];
+      if (configMap['options'] != 'None') {
+        _optionsController.text = configMap['options'];
+      }
+      if (configMap['path'] != 'None') {
+        _pathController.text = configMap['path'];
+      }
+    } catch (e) {
+      FLog.error(
+          className: 'QiniuConfigState',
+          methodName: '_initConfig',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
+    }
+  }
 
   @override
   void dispose() {

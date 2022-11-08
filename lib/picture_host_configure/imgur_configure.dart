@@ -12,6 +12,7 @@ import 'package:horopic/pages/loading.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/sql_utils.dart';
 import 'package:horopic/utils/global.dart';
+import 'package:horopic/picture_host_manage/manage_api/imgur_manage_api.dart';
 
 class ImgurConfig extends StatefulWidget {
   const ImgurConfig({Key? key}) : super(key: key);
@@ -24,6 +25,29 @@ class ImgurConfigState extends State<ImgurConfig> {
   final _formKey = GlobalKey<FormState>();
   final _clientIdController = TextEditingController();
   final _proxyController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _initConfig();
+  }
+
+  _initConfig() async {
+    try {
+      Map configMap = await ImgurManageAPI.getConfigMap();
+      _clientIdController.text = configMap['clientId'];
+      if (configMap['proxy'] != 'None') {
+        _proxyController.text = configMap['proxy'];
+      }
+      setState(() {});
+    } catch (e) {
+      FLog.error(
+          className: 'ImgurConfigState',
+          methodName: '_initConfig',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
+    }
+  }
 
   @override
   void dispose() {

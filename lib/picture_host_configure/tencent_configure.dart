@@ -13,6 +13,7 @@ import 'package:horopic/pages/loading.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/sql_utils.dart';
 import 'package:horopic/utils/global.dart';
+import 'package:horopic/picture_host_manage/manage_api/tencent_manage_api.dart';
 
 class TencentConfig extends StatefulWidget {
   const TencentConfig({Key? key}) : super(key: key);
@@ -32,6 +33,38 @@ class TencentConfigState extends State<TencentConfig> {
   final _pathController = TextEditingController();
   final _customUrlController = TextEditingController();
   final _optionsController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _initCongfig();
+  }
+
+  _initCongfig() async {
+    try {
+      Map configMap = await TencentManageAPI.getConfigMap();
+      _secretIdController.text = configMap['secretId'];
+      _secretKeyController.text = configMap['secretKey'];
+      _bucketController.text = configMap['bucket'];
+      _appIdController.text = configMap['appId'];
+      _areaController.text = configMap['area'];
+      if (configMap['path'] != 'None') {
+        _pathController.text = configMap['path'];
+      }
+      if (configMap['customUrl'] != 'None') {
+        _customUrlController.text = configMap['customUrl'];
+      }
+      if (configMap['options'] != 'None') {
+        _optionsController.text = configMap['options'];
+      }
+    } catch (e) {
+      FLog.error(
+          className: 'TencentConfigState',
+          methodName: 'initConfig',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
+    }
+  }
 
   @override
   void dispose() {

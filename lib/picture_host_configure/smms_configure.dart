@@ -11,6 +11,7 @@ import 'package:horopic/pages/loading.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/sql_utils.dart';
 import 'package:horopic/utils/global.dart';
+import 'package:horopic/picture_host_manage/manage_api/smms_manage_api.dart';
 
 class SmmsConfig extends StatefulWidget {
   const SmmsConfig({Key? key}) : super(key: key);
@@ -22,6 +23,25 @@ class SmmsConfig extends StatefulWidget {
 class SmmsConfigState extends State<SmmsConfig> {
   final _formKey = GlobalKey<FormState>();
   final _tokenController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _initConfig();
+  }
+
+  _initConfig() async {
+    try {
+      Map configMap = await SmmsManageAPI.getConfigMap();
+      _tokenController.text = configMap['token'];
+    } catch (e) {
+      FLog.error(
+          className: 'SmmsConfigState',
+          methodName: '_initConfig',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
+    }
+  }
 
   @override
   void dispose() {

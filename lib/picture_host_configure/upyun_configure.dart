@@ -13,6 +13,7 @@ import 'package:horopic/pages/loading.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/sql_utils.dart';
+import 'package:horopic/picture_host_manage/manage_api/upyun_manage_api.dart';
 
 class UpyunConfig extends StatefulWidget {
   const UpyunConfig({Key? key}) : super(key: key);
@@ -30,6 +31,34 @@ class UpyunConfigState extends State<UpyunConfig> {
   final _urlController = TextEditingController();
   final _optionsController = TextEditingController();
   final _pathController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _initCongfig();
+  }
+
+  _initCongfig() async {
+    try {
+      Map configMap = await UpyunManageAPI.getConfigMap();
+      _bucketController.text = configMap['bucket'];
+      _operatorController.text = configMap['operator'];
+      _passwordController.text = configMap['password'];
+      _urlController.text = configMap['url'];
+      if (configMap['options'] != 'None') {
+        _optionsController.text = configMap['options'];
+      }
+      if (configMap['path'] != 'None') {
+        _pathController.text = configMap['path'];
+      }
+    } catch (e) {
+      FLog.error(
+          className: 'UpyunConfigState',
+          methodName: '_initCongfig',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
+    }
+  }
 
   @override
   void dispose() {
@@ -115,7 +144,7 @@ class UpyunConfigState extends State<UpyunConfig> {
               controller: _optionsController,
               decoration: const InputDecoration(
                 contentPadding: EdgeInsets.zero,
-                label: Center(child: Text('网站后缀')),
+                label: Center(child: Text('可选：网站后缀')),
                 hintText: '例如!/fwfh/500x500',
                 hintStyle: TextStyle(fontSize: 13),
               ),

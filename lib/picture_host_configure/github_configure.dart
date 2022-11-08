@@ -11,6 +11,7 @@ import 'package:horopic/pages/loading.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/sql_utils.dart';
 import 'package:horopic/utils/global.dart';
+import 'package:horopic/picture_host_manage/manage_api/github_manage_api.dart';
 
 class GithubConfig extends StatefulWidget {
   const GithubConfig({Key? key}) : super(key: key);
@@ -28,6 +29,35 @@ class GithubConfigState extends State<GithubConfig> {
   final _storePathController = TextEditingController();
   final _branchController = TextEditingController();
   final _customDomainController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _initConfig();
+  }
+
+  _initConfig() async {
+    try {
+      Map configMap = await GithubManageAPI.getConfigMap();
+      _githubusernameController.text = configMap['githubusername'];
+      _repoController.text = configMap['repo'];
+      _tokenController.text = configMap['token'];
+      if (configMap['storePath'] != 'None') {
+        _storePathController.text = configMap['storePath'];
+      }
+      _branchController.text = configMap['branch'];
+      if (configMap['customDomain'] != 'None') {
+        _customDomainController.text = configMap['customDomain'];
+      }
+      setState(() {});
+    } catch (e) {
+      FLog.error(
+          className: 'GithubConfigState',
+          methodName: '_initConfig',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
+    }
+  }
 
   @override
   void dispose() {

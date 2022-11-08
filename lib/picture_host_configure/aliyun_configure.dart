@@ -15,6 +15,7 @@ import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/pages/loading.dart';
 import 'package:horopic/utils/sql_utils.dart';
 import 'package:horopic/utils/global.dart';
+import 'package:horopic/picture_host_manage/manage_api/aliyun_manage_api.dart';
 
 class AliyunConfig extends StatefulWidget {
   const AliyunConfig({Key? key}) : super(key: key);
@@ -33,6 +34,38 @@ class AliyunConfigState extends State<AliyunConfig> {
   final _pathController = TextEditingController();
   final _customUrlController = TextEditingController();
   final _optionsController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _initConfig();
+  }
+
+  _initConfig() async {
+    try {
+      Map configMap = await AliyunManageAPI.getConfigMap();
+      _keyIdController.text = configMap['keyId'];
+      _keySecretController.text = configMap['keySecret'];
+      _bucketController.text = configMap['bucket'];
+      _areaController.text = configMap['area'];
+      if (configMap['path'] != 'None') {
+        _pathController.text = configMap['path'];
+      }
+      if (configMap['customUrl'] != 'None') {
+        _customUrlController.text = configMap['customUrl'];
+      }
+      if (configMap['options'] != 'None') {
+        _optionsController.text = configMap['options'];
+      }
+      setState(() {});
+    } catch (e) {
+      FLog.error(
+          className: 'AliyunConfigState',
+          methodName: '_initConfig',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
+    }
+  }
 
   @override
   void dispose() {

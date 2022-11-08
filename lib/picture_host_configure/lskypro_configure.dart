@@ -11,6 +11,7 @@ import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/pages/loading.dart';
 import 'package:horopic/utils/sql_utils.dart';
 import 'package:horopic/utils/global.dart';
+import 'package:horopic/picture_host_manage/manage_api/lskypro_manage_api.dart';
 
 //a textfield to get hosts,username,passwd,token and strategy_id
 class HostConfig extends StatefulWidget {
@@ -30,6 +31,22 @@ class HostConfigState extends State<HostConfig> {
   @override
   void initState() {
     super.initState();
+    _initConfig();
+  }
+
+  _initConfig() async {
+    try {
+      Map configMap = await LskyproManageAPI.getConfigMap();
+      _hostController.text = configMap['host'];
+
+      _strategyIdController.text = configMap['strategy_id'];
+    } catch (e) {
+      FLog.error(
+          className: 'LskyproConfigState',
+          methodName: '_initConfig',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
+    }
   }
 
   @override
@@ -56,7 +73,8 @@ class HostConfigState extends State<HostConfig> {
             TextFormField(
               controller: _hostController,
               decoration: const InputDecoration(
-                hintText: '域名 eg:https://imgx.horosama.com )',
+                label: Center(child: Text('域名')),
+                hintText: '例如: https://imgx.horosama.com',
               ),
               textAlign: TextAlign.center,
               validator: (value) {
