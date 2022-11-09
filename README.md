@@ -5,6 +5,10 @@
 
 &emsp;&emsp;一款基于flutter的手机端云存储平台/图床管理和文件上传/下载工具，最新版本**V1.8.7**，与PicGo配置互通，可直接扫码导入，主要功能包括云存储平台和图床平台的管理，文件上传和下载管理，以及各种格式的链接分享。
 
+&emsp;&emsp;项目介绍和配置手册网址:
+
+&emsp;&emsp;[https://pichoro.horosama.com](https://pichoro.horosama.com)
+
 &emsp;&emsp;图片上传/相册功能已支持如下图床：
 
 - [X] 兰空图床V2 (**V1.00版本添加**)
