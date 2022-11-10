@@ -55,12 +55,19 @@ class UploadManager {
       });
       String token = configMap["token"];
       String strategyId = configMap["strategy_id"];
+      String albumId = configMap["album_id"].toString();
       if (strategyId == "None") {
         formdata = FormData.fromMap({});
+      } else if (albumId == 'None') {
+        formdata = FormData.fromMap({
+          "file": await MultipartFile.fromFile(path, filename: fileName),
+          "strategy_id": strategyId,
+        });
       } else {
         formdata = FormData.fromMap({
           "file": await MultipartFile.fromFile(path, filename: fileName),
           "strategy_id": strategyId,
+          "album_id": albumId,
         });
       }
       BaseOptions baseoptions = BaseOptions(
