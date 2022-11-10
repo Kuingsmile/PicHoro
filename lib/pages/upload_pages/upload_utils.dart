@@ -573,11 +573,18 @@ class UploadManager {
         });
         if (configMap["strategy_id"] == "None") {
           formdata = FormData.fromMap({});
+        } else if (configMap["album_id"] == "None") {
+          formdata = FormData.fromMap({
+            "file": await MultipartFile.fromFile(path,
+                filename: my_path.basename(path)),
+            "strategy_id": configMap["strategy_id"],
+          });
         } else {
           formdata = FormData.fromMap({
             "file": await MultipartFile.fromFile(path,
                 filename: my_path.basename(path)),
             "strategy_id": configMap["strategy_id"],
+            "album_id": configMap["album_id"],
           });
         }
         BaseOptions options = BaseOptions(
