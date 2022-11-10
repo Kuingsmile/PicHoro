@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:fluro/fluro.dart';
+import 'package:f_logs/f_logs.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:qiniu_flutter_sdk/qiniu_flutter_sdk.dart';
 import 'package:path/path.dart' as mypath;
@@ -62,6 +63,11 @@ class AllPShostState extends State<AllPShost> {
         Global.qrScanResult = result.rawContent.toString();
       });
     } catch (e) {
+      FLog.error(
+          className: 'AllPShostState',
+          methodName: '_scan',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
       setState(() {
         Global.qrScanResult = ScanResult(
           type: ResultType.Error,
@@ -73,69 +79,69 @@ class AllPShostState extends State<AllPShost> {
   }
 
   //smms配置
-  Future<String> get _localPath async {
+  static Future<String> get localPath async {
     final directory = await getApplicationDocumentsDirectory();
     return directory.path;
   }
 
   Future<File> get smmsFile async {
-    final path = await _localPath;
+    final path = await localPath;
     String defaultUser = await Global.getUser();
     return File('$path/${defaultUser}_smms_config.txt');
   }
 
 //lskypro配置
   Future<File> get lskyFile async {
-    final path = await _localPath;
+    final path = await localPath;
     String defaultUser = await Global.getUser();
     return File('$path/${defaultUser}_host_config.txt');
   }
 
 //github配置
   Future<File> get githubFile async {
-    final path = await _localPath;
+    final path = await localPath;
     String defaultUser = await Global.getUser();
     return File('$path/${defaultUser}_github_config.txt');
   }
 
   //imgur配置
   Future<File> get imgurFile async {
-    final path = await _localPath;
+    final path = await localPath;
     String defaultUser = await Global.getUser();
     return File('$path/${defaultUser}_imgur_config.txt');
   }
 
   //qiniu配置
   Future<File> get qiniuFile async {
-    final path = await _localPath;
+    final path = await localPath;
     String defaultUser = await Global.getUser();
     return File('$path/${defaultUser}_qiniu_config.txt');
   }
 
   //tencent配置
   Future<File> get tencentFile async {
-    final path = await _localPath;
+    final path = await localPath;
     String defaultUser = await Global.getUser();
     return File('$path/${defaultUser}_tencent_config.txt');
   }
 
   //aliyun配置
   Future<File> get aliyunFile async {
-    final path = await _localPath;
+    final path = await localPath;
     String defaultUser = await Global.getUser();
     return File('$path/${defaultUser}_aliyun_config.txt');
   }
 
   //upyun配置
   Future<File> get upyunFile async {
-    final path = await _localPath;
+    final path = await localPath;
     String defaultUser = await Global.getUser();
     return File('$path/${defaultUser}_upyun_config.txt');
   }
 
   exportConfiguration(String pshost) async {
     try {
-      String configPath = await _localPath;
+      String configPath = await localPath;
       String defaultUser = await Global.getUser();
       Map<String, dynamic> configFilePath = {
         "smms": "$configPath/${defaultUser}_smms_config.txt",
@@ -157,6 +163,13 @@ class AllPShostState extends State<AllPShost> {
       await Clipboard.setData(ClipboardData(text: configJson));
       showToast("$pshost配置已复制到剪贴板");
     } catch (e) {
+      FLog.error(
+          className: 'AllPShostState',
+          methodName: 'exportConfiguration',
+          text: formatErrorMessage({
+            "pshost": pshost,
+          }, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
       showToast("导出失败");
     }
   }
@@ -229,9 +242,19 @@ class AllPShostState extends State<AllPShost> {
             showToast("sm.ms验证失败");
           }
         } catch (e) {
+          FLog.error(
+              className: 'AllPShostState',
+              methodName: 'processingQRCodeResult_smms_1',
+              text: formatErrorMessage({}, e.toString()),
+              dataLogType: DataLogType.ERRORS.toString());
           rethrow;
         }
       } catch (e) {
+        FLog.error(
+            className: 'AllPShostState',
+            methodName: 'processingQRCodeResult_smms_2',
+            text: formatErrorMessage({}, e.toString()),
+            dataLogType: DataLogType.ERRORS.toString());
         showToast("sm.ms配置错误");
       }
     }
@@ -331,14 +354,30 @@ class AllPShostState extends State<AllPShost> {
               showToast("Github验证失败");
             }
           } catch (e) {
+            FLog.error(
+                className: 'AllPShostState',
+                methodName: 'processingQRCodeResult_github_1',
+                text: formatErrorMessage({}, e.toString()),
+                dataLogType: DataLogType.ERRORS.toString());
             showToast("Github验证失败");
           }
         } catch (e) {
+          FLog.error(
+              className: 'AllPShostState',
+              methodName: 'processingQRCodeResult_github_2',
+              text: formatErrorMessage({}, e.toString()),
+              dataLogType: DataLogType.ERRORS.toString());
           showToast("Github配置错误");
         }
       } catch (e) {
+        FLog.error(
+            className: 'AllPShostState',
+            methodName: 'processingQRCodeResult_github_3',
+            text: formatErrorMessage({}, e.toString()),
+            dataLogType: DataLogType.ERRORS.toString());
         showToast("Github配置错误");
       }
+    }
 
       if (jsonResult['lankong'] != null) {
         try {
@@ -357,6 +396,10 @@ class AllPShostState extends State<AllPShost> {
             String lanKongstrategyId = jsonResult['lankong']['strategyId'];
             if (lanKongstrategyId == '' || lanKongstrategyId.isEmpty) {
               lanKongstrategyId = 'None';
+            }
+            String lanKongalbumId = jsonResult['lankong']['albumId'];
+            if (lanKongalbumId == '' || lanKongalbumId.isEmpty) {
+              lanKongalbumId = 'None';
             }
 
             BaseOptions options = BaseOptions(
@@ -384,6 +427,7 @@ class AllPShostState extends State<AllPShost> {
                   List sqlconfig = [];
                   sqlconfig.add(lankongVtwoHost);
                   sqlconfig.add(lanKongstrategyId.toString());
+                  sqlconfig.add(lanKongalbumId.toString());
                   sqlconfig.add(lankongToken);
                   String defaultUser = await Global.getUser();
                   sqlconfig.add(defaultUser);
@@ -403,11 +447,16 @@ class AllPShostState extends State<AllPShost> {
                         await MySqlUtils.updateLankong(content: sqlconfig);
                   }
                 } catch (e) {
+                  FLog.error(
+                      className: 'AllPShostState',
+                      methodName: 'processingQRCodeResult_lankong_1',
+                      text: formatErrorMessage({}, e.toString()),
+                      dataLogType: DataLogType.ERRORS.toString());
                   showToast("兰空数据库错误");
                 }
                 if (sqlResult == "Success") {
                   HostConfigModel hostConfig = HostConfigModel(
-                      lankongVtwoHost, lankongToken, lanKongstrategyId);
+                      lankongVtwoHost, lankongToken, lanKongstrategyId , lanKongalbumId);
                   final hostConfigJson = jsonEncode(hostConfig);
                   final hostConfigFile = await lskyFile;
                   hostConfigFile.writeAsString(hostConfigJson);
@@ -419,16 +468,25 @@ class AllPShostState extends State<AllPShost> {
                 showToast("兰空验证失败");
               }
             } catch (e) {
+              FLog.error(
+                  className: 'AllPShostState',
+                  methodName: 'processingQRCodeResult_lankong_2',
+                  text: formatErrorMessage({}, e.toString()),
+                  dataLogType: DataLogType.ERRORS.toString());
               showToast("兰空配置错误");
             }
           } else {
             showToast("不支持兰空V1");
           }
         } catch (e) {
+          FLog.error(
+              className: 'AllPShostState',
+              methodName: 'processingQRCodeResult_lankong_3',
+              text: formatErrorMessage({}, e.toString()),
+              dataLogType: DataLogType.ERRORS.toString());
           showToast("兰空配置错误");
         }
       }
-    }
 
     if (jsonResult['imgur'] != null) {
       final imgurclientId = jsonResult['imgur']['clientId'];
@@ -503,9 +561,19 @@ class AllPShostState extends State<AllPShost> {
             showToast("Imgur验证失败");
           }
         } catch (e) {
+          FLog.error(
+              className: 'AllPShostState',
+              methodName: 'processingQRCodeResult_imgur_1',
+              text: formatErrorMessage({}, e.toString()),
+              dataLogType: DataLogType.ERRORS.toString());
           rethrow;
         }
       } catch (e) {
+        FLog.error(
+            className: 'AllPShostState',
+            methodName: 'processingQRCodeResult_imgur_2',
+            text: formatErrorMessage({}, e.toString()),
+            dataLogType: DataLogType.ERRORS.toString());
         showToast("Imgur配置错误");
       }
     }
@@ -618,9 +686,19 @@ class AllPShostState extends State<AllPShost> {
             showToast("七牛验证失败");
           }
         } catch (e) {
+          FLog.error(
+              className: 'AllPShostState',
+              methodName: 'processingQRCodeResult_qiniu_1',
+              text: formatErrorMessage({}, e.toString()),
+              dataLogType: DataLogType.ERRORS.toString());
           rethrow;
         }
       } catch (e) {
+        FLog.error(
+            className: 'AllPShostState',
+            methodName: 'processingQRCodeResult_qiniu_2',
+            text: formatErrorMessage({}, e.toString()),
+            dataLogType: DataLogType.ERRORS.toString());
         showToast("七牛配置错误");
       }
     }
@@ -795,6 +873,11 @@ class AllPShostState extends State<AllPShost> {
             showToast("腾讯云验证失败");
           }
         } catch (e) {
+          FLog.error(
+          className: 'TencentConfigPage',
+          methodName: 'saveTencentConfig',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
           showToast("腾讯云配置错误");
         }
       } else {
@@ -957,6 +1040,11 @@ class AllPShostState extends State<AllPShost> {
           showToast("阿里云验证失败");
         }
       } catch (e) {
+        FLog.error(
+          className: 'AliyunConfigPage',
+          methodName: 'saveAliyunConfig',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
         showToast("阿里云配置错误");
       }
     }
@@ -1105,6 +1193,11 @@ class AllPShostState extends State<AllPShost> {
           showToast("又拍云验证失败");
         }
       } catch (e) {
+        FLog.error(
+          className: 'UpyunConfigPage',
+          methodName: 'upyunConfig',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
         showToast("又拍云配置错误");
       }
     }
@@ -1116,6 +1209,7 @@ class AllPShostState extends State<AllPShost> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        elevation: 0,
         centerTitle: true,
         title: const Text(
           '图床设置',
@@ -1132,7 +1226,6 @@ class AllPShostState extends State<AllPShost> {
           title: const Text('二维码扫描导入PicGo配置'),
           onTap: () async {
             await _scan();
-
             showDialog(
                 context: this.context,
                 barrierDismissible: false,
