@@ -14,19 +14,24 @@ class LskyproImageUploadUtils {
     FormData formdata = FormData.fromMap({
       "file": await MultipartFile.fromFile(path, filename: name),
     });
+    String albumId = configMap['album_id'];
     if (configMap["strategy_id"] == "None") {
       formdata = FormData.fromMap({});
-    } else {
+    } else if (albumId == 'None') {
       formdata = FormData.fromMap({
         "file": await MultipartFile.fromFile(path, filename: name),
         "strategy_id": configMap["strategy_id"],
       });
+    } else {
+      formdata = FormData.fromMap({
+        "file": await MultipartFile.fromFile(path, filename: name),
+        "strategy_id": configMap["strategy_id"],
+        "album_id": albumId,
+      });
     }
 
     BaseOptions options = BaseOptions(
-      //连接服务器超时时间，单位是毫秒.
       connectTimeout: 30000,
-      //响应超时时间。
       receiveTimeout: 30000,
       sendTimeout: 30000,
     );
@@ -85,9 +90,7 @@ class LskyproImageUploadUtils {
       "key": deleteMap["pictureKey"],
     };
     BaseOptions options = BaseOptions(
-      //连接服务器超时时间，单位是毫秒.
       connectTimeout: 30000,
-      //响应超时时间。
       receiveTimeout: 30000,
       sendTimeout: 30000,
     );
