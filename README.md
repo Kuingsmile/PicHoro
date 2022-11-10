@@ -63,7 +63,7 @@
 
 Github下载地址 [Github release](https://github.com/Kuingsmile/PicHoro/releases)  
 
-我的个人网站提供的最新版本下载地址 [https://www.horosama.com/self_apk/PicHoro_V1.8.7.apk](https://www.horosama.com/self_apk/PicHoro_V1.8.7.apk)
+我的个人网站提供的最新版本下载地址 [https://www.horosama.com/self_apk/PicHoro_V1.8.8.apk](https://www.horosama.com/self_apk/PicHoro_V1.8.8.apk)
 
 ### IOS
 
