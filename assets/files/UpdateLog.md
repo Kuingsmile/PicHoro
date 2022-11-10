@@ -1,6 +1,42 @@
 
 [https://github.com/Kuingsmile/PicHoro](https://github.com/Kuingsmile/PicHoro)
 
+
+- 2022-11-09: **V1.88**:
+
+  - 新增：**由于新增了字段，旧版本APP保存兰空图床配置会失败，请尽快更新到最新版本**
+  - 新增：新建了软件的介绍和配置说明网站[https://pichoro.horosama.com](https://pichoro.horosama.com)，并在软件配置主页加入了`软件主页`跳转选项
+  - 新增：兰空图床显示了当前token，同时在已有token的情况下，可以直接获取策略ID和相册ID列表，不再需要输入用户名和密码。
+  - 新增：兰空图床配置参数增加了相册ID，管理界面上传时也会上传到对应相册，但限于以下两种情况下才会生效：
+    1. 基于付费企业版兰空图床搭建
+    2. 开源免费版需要自己或者联系管理员修改源代码文件，修改方式为打开 **/app/Services/ImageService.php**文件，修改第139行，原文件为
+
+```php
+           // 图片保存至默认相册(若有)
+            if ($albumId = $user->configs->get(UserConfigKey::DefaultAlbum)) {
+                if ($user->albums()->where('id', $albumId)->exists()) {
+                    $image->album_id = $albumId;
+                }
+            }
+```
+
+修改为
+
+```php
+           if ($request->has('album_id')) {
+                $image->album_id = $request->input('album_id');
+            } else {
+            // 图片保存至默认相册(若有)
+            if ($albumId = $user->configs->get(UserConfigKey::DefaultAlbum)) {
+                if ($user->albums()->where('id', $albumId)->exists()) {
+                    $image->album_id = $albumId;
+                }
+            }
+        }
+```
+
+- - 新增：APP启动时现在会自动清理已下载的新版本安装包，避免占用过多空间。
+  - 优化：修改了图床配置界面的图标UI。
 - 2022-11-08: **V1.87**:
   - 新增：图床仓库管理功能增加了对**兰空图床**的支持
   - 优化：修改了相册和文件浏览页面缩略图的显示方式，从cover修改为fill。
