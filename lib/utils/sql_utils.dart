@@ -114,33 +114,21 @@ class MySqlUtils {
       resultsMap.clear();
       for (var row in results) {
         String host = await decryptSelf(row[1].toString());
-        String strategy_id = await decryptSelf(row[2].toString());
-        String token = await decryptSelf(row[3].toString());
+        String strategyId = await decryptSelf(row[2].toString());
+        String albumId = await decryptSelf(row[3].toString());
+        String token = await decryptSelf(row[4].toString());
         resultsMap['host'] = host;
-        resultsMap['strategy_id'] = strategy_id;
+        resultsMap['strategy_id'] = strategyId;
+        resultsMap['album_id'] = albumId;
         resultsMap['token'] = token;
       }
       return resultsMap;
     } catch (e) {
-      //print(e);
-      return "Error";
-    } finally {
-      await conn.close();
-    }
-  }
-
-  static insertUser({required List content}) async {
-    var conn = await MySqlConnection.connect(settings);
-    try {
-      String valuename = content[0].toString();
-      String valuepassword = content[1].toString();
-      String valuedefaultPShost = content[2].toString();
-      String encryptedPassword = await encryptSelf(valuepassword);
-      var results = await conn.query(
-          "insert into users (username,password,defaultPShost) values (?,?,?)",
-          [valuename, encryptedPassword, valuedefaultPShost]);
-      return 'Success';
-    } catch (e) {
+      FLog.error(
+          className: 'MySqlUtils',
+          methodName: 'queryLankong',
+          text: formatErrorMessage({'username': username}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
       return "Error";
     } finally {
       await conn.close();
@@ -151,18 +139,67 @@ class MySqlUtils {
     var conn = await MySqlConnection.connect(settings);
     try {
       String hosts = content[0].toString();
-      String strategy_id = content[1].toString();
-      String token = content[2].toString();
-      String username = content[3].toString();
+      String strategyId = content[1].toString();
+      String albumId = content[2].toString();
+      String token = content[3].toString();
+      String username = content[4].toString();
       String encryptedHost = await encryptSelf(hosts);
-      String encryptedStrategy_id = await encryptSelf(strategy_id);
+      String encryptedStrategyId = await encryptSelf(strategyId);
+      String encryptedAlbumId = await encryptSelf(albumId);
       String encryptedToken = await encryptSelf(token);
 
-      var results = await conn.query(
-          "insert into lankong (hosts,strategy_id,token,username) values (?,?,?,?)",
-          [encryptedHost, encryptedStrategy_id, encryptedToken, username]);
+      await conn.query(
+          "insert into lankong (hosts,strategy_id,album_id,token,username) values (?,?,?,?,?)",
+          [
+            encryptedHost,
+            encryptedStrategyId,
+            encryptedAlbumId,
+            encryptedToken,
+            username
+          ]);
       return 'Success';
     } catch (e) {
+      FLog.error(
+          className: 'MySqlUtils',
+          methodName: 'insertLankong',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
+      return "Error";
+    } finally {
+      await conn.close();
+    }
+  }
+
+  static updateLankong({required List content}) async {
+    var conn = await MySqlConnection.connect(settings);
+
+    try {
+      String hosts = content[0].toString();
+      String strategyId = content[1].toString();
+      String albumId = content[2].toString();
+      String token = content[3].toString();
+      String username = content[4].toString();
+      String encryptedHost = await encryptSelf(hosts);
+      String encryptedStrategyId = await encryptSelf(strategyId);
+      String encryptedAlbumId = await encryptSelf(albumId);
+      String encryptedToken = await encryptSelf(token);
+
+      await conn.query(
+          "update lankong set hosts = ?,strategy_id = ?,album_id = ?,token = ? where username = ?",
+          [
+            encryptedHost,
+            encryptedStrategyId,
+            encryptedAlbumId,
+            encryptedToken,
+            username
+          ]);
+      return 'Success';
+    } catch (e) {
+      FLog.error(
+          className: 'MySqlUtils',
+          methodName: 'updateLankong',
+          text: formatErrorMessage({'content': content}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
       return "Error";
     } finally {
       await conn.close();
