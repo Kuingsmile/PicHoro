@@ -5,6 +5,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:r_upgrade/r_upgrade.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:fluro/fluro.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'package:horopic/utils/sql_utils.dart';
 import 'package:horopic/utils/permission.dart';
@@ -200,6 +201,14 @@ class ConfigurePageState extends State<ConfigurePage>
             onTap: () {
               Application.router.navigateTo(this.context, Routes.updateLog,
                   transition: TransitionType.cupertino);
+            },
+            trailing: const Icon(Icons.arrow_forward_ios),
+          ),
+          ListTile(
+            title: const Text('软件官网'),
+            onTap: () async {
+              Uri url = Uri.parse('https://pichoro.horosama.com');
+              await launchUrl(url);
             },
             trailing: const Icon(Icons.arrow_forward_ios),
           ),
