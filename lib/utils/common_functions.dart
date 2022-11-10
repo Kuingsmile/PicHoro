@@ -12,6 +12,8 @@ import "package:crypto/crypto.dart";
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:fluro/fluro.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/router/application.dart';
@@ -449,6 +451,25 @@ formatErrorMessage(
   return formateTemplate;
 }
 
+//清理下载的apk文件
+Future<void> deleteApkFile() async {
+  try {
+    var directory = await getExternalStorageDirectory();
+    var path = directory!.path;
+    String apkFilePath = '$path/Download';
+    Directory apkFileDirectory = Directory(apkFilePath);
+    if (await apkFileDirectory.exists()) {
+      apkFileDirectory.list().listen((file) {
+        if (file.path.endsWith('.apk')) {
+          file.delete();
+        }
+      });
+    }
+  } catch (e) {
+    return;
+  }
+}
+
 //APPinit
 mainInit() async {
   await Permissionutils.askPermission();
@@ -459,6 +480,7 @@ mainInit() async {
   //初始化全局信息，会在APP启动时执行
   String initUser = await Global.getUser();
   await Global.setUser(initUser);
+  deleteApkFile();
   String initPassword = await Global.getPassword();
   await Global.setPassword(initPassword);
   String initPShost = await Global.getPShost();
@@ -551,20 +573,20 @@ Widget getImageIcon(String path) {
   try {
     List imageType = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp'];
     if (imageType.contains(path.substring(path.lastIndexOf('.')))) {
-      return Image.file(File(path), width: 30, height: 30, fit: BoxFit.cover);
+      return Image.file(File(path), width: 30, height: 30, fit: BoxFit.fill);
     } else if (Global.iconList.contains(my_path.extension(path).substring(1))) {
       return Image.asset(
         'assets/icons/${my_path.extension(path).substring(1)}.png',
         width: 30,
         height: 30,
-        fit: BoxFit.cover,
+        fit: BoxFit.fill,
       );
     } else {
       return Image.asset('assets/icons/unknown.png',
-          width: 30, height: 30, fit: BoxFit.cover);
+          width: 30, height: 30, fit: BoxFit.fill);
     }
   } catch (e) {
     return Image.asset('assets/icons/unknown.png',
-        width: 30, height: 30, fit: BoxFit.cover);
+        width: 30, height: 30, fit: BoxFit.fill);
   }
 }
