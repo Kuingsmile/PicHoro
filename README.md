@@ -12,7 +12,7 @@
      </a>
 </div>
 
-&emsp;&emsp;一款基于flutter的手机端云存储平台/图床管理和文件上传/下载工具，最新版本**V1.8.8**，与PicGo配置互通，可直接扫码导入，主要功能包括云存储平台和图床平台的管理，文件上传和下载管理，以及各种格式的链接分享。
+&emsp;&emsp;一款基于flutter的手机端云存储平台/图床管理和文件上传/下载工具，最新版本**V1.8.9**，与PicGo配置互通，可直接扫码导入，主要功能包括云存储平台和图床平台的管理，文件上传和下载管理，以及各种格式的链接分享。
 
 &emsp;&emsp;项目介绍和配置手册网址:
 
@@ -37,6 +37,7 @@
 - [X] 又拍云存储 (**V1.85版本添加**)
 - [X] 七牛云存储 (**V1.86版本添加**)
 - [X] 兰空图床 (**V1.87版本添加**)
+- [X] Github (**V1.89版本添加**)
 
 &emsp;&emsp;个人开发用于学习flutter和替代很久没更新了的[flutter-Picgo](https://github.com/PicGo/flutter-picgo)。
 
@@ -63,7 +64,7 @@
 
 Github下载地址 [Github release](https://github.com/Kuingsmile/PicHoro/releases)  
 
-我的个人网站提供的最新版本下载地址 [https://www.horosama.com/self_apk/PicHoro_V1.8.8.apk](https://www.horosama.com/self_apk/PicHoro_V1.8.8.apk)
+我的个人网站提供的最新版本下载地址 [https://www.horosama.com/self_apk/PicHoro_V1.8.9.apk](https://www.horosama.com/self_apk/PicHoro_V1.8.9.apk)
 
 ### IOS
 
@@ -98,42 +99,12 @@ Github下载地址 [Github release](https://github.com/Kuingsmile/PicHoro/releas
 
   详细更新日志请查看[更新日志](https://github.com/Kuingsmile/PicHoro/blob/main/Version_update_log.md "更新日志")
 
-- 2022-11-09: **V1.88**:
+- 2022-11-12: **V1.89**:
 
-  - 新增：**由于新增了字段，旧版本APP保存兰空图床配置会失败，请尽快更新到最新版本**
-  - 新增：新建了软件的介绍和配置说明网站[https://pichoro.horosama.com](https://pichoro.horosama.com)，并在软件配置主页加入了`软件主页`跳转选项
-  - 新增：兰空图床显示了当前token，同时在已有token的情况下，可以直接获取策略ID和相册ID列表，不再需要输入用户名和密码。
-  - 新增：兰空图床配置参数增加了相册ID，管理界面上传时也会上传到对应相册，但限于以下两种情况下才会生效：
-    1. 基于付费企业版兰空图床搭建
-    2. 开源免费版需要自己或者联系管理员修改源代码文件，修改方式为打开 **/app/Services/ImageService.php**文件，修改第139行，原文件为
-
-```php
-           // 图片保存至默认相册(若有)
-            if ($albumId = $user->configs->get(UserConfigKey::DefaultAlbum)) {
-                if ($user->albums()->where('id', $albumId)->exists()) {
-                    $image->album_id = $albumId;
-                }
-            }
-```
-
-修改为
-
-```php
-           if ($request->has('album_id')) {
-                $image->album_id = $request->input('album_id');
-            } else {
-            // 图片保存至默认相册(若有)
-            if ($albumId = $user->configs->get(UserConfigKey::DefaultAlbum)) {
-                if ($user->albums()->where('id', $albumId)->exists()) {
-                    $image->album_id = $albumId;
-                }
-            }
-        }
-```
-
-- - 新增：APP启动时现在会自动清理已下载的新版本安装包，避免占用过多空间。
-  - 优化：修改了图床配置界面的图标UI。
-  - 修复：修复了兰空图床二维码扫描没有反应的问题，感谢知乎用户@力子头的反馈
+  - 新增：新增了对**Github**管理功能的支持，并且可以浏览其它用户的公开仓库，同时可以下载其它用户的公开仓库的文件，此外复制链接时对私有仓库还会添加临时访问token，以便于下载私有仓库的文件。
+  - 新增：使用github图床时，如果未设置自定义域名，现在相册预览，文件下载等情况下会默认使用加速服务，以解决国内可能无法访问raw.githubusercontent.com，导致图片无法显示或者下载失败的问题。
+  - 新增：新增了近200个文件图标，使得文件管理界面更加美观。
+  - 修复：将上传界面的同时可进行任务数修改为1，以解决Github同时上传冲突的上传失败问题。
 - 2022-10-02: **V1.00**:
   - 项目初始化，完成基本的上传功能，目前仅支持兰空图床，需要手动授予存储和相机权限
 
@@ -153,7 +124,7 @@ Github下载地址 [Github release](https://github.com/Kuingsmile/PicHoro/releas
 
 1. 你需要有 Android Studio和 Android SDK 21+ 的环境，并安装了Flutter 3.0+版本。flutter环境配置可以参考 [Flutter 官方文档](https://flutter.dev/docs/get-started/install)。
 2. `git clone https://github.com/Kuingsmile/PicHoro.git` 并进入项目。
-3. Windows 推荐使用VScode编辑和调试代。
+3. Windows 推荐使用VScode编辑和调试代码。
 
 ### 软件打包
 
