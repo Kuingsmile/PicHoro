@@ -71,6 +71,19 @@ import 'package:horopic/picture_host_manage/qiniu/qiniu_file_explorer.dart';
 import 'package:horopic/picture_host_manage/qiniu/qiniu_file_information_page.dart';
 import 'package:horopic/picture_host_manage/qiniu/qiniu_download_manage_page.dart';
 
+import 'package:horopic/picture_host_manage/lskypro/lskypro_manage_home_page.dart';
+import 'package:horopic/picture_host_manage/lskypro/lskypro_file_explorer.dart';
+import 'package:horopic/picture_host_manage/lskypro/lskypro_file_information_page.dart';
+import 'package:horopic/picture_host_manage/lskypro/lskypro_download_manage_page.dart';
+
+import 'package:horopic/picture_host_manage/github/github_manage_home_page.dart';
+import 'package:horopic/picture_host_manage/github/github_repos_list_page.dart';
+import 'package:horopic/picture_host_manage/github/github_repo_information_page.dart';
+import 'package:horopic/picture_host_manage/github/github_new_repo_configure.dart';
+import 'package:horopic/picture_host_manage/github/github_file_explorer.dart';
+import 'package:horopic/picture_host_manage/github/github_file_information_page.dart';
+import 'package:horopic/picture_host_manage/github/github_download_manage_page.dart';
+
 //root
 Handler rootHandler = Handler(
     handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
@@ -497,4 +510,104 @@ var qiniuDownloadFileHandler = Handler(
   String tabIndex = params['tabIndex']!.first;
   return QiniuUpDownloadManagePage(
       bucketName: bucketName, downloadPath: downloadPath, tabIndex: tabIndex);
+});
+
+//lskypro图床管理首页
+var lskyproManageHomePageHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  return const LskyproManageHomePage();
+});
+
+//lskypro文件列表页面
+var lskyproFileExplorerHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  var userProfile = json.decode(params['userProfile']!.first);
+  var albumInfo = json.decode(params['albumInfo']!.first);
+  return LskyproFileExplorer(
+    userProfile: userProfile,
+    albumInfo: albumInfo,
+  );
+});
+
+//lskypro文件详情页面
+var lskyproFileInformationHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  var fileMap = json.decode(params['fileMap']!.first);
+  return LskyproFileInformation(
+    fileMap: fileMap,
+  );
+});
+
+//lskypro存储下载文件页面
+var lskyproDownloadFileHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  var albumName = params['albumName']!.first;
+  String downloadPath = params['downloadPath']!.first;
+  String tabIndex = params['tabIndex']!.first;
+  return LskyproUpDownloadManagePage(
+      albumName: albumName, downloadPath: downloadPath, tabIndex: tabIndex);
+});
+
+//github图床管理首页
+var githubManageHomePageHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  return const GithubManageHomePage();
+});
+
+//github仓库列表页面
+var githubReposListHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  String showedUsername = params['showedUsername']!.first;
+  return GithubReposList(
+    showedUsername: showedUsername,
+  );
+});
+
+//github仓库详情页面
+var githubRepoInformationHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  var repoMap = json.decode(params['repoMap']!.first);
+  return GithubRepoInformation(
+    repoMap: repoMap,
+  );
+});
+
+//github新建仓库页面
+var githubNewRepoConfigHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  return const GithubNewRepoConfig();
+});
+
+//github文件列表页面
+var githubFileExplorerHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  var element = json.decode(params['element']!.first);
+  var bucketPrefix = params['bucketPrefix']!.first;
+  return GithubFileExplorer(
+    element: element,
+    bucketPrefix: bucketPrefix,
+  );
+});
+
+//github文件详情页面
+var githubFileInformationHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  var fileMap = json.decode(params['fileMap']!.first);
+  return GithubFileInformation(
+    fileMap: fileMap,
+  );
+});
+
+//Github存储下载文件页面
+var githubDownloadFileHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  var userName = params['userName']!.first;
+  var repoName = params['repoName']!.first;
+  String downloadPath = params['downloadPath']!.first;
+  String tabIndex = params['tabIndex']!.first;
+  return GithubUpDownloadManagePage(
+      userName: userName,
+      repoName: repoName,
+      downloadPath: downloadPath,
+      tabIndex: tabIndex);
 });

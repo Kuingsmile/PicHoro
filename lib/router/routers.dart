@@ -64,6 +64,17 @@ class Routes {
   static String qiniuFileExplorer = "/qiniuFileExplorer";
   static String qiniuFileInformation = "/qiniuFileInformation";
   static String qiniuUpDownloadManagePage = "/qiniuUpDownloadManagePage";
+  static String lskyproManageHomePage = "/lskyproManageHomePage";
+  static String lskyproFileExplorer = "/lskyproFileExplorer";
+  static String lskyproFileInformation = "/lskyproFileInformation";
+  static String lskyproUpDownloadManagePage = "/lskyproUpDownloadManagePage";
+  static String githubManageHomePage = "/githubManageHomePage";
+  static String githubReposList = "/githubReposList";
+  static String githubRepoInformation = "/githubRepoInformation";
+  static String githubNewRepoConfig = "/githubNewRepoConfig";
+  static String githubFileExplorer = "/githubFileExplorer";
+  static String githubFileInformation = "/githubFileInformation";
+  static String githubUpDownloadManagePage = "/githubUpDownloadManagePage";
 
   static void configureRoutes(FluroRouter router) {
     router.notFoundHandler = Handler(
@@ -139,5 +150,19 @@ class Routes {
     router.define(qiniuFileExplorer, handler: qiniuFileExplorerHandler);
     router.define(qiniuFileInformation, handler: qiniuFileInformationHandler);
     router.define(qiniuUpDownloadManagePage, handler: qiniuDownloadFileHandler);
+    router.define(lskyproManageHomePage, handler: lskyproManageHomePageHandler);
+    router.define(lskyproFileExplorer, handler: lskyproFileExplorerHandler);
+    router.define(lskyproFileInformation,
+        handler: lskyproFileInformationHandler);
+    router.define(lskyproUpDownloadManagePage,
+        handler: lskyproDownloadFileHandler);
+    router.define(githubManageHomePage, handler: githubManageHomePageHandler);
+    router.define(githubReposList, handler: githubReposListHandler);
+    router.define(githubRepoInformation, handler: githubRepoInformationHandler);
+    router.define(githubNewRepoConfig, handler: githubNewRepoConfigHandler);
+    router.define(githubFileExplorer, handler: githubFileExplorerHandler);
+    router.define(githubFileInformation, handler: githubFileInformationHandler);
+    router.define(githubUpDownloadManagePage,
+        handler: githubDownloadFileHandler);
   }
 }
