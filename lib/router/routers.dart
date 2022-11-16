@@ -24,6 +24,7 @@ class Routes {
   static String tencentPShostSelect = "/tencentPShostSelect";
   static String qiniuPShostSelect = "/qiniuPShostSelect";
   static String upyunPShostSelect = "/upyunPShostSelect";
+  static String ftpPShostSelect = "/ftpPShostSelect";
   static String commonConfig = "/commonConfig";
   static String renameFile = "/renameFile";
   static String linkFormatSelect = "/linkFormatSelect";
@@ -75,6 +76,17 @@ class Routes {
   static String githubFileExplorer = "/githubFileExplorer";
   static String githubFileInformation = "/githubFileInformation";
   static String githubUpDownloadManagePage = "/githubUpDownloadManagePage";
+  static String imgurLogIn = "/imgurLogIn";
+  static String imgurFileExplorer = "/imgurFileExplorer";
+  static String imgurTokenManagePage = "/imgurTokenManagePage";
+  static String imgurFileInformation = "/imgurFileInformation";
+  static String imgurUpDownloadManagePage = "/imgurUpDownloadManagePage";
+  static String sftpFileExplorer = "/sftpFileExplorer";
+  static String sftpFileInformation = "/sftpFileInformation";
+  static String sshTerminal = "/sshTerminal";
+  static String sftpLocalImagePreview = "/sftpLocalImagePreview";
+  static String sftpUpDownloadManagePage = "/sftpUpDownloadManagePage";
+  static String mdPreview = "/mdPreview";
 
   static void configureRoutes(FluroRouter router) {
     router.notFoundHandler = Handler(
@@ -101,6 +113,7 @@ class Routes {
     router.define(tencentPShostSelect, handler: tencentPShostSelectHandler);
     router.define(qiniuPShostSelect, handler: qiniuPShostSelectHandler);
     router.define(upyunPShostSelect, handler: upyunPShostSelectHandler);
+    router.define(ftpPShostSelect, handler: ftpPShostSelectHandler);
     router.define(commonConfig, handler: commonConfigHandler);
     router.define(renameFile, handler: renameFileHandler);
     router.define(linkFormatSelect, handler: linkFormatSelectHandler);
@@ -164,5 +177,16 @@ class Routes {
     router.define(githubFileInformation, handler: githubFileInformationHandler);
     router.define(githubUpDownloadManagePage,
         handler: githubDownloadFileHandler);
+    router.define(imgurLogIn, handler: imgurLogInHandler);
+    router.define(imgurFileExplorer, handler: imgurFileExplorerHandler);
+    router.define(imgurTokenManagePage, handler: imgurTokenManageHandler);
+    router.define(imgurFileInformation, handler: imgurFileInformationHandler);
+    router.define(imgurUpDownloadManagePage, handler: imgurDownloadFileHandler);
+    router.define(sftpFileExplorer, handler: sftpFileExplorerHandler);
+    router.define(sftpFileInformation, handler: sftpFileInformationHandler);
+    router.define(sshTerminal, handler: sshTerminalHandler);
+    router.define(sftpLocalImagePreview, handler: sftplocalImagePreviewHandler);
+    router.define(sftpUpDownloadManagePage, handler: sftpDownloadFileHandler);
+    router.define(mdPreview, handler: mdFilePreviewHandler);
   }
 }

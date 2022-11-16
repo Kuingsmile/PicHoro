@@ -31,6 +31,7 @@ import 'package:horopic/picture_host_configure/aliyun_configure.dart';
 import 'package:horopic/picture_host_configure/tencent_configure.dart';
 import 'package:horopic/picture_host_configure/qiniu_configure.dart';
 import 'package:horopic/picture_host_configure/upyun_configure.dart';
+import 'package:horopic/picture_host_configure/ftp_configure.dart';
 import 'package:horopic/picture_host_configure/default_picture_host_select.dart';
 
 import 'package:horopic/picture_host_manage/tencent/tencent_bucket_list_page.dart';
@@ -83,6 +84,20 @@ import 'package:horopic/picture_host_manage/github/github_new_repo_configure.dar
 import 'package:horopic/picture_host_manage/github/github_file_explorer.dart';
 import 'package:horopic/picture_host_manage/github/github_file_information_page.dart';
 import 'package:horopic/picture_host_manage/github/github_download_manage_page.dart';
+
+import 'package:horopic/picture_host_manage/imgur/imgur_login.dart';
+import 'package:horopic/picture_host_manage/imgur/imgur_file_explorer.dart';
+import 'package:horopic/picture_host_manage/imgur/imgur_token_manage_page.dart';
+import 'package:horopic/picture_host_manage/imgur/imgur_file_information_page.dart';
+import 'package:horopic/picture_host_manage/imgur/imgur_download_manage_page.dart';
+
+import 'package:horopic/picture_host_manage/ftp/sftp_file_explorer.dart';
+import 'package:horopic/picture_host_manage/ftp/sftp_file_information_page.dart';
+import 'package:horopic/picture_host_manage/ftp/ssh_terminal.dart';
+import 'package:horopic/picture_host_manage/ftp/sftp_local_image_preview.dart';
+import 'package:horopic/picture_host_manage/ftp/sftp_download_manage_page.dart';
+
+import 'package:horopic/picture_host_manage/common_page/file_explorer/md_preview.dart';
 
 //root
 Handler rootHandler = Handler(
@@ -199,6 +214,12 @@ var qiniuPShostSelectHandler = Handler(
 var upyunPShostSelectHandler = Handler(
     handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
   return const UpyunConfig();
+});
+
+//ftp图床配置页面
+var ftpPShostSelectHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  return const FTPConfig();
 });
 
 //通用配置页面
@@ -415,7 +436,7 @@ var upyunFileExplorerHandler = Handler(
   );
 });
 
-//拍云存储桶列表页面
+//又拍云存储桶列表页面
 var upyunBucketListHandler = Handler(
     handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
   return const UpyunBucketList();
@@ -610,4 +631,107 @@ var githubDownloadFileHandler = Handler(
       repoName: repoName,
       downloadPath: downloadPath,
       tabIndex: tabIndex);
+});
+
+//Imgur登录页面
+var imgurLogInHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  return const ImgurLogIn();
+});
+
+//Imgur文件列表页面
+var imgurFileExplorerHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  var userProfile = json.decode(params['userProfile']!.first);
+  var albumInfo = json.decode(params['albumInfo']!.first);
+  var allImages = json.decode(params['allImages']!.first);
+  return ImgurFileExplorer(
+    userProfile: userProfile,
+    albumInfo: albumInfo,
+    allImages: allImages,
+  );
+});
+
+//ImgurToken管理页面
+var imgurTokenManageHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  return const ImgurTokenManage();
+});
+
+//Imgur文件详情页面
+var imgurFileInformationHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  var fileMap = json.decode(params['fileMap']!.first);
+  return ImgurFileInformation(
+    fileMap: fileMap,
+  );
+});
+
+//imgur存储下载文件页面
+var imgurDownloadFileHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  var albumName = params['albumName']!.first;
+  String downloadPath = params['downloadPath']!.first;
+  String tabIndex = params['tabIndex']!.first;
+  return ImgurUpDownloadManagePage(
+      albumName: albumName, downloadPath: downloadPath, tabIndex: tabIndex);
+});
+
+//SFTP文件列表页面
+var sftpFileExplorerHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  var element = json.decode(params['element']!.first);
+  var bucketPrefix = params['bucketPrefix']!.first;
+  return SFTPFileExplorer(
+    element: element,
+    bucketPrefix: bucketPrefix,
+  );
+});
+
+//SFTP文件详情页面
+var sftpFileInformationHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  var fileMap = json.decode(params['fileMap']!.first);
+  return SFTPFileInformation(
+    fileMap: fileMap,
+  );
+});
+
+//ssh terminal页面
+var sshTerminalHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  var configMap = json.decode(params['configMap']!.first);
+  return SSHTermimal(configMap: configMap);
+});
+
+//sftp图片预览
+var sftplocalImagePreviewHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  var configMap = json.decode(params['configMap']!.first);
+  String image = params['image']!.first;
+  return SFTPLocalImagePreview(
+    configMap: configMap,
+    image: image,
+  );
+});
+
+//sftp存储下载文件页面
+var sftpDownloadFileHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  var ftpHost = params['ftpHost']!.first;
+  String downloadPath = params['downloadPath']!.first;
+  String tabIndex = params['tabIndex']!.first;
+  return SFTPUpDownloadManagePage(
+      ftpHost: ftpHost, downloadPath: downloadPath, tabIndex: tabIndex);
+});
+
+//md文件预览
+var mdFilePreviewHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  String filePath = params['filePath']!.first;
+  String fileName = params['fileName']!.first;
+  return MarkDownPreview(
+    filePath: filePath,
+    fileName: fileName,
+  );
 });
