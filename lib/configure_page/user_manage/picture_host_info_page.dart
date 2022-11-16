@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:fluro/fluro.dart';
@@ -33,6 +32,7 @@ class PictureHostInfoPageState
     'github': 'GitHub',
     'imgur': 'Imgur',
     'lankong': '兰空图床',
+    'ftp': 'FTP',
   };
   final Map<String, dynamic> psNameRouterMap = {
     'smms': Routes.smmsPShostSelect,
@@ -43,6 +43,7 @@ class PictureHostInfoPageState
     'github': Routes.githubPShostSelect,
     'imgur': Routes.imgurPShostSelect,
     'lankong': Routes.lskyproPShostSelect,
+    'ftp': Routes.ftpPShostSelect,
   };
 
   @override
@@ -65,6 +66,7 @@ class PictureHostInfoPageState
         "tcyun": "$configPath/${defaultUser}_tencent_config.txt",
         "aliyun": "$configPath/${defaultUser}_aliyun_config.txt",
         "upyun": "$configPath/${defaultUser}_upyun_config.txt",
+        "ftp": "$configPath/${defaultUser}_ftp_config.txt",
       };
       List pictureHostInfoList = [
         'smms',
@@ -74,7 +76,8 @@ class PictureHostInfoPageState
         'qiniu',
         'tcyun',
         'aliyun',
-        'upyun'
+        'upyun',
+        'ftp',
       ];
 
       for (var i = 0; i < pictureHostInfoList.length; i++) {
@@ -180,6 +183,7 @@ class PictureHostInfoPageState
       'tcyun': 'assets/icons/tcyun.png',
       'aliyun': 'assets/icons/aliyun.png',
       'upyun': 'assets/icons/upyun.png',
+      'ftp': 'assets/images/ftp.png',
     };
     return Image.asset(iconMap[pshost]!, width: 30, height: 30);
   }
