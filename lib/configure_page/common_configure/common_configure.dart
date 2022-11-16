@@ -24,6 +24,7 @@ class CommonConfigState extends State<CommonConfig> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        elevation: 0,
         centerTitle: true,
         title: const Text('通用设置'),
       ),
