@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:f_logs/f_logs.dart';
+import 'package:horopic/utils/event_bus_utils.dart';
 
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/global.dart';
@@ -28,6 +29,7 @@ class DefaultPShostSelectState extends State<DefaultPShostSelect> {
     'tencent',
     'aliyun',
     'upyun',
+    'ftp',
   ];
 
   @override
@@ -41,22 +43,25 @@ class DefaultPShostSelectState extends State<DefaultPShostSelect> {
       body: ListView(
         children: [
           ListTile(
-            title: const Text('兰空图床'),
-            trailing: Global.defaultPShost == 'lsky.pro'
+            title: const Text('阿里云'),
+            trailing: Global.defaultPShost == 'aliyun'
                 ? const Icon(Icons.check)
                 : null,
             onTap: () async {
-              await setdefaultPShostRemoteAndLocal('lsky.pro');
+              await setdefaultPShostRemoteAndLocal('aliyun');
+              eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
+              eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
               setState(() {});
             },
           ),
           ListTile(
-            title: const Text('SM.MS'),
-            trailing: Global.defaultPShost == 'sm.ms'
-                ? const Icon(Icons.check)
-                : null,
+            title: const Text('FTP-SSH/SFTP'),
+            trailing:
+                Global.defaultPShost == 'ftp' ? const Icon(Icons.check) : null,
             onTap: () async {
-              await setdefaultPShostRemoteAndLocal('sm.ms');
+              await setdefaultPShostRemoteAndLocal('ftp');
+              eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
+              eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
               setState(() {});
             },
           ),
@@ -67,6 +72,8 @@ class DefaultPShostSelectState extends State<DefaultPShostSelect> {
                 : null,
             onTap: () async {
               await setdefaultPShostRemoteAndLocal('github');
+              eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
+              eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
               setState(() {});
             },
           ),
@@ -77,6 +84,20 @@ class DefaultPShostSelectState extends State<DefaultPShostSelect> {
                 : null,
             onTap: () async {
               await setdefaultPShostRemoteAndLocal('imgur');
+              eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
+              eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
+              setState(() {});
+            },
+          ),
+          ListTile(
+            title: const Text('兰空图床'),
+            trailing: Global.defaultPShost == 'lsky.pro'
+                ? const Icon(Icons.check)
+                : null,
+            onTap: () async {
+              await setdefaultPShostRemoteAndLocal('lsky.pro');
+              eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
+              eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
               setState(() {});
             },
           ),
@@ -87,6 +108,20 @@ class DefaultPShostSelectState extends State<DefaultPShostSelect> {
                 : null,
             onTap: () async {
               await setdefaultPShostRemoteAndLocal('qiniu');
+              eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
+              eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
+              setState(() {});
+            },
+          ),
+          ListTile(
+            title: const Text('SM.MS'),
+            trailing: Global.defaultPShost == 'sm.ms'
+                ? const Icon(Icons.check)
+                : null,
+            onTap: () async {
+              await setdefaultPShostRemoteAndLocal('sm.ms');
+              eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
+              eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
               setState(() {});
             },
           ),
@@ -97,16 +132,8 @@ class DefaultPShostSelectState extends State<DefaultPShostSelect> {
                 : null,
             onTap: () async {
               await setdefaultPShostRemoteAndLocal('tencent');
-              setState(() {});
-            },
-          ),
-          ListTile(
-            title: const Text('阿里云'),
-            trailing: Global.defaultPShost == 'aliyun'
-                ? const Icon(Icons.check)
-                : null,
-            onTap: () async {
-              await setdefaultPShostRemoteAndLocal('aliyun');
+              eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
+              eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
               setState(() {});
             },
           ),
@@ -117,6 +144,8 @@ class DefaultPShostSelectState extends State<DefaultPShostSelect> {
                 : null,
             onTap: () async {
               await setdefaultPShostRemoteAndLocal('upyun');
+              eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
+              eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
               setState(() {});
             },
           ),
@@ -137,6 +166,7 @@ setdefaultPShostRemoteAndLocal(String psHost) async {
     'tencent': MySqlUtils.queryTencent,
     'aliyun': MySqlUtils.queryAliyun,
     'upyun': MySqlUtils.queryUpyun,
+    'ftp': MySqlUtils.queryFTP,
   };
 
   try {
@@ -190,6 +220,8 @@ setdefaultPShostRemoteAndLocal(String psHost) async {
         await Global.setShowedPBhost('aliyun');
       } else if (psHost == 'upyun') {
         await Global.setShowedPBhost('upyun');
+      } else if (psHost == 'ftp') {
+        await Global.setShowedPBhost('PBhostExtend1');
       }
       return Fluttertoast.showToast(
           msg: "已经是默认配置",
@@ -222,6 +254,8 @@ setdefaultPShostRemoteAndLocal(String psHost) async {
           await Global.setShowedPBhost('aliyun');
         } else if (psHost == 'upyun') {
           await Global.setShowedPBhost('upyun');
+        } else if (psHost == 'ftp') {
+          await Global.setShowedPBhost('PBhostExtend1');
         }
         showToast('已设置$psHost为默认图床');
       } else {
