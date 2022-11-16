@@ -8,3 +8,10 @@ class AlbumRefreshEvent {
     this.albumKeepAlive = true,
   });
 }
+
+class HomePhotoRefreshEvent {
+  bool homePhotoKeepAlive = true;
+  HomePhotoRefreshEvent({
+    this.homePhotoKeepAlive = true,
+  });
+}
