@@ -12,6 +12,7 @@ import 'package:horopic/api/imgur_api.dart';
 import 'package:horopic/api/qiniu_api.dart';
 import 'package:horopic/api/tencent_api.dart';
 import 'package:horopic/api/upyun_api.dart';
+import 'package:horopic/api/ftp_api.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/common_functions.dart';
 
@@ -27,6 +28,7 @@ Map<String, String> pdconfig = {
   'github': 'github_config',
   'gitee': 'gitee_config',
   'weibo': 'weibo_config',
+  'ftp': 'ftp_config',
 };
 
 Map<String, Function> deleteFunc = {
@@ -38,6 +40,7 @@ Map<String, Function> deleteFunc = {
   'tencent': TencentImageUploadUtils.deleteApi,
   'aliyun': AliyunImageUploadUtils.deleteApi,
   'upyun': UpyunImageUploadUtils.deleteApi,
+  'PBhostExtend1': FTPImageUploadUtils.deleteApi, //FTP
 };
 
 //获取图床配置文件
@@ -49,6 +52,8 @@ Future<File> get _localFile async {
     defaultConfig = 'lsky.pro';
   } else if (defaultConfig == 'smms') {
     defaultConfig = 'sm.ms';
+  } else if (defaultConfig == 'PBhostExtend1') {
+    defaultConfig = 'ftp';
   }
   return File(
       '${directory.path}/${defaultUser}_${pdconfig[defaultConfig]}.txt');
@@ -76,21 +81,17 @@ deleterentry(Map deleteConfig) async {
     return ["Error"];
   }
   Map configMap = jsonDecode(configData);
-  //获取用户设置的默认图床
+
   String defaultConfig = await Global.getShowedPBhost();
-  //调用对应图床的删除接口
   try {
     var result = await deleteFunc[defaultConfig]!(
         deleteMap: deleteConfig, configMap: configMap);
-
     return result;
   } catch (e) {
     FLog.error(
         className: "Deleter",
         methodName: "deleterentry",
-        text: formatErrorMessage({
-          'deleteConfig': deleteConfig,
-        }, e.toString()),
+        text: formatErrorMessage({}, e.toString()),
         dataLogType: DataLogType.ERRORS.toString());
     return ["Error"];
   }
