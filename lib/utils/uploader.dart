@@ -11,6 +11,7 @@ import 'package:horopic/api/qiniu_api.dart';
 import 'package:horopic/api/tencent_api.dart';
 import 'package:horopic/api/aliyun_api.dart';
 import 'package:horopic/api/upyun_api.dart';
+import 'package:horopic/api/ftp_api.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/common_functions.dart';
 
@@ -26,6 +27,7 @@ Map<String, String> pdconfig = {
   'github': 'github_config',
   'gitee': 'gitee_config',
   'weibo': 'weibo_config',
+  'ftp': 'ftp_config',
 };
 
 Map<String, Function> uploadFunc = {
@@ -37,6 +39,7 @@ Map<String, Function> uploadFunc = {
   'tencent': TencentImageUploadUtils.uploadApi,
   'aliyun': AliyunImageUploadUtils.uploadApi,
   'upyun': UpyunImageUploadUtils.uploadApi,
+  'ftp': FTPImageUploadUtils.uploadApi,
 };
 
 //获取图床配置文件
@@ -72,9 +75,7 @@ uploaderentry({required String path, required String name}) async {
     return ["Error"];
   }
   Map configMap = jsonDecode(configData);
-  //获取用户设置的默认图床
   String defaultConfig = await Global.getPShost();
-  //调用对应图床的上传接口
   try {
     var result = await uploadFunc[defaultConfig]!(
         path: path, name: name, configMap: configMap);
