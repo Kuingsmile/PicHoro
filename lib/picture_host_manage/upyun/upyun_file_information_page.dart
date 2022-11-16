@@ -42,14 +42,16 @@ class UpyunFileInformationState extends State<UpyunFileInformation> {
             isThreeLine: true,
             title: const Text('文件创建时间'),
             subtitle: SelectableText(DateTime.fromMillisecondsSinceEpoch(
-                    int.parse(
-                        (widget.fileMap['last_modified']*1000).toString().split('.')[0]))
+                    int.parse((widget.fileMap['last_modified'] * 1000)
+                        .toString()
+                        .split('.')[0]))
                 .toString()
                 .split('.')[0]),
           ),
           ListTile(
             title: const Text('文件etag'),
-            subtitle: SelectableText(widget.fileMap['etag'].replaceAll('"', '')),
+            subtitle:
+                SelectableText(widget.fileMap['etag'].replaceAll('"', '')),
           ),
         ],
       ),
