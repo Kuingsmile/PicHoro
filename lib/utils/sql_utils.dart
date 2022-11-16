@@ -1284,4 +1284,262 @@ class MySqlUtils {
       await conn.close();
     }
   }
+
+  static queryFTP({required String username}) async {
+    var conn = await MySqlConnection.connect(settings);
+    try {
+      var results =
+          await conn.query('select * from ftp where username = ?', [username]);
+
+      if (results.isEmpty) {
+        return "Empty";
+      }
+      Map<String, dynamic> resultsMap = {};
+      resultsMap.clear();
+      for (var row in results) {
+        //第一列是id
+        String ftpHost = await decryptSelf(row[1].toString());
+        String ftpPort = await decryptSelf(row[2].toString());
+        String ftpUser = await decryptSelf(row[3].toString());
+        String ftpPassword = await decryptSelf(row[4].toString());
+        String ftpType = await decryptSelf(row[5].toString());
+        String isAnonymous = await decryptSelf(row[6].toString());
+        String uploadPath = await decryptSelf(row[7].toString());
+        String ftpHomeDir = await decryptSelf(row[8].toString());
+
+        resultsMap['ftpHost'] = ftpHost;
+        resultsMap['ftpPort'] = ftpPort;
+        resultsMap['ftpUser'] = ftpUser;
+        resultsMap['ftpPassword'] = ftpPassword;
+        resultsMap['ftpType'] = ftpType;
+        resultsMap['isAnonymous'] = isAnonymous;
+        resultsMap['uploadPath'] = uploadPath;
+        resultsMap['ftpHomeDir'] = ftpHomeDir;
+      }
+      return resultsMap;
+    } catch (e) {
+      FLog.error(
+          className: 'MySqlUtils',
+          methodName: 'queryFTP',
+          text: formatErrorMessage({'username': username}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
+      return "Error";
+    } finally {
+      await conn.close();
+    }
+  }
+
+  static insertFTP({required List content}) async {
+    var conn = await MySqlConnection.connect(settings);
+    try {
+      String ftpHost = content[0].toString();
+      String ftpPort = content[1].toString();
+      String ftpUser = content[2].toString();
+      String ftpPassword = content[3].toString();
+      String ftpType = content[4].toString();
+      String isAnonymous = content[5].toString();
+      String uploadPath = content[6].toString();
+      String ftpHomeDir = content[7].toString();
+      String username = content[8].toString();
+
+      String encryptedFtpHost = await encryptSelf(ftpHost);
+      String encryptedFtpPort = await encryptSelf(ftpPort);
+      String encryptedFtpUser = await encryptSelf(ftpUser);
+      String encryptedFtpPassword = await encryptSelf(ftpPassword);
+      String encryptedFtpType = await encryptSelf(ftpType);
+      String encryptedIsAnonymous = await encryptSelf(isAnonymous);
+      String encryptedUploadPath = await encryptSelf(uploadPath);
+      String encryptedFtpHomeDir = await encryptSelf(ftpHomeDir);
+
+      await conn.query(
+          "insert into ftp (ftpHost,ftpPort,ftpUser,ftpPassword,ftpType,isAnonymous,uploadPath,ftpHomeDir,username) values (?,?,?,?,?,?,?,?,?)",
+          [
+            encryptedFtpHost,
+            encryptedFtpPort,
+            encryptedFtpUser,
+            encryptedFtpPassword,
+            encryptedFtpType,
+            encryptedIsAnonymous,
+            encryptedUploadPath,
+            encryptedFtpHomeDir,
+            username
+          ]);
+      return 'Success';
+    } catch (e) {
+      FLog.error(
+          className: 'MySqlUtils',
+          methodName: 'insertFTP',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
+      return "Error";
+    } finally {
+      await conn.close();
+    }
+  }
+
+  static updateFTP({required List content}) async {
+    var conn = await MySqlConnection.connect(settings);
+
+    try {
+      String ftpHost = content[0].toString();
+      String ftpPort = content[1].toString();
+      String ftpUser = content[2].toString();
+      String ftpPassword = content[3].toString();
+      String ftpType = content[4].toString();
+      String isAnonymous = content[5].toString();
+      String uploadPath = content[6].toString();
+      String ftpHomeDir = content[7].toString();
+      String username = content[8].toString();
+
+      String encryptedFtpHost = await encryptSelf(ftpHost);
+      String encryptedFtpPort = await encryptSelf(ftpPort);
+      String encryptedFtpUser = await encryptSelf(ftpUser);
+      String encryptedFtpPassword = await encryptSelf(ftpPassword);
+      String encryptedFtpType = await encryptSelf(ftpType);
+      String encryptedIsAnonymous = await encryptSelf(isAnonymous);
+      String encryptedUploadPath = await encryptSelf(uploadPath);
+      String encryptedFtpHomeDir = await encryptSelf(ftpHomeDir);
+
+      await conn.query(
+          "update ftp set ftpHost = ?,ftpPort = ?,ftpUser = ?,ftpPassword = ?,ftpType = ?,isAnonymous = ?,uploadPath = ?,ftpHomeDir = ? where username = ?",
+          [
+            encryptedFtpHost,
+            encryptedFtpPort,
+            encryptedFtpUser,
+            encryptedFtpPassword,
+            encryptedFtpType,
+            encryptedIsAnonymous,
+            encryptedUploadPath,
+            encryptedFtpHomeDir,
+            username
+          ]);
+      return 'Success';
+    } catch (e) {
+      FLog.error(
+          className: 'MySqlUtils',
+          methodName: 'updateFTP',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
+      return "Error";
+    } finally {
+      await conn.close();
+    }
+  }
+
+  static queryImgurManage({required String username}) async {
+    var conn = await MySqlConnection.connect(settings);
+    try {
+      var results = await conn
+          .query('select * from imgurmanage where username = ?', [username]);
+
+      if (results.isEmpty) {
+        return "Empty";
+      }
+      Map<String, dynamic> resultsMap = {};
+      resultsMap.clear();
+      for (var row in results) {
+        //第一列是id
+        String imguruser = await decryptSelf(row[1].toString());
+        String clientid = await decryptSelf(row[2].toString());
+        String clientsecret = await decryptSelf(row[3].toString());
+        String accesstoken = await decryptSelf(row[4].toString());
+        String proxy = await decryptSelf(row[5].toString());
+
+        resultsMap['imguruser'] = imguruser;
+        resultsMap['clientid'] = clientid;
+        resultsMap['clientsecret'] = clientsecret;
+        resultsMap['accesstoken'] = accesstoken;
+        resultsMap['proxy'] = proxy;
+      }
+      return resultsMap;
+    } catch (e) {
+      FLog.error(
+          className: 'MySqlUtils',
+          methodName: 'queryImgurManage',
+          text: formatErrorMessage({'username': username}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
+      return "Error";
+    } finally {
+      await conn.close();
+    }
+  }
+
+  static insertImgurManage({required List content}) async {
+    var conn = await MySqlConnection.connect(settings);
+    try {
+      String imguruser = content[0].toString();
+      String clientid = content[1].toString();
+      String clientsecret = content[2].toString();
+      String accesstoken = content[3].toString();
+      String proxy = content[4].toString();
+      String username = content[5].toString();
+
+      String encryptedImguruser = await encryptSelf(imguruser);
+      String encryptedClientid = await encryptSelf(clientid);
+      String encryptedClientsecret = await encryptSelf(clientsecret);
+      String encryptedAccesstoken = await encryptSelf(accesstoken);
+      String encryptedProxy = await encryptSelf(proxy);
+
+      await conn.query(
+          "insert into imgurmanage (imguruser,clientid,clientsecret,accesstoken,proxy,username) values (?,?,?,?,?,?)",
+          [
+            encryptedImguruser,
+            encryptedClientid,
+            encryptedClientsecret,
+            encryptedAccesstoken,
+            encryptedProxy,
+            username
+          ]);
+      return 'Success';
+    } catch (e) {
+      FLog.error(
+          className: 'MySqlUtils',
+          methodName: 'insertImgurManage',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
+      return "Error";
+    } finally {
+      await conn.close();
+    }
+  }
+
+  static updateImgurManage({required List content}) async {
+    var conn = await MySqlConnection.connect(settings);
+
+    try {
+      String imguruser = content[0].toString();
+      String clientid = content[1].toString();
+      String clientsecret = content[2].toString();
+      String accesstoken = content[3].toString();
+      String proxy = content[4].toString();
+      String username = content[5].toString();
+
+      String encryptedImguruser = await encryptSelf(imguruser);
+      String encryptedClientid = await encryptSelf(clientid);
+      String encryptedClientsecret = await encryptSelf(clientsecret);
+      String encryptedAccesstoken = await encryptSelf(accesstoken);
+      String encryptedProxy = await encryptSelf(proxy);
+
+      await conn.query(
+          "update imgurmanage set imguruser = ?,clientid = ?,clientsecret = ?,accesstoken = ?,proxy = ? where username = ?",
+          [
+            encryptedImguruser,
+            encryptedClientid,
+            encryptedClientsecret,
+            encryptedAccesstoken,
+            encryptedProxy,
+            username
+          ]);
+      return 'Success';
+    } catch (e) {
+      FLog.error(
+          className: 'MySqlUtils',
+          methodName: 'updateImgurManage',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
+      return "Error";
+    } finally {
+      await conn.close();
+    }
+  }
 }
