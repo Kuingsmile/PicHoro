@@ -18,8 +18,9 @@ class RenameFileState extends State<RenameFile> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+         elevation: 0,
         centerTitle: true,
-        title: const Text('通用设置'),
+        title: const Text('文件重命名'),
       ),
       body: ListView(children: [
         ListTile(
