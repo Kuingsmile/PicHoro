@@ -33,6 +33,9 @@ import 'package:horopic/picture_host_configure/aliyun_configure.dart'
     as aliyunhostclass;
 import 'package:horopic/picture_host_configure/upyun_configure.dart'
     as upyunhostclass;
+import 'package:horopic/picture_host_configure/ftp_configure.dart'
+    as ftphostclass;
+import 'package:sqflite/sqflite.dart';
 
 class UserInformationPage extends StatefulWidget {
   const UserInformationPage({Key? key}) : super(key: key);
@@ -53,6 +56,7 @@ class UserInformationPageState
     'github': 'GitHub',
     'imgur': 'Imgur',
     'lsky.pro': '兰空图床',
+    'ftp': 'FTP',
   };
 
   @override
@@ -97,6 +101,7 @@ class UserInformationPageState
                 lskyhostresult['host'],
                 lskyhostresult['token'],
                 lskyhostresult['strategy_id'],
+                lskyhostresult['album_id'],
               );
               final hostConfigJson = jsonEncode(hostConfig);
               final directory = await getApplicationDocumentsDirectory();
@@ -261,7 +266,7 @@ class UserInformationPageState
             } catch (e) {
               FLog.error(
                   className: 'UserInformationPageState',
-                  methodName: '_fetchconfig_tencenthos',
+                  methodName: '_fetchconfig_tencenthost',
                   text: formatErrorMessage({
                     'username': username,
                   }, e.toString()),
@@ -333,6 +338,40 @@ class UserInformationPageState
                   dataLogType: DataLogType.ERRORS.toString());
               return showCupertinoAlertDialog(
                   context: context, title: "错误", content: "拉取又拍云配置失败,请重试!");
+            }
+          }
+          //拉取FTP配置
+          var ftpresult = await MySqlUtils.queryFTP(username: username);
+          if (ftpresult == 'Error') {
+            return showCupertinoAlertDialog(
+                context: context, title: "错误", content: "获取FTP云端信息失败,请重试!");
+          } else if (ftpresult != 'Empty') {
+            try {
+              final ftphostConfig = ftphostclass.FTPConfigModel(
+                ftpresult['ftpHost'],
+                ftpresult['ftpPort'],
+                ftpresult['ftpUser'],
+                ftpresult['ftpPassword'],
+                ftpresult['ftpType'],
+                ftpresult['isAnonymous'],
+                ftpresult['uploadPath'],
+                ftpresult['ftpHomeDir'],
+              );
+              final ftpConfigJson = jsonEncode(ftphostConfig);
+              final directory = await getApplicationDocumentsDirectory();
+              File ftpLocalFile =
+                  File('${directory.path}/${username}_ftp_config.txt');
+              ftpLocalFile.writeAsString(ftpConfigJson);
+            } catch (e) {
+              FLog.error(
+                  className: 'UserInformationPageState',
+                  methodName: '_fetchconfig_ftphost',
+                  text: formatErrorMessage({
+                    'username': username,
+                  }, e.toString()),
+                  dataLogType: DataLogType.ERRORS.toString());
+              return showCupertinoAlertDialog(
+                  context: context, title: "错误", content: "拉取FTP配置失败,请重试!");
             }
           }
           //全部拉取完成后，提示用户
@@ -427,7 +466,6 @@ class UserInformationPageState
 
   @override
   Widget buildSuccess() {
-    //a user profile page
     return ListView(children: [
       Center(
         child: Padding(
@@ -522,7 +560,6 @@ class UserInformationPageState
               },
             ),
             const SizedBox(width: 20),
-            //logout button
             CupertinoButton(
               padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
               color: const Color.fromARGB(255, 187, 197, 202),
@@ -530,6 +567,66 @@ class UserInformationPageState
               onPressed: () async {
                 await Global.setUser(' ');
                 await Global.setPassword(' ');
+                await Global.setPShost('lsky.pro');
+                await Global.setLKformat('rawurl');
+                await Global.setTimeStamp(false);
+                await Global.setRandomName(false);
+                await Global.setCustomeRename(false);
+                await Global.setCopyLink(true);
+                Database db = await Global.getDatabase();
+                await Global.setDatabase(db);
+                Database dbExtend = await Global.getDatabaseExtend();
+                await Global.setDatabaseExtend(dbExtend);
+                await Global.setShowedPBhost('lskypro');
+                await Global.setDeleteLocal(false);
+                await Global.setCustomLinkFormat(r'[$fileName]($url)');
+                await Global.setCustomeRenameFormat(r'{filename}');
+                await Global.setDeleteCloud(false);
+                await Global.setOperateDone(false);
+                await Global.setpsHostHomePageOrder([
+                  '0',
+                  '1',
+                  '2',
+                  '3',
+                  '4',
+                  '5',
+                  '6',
+                  '7',
+                  '8'
+                      '9',
+                  '10',
+                  '11',
+                  '12',
+                  '13',
+                  '14',
+                  '15',
+                  '16',
+                  '17',
+                  '18',
+                  '19',
+                  '20',
+                  '21',
+                ]);
+                await Global.setTencentUploadList([]);
+                await Global.setTencentDownloadList([]);
+                await Global.setAliyunUploadList([]);
+                await Global.setAliyunDownloadList([]);
+                await Global.setQiniuUploadList([]);
+                await Global.setQiniuDownloadList([]);
+                await Global.setLskyproUploadList([]);
+                await Global.setLskyproDownloadList([]);
+                await Global.setUpyunUploadList([]);
+                await Global.setUpyunDownloadList([]);
+                await Global.setImgurUploadList([]);
+                await Global.setImgurDownloadList([]);
+                await Global.setSmmsUploadList([]);
+                await Global.setSmmsDownloadList([]);
+                await Global.setSmmsSavedNameList([]);
+                await Global.setGithubUploadList([]);
+                await Global.setGithubDownloadList([]);
+                await Global.setFtpUploadList([]);
+                await Global.setFtpDownloadList([]);
+                showToast('注销成功');
                 if (mounted) {
                   Navigator.pop(context);
                 }
