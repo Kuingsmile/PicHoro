@@ -1,23 +1,24 @@
+import 'package:f_logs/f_logs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:provider/provider.dart';
-import 'package:f_logs/f_logs.dart';
+
 import 'package:horopic/configure_page/others/theme_data.dart';
 import 'package:horopic/router/application.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/theme_provider.dart';
 
 /*
-@Author: Horo
+@Author: Kuingsmile@Github
+@HomePage: https://www.horosama.com
 @e-mail: ma_shiqing@163.com
-@Date: 2022-11-04
+@Date: 2022-11-16
 @Description:PicHoro,一款云储存平台和图床管理工具
-@version: 1.8.5
+@version: 1.9.0
 */
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  //初始化
   try {
     await mainInit();
   } catch (e) {
