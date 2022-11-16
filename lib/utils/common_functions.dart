@@ -13,7 +13,6 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:fluro/fluro.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/router/application.dart';
@@ -387,6 +386,7 @@ String selectIcon(String ext) {
     return 'assets/icons/unknown.png';
   } else {
     String extNoDot = ext.substring(1);
+    extNoDot = extNoDot.toLowerCase();
     String iconPath = 'assets/icons/';
     if (extNoDot == '') {
       iconPath += '_blank.png';
@@ -509,6 +509,9 @@ mainInit() async {
   //初始化图床相册数据库
   Database db = await Global.getDatabase();
   await Global.setDatabase(db);
+  //初始化扩展图床相册数据库
+  Database dbExtend = await Global.getDatabaseExtend();
+  await Global.setDatabaseExtend(dbExtend);
 
   //初始化路由
   FluroRouter router = FluroRouter();
@@ -516,6 +519,23 @@ mainInit() async {
   Routes.configureRoutes(router);
   //初始化图床管理页面排列顺序
   List<String> psHostHomePageOrder = await Global.getpsHostHomePageOrder();
+  if (psHostHomePageOrder.length < 22) {
+    psHostHomePageOrder.addAll([
+      '9',
+      '10',
+      '11',
+      '12',
+      '13',
+      '14',
+      '15',
+      '16',
+      '17',
+      '18',
+      '19',
+      '20',
+      '21'
+    ]);
+  }
   await Global.setpsHostHomePageOrder(psHostHomePageOrder);
   //设定loading样式 备用 先注释掉了
   /* EasyLoading.instance
@@ -566,15 +586,21 @@ mainInit() async {
   await Global.setLskyproUploadList(lskyproUploadList);
   List<String> lskyproDownloadList = await Global.getLskyproDownloadList();
   await Global.setLskyproDownloadList(lskyproDownloadList);
+  List<String> ftpUploadList = await Global.getFtpUploadList();
+  await Global.setFtpUploadList(ftpUploadList);
+  List<String> ftpDownloadList = await Global.getFtpDownloadList();
+  await Global.setFtpDownloadList(ftpDownloadList);
 }
 
 //获得小图标，图片预览
 Widget getImageIcon(String path) {
   try {
     List imageType = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp'];
-    if (imageType.contains(path.substring(path.lastIndexOf('.')))) {
+    if (imageType
+        .contains(path.substring(path.lastIndexOf('.')).toLowerCase())) {
       return Image.file(File(path), width: 30, height: 30, fit: BoxFit.fill);
-    } else if (Global.iconList.contains(my_path.extension(path).substring(1))) {
+    } else if (Global.iconList
+        .contains(my_path.extension(path).substring(1).toLowerCase())) {
       return Image.asset(
         'assets/icons/${my_path.extension(path).substring(1)}.png',
         width: 30,
