@@ -4,7 +4,6 @@ import 'package:flustars_flutter3/flustars_flutter3.dart';
 import 'package:sqflite/sqflite.dart';
 
 import 'package:horopic/album/album_sql.dart';
-import 'package:horopic/picture_host_manage/common_page/picture_host_sql.dart';
 
 //全局共享变量
 class UploadedImage {
@@ -44,8 +43,7 @@ class Global {
   static bool isRandomName = false; //是否使用随机字符串重命名
   static bool isCopyLink = true; //是否复制链接
   static Database? imageDB; //默认相册数据库
-  static Database? uploadDB; //默认上传数据库
-  static Database? downloadDB; //默认下载数据库
+  static Database? imageDBExtend; //扩展相册数据库
   static String defaultShowedPBhost = 'lskypro'; //默认显示的图床
   static bool isDeleteLocal = false; //是否删除本地图片
   static bool isDeleteCloud = false; //是否删除远程图片
@@ -54,7 +52,30 @@ class Global {
   static bool iscustomRename = false; //是否自定义重命名
   static String customRenameFormat = r'{Y}_{m}_{d}_{uuid}'; //自定义重命名格式
   static bool operateDone = false;
-  static List psHostHomePageOrder = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+  static List psHostHomePageOrder = [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+  ]; //图床首页顺序
   //图床管理上传下载页面的任务保存列表
   static List<String> tencentDownloadList = [];
   static List<String> tencentUploadList = [];
@@ -73,6 +94,8 @@ class Global {
   static List<String> lskyproUploadList = [];
   static List<String> aliyunDownloadList = [];
   static List<String> aliyunUploadList = [];
+  static List<String> ftpDownloadList = [];
+  static List<String> ftpUploadList = [];
 
   static final List iconList = [
     "_blank",
@@ -403,22 +426,13 @@ class Global {
     imageDB = db;
   }
 
-  static getUploadDatabase() async {
-    uploadDB = await PSHostSQL.getUploadDatabase();
-    return uploadDB;
+  static getDatabaseExtend() async {
+    imageDBExtend = await AlbumSQL.getExtendDatabase();
+    return imageDBExtend;
   }
 
-  static setUploadDatabase(Database db) async {
-    uploadDB = db;
-  }
-
-  static getDownloadDatabase() async {
-    downloadDB = await PSHostSQL.getDownloadDatabase();
-    return downloadDB;
-  }
-
-  static setDownloadDatabase(Database db) async {
-    downloadDB = db;
+  static setDatabaseExtend(Database db) async {
+    imageDBExtend = db;
   }
 
   static setShowedPBhost(String showedPBhost) async {
@@ -504,8 +518,31 @@ class Global {
 
   static getpsHostHomePageOrder() async {
     await SpUtil.getInstance();
-    List psHostHomePageOrder = SpUtil.getStringList('key_psHostHomePageOrder',
-        defValue: ['0', '1', '2', '3', '4', '5', '6', '7', '8'])!;
+    List psHostHomePageOrder =
+        SpUtil.getStringList('key_psHostHomePageOrder', defValue: [
+      '0',
+      '1',
+      '2',
+      '3',
+      '4',
+      '5',
+      '6',
+      '7',
+      '8',
+      '9',
+      '10',
+      '11',
+      '12',
+      '13',
+      '14',
+      '15',
+      '16',
+      '17',
+      '18',
+      '19',
+      '20',
+      '21',
+    ])!;
     return psHostHomePageOrder;
   }
 
@@ -728,5 +765,31 @@ class Global {
     List lskyproDownloadList =
         SpUtil.getStringList('key_lskyproDownloadList', defValue: [])!;
     return lskyproDownloadList;
+  }
+
+  static setFtpUploadList(List<String> ftpUploadList) async {
+    await SpUtil.getInstance();
+    SpUtil.putStringList('key_ftpUploadList', ftpUploadList);
+    Global.ftpUploadList = ftpUploadList;
+  }
+
+  static getFtpUploadList() async {
+    await SpUtil.getInstance();
+    List ftpUploadList =
+        SpUtil.getStringList('key_ftpUploadList', defValue: [])!;
+    return ftpUploadList;
+  }
+
+  static setFtpDownloadList(List<String> ftpDownloadList) async {
+    await SpUtil.getInstance();
+    SpUtil.putStringList('key_ftpDownloadList', ftpDownloadList);
+    Global.ftpDownloadList = ftpDownloadList;
+  }
+
+  static getFtpDownloadList() async {
+    await SpUtil.getInstance();
+    List ftpDownloadList =
+        SpUtil.getStringList('key_ftpDownloadList', defValue: [])!;
+    return ftpDownloadList;
   }
 }
