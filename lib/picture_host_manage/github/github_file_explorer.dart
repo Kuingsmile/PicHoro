@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:convert';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' as flutter_services;
@@ -15,6 +16,7 @@ import 'package:path/path.dart' as my_path;
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:msh_checkbox/msh_checkbox.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
+import 'package:path_provider/path_provider.dart';
 
 import 'package:horopic/router/application.dart';
 import 'package:horopic/router/routers.dart';
@@ -223,6 +225,39 @@ class GithubFileExplorerState
   void dispose() {
     refreshController.dispose();
     super.dispose();
+  }
+
+  downloadFile(String urlpath, String fileName) async {
+    try {
+      BaseOptions baseOptions = BaseOptions(
+        sendTimeout: 30000,
+        receiveTimeout: 30000,
+        connectTimeout: 30000,
+      );
+      Dio dio = Dio(baseOptions);
+      String tempDir = (await getTemporaryDirectory()).path;
+      var tempfile = File('$tempDir/$fileName');
+      var response = await dio.download(
+        urlpath,
+        tempfile.path,
+        deleteOnError: false,
+        options: Options(
+          headers: {},
+        ),
+      );
+      if (response.statusCode == 200) {
+        return tempfile.path;
+      } else {
+        return 'error';
+      }
+    } catch (e) {
+      FLog.error(
+          className: "githubFileExplorerState",
+          methodName: "downloadFile",
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
+    }
+    return 'error';
   }
 
   @override
@@ -807,7 +842,7 @@ class GithubFileExplorerState
                       return;
                     }
                     String hostPrefix =
-                        'https://*********/https://raw.githubusercontent.com/${widget.element['showedUsername']}/${widget.element['name']}/${widget.element['default_branch']}/${widget.bucketPrefix}';
+                        'https://gh.api.99988866.xyz/https://raw.githubusercontent.com/${widget.element['showedUsername']}/${widget.element['name']}/${widget.element['default_branch']}/${widget.bucketPrefix}';
                     List<String> urlList = [];
                     for (int i = 0; i < downloadList.length; i++) {
                       urlList.add(hostPrefix + downloadList[i]['path']);
@@ -843,7 +878,7 @@ class GithubFileExplorerState
                       );
                       if (result[0] == 'success') {
                         urlList.add(
-                            'https://*********/${result[1]['download_url']}');
+                            'https://gh.api.99988866.xyz/${result[1]['download_url']}');
                       }
                     }
                     Global.githubDownloadList.addAll(urlList);
@@ -1459,6 +1494,7 @@ class GithubFileExplorerState
                                   'tif',
                                   'tiff',
                                   'ico',
+                                  'md',
                                   'heif',
                                 ];
                                 //判断是否为图片
@@ -1470,64 +1506,123 @@ class GithubFileExplorerState
                                   showToast('只支持图片预览');
                                   return;
                                 }
-                                //预览图片
-                                if (widget.element['showedUsername'] !=
-                                        adminUserName ||
-                                    widget.element['private'] == false) {
-                                  int newImageIndex =
-                                      index - dirAllInfoList.length;
-                                  for (int i = dirAllInfoList.length;
-                                      i < allInfoList.length;
-                                      i++) {
-                                    if (imageExt.contains(allInfoList[i]['path']
+                                if (allInfoList[index]['path']
                                         .split('.')
                                         .last
-                                        .toLowerCase())) {
-                                      if (widget.element['showedUsername'] !=
-                                              adminUserName ||
-                                          widget.element['private'] == false) {
-                                        urlList +=
-                                            'https://*********/https://raw.githubusercontent.com/${widget.element['showedUsername']}/${widget.element['name']}/${widget.element['default_branch']}/${widget.bucketPrefix}${allInfoList[i]['path']},';
-                                      } else {
-                                        var result = await GithubManageAPI
-                                            .getRepoFileContent(
-                                          widget.element['showedUsername'],
-                                          widget.element['name'],
-                                          widget.bucketPrefix +
-                                              allInfoList[i]['path'],
-                                        );
-                                        if (result[0] == 'success') {
+                                        .toLowerCase() !=
+                                    'md') {
+                                  //预览图片
+                                  if (widget.element['showedUsername'] !=
+                                          adminUserName ||
+                                      widget.element['private'] == false) {
+                                    int newImageIndex =
+                                        index - dirAllInfoList.length;
+                                    for (int i = dirAllInfoList.length;
+                                        i < allInfoList.length;
+                                        i++) {
+                                      if (imageExt.contains(allInfoList[i]
+                                                  ['path']
+                                              .split('.')
+                                              .last
+                                              .toLowerCase()) &&
+                                          allInfoList[i]['path']
+                                                  .split('.')
+                                                  .last
+                                                  .toLowerCase() !=
+                                              'md') {
+                                        if (widget.element['showedUsername'] !=
+                                                adminUserName ||
+                                            widget.element['private'] ==
+                                                false) {
                                           urlList +=
-                                              'https://*********/${result[1]['download_url']},';
+                                              'https://gh.api.99988866.xyz/https://raw.githubusercontent.com/${widget.element['showedUsername']}/${widget.element['name']}/${widget.element['default_branch']}/${widget.bucketPrefix}${allInfoList[i]['path']},';
+                                        } else {
+                                          var result = await GithubManageAPI
+                                              .getRepoFileContent(
+                                            widget.element['showedUsername'],
+                                            widget.element['name'],
+                                            widget.bucketPrefix +
+                                                allInfoList[i]['path'],
+                                          );
+                                          if (result[0] == 'success') {
+                                            urlList +=
+                                                'https://gh.api.99988866.xyz/${result[1]['download_url']},';
+                                          }
                                         }
+                                      } else if (i < index) {
+                                        newImageIndex--;
                                       }
-                                    } else if (i < index) {
-                                      newImageIndex--;
                                     }
-                                  }
-                                  Application.router.navigateTo(this.context,
-                                      '${Routes.albumImagePreview}?index=$newImageIndex&images=${Uri.encodeComponent(urlList)}',
-                                      transition: TransitionType.none);
-                                } else {
-                                  int newImageIndex = 0;
-                                  showToast('请稍候，正在获取图片地址');
-                                  var result =
-                                      await GithubManageAPI.getRepoFileContent(
-                                    widget.element['showedUsername'],
-                                    widget.element['name'],
-                                    widget.bucketPrefix +
-                                        allInfoList[index]['path'],
-                                  );
-                                  if (result[0] == 'success') {
-                                    urlList +=
-                                        'https://*********/${result[1]['download_url']}';
+                                    Application.router.navigateTo(this.context,
+                                        '${Routes.albumImagePreview}?index=$newImageIndex&images=${Uri.encodeComponent(urlList)}',
+                                        transition: TransitionType.none);
                                   } else {
-                                    showToast('获取图片地址失败');
-                                    return;
+                                    int newImageIndex = 0;
+                                    showToast('请稍候，正在获取图片地址');
+                                    var result = await GithubManageAPI
+                                        .getRepoFileContent(
+                                      widget.element['showedUsername'],
+                                      widget.element['name'],
+                                      widget.bucketPrefix +
+                                          allInfoList[index]['path'],
+                                    );
+                                    if (result[0] == 'success') {
+                                      urlList +=
+                                          'https://gh.api.99988866.xyz/${result[1]['download_url']}';
+                                    } else {
+                                      showToast('获取图片地址失败');
+                                      return;
+                                    }
+                                    Application.router.navigateTo(this.context,
+                                        '${Routes.albumImagePreview}?index=$newImageIndex&images=${Uri.encodeComponent(urlList)}',
+                                        transition: TransitionType.none);
                                   }
-                                  Application.router.navigateTo(this.context,
-                                      '${Routes.albumImagePreview}?index=$newImageIndex&images=${Uri.encodeComponent(urlList)}',
-                                      transition: TransitionType.none);
+                                } else {
+                                  if (widget.element['showedUsername'] !=
+                                          adminUserName ||
+                                      widget.element['private'] == false) {
+                                    String urlPath =
+                                        'https://gh.api.99988866.xyz/https://raw.githubusercontent.com/${widget.element['showedUsername']}/${widget.element['name']}/${widget.element['default_branch']}/${widget.bucketPrefix}${allInfoList[index]['path']}';
+                                    showToast('开始获取文件');
+                                    String filePath = await downloadFile(
+                                        urlPath, allInfoList[index]['path']);
+                                    String fileName =
+                                        allInfoList[index]['path'];
+                                    if (filePath == 'error') {
+                                      showToast('获取失败');
+                                      return;
+                                    }
+                                    Application.router.navigateTo(this.context,
+                                        '${Routes.mdPreview}?filePath=${Uri.encodeComponent(filePath)}&fileName=${Uri.encodeComponent(fileName)}',
+                                        transition: TransitionType.none);
+                                  } else {
+                                    showToast('请稍候，正在获取文件地址');
+                                    var result = await GithubManageAPI
+                                        .getRepoFileContent(
+                                      widget.element['showedUsername'],
+                                      widget.element['name'],
+                                      widget.bucketPrefix +
+                                          allInfoList[index]['path'],
+                                    );
+                                    if (result[0] == 'success') {
+                                      urlList +=
+                                          'https://gh.api.99988866.xyz/${result[1]['download_url']}';
+                                    } else {
+                                      showToast('获取文件地址失败');
+                                      return;
+                                    }
+                                    String filePath = await downloadFile(
+                                        urlList, allInfoList[index]['path']);
+                                    String fileName =
+                                        allInfoList[index]['path'];
+                                    if (filePath == 'error') {
+                                      showToast('获取文件失败');
+                                      return;
+                                    }
+                                    Application.router.navigateTo(this.context,
+                                        '${Routes.mdPreview}?filePath=${Uri.encodeComponent(filePath)}&fileName=${Uri.encodeComponent(fileName)}',
+                                        transition: TransitionType.none);
+                                  }
                                 }
                               },
                             ),
