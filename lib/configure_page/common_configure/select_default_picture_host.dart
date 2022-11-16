@@ -152,6 +152,7 @@ class AllPShostState extends State<AllPShost> {
         "tcyun": "$configPath/${defaultUser}_tencent_config.txt",
         "aliyun": "$configPath/${defaultUser}_aliyun_config.txt",
         "upyun": "$configPath/${defaultUser}_upyun_config.txt",
+        "ftp": "$configPath/${defaultUser}_ftp_config.txt",
       };
       String config = await File(configFilePath[pshost]!).readAsString();
       Map<String, dynamic> configMap = jsonDecode(config);
@@ -169,6 +170,46 @@ class AllPShostState extends State<AllPShost> {
           text: formatErrorMessage({
             "pshost": pshost,
           }, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
+      showToast("导出失败");
+    }
+  }
+
+  exportAllConfiguration() async {
+    try {
+      String configPath = await localPath;
+      String defaultUser = await Global.getUser();
+      Map<String, dynamic> configFilePath = {
+        "smms": "$configPath/${defaultUser}_smms_config.txt",
+        "lankong": "$configPath/${defaultUser}_host_config.txt",
+        "github": "$configPath/${defaultUser}_github_config.txt",
+        "imgur": "$configPath/${defaultUser}_imgur_config.txt",
+        "qiniu": "$configPath/${defaultUser}_qiniu_config.txt",
+        "tcyun": "$configPath/${defaultUser}_tencent_config.txt",
+        "aliyun": "$configPath/${defaultUser}_aliyun_config.txt",
+        "upyun": "$configPath/${defaultUser}_upyun_config.txt",
+        "ftp": "$configPath/${defaultUser}_ftp_config.txt",
+      };
+      Map<String, dynamic> configMap = {};
+      for (var key in configFilePath.keys) {
+        if (!File(configFilePath[key]!).existsSync()) {
+          continue;
+        }
+        String config = await File(configFilePath[key]!).readAsString();
+        Map<String, dynamic> configMap2 = jsonDecode(config);
+        configMap[key] = configMap2;
+      }
+      String configJson = jsonEncode(configMap);
+      configJson = configJson.replaceAll('None', '');
+      configJson = configJson.replaceAll('keyId', 'accessKeyId');
+      configJson = configJson.replaceAll('keySecret', 'accessKeySecret');
+      await Clipboard.setData(ClipboardData(text: configJson));
+      showToast("配置已复制到剪贴板");
+    } catch (e) {
+      FLog.error(
+          className: 'AllPShostState',
+          methodName: 'exportAllConfiguration',
+          text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
       showToast("导出失败");
     }
@@ -379,114 +420,113 @@ class AllPShostState extends State<AllPShost> {
       }
     }
 
-      if (jsonResult['lankong'] != null) {
-        try {
-          String lankongVersion = jsonResult['lankong']['lskyProVersion'];
-          if (lankongVersion == 'V2') {
-            String lankongVtwoHost = jsonResult['lankong']['server'];
-            if (lankongVtwoHost.endsWith('/')) {
-              lankongVtwoHost =
-                  lankongVtwoHost.substring(0, lankongVtwoHost.length - 1);
-            }
-            String lankongToken = jsonResult['lankong']['token'];
-            if (lankongToken.startsWith('Bearer ')) {
-            } else {
-              lankongToken = 'Bearer $lankongToken';
-            }
-            String lanKongstrategyId = jsonResult['lankong']['strategyId'];
-            if (lanKongstrategyId == '' || lanKongstrategyId.isEmpty) {
-              lanKongstrategyId = 'None';
-            }
-            String lanKongalbumId = jsonResult['lankong']['albumId'];
-            if (lanKongalbumId == '' || lanKongalbumId.isEmpty) {
-              lanKongalbumId = 'None';
-            }
-
-            BaseOptions options = BaseOptions(
-              //连接服务器超时时间，单位是毫秒.
-              connectTimeout: 30000,
-              //响应超时时间。
-              receiveTimeout: 30000,
-              sendTimeout: 30000,
-            );
-            options.headers = {
-              "Accept": "application/json",
-              "Authorization": lankongToken,
-            };
-            String profileUrl = "$lankongVtwoHost/api/v1/profile";
-            Dio dio = Dio(options);
-
-            String sqlResult = '';
-            try {
-              var response = await dio.get(
-                profileUrl,
-              );
-              if (response.statusCode == 200 &&
-                  response.data['status'] == true) {
-                try {
-                  List sqlconfig = [];
-                  sqlconfig.add(lankongVtwoHost);
-                  sqlconfig.add(lanKongstrategyId.toString());
-                  sqlconfig.add(lanKongalbumId.toString());
-                  sqlconfig.add(lankongToken);
-                  String defaultUser = await Global.getUser();
-                  sqlconfig.add(defaultUser);
-
-                  var querylankong =
-                      await MySqlUtils.queryLankong(username: defaultUser);
-                  var queryuser =
-                      await MySqlUtils.queryUser(username: defaultUser);
-
-                  if (queryuser == 'Empty') {
-                    showToast("请先登录");
-                  } else if (querylankong == 'Empty') {
-                    sqlResult =
-                        await MySqlUtils.insertLankong(content: sqlconfig);
-                  } else {
-                    sqlResult =
-                        await MySqlUtils.updateLankong(content: sqlconfig);
-                  }
-                } catch (e) {
-                  FLog.error(
-                      className: 'AllPShostState',
-                      methodName: 'processingQRCodeResult_lankong_1',
-                      text: formatErrorMessage({}, e.toString()),
-                      dataLogType: DataLogType.ERRORS.toString());
-                  showToast("兰空数据库错误");
-                }
-                if (sqlResult == "Success") {
-                  HostConfigModel hostConfig = HostConfigModel(
-                      lankongVtwoHost, lankongToken, lanKongstrategyId , lanKongalbumId);
-                  final hostConfigJson = jsonEncode(hostConfig);
-                  final hostConfigFile = await lskyFile;
-                  hostConfigFile.writeAsString(hostConfigJson);
-                  showToast("兰空配置成功");
-                } else {
-                  showToast("兰空数据库错误");
-                }
-              } else {
-                showToast("兰空验证失败");
-              }
-            } catch (e) {
-              FLog.error(
-                  className: 'AllPShostState',
-                  methodName: 'processingQRCodeResult_lankong_2',
-                  text: formatErrorMessage({}, e.toString()),
-                  dataLogType: DataLogType.ERRORS.toString());
-              showToast("兰空配置错误");
-            }
-          } else {
-            showToast("不支持兰空V1");
+    if (jsonResult['lankong'] != null) {
+      try {
+        String lankongVersion = jsonResult['lankong']['lskyProVersion'];
+        if (lankongVersion == 'V2') {
+          String lankongVtwoHost = jsonResult['lankong']['server'];
+          if (lankongVtwoHost.endsWith('/')) {
+            lankongVtwoHost =
+                lankongVtwoHost.substring(0, lankongVtwoHost.length - 1);
           }
-        } catch (e) {
-          FLog.error(
-              className: 'AllPShostState',
-              methodName: 'processingQRCodeResult_lankong_3',
-              text: formatErrorMessage({}, e.toString()),
-              dataLogType: DataLogType.ERRORS.toString());
-          showToast("兰空配置错误");
+          String lankongToken = jsonResult['lankong']['token'];
+          if (lankongToken.startsWith('Bearer ')) {
+          } else {
+            lankongToken = 'Bearer $lankongToken';
+          }
+          String lanKongstrategyId = jsonResult['lankong']['strategyId'];
+          if (lanKongstrategyId == '' || lanKongstrategyId.isEmpty) {
+            lanKongstrategyId = 'None';
+          }
+          String lanKongalbumId = jsonResult['lankong']['albumId'];
+          if (lanKongalbumId == '' || lanKongalbumId.isEmpty) {
+            lanKongalbumId = 'None';
+          }
+
+          BaseOptions options = BaseOptions(
+            //连接服务器超时时间，单位是毫秒.
+            connectTimeout: 30000,
+            //响应超时时间。
+            receiveTimeout: 30000,
+            sendTimeout: 30000,
+          );
+          options.headers = {
+            "Accept": "application/json",
+            "Authorization": lankongToken,
+          };
+          String profileUrl = "$lankongVtwoHost/api/v1/profile";
+          Dio dio = Dio(options);
+
+          String sqlResult = '';
+          try {
+            var response = await dio.get(
+              profileUrl,
+            );
+            if (response.statusCode == 200 && response.data['status'] == true) {
+              try {
+                List sqlconfig = [];
+                sqlconfig.add(lankongVtwoHost);
+                sqlconfig.add(lanKongstrategyId.toString());
+                sqlconfig.add(lanKongalbumId.toString());
+                sqlconfig.add(lankongToken);
+                String defaultUser = await Global.getUser();
+                sqlconfig.add(defaultUser);
+
+                var querylankong =
+                    await MySqlUtils.queryLankong(username: defaultUser);
+                var queryuser =
+                    await MySqlUtils.queryUser(username: defaultUser);
+
+                if (queryuser == 'Empty') {
+                  showToast("请先登录");
+                } else if (querylankong == 'Empty') {
+                  sqlResult =
+                      await MySqlUtils.insertLankong(content: sqlconfig);
+                } else {
+                  sqlResult =
+                      await MySqlUtils.updateLankong(content: sqlconfig);
+                }
+              } catch (e) {
+                FLog.error(
+                    className: 'AllPShostState',
+                    methodName: 'processingQRCodeResult_lankong_1',
+                    text: formatErrorMessage({}, e.toString()),
+                    dataLogType: DataLogType.ERRORS.toString());
+                showToast("兰空数据库错误");
+              }
+              if (sqlResult == "Success") {
+                HostConfigModel hostConfig = HostConfigModel(lankongVtwoHost,
+                    lankongToken, lanKongstrategyId, lanKongalbumId);
+                final hostConfigJson = jsonEncode(hostConfig);
+                final hostConfigFile = await lskyFile;
+                hostConfigFile.writeAsString(hostConfigJson);
+                showToast("兰空配置成功");
+              } else {
+                showToast("兰空数据库错误");
+              }
+            } else {
+              showToast("兰空验证失败");
+            }
+          } catch (e) {
+            FLog.error(
+                className: 'AllPShostState',
+                methodName: 'processingQRCodeResult_lankong_2',
+                text: formatErrorMessage({}, e.toString()),
+                dataLogType: DataLogType.ERRORS.toString());
+            showToast("兰空配置错误");
+          }
+        } else {
+          showToast("不支持兰空V1");
         }
+      } catch (e) {
+        FLog.error(
+            className: 'AllPShostState',
+            methodName: 'processingQRCodeResult_lankong_3',
+            text: formatErrorMessage({}, e.toString()),
+            dataLogType: DataLogType.ERRORS.toString());
+        showToast("兰空配置错误");
       }
+    }
 
     if (jsonResult['imgur'] != null) {
       final imgurclientId = jsonResult['imgur']['clientId'];
@@ -874,10 +914,10 @@ class AllPShostState extends State<AllPShost> {
           }
         } catch (e) {
           FLog.error(
-          className: 'TencentConfigPage',
-          methodName: 'saveTencentConfig',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+              className: 'TencentConfigPage',
+              methodName: 'saveTencentConfig',
+              text: formatErrorMessage({}, e.toString()),
+              dataLogType: DataLogType.ERRORS.toString());
           showToast("腾讯云配置错误");
         }
       } else {
@@ -1041,10 +1081,10 @@ class AllPShostState extends State<AllPShost> {
         }
       } catch (e) {
         FLog.error(
-          className: 'AliyunConfigPage',
-          methodName: 'saveAliyunConfig',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+            className: 'AliyunConfigPage',
+            methodName: 'saveAliyunConfig',
+            text: formatErrorMessage({}, e.toString()),
+            dataLogType: DataLogType.ERRORS.toString());
         showToast("阿里云配置错误");
       }
     }
@@ -1194,10 +1234,10 @@ class AllPShostState extends State<AllPShost> {
         }
       } catch (e) {
         FLog.error(
-          className: 'UpyunConfigPage',
-          methodName: 'upyunConfig',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+            className: 'UpyunConfigPage',
+            methodName: 'upyunConfig',
+            text: formatErrorMessage({}, e.toString()),
+            dataLogType: DataLogType.ERRORS.toString());
         showToast("又拍云配置错误");
       }
     }
@@ -1253,17 +1293,17 @@ class AllPShostState extends State<AllPShost> {
           trailing: const Icon(Icons.arrow_forward_ios),
         ),
         ListTile(
-          title: const Text('兰空图床V2'),
+          title: const Text('阿里云OSS'),
           onTap: () {
-            Application.router.navigateTo(context, Routes.lskyproPShostSelect,
+            Application.router.navigateTo(context, Routes.aliyunPShostSelect,
                 transition: TransitionType.cupertino);
           },
           trailing: const Icon(Icons.arrow_forward_ios),
         ),
         ListTile(
-          title: const Text('SM.MS图床'),
+          title: const Text('FTP-SSH/SFTP'),
           onTap: () {
-            Application.router.navigateTo(context, Routes.smmsPShostSelect,
+            Application.router.navigateTo(context, Routes.ftpPShostSelect,
                 transition: TransitionType.cupertino);
           },
           trailing: const Icon(Icons.arrow_forward_ios),
@@ -1277,7 +1317,7 @@ class AllPShostState extends State<AllPShost> {
           trailing: const Icon(Icons.arrow_forward_ios),
         ),
         ListTile(
-          title: const Text('Imgur图床(需翻墙)'),
+          title: const Text('Imgur图床'),
           onTap: () {
             Application.router.navigateTo(context, Routes.imgurPShostSelect,
                 transition: TransitionType.cupertino);
@@ -1285,9 +1325,25 @@ class AllPShostState extends State<AllPShost> {
           trailing: const Icon(Icons.arrow_forward_ios),
         ),
         ListTile(
-          title: const Text('七牛云'),
+          title: const Text('兰空图床V2'),
+          onTap: () {
+            Application.router.navigateTo(context, Routes.lskyproPShostSelect,
+                transition: TransitionType.cupertino);
+          },
+          trailing: const Icon(Icons.arrow_forward_ios),
+        ),
+        ListTile(
+          title: const Text('七牛云存储'),
           onTap: () {
             Application.router.navigateTo(context, Routes.qiniuPShostSelect,
+                transition: TransitionType.cupertino);
+          },
+          trailing: const Icon(Icons.arrow_forward_ios),
+        ),
+        ListTile(
+          title: const Text('SM.MS图床'),
+          onTap: () {
+            Application.router.navigateTo(context, Routes.smmsPShostSelect,
                 transition: TransitionType.cupertino);
           },
           trailing: const Icon(Icons.arrow_forward_ios),
@@ -1301,15 +1357,7 @@ class AllPShostState extends State<AllPShost> {
           trailing: const Icon(Icons.arrow_forward_ios),
         ),
         ListTile(
-          title: const Text('阿里云OSS'),
-          onTap: () {
-            Application.router.navigateTo(context, Routes.aliyunPShostSelect,
-                transition: TransitionType.cupertino);
-          },
-          trailing: const Icon(Icons.arrow_forward_ios),
-        ),
-        ListTile(
-          title: const Text('又拍云'),
+          title: const Text('又拍云存储'),
           onTap: () {
             Application.router.navigateTo(context, Routes.upyunPShostSelect,
                 transition: TransitionType.cupertino);
@@ -1323,7 +1371,6 @@ class AllPShostState extends State<AllPShost> {
           child: FloatingActionButton(
             heroTag: 'copyConfig',
             backgroundColor: const Color.fromARGB(255, 198, 135, 235),
-            //select host menu
             onPressed: () async {
               await showDialog(
                 barrierDismissible: true,
@@ -1337,16 +1384,24 @@ class AllPShostState extends State<AllPShost> {
                     ),
                     children: [
                       SimpleDialogOption(
-                        child: const Text('兰空图床', textAlign: TextAlign.center),
+                        child: const Text('全部导出', textAlign: TextAlign.center),
                         onPressed: () {
-                          exportConfiguration('lankong');
+                          exportAllConfiguration();
                           Navigator.pop(context);
                         },
                       ),
                       SimpleDialogOption(
-                        child: const Text('SM.MS', textAlign: TextAlign.center),
+                        child: const Text('阿里云', textAlign: TextAlign.center),
                         onPressed: () {
-                          exportConfiguration('smms');
+                          exportConfiguration('aliyun');
+                          Navigator.pop(context);
+                        },
+                      ),
+                      SimpleDialogOption(
+                        child: const Text('FTP-SSH/SFTP',
+                            textAlign: TextAlign.center),
+                        onPressed: () {
+                          exportConfiguration('ftp');
                           Navigator.pop(context);
                         },
                       ),
@@ -1366,6 +1421,13 @@ class AllPShostState extends State<AllPShost> {
                         },
                       ),
                       SimpleDialogOption(
+                        child: const Text('兰空图床', textAlign: TextAlign.center),
+                        onPressed: () {
+                          exportConfiguration('lankong');
+                          Navigator.pop(context);
+                        },
+                      ),
+                      SimpleDialogOption(
                         child: const Text('七牛云', textAlign: TextAlign.center),
                         onPressed: () {
                           exportConfiguration('qiniu');
@@ -1373,16 +1435,16 @@ class AllPShostState extends State<AllPShost> {
                         },
                       ),
                       SimpleDialogOption(
-                        child: const Text('腾讯云', textAlign: TextAlign.center),
+                        child: const Text('SM.MS', textAlign: TextAlign.center),
                         onPressed: () {
-                          exportConfiguration('tcyun');
+                          exportConfiguration('smms');
                           Navigator.pop(context);
                         },
                       ),
                       SimpleDialogOption(
-                        child: const Text('阿里云', textAlign: TextAlign.center),
+                        child: const Text('腾讯云', textAlign: TextAlign.center),
                         onPressed: () {
-                          exportConfiguration('aliyun');
+                          exportConfiguration('tcyun');
                           Navigator.pop(context);
                         },
                       ),
