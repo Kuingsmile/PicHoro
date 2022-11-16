@@ -71,6 +71,11 @@ dependencies:
   f_logs: 2.0.1
   data_table_2: 2.3.8
   #flutter_uploader: ^3.0.0-beta.4
+  ftpconnect: 2.0.2
+  dartssh2: 2.7.3
+  cached_network_image: 3.2.2
+  flutter_image_compress: 1.1.3
+  xterm: 3.4.0
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.

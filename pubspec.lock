@@ -8,6 +8,13 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "2.3.1"
+  asn1lib:
+    dependency: transitive
+    description:
+      name: asn1lib
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "1.3.0"
   async:
     dependency: transitive
     description:
@@ -29,6 +36,27 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "2.1.0"
+  cached_network_image:
+    dependency: "direct main"
+    description:
+      name: cached_network_image
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "3.2.2"
+  cached_network_image_platform_interface:
+    dependency: transitive
+    description:
+      name: cached_network_image_platform_interface
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "2.0.0"
+  cached_network_image_web:
+    dependency: transitive
+    description:
+      name: cached_network_image_web
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "1.0.2"
   characters:
     dependency: transitive
     description:
@@ -99,6 +127,13 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "1.0.2"
+  dartssh2:
+    dependency: "direct main"
+    description:
+      name: dartssh2
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "2.7.3"
   data_table_2:
     dependency: "direct main"
     description:
@@ -127,6 +162,13 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "1.0.1"
+  equatable:
+    dependency: transitive
+    description:
+      name: equatable
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "2.0.5"
   event_bus:
     dependency: "direct main"
     description:
@@ -216,6 +258,20 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_blurhash:
+    dependency: transitive
+    description:
+      name: flutter_blurhash
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "0.7.0"
+  flutter_cache_manager:
+    dependency: transitive
+    description:
+      name: flutter_cache_manager
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "3.3.0"
   flutter_draggable_gridview:
     dependency: "direct main"
     description:
@@ -230,6 +286,13 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "3.0.5"
+  flutter_image_compress:
+    dependency: "direct main"
+    description:
+      name: flutter_image_compress
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "1.1.3"
   flutter_lints:
     dependency: "direct dev"
     description:
@@ -289,6 +352,13 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "8.0.9"
+  ftpconnect:
+    dependency: "direct main"
+    description:
+      name: ftpconnect
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "2.0.2"
   grouped_list:
     dependency: "direct main"
     description:
@@ -443,6 +513,13 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "1.0.0"
+  octo_image:
+    dependency: transitive
+    description:
+      name: octo_image
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "1.0.2"
   open_filex:
     dependency: "direct main"
     description:
@@ -548,6 +625,13 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "2.1.3"
+  pedantic:
+    dependency: transitive
+    description:
+      name: pedantic
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "1.11.1"
   permission_handler:
     dependency: "direct main"
     description:
@@ -597,6 +681,13 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "2.3.0"
+  pinenacl:
+    dependency: transitive
+    description:
+      name: pinenacl
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "0.5.1"
   platform:
     dependency: transitive
     description:
@@ -604,6 +695,13 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "3.1.0"
+  platform_info:
+    dependency: transitive
+    description:
+      name: platform_info
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "3.2.0"
   plugin_platform_interface:
     dependency: transitive
     description:
@@ -611,6 +709,13 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "2.1.3"
+  pointycastle:
+    dependency: transitive
+    description:
+      name: pointycastle
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "3.6.2"
   pool:
     dependency: transitive
     description:
@@ -660,6 +765,13 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "0.4.0"
+  quiver:
+    dependency: transitive
+    description:
+      name: quiver
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "3.1.0"
   r_upgrade:
     dependency: "direct main"
     description:
@@ -674,6 +786,13 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "2.2.0"
+  rxdart:
+    dependency: transitive
+    description:
+      name: rxdart
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "0.27.6"
   sembast:
     dependency: transitive
     description:
@@ -973,6 +1092,13 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "5.3.5"
+  xterm:
+    dependency: "direct main"
+    description:
+      name: xterm
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "3.4.0"
   xxtea:
     dependency: transitive
     description:
