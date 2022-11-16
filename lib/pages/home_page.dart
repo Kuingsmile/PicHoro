@@ -48,15 +48,24 @@ class HomePageState extends State<HomePage>
   List uploadList = [];
   List<String> uploadPathList = [];
   List<String> uploadFileNameList = [];
-  var uploadManager = UploadManager();
+  var uploadManager = UploadManager(maxConcurrentTasks: 1);
+
+  bool homepageKeepAlive = true;
+  var actionEventBus;
 
   @override
-  bool get wantKeepAlive => true;
+  bool get wantKeepAlive => homepageKeepAlive;
 
   @override
   void initState() {
+    actionEventBus = eventBus.on<HomePhotoRefreshEvent>().listen(
+      (event) {
+        homepageKeepAlive = false;
+        updateKeepAlive();
+      },
+    );
     super.initState();
-    uploadManager = UploadManager();
+    uploadManager = UploadManager(maxConcurrentTasks: 1);
   }
 
   clearAllList() {
@@ -73,6 +82,7 @@ class HomePageState extends State<HomePage>
 
   @override
   void dispose() {
+    actionEventBus.cancel();
     super.dispose();
     clipboardList.clear();
   }
@@ -347,7 +357,6 @@ class HomePageState extends State<HomePage>
   _uploadAndBackToCamera() async {
     String path = Global.imageOriginalFile!.path;
     String name = Global.imageFile!.split('/').last;
-    // String name = path.substring(path.lastIndexOf("/") + 1, path.length);
     Global.imageFile = null;
     Global.imageOriginalFile = null;
 
@@ -473,10 +482,37 @@ class HomePageState extends State<HomePage>
           'hostSpecificArgD': 'test',
           'hostSpecificArgE': 'test',
         };
+      } else if (Global.defaultPShost == 'ftp') {
+        // ["success", formatedURL, returnUrl, pictureKey,displayUrl]
+        maps = {
+          'path': path,
+          'name': name,
+          'url': uploadResult[2], //ftp文件原始地址
+          'PBhost': Global.defaultPShost,
+          'pictureKey': uploadResult[3],
+          'hostSpecificArgA': uploadResult[4], //实际展示的是displayUrl
+          'hostSpecificArgB': uploadResult[5], //ftp自定义域名
+          'hostSpecificArgC': uploadResult[6], //ftp端口
+          'hostSpecificArgD': uploadResult[7], //ftp用户名
+          'hostSpecificArgE': uploadResult[8], //ftp密码
+          'hostSpecificArgF': uploadResult[9], //ftp类型
+          'hostSpecificArgG': uploadResult[10], //ftp是否匿名
+          'hostSpecificArgH': uploadResult[11], //ftp路径
+          'hostSpecificArgI': uploadResult[12], //缩略图路径
+        };
+        List letter = 'JKLMNOPQRSTUVWXYZ'.split('');
+        for (int i = 0; i < letter.length; i++) {
+          maps['hostSpecificArg${letter[i]}'] = 'test';
+        }
       }
 
-      await AlbumSQL.insertData(
-          Global.imageDB!, pBhostToTableName[Global.defaultPShost]!, maps);
+      if (Global.defaultPShost == 'ftp') {
+        await AlbumSQL.insertData(Global.imageDBExtend!,
+            pBhostToTableName[Global.defaultPShost]!, maps);
+      } else {
+        await AlbumSQL.insertData(
+            Global.imageDB!, pBhostToTableName[Global.defaultPShost]!, maps);
+      }
 
       clipboardList.add(uploadResult[1]); //这里是formatedURL,应该是可以直接访问的地址
       Global.multiUpload = 'success';
@@ -661,10 +697,37 @@ class HomePageState extends State<HomePage>
             'hostSpecificArgD': 'test',
             'hostSpecificArgE': 'test',
           };
+        } else if (Global.defaultPShost == 'ftp') {
+          // ["success", formatedURL, returnUrl, pictureKey,displayUrl]
+          maps = {
+            'path': path,
+            'name': name,
+            'url': uploadResult[2], //ftp文件原始地址
+            'PBhost': Global.defaultPShost,
+            'pictureKey': uploadResult[3],
+            'hostSpecificArgA': uploadResult[4], //实际展示的是displayUrl
+            'hostSpecificArgB': uploadResult[5], //ftp自定义域名
+            'hostSpecificArgC': uploadResult[6], //ftp端口
+            'hostSpecificArgD': uploadResult[7], //ftp用户名
+            'hostSpecificArgE': uploadResult[8], //ftp密码
+            'hostSpecificArgF': uploadResult[9], //ftp类型
+            'hostSpecificArgG': uploadResult[10], //ftp是否匿名
+            'hostSpecificArgH': uploadResult[11], //ftp路径
+            'hostSpecificArgI': uploadResult[12], //缩略图路径
+          };
+          List letter = 'JKLMNOPQRSTUVWXYZ'.split('');
+          for (int i = 0; i < letter.length; i++) {
+            maps['hostSpecificArg${letter[i]}'] = 'test';
+          }
         }
 
-        await AlbumSQL.insertData(
-            Global.imageDB!, pBhostToTableName[Global.defaultPShost]!, maps);
+        if (Global.defaultPShost == 'ftp') {
+          await AlbumSQL.insertData(Global.imageDBExtend!,
+              pBhostToTableName[Global.defaultPShost]!, maps);
+        } else {
+          await AlbumSQL.insertData(
+              Global.imageDB!, pBhostToTableName[Global.defaultPShost]!, maps);
+        }
 
         clipboardList.add(uploadResult[1]);
       } else if (uploadResult[0] == "failed") {
@@ -757,6 +820,490 @@ class HomePageState extends State<HomePage>
           shadowColor: Colors.transparent,
           elevation: 0,
           actions: [
+            PopupMenuButton(
+                icon: const Icon(
+                  Icons.settings,
+                  size: 30,
+                ),
+                position: PopupMenuPosition.under,
+                itemBuilder: (BuildContext context) {
+                  return [
+                    PopupMenuItem(
+                      padding: EdgeInsets.zero,
+                      child: Row(
+                        children: [
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          const Text('自动复制链接'),
+                          Switch(
+                            materialTapTargetSize:
+                                MaterialTapTargetSize.shrinkWrap,
+                            value: Global.isCopyLink,
+                            onChanged: (value) async {
+                              if (value == true) {
+                                showToastWithContext(context, '开启链接复制');
+                              } else {
+                                showToastWithContext(context, '关闭链接复制');
+                              }
+                              await Global.setCopyLink(value);
+                              setState(() {});
+                              if (mounted) {
+                                Navigator.pop(context);
+                              }
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    PopupMenuItem(
+                      child: GestureDetector(
+                        onTap: () async {
+                          Navigator.pop(context);
+                          await showDialog(
+                            barrierDismissible: true,
+                            context: context,
+                            builder: (context) {
+                              return SimpleDialog(
+                                title: const Text(
+                                  '选择默认链接格式',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                                children: [
+                                  SimpleDialogOption(
+                                    child: Text(
+                                      Global.defaultLKformat == 'rawurl'
+                                          ? 'URL格式 \u2713'
+                                          : 'URL格式',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        color:
+                                            Global.defaultLKformat == 'rawurl'
+                                                ? Colors.blue
+                                                : Colors.black,
+                                        fontWeight:
+                                            Global.defaultLKformat == 'rawurl'
+                                                ? FontWeight.bold
+                                                : FontWeight.normal,
+                                      ),
+                                    ),
+                                    onPressed: () async {
+                                      await Global.setLKformat('rawurl');
+                                      if (mounted) {
+                                        showToastWithContext(
+                                            context, '已设置为URL格式');
+                                        Navigator.pop(context);
+                                      }
+                                    },
+                                  ),
+                                  SimpleDialogOption(
+                                    child: Text(
+                                      Global.defaultLKformat == 'html'
+                                          ? 'HTML格式 \u2713'
+                                          : 'HTML格式',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        color: Global.defaultLKformat == 'html'
+                                            ? Colors.blue
+                                            : Colors.black,
+                                        fontWeight:
+                                            Global.defaultLKformat == 'html'
+                                                ? FontWeight.bold
+                                                : FontWeight.normal,
+                                      ),
+                                    ),
+                                    onPressed: () async {
+                                      await Global.setLKformat('html');
+                                      if (mounted) {
+                                        showToastWithContext(
+                                            context, '已设置为HTML格式');
+                                        Navigator.pop(context);
+                                      }
+                                    },
+                                  ),
+                                  SimpleDialogOption(
+                                    child: Text(
+                                      Global.defaultLKformat == 'BBcode'
+                                          ? 'BBcode格式 \u2713'
+                                          : 'BBcode格式',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        color:
+                                            Global.defaultLKformat == 'BBcode'
+                                                ? Colors.blue
+                                                : Colors.black,
+                                        fontWeight:
+                                            Global.defaultLKformat == 'BBcode'
+                                                ? FontWeight.bold
+                                                : FontWeight.normal,
+                                      ),
+                                    ),
+                                    onPressed: () async {
+                                      await Global.setLKformat('BBcode');
+                                      if (mounted) {
+                                        showToastWithContext(
+                                            context, '已设置为BBcode格式');
+                                        Navigator.pop(context);
+                                      }
+                                    },
+                                  ),
+                                  SimpleDialogOption(
+                                    child: Text(
+                                      Global.defaultLKformat == 'markdown'
+                                          ? 'markdown格式 \u2713'
+                                          : 'markdown格式',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        color:
+                                            Global.defaultLKformat == 'markdown'
+                                                ? Colors.blue
+                                                : Colors.black,
+                                        fontWeight:
+                                            Global.defaultLKformat == 'markdown'
+                                                ? FontWeight.bold
+                                                : FontWeight.normal,
+                                      ),
+                                    ),
+                                    onPressed: () async {
+                                      await Global.setLKformat('markdown');
+                                      if (mounted) {
+                                        showToastWithContext(
+                                            context, '已设置为markdown格式');
+                                        Navigator.pop(context);
+                                      }
+                                    },
+                                  ),
+                                  SimpleDialogOption(
+                                    child: Text(
+                                      Global.defaultLKformat ==
+                                              'markdown_with_link'
+                                          ? 'markdown格式(带链接) \u2713'
+                                          : 'markdown格式(带链接)',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        color: Global.defaultLKformat ==
+                                                'markdown_with_link'
+                                            ? Colors.blue
+                                            : Colors.black,
+                                        fontWeight: Global.defaultLKformat ==
+                                                'markdown_with_link'
+                                            ? FontWeight.bold
+                                            : FontWeight.normal,
+                                      ),
+                                    ),
+                                    onPressed: () async {
+                                      await Global.setLKformat(
+                                          'markdown_with_link');
+                                      if (mounted) {
+                                        showToastWithContext(
+                                            context, '已设置为md_link格式');
+                                        Navigator.pop(context);
+                                      }
+                                    },
+                                  ),
+                                  SimpleDialogOption(
+                                    child: Text(
+                                      Global.defaultLKformat == 'custom'
+                                          ? '自定义格式 \u2713'
+                                          : '自定义格式',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        color:
+                                            Global.defaultLKformat == 'custom'
+                                                ? Colors.blue
+                                                : Colors.black,
+                                        fontWeight:
+                                            Global.defaultLKformat == 'custom'
+                                                ? FontWeight.bold
+                                                : FontWeight.normal,
+                                      ),
+                                    ),
+                                    onPressed: () async {
+                                      await Global.setLKformat('custom');
+                                      if (mounted) {
+                                        showToastWithContext(
+                                            context, '已设置为自定义格式');
+                                        Navigator.pop(context);
+                                      }
+                                    },
+                                  ),
+                                  SimpleDialogOption(
+                                    child: TextFormField(
+                                      textAlign: TextAlign.center,
+                                      initialValue: Global.customLinkFormat,
+                                      decoration: const InputDecoration(
+                                        hintText: r'使用$url和$fileName作为占位符',
+                                      ),
+                                      onChanged: (String value) async {
+                                        await Global.setCustomLinkFormat(value);
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        },
+                        child: const Text('选择默认链接格式'),
+                      ),
+                    ),
+                    PopupMenuItem(
+                        child: GestureDetector(
+                      onTap: () async {
+                        Navigator.pop(context);
+                        await showDialog(
+                          barrierDismissible: true,
+                          context: context,
+                          builder: (context) {
+                            return SimpleDialog(
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10)),
+                              title: const Text(
+                                '选择重命名方式',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              children: [
+                                SimpleDialogOption(
+                                  child: ListTile(
+                                    title: const Text('开启时间戳重命名'),
+                                    subtitle: const Text('优先级按照自定义>时间戳>随机字符串'),
+                                    trailing: Switch(
+                                      value: Global.isTimeStamp,
+                                      onChanged: (value) async {
+                                        await Global.setTimeStamp(value);
+                                        if (mounted) {
+                                          if (value) {
+                                            showToastWithContext(
+                                                context, '已开启时间戳重命名');
+                                          } else {
+                                            showToastWithContext(
+                                                context, '已关闭时间戳重命名');
+                                          }
+                                          Navigator.pop(context);
+                                        }
+                                      },
+                                    ),
+                                  ),
+                                ),
+                                SimpleDialogOption(
+                                  child: ListTile(
+                                    title: const Text('开启随机字符串重命名'),
+                                    subtitle: const Text('字符串长度固定为30'),
+                                    trailing: Switch(
+                                      value: Global.isRandomName,
+                                      onChanged: (value) async {
+                                        await Global.setRandomName(value);
+                                        if (mounted) {
+                                          if (value) {
+                                            showToastWithContext(
+                                                context, '已开启随机字符串重命名');
+                                          } else {
+                                            showToastWithContext(
+                                                context, '已关闭随机字符串重命名');
+                                          }
+                                          Navigator.pop(context);
+                                        }
+                                      },
+                                    ),
+                                  ),
+                                ),
+                                SimpleDialogOption(
+                                  child: ListTile(
+                                    title: const Text('使用自定义重命名'),
+                                    trailing: Switch(
+                                      value: Global.iscustomRename,
+                                      onChanged: (value) async {
+                                        await Global.setCustomeRename(value);
+                                        if (mounted) {
+                                          if (value) {
+                                            showToastWithContext(
+                                                context, '已开启自定义重命名');
+                                          } else {
+                                            showToastWithContext(
+                                                context, '已关闭自定义重命名');
+                                          }
+                                          Navigator.pop(context);
+                                        }
+                                      },
+                                    ),
+                                  ),
+                                ),
+                                SimpleDialogOption(
+                                  child: TextFormField(
+                                    textAlign: TextAlign.center,
+                                    initialValue: Global.customRenameFormat,
+                                    decoration: const InputDecoration(
+                                      label: Center(child: Text('自定义重命名格式')),
+                                      hintText: r'规则参考表格，可随意组合其它字符',
+                                    ),
+                                    onChanged: (String value) async {
+                                      await Global.setCustomeRenameFormat(
+                                          value);
+                                    },
+                                  ),
+                                ),
+                                SimpleDialogOption(
+                                  child: Container(
+                                      margin: const EdgeInsets.only(
+                                          left: 20, right: 20),
+                                      child: Table(
+                                        border: TableBorder.all(
+                                          color: Colors.black,
+                                          width: 1,
+                                          style: BorderStyle.solid,
+                                          borderRadius:
+                                              BorderRadius.circular(5),
+                                        ),
+                                        children: const [
+                                          TableRow(
+                                            decoration: ShapeDecoration(
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.only(
+                                                  topLeft: Radius.circular(5),
+                                                  topRight: Radius.circular(5),
+                                                ),
+                                              ),
+                                              color: Colors.grey,
+                                            ),
+                                            children: [
+                                              TableCell(
+                                                  child: Center(
+                                                      child: Text("占位符"))),
+                                              TableCell(
+                                                  child: Center(
+                                                      child: Text("说明"))),
+                                            ],
+                                          ),
+                                          TableRow(
+                                            children: [
+                                              TableCell(
+                                                  child: Center(
+                                                      child: Text("{Y}"))),
+                                              TableCell(
+                                                  child: Center(
+                                                      child: Text("年份(2022)"))),
+                                            ],
+                                          ),
+                                          TableRow(
+                                            children: [
+                                              TableCell(
+                                                  child: Center(
+                                                      child: Text("{y}"))),
+                                              TableCell(
+                                                  child: Center(
+                                                      child:
+                                                          Text("两位数年份(22)"))),
+                                            ],
+                                          ),
+                                          TableRow(
+                                            children: [
+                                              TableCell(
+                                                  child: Center(
+                                                      child: Text("{m}"))),
+                                              TableCell(
+                                                  child: Center(
+                                                      child:
+                                                          Text("月份(01-12)"))),
+                                            ],
+                                          ),
+                                          TableRow(
+                                            children: [
+                                              TableCell(
+                                                  child: Center(
+                                                      child: Text("{d}"))),
+                                              TableCell(
+                                                  child: Center(
+                                                      child:
+                                                          Text("日期(01-31)"))),
+                                            ],
+                                          ),
+                                          TableRow(
+                                            children: [
+                                              TableCell(
+                                                  child: Center(
+                                                      child:
+                                                          Text("{timestamp}"))),
+                                              TableCell(
+                                                  child: Center(
+                                                      child: Text("时间戳(秒)"))),
+                                            ],
+                                          ),
+                                          TableRow(
+                                            children: [
+                                              TableCell(
+                                                  child: Center(
+                                                      child: Text("{uuid}"))),
+                                              TableCell(
+                                                  child: Center(
+                                                      child: Text("唯一字符串"))),
+                                            ],
+                                          ),
+                                          TableRow(
+                                            children: [
+                                              TableCell(
+                                                  child: Center(
+                                                      child: Text("{md5}"))),
+                                              TableCell(
+                                                  child: Center(
+                                                      child: Text("随机md5"))),
+                                            ],
+                                          ),
+                                          TableRow(
+                                            children: [
+                                              TableCell(
+                                                  child: Center(
+                                                      child: Text("{md5-16}"))),
+                                              TableCell(
+                                                  child: Center(
+                                                      child:
+                                                          Text("随机md5前16位"))),
+                                            ],
+                                          ),
+                                          TableRow(
+                                            children: [
+                                              TableCell(
+                                                  child: Center(
+                                                      child: Text("{str-10}"))),
+                                              TableCell(
+                                                  child: Center(
+                                                      child: Text("10位随机字符串"))),
+                                            ],
+                                          ),
+                                          TableRow(
+                                            children: [
+                                              TableCell(
+                                                  child: Center(
+                                                      child: Text("{str-20}"))),
+                                              TableCell(
+                                                  child: Center(
+                                                      child: Text("20位随机字符串"))),
+                                            ],
+                                          ),
+                                          TableRow(
+                                            children: [
+                                              TableCell(
+                                                  child: Center(
+                                                      child:
+                                                          Text("{filename}"))),
+                                              TableCell(
+                                                  child: Center(
+                                                      child: Text("原始文件名"))),
+                                            ],
+                                          ),
+                                        ],
+                                      )),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      },
+                      child: const Text('文件重命名方式'),
+                    )),
+                  ];
+                }),
             IconButton(
               icon: const Icon(
                 Icons.cleaning_services_sharp,
@@ -772,6 +1319,7 @@ class HomePageState extends State<HomePage>
                   Global.imagesFileList.clear();
                   Global.imageFile = null;
                   Global.imageOriginalFile = null;
+                  showToastWithContext(context, "清除成功");
                 });
               },
             ),
@@ -797,6 +1345,7 @@ class HomePageState extends State<HomePage>
                       height: 10,
                     ),
                     const Text('空空如也哦 点击下方按钮上传',
+                        textAlign: TextAlign.center,
                         style: TextStyle(
                             fontSize: 20,
                             color: Color.fromARGB(136, 121, 118, 118))),
@@ -804,6 +1353,7 @@ class HomePageState extends State<HomePage>
                       height: 10,
                     ),
                     const Text('注意：上传前请先登录',
+                        textAlign: TextAlign.center,
                         style: TextStyle(
                             fontSize: 20,
                             color: Color.fromARGB(136, 121, 118, 118))),
@@ -953,84 +1503,16 @@ class HomePageState extends State<HomePage>
               SpeedDialChild(
                 shape: const CircleBorder(),
                 child: const Icon(
-                  IconData(0x004C),
+                  IconData(0x0055),
                   color: Colors.white,
                 ),
-                backgroundColor: Global.defaultPShost == 'lsky.pro'
+                backgroundColor: Global.defaultPShost == 'upyun'
                     ? Colors.amber
                     : const Color.fromARGB(255, 97, 180, 248),
-                label: '兰空',
+                label: '又拍',
                 labelStyle: const TextStyle(fontSize: 12.0),
                 onTap: () async {
-                  await setdefaultPShostRemoteAndLocal('lsky.pro');
-                  eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-                  setState(() {});
-                },
-              ),
-              SpeedDialChild(
-                shape: const CircleBorder(),
-                child: const Icon(
-                  IconData(0x0053),
-                  color: Colors.white,
-                ),
-                backgroundColor: Global.defaultPShost == 'sm.ms'
-                    ? Colors.amber
-                    : const Color.fromARGB(255, 97, 180, 248),
-                label: 'SM.MS',
-                labelStyle: const TextStyle(fontSize: 12.0),
-                onTap: () async {
-                  await setdefaultPShostRemoteAndLocal('sm.ms');
-                  eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-                  setState(() {});
-                },
-              ),
-              SpeedDialChild(
-                shape: const CircleBorder(),
-                child: const Icon(
-                  IconData(0x0047),
-                  color: Colors.white,
-                ),
-                backgroundColor: Global.defaultPShost == 'github'
-                    ? Colors.amber
-                    : const Color.fromARGB(255, 97, 180, 248),
-                label: 'Github',
-                labelStyle: const TextStyle(fontSize: 12.0),
-                onTap: () async {
-                  await setdefaultPShostRemoteAndLocal('github');
-                  eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-                  setState(() {});
-                },
-              ),
-              SpeedDialChild(
-                shape: const CircleBorder(),
-                child: const Icon(
-                  IconData(0x0049),
-                  color: Colors.white,
-                ),
-                backgroundColor: Global.defaultPShost == 'imgur'
-                    ? Colors.amber
-                    : const Color.fromARGB(255, 97, 180, 248),
-                label: 'Imgur',
-                labelStyle: const TextStyle(fontSize: 12.0),
-                onTap: () async {
-                  await setdefaultPShostRemoteAndLocal('imgur');
-                  eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-                  setState(() {});
-                },
-              ),
-              SpeedDialChild(
-                shape: const CircleBorder(),
-                child: const Icon(
-                  IconData(0x0051),
-                  color: Colors.white,
-                ),
-                backgroundColor: Global.defaultPShost == 'qiniu'
-                    ? Colors.amber
-                    : const Color.fromARGB(255, 97, 180, 248),
-                label: '七牛',
-                labelStyle: const TextStyle(fontSize: 12.0),
-                onTap: () async {
-                  await setdefaultPShostRemoteAndLocal('qiniu');
+                  await setdefaultPShostRemoteAndLocal('upyun');
                   eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
                   setState(() {});
                 },
@@ -1055,6 +1537,108 @@ class HomePageState extends State<HomePage>
               SpeedDialChild(
                 shape: const CircleBorder(),
                 child: const Icon(
+                  IconData(0x0053),
+                  color: Colors.white,
+                ),
+                backgroundColor: Global.defaultPShost == 'sm.ms'
+                    ? Colors.amber
+                    : const Color.fromARGB(255, 97, 180, 248),
+                label: 'SM.MS',
+                labelStyle: const TextStyle(fontSize: 12.0),
+                onTap: () async {
+                  await setdefaultPShostRemoteAndLocal('sm.ms');
+                  eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
+                  setState(() {});
+                },
+              ),
+              SpeedDialChild(
+                shape: const CircleBorder(),
+                child: const Icon(
+                  IconData(0x0051),
+                  color: Colors.white,
+                ),
+                backgroundColor: Global.defaultPShost == 'qiniu'
+                    ? Colors.amber
+                    : const Color.fromARGB(255, 97, 180, 248),
+                label: '七牛',
+                labelStyle: const TextStyle(fontSize: 12.0),
+                onTap: () async {
+                  await setdefaultPShostRemoteAndLocal('qiniu');
+                  eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
+                  setState(() {});
+                },
+              ),
+              SpeedDialChild(
+                shape: const CircleBorder(),
+                child: const Icon(
+                  IconData(0x004C),
+                  color: Colors.white,
+                ),
+                backgroundColor: Global.defaultPShost == 'lsky.pro'
+                    ? Colors.amber
+                    : const Color.fromARGB(255, 97, 180, 248),
+                label: '兰空',
+                labelStyle: const TextStyle(fontSize: 12.0),
+                onTap: () async {
+                  await setdefaultPShostRemoteAndLocal('lsky.pro');
+                  eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
+                  setState(() {});
+                },
+              ),
+              SpeedDialChild(
+                shape: const CircleBorder(),
+                child: const Icon(
+                  IconData(0x0049),
+                  color: Colors.white,
+                ),
+                backgroundColor: Global.defaultPShost == 'imgur'
+                    ? Colors.amber
+                    : const Color.fromARGB(255, 97, 180, 248),
+                label: 'Imgur',
+                labelStyle: const TextStyle(fontSize: 12.0),
+                onTap: () async {
+                  await setdefaultPShostRemoteAndLocal('imgur');
+                  eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
+                  setState(() {});
+                },
+              ),
+              SpeedDialChild(
+                shape: const CircleBorder(),
+                child: const Icon(
+                  IconData(0x0047),
+                  color: Colors.white,
+                ),
+                backgroundColor: Global.defaultPShost == 'github'
+                    ? Colors.amber
+                    : const Color.fromARGB(255, 97, 180, 248),
+                label: 'Github',
+                labelStyle: const TextStyle(fontSize: 12.0),
+                onTap: () async {
+                  await setdefaultPShostRemoteAndLocal('github');
+                  eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
+                  setState(() {});
+                },
+              ),
+              SpeedDialChild(
+                shape: const CircleBorder(),
+                child: const Icon(
+                  IconData(0x0046),
+                  color: Colors.white,
+                ),
+                backgroundColor: Global.defaultPShost == 'ftp'
+                    ? Colors.amber
+                    : const Color.fromARGB(255, 97, 180, 248),
+                label: 'FTP',
+                labelStyle: const TextStyle(fontSize: 12.0),
+                onTap: () async {
+                  await setdefaultPShostRemoteAndLocal('ftp');
+                  eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
+                  setState(() {});
+                },
+              ),
+              SpeedDialChild(
+                shape: const CircleBorder(),
+                child: const Icon(
                   IconData(0x0041),
                   color: Colors.white,
                 ),
@@ -1072,17 +1656,38 @@ class HomePageState extends State<HomePage>
               SpeedDialChild(
                 shape: const CircleBorder(),
                 child: const Icon(
-                  IconData(0x0055),
+                  Icons.more_horiz_rounded,
                   color: Colors.white,
                 ),
-                backgroundColor: Global.defaultPShost == 'upyun'
+                backgroundColor: Global.defaultPShost == 'local'
                     ? Colors.amber
                     : const Color.fromARGB(255, 97, 180, 248),
-                label: '又拍',
+                label: '更多',
                 labelStyle: const TextStyle(fontSize: 12.0),
                 onTap: () async {
-                  await setdefaultPShostRemoteAndLocal('upyun');
-                  eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
+                  await showDialog(
+                    barrierDismissible: true,
+                    context: context,
+                    builder: (context) {
+                      return SimpleDialog(
+                        title: const Text(
+                          '选择要为默认的图床',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        children: [
+                          SimpleDialogOption(
+                              child: ListTile(
+                            title:
+                                const Text('占位图床', textAlign: TextAlign.center),
+                            onTap: () {
+                              showToast('该图床仅为示例');
+                            },
+                          )),
+                        ],
+                      );
+                    },
+                  );
                   setState(() {});
                 },
               ),
