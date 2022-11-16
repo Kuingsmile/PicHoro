@@ -12,6 +12,7 @@ import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/sql_utils.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/picture_host_manage/manage_api/github_manage_api.dart';
+import 'package:horopic/utils/event_bus_utils.dart';
 
 class GithubConfig extends StatefulWidget {
   const GithubConfig({Key? key}) : super(key: key);
@@ -152,7 +153,8 @@ class GithubConfigState extends State<GithubConfig> {
               ),
               textAlign: TextAlign.center,
             ),
-            ElevatedButton(
+            ListTile(
+                title: ElevatedButton(
               onPressed: () {
                 if (_formKey.currentState!.validate()) {
                   showDialog(
@@ -169,19 +171,21 @@ class GithubConfigState extends State<GithubConfig> {
                 }
               },
               child: const Text('提交表单'),
-            ),
-            ElevatedButton(
+            )),
+            ListTile(
+                title: ElevatedButton(
               onPressed: () {
                 checkGithubConfig();
               },
               child: const Text('检查当前配置'),
-            ),
-            ElevatedButton(
+            )),
+            ListTile(
+                title: ElevatedButton(
               onPressed: () {
                 _setdefault();
               },
               child: const Text('设为默认图床'),
-            ),
+            )),
           ],
         ),
       ),
@@ -427,6 +431,8 @@ class GithubConfigState extends State<GithubConfig> {
       if (queryuser['defaultPShost'] == 'github') {
         await Global.setPShost('github');
         await Global.setShowedPBhost('github');
+        eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
+        eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
         return Fluttertoast.showToast(
             msg: "已经是默认配置",
             toastLength: Toast.LENGTH_SHORT,
@@ -442,6 +448,8 @@ class GithubConfigState extends State<GithubConfig> {
         if (updateResult == 'Success') {
           await Global.setPShost('github');
           await Global.setShowedPBhost('github');
+          eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
+          eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
           showToast('已设置Github为默认图床');
         } else {
           showToast('写入数据库失败');

@@ -13,6 +13,7 @@ import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/sql_utils.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/picture_host_manage/manage_api/imgur_manage_api.dart';
+import 'package:horopic/utils/event_bus_utils.dart';
 
 class ImgurConfig extends StatefulWidget {
   const ImgurConfig({Key? key}) : super(key: key);
@@ -90,7 +91,8 @@ class ImgurConfigState extends State<ImgurConfig> {
               ),
               textAlign: TextAlign.center,
             ),
-            ElevatedButton(
+            ListTile(
+                title: ElevatedButton(
               onPressed: () {
                 if (_formKey.currentState!.validate()) {
                   showDialog(
@@ -107,19 +109,21 @@ class ImgurConfigState extends State<ImgurConfig> {
                 }
               },
               child: const Text('提交'),
-            ),
-            ElevatedButton(
+            )),
+            ListTile(
+                title: ElevatedButton(
               onPressed: () {
                 checkImgurConfig();
               },
               child: const Text('检查当前配置'),
-            ),
-            ElevatedButton(
+            )),
+            ListTile(
+                title: ElevatedButton(
               onPressed: () {
                 _setdefault();
               },
               child: const Text('设为默认图床'),
-            ),
+            )),
           ],
         ),
       ),
@@ -354,6 +358,8 @@ class ImgurConfigState extends State<ImgurConfig> {
       if (queryuser['defaultPShost'] == 'imgur') {
         await Global.setPShost('imgur');
         await Global.setShowedPBhost('imgur');
+        eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
+        eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
         return Fluttertoast.showToast(
             msg: "已经是默认配置",
             toastLength: Toast.LENGTH_SHORT,
@@ -368,6 +374,8 @@ class ImgurConfigState extends State<ImgurConfig> {
         if (updateResult == 'Success') {
           await Global.setPShost('imgur');
           await Global.setShowedPBhost('imgur');
+          eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
+          eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
           showToast('已设置Imgur为默认图床');
         } else {
           showToast('写入数据库失败');

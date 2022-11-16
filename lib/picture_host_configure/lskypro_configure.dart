@@ -11,6 +11,7 @@ import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/pages/loading.dart';
 import 'package:horopic/utils/sql_utils.dart';
 import 'package:horopic/utils/global.dart';
+import 'package:horopic/utils/event_bus_utils.dart';
 import 'package:horopic/picture_host_manage/manage_api/lskypro_manage_api.dart';
 
 class HostConfig extends StatefulWidget {
@@ -812,6 +813,8 @@ class HostConfigState extends State<HostConfig> {
       if (queryuser['defaultPShost'] == 'lsky.pro') {
         await Global.setPShost('lsky.pro');
         await Global.setShowedPBhost('lskypro');
+        eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
+        eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
         return Fluttertoast.showToast(
             msg: "已经是默认配置",
             toastLength: Toast.LENGTH_SHORT,
@@ -826,6 +829,8 @@ class HostConfigState extends State<HostConfig> {
         if (updateResult == 'Success') {
           await Global.setPShost('lsky.pro');
           await Global.setShowedPBhost('lskypro');
+          eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
+          eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
           showToast('已设置兰空图床为默认图床');
         } else {
           showToast('写入数据库失败');

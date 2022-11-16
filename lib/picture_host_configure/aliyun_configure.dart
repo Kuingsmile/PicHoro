@@ -10,6 +10,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:f_logs/f_logs.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as my_path;
+import 'package:horopic/utils/event_bus_utils.dart';
 
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/pages/loading.dart';
@@ -179,7 +180,8 @@ class AliyunConfigState extends State<AliyunConfig> {
               ),
               textAlign: TextAlign.center,
             ),
-            ElevatedButton(
+            ListTile(
+                title: ElevatedButton(
               onPressed: () {
                 if (_formKey.currentState!.validate()) {
                   showDialog(
@@ -196,19 +198,21 @@ class AliyunConfigState extends State<AliyunConfig> {
                 }
               },
               child: const Text('提交表单'),
-            ),
-            ElevatedButton(
+            )),
+            ListTile(
+                title: ElevatedButton(
               onPressed: () {
                 checkAliyunConfig();
               },
               child: const Text('检查当前配置'),
-            ),
-            ElevatedButton(
+            )),
+            ListTile(
+                title: ElevatedButton(
               onPressed: () {
                 _setdefault();
               },
               child: const Text('设为默认图床'),
-            ),
+            )),
           ],
         ),
       ),
@@ -548,6 +552,8 @@ class AliyunConfigState extends State<AliyunConfig> {
       if (queryuser['defaultPShost'] == 'aliyun') {
         await Global.setPShost('aliyun');
         await Global.setShowedPBhost('aliyun');
+        eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
+        eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
         return Fluttertoast.showToast(
             msg: "已经是默认配置",
             toastLength: Toast.LENGTH_SHORT,
@@ -564,6 +570,8 @@ class AliyunConfigState extends State<AliyunConfig> {
           await Global.setPShost('aliyun');
           await Global.setShowedPBhost('aliyun');
           showToast('已设置阿里云为默认图床');
+          eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
+          eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
         } else {
           showToast('写入数据库失败');
         }

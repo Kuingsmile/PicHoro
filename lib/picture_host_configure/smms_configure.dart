@@ -11,6 +11,7 @@ import 'package:horopic/pages/loading.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/sql_utils.dart';
 import 'package:horopic/utils/global.dart';
+import 'package:horopic/utils/event_bus_utils.dart';
 import 'package:horopic/picture_host_manage/manage_api/smms_manage_api.dart';
 
 class SmmsConfig extends StatefulWidget {
@@ -75,7 +76,8 @@ class SmmsConfigState extends State<SmmsConfig> {
                 return null;
               },
             ),
-            ElevatedButton(
+            ListTile(
+                title: ElevatedButton(
               onPressed: () {
                 if (_formKey.currentState!.validate()) {
                   showDialog(
@@ -92,19 +94,21 @@ class SmmsConfigState extends State<SmmsConfig> {
                 }
               },
               child: const Text('提交'),
-            ),
-            ElevatedButton(
+            )),
+            ListTile(
+                title: ElevatedButton(
               onPressed: () {
                 checkSmmsConfig();
               },
               child: const Text('检查当前配置'),
-            ),
-            ElevatedButton(
+            )),
+            ListTile(
+                title: ElevatedButton(
               onPressed: () {
                 _setdefault();
               },
               child: const Text('设为默认图床'),
-            ),
+            )),
           ],
         ),
       ),
@@ -300,6 +304,8 @@ class SmmsConfigState extends State<SmmsConfig> {
       if (queryuser['defaultPShost'] == 'sm.ms') {
         await Global.setPShost('sm.ms');
         await Global.setShowedPBhost('smms');
+        eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
+        eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
         return Fluttertoast.showToast(
             msg: "已经是默认配置",
             toastLength: Toast.LENGTH_SHORT,
@@ -314,6 +320,8 @@ class SmmsConfigState extends State<SmmsConfig> {
         if (updateResult == 'Success') {
           await Global.setPShost('sm.ms');
           await Global.setShowedPBhost('smms');
+          eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
+          eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
           showToast("已设置sm.ms为默认图床");
         } else {
           showToast("写入数据库失败");

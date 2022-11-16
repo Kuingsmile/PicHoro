@@ -13,6 +13,7 @@ import 'package:horopic/pages/loading.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/sql_utils.dart';
+import 'package:horopic/utils/event_bus_utils.dart';
 import 'package:horopic/picture_host_manage/manage_api/upyun_manage_api.dart';
 
 class UpyunConfig extends StatefulWidget {
@@ -160,7 +161,8 @@ class UpyunConfigState extends State<UpyunConfig> {
               ),
               textAlign: TextAlign.center,
             ),
-            ElevatedButton(
+            ListTile(
+                title: ElevatedButton(
               onPressed: () {
                 if (_formKey.currentState!.validate()) {
                   showDialog(
@@ -177,19 +179,21 @@ class UpyunConfigState extends State<UpyunConfig> {
                 }
               },
               child: const Text('提交表单'),
-            ),
-            ElevatedButton(
+            )),
+            ListTile(
+                title: ElevatedButton(
               onPressed: () {
                 checkUpyunConfig();
               },
               child: const Text('检查当前配置'),
-            ),
-            ElevatedButton(
+            )),
+            ListTile(
+                title: ElevatedButton(
               onPressed: () {
                 _setdefault();
               },
               child: const Text('设为默认图床'),
-            ),
+            )),
           ],
         ),
       ),
@@ -525,6 +529,8 @@ class UpyunConfigState extends State<UpyunConfig> {
       if (queryuser['defaultPShost'] == 'upyun') {
         await Global.setPShost('upyun');
         await Global.setShowedPBhost('upyun');
+        eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
+        eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
         return Fluttertoast.showToast(
             msg: "已经是默认配置",
             toastLength: Toast.LENGTH_SHORT,
@@ -540,6 +546,8 @@ class UpyunConfigState extends State<UpyunConfig> {
         if (updateResult == 'Success') {
           await Global.setPShost('upyun');
           await Global.setShowedPBhost('upyun');
+          eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
+          eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
           showToast('已设置又拍云为默认图床');
         } else {
           showToast('写入数据库失败');
