@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'dart:convert';
 import 'package:fluro/fluro.dart';
 import 'package:flutter_draggable_gridview/flutter_draggable_gridview.dart';
 
@@ -9,6 +9,8 @@ import 'package:horopic/router/application.dart';
 import 'package:horopic/router/routers.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/picture_host_manage/manage_api/upyun_manage_api.dart';
+import 'package:horopic/picture_host_manage/manage_api/imgur_manage_api.dart';
+import 'package:horopic/picture_host_manage/manage_api/ftp_manage_api.dart';
 
 class PsHostHomePage extends StatefulWidget {
   const PsHostHomePage({super.key});
@@ -78,11 +80,7 @@ class PsHostHomePageState extends State<PsHostHomePage>
                   right: 0,
                   child: Container(
                     color: Colors.transparent,
-                    child: const Icon(
-                      Icons.check_circle,
-                      color: Colors.green,
-                      size: 20,
-                    ),
+                    child: const Text(''),
                   )),
             ],
           ),
@@ -120,11 +118,7 @@ class PsHostHomePageState extends State<PsHostHomePage>
                   right: 0,
                   child: Container(
                     color: Colors.transparent,
-                    child: const Icon(
-                      Icons.check_circle,
-                      color: Colors.green,
-                      size: 20,
-                    ),
+                    child: const Text(''),
                   )),
             ],
           ),
@@ -162,11 +156,7 @@ class PsHostHomePageState extends State<PsHostHomePage>
                   right: 0,
                   child: Container(
                     color: Colors.transparent,
-                    child: const Icon(
-                      Icons.check_circle,
-                      color: Colors.green,
-                      size: 20,
-                    ),
+                    child: const Text(''),
                   )),
             ],
           ),
@@ -204,11 +194,7 @@ class PsHostHomePageState extends State<PsHostHomePage>
                   right: 0,
                   child: Container(
                     color: Colors.transparent,
-                    child: const Icon(
-                      Icons.check_circle,
-                      color: Colors.green,
-                      size: 20,
-                    ),
+                    child: const Text(''),
                   )),
             ],
           ),
@@ -286,11 +272,7 @@ class PsHostHomePageState extends State<PsHostHomePage>
                   right: 0,
                   child: Container(
                     color: Colors.transparent,
-                    child: const Icon(
-                      Icons.check_circle,
-                      color: Colors.green,
-                      size: 20,
-                    ),
+                    child: const Text(''),
                   )),
             ],
           ),
@@ -328,11 +310,7 @@ class PsHostHomePageState extends State<PsHostHomePage>
                   right: 0,
                   child: Container(
                     color: Colors.transparent,
-                    child: const Icon(
-                      Icons.check_circle,
-                      color: Colors.green,
-                      size: 20,
-                    ),
+                    child: const Text(''),
                   )),
             ],
           ),
@@ -370,11 +348,7 @@ class PsHostHomePageState extends State<PsHostHomePage>
                   right: 0,
                   child: Container(
                     color: Colors.transparent,
-                    child: const Icon(
-                      Icons.check_circle,
-                      color: Colors.green,
-                      size: 20,
-                    ),
+                    child: const Text(''),
                   )),
             ],
           ),
@@ -387,8 +361,65 @@ class PsHostHomePageState extends State<PsHostHomePage>
             children: [
               Center(
                 child: InkWell(
-                  onTap: () {
-                    showToastWithContext(context, '暂未开放');
+                  onTap: () async {
+                    String currentPicHoroUser = await Global.getUser();
+                    String currentPicHoroPasswd = await Global.getPassword();
+                    var usernamecheck = await MySqlUtils.queryUser(
+                        username: currentPicHoroUser);
+
+                    if (usernamecheck == 'Empty') {
+                      return showToast('请先去设置页面注册');
+                    } else if (currentPicHoroPasswd !=
+                        usernamecheck['password']) {
+                      return showToast('请先去设置页面登录');
+                    }
+                    var queryImgurManage = await MySqlUtils.queryImgurManage(
+                        username: currentPicHoroUser);
+                    if (queryImgurManage == 'Empty') {
+                      if (mounted) {
+                        Application.router.navigateTo(
+                          context,
+                          Routes.imgurLogIn,
+                          transition: TransitionType.inFromRight,
+                        );
+                      }
+                    } else if (queryImgurManage == 'Error') {
+                      return showToast('获取数据库错误');
+                    } else {
+                      showToast('开始校验');
+                      String imguruser = queryImgurManage['imguruser'];
+                      String token = queryImgurManage['accesstoken'];
+                      String proxy = queryImgurManage['proxy'];
+                      if (token == 'None') {
+                        if (mounted) {
+                          Application.router.navigateTo(
+                            context,
+                            Routes.imgurLogIn,
+                            transition: TransitionType.inFromRight,
+                          );
+                        }
+                        return;
+                      }
+                      var checkTokenResult = await ImgurManageAPI.checkToken(
+                          imguruser, token, proxy);
+                      if (checkTokenResult[0] == 'success') {
+                        if (mounted) {
+                          Application.router.navigateTo(
+                            context,
+                            '${Routes.imgurFileExplorer}?userProfile=${Uri.encodeComponent(jsonEncode(queryImgurManage))}&albumInfo=${Uri.encodeComponent(jsonEncode({}))}&allImages=${Uri.encodeComponent(jsonEncode([]))}',
+                            transition: TransitionType.inFromRight,
+                          );
+                        }
+                      } else {
+                        if (mounted) {
+                          Application.router.navigateTo(
+                            context,
+                            Routes.imgurLogIn,
+                            transition: TransitionType.inFromRight,
+                          );
+                        }
+                      }
+                    }
                   },
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -408,13 +439,75 @@ class PsHostHomePageState extends State<PsHostHomePage>
                   right: 0,
                   child: Container(
                     color: Colors.transparent,
-                    child: const Text(
-                      '',
-                      style: TextStyle(
-                        color: Color.fromARGB(255, 128, 125, 125),
-                        fontSize: 12,
+                    child: const Text(''),
+                  )),
+            ],
+          ),
+        ),
+        isDraggable: true,
+      ),
+      DraggableGridItem(
+        child: Card(
+          child: Stack(
+            children: [
+              Center(
+                child: InkWell(
+                  onTap: () async {
+                    String currentPicHoroUser = await Global.getUser();
+                    String currentPicHoroPasswd = await Global.getPassword();
+                    var usernamecheck = await MySqlUtils.queryUser(
+                        username: currentPicHoroUser);
+                    if (usernamecheck == 'Empty') {
+                      return showToast('请先去设置页面注册');
+                    } else if (currentPicHoroPasswd !=
+                        usernamecheck['password']) {
+                      return showToast('请先去设置页面登录');
+                    }
+                    String currentUser = await Global.getUser();
+                    var queryFTP =
+                        await MySqlUtils.queryFTP(username: currentUser);
+                    if (queryFTP == 'Empty') {
+                      return showToast('请先去配置FTP');
+                    }
+                    Map configMap = await FTPManageAPI.getConfigMap();
+                    if (mounted && configMap['ftpType'] == 'SFTP') {
+                      String startDir = configMap['ftpHomeDir'];
+                      if (startDir == 'None') {
+                        startDir = '/';
+                      } else {
+                        if (!startDir.endsWith('/')) {
+                          startDir = '$startDir/';
+                        }
+                        if (!startDir.startsWith('/')) {
+                          startDir = '/$startDir';
+                        }
+                      }
+                      Application.router.navigateTo(context,
+                          '${Routes.sftpFileExplorer}?element=${Uri.encodeComponent(jsonEncode(configMap))}&bucketPrefix=${Uri.encodeComponent(startDir)}',
+                          transition: TransitionType.cupertino);
+                    } else {
+                      showToast('仅支持管理SFTP');
+                    }
+                  },
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Image.asset(
+                        'assets/images/ftp.png',
+                        width: 80,
+                        height: 80,
                       ),
-                    ),
+                      const Text('SSH/SFTP'),
+                    ],
+                  ),
+                ),
+              ),
+              Positioned(
+                  top: 0,
+                  right: 0,
+                  child: Container(
+                    color: Colors.transparent,
+                    child: const Text(''),
                   )),
             ],
           ),
