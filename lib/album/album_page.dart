@@ -57,6 +57,7 @@ class UploadedImagesState extends State<UploadedImages>
     'tencent': '腾讯云',
     'aliyun': '阿里云',
     'upyun': '又拍云',
+    'PBhostExtend1': 'FTP',
   };
 
   bool albumKeepAlive = true;
@@ -103,6 +104,236 @@ class UploadedImagesState extends State<UploadedImages>
           shadowColor: Colors.transparent,
           elevation: 0,
           actions: [
+            PopupMenuButton(
+                icon: const Icon(
+                  Icons.settings,
+                  size: 30,
+                ),
+                position: PopupMenuPosition.under,
+                itemBuilder: (BuildContext context) {
+                  return [
+                    PopupMenuItem(
+                      padding: EdgeInsets.zero,
+                      child: Row(
+                        children: [
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          const Text('同步删除云端'),
+                          Switch(
+                            materialTapTargetSize:
+                                MaterialTapTargetSize.shrinkWrap,
+                            value: Global.isDeleteCloud,
+                            onChanged: (value) async {
+                              await Global.setDeleteCloud(value);
+                              setState(() {});
+                              if (mounted) {
+                                if (value == true) {
+                                  showToastWithContext(context, '已开启云端删除');
+                                } else {
+                                  showToastWithContext(context, '已关闭云端删除');
+                                }
+                                Navigator.pop(context);
+                              }
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    PopupMenuItem(
+                      child: GestureDetector(
+                        onTap: () async {
+                          Navigator.pop(context);
+                          await showDialog(
+                            barrierDismissible: true,
+                            context: context,
+                            builder: (context) {
+                              return SimpleDialog(
+                                title: const Text(
+                                  '选择默认链接格式',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                                children: [
+                                  SimpleDialogOption(
+                                    child: Text(
+                                      Global.defaultLKformat == 'rawurl'
+                                          ? 'URL格式 \u2713'
+                                          : 'URL格式',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        color:
+                                            Global.defaultLKformat == 'rawurl'
+                                                ? Colors.blue
+                                                : Colors.black,
+                                        fontWeight:
+                                            Global.defaultLKformat == 'rawurl'
+                                                ? FontWeight.bold
+                                                : FontWeight.normal,
+                                      ),
+                                    ),
+                                    onPressed: () async {
+                                      await Global.setLKformat('rawurl');
+                                      if (mounted) {
+                                        showToastWithContext(
+                                            context, '已设置为URL格式');
+                                        Navigator.pop(context);
+                                      }
+                                    },
+                                  ),
+                                  SimpleDialogOption(
+                                    child: Text(
+                                      Global.defaultLKformat == 'html'
+                                          ? 'HTML格式 \u2713'
+                                          : 'HTML格式',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        color: Global.defaultLKformat == 'html'
+                                            ? Colors.blue
+                                            : Colors.black,
+                                        fontWeight:
+                                            Global.defaultLKformat == 'html'
+                                                ? FontWeight.bold
+                                                : FontWeight.normal,
+                                      ),
+                                    ),
+                                    onPressed: () async {
+                                      await Global.setLKformat('html');
+                                      if (mounted) {
+                                        showToastWithContext(
+                                            context, '已设置为HTML格式');
+                                        Navigator.pop(context);
+                                      }
+                                    },
+                                  ),
+                                  SimpleDialogOption(
+                                    child: Text(
+                                      Global.defaultLKformat == 'BBcode'
+                                          ? 'BBcode格式 \u2713'
+                                          : 'BBcode格式',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        color:
+                                            Global.defaultLKformat == 'BBcode'
+                                                ? Colors.blue
+                                                : Colors.black,
+                                        fontWeight:
+                                            Global.defaultLKformat == 'BBcode'
+                                                ? FontWeight.bold
+                                                : FontWeight.normal,
+                                      ),
+                                    ),
+                                    onPressed: () async {
+                                      await Global.setLKformat('BBcode');
+                                      if (mounted) {
+                                        showToastWithContext(
+                                            context, '已设置为BBcode格式');
+                                        Navigator.pop(context);
+                                      }
+                                    },
+                                  ),
+                                  SimpleDialogOption(
+                                    child: Text(
+                                      Global.defaultLKformat == 'markdown'
+                                          ? 'markdown格式 \u2713'
+                                          : 'markdown格式',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        color:
+                                            Global.defaultLKformat == 'markdown'
+                                                ? Colors.blue
+                                                : Colors.black,
+                                        fontWeight:
+                                            Global.defaultLKformat == 'markdown'
+                                                ? FontWeight.bold
+                                                : FontWeight.normal,
+                                      ),
+                                    ),
+                                    onPressed: () async {
+                                      await Global.setLKformat('markdown');
+                                      if (mounted) {
+                                        showToastWithContext(
+                                            context, '已设置为markdown格式');
+                                        Navigator.pop(context);
+                                      }
+                                    },
+                                  ),
+                                  SimpleDialogOption(
+                                    child: Text(
+                                      Global.defaultLKformat ==
+                                              'markdown_with_link'
+                                          ? 'markdown格式(带链接) \u2713'
+                                          : 'markdown格式(带链接)',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        color: Global.defaultLKformat ==
+                                                'markdown_with_link'
+                                            ? Colors.blue
+                                            : Colors.black,
+                                        fontWeight: Global.defaultLKformat ==
+                                                'markdown_with_link'
+                                            ? FontWeight.bold
+                                            : FontWeight.normal,
+                                      ),
+                                    ),
+                                    onPressed: () async {
+                                      await Global.setLKformat(
+                                          'markdown_with_link');
+                                      if (mounted) {
+                                        showToastWithContext(
+                                            context, '已设置为md_link格式');
+                                        Navigator.pop(context);
+                                      }
+                                    },
+                                  ),
+                                  SimpleDialogOption(
+                                    child: Text(
+                                      Global.defaultLKformat == 'custom'
+                                          ? '自定义格式 \u2713'
+                                          : '自定义格式',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        color:
+                                            Global.defaultLKformat == 'custom'
+                                                ? Colors.blue
+                                                : Colors.black,
+                                        fontWeight:
+                                            Global.defaultLKformat == 'custom'
+                                                ? FontWeight.bold
+                                                : FontWeight.normal,
+                                      ),
+                                    ),
+                                    onPressed: () async {
+                                      await Global.setLKformat('custom');
+                                      if (mounted) {
+                                        showToastWithContext(
+                                            context, '已设置为自定义格式');
+                                        Navigator.pop(context);
+                                      }
+                                    },
+                                  ),
+                                  SimpleDialogOption(
+                                    child: TextFormField(
+                                      textAlign: TextAlign.center,
+                                      initialValue: Global.customLinkFormat,
+                                      decoration: const InputDecoration(
+                                        hintText: r'使用$url和$fileName作为占位符',
+                                      ),
+                                      onChanged: (String value) async {
+                                        await Global.setCustomLinkFormat(value);
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        },
+                        child: const Text('选择默认链接格式'),
+                      ),
+                    ),
+                  ];
+                }),
             IconButton(
               icon: selectedImagesBool.contains(true)
                   ? const Icon(Icons.delete,
@@ -177,10 +408,7 @@ class UploadedImagesState extends State<UploadedImages>
           child: GridView.builder(
             padding: const EdgeInsets.all(2),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-                //mainAxisSpacing: 10,
-                // crossAxisSpacing: 10,
-                childAspectRatio: 1),
+                crossAxisCount: 3, childAspectRatio: 1),
             itemCount: currentShowedImagesUrl.length,
             itemBuilder: (context, index) {
               return GestureDetector(
@@ -193,8 +421,18 @@ class UploadedImagesState extends State<UploadedImages>
                         transition: TransitionType.none);
                   } else if (Global.defaultShowedPBhost == 'imgur' ||
                       Global.defaultShowedPBhost == 'github') {
-                    String urlList =
-                        currentShowedImagesDisplayAddressUrl.join(',');
+                    String urlList = '';
+                    for (int i = 0;
+                        i < currentShowedImagesDisplayAddressUrl.length;
+                        i++) {
+                      if (currentShowedImagesDisplayAddressUrl[i]
+                          .contains('raw.githubusercontent.com')) {
+                        urlList +=
+                            'https://gh.api.99988866.xyz/${currentShowedImagesDisplayAddressUrl[i]},';
+                      } else {
+                        urlList += currentShowedImagesUrl[i] + ',';
+                      }
+                    }
                     Application.router.navigateTo(context,
                         '${Routes.albumImagePreview}?index=$index&images=${Uri.encodeComponent(urlList)}',
                         transition: TransitionType.none);
@@ -218,6 +456,12 @@ class UploadedImagesState extends State<UploadedImages>
                     Application.router.navigateTo(context,
                         '${Routes.albumImagePreview}?index=$index&images=${Uri.encodeComponent(urlList)}',
                         transition: TransitionType.none);
+                  } else if (Global.defaultShowedPBhost == 'PBhostExtend1') {
+                    String urlList =
+                        currentShowedImagesDisplayAddressUrl.join(',');
+                    Application.router.navigateTo(context,
+                        '${Routes.localImagePreview}?index=$index&images=${Uri.encodeComponent(urlList)}',
+                        transition: TransitionType.none);
                   }
                 },
                 onDoubleTap: () =>
@@ -236,24 +480,66 @@ class UploadedImagesState extends State<UploadedImages>
                         clipBehavior: Clip.antiAlias,
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadiusDirectional.circular(8)),
-                        //这玩意只识别http或者https开头的链接
-                        child: ExtendedImage.network(
-                          currentShowedImagesDisplayAddressUrl[index],
-                          clearMemoryCacheIfFailed: true,
-                          retries: 5,
-                          height: 150,
-                          fit: BoxFit.cover,
-                          cache: true,
-                          border: Border.all(
-                              color: selectedImagesBool[index]
-                                  ? Colors.red
-                                  : Colors.transparent,
-                              width: 2),
-                          borderRadius:
-                              const BorderRadius.all(Radius.circular(8)),
-                          loadStateChanged: (state) =>
-                              defaultLoadStateChanged(state, iconSize: 30),
-                        ),
+                        child: Global.defaultShowedPBhost == 'github' ||
+                                Global.defaultShowedPBhost == 'imgur' ||
+                                Global.defaultShowedPBhost == 'upyun' ||
+                                Global.defaultShowedPBhost == 'aliyun' ||
+                                Global.defaultShowedPBhost == 'qiniu' ||
+                                Global.defaultShowedPBhost == 'tencent' ||
+                                Global.defaultShowedPBhost == 'smms' ||
+                                Global.defaultShowedPBhost == 'lskypro'
+                            ? ExtendedImage.network(
+                                currentShowedImagesDisplayAddressUrl[index]
+                                        .contains('raw.githubusercontent.com')
+                                    ?
+                                    // ignore: prefer_interpolation_to_compose_strings
+                                    'https://gh.api.99988866.xyz/' +
+                                        currentShowedImagesDisplayAddressUrl[
+                                            index]
+                                    : currentShowedImagesDisplayAddressUrl[
+                                        index],
+                                clearMemoryCacheIfFailed: true,
+                                retries: 5,
+                                height: 150,
+                                fit: BoxFit.fill,
+                                cache: true,
+                                border: Border.all(
+                                    color: selectedImagesBool[index]
+                                        ? Colors.red
+                                        : Colors.transparent,
+                                    width: 2),
+                                borderRadius:
+                                    const BorderRadius.all(Radius.circular(8)),
+                                loadStateChanged: (state) =>
+                                    defaultLoadStateChanged(state,
+                                        iconSize: 30),
+                              )
+                            : Global.defaultShowedPBhost == 'PBhostExtend1'
+                                ? File(currentShowedImagesDisplayAddressUrl[
+                                            index])
+                                        .existsSync()
+                                    ? ExtendedImage.file(
+                                        File(
+                                            currentShowedImagesDisplayAddressUrl[
+                                                index]),
+                                        fit: BoxFit.fill,
+                                        clearMemoryCacheIfFailed: true,
+                                        height: 150,
+                                        border: Border.all(
+                                            color: selectedImagesBool[index]
+                                                ? Colors.red
+                                                : Colors.transparent,
+                                            width: 2),
+                                        borderRadius: const BorderRadius.all(
+                                            Radius.circular(8)),
+                                        loadStateChanged: (state) =>
+                                            defaultLoadStateChanged(state,
+                                                iconSize: 30),
+                                      )
+                                    : const Icon(Icons.error,
+                                        size: 30, color: Colors.red)
+                                : const Icon(Icons.error,
+                                    size: 30, color: Colors.red),
                       ),
                     ),
                     Positioned(
@@ -298,7 +584,6 @@ class UploadedImagesState extends State<UploadedImages>
               child: FloatingActionButton(
                 heroTag: 'switch',
                 backgroundColor: const Color.fromARGB(255, 180, 236, 182),
-                //select host menu
                 onPressed: () async {
                   await showDialog(
                     barrierDismissible: true,
@@ -313,19 +598,19 @@ class UploadedImagesState extends State<UploadedImages>
                         children: [
                           SimpleDialogOption(
                             child:
-                                const Text('兰空图床', textAlign: TextAlign.center),
+                                const Text('阿里云', textAlign: TextAlign.center),
                             onPressed: () {
-                              Global.setShowedPBhost('lskypro');
+                              Global.setShowedPBhost('aliyun');
                               Navigator.pop(context);
                               _currentPage = 0;
                               _onRefresh();
                             },
                           ),
                           SimpleDialogOption(
-                            child: const Text('SM.MS',
+                            child: const Text('FTP-SSH/SFTP',
                                 textAlign: TextAlign.center),
                             onPressed: () {
-                              Global.setShowedPBhost('smms');
+                              Global.setShowedPBhost('PBhostExtend1');
                               Navigator.pop(context);
                               _currentPage = 0;
                               _onRefresh();
@@ -353,9 +638,29 @@ class UploadedImagesState extends State<UploadedImages>
                           ),
                           SimpleDialogOption(
                             child:
+                                const Text('兰空图床', textAlign: TextAlign.center),
+                            onPressed: () {
+                              Global.setShowedPBhost('lskypro');
+                              Navigator.pop(context);
+                              _currentPage = 0;
+                              _onRefresh();
+                            },
+                          ),
+                          SimpleDialogOption(
+                            child:
                                 const Text('七牛云', textAlign: TextAlign.center),
                             onPressed: () {
                               Global.setShowedPBhost('qiniu');
+                              Navigator.pop(context);
+                              _currentPage = 0;
+                              _onRefresh();
+                            },
+                          ),
+                          SimpleDialogOption(
+                            child: const Text('SM.MS',
+                                textAlign: TextAlign.center),
+                            onPressed: () {
+                              Global.setShowedPBhost('smms');
                               Navigator.pop(context);
                               _currentPage = 0;
                               _onRefresh();
@@ -366,16 +671,6 @@ class UploadedImagesState extends State<UploadedImages>
                                 const Text('腾讯云', textAlign: TextAlign.center),
                             onPressed: () {
                               Global.setShowedPBhost('tencent');
-                              Navigator.pop(context);
-                              _currentPage = 0;
-                              _onRefresh();
-                            },
-                          ),
-                          SimpleDialogOption(
-                            child:
-                                const Text('阿里云', textAlign: TextAlign.center),
-                            onPressed: () {
-                              Global.setShowedPBhost('aliyun');
                               Navigator.pop(context);
                               _currentPage = 0;
                               _onRefresh();
@@ -408,7 +703,6 @@ class UploadedImagesState extends State<UploadedImages>
               child: FloatingActionButton(
                 heroTag: 'Home',
                 backgroundColor: Colors.blue,
-                //select host menu
                 onPressed: () async {
                   setState(() {
                     _currentPage = 0;
@@ -437,7 +731,6 @@ class UploadedImagesState extends State<UploadedImages>
                     ? const Color.fromARGB(255, 232, 177, 241)
                     : Colors.transparent,
                 elevation: 5,
-                //select host menu
                 onPressed: () async {
                   if (!selectedImagesBool.contains(true)) {
                     Fluttertoast.showToast(
@@ -488,7 +781,6 @@ class UploadedImagesState extends State<UploadedImages>
                 heroTag: 'select',
                 backgroundColor: const Color.fromARGB(255, 248, 196, 237),
                 elevation: 5,
-                //select host menu
                 onPressed: () async {
                   if (currentShowedImagesUrl.isEmpty) {
                     showToastWithContext(context, '相册为空');
@@ -535,7 +827,6 @@ class UploadedImagesState extends State<UploadedImages>
               child: Text('Url', textAlign: TextAlign.center),
             ),
           ),
-          //divider
           const PopupMenuItem(
             height: 1,
             value: 10,
@@ -687,12 +978,31 @@ class UploadedImagesState extends State<UploadedImages>
             return;
           }
         }
+        if (Global.defaultShowedPBhost == 'PBhostExtend1') {
+          await AlbumSQL.deleteData(
+              Global.imageDBExtend!,
+              Global.defaultShowedPBhost,
+              showedImageId[
+                  imagesIndex[i] + (_currentPage * _perPageItemSize) - i]);
+          try {
+            await File(showedImageDisplayAddressUrl[
+                    imagesIndex[i] + _currentPage * _perPageItemSize - i])
+                .delete();
+          } catch (e) {
+            FLog.error(
+                className: 'ImagePage',
+                methodName: 'deleteALLFTPThumbnail',
+                text: formatErrorMessage({}, e.toString()),
+                dataLogType: DataLogType.ERRORS.toString());
+          }
+        } else {
+          await AlbumSQL.deleteData(
+              Global.imageDB!,
+              Global.defaultShowedPBhost,
+              showedImageId[
+                  imagesIndex[i] + (_currentPage * _perPageItemSize) - i]);
+        }
 
-        await AlbumSQL.deleteData(
-            Global.imageDB!,
-            Global.defaultShowedPBhost,
-            showedImageId[
-                imagesIndex[i] + (_currentPage * _perPageItemSize) - i]);
         if (deleteLocal) {
           try {
             await File(showedImagePaths[
@@ -760,9 +1070,26 @@ class UploadedImagesState extends State<UploadedImages>
           return;
         }
       }
-
-      await AlbumSQL.deleteData(Global.imageDB!, Global.defaultShowedPBhost,
-          showedImageId[index + (_currentPage * _perPageItemSize)]);
+      if (Global.defaultShowedPBhost == 'PBhostExtend1') {
+        await AlbumSQL.deleteData(
+            Global.imageDBExtend!,
+            Global.defaultShowedPBhost,
+            showedImageId[index + (_currentPage * _perPageItemSize)]);
+        try {
+          await File(showedImageDisplayAddressUrl[
+                  index + _currentPage * _perPageItemSize])
+              .delete();
+        } catch (e) {
+          FLog.error(
+              className: 'ImagePage',
+              methodName: 'deleteFTPThumbnail',
+              text: formatErrorMessage({}, e.toString()),
+              dataLogType: DataLogType.ERRORS.toString());
+        }
+      } else {
+        await AlbumSQL.deleteData(Global.imageDB!, Global.defaultShowedPBhost,
+            showedImageId[index + (_currentPage * _perPageItemSize)]);
+      }
 
       if (deleteLocal) {
         try {
@@ -856,8 +1183,18 @@ class UploadedImagesState extends State<UploadedImages>
     //所有的图床的图片ID
     Map<String, dynamic> imageList =
         await AlbumSQL.getAllTableData(Global.imageDB!, 'id');
+    //扩展图床的图片ID
+    Map<String, dynamic> imageListExtend = await AlbumSQL.getAllTableDataExtend(
+      Global.imageDBExtend!,
+      'id',
+    );
     //默认图床的图片ID
-    showedImageId = imageList[Global.defaultShowedPBhost]!;
+    if (Global.defaultShowedPBhost == 'PBhostExtend1') {
+      showedImageId = imageListExtend[Global.defaultShowedPBhost]!;
+    } else {
+      showedImageId = imageList[Global.defaultShowedPBhost]!;
+    }
+
     showedImageId = showedImageId.reversed.toList();
     showedImageUrl.clear();
     showedImageDisplayAddressUrl.clear();
@@ -865,8 +1202,14 @@ class UploadedImagesState extends State<UploadedImages>
     showedImageName.clear();
     showedImagePaths.clear();
     for (int i = 0; i < showedImageId.length; i++) {
-      List<Map<String, dynamic>> maps = await AlbumSQL.queryData(
-          Global.imageDB!, Global.defaultShowedPBhost, showedImageId[i]);
+      List<Map<String, dynamic>> maps;
+      if (Global.defaultShowedPBhost == 'PBhostExtend1') {
+        maps = await AlbumSQL.queryData(Global.imageDBExtend!,
+            Global.defaultShowedPBhost, showedImageId[i]);
+      } else {
+        maps = await AlbumSQL.queryData(
+            Global.imageDB!, Global.defaultShowedPBhost, showedImageId[i]);
+      }
       if (Global.defaultShowedPBhost == 'smms') {
         showedImageUrl.add(maps[0]['url']); //smms的returnUrl就是用来复制和相册展示的url
         showedImageDisplayAddressUrl.add(maps[0]['url']);
@@ -982,6 +1325,12 @@ class UploadedImagesState extends State<UploadedImages>
         } else {
           showedImageDisplayAddressUrl.add(maps[0]['hostSpecificArgA']);
         }
+        showedImageName.add(maps[0]['name']);
+        showedImagePictureKey.add(maps[0]['pictureKey']);
+        showedImagePaths.add(maps[0]['path']);
+      } else if (Global.defaultShowedPBhost == 'PBhostExtend1') {
+        showedImageUrl.add(maps[0]['url']); //用来复制的url
+        showedImageDisplayAddressUrl.add(maps[0]['hostSpecificArgI']); //缩略图文件地址
         showedImageName.add(maps[0]['name']);
         showedImagePictureKey.add(maps[0]['pictureKey']);
         showedImagePaths.add(maps[0]['path']);
