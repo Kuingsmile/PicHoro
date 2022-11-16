@@ -507,7 +507,6 @@ class UpyunFileExplorerState
                               final List<AssetEntity>? pickedImage =
                                   await AssetPicker.pickAssets(context,
                                       pickerConfig: config);
-
                               if (pickedImage == null) {
                                 showToast('未选择照片');
                               } else {
@@ -1180,6 +1179,7 @@ class UpyunFileExplorerState
               );
             } else {
               String fileExtension = allInfoList[index]['name'].split('.').last;
+              fileExtension = fileExtension.toLowerCase();
               String iconPath = 'assets/icons/';
               if (fileExtension == '') {
                 iconPath += '_blank.png';
@@ -2047,7 +2047,6 @@ class NewFolderDialog extends AlertDialog {
           contentPadding: EdgeInsets.zero,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(30),
-            //side: BorderSide(color: Colors.blue, width: 3)
           ),
         );
 }
