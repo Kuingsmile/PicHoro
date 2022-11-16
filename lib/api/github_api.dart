@@ -15,7 +15,7 @@ class GithubImageUploadUtils {
     String base64Image = base64Encode(File(path).readAsBytesSync());
 
     Map<String, dynamic> queryBody = {
-      'message': 'uploaded by horopic app',
+      'message': 'uploaded by PicHoro app',
       'content': base64Image,
       'branch': configMap["branch"], //分支
     };
@@ -53,7 +53,9 @@ class GithubImageUploadUtils {
       var response = await dio.put(uploadUrl, data: jsonEncode(queryBody));
       if (response.statusCode == 200 || response.statusCode == 201) {
         String returnUrl = response.data!['content']['html_url'];
-        String pictureKey = response.data!['content']['sha'];
+        Map pictureKeyMap = Map.from(configMap);
+        pictureKeyMap['sha'] = response.data!['content']['sha'];
+        String pictureKey = jsonEncode(pictureKeyMap);
         String downloadUrl = '';
         if (configMap['customDomain'] != 'None') {
           if (configMap['customDomain'].toString().endsWith('/')) {
@@ -115,10 +117,11 @@ class GithubImageUploadUtils {
   }
 
   static deleteApi({required Map deleteMap, required Map configMap}) async {
+    Map configMapFromPictureKey = jsonDecode(deleteMap['pictureKey']);
     Map<String, dynamic> formdata = {
-      "message": "deleted by horopic app",
-      "sha": deleteMap["pictureKey"],
-      "branch": configMap["branch"],
+      "message": "deleted by PicHoro app",
+      "sha": configMapFromPictureKey['sha'],
+      "branch": configMapFromPictureKey["branch"],
     };
     BaseOptions options = BaseOptions(
       //连接服务器超时时间，单位是毫秒.
@@ -128,12 +131,12 @@ class GithubImageUploadUtils {
       sendTimeout: 30000,
     );
     options.headers = {
-      "Authorization": configMap["token"],
+      "Authorization": configMapFromPictureKey["token"],
       "Accept": "application/vnd.github+json",
     };
 
     Dio dio = Dio(options);
-    String trimedPath = configMap['storePath'].toString().trim();
+    String trimedPath = configMapFromPictureKey['storePath'].toString().trim();
     if (trimedPath.startsWith('/')) {
       trimedPath = trimedPath.substring(1);
     }
@@ -143,10 +146,10 @@ class GithubImageUploadUtils {
     String deleteUrl = '';
     if (trimedPath == 'None') {
       deleteUrl =
-          "https://api.github.com/repos/${configMap["githubusername"]}/${configMap["repo"]}/contents/${deleteMap["name"]}";
+          "https://api.github.com/repos/${configMapFromPictureKey["githubusername"]}/${configMapFromPictureKey["repo"]}/contents/${deleteMap["name"]}";
     } else {
       deleteUrl =
-          "https://api.github.com/repos/${configMap["githubusername"]}/${configMap["repo"]}/contents/$trimedPath/${deleteMap["name"]}";
+          "https://api.github.com/repos/${configMapFromPictureKey["githubusername"]}/${configMapFromPictureKey["repo"]}/contents/$trimedPath/${deleteMap["name"]}";
     }
     try {
       var response = await dio.delete(deleteUrl, data: jsonEncode(formdata));

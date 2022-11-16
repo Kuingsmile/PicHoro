@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'dart:convert';
 import 'package:f_logs/f_logs.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/global.dart';
@@ -49,7 +50,9 @@ class LskyproImageUploadUtils {
         String returnUrl = response.data!['data']['links']['url'];
         //返回缩略图地址用来在相册显示
         String displayUrl = response.data!['data']['links']['thumbnail_url'];
-        String pictureKey = response.data!['data']['key'];
+        Map pictureKeyMap = Map.from(configMap);
+        pictureKeyMap['deletekey'] = response.data!['data']['key'];
+        String pictureKey = jsonEncode(pictureKeyMap);
 
         if (Global.isCopyLink == true) {
           formatedURL =
@@ -86,8 +89,9 @@ class LskyproImageUploadUtils {
   }
 
   static deleteApi({required Map deleteMap, required Map configMap}) async {
+    Map configMapFromPictureKey = jsonDecode(deleteMap['pictureKey']);
     Map<String, dynamic> formdata = {
-      "key": deleteMap["pictureKey"],
+      "key": configMapFromPictureKey["deletekey"],
     };
     BaseOptions options = BaseOptions(
       connectTimeout: 30000,
@@ -95,12 +99,12 @@ class LskyproImageUploadUtils {
       sendTimeout: 30000,
     );
     options.headers = {
-      "Authorization": configMap["token"],
+      "Authorization": configMapFromPictureKey["token"],
       "Accept": "application/json",
     };
     Dio dio = Dio(options);
-    String deleteUrl =
-        configMap["host"] + "/api/v1/images/${deleteMap["pictureKey"]}";
+    String deleteUrl = configMapFromPictureKey["host"] +
+        "/api/v1/images/${configMapFromPictureKey["deletekey"]}";
     try {
       var response = await dio.delete(deleteUrl, data: formdata);
       if (response.statusCode == 200 && response.data!['status'] == true) {

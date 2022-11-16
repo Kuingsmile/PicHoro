@@ -148,7 +148,8 @@ class QiniuImageUploadUtils {
         } else {
           formatedURL = returnUrl;
         }
-        String pictureKey = 'None';
+        Map pictureKeyMap = Map.from(configMap);
+        String pictureKey = jsonEncode(pictureKeyMap);
         return ["success", formatedURL, returnUrl, pictureKey, displayUrl];
       } else {
         return ['failed'];
@@ -179,11 +180,12 @@ class QiniuImageUploadUtils {
 
   static deleteApi({required Map deleteMap, required Map configMap}) async {
     String fileName = deleteMap['name'];
+    Map configMapFromPictureKey = jsonDecode(deleteMap['pictureKey']);
 
-    String accessKey = configMap['accessKey'];
-    String secretKey = configMap['secretKey'];
-    String bucket = configMap['bucket'];
-    String qiniupath = configMap['path'];
+    String accessKey = configMapFromPictureKey['accessKey'];
+    String secretKey = configMapFromPictureKey['secretKey'];
+    String bucket = configMapFromPictureKey['bucket'];
+    String qiniupath = configMapFromPictureKey['path'];
     String key = '';
     if (qiniupath.startsWith('/')) {
       qiniupath = qiniupath.substring(1);

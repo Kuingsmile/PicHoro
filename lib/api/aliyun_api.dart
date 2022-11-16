@@ -128,7 +128,7 @@ class AliyunImageUploadUtils {
         } else {
           formatedURL = returnUrl;
         }
-        String pictureKey = 'None';
+        String pictureKey = jsonEncode(configMap);
         return ["success", formatedURL, returnUrl, pictureKey, displayUrl];
       } else {
         return ['failed'];
@@ -158,82 +158,101 @@ class AliyunImageUploadUtils {
   }
 
   static deleteApi({required Map deleteMap, required Map configMap}) async {
-    String fileName = deleteMap['name'];
-    String keyId = configMap['keyId'];
-    String keySecret = configMap['keySecret'];
-    String bucket = configMap['bucket'];
-    String area = configMap['area'];
-    String aliyunpath = configMap['path'];
-    String deleteHost = 'https://$bucket.$area.aliyuncs.com';
-    String urlpath = '';
-    if (aliyunpath != 'None') {
-      if (aliyunpath.startsWith('/')) {
-        aliyunpath = aliyunpath.substring(1);
-      }
-      if (!aliyunpath.endsWith('/')) {
-        aliyunpath = '$aliyunpath/';
-      }
-      deleteHost = '$deleteHost/$aliyunpath$fileName';
-      urlpath = '$aliyunpath$fileName';
-    } else {
-      deleteHost = '$deleteHost/$fileName';
-      urlpath = fileName;
-    }
-    BaseOptions baseOptions = BaseOptions(
-      //连接服务器超时时间，单位是毫秒.
-      connectTimeout: 30000,
-      //响应超时时间。
-      receiveTimeout: 30000,
-      sendTimeout: 30000,
-    );
-    String authorization = 'OSS $keyId:';
-    var date = HttpDate.format(DateTime.now());
-    String verb = 'DELETE';
-    String contentMD5 = '';
-    String contentType = 'application/json';
-    String canonicalizedOSSHeaders = '';
-    String canonicalizedResource = '/$bucket/$urlpath';
-    String stringToSign =
-        '$verb\n$contentMD5\n$contentType\n$date\n$canonicalizedOSSHeaders$canonicalizedResource';
-    String signature = base64.encode(Hmac(sha1, utf8.encode(keySecret))
-        .convert(utf8.encode(stringToSign))
-        .bytes);
-
-    baseOptions.headers = {
-      'Host': '$bucket.$area.aliyuncs.com',
-      'Authorization': '$authorization$signature',
-      'Date': HttpDate.format(DateTime.now()),
-      'Content-type': 'application/json',
-    };
-    Dio dio = Dio(baseOptions);
-
     try {
-      var response = await dio.delete(
-        deleteHost,
-      );
-      if (response.statusCode == 204) {
-        return [
-          "success",
-        ];
+      String fileName = deleteMap['name'];
+      Map configMapFromPictureKey = jsonDecode(deleteMap['pictureKey']);
+      String keyId = configMapFromPictureKey['keyId'];
+      String keySecret = configMapFromPictureKey['keySecret'];
+      String bucket = configMapFromPictureKey['bucket'];
+      String area = configMapFromPictureKey['area'];
+      String aliyunpath = configMapFromPictureKey['path'];
+      String deleteHost = 'https://$bucket.$area.aliyuncs.com';
+      String urlpath = '';
+      if (aliyunpath != 'None') {
+        if (aliyunpath.startsWith('/')) {
+          aliyunpath = aliyunpath.substring(1);
+        }
+        if (!aliyunpath.endsWith('/')) {
+          aliyunpath = '$aliyunpath/';
+        }
+        deleteHost = '$deleteHost/$aliyunpath$fileName';
+        urlpath = '$aliyunpath$fileName';
       } else {
-        return ["failed"];
+        deleteHost = '$deleteHost/$fileName';
+        urlpath = fileName;
+      }
+      BaseOptions baseOptions = BaseOptions(
+        //连接服务器超时时间，单位是毫秒.
+        connectTimeout: 30000,
+        //响应超时时间。
+        receiveTimeout: 30000,
+        sendTimeout: 30000,
+      );
+      String authorization = 'OSS $keyId:';
+      var date = HttpDate.format(DateTime.now());
+      String verb = 'DELETE';
+      String contentMD5 = '';
+      String contentType = 'application/json';
+      String canonicalizedOSSHeaders = '';
+      String canonicalizedResource = '/$bucket/$urlpath';
+      String stringToSign =
+          '$verb\n$contentMD5\n$contentType\n$date\n$canonicalizedOSSHeaders$canonicalizedResource';
+      String signature = base64.encode(Hmac(sha1, utf8.encode(keySecret))
+          .convert(utf8.encode(stringToSign))
+          .bytes);
+
+      baseOptions.headers = {
+        'Host': '$bucket.$area.aliyuncs.com',
+        'Authorization': '$authorization$signature',
+        'Date': HttpDate.format(DateTime.now()),
+        'Content-type': 'application/json',
+      };
+      Dio dio = Dio(baseOptions);
+
+      try {
+        var response = await dio.delete(
+          deleteHost,
+        );
+        if (response.statusCode == 204) {
+          return [
+            "success",
+          ];
+        } else {
+          return ["failed"];
+        }
+      } catch (e) {
+        if (e is DioError) {
+          FLog.error(
+              className: "AliyunImageUploadUtils",
+              methodName: "deleteApi",
+              text: formatErrorMessage({
+                'fileName': fileName,
+              }, e.toString(), isDioError: true, dioErrorMessage: e),
+              dataLogType: DataLogType.ERRORS.toString());
+        } else {
+          FLog.error(
+              className: "AliyunImageUploadUtils",
+              methodName: "deleteApi",
+              text: formatErrorMessage({
+                'fileName': fileName,
+              }, e.toString()),
+              dataLogType: DataLogType.ERRORS.toString());
+        }
+        return [e.toString()];
       }
     } catch (e) {
       if (e is DioError) {
         FLog.error(
             className: "AliyunImageUploadUtils",
             methodName: "deleteApi",
-            text: formatErrorMessage({
-              'fileName': fileName,
-            }, e.toString(), isDioError: true, dioErrorMessage: e),
+            text: formatErrorMessage({}, e.toString(),
+                isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
             className: "AliyunImageUploadUtils",
             methodName: "deleteApi",
-            text: formatErrorMessage({
-              'fileName': fileName,
-            }, e.toString()),
+            text: formatErrorMessage({}, e.toString()),
             dataLogType: DataLogType.ERRORS.toString());
       }
       return [e.toString()];

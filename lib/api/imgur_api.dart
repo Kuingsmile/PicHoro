@@ -48,8 +48,11 @@ class ImgurImageUploadUtils {
       var response = await dio.post(uploadUrl, data: formdata);
       if (response.statusCode == 200 && response.data!['success'] == true) {
         String returnUrl = response.data!['data']['link'];
-        String pictureKey = response.data!['data']['deletehash'];
-
+        Map pictureKeyMap = {
+          'clientId': configMap['clientId'],
+          'deletehash': response.data!['data']['deletehash'],
+        };
+        String pictureKey = jsonEncode(pictureKeyMap);
         if (Global.isCopyLink == true) {
           formatedURL =
               linkGenerateDict[Global.defaultLKformat]!(returnUrl, name);
@@ -89,7 +92,8 @@ class ImgurImageUploadUtils {
   }
 
   static deleteApi({required Map deleteMap, required Map configMap}) async {
-    String deletehash = deleteMap["pictureKey"];
+    Map deleteMapFromPictureKey = jsonDecode(deleteMap['pictureKey']);
+    String deletehash = deleteMapFromPictureKey["deletehash"];
 
     BaseOptions options = BaseOptions(
       //连接服务器超时时间，单位是毫秒.
@@ -99,7 +103,7 @@ class ImgurImageUploadUtils {
       sendTimeout: 30000,
     );
     options.headers = {
-      "Authorization": "Client-ID ${configMap["clientId"]}",
+      "Authorization": "Client-ID ${deleteMapFromPictureKey["clientId"]}",
     };
     Dio dio = Dio(options);
     String deleteUrl = "https://api.imgur.com/3/image/$deletehash";

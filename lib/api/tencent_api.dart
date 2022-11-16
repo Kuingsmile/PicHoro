@@ -179,9 +179,8 @@ class TencentImageUploadUtils {
         } else {
           formatedURL = returnUrl;
         }
-
-        String pictureKey = 'None';
-
+        Map pictureKeyMap = Map.from(configMap);
+        String pictureKey = jsonEncode(pictureKeyMap);
         return ["success", formatedURL, returnUrl, pictureKey, displayUrl];
       } else {
         return ['failed'];
@@ -211,12 +210,13 @@ class TencentImageUploadUtils {
   }
 
   static deleteApi({required Map deleteMap, required Map configMap}) async {
+    Map configMapFromPictureKey = jsonDecode(deleteMap['pictureKey']);
     String fileName = deleteMap['name'];
-    String secretId = configMap['secretId'];
-    String secretKey = configMap['secretKey'];
-    String bucket = configMap['bucket'];
-    String area = configMap['area'];
-    String tencentpath = configMap['path'];
+    String secretId = configMapFromPictureKey['secretId'];
+    String secretKey = configMapFromPictureKey['secretKey'];
+    String bucket = configMapFromPictureKey['bucket'];
+    String area = configMapFromPictureKey['area'];
+    String tencentpath = configMapFromPictureKey['path'];
     String deleteHost = 'https://$bucket.cos.$area.myqcloud.com';
     String urlpath = '';
     if (tencentpath != 'None') {

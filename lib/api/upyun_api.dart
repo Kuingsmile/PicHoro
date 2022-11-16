@@ -118,7 +118,8 @@ class UpyunImageUploadUtils {
         } else {
           formatedURL = returnUrl;
         }
-        String pictureKey = 'None';
+        Map pictureKeyMap = Map.from(configMap);
+        String pictureKey = jsonEncode(pictureKeyMap);
         return ["success", formatedURL, returnUrl, pictureKey, displayUrl];
       } else {
         return ['failed'];
@@ -149,10 +150,11 @@ class UpyunImageUploadUtils {
 
   static deleteApi({required Map deleteMap, required Map configMap}) async {
     String fileName = deleteMap['name'];
-    String bucket = configMap['bucket'];
-    String upyunOperator = configMap['operator'];
-    String password = configMap['password'];
-    String upyunpath = configMap['path'];
+    Map configMapFromPictureKey = jsonDecode(deleteMap['pictureKey']);
+    String bucket = configMapFromPictureKey['bucket'];
+    String upyunOperator = configMapFromPictureKey['operator'];
+    String password = configMapFromPictureKey['password'];
+    String upyunpath = configMapFromPictureKey['path'];
 
     String deleteHost = 'http://v0.api.upyun.com';
     String urlpath = '';
