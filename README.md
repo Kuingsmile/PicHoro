@@ -141,3 +141,8 @@ Github下载地址 [Github release](https://github.com/Kuingsmile/PicHoro/releas
 [MIT](https://opensource.org/licenses/MIT)
 
 Copyright (c) 2022 Kuingsmile
+
+## Github star 
+
+[![Stargazers over time](https://starchart.cc/Kuingsmile/PicHoro.svg)](https://starchart.cc/Kuingsmile/PicHoro)
+
