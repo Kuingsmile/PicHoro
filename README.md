@@ -12,42 +12,28 @@
      </a>
 </div>
 
-&emsp;&emsp;一款基于flutter的手机端云存储平台/图床管理和文件上传/下载工具，最新版本**V1.8.9**，与PicGo配置互通，可直接扫码导入，主要功能包括云存储平台和图床平台的管理，文件上传和下载管理，以及各种格式的链接分享。
+&emsp;&emsp;一款基于flutter的手机端云存储平台/图床管理和文件上传/下载工具，最新版本**V1.9.0**，与PicGo配置互通，可直接扫码导入，主要功能包括云存储平台和图床平台,以及云服务器的管理，文件上传和下载管理，以及各种格式的链接分享。
 
 &emsp;&emsp;项目介绍和配置手册网址:
 
 &emsp;&emsp;[https://pichoro.horosama.com](https://pichoro.horosama.com)
 
-&emsp;&emsp;图片上传/相册功能已支持如下图床：
+&emsp;&emsp;目前已支持如下图床：
 
-- [X] 兰空图床V2 (**V1.00版本添加**)
-- [X] SM.MS(**V1.41版本添加**) 图床网站[https://smms.app](https://smms.app)或[https://sm.ms](https://sm.ms)
-- [X] Github(**V1.55版本添加**)
-- [X] Imgur(**V1.60版本添加**) Imgur国内用户需要配合翻墙使用，个人手机测试配合clash可以正常使用
-- [X] 七牛云存储(**V1.65版本添加**)
-- [X] 腾讯云COS V5(**V1.70版本添加**)
-- [X] 阿里云OSS(**V1.75版本添加**)
-- [X] 又拍云存储(**V1.75版本添加**)
-  
-&emsp;&emsp;云存储/图床管理功能已支持如下平台：
-
-- [X] 腾讯云COS(**V1.80版本添加**)
-- [X] SM.MS (**V1.81版本添加**)
-- [X] 阿里云OSS (**V1.84版本添加**)
-- [X] 又拍云存储 (**V1.85版本添加**)
-- [X] 七牛云存储 (**V1.86版本添加**)
-- [X] 兰空图床 (**V1.87版本添加**)
-- [X] Github (**V1.89版本添加**)
-
-&emsp;&emsp;个人开发用于学习flutter和替代很久没更新了的[flutter-Picgo](https://github.com/PicGo/flutter-picgo)。
-
-@author: Kuingsmile
-@website: [https://pichoro.horosama.com](https://pichoro.horosama.com)
-@email: ma_shiqing@163.com
+- [X] 兰空图床V2 (上传/相册-**V1.00**，文件管理-**V1.87**)
+- [X] SM.MS (上传/相册-**V1.41**，文件管理-**V1.81**)
+- [X] Github (上传/相册-**V1.55**，文件管理-**V1.89**)
+- [X] Imgur (上传/相册-**V1.60**，文件管理-**V1.90**)
+- [X] 七牛云存储 (上传/相册-**V1.65**，文件管理-**V1.86**)
+- [X] 腾讯云COS V5 (上传/相册-**V1.70**，文件管理-**V1.80**)
+- [X] 阿里云OSS (上传/相册-**V1.75**，文件管理-**V1.84**)
+- [X] 又拍云存储 (上传/相册-**V1.75**，文件管理-**V1.85**)
+- [X] FTP-SSH/SFTP (上传/相册-**V1.90**，文件管理-**V1.90**)
 
 ## 特色功能
 
 - **支持直接管理云存储平台和图床，包括新建/删除/修改存储桶，创建/删除目录和文件，上传和下载文件和照片等**
+- **支持SSH/SFTP，可视化管理文件，内置SSH终端可直接管理云服务器**
 - **支持扫描二维码将PicGo(v2.3.0-beta.2以上版本)配置文件直接导入PicHoro**
 - 连续上传模式，相机拍照后自动上传然后返回拍照页面，可连续拍照上传
 - 可导入剪贴板中的网络图片链接，同时使用换行符分割多个链接可批量导入
@@ -64,7 +50,7 @@
 
 Github下载地址 [Github release](https://github.com/Kuingsmile/PicHoro/releases)  
 
-我的个人网站提供的最新版本下载地址 [https://www.horosama.com/self_apk/PicHoro_V1.8.9.apk](https://www.horosama.com/self_apk/PicHoro_V1.8.9.apk)
+我的个人网站提供的最新版本下载地址 [https://www.horosama.com/self_apk/PicHoro_V1.9.0.apk](https://www.horosama.com/self_apk/PicHoro_V1.9.0.apk)
 
 ### IOS
 
@@ -76,7 +62,7 @@ Github下载地址 [Github release](https://github.com/Kuingsmile/PicHoro/releas
   <tr>
     <td><img src="http://imgx.horosama.com/admin_uploads/2022/10/2022_10_28_635bdaa1381c4.jpg" width="200" height="400" alt=""/></td>
     <td><img src="http://imgx.horosama.com/admin_uploads/2022/10/2022_10_28_635bdbc4b1817.jpg" width="200" height="400" alt=""/></td>
-    <td><img src="http://imgx.horosama.com/admin_uploads/2022/11/2022_11_08_636a348b8d3e0.jpg" width="200" height="400" alt=""/></td>
+    <td><img src="http://imgx.horosama.com/admin_uploads/2022/11/2022_11_16_6374742f6c0e0.jpg" width="200" height="400" alt=""/></td>
   </tr>
    <tr>
     <td><img src="http://imgx.horosama.com/admin_uploads/2022/10/2022_10_15_634a630aa7563.jpg" width="200" height="400" alt=""/></td>
@@ -84,7 +70,7 @@ Github下载地址 [Github release](https://github.com/Kuingsmile/PicHoro/releas
     <td><img src="http://imgx.horosama.com/admin_uploads/2022/10/2022_10_15_634a630b8b481.jpg" width="200" height="400" alt=""/></td>
   </tr>
    <tr>
-    <td><img src="http://imgx.horosama.com/admin_uploads/2022/11/2022_11_01_6360d77d9cfd4.jpg" width="200" height="400" alt=""/></td>
+    <td><img src="http://imgx.horosama.com/admin_uploads/2022/11/2022_11_16_6374742c9b51d.jpg" width="200" height="400" alt=""/></td>
     <td><img src="http://imgx.horosama.com/admin_uploads/2022/10/2022_10_24_6356546ee6731.jpg" width="200" height="400" alt=""/></td>
     <td><img src="http://imgx.horosama.com/admin_uploads/2022/10/2022_10_24_6356548f45f14.jpg" width="200" height="400" alt=""/></td>
   </tr>
@@ -99,12 +85,31 @@ Github下载地址 [Github release](https://github.com/Kuingsmile/PicHoro/releas
 
   详细更新日志请查看[更新日志](https://github.com/Kuingsmile/PicHoro/blob/main/Version_update_log.md "更新日志")
 
-- 2022-11-12: **V1.89**:
+- 2022-11-16: **V1.90**:
 
-  - 新增：新增了对**Github**管理功能的支持，并且可以浏览其它用户的公开仓库，同时可以下载其它用户的公开仓库的文件，此外复制链接时对私有仓库还会添加临时访问token，以便于下载私有仓库的文件。
-  - 新增：使用github图床时，如果未设置自定义域名，现在相册预览，文件下载等情况下会默认使用加速服务，以解决国内可能无法访问raw.githubusercontent.com，导致图片无法显示或者下载失败的问题。
-  - 新增：新增了近200个文件图标，使得文件管理界面更加美观。
-  - 修复：将上传界面的同时可进行任务数修改为1，以解决Github同时上传冲突的上传失败问题。
+  - 新增：新增了对**Imgur**管理功能的支持。
+    - 图片查看时使用CDN进行了加速，避免图片加载过慢或失败。
+  - 新增：新增了对**FTP**和**SSH/SFTP**上传、相册、管理功能的支持,可匿名或SSH登录服务器管理文件，另外作为补充，内置了**SSH终端**，可直接管理**云服务器**。
+    - 由于一般情况下普通FTP功能限制较多，能做到的操作不多，因此管理功能仅支持SFTP方式。
+    - 禁止了对文件名包含 `*#?` 等特殊字符的文件的删除操作，防止出现意外情况。
+    - 由于服务器操作的敏感性，APP内仅实现了一些安全操作，其它操作请使用内置**SSH终端**进行。
+    - 为了解决FTP文件上图片无法直接预览的问题，在上传时会自动生成一份图片缩略图保存于缓存目录下用于相册内查看，在从相册中删除图片时会自动删除缓存目录下的缩略图。
+    - 缩略图保存路径为`手机存储/Android/data/com.example.horopic/cache/ftp/`，可根据需要自行删除。
+    - 管理功能针对普通目录和文件，为避免混乱，不支持软链接等特殊类型文件,如需管理软链接等特殊类型文件，请使用内置**SSH终端**。
+    - 支持选择管理功能入口目录，方便快速进入指定目录。
+  - 新增：Github和SSH/SFTP管理页面现在支持预览markdown文件。
+  - 新增：图床配置导出增加了**导出全部**的选项。
+  - 新增：修改了图片上传和删除时保存配置信息的逻辑，现在会在本地数据库保存每一张图片上传时对应的图床配置，这样即使上传后修改了图床配置，仍然可以正常删除云端图片，同时为后续的一个图床多套配置功能做准备。
+  - 新增：上传页面和相册页面顶部栏增加了配置按钮，方便快速修改常用配置。
+  - 优化：现在浏览本地文件时如果目标已被删除会显示空白提示页面。
+  - 优化：一些UI优化，包括如下：
+    - 本地图片预览修改为页面居中显示。
+    - 首页和相册页面的图床选择弹出栏的的顺序调整为图床首字母字典序。
+    - 图床配置和默认图床选择页面的顺序调整为图床首字母字典序。
+    - 更新日志界面现在支持跳转链接和选择文字。
+  - 修复：修复了在配置页面修改默认图床和单独图床配置页面内设置为默认图床后，上传页面弹出栏显示的默认图床和相册页面显示的图床没有同步更新的问题。
+  - 修复：修复了兰空图床管理页面内删除相册后，后续的部分文件会被错误显示为文件夹的问题。
+
 - 2022-10-02: **V1.00**:
   - 项目初始化，完成基本的上传功能，目前仅支持兰空图床，需要手动授予存储和相机权限
 
