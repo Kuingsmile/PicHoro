@@ -11,6 +11,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:f_logs/f_logs.dart';
 import 'package:path/path.dart' as my_path;
+import 'package:ftpconnect/ftpconnect.dart';
+import 'package:dartssh2/dartssh2.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 
 import 'package:horopic/pages/upload_pages/upload_request.dart';
 import 'package:horopic/pages/upload_pages/upload_status.dart';
@@ -183,7 +187,8 @@ class UploadManager {
           }
           await Clipboard.setData(ClipboardData(text: formatedURL));
 
-          String pictureKey = 'None';
+          Map pictureKeyMap = Map.from(configMap);
+          String pictureKey = jsonEncode(pictureKeyMap);
           maps = {
             'path': path,
             'name': fileName,
@@ -320,7 +325,7 @@ class UploadManager {
             formatedURL = returnUrl;
           }
           await Clipboard.setData(ClipboardData(text: formatedURL));
-          String pictureKey = 'None';
+          String pictureKey = jsonEncode(configMap);
           maps = {
             'path': path,
             'name': fileName,
@@ -422,7 +427,8 @@ class UploadManager {
             formatedURL = returnUrl;
           }
           await Clipboard.setData(ClipboardData(text: formatedURL));
-          String pictureKey = 'None';
+          Map pictureKeyMap = Map.from(configMap);
+          String pictureKey = jsonEncode(pictureKeyMap);
           maps = {
             'path': path,
             'name': fileName,
@@ -549,7 +555,8 @@ class UploadManager {
             formatedURL = returnUrl;
           }
           await Clipboard.setData(ClipboardData(text: formatedURL));
-          String pictureKey = 'None';
+          Map pictureKeyMap = Map.from(configMap);
+          String pictureKey = jsonEncode(pictureKeyMap);
           maps = {
             'path': path,
             'name': fileName,
@@ -621,7 +628,9 @@ class UploadManager {
             formatedURL = returnUrl;
           }
           await Clipboard.setData(ClipboardData(text: formatedURL));
-          String pictureKey = response.data!['data']['key'];
+          Map pictureKeyMap = Map.from(configMap);
+          pictureKeyMap['deletekey'] = response.data!['data']['key'];
+          String pictureKey = jsonEncode(pictureKeyMap);
           maps = {
             'path': path,
             'name': fileName,
@@ -692,6 +701,7 @@ class UploadManager {
           setStatus(task, UploadStatus.completed);
         }
       } else if (defaultPH == 'github') {
+        maxConcurrentTasks = 1;
         String base64Image = base64Encode(File(path).readAsBytesSync());
         Map<String, dynamic> queryBody = {
           'message': 'uploaded by horopic app',
@@ -735,7 +745,9 @@ class UploadManager {
           eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
           Map<String, dynamic> maps = {};
           String returnUrl = response.data!['content']['html_url'];
-          String pictureKey = response.data!['content']['sha'];
+          Map pictureKeyMap = Map.from(configMap);
+          pictureKeyMap['sha'] = response.data!['content']['sha'];
+          String pictureKey = jsonEncode(pictureKeyMap);
           String downloadUrl = '';
           String formatedURL = '';
           if (configMap['customDomain'] != 'None') {
@@ -824,7 +836,11 @@ class UploadManager {
           eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
           Map<String, dynamic> maps = {};
           String returnUrl = response.data!['data']['link'];
-          String pictureKey = response.data!['data']['deletehash'];
+          Map pictureKeyMap = {
+            'clientId': configMap['clientId'],
+            'deletehash': response.data!['data']['deletehash'],
+          };
+          String pictureKey = jsonEncode(pictureKeyMap);
 
           String formatedURL = '';
           if (Global.isCopyLink == true) {
@@ -853,6 +869,208 @@ class UploadManager {
           await AlbumSQL.insertData(
               Global.imageDB!, pBhostToTableName[Global.defaultPShost]!, maps);
           setStatus(task, UploadStatus.completed);
+        }
+      } else if (defaultPH == 'ftp') {
+        String ftpHost = configMap["ftpHost"];
+        String ftpPort = configMap["ftpPort"];
+        String ftpUser = configMap["ftpUser"];
+        String ftpPassword = configMap["ftpPassword"];
+        String ftpType = configMap["ftpType"];
+        String isAnonymous = configMap["isAnonymous"].toString();
+        String uploadPath = configMap["uploadPath"];
+
+        if (ftpType == 'SFTP') {
+          final socket =
+              await SSHSocket.connect(ftpHost, int.parse(ftpPort.toString()));
+          final client = SSHClient(
+            socket,
+            username: ftpUser,
+            onPasswordRequest: () {
+              return ftpPassword;
+            },
+          );
+          final sftp = await client.sftp();
+          if (uploadPath == 'None') {
+            uploadPath = '/';
+          }
+          if (!uploadPath.startsWith('/')) {
+            uploadPath = '/$uploadPath';
+          }
+          if (!uploadPath.endsWith('/')) {
+            uploadPath = '$uploadPath/';
+          }
+          String urlPath = uploadPath + fileName;
+          var file = await sftp.open(urlPath,
+              mode: SftpFileOpenMode.create | SftpFileOpenMode.write);
+          int fileSize = File(path).lengthSync();
+          bool operateDone = false;
+          file.write(File(path).openRead().cast(), onProgress: (int sent) {
+            getUpload(fileName)?.progress.value = sent / fileSize;
+            if (sent == fileSize) {
+              operateDone = true;
+            }
+          });
+          while (!operateDone) {
+            await Future.delayed(const Duration(milliseconds: 100));
+          }
+          client.close();
+          String returnUrl =
+              'ftp://$ftpUser:$ftpPassword@$ftpHost:$ftpPort$urlPath';
+          returnUrl = returnUrl;
+          String pictureKey = jsonEncode(configMap);
+          String displayUrl = returnUrl;
+
+          eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
+          Map<String, dynamic> maps = {};
+          String formatedURL = '';
+          if (Global.isCopyLink == true) {
+            formatedURL =
+                linkGenerateDict[Global.defaultLKformat]!(returnUrl, fileName);
+          } else {
+            formatedURL = returnUrl;
+          }
+          var externalCacheDir = await getExternalCacheDirectories();
+          String cachePath = externalCacheDir![0].path;
+          String ftpCachePath = '$cachePath/ftp';
+          if (!await Directory(ftpCachePath).exists()) {
+            await Directory(ftpCachePath).create(recursive: true);
+          }
+          String randomString = randomStringGenerator(5);
+          String thumbnailFileName = 'FTP_${randomString}_$fileName';
+          var result = await FlutterImageCompress.compressAndGetFile(
+            path,
+            '$ftpCachePath/$thumbnailFileName',
+            quality: 50,
+            minWidth: 500,
+            minHeight: 500,
+          );
+          if (result == null) {
+            //copy raw file
+            await File(path).copy('$ftpCachePath/$thumbnailFileName');
+          }
+          await Clipboard.setData(ClipboardData(text: formatedURL));
+          maps = {
+            'path': path,
+            'name': fileName,
+            'url': returnUrl, //ftp文件原始地址
+            'PBhost': Global.defaultPShost,
+            'pictureKey': pictureKey,
+            'hostSpecificArgA': displayUrl, //实际展示的是displayUrl
+            'hostSpecificArgB': ftpHost, //ftp自定义域名
+            'hostSpecificArgC': ftpPort, //ftp端口
+            'hostSpecificArgD': ftpUser, //ftp用户名
+            'hostSpecificArgE': ftpPassword, //ftp密码
+            'hostSpecificArgF': ftpType, //ftp类型
+            'hostSpecificArgG': isAnonymous, //ftp是否匿名
+            'hostSpecificArgH': uploadPath, //ftp路径
+            'hostSpecificArgI': '$ftpCachePath/$thumbnailFileName', //缩略图路径
+          };
+          List letter = 'JKLMNOPQRSTUVWXYZ'.split('');
+          for (int i = 0; i < letter.length; i++) {
+            maps['hostSpecificArg${letter[i]}'] = 'test';
+          }
+          await AlbumSQL.insertData(Global.imageDBExtend!,
+              pBhostToTableName[Global.defaultPShost]!, maps);
+          setStatus(task, UploadStatus.completed);
+        } else if (ftpType == 'FTP') {
+          FTPConnect ftpConnect;
+          if (isAnonymous == 'true') {
+            ftpConnect = FTPConnect(ftpHost,
+                port: int.parse(ftpPort), securityType: SecurityType.FTP);
+          } else {
+            ftpConnect = FTPConnect(ftpHost,
+                port: int.parse(ftpPort),
+                user: ftpUser,
+                pass: ftpPassword,
+                securityType: SecurityType.FTP);
+          }
+          var connectResult = await ftpConnect.connect();
+          if (connectResult == true) {
+            if (uploadPath == 'None') {
+              uploadPath = '/';
+            }
+            if (!uploadPath.startsWith('/')) {
+              uploadPath = '/$uploadPath';
+            }
+            if (!uploadPath.endsWith('/')) {
+              uploadPath = '$uploadPath/';
+            }
+            String urlPath = uploadPath + fileName;
+            File fileToUpload = File(path);
+            await ftpConnect.sendCustomCommand('TYPE I');
+            await ftpConnect.changeDirectory(uploadPath);
+            bool res = await ftpConnect.uploadFile(
+              fileToUpload,
+              sRemoteName: fileName,
+            );
+            if (res == true) {
+              String returnUrl = '';
+              if (isAnonymous == 'true') {
+                returnUrl = 'ftp://$ftpHost:$ftpPort$urlPath';
+              } else if (ftpPassword == 'None') {
+                returnUrl = 'ftp://$ftpUser@$ftpHost:$ftpPort$urlPath';
+              } else {
+                returnUrl =
+                    'ftp://$ftpUser:$ftpPassword@$ftpHost:$ftpPort$urlPath';
+              }
+              returnUrl = returnUrl;
+              String pictureKey = jsonEncode(configMap);
+              String displayUrl = returnUrl;
+              eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
+              Map<String, dynamic> maps = {};
+              String formatedURL = '';
+              if (Global.isCopyLink == true) {
+                formatedURL = linkGenerateDict[Global.defaultLKformat]!(
+                    returnUrl, fileName);
+              } else {
+                formatedURL = returnUrl;
+              }
+              ftpConnect.disconnect();
+              var externalCacheDir = await getExternalCacheDirectories();
+              String cachePath = externalCacheDir![0].path;
+              String ftpCachePath = '$cachePath/ftp';
+              if (!await Directory(ftpCachePath).exists()) {
+                await Directory(ftpCachePath).create(recursive: true);
+              }
+              String randomString = randomStringGenerator(5);
+              String thumbnailFileName = 'FTP_${randomString}_$fileName';
+              var result = await FlutterImageCompress.compressAndGetFile(
+                path,
+                '$ftpCachePath/$thumbnailFileName',
+                quality: 50,
+                minWidth: 500,
+                minHeight: 500,
+              );
+              if (result == null) {
+                await File(path).copy('$ftpCachePath/$thumbnailFileName');
+              }
+              await Clipboard.setData(ClipboardData(text: formatedURL));
+              maps = {
+                'path': path,
+                'name': fileName,
+                'url': returnUrl, //ftp文件原始地址
+                'PBhost': Global.defaultPShost,
+                'pictureKey': pictureKey,
+                'hostSpecificArgA': displayUrl, //实际展示的是displayUrl
+                'hostSpecificArgB': ftpHost, //ftp自定义域名
+                'hostSpecificArgC': ftpPort, //ftp端口
+                'hostSpecificArgD': ftpUser, //ftp用户名
+                'hostSpecificArgE': ftpPassword, //ftp密码
+                'hostSpecificArgF': ftpType, //ftp类型
+                'hostSpecificArgG': isAnonymous, //ftp是否匿名
+                'hostSpecificArgH': uploadPath, //ftp路径
+                'hostSpecificArgI': '$ftpCachePath/$thumbnailFileName', //缩略图路径
+              };
+
+              List letter = 'JKLMNOPQRSTUVWXYZ'.split('');
+              for (int i = 0; i < letter.length; i++) {
+                maps['hostSpecificArg${letter[i]}'] = 'test';
+              }
+              await AlbumSQL.insertData(Global.imageDBExtend!,
+                  pBhostToTableName[Global.defaultPShost]!, maps);
+              setStatus(task, UploadStatus.completed);
+            }
+          }
         }
       }
     } catch (e) {
