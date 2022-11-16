@@ -49,7 +49,7 @@ class UpyunTokenManageState extends State<UpyunTokenManage> {
                   Center(child: Text('Token', style: TextStyle(fontSize: 20))),
             ),
             ListTile(
-              title: Center(
+              subtitle: Center(
                 child: SelectableText(token,
                     style: const TextStyle(color: Colors.blue)),
               ),
