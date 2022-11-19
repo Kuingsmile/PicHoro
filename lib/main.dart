@@ -12,9 +12,9 @@ import 'package:horopic/utils/theme_provider.dart';
 @Author: Kuingsmile@Github
 @HomePage: https://www.horosama.com
 @e-mail: ma_shiqing@163.com
-@Date: 2022-11-16
+@Date: 2022-11-19
 @Description:PicHoro,一款云储存平台和图床管理工具
-@version: 1.9.0
+@version: 1.9.1
 */
 
 void main() async {
