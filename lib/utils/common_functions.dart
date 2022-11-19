@@ -4,6 +4,7 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:path/path.dart' as my_path;
@@ -18,6 +19,7 @@ import 'package:horopic/utils/global.dart';
 import 'package:horopic/router/application.dart';
 import 'package:horopic/router/routers.dart';
 import 'package:horopic/utils/permission.dart';
+import 'package:horopic/picture_host_configure/configure_store/configure_store_file.dart';
 
 Map downloadStatus = {
   'DownloadStatus.downloading': "下载中",
@@ -485,6 +487,7 @@ mainInit() async {
   await Global.setPassword(initPassword);
   String initPShost = await Global.getPShost();
   await Global.setPShost(initPShost);
+  await ConfigureStoreFile().generateConfigureFile();
   String initLKformat = await Global.getLKformat();
   await Global.setLKformat(initLKformat);
   bool initIsTimeStamp = await Global.getTimeStamp();
