@@ -15,6 +15,7 @@ import 'package:ftpconnect/ftpconnect.dart';
 import 'package:dartssh2/dartssh2.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:minio_new/minio.dart';
 
 import 'package:horopic/pages/upload_pages/upload_request.dart';
 import 'package:horopic/pages/upload_pages/upload_status.dart';
@@ -1072,6 +1073,102 @@ class UploadManager {
             }
           }
         }
+      } else if (defaultPH == 'aws') {
+        String accessKeyId = configMap['accessKeyId'];
+        String secretAccessKey = configMap['secretAccessKey'];
+        String bucket = configMap['bucket'];
+        String endpoint = configMap['endpoint'];
+        String region = configMap['region'];
+        String uploadPath = configMap['uploadPath'];
+        String customUrl = configMap['customUrl'];
+        if (customUrl != "None") {
+          if (!customUrl.startsWith('http') && !customUrl.startsWith('https')) {
+            customUrl = 'http://$customUrl';
+          }
+        }
+
+        if (uploadPath != 'None') {
+          if (uploadPath.startsWith('/')) {
+            uploadPath = uploadPath.substring(1);
+          }
+          if (!uploadPath.endsWith('/')) {
+            uploadPath = '$uploadPath/';
+          }
+        }
+        //云存储的路径
+        String urlpath = '';
+        if (uploadPath != 'None') {
+          urlpath = '$uploadPath$fileName';
+        } else {
+          urlpath = fileName;
+        }
+
+        Minio minio;
+        if (region == 'None') {
+          minio = Minio(
+            endPoint: endpoint,
+            accessKey: accessKeyId,
+            secretKey: secretAccessKey,
+          );
+        } else {
+          minio = Minio(
+            endPoint: endpoint,
+            accessKey: accessKeyId,
+            secretKey: secretAccessKey,
+            region: region,
+          );
+        }
+        int fileSize = File(path).lengthSync();
+        Stream<Uint8List> stream = File(path).openRead().cast();
+
+        await minio.putObject(bucket, urlpath, stream, onProgress: (int sent) {
+          getUpload(fileName)?.progress.value = sent / fileSize;
+        });
+
+        eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
+        Map<String, dynamic> maps = {};
+        String returnUrl = '';
+        String displayUrl = '';
+
+        if (customUrl != 'None') {
+          if (!customUrl.endsWith('/')) {
+            returnUrl = '$customUrl/$urlpath';
+            displayUrl = '$customUrl/$urlpath';
+          } else {
+            returnUrl = '$customUrl$urlpath';
+            displayUrl = '$customUrl$urlpath';
+          }
+        } else {
+          returnUrl = 'https://$endpoint/$urlpath';
+          displayUrl = 'https://$endpoint/$urlpath';
+        }
+
+        String formatedURL = '';
+        if (Global.isCopyLink == true) {
+          formatedURL =
+              linkGenerateDict[Global.defaultLKformat]!(returnUrl, fileName);
+        } else {
+          formatedURL = returnUrl;
+        }
+        await Clipboard.setData(ClipboardData(text: formatedURL));
+
+        Map pictureKeyMap = Map.from(configMap);
+        String pictureKey = jsonEncode(pictureKeyMap);
+        maps = {
+          'path': path,
+          'name': fileName,
+          'url': returnUrl,
+          'PBhost': Global.defaultPShost,
+          'pictureKey': pictureKey,
+          'hostSpecificArgA': displayUrl,
+        };
+        List letter = 'BCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+        for (int i = 0; i < letter.length; i++) {
+          maps['hostSpecificArg${letter[i]}'] = 'test';
+        }
+        await AlbumSQL.insertData(Global.imageDBExtend!,
+            pBhostToTableName[Global.defaultPShost]!, maps);
+        setStatus(task, UploadStatus.completed);
       }
     } catch (e) {
       FLog.error(
