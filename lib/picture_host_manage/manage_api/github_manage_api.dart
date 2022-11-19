@@ -10,7 +10,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/sql_utils.dart';
 import 'package:horopic/utils/common_functions.dart';
-import 'package:horopic/picture_host_configure/github_configure.dart';
+import 'package:horopic/picture_host_configure/configure_page/github_configure.dart';
 
 class GithubManageAPI {
   static Future<File> get _localFile async {

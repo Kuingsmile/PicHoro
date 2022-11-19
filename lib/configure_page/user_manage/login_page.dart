@@ -11,21 +11,21 @@ import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/sql_utils.dart';
 import 'package:horopic/pages/loading.dart';
-import 'package:horopic/picture_host_configure/lskypro_configure.dart'
+import 'package:horopic/picture_host_configure/configure_page/lskypro_configure.dart'
     as lskyhost;
-import 'package:horopic/picture_host_configure/smms_configure.dart'
+import 'package:horopic/picture_host_configure/configure_page/smms_configure.dart'
     as smmshostclass;
-import 'package:horopic/picture_host_configure/github_configure.dart'
+import 'package:horopic/picture_host_configure/configure_page/github_configure.dart'
     as githubhostclass;
-import 'package:horopic/picture_host_configure/imgur_configure.dart'
+import 'package:horopic/picture_host_configure/configure_page/imgur_configure.dart'
     as imgurhostclass;
-import 'package:horopic/picture_host_configure/qiniu_configure.dart'
+import 'package:horopic/picture_host_configure/configure_page/qiniu_configure.dart'
     as qiniuhostclass;
-import 'package:horopic/picture_host_configure/tencent_configure.dart'
+import 'package:horopic/picture_host_configure/configure_page/tencent_configure.dart'
     as tencenthostclass;
-import 'package:horopic/picture_host_configure/aliyun_configure.dart'
+import 'package:horopic/picture_host_configure/configure_page/aliyun_configure.dart'
     as aliyunhostclass;
-import 'package:horopic/picture_host_configure/upyun_configure.dart'
+import 'package:horopic/picture_host_configure/configure_page/upyun_configure.dart'
     as upyunhostclass;
 
 class APPPassword extends StatefulWidget {

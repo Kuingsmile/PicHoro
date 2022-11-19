@@ -10,7 +10,7 @@ import 'package:dartssh2/dartssh2.dart';
 
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/sql_utils.dart';
-import 'package:horopic/picture_host_configure/ftp_configure.dart';
+import 'package:horopic/picture_host_configure/configure_page/ftp_configure.dart';
 import 'package:horopic/utils/common_functions.dart';
 
 class FTPManageAPI {
