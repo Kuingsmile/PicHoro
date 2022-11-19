@@ -12,7 +12,7 @@
      </a>
 </div>
 
-&emsp;&emsp;一款基于flutter的手机端云存储平台/图床管理和文件上传/下载工具，最新版本**V1.9.0**，与PicGo配置互通，可直接扫码导入，主要功能包括云存储平台和图床平台,以及云服务器的管理，文件上传和下载管理，以及各种格式的链接分享。
+&emsp;&emsp;一款基于flutter的手机端云存储平台/图床管理和文件上传/下载工具，最新版本**V1.9.1**，与PicGo配置互通，可直接扫码导入，主要功能包括云存储平台和图床平台,以及云服务器的管理，文件上传和下载管理，以及各种格式的链接分享。
 
 &emsp;&emsp;项目介绍和配置手册网址:
 
@@ -29,12 +29,14 @@
 - [X] 阿里云OSS (上传/相册-**V1.75**，文件管理-**V1.84**)
 - [X] 又拍云存储 (上传/相册-**V1.75**，文件管理-**V1.85**)
 - [X] FTP-SSH/SFTP (上传/相册-**V1.90**，文件管理-**V1.90**)
+- [X] 兼容S3 API接口的平台 (上传/相册-**V1.91**，文件管理-**V1.91**)
 
 ## 特色功能
 
 - **支持直接管理云存储平台和图床，包括新建/删除/修改存储桶，创建/删除目录和文件，上传和下载文件和照片等**
 - **支持SSH/SFTP，可视化管理文件，内置SSH终端可直接管理云服务器**
 - **支持扫描二维码将PicGo(v2.3.0-beta.2以上版本)配置文件直接导入PicHoro**
+- **每种图床支持保存最多26个备用配置，可快速切换备用配置为主配置**
 - 连续上传模式，相机拍照后自动上传然后返回拍照页面，可连续拍照上传
 - 可导入剪贴板中的网络图片链接，同时使用换行符分割多个链接可批量导入
 - 上传图片后自动复制链接到剪贴板，多图上传时全部复制
@@ -50,7 +52,7 @@
 
 Github下载地址 [Github release](https://github.com/Kuingsmile/PicHoro/releases)  
 
-我的个人网站提供的最新版本下载地址 [https://www.horosama.com/self_apk/PicHoro_V1.9.0.apk](https://www.horosama.com/self_apk/PicHoro_V1.9.0.apk)
+我的个人网站提供的最新版本下载地址 [https://www.horosama.com/self_apk/PicHoro_V1.9.1.apk](https://www.horosama.com/self_apk/PicHoro_V1.9.1.apk)
 
 ### IOS
 
@@ -85,30 +87,19 @@ Github下载地址 [Github release](https://github.com/Kuingsmile/PicHoro/releas
 
   详细更新日志请查看[更新日志](https://github.com/Kuingsmile/PicHoro/blob/main/Version_update_log.md "更新日志")
 
-- 2022-11-16: **V1.90**:
+- 2022-11-19: **V1.91**:
 
-  - 新增：新增了对**Imgur**管理功能的支持。
-    - 图片查看时使用CDN进行了加速，避免图片加载过慢或失败。
-  - 新增：新增了对**FTP**和**SSH/SFTP**上传、相册、管理功能的支持,可匿名或SSH登录服务器管理文件，另外作为补充，内置了**SSH终端**，可直接管理**云服务器**。
-    - 由于一般情况下普通FTP功能限制较多，能做到的操作不多，因此管理功能仅支持SFTP方式。
-    - 禁止了对文件名包含 `*#?` 等特殊字符的文件的删除操作，防止出现意外情况。
-    - 由于服务器操作的敏感性，APP内仅实现了一些安全操作，其它操作请使用内置**SSH终端**进行。
-    - 为了解决FTP文件上图片无法直接预览的问题，在上传时会自动生成一份图片缩略图保存于缓存目录下用于相册内查看，在从相册中删除图片时会自动删除缓存目录下的缩略图。
-    - 缩略图保存路径为`手机存储/Android/data/com.example.horopic/cache/ftp/`，可根据需要自行删除。
-    - 管理功能针对普通目录和文件，为避免混乱，不支持软链接等特殊类型文件,如需管理软链接等特殊类型文件，请使用内置**SSH终端**。
-    - 支持选择管理功能入口目录，方便快速进入指定目录。
-  - 新增：Github和SSH/SFTP管理页面现在支持预览markdown文件。
-  - 新增：图床配置导出增加了**导出全部**的选项。
-  - 新增：修改了图片上传和删除时保存配置信息的逻辑，现在会在本地数据库保存每一张图片上传时对应的图床配置，这样即使上传后修改了图床配置，仍然可以正常删除云端图片，同时为后续的一个图床多套配置功能做准备。
-  - 新增：上传页面和相册页面顶部栏增加了配置按钮，方便快速修改常用配置。
-  - 优化：现在浏览本地文件时如果目标已被删除会显示空白提示页面。
-  - 优化：一些UI优化，包括如下：
-    - 本地图片预览修改为页面居中显示。
-    - 首页和相册页面的图床选择弹出栏的的顺序调整为图床首字母字典序。
-    - 图床配置和默认图床选择页面的顺序调整为图床首字母字典序。
-    - 更新日志界面现在支持跳转链接和选择文字。
-  - 修复：修复了在配置页面修改默认图床和单独图床配置页面内设置为默认图床后，上传页面弹出栏显示的默认图床和相册页面显示的图床没有同步更新的问题。
-  - 修复：修复了兰空图床管理页面内删除相册后，后续的部分文件会被错误显示为文件夹的问题。
+  - 新增：增加了对**兼容S3 API协议的平台**的支持，目前已测试通过的平台包括**AWS S3，backblaze和cloudfare R2**，其他平台只要兼容S3 API协议也可使用，但个人未全部测试，如果你使用了其他平台，欢迎反馈测试结果。
+  - 新增：现在每种图床可以保存最多26组备用配置，可一键替换默认图床配置，方便在不同的图床目录或例如在不同的S3兼容平台之间切换。
+    - 备用配置保存于本地，不会上传到云端。
+    - 可将备用配置导出为json格式并复制到剪贴板内，并可将剪贴板内的json格式的备用配置导入到APP内，方便保存和同步。
+    - 修改配置时可导入现有默认配置，方便快速修改。
+  - 优化：检查图床配置时现在会显示loading界面，避免误认为无响应。
+  - 修复：修复了腾讯云、阿里云、七牛云和又拍云在获取文件列表时，单目录下获取文件数量存在上限，导致不能获得全部文件列表的问题。
+  - 修复：修复了又拍云最多只能获取到25个存储桶的问题。
+  - 修复：修复了每次进入目录时都会检查一次存储桶是否为空的问题，大幅提高了目录文件的加载速度。
+  - 修复：修复了ftp管理起始目录如果不以'/'结尾导致报错的问题。
+  - 修复：修复了smms数据库更新数据的SQL语句错误导致无法更新图床配置的问题。
 
 - 2022-10-02: **V1.00**:
   - 项目初始化，完成基本的上传功能，目前仅支持兰空图床，需要手动授予存储和相机权限
@@ -131,6 +122,67 @@ Github下载地址 [Github release](https://github.com/Kuingsmile/PicHoro/releas
 2. `git clone https://github.com/Kuingsmile/PicHoro.git` 并进入项目。
 3. Windows 推荐使用VScode编辑和调试代码。
 
+### 依赖包修改
+
+本APP使用的部分依赖包需要手动修改源代码才可使用，修改修改的依赖包如下：
+
+#### flutter_speed_dial
+
+文件路径示例: `D:\flutter\.pub-cache\hosted\pub.flutter-io.cn\flutter_speed_dial-6.1.0+1\lib\src\speed_dial.dart`
+
+如下修改：
+
+```dart
+  //overlayEntry?.remove();
+    //overlayEntry?.dispose();
+    if (overlayEntry != null && overlayEntry!.mounted) {
+      overlayEntry?.remove();
+      overlayEntry?.dispose();
+    }
+```
+
+#### minio_new
+
+文件路径示例: `D:\flutter\.pub-cache\hosted\pub.flutter-io.cn\minio_new-1.0.1\lib\src\minio.dart`
+
+1. queries['maxKeys']修改为queries['max-keys']
+2. 添加导入 `import 'package:xml2json/xml2json.dart';`
+3. 如下修改`listBuckets`函数
+
+```dart
+  Future<List<Bucket>> listBuckets() async {
+    final resp = await _client.request(
+      method: 'GET',
+      region: region ?? 'us-east-1',
+    );
+    final myTransformer = Xml2Json();
+    myTransformer.parse(resp.body);
+    Map responseMap = json.decode(myTransformer.toParker());
+    print(responseMap);
+    List<Bucket> buckets = [];
+    if (responseMap['ListAllMyBucketsResult'] == null ||
+        responseMap['ListAllMyBucketsResult']['Buckets'] == null ||
+        responseMap['ListAllMyBucketsResult']['Buckets']['Bucket'] == null ||
+        responseMap['ListAllMyBucketsResult']['Buckets']['Bucket'].length ==
+            0) {
+      return buckets;
+    }
+    if (responseMap['ListAllMyBucketsResult']['Buckets']['Bucket'] is! List) {
+      buckets.add(Bucket(
+          DateTime.parse(responseMap['ListAllMyBucketsResult']['Buckets']
+              ['Bucket']['CreationDate']),
+          responseMap['ListAllMyBucketsResult']['Buckets']['Bucket']['Name']));
+      return buckets;
+    }
+    for (var bucket in responseMap['ListAllMyBucketsResult']['Buckets']
+        ['Bucket']) {
+      buckets
+          .add(Bucket(DateTime.parse(bucket['CreationDate']), bucket['Name']));
+    }
+    return buckets;
+  }
+```
+
 ### 软件打包
 
 如果你需要自行构建，可以使用 `flutter build apk` 或者 进入 `android` 目录，使用 `gradlew assembleRelease` 命令构建。
@@ -142,7 +194,6 @@ Github下载地址 [Github release](https://github.com/Kuingsmile/PicHoro/releas
 
 Copyright (c) 2022 Kuingsmile
 
-## Github star 
+## Github star
 
 [![Stargazers over time](https://starchart.cc/Kuingsmile/PicHoro.svg)](https://starchart.cc/Kuingsmile/PicHoro)
-
