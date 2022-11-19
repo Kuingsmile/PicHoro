@@ -300,7 +300,7 @@ class MySqlUtils {
       String encryptedToken = await encryptSelf(token);
 
       var results = await conn.query(
-          "update smms set ,token = ? where username = ?",
+          "update smms set token = ? where username = ?",
           [encryptedToken, username]);
       return 'Success';
     } catch (e) {
@@ -1535,6 +1535,140 @@ class MySqlUtils {
       FLog.error(
           className: 'MySqlUtils',
           methodName: 'updateImgurManage',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
+      return "Error";
+    } finally {
+      await conn.close();
+    }
+  }
+
+      static queryAws({required String username}) async {
+    var conn = await MySqlConnection.connect(settings);
+    try {
+      var results =
+          await conn.query('select * from aws where username = ?', [username]);
+
+      if (results.isEmpty) {
+        return "Empty";
+      }
+      Map<String, dynamic> resultsMap = {};
+      resultsMap.clear();
+      for (var row in results) {
+        //第一列是id
+        String accessKeyID = await decryptSelf(row[1].toString());
+        String secretAccessKey = await decryptSelf(row[2].toString());
+        String bucket = await decryptSelf(row[3].toString());
+        String endpoint = await decryptSelf(row[4].toString());
+        String region = await decryptSelf(row[5].toString());
+        String uploadPath = await decryptSelf(row[6].toString());
+        String customUrl = await decryptSelf(row[7].toString());
+
+        resultsMap['accessKeyID'] = accessKeyID;
+        resultsMap['secretAccessKey'] = secretAccessKey;
+        resultsMap['bucket'] = bucket;
+        resultsMap['endpoint'] = endpoint;
+        resultsMap['region'] = region;
+        resultsMap['uploadPath'] = uploadPath;
+        resultsMap['customUrl'] = customUrl;
+      }
+      return resultsMap;
+    } catch (e) {
+      FLog.error(
+          className: 'MySqlUtils',
+          methodName: 'queryAws',
+          text: formatErrorMessage({'username': username}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
+      return "Error";
+    } finally {
+      await conn.close();
+    }
+  }
+
+  static insertAws({required List content}) async {
+    var conn = await MySqlConnection.connect(settings);
+    try {
+      String accessKeyID = content[0].toString();
+      String secretAccessKey = content[1].toString();
+      String bucket = content[2].toString();
+      String endpoint = content[3].toString();
+      String region = content[4].toString();
+      String uploadPath = content[5].toString();
+      String customUrl = content[6].toString();
+      String username = content[7].toString();
+
+      String encryptedAccessKeyID = await encryptSelf(accessKeyID);
+      String encryptedSecretAccessKey = await encryptSelf(secretAccessKey);
+      String encryptedBucket = await encryptSelf(bucket);
+      String encryptedEndpoint = await encryptSelf(endpoint);
+      String encryptedRegion = await encryptSelf(region);
+      String encryptedUploadPath = await encryptSelf(uploadPath);
+      String encryptedCustomUrl = await encryptSelf(customUrl);
+
+
+      await conn.query(
+          "insert into aws (accessKeyID,secretAccessKey,bucket,endpoint,region,uploadPath,customUrl,username) values (?,?,?,?,?,?,?,?)",
+          [
+            encryptedAccessKeyID,
+            encryptedSecretAccessKey,
+            encryptedBucket,
+            encryptedEndpoint,
+            encryptedRegion,
+            encryptedUploadPath,
+            encryptedCustomUrl,
+            username
+          ]);
+      return 'Success';
+    } catch (e) {
+      FLog.error(
+          className: 'MySqlUtils',
+          methodName: 'insertAws',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
+      return "Error";
+    } finally {
+      await conn.close();
+    }
+  }
+
+  static updateAws({required List content}) async {
+    var conn = await MySqlConnection.connect(settings);
+
+    try {
+      String accessKeyID = content[0].toString();
+      String secretAccessKey = content[1].toString();
+      String bucket = content[2].toString();
+      String endpoint = content[3].toString();
+      String region = content[4].toString();
+      String uploadPath = content[5].toString();
+      String customUrl = content[6].toString();
+      String username = content[7].toString();
+
+      String encryptedAccessKeyID = await encryptSelf(accessKeyID);
+      String encryptedSecretAccessKey = await encryptSelf(secretAccessKey);
+      String encryptedBucket = await encryptSelf(bucket);
+      String encryptedEndpoint = await encryptSelf(endpoint);
+      String encryptedRegion = await encryptSelf(region);
+      String encryptedUploadPath = await encryptSelf(uploadPath);
+      String encryptedCustomUrl = await encryptSelf(customUrl);
+      
+      await conn.query(
+          "update aws set accessKeyID = ?,secretAccessKey = ?,bucket = ?,endpoint = ?,region = ?,uploadPath = ?,customUrl = ? where username = ?",
+          [
+            encryptedAccessKeyID,
+            encryptedSecretAccessKey,
+            encryptedBucket,
+            encryptedEndpoint,
+            encryptedRegion,
+            encryptedUploadPath,
+            encryptedCustomUrl,
+            username
+          ]);
+      return 'Success';
+    } catch (e) {
+      FLog.error(
+          className: 'MySqlUtils',
+          methodName: 'updateAws',
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
       return "Error";
