@@ -30,6 +30,7 @@ class DefaultPShostSelectState extends State<DefaultPShostSelect> {
     'aliyun',
     'upyun',
     'ftp',
+    'aws'
   ];
 
   @override
@@ -114,6 +115,17 @@ class DefaultPShostSelectState extends State<DefaultPShostSelect> {
             },
           ),
           ListTile(
+            title: const Text('S3兼容平台'),
+            trailing:
+                Global.defaultPShost == 'aws' ? const Icon(Icons.check) : null,
+            onTap: () async {
+              await setdefaultPShostRemoteAndLocal('aws');
+              eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
+              eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
+              setState(() {});
+            },
+          ),
+          ListTile(
             title: const Text('SM.MS'),
             trailing: Global.defaultPShost == 'sm.ms'
                 ? const Icon(Icons.check)
@@ -167,6 +179,7 @@ setdefaultPShostRemoteAndLocal(String psHost) async {
     'aliyun': MySqlUtils.queryAliyun,
     'upyun': MySqlUtils.queryUpyun,
     'ftp': MySqlUtils.queryFTP,
+    'aws': MySqlUtils.queryAws,
   };
 
   try {
@@ -222,6 +235,8 @@ setdefaultPShostRemoteAndLocal(String psHost) async {
         await Global.setShowedPBhost('upyun');
       } else if (psHost == 'ftp') {
         await Global.setShowedPBhost('PBhostExtend1');
+      } else if (psHost == 'aws') {
+        await Global.setShowedPBhost('PBhostExtend2');
       }
       return Fluttertoast.showToast(
           msg: "已经是默认配置",
@@ -256,6 +271,8 @@ setdefaultPShostRemoteAndLocal(String psHost) async {
           await Global.setShowedPBhost('upyun');
         } else if (psHost == 'ftp') {
           await Global.setShowedPBhost('PBhostExtend1');
+        } else if (psHost == 'aws') {
+          await Global.setShowedPBhost('PBhostExtend2');
         }
         showToast('已设置$psHost为默认图床');
       } else {
