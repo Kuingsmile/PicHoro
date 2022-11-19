@@ -1,33 +1,8 @@
 import 'dart:io';
-
 import 'package:flustars_flutter3/flustars_flutter3.dart';
 import 'package:sqflite/sqflite.dart';
 
 import 'package:horopic/album/album_sql.dart';
-
-//全局共享变量
-class UploadedImage {
-  String path;
-  String url;
-  String pbhost;
-  UploadedImage({required this.path, required this.url, required this.pbhost});
-
-  UploadedImage.fromMap(Map<String, dynamic> map)
-      : assert(map['path'] != null),
-        assert(map['url'] != null),
-        assert(map['pbhost'] != null),
-        path = map['path'],
-        url = map['url'],
-        pbhost = map['pbhost'];
-
-  Map<String, dynamic> toMap() {
-    return {
-      'path': path,
-      'url': url,
-      'pbhost': pbhost,
-    };
-  }
-}
 
 class Global {
   static String? imageFile;
@@ -96,6 +71,10 @@ class Global {
   static List<String> aliyunUploadList = [];
   static List<String> ftpDownloadList = [];
   static List<String> ftpUploadList = [];
+  static List<String> awsDownloadList = [];
+  static List<String> awsUploadList = [];
+
+
 
   static final List iconList = [
     "_blank",
@@ -791,5 +770,31 @@ class Global {
     List ftpDownloadList =
         SpUtil.getStringList('key_ftpDownloadList', defValue: [])!;
     return ftpDownloadList;
+  }
+
+  static setAwsUploadList(List<String> awsUploadList) async {
+    await SpUtil.getInstance();
+    SpUtil.putStringList('key_awsUploadList', awsUploadList);
+    Global.awsUploadList = awsUploadList;
+  }
+
+  static getAwsUploadList() async {
+    await SpUtil.getInstance();
+    List awsUploadList =
+        SpUtil.getStringList('key_awsUploadList', defValue: [])!;
+    return awsUploadList;
+  }
+
+  static setAwsDownloadList(List<String> awsDownloadList) async {
+    await SpUtil.getInstance();
+    SpUtil.putStringList('key_awsDownloadList', awsDownloadList);
+    Global.awsDownloadList = awsDownloadList;
+  }
+
+  static getAwsDownloadList() async {
+    await SpUtil.getInstance();
+    List awsDownloadList =
+        SpUtil.getStringList('key_awsDownloadList', defValue: [])!;
+    return awsDownloadList;
   }
 }
