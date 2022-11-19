@@ -504,6 +504,20 @@ class HomePageState extends State<HomePage>
         for (int i = 0; i < letter.length; i++) {
           maps['hostSpecificArg${letter[i]}'] = 'test';
         }
+      } else if (Global.defaultPShost == 'aws') {
+        // ["success", formatedURL, returnUrl, pictureKey,displayUrl]
+        maps = {
+          'path': path,
+          'name': name,
+          'url': uploadResult[2], //aws文件原始地址
+          'PBhost': Global.defaultPShost,
+          'pictureKey': uploadResult[3],
+          'hostSpecificArgA': uploadResult[4], //实际展示的是displayUrl
+        };
+        List letter = 'BCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+        for (int i = 0; i < letter.length; i++) {
+          maps['hostSpecificArg${letter[i]}'] = 'test';
+        }
       }
 
       if (Global.defaultPShost == 'ftp') {
@@ -698,7 +712,6 @@ class HomePageState extends State<HomePage>
             'hostSpecificArgE': 'test',
           };
         } else if (Global.defaultPShost == 'ftp') {
-          // ["success", formatedURL, returnUrl, pictureKey,displayUrl]
           maps = {
             'path': path,
             'name': name,
@@ -719,9 +732,23 @@ class HomePageState extends State<HomePage>
           for (int i = 0; i < letter.length; i++) {
             maps['hostSpecificArg${letter[i]}'] = 'test';
           }
+        } else if (Global.defaultPShost == 'aws') {
+          // ["success", formatedURL, returnUrl, pictureKey,displayUrl]
+          maps = {
+            'path': path,
+            'name': name,
+            'url': uploadResult[2], //aws文件原始地址
+            'PBhost': Global.defaultPShost,
+            'pictureKey': uploadResult[3],
+            'hostSpecificArgA': uploadResult[4], //实际展示的是displayUrl
+          };
+          List letter = 'BCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+          for (int i = 0; i < letter.length; i++) {
+            maps['hostSpecificArg${letter[i]}'] = 'test';
+          }
         }
 
-        if (Global.defaultPShost == 'ftp') {
+        if (Global.defaultPShost == 'ftp' || Global.defaultPShost == 'aws') {
           await AlbumSQL.insertData(Global.imageDBExtend!,
               pBhostToTableName[Global.defaultPShost]!, maps);
         } else {
@@ -1678,10 +1705,19 @@ class HomePageState extends State<HomePage>
                         children: [
                           SimpleDialogOption(
                               child: ListTile(
-                            title:
-                                const Text('占位图床', textAlign: TextAlign.center),
-                            onTap: () {
-                              showToast('该图床仅为示例');
+                            title: Text('S3兼容平台',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                    color: Global.defaultPShost == 'aws'
+                                        ? Colors.amber
+                                        : const Color.fromARGB(
+                                            255, 97, 180, 248))),
+                            onTap: () async {
+                              Navigator.pop(context);
+                              await setdefaultPShostRemoteAndLocal('aws');
+                              eventBus.fire(
+                                  AlbumRefreshEvent(albumKeepAlive: false));
+                              setState(() {});
                             },
                           )),
                         ],
