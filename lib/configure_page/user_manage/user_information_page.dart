@@ -57,6 +57,7 @@ class UserInformationPageState
     'imgur': 'Imgur',
     'lsky.pro': '兰空图床',
     'ftp': 'FTP',
+    'aws':'S3兼容平台'
   };
 
   @override
@@ -593,7 +594,7 @@ class UserInformationPageState
                   '6',
                   '7',
                   '8'
-                      '9',
+                  '9',
                   '10',
                   '11',
                   '12',
