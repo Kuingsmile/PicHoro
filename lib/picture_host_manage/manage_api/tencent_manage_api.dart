@@ -12,7 +12,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/sql_utils.dart';
 import 'package:horopic/utils/common_functions.dart';
-import 'package:horopic/picture_host_configure/tencent_configure.dart';
+import 'package:horopic/picture_host_configure/configure_page/tencent_configure.dart';
 import 'package:horopic/api/tencent_api.dart';
 
 class TencentManageAPI {
@@ -93,7 +93,7 @@ class TencentManageAPI {
       Map uriEncodeUrlParam = {};
       urlParam.forEach((key, value) {
         uriEncodeUrlParam[Uri.encodeComponent(key).toLowerCase()] =
-            Uri.encodeComponent(value);
+            Uri.encodeComponent(value.toString());
       });
 
       List urlParamKeyList = uriEncodeUrlParam.keys.toList();
@@ -530,6 +530,8 @@ class TencentManageAPI {
     Map<String, dynamic> header = {
       'Host': host,
     };
+    query['max-keys'] = 1000;
+
     String authorization = tecentAuthorization(
         method, urlpath, header, secretId, secretKey, query);
 
@@ -543,14 +545,71 @@ class TencentManageAPI {
     Dio dio = Dio(baseoptions);
 
     try {
+      String marker = '';
       var response = await dio.get('https://$host', queryParameters: query);
       var responseBody = response.data;
       final myTransformer = Xml2Json();
       myTransformer.parse(responseBody);
       Map responseMap = json.decode(myTransformer.toParker());
-
       if (response.statusCode == 200) {
-        return ['success', responseMap];
+        if (responseMap['ListBucketResult']['IsTruncated'] == null ||
+            responseMap['ListBucketResult']['IsTruncated'] == 'false') {
+          return ['success', responseMap];
+        } else {
+          Map tempMap = Map.from(responseMap);
+          while (tempMap['ListBucketResult']['IsTruncated'] == 'true') {
+            marker = tempMap['ListBucketResult']['NextMarker'];
+            query['marker'] = marker;
+            response = await dio.get('https://$host', queryParameters: query);
+            responseBody = response.data;
+            myTransformer.parse(responseBody);
+            tempMap.clear();
+            tempMap = json.decode(myTransformer.toParker());
+            if (response.statusCode == 200) {
+              if (tempMap['ListBucketResult']['Contents'] != null) {
+                if (tempMap['ListBucketResult']['Contents'] is! List) {
+                 
+                  tempMap['ListBucketResult']
+                      ['Contents'] = [tempMap['ListBucketResult']['Contents']];
+                }
+                if (responseMap['ListBucketResult']['Contents'] == null) {
+                  responseMap['ListBucketResult']['Contents'] =
+                      tempMap['ListBucketResult']['Contents'];
+                } else {
+                  if (responseMap['ListBucketResult']['Contents'] is! List) {
+                    responseMap['ListBucketResult']['Contents'] = [
+                      responseMap['ListBucketResult']['Contents']
+                    ];
+                  }
+                  responseMap['ListBucketResult']['Contents']
+                      .addAll(tempMap['ListBucketResult']['Contents']);
+                }
+              }
+              if (tempMap['ListBucketResult']['CommonPrefixes'] != null) {
+                if (tempMap['ListBucketResult']['CommonPrefixes'] is! List) {
+                  tempMap['ListBucketResult']['CommonPrefixes'] = [
+                    tempMap['ListBucketResult']['CommonPrefixes']
+                  ];
+                }
+                if (responseMap['ListBucketResult']['CommonPrefixes'] == null) {
+                  responseMap['ListBucketResult']['CommonPrefixes'] =
+                      tempMap['ListBucketResult']['CommonPrefixes'];
+                } else {
+                  if (responseMap['ListBucketResult']['CommonPrefixes'] is! List) {
+                    responseMap['ListBucketResult']['CommonPrefixes'] = [
+                      responseMap['ListBucketResult']['CommonPrefixes']
+                    ];
+                  }
+                  responseMap['ListBucketResult']['CommonPrefixes']
+                      .addAll(tempMap['ListBucketResult']['CommonPrefixes']);
+                }
+              }
+            } else {
+              return ['failed'];
+            }
+          }
+          return ['success', responseMap];
+        }
       } else {
         return ['failed'];
       }

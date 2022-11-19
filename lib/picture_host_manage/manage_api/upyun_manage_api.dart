@@ -10,7 +10,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/sql_utils.dart';
 import 'package:horopic/utils/common_functions.dart';
-import 'package:horopic/picture_host_configure/upyun_configure.dart';
+import 'package:horopic/picture_host_configure/configure_page/upyun_configure.dart';
 
 //又拍云的API文档，写的是真的简陋
 class UpyunManageAPI {
@@ -263,9 +263,7 @@ class UpyunManageAPI {
       return ['failed'];
     }
     String token = configMap['token'];
-
     String host = 'https://api.upyun.com/buckets';
-
     BaseOptions baseoptions = BaseOptions(
       sendTimeout: 30000,
       receiveTimeout: 30000,
@@ -273,16 +271,43 @@ class UpyunManageAPI {
     );
     baseoptions.headers = {
       'Authorization': 'Bearer $token',
-      'limit': '100',
-      'business_type': 'file',
+    };
+    Map<String, dynamic> queryParameters = {
+      'limit': 100,
+      'bucket_type': 'file',
     };
     Dio dio = Dio(baseoptions);
     try {
+      String max = '';
       var response = await dio.get(
         host,
+        queryParameters: queryParameters,
       );
+      Map responseMap = response.data;
       if (response.statusCode == 200) {
-        return ['success', response.data['buckets']];
+        if (responseMap['pager']['max'] == null) {
+          return ['success', responseMap['buckets']];
+        } else {
+          Map tempMap = Map.from(responseMap);
+          while (tempMap['pager']['max'] != null) {
+            max = tempMap['pager']['max'].toString();
+            queryParameters['max'] = max;
+            response = await dio.get(
+              host,
+              queryParameters: queryParameters,
+            );
+            tempMap.clear();
+            tempMap = response.data;
+            if (response.statusCode == 200) {
+              if (tempMap['buckets'] != null) {
+                responseMap['buckets'].addAll(tempMap['buckets']);
+              }
+            } else {
+              return ['failed'];
+            }
+          }
+        }
+        return ['success', responseMap['buckets']];
       } else {
         return ['failed'];
       }
@@ -718,9 +743,33 @@ class UpyunManageAPI {
     String url = 'http://$upyunBaseURL$uri';
     Dio dio = Dio(baseoptions);
     try {
+      String marker = '';
       var response = await dio.get(url);
+      Map responseMap = response.data;
       if (response.statusCode == 200) {
-        return ['success', response.data['files']];
+        if (responseMap['iter'] == null ||
+            responseMap['iter'].toString().isEmpty) {
+          return ['success', responseMap['files']];
+        } else {
+          Map tempMap = Map.from(responseMap);
+          while (tempMap['iter'] != null &&
+              tempMap['iter'].toString().isNotEmpty &&
+              tempMap['iter'].toString() != 'g2gCZAAEbmV4dGQAA2VvZg') {
+            marker = tempMap['iter'];
+            baseoptions.headers['x-list-iter'] = marker;
+            dio = Dio(baseoptions);
+            response = await dio.get(url);
+            tempMap = response.data;
+            if (response.statusCode == 200) {
+              if (tempMap['files'] != null) {
+                responseMap['files'].addAll(tempMap['files']);
+              }
+            } else {
+              return ['failed'];
+            }
+          }
+        }
+        return ['success', responseMap['files']];
       } else {
         return ['failed'];
       }
@@ -785,9 +834,7 @@ class UpyunManageAPI {
       'folder': 'true',
       'Date': HttpDate.format(DateTime.now()),
     };
-
     String url = 'http://$upyunBaseURL$uri';
-
     Dio dio = Dio(baseoptions);
     try {
       var response = await dio.post(url);

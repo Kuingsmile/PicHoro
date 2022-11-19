@@ -10,7 +10,7 @@ import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/sql_utils.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/api/qiniu_api.dart';
-import 'package:horopic/picture_host_configure/qiniu_configure.dart';
+import 'package:horopic/picture_host_configure/configure_page/qiniu_configure.dart';
 
 class QiniuManageAPI {
   static Map<String, String> areaUploadCodeName = {
@@ -33,7 +33,7 @@ class QiniuManageAPI {
     'ap-northeast-1': '亚太-首尔',
   };
 
-  static Future<File> get _localFile async {
+  static Future<File> get localFile async {
     final path = await _localPath;
     String defaultUser = await Global.getUser();
     return File('$path/${defaultUser}_qiniu_config.txt');
@@ -46,7 +46,7 @@ class QiniuManageAPI {
 
   static Future<String> readQiniuConfig() async {
     try {
-      final file = await _localFile;
+      final file = await localFile;
       String contents = await file.readAsString();
       return contents;
     } catch (e) {
@@ -545,7 +545,7 @@ signingStr=signingStr+<body>
         final qiniuConfig = QiniuConfigModel(
             accessKey, secretKey, bucket, url, area, options, path);
         final qiniuConfigJson = jsonEncode(qiniuConfig);
-        final qiniuConfigFile = await _localFile;
+        final qiniuConfigFile = await localFile;
         await qiniuConfigFile.writeAsString(qiniuConfigJson);
         return ['success'];
       } else {
@@ -605,6 +605,8 @@ signingStr=signingStr+<body>
     Dio dio = Dio(baseoptions);
 
     try {
+      String marker = '';
+      String newQuery = queryStr;
       var response = await dio.get(
         'https://$host$urlpath?$queryStr',
         options: Options(
@@ -615,9 +617,73 @@ signingStr=signingStr+<body>
           },
         ),
       );
-
+      Map responseMap = response.data;
       if (response.statusCode == 200) {
-        return ['success', response.data];
+        if (responseMap['marker'] == null || responseMap['marker'].isEmpty) {
+          return ['success', responseMap];
+        } else {
+          Map tempMap = Map.from(responseMap);
+          while (tempMap['marker'] != null && tempMap['marker'].isNotEmpty) {
+            marker = tempMap['marker'];
+            newQuery = '$queryStr&marker=${Uri.encodeComponent(marker)}';
+            String authorization = await qiniuAuthorization(
+                method,
+                urlpath,
+                newQuery,
+                host,
+                'application/x-www-form-urlencoded',
+                null,
+                '',
+                accessKey,
+                secretKey);
+            var response = await dio.get(
+              'https://$host$urlpath?$newQuery',
+              options: Options(
+                headers: {
+                  'Authorization': 'Qiniu $authorization',
+                  'Host': host,
+                  'Content-Type': 'application/x-www-form-urlencoded',
+                },
+              ),
+            );
+            tempMap.clear();
+            tempMap = response.data;
+            if (response.statusCode == 200) {
+              if (tempMap['items'] != null) {
+                if (tempMap['items'] is! List) {
+                  tempMap['items'] = [tempMap['items']];
+                }
+                if (responseMap['items'] == null) {
+                  responseMap['items'] = tempMap['items'];
+                } else {
+                  if (responseMap['items'] is! List) {
+                    responseMap['items'] = [responseMap['items']];
+                  }
+                  responseMap['items'].addAll(tempMap['items']);
+                }
+              }
+              if (tempMap['commonPrefixes'] != null) {
+                if (tempMap['commonPrefixes'] is! List) {
+                  tempMap['commonPrefixes'] = [tempMap['commonPrefixes']];
+                }
+                if (responseMap['commonPrefixes'] == null) {
+                  responseMap['commonPrefixes'] = tempMap['commonPrefixes'];
+                } else {
+                  if (responseMap['commonPrefixes'] is! List) {
+                    responseMap['commonPrefixes'] = [
+                      responseMap['commonPrefixes']
+                    ];
+                  }
+                  responseMap['commonPrefixes']
+                      .addAll(tempMap['commonPrefixes']);
+                }
+              }
+            } else {
+              return ['failed'];
+            }
+          }
+          return ['success', responseMap];
+        }
       } else {
         return ['failed'];
       }

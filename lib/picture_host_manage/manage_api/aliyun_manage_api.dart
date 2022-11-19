@@ -12,7 +12,7 @@ import 'package:xml2json/xml2json.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/sql_utils.dart';
 import 'package:horopic/utils/common_functions.dart';
-import 'package:horopic/picture_host_configure/aliyun_configure.dart';
+import 'package:horopic/picture_host_configure/configure_page/aliyun_configure.dart';
 
 class AliyunManageAPI {
   static Map<String, String> areaCodeName = {
@@ -533,8 +533,9 @@ class AliyunManageAPI {
     );
     baseoptions.headers = {
       'Date': HttpDate.format(DateTime.now()),
-      'list-type': '2',
     };
+    query['max-keys'] = 1000;
+    query['list-type'] = 2;
     String authorization =
         await aliyunAuthorization(method, urlpath, baseoptions.headers, '', '');
     baseoptions.headers['Authorization'] = authorization;
@@ -542,14 +543,80 @@ class AliyunManageAPI {
     Dio dio = Dio(baseoptions);
 
     try {
-      var response =
-          await dio.get('https://$host/?list-type=2', queryParameters: query);
+      String marker = '';
+      var response = await dio.get('https://$host/', queryParameters: query);
       var responseBody = response.data;
       final myTransformer = Xml2Json();
       myTransformer.parse(responseBody);
       Map responseMap = json.decode(myTransformer.toParker());
       if (response.statusCode == 200) {
-        return ['success', responseMap];
+        if (responseMap['ListBucketResult']['IsTruncated'] == null ||
+            responseMap['ListBucketResult']['IsTruncated'] == 'false') {
+          return ['success', responseMap];
+        } else {
+          Map tempMap = Map.from(responseMap);
+          while (tempMap['ListBucketResult']['IsTruncated'] == 'true') {
+            marker = tempMap['ListBucketResult']['NextContinuationToken'];
+            query['continuation-token'] = marker;
+             urlpath = '/$bucket/?continuation-token=$marker';
+            baseoptions.headers = {
+              'Date': HttpDate.format(DateTime.now()),
+            };
+            String authorization = await aliyunAuthorization(
+                method, urlpath, baseoptions.headers, '', '');
+            baseoptions.headers['Authorization'] = authorization;
+
+            dio = Dio(baseoptions);
+            response = await dio.get('https://$host/', queryParameters: query);
+            responseBody = response.data;
+            myTransformer.parse(responseBody);
+            tempMap.clear();
+            tempMap = json.decode(myTransformer.toParker());
+            if (response.statusCode == 200) {
+              if (tempMap['ListBucketResult']['Contents'] != null) {
+                if (tempMap['ListBucketResult']['Contents'] is! List) {
+                  tempMap['ListBucketResult']
+                      ['Contents'] = [tempMap['ListBucketResult']['Contents']];
+                }
+                if (responseMap['ListBucketResult']['Contents'] == null) {
+                  responseMap['ListBucketResult']['Contents'] =
+                      tempMap['ListBucketResult']['Contents'];
+                } else {
+                  if (responseMap['ListBucketResult']['Contents'] is! List) {
+                    responseMap['ListBucketResult']['Contents'] = [
+                      responseMap['ListBucketResult']['Contents']
+                    ];
+                  }
+                  responseMap['ListBucketResult']['Contents']
+                      .addAll(tempMap['ListBucketResult']['Contents']);
+                }
+              }
+              if (tempMap['ListBucketResult']['CommonPrefixes'] != null) {
+                if (tempMap['ListBucketResult']['CommonPrefixes'] is! List) {
+                  tempMap['ListBucketResult']['CommonPrefixes'] = [
+                    tempMap['ListBucketResult']['CommonPrefixes']
+                  ];
+                }
+                if (responseMap['ListBucketResult']['CommonPrefixes'] == null) {
+                  responseMap['ListBucketResult']['CommonPrefixes'] =
+                      tempMap['ListBucketResult']['CommonPrefixes'];
+                } else {
+                  if (responseMap['ListBucketResult']['CommonPrefixes']
+                      is! List) {
+                    responseMap['ListBucketResult']['CommonPrefixes'] = [
+                      responseMap['ListBucketResult']['CommonPrefixes']
+                    ];
+                  }
+                  responseMap['ListBucketResult']['CommonPrefixes']
+                      .addAll(tempMap['ListBucketResult']['CommonPrefixes']);
+                }
+              }
+            } else {
+              return ['failed'];
+            }
+          }
+          return ['success', responseMap];
+        }
       } else {
         return ['failed'];
       }
