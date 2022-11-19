@@ -153,6 +153,7 @@ class AllPShostState extends State<AllPShost> {
         "aliyun": "$configPath/${defaultUser}_aliyun_config.txt",
         "upyun": "$configPath/${defaultUser}_upyun_config.txt",
         "ftp": "$configPath/${defaultUser}_ftp_config.txt",
+        "aws": "$configPath/${defaultUser}_aws_config.txt",
       };
       String config = await File(configFilePath[pshost]!).readAsString();
       Map<String, dynamic> configMap = jsonDecode(config);
@@ -189,6 +190,7 @@ class AllPShostState extends State<AllPShost> {
         "aliyun": "$configPath/${defaultUser}_aliyun_config.txt",
         "upyun": "$configPath/${defaultUser}_upyun_config.txt",
         "ftp": "$configPath/${defaultUser}_ftp_config.txt",
+        "aws": "$configPath/${defaultUser}_aws_config.txt",
       };
       Map<String, dynamic> configMap = {};
       for (var key in configFilePath.keys) {
@@ -1341,6 +1343,14 @@ class AllPShostState extends State<AllPShost> {
           trailing: const Icon(Icons.arrow_forward_ios),
         ),
         ListTile(
+          title: const Text('S3兼容平台'),
+          onTap: () {
+            Application.router.navigateTo(context, Routes.awsPShostSelect,
+                transition: TransitionType.cupertino);
+          },
+          trailing: const Icon(Icons.arrow_forward_ios),
+        ),
+        ListTile(
           title: const Text('SM.MS图床'),
           onTap: () {
             Application.router.navigateTo(context, Routes.smmsPShostSelect,
@@ -1431,6 +1441,14 @@ class AllPShostState extends State<AllPShost> {
                         child: const Text('七牛云', textAlign: TextAlign.center),
                         onPressed: () {
                           exportConfiguration('qiniu');
+                          Navigator.pop(context);
+                        },
+                      ),
+                      SimpleDialogOption(
+                        child:
+                            const Text('S3兼容平台', textAlign: TextAlign.center),
+                        onPressed: () {
+                          exportConfiguration('aws');
                           Navigator.pop(context);
                         },
                       ),
