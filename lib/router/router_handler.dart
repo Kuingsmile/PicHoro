@@ -23,16 +23,11 @@ import 'package:horopic/configure_page/user_manage/login_page.dart';
 import 'package:horopic/configure_page/user_manage/user_information_page.dart';
 import 'package:horopic/configure_page/user_manage/picture_host_info_page.dart';
 
-import 'package:horopic/picture_host_configure/imgur_configure.dart';
-import 'package:horopic/picture_host_configure/smms_configure.dart';
-import 'package:horopic/picture_host_configure/lskypro_configure.dart';
-import 'package:horopic/picture_host_configure/github_configure.dart';
-import 'package:horopic/picture_host_configure/aliyun_configure.dart';
-import 'package:horopic/picture_host_configure/tencent_configure.dart';
-import 'package:horopic/picture_host_configure/qiniu_configure.dart';
-import 'package:horopic/picture_host_configure/upyun_configure.dart';
-import 'package:horopic/picture_host_configure/ftp_configure.dart';
+import 'package:horopic/picture_host_configure/configure_page/configure_export.dart';
 import 'package:horopic/picture_host_configure/default_picture_host_select.dart';
+
+import 'package:horopic/picture_host_configure/configure_store/configure_store_page.dart';
+import 'package:horopic/picture_host_configure/configure_store/configure_store_edit_page/configure_store_edit_export.dart';
 
 import 'package:horopic/picture_host_manage/tencent/tencent_bucket_list_page.dart';
 import 'package:horopic/picture_host_manage/tencent/tencent_bucket_information_page.dart';
@@ -98,6 +93,12 @@ import 'package:horopic/picture_host_manage/ftp/sftp_local_image_preview.dart';
 import 'package:horopic/picture_host_manage/ftp/sftp_download_manage_page.dart';
 
 import 'package:horopic/picture_host_manage/common_page/file_explorer/md_preview.dart';
+
+import 'package:horopic/picture_host_manage/aws/aws_bucket_list_page.dart';
+import 'package:horopic/picture_host_manage/aws/aws_new_bucket_configure.dart';
+import 'package:horopic/picture_host_manage/aws/aws_file_explorer.dart';
+import 'package:horopic/picture_host_manage/aws/aws_file_information_page.dart';
+import 'package:horopic/picture_host_manage/aws/aws_download_manage_page.dart';
 
 //root
 Handler rootHandler = Handler(
@@ -220,6 +221,132 @@ var upyunPShostSelectHandler = Handler(
 var ftpPShostSelectHandler = Handler(
     handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
   return const FTPConfig();
+});
+
+//aws图床配置页面
+var awsPShostSelectHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  return const AwsConfig();
+});
+
+//备用配置查看页面
+
+var configureStorePageHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  String psHost = params['psHost']!.first;
+  return ConfigureStorePage(
+    psHost: psHost,
+  );
+});
+
+//aliyun备用配置编辑页面
+var aliyunConfigureStoreEditPageHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  String storeKey = params['storeKey']!.first;
+  Map psInfo = json.decode(params['psInfo']!.first);
+  return AliyunConfigureStoreEdit(
+    storeKey: storeKey,
+    psInfo: psInfo,
+  );
+});
+
+//aws备用配置编辑页面
+var awsConfigureStoreEditPageHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  String storeKey = params['storeKey']!.first;
+  Map psInfo = json.decode(params['psInfo']!.first);
+  return AwsConfigureStoreEdit(
+    storeKey: storeKey,
+    psInfo: psInfo,
+  );
+});
+
+//ftp备用配置编辑页面
+var ftpConfigureStoreEditPageHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  String storeKey = params['storeKey']!.first;
+  Map psInfo = json.decode(params['psInfo']!.first);
+  return FtpConfigureStoreEdit(
+    storeKey: storeKey,
+    psInfo: psInfo,
+  );
+});
+
+//github备用配置编辑页面
+var githubConfigureStoreEditPageHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  String storeKey = params['storeKey']!.first;
+  Map psInfo = json.decode(params['psInfo']!.first);
+  return GithubConfigureStoreEdit(
+    storeKey: storeKey,
+    psInfo: psInfo,
+  );
+});
+
+//imgur备用配置编辑页面
+var imgurConfigureStoreEditPageHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  String storeKey = params['storeKey']!.first;
+  Map psInfo = json.decode(params['psInfo']!.first);
+  return ImgurConfigureStoreEdit(
+    storeKey: storeKey,
+    psInfo: psInfo,
+  );
+});
+
+//lskypro备用配置编辑页面
+var lskyproConfigureStoreEditPageHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  String storeKey = params['storeKey']!.first;
+  Map psInfo = json.decode(params['psInfo']!.first);
+  return LskyproConfigureStoreEdit(
+    storeKey: storeKey,
+    psInfo: psInfo,
+  );
+});
+
+//qiniu备用配置编辑页面
+var qiniuConfigureStoreEditPageHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  String storeKey = params['storeKey']!.first;
+  Map psInfo = json.decode(params['psInfo']!.first);
+  return QiniuConfigureStoreEdit(
+    storeKey: storeKey,
+    psInfo: psInfo,
+  );
+});
+
+//smms备用配置编辑页面
+var smmsConfigureStoreEditPageHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  String storeKey = params['storeKey']!.first;
+  Map psInfo = json.decode(params['psInfo']!.first);
+  return SmmsConfigureStoreEdit(
+    storeKey: storeKey,
+    psInfo: psInfo,
+  );
+});
+
+//tencent备用配置编辑页面
+var tencentConfigureStoreEditPageHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  String storeKey = params['storeKey']!.first;
+  Map psInfo = json.decode(params['psInfo']!.first);
+  return TencentConfigureStoreEdit(
+    storeKey: storeKey,
+    psInfo: psInfo,
+  );
+});
+
+//upyun备用配置编辑页面
+var upyunConfigureStoreEditPageHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  String storeKey = params['storeKey']!.first;
+  Map psInfo = json.decode(params['psInfo']!.first);
+  return UpyunConfigureStoreEdit(
+    storeKey: storeKey,
+    psInfo: psInfo,
+  );
 });
 
 //通用配置页面
@@ -734,4 +861,46 @@ var mdFilePreviewHandler = Handler(
     filePath: filePath,
     fileName: fileName,
   );
+});
+
+//Aws存储桶列表页面
+var awsBucketListHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  return const AwsBucketList();
+});
+
+//Aws新建存储桶页面
+var newAwsBucketHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  return const AwsNewBucketConfig();
+});
+
+//Aws存储桶文件列表页面
+var awsFileExplorerHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  var element = json.decode(params['element']!.first);
+  var bucketPrefix = params['bucketPrefix']!.first;
+  return AwsFileExplorer(
+    element: element,
+    bucketPrefix: bucketPrefix,
+  );
+});
+
+//Aws文件详情页面
+var awsFileInformationHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  var fileMap = json.decode(params['fileMap']!.first);
+  return AwsFileInformation(
+    fileMap: fileMap,
+  );
+});
+
+//Aws存储下载文件页面
+var awsDownloadFileHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  var bucketName = params['bucketName']!.first;
+  String downloadPath = params['downloadPath']!.first;
+  String tabIndex = params['tabIndex']!.first;
+  return AwsUpDownloadManagePage(
+      bucketName: bucketName, downloadPath: downloadPath, tabIndex: tabIndex);
 });

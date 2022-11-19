@@ -25,6 +25,18 @@ class Routes {
   static String qiniuPShostSelect = "/qiniuPShostSelect";
   static String upyunPShostSelect = "/upyunPShostSelect";
   static String ftpPShostSelect = "/ftpPShostSelect";
+  static String awsPShostSelect = "/awsPShostSelect";
+  static String configureStorePage = "/configureStorePage";
+  static String aliyunConfigureStoreEditPage = "/aliyunConfigureStoreEditPage";
+  static String awsConfigureStoreEditPage = "/awsConfigureStoreEditPage";
+  static String ftpConfigureStoreEditPage = "/ftpConfigureStoreEditPage";
+  static String githubConfigureStoreEditPage = "/githubConfigureStoreEditPage";
+  static String imgurConfigureStoreEditPage = "/imgurConfigureStoreEditPage";
+  static String lskyproConfigureStoreEditPage = "/lskyConfigureStoreEditPage";
+  static String qiniuConfigureStoreEditPage = "/qiniuConfigureStoreEditPage";
+  static String smmsConfigureStoreEditPage = "/smmsConfigureStoreEditPage";
+  static String tencentConfigureStoreEditPage = "/tencentConfigureStoreEditPage";
+  static String upyunConfigureStoreEditPage = "/upyunConfigureStoreEditPage";
   static String commonConfig = "/commonConfig";
   static String renameFile = "/renameFile";
   static String linkFormatSelect = "/linkFormatSelect";
@@ -87,6 +99,11 @@ class Routes {
   static String sftpLocalImagePreview = "/sftpLocalImagePreview";
   static String sftpUpDownloadManagePage = "/sftpUpDownloadManagePage";
   static String mdPreview = "/mdPreview";
+  static String awsBucketList = "/awsBucketList";
+  static String awsNewBucketConfig = "/awsNewBucketConfig";
+  static String awsFileExplorer = "/awsFileExplorer";
+  static String awsFileInformation = "/awsFileInformation";
+  static String awsUpDownloadManagePage = "/awsUpDownloadManagePage";
 
   static void configureRoutes(FluroRouter router) {
     router.notFoundHandler = Handler(
@@ -114,6 +131,17 @@ class Routes {
     router.define(qiniuPShostSelect, handler: qiniuPShostSelectHandler);
     router.define(upyunPShostSelect, handler: upyunPShostSelectHandler);
     router.define(ftpPShostSelect, handler: ftpPShostSelectHandler);
+    router.define(awsPShostSelect, handler: awsPShostSelectHandler);
+    router.define(aliyunConfigureStoreEditPage, handler: aliyunConfigureStoreEditPageHandler);
+    router.define(awsConfigureStoreEditPage, handler: awsConfigureStoreEditPageHandler);
+    router.define(ftpConfigureStoreEditPage, handler: ftpConfigureStoreEditPageHandler);
+    router.define(githubConfigureStoreEditPage, handler: githubConfigureStoreEditPageHandler);
+    router.define(imgurConfigureStoreEditPage, handler: imgurConfigureStoreEditPageHandler);
+    router.define(lskyproConfigureStoreEditPage, handler: lskyproConfigureStoreEditPageHandler);
+    router.define(qiniuConfigureStoreEditPage, handler: qiniuConfigureStoreEditPageHandler);
+    router.define(smmsConfigureStoreEditPage, handler: smmsConfigureStoreEditPageHandler);
+    router.define(tencentConfigureStoreEditPage, handler: tencentConfigureStoreEditPageHandler);
+    router.define(upyunConfigureStoreEditPage, handler: upyunConfigureStoreEditPageHandler);
     router.define(commonConfig, handler: commonConfigHandler);
     router.define(renameFile, handler: renameFileHandler);
     router.define(linkFormatSelect, handler: linkFormatSelectHandler);
@@ -188,5 +216,11 @@ class Routes {
     router.define(sftpLocalImagePreview, handler: sftplocalImagePreviewHandler);
     router.define(sftpUpDownloadManagePage, handler: sftpDownloadFileHandler);
     router.define(mdPreview, handler: mdFilePreviewHandler);
+    router.define(awsBucketList, handler: awsBucketListHandler);
+    router.define(awsNewBucketConfig, handler: newAwsBucketHandler);
+    router.define(awsFileExplorer, handler: awsFileExplorerHandler);
+    router.define(awsFileInformation, handler: awsFileInformationHandler);
+    router.define(awsUpDownloadManagePage, handler: awsDownloadFileHandler);
+    router.define(configureStorePage, handler: configureStorePageHandler);
   }
 }
