@@ -58,6 +58,7 @@ class UploadedImagesState extends State<UploadedImages>
     'aliyun': '阿里云',
     'upyun': '又拍云',
     'PBhostExtend1': 'FTP',
+    'PBhostExtend2': 'S3兼容平台',
   };
 
   bool albumKeepAlive = true;
@@ -462,6 +463,11 @@ class UploadedImagesState extends State<UploadedImages>
                     Application.router.navigateTo(context,
                         '${Routes.localImagePreview}?index=$index&images=${Uri.encodeComponent(urlList)}',
                         transition: TransitionType.none);
+                  } else if (Global.defaultShowedPBhost == 'PBhostExtend2') {
+                    String urlList = currentShowedImagesUrl.join(',');
+                    Application.router.navigateTo(context,
+                        '${Routes.albumImagePreview}?index=$index&images=${Uri.encodeComponent(urlList)}',
+                        transition: TransitionType.none);
                   }
                 },
                 onDoubleTap: () =>
@@ -487,7 +493,8 @@ class UploadedImagesState extends State<UploadedImages>
                                 Global.defaultShowedPBhost == 'qiniu' ||
                                 Global.defaultShowedPBhost == 'tencent' ||
                                 Global.defaultShowedPBhost == 'smms' ||
-                                Global.defaultShowedPBhost == 'lskypro'
+                                Global.defaultShowedPBhost == 'lskypro' ||
+                                Global.defaultShowedPBhost == 'PBhostExtend2'
                             ? ExtendedImage.network(
                                 currentShowedImagesDisplayAddressUrl[index]
                                         .contains('raw.githubusercontent.com')
@@ -651,6 +658,16 @@ class UploadedImagesState extends State<UploadedImages>
                                 const Text('七牛云', textAlign: TextAlign.center),
                             onPressed: () {
                               Global.setShowedPBhost('qiniu');
+                              Navigator.pop(context);
+                              _currentPage = 0;
+                              _onRefresh();
+                            },
+                          ),
+                          SimpleDialogOption(
+                            child: const Text('S3兼容平台',
+                                textAlign: TextAlign.center),
+                            onPressed: () {
+                              Global.setShowedPBhost('PBhostExtend2');
                               Navigator.pop(context);
                               _currentPage = 0;
                               _onRefresh();
@@ -978,7 +995,8 @@ class UploadedImagesState extends State<UploadedImages>
             return;
           }
         }
-        if (Global.defaultShowedPBhost == 'PBhostExtend1') {
+        if (Global.defaultShowedPBhost == 'PBhostExtend1' ||
+            Global.defaultShowedPBhost == 'PBhostExtend2') {
           await AlbumSQL.deleteData(
               Global.imageDBExtend!,
               Global.defaultShowedPBhost,
@@ -1086,6 +1104,11 @@ class UploadedImagesState extends State<UploadedImages>
               text: formatErrorMessage({}, e.toString()),
               dataLogType: DataLogType.ERRORS.toString());
         }
+      } else if (Global.defaultShowedPBhost == 'PBhostExtend2') {
+        await AlbumSQL.deleteData(
+            Global.imageDBExtend!,
+            Global.defaultShowedPBhost,
+            showedImageId[index + (_currentPage * _perPageItemSize)]);
       } else {
         await AlbumSQL.deleteData(Global.imageDB!, Global.defaultShowedPBhost,
             showedImageId[index + (_currentPage * _perPageItemSize)]);
@@ -1189,7 +1212,8 @@ class UploadedImagesState extends State<UploadedImages>
       'id',
     );
     //默认图床的图片ID
-    if (Global.defaultShowedPBhost == 'PBhostExtend1') {
+    if (Global.defaultShowedPBhost == 'PBhostExtend1' ||
+        Global.defaultShowedPBhost == 'PBhostExtend2') {
       showedImageId = imageListExtend[Global.defaultShowedPBhost]!;
     } else {
       showedImageId = imageList[Global.defaultShowedPBhost]!;
@@ -1203,7 +1227,8 @@ class UploadedImagesState extends State<UploadedImages>
     showedImagePaths.clear();
     for (int i = 0; i < showedImageId.length; i++) {
       List<Map<String, dynamic>> maps;
-      if (Global.defaultShowedPBhost == 'PBhostExtend1') {
+      if (Global.defaultShowedPBhost == 'PBhostExtend1' ||
+          Global.defaultShowedPBhost == 'PBhostExtend2') {
         maps = await AlbumSQL.queryData(Global.imageDBExtend!,
             Global.defaultShowedPBhost, showedImageId[i]);
       } else {
@@ -1240,8 +1265,6 @@ class UploadedImagesState extends State<UploadedImages>
         } else {
           showedImageDisplayAddressUrl.add(maps[0]['hostSpecificArgA']);
         }
-        // showedImageDisplayAddressUrl
-        //  .add(maps[0]['hostSpecificArgA']); //用来相册展示的url
         showedImageName.add(maps[0]['name']);
         showedImagePictureKey.add(maps[0]['pictureKey']);
         showedImagePaths.add(maps[0]['path']);
@@ -1331,6 +1354,25 @@ class UploadedImagesState extends State<UploadedImages>
       } else if (Global.defaultShowedPBhost == 'PBhostExtend1') {
         showedImageUrl.add(maps[0]['url']); //用来复制的url
         showedImageDisplayAddressUrl.add(maps[0]['hostSpecificArgI']); //缩略图文件地址
+        showedImageName.add(maps[0]['name']);
+        showedImagePictureKey.add(maps[0]['pictureKey']);
+        showedImagePaths.add(maps[0]['path']);
+      } else if (Global.defaultShowedPBhost == 'PBhostExtend2') {
+        if (!maps[0]['url'].toString().startsWith('https://') &&
+            !maps[0]['url'].toString().startsWith('http://')) {
+          // ignore: prefer_interpolation_to_compose_strings
+          showedImageUrl.add('http://' + maps[0]['url']);
+        } else {
+          showedImageUrl.add(maps[0]['url']);
+        }
+        if (!maps[0]['hostSpecificArgA'].toString().startsWith('https://') &&
+            !maps[0]['hostSpecificArgA'].toString().startsWith('http://')) {
+          showedImageDisplayAddressUrl
+              // ignore: prefer_interpolation_to_compose_strings
+              .add('http://' + maps[0]['hostSpecificArgA']);
+        } else {
+          showedImageDisplayAddressUrl.add(maps[0]['hostSpecificArgA']);
+        }
         showedImageName.add(maps[0]['name']);
         showedImagePictureKey.add(maps[0]['pictureKey']);
         showedImagePaths.add(maps[0]['path']);

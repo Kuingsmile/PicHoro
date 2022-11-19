@@ -21,10 +21,11 @@ List<String> allPBhost = [
   'PBhost3', //自定义图床3
 ];
 
+
 //扩展数据库的图床表名
 List<String> allPBhostExtend = [
-  'PBhostExtend1', //扩展图床1
-  'PBhostExtend2', //扩展图床2
+  'PBhostExtend1', //ftp
+  'PBhostExtend2', //aws
   'PBhostExtend3', //扩展图床3
   'PBhostExtend4', //扩展图床4
   'PBhostExtend5', //扩展图床5
@@ -80,17 +81,13 @@ Map<String, String> pBhostToTableName = {
   "lsky.pro": "lskypro",
   "sm.ms": "smms",
   'github': 'github',
-  'gitee': 'gitee',
-  'weibo': 'weibo',
   'imgur': 'imgur',
   'upyun': 'upyun',
   'qiniu': 'qiniu',
   'aliyun': 'aliyun',
   'tencent': 'tencent',
-  'PBhost1': 'PBhost1',
-  'PBhost2': 'PBhost2',
-  'PBhost3': 'PBhost3',
-  'ftp': 'PBhostExtend1',
+  'ftp' :'PBhostExtend1',
+  'aws' :'PBhostExtend2',
 };
 
 List<String> tableKeysList = [
@@ -128,6 +125,7 @@ List<String> tableKeysList = [
 ];
 
 class AlbumSQL {
+
   static getDatabase() async {
     String currentUserName = await Global.getUser();
     Database db = await initDB(currentUserName);
@@ -142,7 +140,7 @@ class AlbumSQL {
     if (!await Directory(persistPath).exists()) {
       await Directory(persistPath).create(recursive: true);
     }
-    if (username == '' || username == ' ') {
+    if (username == ''||username == ' ') {
       username = 'null';
     }
     var dbPath = join(persistPath, '${username}_album.db');
@@ -178,6 +176,7 @@ class AlbumSQL {
     return db;
   }
 
+  
   static initExtendDB(String username) async {
     var externalDirectoryPath =
         await ExternalPath.getExternalStoragePublicDirectory(
@@ -186,7 +185,7 @@ class AlbumSQL {
     if (!await Directory(persistPath).exists()) {
       await Directory(persistPath).create(recursive: true);
     }
-    if (username == '' || username == ' ') {
+    if (username == ''||username == ' ') {
       username = 'null';
     }
     var dbPath = join(persistPath, '${username}_album_extend.db');

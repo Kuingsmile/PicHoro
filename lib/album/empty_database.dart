@@ -74,6 +74,22 @@ class EmptyDatabaseState extends State<EmptyDatabase> {
             },
           );
         });
+    ListTile awsEmpty = ListTile(
+        title: const Center(child: Text('S3兼容平台')),
+        onTap: () async {
+          showCupertinoAlertDialogWithConfirmFunc(
+            title: '通知',
+            content: '是否确定清空S3兼容平台数据库？',
+            context: context,
+            onConfirm: () async {
+              Navigator.pop(context);
+              await AlbumSQL.deleteTable(
+                  Global.imageDBExtend!, 'PBhostExtend2');
+              showToast('已清空S3兼容平台数据库');
+              eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
+            },
+          );
+        });
     ListTile allEmpty = ListTile(
         title: const Center(child: Text('所有数据库')),
         onTap: () async {
@@ -95,6 +111,7 @@ class EmptyDatabaseState extends State<EmptyDatabase> {
           );
         });
     listTiles.add(ftpEmpty);
+    listTiles.add(awsEmpty);
     listTiles.add(allEmpty);
     return listTiles;
   }
