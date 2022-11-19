@@ -32,22 +32,10 @@
       "languageVersion": "2.12"
     },
     {
-      "name": "cached_network_image",
-      "rootUri": "file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/cached_network_image-3.2.2",
+      "name": "buffer",
+      "rootUri": "file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/buffer-1.1.1",
       "packageUri": "lib/",
-      "languageVersion": "2.18"
-    },
-    {
-      "name": "cached_network_image_platform_interface",
-      "rootUri": "file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/cached_network_image_platform_interface-2.0.0",
-      "packageUri": "lib/",
-      "languageVersion": "2.18"
-    },
-    {
-      "name": "cached_network_image_web",
-      "rootUri": "file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/cached_network_image_web-1.0.2",
-      "packageUri": "lib/",
-      "languageVersion": "2.18"
+      "languageVersion": "2.12"
     },
     {
       "name": "characters",
@@ -75,9 +63,9 @@
     },
     {
       "name": "convert",
-      "rootUri": "file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/convert-3.0.2",
+      "rootUri": "file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/convert-3.1.1",
       "packageUri": "lib/",
-      "languageVersion": "2.12"
+      "languageVersion": "2.18"
     },
     {
       "name": "cross_file",
@@ -222,18 +210,6 @@
       "rootUri": "file:///D:/flutter/packages/flutter",
       "packageUri": "lib/",
       "languageVersion": "2.17"
-    },
-    {
-      "name": "flutter_blurhash",
-      "rootUri": "file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/flutter_blurhash-0.7.0",
-      "packageUri": "lib/",
-      "languageVersion": "2.15"
-    },
-    {
-      "name": "flutter_cache_manager",
-      "rootUri": "file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/flutter_cache_manager-3.3.0",
-      "packageUri": "lib/",
-      "languageVersion": "2.12"
     },
     {
       "name": "flutter_draggable_gridview",
@@ -428,6 +404,12 @@
       "languageVersion": "2.12"
     },
     {
+      "name": "minio_new",
+      "rootUri": "file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/minio_new-1.0.1",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
       "name": "msh_checkbox",
       "rootUri": "file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/msh_checkbox-1.1.1",
       "packageUri": "lib/",
@@ -442,12 +424,6 @@
     {
       "name": "nested",
       "rootUri": "file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/nested-1.0.0",
-      "packageUri": "lib/",
-      "languageVersion": "2.12"
-    },
-    {
-      "name": "octo_image",
-      "rootUri": "file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/octo_image-1.0.2",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
@@ -540,12 +516,6 @@
       "rootUri": "file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/path_provider_windows-2.1.3",
       "packageUri": "lib/",
       "languageVersion": "2.17"
-    },
-    {
-      "name": "pedantic",
-      "rootUri": "file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/pedantic-1.11.1",
-      "packageUri": "lib/",
-      "languageVersion": "2.12"
     },
     {
       "name": "permission_handler",
@@ -678,12 +648,6 @@
       "rootUri": "file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/rational-2.2.0",
       "packageUri": "lib/",
       "languageVersion": "2.14"
-    },
-    {
-      "name": "rxdart",
-      "rootUri": "file:///D:/flutter/.pub-cache/hosted/pub.flutter-io.cn/rxdart-0.27.6",
-      "packageUri": "lib/",
-      "languageVersion": "2.12"
     },
     {
       "name": "sembast",
@@ -962,7 +926,7 @@
       "languageVersion": "2.18"
     }
   ],
-  "generated": "2022-11-16T05:39:09.203566Z",
+  "generated": "2022-11-19T15:06:14.988784Z",
   "generator": "pub",
   "generatorVersion": "2.18.0"
 }
