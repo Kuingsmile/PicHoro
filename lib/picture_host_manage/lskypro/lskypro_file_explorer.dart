@@ -475,6 +475,7 @@ class LskyproFileExplorerState
                               }
                               Map configMap =
                                   await LskyproManageAPI.getConfigMap();
+                              configMap['album_id'] = widget.albumInfo['id'] ?? 'None';
                               for (int i = 0; i < files.length; i++) {
                                 List uploadList = [
                                   files[i].path,
@@ -489,7 +490,6 @@ class LskyproFileExplorerState
                               String downloadPath = await ExternalPath
                                   .getExternalStoragePublicDirectory(
                                       ExternalPath.DIRECTORY_DOWNLOADS);
-
                               if (mounted) {
                                 String albumName = '';
                                 if (widget.albumInfo.isEmpty) {
@@ -979,6 +979,8 @@ class LskyproFileExplorerState
                                               showToast('删除成功');
                                               setState(() {
                                                 allInfoList.removeAt(index);
+                                                dirAllInfoList
+                                                      .removeAt(index);
                                                 selectedFilesBool
                                                     .removeAt(index);
                                               });
@@ -1273,6 +1275,7 @@ class LskyproFileExplorerState
           text: formatErrorMessage({'index': index}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
       String fileExtension = allInfoList[index]['links']['url'].split('.').last;
+      fileExtension = fileExtension.toLowerCase();
       String iconPath = 'assets/icons/';
       if (fileExtension == '') {
         iconPath += '_blank.png';

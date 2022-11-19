@@ -60,25 +60,6 @@ class QiniuFileExplorerState
   }
 
   _getBucketList() async {
-    var res = await QiniuManageAPI.isEmptyBucket(
-      widget.element,
-    );
-    //check if the bucket is empty
-    if (res[0] == 'empty') {
-      if (mounted) {
-        setState(() {
-          state = loading_state.LoadState.EMPTY;
-        });
-      }
-      return;
-    } else if (res[0] == 'error') {
-      if (mounted) {
-        setState(() {
-          state = loading_state.LoadState.ERROR;
-        });
-      }
-      return;
-    }
     var res2 = await QiniuManageAPI.queryBucketFiles(
       widget.element,
       widget.bucketPrefix == ''
@@ -1246,6 +1227,7 @@ class QiniuFileExplorerState
               );
             } else {
               String fileExtension = allInfoList[index]['key'].split('.').last;
+              fileExtension = fileExtension.toLowerCase();
               String iconPath = 'assets/icons/';
               if (fileExtension == '') {
                 iconPath += '_blank.png';

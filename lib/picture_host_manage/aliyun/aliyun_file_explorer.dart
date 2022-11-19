@@ -60,24 +60,6 @@ class AliyunFileExplorerState
   }
 
   _getBucketList() async {
-    var res = await AliyunManageAPI.isEmptyBucket(
-      widget.element,
-    );
-    if (res[0] == 'empty') {
-      if (mounted) {
-        setState(() {
-          state = loading_state.LoadState.EMPTY;
-        });
-      }
-      return;
-    } else if (res[0] == 'error') {
-      if (mounted) {
-        setState(() {
-          state = loading_state.LoadState.ERROR;
-        });
-      }
-      return;
-    }
     var res2 = await AliyunManageAPI.queryBucketFiles(
       widget.element,
       {'prefix': widget.bucketPrefix, 'delimiter': '/'},
@@ -660,7 +642,6 @@ class AliyunFileExplorerState
               )),
           IconButton(
               onPressed: () async {
-                List downloadList = [];
                 String downloadPath =
                     await ExternalPath.getExternalStoragePublicDirectory(
                         ExternalPath.DIRECTORY_DOWNLOADS);
@@ -1209,6 +1190,7 @@ class AliyunFileExplorerState
               );
             } else {
               String fileExtension = allInfoList[index]['Key'].split('.').last;
+              fileExtension = fileExtension.toLowerCase();
               String iconPath = 'assets/icons/';
               if (fileExtension == '') {
                 iconPath += '_blank.png';

@@ -61,22 +61,7 @@ class UpyunFileExplorerState
 
   _getBucketList() async {
     try {
-      var res = await UpyunManageAPI.isEmptyBucket(widget.element);
-      if (res[0] == 'empty') {
-        if (mounted) {
-          setState(() {
-            state = loading_state.LoadState.EMPTY;
-          });
-        }
-        return;
-      } else if (res[0] == 'error') {
-        if (mounted) {
-          setState(() {
-            state = loading_state.LoadState.ERROR;
-          });
-        }
-        return;
-      }
+     
       var res2 = await UpyunManageAPI.queryBucketFiles(
           widget.element, widget.bucketPrefix);
 
@@ -623,8 +608,8 @@ class UpyunFileExplorerState
                                         okBtnTap: () async {
                                           String newName = newFolder.text;
                                           if (newName.isEmpty) {
-                                            showToastWithContext(
-                                                context, "文件夹名不能为空");
+                                            showToastWithContext(context,
+                                                "文件夹名不能为空");
                                             return;
                                           }
                                           var copyResult =
@@ -1423,6 +1408,7 @@ class UpyunFileExplorerState
     return SingleChildScrollView(
       child: Column(
         children: [
+          
           ListTile(
             leading: Image.asset(
               iconPath,
@@ -1446,7 +1432,7 @@ class UpyunFileExplorerState
             height: 0.1,
             color: Color.fromARGB(255, 230, 230, 230),
           ),
-          ListTile(
+           ListTile(
               leading: const Icon(
                 Icons.info_outline_rounded,
                 color: Color.fromARGB(255, 97, 141, 236),

@@ -60,25 +60,7 @@ class TencentFileExplorerState
   }
 
   _getBucketList() async {
-    var res = await TencentManageAPI.isEmptyBucket(
-      widget.element,
-    );
-    //check if the bucket is empty
-    if (res[0] == 'empty') {
-      if (mounted) {
-        setState(() {
-          state = loading_state.LoadState.EMPTY;
-        });
-      }
-      return;
-    } else if (res[0] == 'error') {
-      if (mounted) {
-        setState(() {
-          state = loading_state.LoadState.ERROR;
-        });
-      }
-      return;
-    }
+
     var res2 = await TencentManageAPI.queryBucketFiles(
       widget.element,
       {'prefix': widget.bucketPrefix, 'delimiter': '/'},
@@ -851,7 +833,6 @@ class TencentFileExplorerState
                 heroTag: 'select',
                 backgroundColor: const Color.fromARGB(255, 248, 196, 237),
                 elevation: 50,
-                //select host menu
                 onPressed: () async {
                   if (allInfoList.isEmpty) {
                     showToastWithContext(context, '目录为空');
@@ -976,7 +957,6 @@ class TencentFileExplorerState
     );
   }
 
-  //build the file list with filetype icon ，name and last modified time
   @override
   Widget buildSuccess() {
     if (allInfoList.isEmpty) {
@@ -1208,6 +1188,7 @@ class TencentFileExplorerState
               );
             } else {
               String fileExtension = allInfoList[index]['Key'].split('.').last;
+              fileExtension = fileExtension.toLowerCase();
               String iconPath = 'assets/icons/';
               if (fileExtension == '') {
                 iconPath += '_blank.png';
@@ -1334,7 +1315,7 @@ class TencentFileExplorerState
                                           .last,
                                   style: const TextStyle(fontSize: 14)),
                               subtitle: Text(
-                                  '${allInfoList[index]['LastModified'].toString().replaceAll('T', ' ').replaceAll('Z', '').substring(0, 19)}  ${(double.parse(allInfoList[index]['Size']) / 1024 / 1024 / 1024 > 1 ? '${(double.parse(allInfoList[index]['Size']) / 1024 / 1024 / 1024).toStringAsFixed(2)}GB' : (double.parse(allInfoList[index]['Size']) / 1024 / 1024 > 1 ? '${(double.parse(allInfoList[index]['Size']) / 1024 / 1024).toStringAsFixed(2)}MB' : (double.parse(allInfoList[index]['Size']) / 1024 > 1 ? '${(double.parse(allInfoList[index]['Size']) / 1024).toStringAsFixed(2)}KB' : allInfoList[index]['Size'] + 'B')))}',
+                                  '${allInfoList[index]['LastModified'].toString().replaceAll('T', ' ').replaceAll('Z', '').substring(0, 19)}  ${getFileSize(int.parse(allInfoList[index]['Size'].toString().split('.')[0]))}',
                                   style: const TextStyle(fontSize: 12)),
                               trailing: IconButton(
                                 icon: const Icon(Icons.more_horiz),

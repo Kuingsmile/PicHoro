@@ -66,23 +66,6 @@ class GithubFileExplorerState
   _getBucketList() async {
     var configMap = await GithubManageAPI.getConfigMap();
     adminUserName = configMap['githubusername'];
-    var res = await GithubManageAPI.isDirEmpty(widget.element['showedUsername'],
-        widget.element['name'], widget.bucketPrefix);
-    if (res[0] == 'empty') {
-      if (mounted) {
-        setState(() {
-          state = loading_state.LoadState.EMPTY;
-        });
-      }
-      return;
-    } else if (res[0] == 'error') {
-      if (mounted) {
-        setState(() {
-          state = loading_state.LoadState.ERROR;
-        });
-      }
-      return;
-    }
     if (widget.bucketPrefix == '') {
       var rootdir = await GithubManageAPI.getRootDirSha(
           widget.element['showedUsername'],
