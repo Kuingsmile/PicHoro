@@ -4,15 +4,7 @@ import 'dart:convert';
 import 'package:f_logs/f_logs.dart';
 import 'package:path_provider/path_provider.dart';
 
-import 'package:horopic/api/aliyun_api.dart';
-import 'package:horopic/api/lskypro_api.dart';
-import 'package:horopic/api/smms_api.dart';
-import 'package:horopic/api/github_api.dart';
-import 'package:horopic/api/imgur_api.dart';
-import 'package:horopic/api/qiniu_api.dart';
-import 'package:horopic/api/tencent_api.dart';
-import 'package:horopic/api/upyun_api.dart';
-import 'package:horopic/api/ftp_api.dart';
+import 'package:horopic/api/api.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/common_functions.dart';
 
@@ -29,6 +21,7 @@ Map<String, String> pdconfig = {
   'gitee': 'gitee_config',
   'weibo': 'weibo_config',
   'ftp': 'ftp_config',
+  'aws': 'aws_config',
 };
 
 Map<String, Function> deleteFunc = {
@@ -40,7 +33,8 @@ Map<String, Function> deleteFunc = {
   'tencent': TencentImageUploadUtils.deleteApi,
   'aliyun': AliyunImageUploadUtils.deleteApi,
   'upyun': UpyunImageUploadUtils.deleteApi,
-  'PBhostExtend1': FTPImageUploadUtils.deleteApi, //FTP
+  'PBhostExtend1': FTPImageUploadUtils.deleteApi,//FTP
+  'PBhostExtend2': AwsImageUploadUtils.deleteApi,//AWS
 };
 
 //获取图床配置文件
@@ -54,6 +48,8 @@ Future<File> get _localFile async {
     defaultConfig = 'sm.ms';
   } else if (defaultConfig == 'PBhostExtend1') {
     defaultConfig = 'ftp';
+  } else if (defaultConfig == 'PBhostExtend2') {
+    defaultConfig = 'aws';
   }
   return File(
       '${directory.path}/${defaultUser}_${pdconfig[defaultConfig]}.txt');
@@ -91,7 +87,8 @@ deleterentry(Map deleteConfig) async {
     FLog.error(
         className: "Deleter",
         methodName: "deleterentry",
-        text: formatErrorMessage({}, e.toString()),
+        text: formatErrorMessage({
+        }, e.toString()),
         dataLogType: DataLogType.ERRORS.toString());
     return ["Error"];
   }

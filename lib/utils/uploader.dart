@@ -3,15 +3,7 @@ import 'dart:convert';
 import 'package:f_logs/f_logs.dart';
 import 'package:path_provider/path_provider.dart';
 
-import 'package:horopic/api/lskypro_api.dart';
-import 'package:horopic/api/smms_api.dart';
-import 'package:horopic/api/github_api.dart';
-import 'package:horopic/api/imgur_api.dart';
-import 'package:horopic/api/qiniu_api.dart';
-import 'package:horopic/api/tencent_api.dart';
-import 'package:horopic/api/aliyun_api.dart';
-import 'package:horopic/api/upyun_api.dart';
-import 'package:horopic/api/ftp_api.dart';
+import 'package:horopic/api/api.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/common_functions.dart';
 
@@ -28,6 +20,7 @@ Map<String, String> pdconfig = {
   'gitee': 'gitee_config',
   'weibo': 'weibo_config',
   'ftp': 'ftp_config',
+  'aws': 'aws_config',
 };
 
 Map<String, Function> uploadFunc = {
@@ -40,6 +33,7 @@ Map<String, Function> uploadFunc = {
   'aliyun': AliyunImageUploadUtils.uploadApi,
   'upyun': UpyunImageUploadUtils.uploadApi,
   'ftp': FTPImageUploadUtils.uploadApi,
+  'aws': AwsImageUploadUtils.uploadApi,
 };
 
 //获取图床配置文件
