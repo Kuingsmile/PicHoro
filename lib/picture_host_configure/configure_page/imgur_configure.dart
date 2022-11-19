@@ -6,8 +6,10 @@ import 'package:dio/dio.dart';
 import 'package:dio_proxy_adapter/dio_proxy_adapter.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:f_logs/f_logs.dart';
+import 'package:fluro/fluro.dart';
 import 'package:path_provider/path_provider.dart';
 
+import 'package:horopic/router/application.dart';
 import 'package:horopic/pages/loading.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/sql_utils.dart';
@@ -39,6 +41,8 @@ class ImgurConfigState extends State<ImgurConfig> {
       _clientIdController.text = configMap['clientId'];
       if (configMap['proxy'] != 'None') {
         _proxyController.text = configMap['proxy'];
+      } else {
+        _proxyController.clear();
       }
       setState(() {});
     } catch (e) {
@@ -64,6 +68,19 @@ class ImgurConfigState extends State<ImgurConfig> {
         elevation: 0,
         centerTitle: true,
         title: const Text('Imgur参数配置'),
+        actions: [
+          IconButton(
+            onPressed: () async {
+              await Application.router.navigateTo(
+                  context, '/configureStorePage?psHost=imgur',
+                  transition: TransitionType.cupertino);
+              await _initConfig();
+              setState(() {});
+            },
+            icon: const Icon(Icons.save_as_outlined,
+                color: Color.fromARGB(255, 255, 255, 255), size: 35),
+          )
+        ],
       ),
       body: Form(
         key: _formKey,
@@ -113,9 +130,30 @@ class ImgurConfigState extends State<ImgurConfig> {
             ListTile(
                 title: ElevatedButton(
               onPressed: () {
-                checkImgurConfig();
+                showDialog(
+                    context: context,
+                    barrierDismissible: false,
+                    builder: (context) {
+                      return NetLoadingDialog(
+                        outsideDismiss: false,
+                        loading: true,
+                        loadingText: "检查中...",
+                        requestCallBack: checkImgurConfig(),
+                      );
+                    });
               },
               child: const Text('检查当前配置'),
+            )),
+             ListTile(
+                title: ElevatedButton(
+              onPressed: () async {
+                await Application.router.navigateTo(
+                    context, '/configureStorePage?psHost=imgur',
+                    transition: TransitionType.cupertino);
+                await _initConfig();
+                setState(() {});
+              },
+              child: const Text('设置备用配置'),
             )),
             ListTile(
                 title: ElevatedButton(
@@ -158,16 +196,12 @@ class ImgurConfigState extends State<ImgurConfig> {
         return showCupertinoAlertDialog(
             context: context, title: '错误', content: '用户不存在,请先登录');
       }
-      //拿百度的logo来测试
-
       String baiduPicUrl =
           "https://dss0.bdstatic.com/5aV1bjqh_Q23odCf/static/superman/img/logo/logo_white-d0c9fe2af5.png";
       String validateURL = "https://api.imgur.com/3/image";
 
       BaseOptions options = BaseOptions(
-        //连接服务器超时时间，单位是毫秒.
         connectTimeout: 30000,
-        //响应超时时间。
         receiveTimeout: 30000,
         sendTimeout: 30000,
       );
@@ -201,7 +235,7 @@ class ImgurConfigState extends State<ImgurConfig> {
           if (sqlResult == "Success") {
             final imgurConfig = ImgurConfigModel(clientId, proxy);
             final imgurConfigJson = jsonEncode(imgurConfig);
-            final imgurConfigFile = await _localFile;
+            final imgurConfigFile = await localFile;
             await imgurConfigFile.writeAsString(imgurConfigJson);
             return showCupertinoAlertDialog(
                 context: context, title: '成功', content: '配置成功');
@@ -233,21 +267,18 @@ class ImgurConfigState extends State<ImgurConfig> {
     }
   }
 
-  void checkImgurConfig() async {
+  checkImgurConfig() async {
     try {
-      final imgurConfigFile = await _localFile;
+      final imgurConfigFile = await localFile;
       String configData = await imgurConfigFile.readAsString();
       if (configData == "Error") {
-        showCupertinoAlertDialog(
+        return showCupertinoAlertDialog(
             context: context, title: "检查失败!", content: "请先配置上传参数.");
-        return;
       }
       Map configMap = jsonDecode(configData);
 
       BaseOptions options = BaseOptions(
-        //连接服务器超时时间，单位是毫秒.
         connectTimeout: 30000,
-        //响应超时时间。
         receiveTimeout: 30000,
         sendTimeout: 30000,
       );
@@ -274,15 +305,14 @@ class ImgurConfigState extends State<ImgurConfig> {
       }
       var response = await dio.post(validateURL, data: formData);
       if (response.statusCode == 200 && response.data['success'] == true) {
-        showCupertinoAlertDialog(
+        return showCupertinoAlertDialog(
             context: context,
             title: '通知',
             content:
                 '检测通过，您的配置信息为:\nclientId:\n${configMap["clientId"]}\n代理:\n${configMap["proxy"]}');
       } else {
-        showCupertinoAlertDialog(
+        return showCupertinoAlertDialog(
             context: context, title: '错误', content: '配置有误，请检查网络或重新配置');
-        return;
       }
     } catch (e) {
       FLog.error(
@@ -290,12 +320,12 @@ class ImgurConfigState extends State<ImgurConfig> {
           methodName: 'checkImgurConfig',
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
-      showCupertinoAlertDialog(
+      return showCupertinoAlertDialog(
           context: context, title: "检查失败!", content: e.toString());
     }
   }
 
-  Future<File> get _localFile async {
+  Future<File> get localFile async {
     final path = await _localPath;
     String defaultUser = await Global.getUser();
     return File('$path/${defaultUser}_imgur_config.txt');
@@ -308,7 +338,7 @@ class ImgurConfigState extends State<ImgurConfig> {
 
   Future<String> readHostConfig() async {
     try {
-      final file = await _localFile;
+      final file = await localFile;
       String contents = await file.readAsString();
       return contents;
     } catch (e) {
@@ -402,4 +432,10 @@ class ImgurConfigModel {
         'clientId': clientId,
         'proxy': proxy,
       };
+
+  static List keysList = [
+    'remarkName',
+    'clientId',
+    'proxy',
+  ];
 }

@@ -6,7 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:f_logs/f_logs.dart';
+import 'package:fluro/fluro.dart';
 
+import 'package:horopic/router/application.dart';
 import 'package:horopic/pages/loading.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/sql_utils.dart';
@@ -45,10 +47,14 @@ class GithubConfigState extends State<GithubConfig> {
       _tokenController.text = configMap['token'];
       if (configMap['storePath'] != 'None') {
         _storePathController.text = configMap['storePath'];
+      } else {
+        _storePathController.clear();
       }
       _branchController.text = configMap['branch'];
       if (configMap['customDomain'] != 'None') {
         _customDomainController.text = configMap['customDomain'];
+      } else {
+        _customDomainController.clear();
       }
       setState(() {});
     } catch (e) {
@@ -78,6 +84,19 @@ class GithubConfigState extends State<GithubConfig> {
         elevation: 0,
         centerTitle: true,
         title: const Text('Github参数配置'),
+        actions: [
+          IconButton(
+            onPressed: () async {
+              await Application.router.navigateTo(
+                  context, '/configureStorePage?psHost=github',
+                  transition: TransitionType.cupertino);
+              await _initConfig();
+              setState(() {});
+            },
+            icon: const Icon(Icons.save_as_outlined,
+                color: Color.fromARGB(255, 255, 255, 255), size: 35),
+          )
+        ],
       ),
       body: Form(
         key: _formKey,
@@ -175,9 +194,30 @@ class GithubConfigState extends State<GithubConfig> {
             ListTile(
                 title: ElevatedButton(
               onPressed: () {
-                checkGithubConfig();
+                showDialog(
+                    context: context,
+                    barrierDismissible: false,
+                    builder: (context) {
+                      return NetLoadingDialog(
+                        outsideDismiss: false,
+                        loading: true,
+                        loadingText: "检查中...",
+                        requestCallBack: checkGithubConfig(),
+                      );
+                    });
               },
               child: const Text('检查当前配置'),
+            )),
+            ListTile(
+                title: ElevatedButton(
+              onPressed: () async {
+                await Application.router.navigateTo(
+                    context, '/configureStorePage?psHost=github',
+                    transition: TransitionType.cupertino);
+                await _initConfig();
+                setState(() {});
+              },
+              child: const Text('设置备用配置'),
             )),
             ListTile(
                 title: ElevatedButton(
@@ -199,7 +239,7 @@ class GithubConfigState extends State<GithubConfig> {
     final String repo = _repoController.text;
     String storePath = '';
     if (_storePathController.text.isEmpty ||
-        _storePathController.text.replaceAll(' ', '').isEmpty) {
+        _storePathController.text.trim().isEmpty) {
       storePath = 'None';
     } else {
       storePath = _storePathController.text;
@@ -209,13 +249,15 @@ class GithubConfigState extends State<GithubConfig> {
     }
 
     String branch = '';
-    if (_branchController.text.isEmpty) {
+    if (_branchController.text.isEmpty ||
+        _branchController.text.trim().isEmpty) {
       branch = 'main';
     } else {
       branch = _branchController.text;
     }
     String customDomain = '';
-    if (_customDomainController.text.isEmpty) {
+    if (_customDomainController.text.isEmpty ||
+        _customDomainController.text.trim().isEmpty) {
       customDomain = 'None';
     } else {
       customDomain = _customDomainController.text;
@@ -254,9 +296,7 @@ class GithubConfigState extends State<GithubConfig> {
             context: context, title: '错误', content: '用户不存在,请先登录');
       }
       BaseOptions options = BaseOptions(
-        //连接服务器超时时间，单位是毫秒.
         connectTimeout: 30000,
-        //响应超时时间。
         receiveTimeout: 30000,
         sendTimeout: 30000,
       );
@@ -283,7 +323,7 @@ class GithubConfigState extends State<GithubConfig> {
             final githubConfig = GithubConfigModel(
                 githubusername, repo, token, storePath, branch, customDomain);
             final githubConfigJson = jsonEncode(githubConfig);
-            final githubConfigFile = await _localFile;
+            final githubConfigFile = await localFile;
             await githubConfigFile.writeAsString(githubConfigJson);
             return showCupertinoAlertDialog(
                 context: context, title: '成功', content: '配置成功');
@@ -315,22 +355,19 @@ class GithubConfigState extends State<GithubConfig> {
     }
   }
 
-  void checkGithubConfig() async {
+  checkGithubConfig() async {
     try {
-      final githubConfigFile = await _localFile;
+      final githubConfigFile = await localFile;
       String configData = await githubConfigFile.readAsString();
 
       if (configData == "Error") {
-        showCupertinoAlertDialog(
+        return showCupertinoAlertDialog(
             context: context, title: "检查失败!", content: "请先配置上传参数.");
-        return;
       }
 
       Map configMap = jsonDecode(configData);
       BaseOptions options = BaseOptions(
-        //连接服务器超时时间，单位是毫秒.
         connectTimeout: 30000,
-        //响应超时时间。
         receiveTimeout: 30000,
         sendTimeout: 30000,
       );
@@ -345,16 +382,15 @@ class GithubConfigState extends State<GithubConfig> {
 
       if (response.statusCode == 200 &&
           response.data.toString().contains("email")) {
-        showCupertinoAlertDialog(
+        return showCupertinoAlertDialog(
           context: context,
           title: '通知',
           content:
               '检测通过，您的配置信息为:\n用户名:\n${configMap["githubusername"]}\n仓库名:\n${configMap["repo"]}\n存储路径:\n${configMap["storePath"]}\n分支:\n${configMap["branch"]}\n自定义域名:\n${configMap["customDomain"]}',
         );
       } else {
-        showCupertinoAlertDialog(
+        return showCupertinoAlertDialog(
             context: context, title: '错误', content: '检查失败，请检查配置信息');
-        return;
       }
     } catch (e) {
       FLog.error(
@@ -362,12 +398,12 @@ class GithubConfigState extends State<GithubConfig> {
           methodName: 'checkGithubConfig',
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
-      showCupertinoAlertDialog(
+      return showCupertinoAlertDialog(
           context: context, title: "检查失败!", content: e.toString());
     }
   }
 
-  Future<File> get _localFile async {
+  Future<File> get localFile async {
     final path = await _localPath;
     String defaultUser = await Global.getUser();
     return File('$path/${defaultUser}_github_config.txt');
@@ -380,7 +416,7 @@ class GithubConfigState extends State<GithubConfig> {
 
   Future<String> readGithubConfig() async {
     try {
-      final file = await _localFile;
+      final file = await localFile;
       String contents = await file.readAsString();
       return contents;
     } catch (e) {
@@ -485,4 +521,14 @@ class GithubConfigModel {
         'branch': branch,
         'customDomain': customDomain,
       };
+
+  static List keysList = [
+    'remarkName',
+    'githubusername',
+    'repo',
+    'token',
+    'storePath',
+    'branch',
+    'customDomain',
+  ];
 }

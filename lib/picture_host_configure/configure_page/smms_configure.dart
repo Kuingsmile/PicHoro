@@ -5,8 +5,10 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:fluro/fluro.dart';
 import 'package:f_logs/f_logs.dart';
 
+import 'package:horopic/router/application.dart';
 import 'package:horopic/pages/loading.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/sql_utils.dart';
@@ -57,6 +59,19 @@ class SmmsConfigState extends State<SmmsConfig> {
         elevation: 0,
         centerTitle: true,
         title: const Text('SM.MS参数配置'),
+        actions: [
+          IconButton(
+            onPressed: () async {
+              await Application.router.navigateTo(
+                  context, '/configureStorePage?psHost=sm.ms',
+                  transition: TransitionType.cupertino);
+              await _initConfig();
+              setState(() {});
+            },
+            icon: const Icon(Icons.save_as_outlined,
+                color: Color.fromARGB(255, 255, 255, 255), size: 35),
+          )
+        ],
       ),
       body: Form(
         key: _formKey,
@@ -98,9 +113,30 @@ class SmmsConfigState extends State<SmmsConfig> {
             ListTile(
                 title: ElevatedButton(
               onPressed: () {
-                checkSmmsConfig();
+                 showDialog(
+                    context: context,
+                    barrierDismissible: false,
+                    builder: (context) {
+                      return NetLoadingDialog(
+                        outsideDismiss: false,
+                        loading: true,
+                        loadingText: "检查中...",
+                        requestCallBack: checkSmmsConfig(),
+                      );
+                    });
               },
               child: const Text('检查当前配置'),
+            )),
+            ListTile(
+                title: ElevatedButton(
+              onPressed: () async {
+                await Application.router.navigateTo(
+                    context, '/configureStorePage?psHost=sm.ms',
+                    transition: TransitionType.cupertino);
+                await _initConfig();
+                setState(() {});
+              },
+              child: const Text('设置备用配置'),
             )),
             ListTile(
                 title: ElevatedButton(
@@ -134,9 +170,7 @@ class SmmsConfigState extends State<SmmsConfig> {
       String validateURL = "https://smms.app/api/v2/profile";
       // String validateURL = "https://sm.ms/api/v2/profile";被墙了
       BaseOptions options = BaseOptions(
-        //连接服务器超时时间，单位是毫秒.
         connectTimeout: 30000,
-        //响应超时时间。
         receiveTimeout: 30000,
         sendTimeout: 30000,
       );
@@ -160,7 +194,7 @@ class SmmsConfigState extends State<SmmsConfig> {
           if (sqlResult == "Success") {
             final smmsConfig = SmmsConfigModel(token);
             final smmsConfigJson = jsonEncode(smmsConfig);
-            final smmsConfigFile = await _localFile;
+            final smmsConfigFile = await localFile;
             await smmsConfigFile.writeAsString(smmsConfigJson);
             return showCupertinoAlertDialog(
                 context: context, title: '成功', content: '配置成功');
@@ -192,20 +226,17 @@ class SmmsConfigState extends State<SmmsConfig> {
     }
   }
 
-  void checkSmmsConfig() async {
+   checkSmmsConfig() async {
     try {
-      final smmsConfigFile = await _localFile;
+      final smmsConfigFile = await localFile;
       String configData = await smmsConfigFile.readAsString();
       if (configData == "Error") {
-        showCupertinoAlertDialog(
+        return showCupertinoAlertDialog(
             context: context, title: "检查失败!", content: "请先配置上传参数.");
-        return;
       }
       Map configMap = jsonDecode(configData);
       BaseOptions options = BaseOptions(
-        //连接服务器超时时间，单位是毫秒.
         connectTimeout: 30000,
-        //响应超时时间。
         receiveTimeout: 30000,
         sendTimeout: 30000,
       );
@@ -218,18 +249,17 @@ class SmmsConfigState extends State<SmmsConfig> {
       Dio dio = Dio(options);
       var response = await dio.post(validateURL, data: formData);
       if (response.statusCode == 200 && response.data['success'] == true) {
-        showCupertinoAlertDialog(
+        return showCupertinoAlertDialog(
             context: context,
             title: '通知',
             content: '检测通过，您的配置信息为:\ntoken:\n${configMap["token"]}');
       } else if (response.data['status'] == false) {
-        showCupertinoAlertDialog(
+        return showCupertinoAlertDialog(
             context: context, title: '错误', content: response.data['message']);
-        return;
+      
       } else {
-        showCupertinoAlertDialog(
+        return showCupertinoAlertDialog(
             context: context, title: '错误', content: '未知错误');
-        return;
       }
     } catch (e) {
       FLog.error(
@@ -237,12 +267,12 @@ class SmmsConfigState extends State<SmmsConfig> {
           methodName: 'checkSmmsConfig',
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
-      showCupertinoAlertDialog(
+      return showCupertinoAlertDialog(
           context: context, title: "检查失败!", content: e.toString());
     }
   }
 
-  Future<File> get _localFile async {
+  Future<File> get localFile async {
     final path = await _localPath;
     String defaultUser = await Global.getUser();
     return File('$path/${defaultUser}_smms_config.txt');
@@ -255,7 +285,7 @@ class SmmsConfigState extends State<SmmsConfig> {
 
   Future<String> readHostConfig() async {
     try {
-      final file = await _localFile;
+      final file = await localFile;
       String contents = await file.readAsString();
       return contents;
     } catch (e) {
@@ -346,4 +376,9 @@ class SmmsConfigModel {
   Map<String, dynamic> toJson() => {
         'token': token,
       };
+
+  static List keysList = [
+    'remarkName',
+    'token',
+  ];
 }

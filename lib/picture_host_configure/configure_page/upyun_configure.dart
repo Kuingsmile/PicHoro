@@ -7,8 +7,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:f_logs/f_logs.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:fluro/fluro.dart';
 import 'package:path_provider/path_provider.dart';
 
+import 'package:horopic/router/application.dart';
 import 'package:horopic/pages/loading.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/global.dart';
@@ -36,10 +38,10 @@ class UpyunConfigState extends State<UpyunConfig> {
   @override
   void initState() {
     super.initState();
-    _initCongfig();
+    _initConfig();
   }
 
-  _initCongfig() async {
+  _initConfig() async {
     try {
       Map configMap = await UpyunManageAPI.getConfigMap();
       _bucketController.text = configMap['bucket'];
@@ -48,9 +50,13 @@ class UpyunConfigState extends State<UpyunConfig> {
       _urlController.text = configMap['url'];
       if (configMap['options'] != 'None') {
         _optionsController.text = configMap['options'];
+      } else {
+        _optionsController.clear();
       }
       if (configMap['path'] != 'None') {
         _pathController.text = configMap['path'];
+      } else {
+        _pathController.clear();
       }
     } catch (e) {
       FLog.error(
@@ -79,6 +85,19 @@ class UpyunConfigState extends State<UpyunConfig> {
         elevation: 0,
         centerTitle: true,
         title: const Text('又拍云参数配置'),
+        actions: [
+          IconButton(
+            onPressed: () async {
+              await Application.router.navigateTo(
+                  context, '/configureStorePage?psHost=upyun',
+                  transition: TransitionType.cupertino);
+              await _initConfig();
+              setState(() {});
+            },
+            icon: const Icon(Icons.save_as_outlined,
+                color: Color.fromARGB(255, 255, 255, 255), size: 35),
+          )
+        ],
       ),
       body: Form(
         key: _formKey,
@@ -183,9 +202,30 @@ class UpyunConfigState extends State<UpyunConfig> {
             ListTile(
                 title: ElevatedButton(
               onPressed: () {
-                checkUpyunConfig();
+                showDialog(
+                    context: context,
+                    barrierDismissible: false,
+                    builder: (context) {
+                      return NetLoadingDialog(
+                        outsideDismiss: false,
+                        loading: true,
+                        loadingText: "检查中...",
+                        requestCallBack: checkUpyunConfig(),
+                      );
+                    });
               },
               child: const Text('检查当前配置'),
+            )),
+            ListTile(
+                title: ElevatedButton(
+              onPressed: () async {
+                await Application.router.navigateTo(
+                    context, '/configureStorePage?psHost=upyun',
+                    transition: TransitionType.cupertino);
+                await _initConfig();
+                setState(() {});
+              },
+              child: const Text('设置备用配置'),
             )),
             ListTile(
                 title: ElevatedButton(
@@ -296,9 +336,7 @@ class UpyunConfigState extends State<UpyunConfig> {
       });
 
       BaseOptions baseoptions = BaseOptions(
-        //连接服务器超时时间，单位是毫秒.
         connectTimeout: 30000,
-        //响应超时时间。
         receiveTimeout: 30000,
         sendTimeout: 30000,
       );
@@ -333,7 +371,7 @@ class UpyunConfigState extends State<UpyunConfig> {
           final upyunConfig = UpyunConfigModel(
               bucket, upyunOperator, password, url, options, path);
           final upyunConfigJson = jsonEncode(upyunConfig);
-          final upyunConfigFile = await _localFile;
+          final upyunConfigFile = await localFile;
           await upyunConfigFile.writeAsString(upyunConfigJson);
           return showCupertinoAlertDialog(
               context: context, title: '成功', content: '配置成功');
@@ -356,15 +394,14 @@ class UpyunConfigState extends State<UpyunConfig> {
     }
   }
 
-  void checkUpyunConfig() async {
+  checkUpyunConfig() async {
     try {
-      final upyunConfigFile = await _localFile;
+      final upyunConfigFile = await localFile;
       String configData = await upyunConfigFile.readAsString();
 
       if (configData == "Error") {
-        showCupertinoAlertDialog(
+        return showCupertinoAlertDialog(
             context: context, title: "检查失败!", content: "请先配置上传参数.");
-        return;
       }
 
       Map configMap = jsonDecode(configData);
@@ -419,9 +456,7 @@ class UpyunConfigState extends State<UpyunConfig> {
       });
 
       BaseOptions baseoptions = BaseOptions(
-        //连接服务器超时时间，单位是毫秒.
         connectTimeout: 30000,
-        //响应超时时间。
         receiveTimeout: 30000,
         sendTimeout: 30000,
       );
@@ -444,15 +479,14 @@ class UpyunConfigState extends State<UpyunConfig> {
       );
 
       if (response.statusCode == 200) {
-        showCupertinoAlertDialog(
+        return showCupertinoAlertDialog(
             context: context,
             title: '通知',
             content:
                 '检测通过，您的配置信息为:\nBucket:\n${configMap['bucket']}\nOperator:\n${configMap['operator']}\nPassword:\n${configMap['password']}\nUrl:\n${configMap['url']}\nOptions:\n${configMap['options']}\nPath:\n${configMap['path']}');
       } else {
-        showCupertinoAlertDialog(
+        return showCupertinoAlertDialog(
             context: context, title: '错误', content: '检查失败，请检查配置信息');
-        return;
       }
     } catch (e) {
       FLog.error(
@@ -460,12 +494,12 @@ class UpyunConfigState extends State<UpyunConfig> {
           methodName: 'checkUpyunConfig',
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
-      showCupertinoAlertDialog(
+      return showCupertinoAlertDialog(
           context: context, title: "检查失败!", content: e.toString());
     }
   }
 
-  Future<File> get _localFile async {
+  Future<File> get localFile async {
     final path = await _localPath;
     String defaultUser = await Global.getUser();
     return File('$path/${defaultUser}_upyun_config.txt');
@@ -478,7 +512,7 @@ class UpyunConfigState extends State<UpyunConfig> {
 
   Future<String> readUpyunConfig() async {
     try {
-      final file = await _localFile;
+      final file = await localFile;
       String contents = await file.readAsString();
       return contents;
     } catch (e) {
@@ -583,4 +617,14 @@ class UpyunConfigModel {
         'options': options,
         'path': path,
       };
+
+  static List keysList = [
+    'remarkName',
+    'bucket',
+    'operator',
+    'password',
+    'url',
+    'options',
+    'path',
+  ];
 }

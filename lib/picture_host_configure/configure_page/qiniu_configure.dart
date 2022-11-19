@@ -5,9 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:f_logs/f_logs.dart';
+import 'package:fluro/fluro.dart';
 import 'package:qiniu_flutter_sdk/qiniu_flutter_sdk.dart';
 import 'package:path_provider/path_provider.dart';
 
+import 'package:horopic/router/application.dart';
 import 'package:horopic/pages/loading.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/sql_utils.dart';
@@ -50,9 +52,13 @@ class QiniuConfigState extends State<QiniuConfig> {
       _areaController.text = configMap['area'];
       if (configMap['options'] != 'None') {
         _optionsController.text = configMap['options'];
+      } else {
+        _optionsController.clear();
       }
       if (configMap['path'] != 'None') {
         _pathController.text = configMap['path'];
+      } else {
+        _pathController.clear();
       }
     } catch (e) {
       FLog.error(
@@ -83,6 +89,19 @@ class QiniuConfigState extends State<QiniuConfig> {
         elevation: 0,
         centerTitle: true,
         title: const Text('七牛云参数配置'),
+        actions: [
+          IconButton(
+            onPressed: () async {
+              await Application.router.navigateTo(
+                  context, '/configureStorePage?psHost=qiniu',
+                  transition: TransitionType.cupertino);
+              await _initConfig();
+              setState(() {});
+            },
+            icon: const Icon(Icons.save_as_outlined,
+                color: Color.fromARGB(255, 255, 255, 255), size: 35),
+          )
+        ],
       ),
       body: Form(
         key: _formKey,
@@ -202,9 +221,30 @@ class QiniuConfigState extends State<QiniuConfig> {
             ListTile(
                 title: ElevatedButton(
               onPressed: () {
-                checkQiniuConfig();
+                showDialog(
+                    context: context,
+                    barrierDismissible: false,
+                    builder: (context) {
+                      return NetLoadingDialog(
+                        outsideDismiss: false,
+                        loading: true,
+                        loadingText: "检查中...",
+                        requestCallBack: checkQiniuConfig(),
+                      );
+                    });
               },
               child: const Text('检查当前配置'),
+            )),
+            ListTile(
+                title: ElevatedButton(
+              onPressed: () async {
+                await Application.router.navigateTo(
+                    context, '/configureStorePage?psHost=qiniu',
+                    transition: TransitionType.cupertino);
+                await _initConfig();
+                setState(() {});
+              },
+              child: const Text('设置备用配置'),
             )),
             ListTile(
                 title: ElevatedButton(
@@ -317,7 +357,7 @@ class QiniuConfigState extends State<QiniuConfig> {
           final qiniuConfig = QiniuConfigModel(
               accessKey, secretKey, bucket, url, area, options, path);
           final qiniuConfigJson = jsonEncode(qiniuConfig);
-          final qiniuConfigFile = await _localFile;
+          final qiniuConfigFile = await localFile;
           await qiniuConfigFile.writeAsString(qiniuConfigJson);
           return showCupertinoAlertDialog(
               context: context, title: '成功', content: '配置成功');
@@ -340,15 +380,14 @@ class QiniuConfigState extends State<QiniuConfig> {
     }
   }
 
-  void checkQiniuConfig() async {
+  checkQiniuConfig() async {
     try {
-      final qiniuConfigFile = await _localFile;
+      final qiniuConfigFile = await localFile;
       String configData = await qiniuConfigFile.readAsString();
 
       if (configData == "Error") {
-        showCupertinoAlertDialog(
+        return showCupertinoAlertDialog(
             context: context, title: "检查失败!", content: "请先配置上传参数.");
-        return;
       }
 
       Map configMap = jsonDecode(configData);
@@ -393,15 +432,14 @@ class QiniuConfigState extends State<QiniuConfig> {
           await storage.putFile(File(assetFilePath), uploadToken);
 
       if (putresult.key == key || putresult.key == '${configMap['path']}$key') {
-        showCupertinoAlertDialog(
+        return showCupertinoAlertDialog(
             context: context,
             title: '通知',
             content:
                 '检测通过，您的配置信息为:\naccessKey:\n${configMap['accessKey']}\nsecretKey:\n${configMap['secretKey']}\nbucket:\n${configMap['bucket']}\nurl:\n${configMap['url']}\narea:\n${configMap['area']}\noptions:\n${configMap['options']}\npath:\n${configMap['path']}');
       } else {
-        showCupertinoAlertDialog(
+        return showCupertinoAlertDialog(
             context: context, title: '错误', content: '检查失败，请检查配置信息');
-        return;
       }
     } catch (e) {
       FLog.error(
@@ -409,12 +447,12 @@ class QiniuConfigState extends State<QiniuConfig> {
           methodName: 'checkQiniuConfig',
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
-      showCupertinoAlertDialog(
+      return showCupertinoAlertDialog(
           context: context, title: "检查失败!", content: e.toString());
     }
   }
 
-  Future<File> get _localFile async {
+  Future<File> get localFile async {
     final path = await _localPath;
     String defaultUser = await Global.getUser();
     return File('$path/${defaultUser}_qiniu_config.txt');
@@ -427,7 +465,7 @@ class QiniuConfigState extends State<QiniuConfig> {
 
   Future<String> readQiniuConfig() async {
     try {
-      final file = await _localFile;
+      final file = await localFile;
       String contents = await file.readAsString();
       return contents;
     } catch (e) {
@@ -534,4 +572,15 @@ class QiniuConfigModel {
         'options': options,
         'path': path,
       };
+
+  static List keysList = [
+    'remarkName',
+    'accessKey',
+    'secretKey',
+    'bucket',
+    'url',
+    'area',
+    'options',
+    'path',
+  ];
 }

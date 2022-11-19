@@ -5,8 +5,10 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:f_logs/f_logs.dart';
+import 'package:fluro/fluro.dart';
 import 'package:path_provider/path_provider.dart';
 
+import 'package:horopic/router/application.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/pages/loading.dart';
 import 'package:horopic/utils/sql_utils.dart';
@@ -43,6 +45,8 @@ class HostConfigState extends State<HostConfig> {
       _strategyIdController.text = configMap['strategy_id'];
       if (configMap['album_id'] != 'None' && configMap['album_id'] != null) {
         _albumIdController.text = configMap['album_id'];
+      } else {
+        _albumIdController.clear();
       }
       _tokenController = configMap['token'];
       setState(() {});
@@ -72,6 +76,19 @@ class HostConfigState extends State<HostConfig> {
         elevation: 0,
         centerTitle: true,
         title: const Text('兰空图床参数配置'),
+        actions: [
+          IconButton(
+            onPressed: () async {
+              await Application.router.navigateTo(
+                  context, '/configureStorePage?psHost=lsky.pro',
+                  transition: TransitionType.cupertino);
+              await _initConfig();
+              setState(() {});
+            },
+            icon: const Icon(Icons.save_as_outlined,
+                color: Color.fromARGB(255, 255, 255, 255), size: 35),
+          )
+        ],
       ),
       body: Form(
         key: _formKey,
@@ -169,9 +186,30 @@ class HostConfigState extends State<HostConfig> {
             ListTile(
                 title: ElevatedButton(
               onPressed: () {
-                checkHostConfig();
+                showDialog(
+                    context: context,
+                    barrierDismissible: false,
+                    builder: (context) {
+                      return NetLoadingDialog(
+                        outsideDismiss: false,
+                        loading: true,
+                        loadingText: "检查中...",
+                        requestCallBack: checkHostConfig(),
+                      );
+                    });
               },
               child: const Text('检查当前配置'),
+            )),
+              ListTile(
+                title: ElevatedButton(
+              onPressed: () async {
+                await Application.router.navigateTo(
+                    context, '/configureStorePage?psHost=lsky.pro',
+                    transition: TransitionType.cupertino);
+                await _initConfig();
+                setState(() {});
+              },
+              child: const Text('设置备用配置'),
             )),
             ListTile(
                 title: ElevatedButton(
@@ -569,7 +607,7 @@ class HostConfigState extends State<HostConfig> {
             final hostConfig = HostConfigModel(
                 host, token, strategyId.toString(), albumID.toString());
             final hostConfigJson = jsonEncode(hostConfig);
-            final hostConfigFile = await _localFile;
+            final hostConfigFile = await localFile;
             hostConfigFile.writeAsString(hostConfigJson);
             setState(() {});
             return showCupertinoAlertDialog(
@@ -656,7 +694,7 @@ class HostConfigState extends State<HostConfig> {
             final hostConfig = HostConfigModel(host, _tokenController,
                 strategyId.toString(), albumID.toString());
             final hostConfigJson = jsonEncode(hostConfig);
-            final hostConfigFile = await _localFile;
+            final hostConfigFile = await localFile;
             hostConfigFile.writeAsString(hostConfigJson);
 
             return showCupertinoAlertDialog(
@@ -686,14 +724,13 @@ class HostConfigState extends State<HostConfig> {
     }
   }
 
-  void checkHostConfig() async {
+  checkHostConfig() async {
     try {
-      final hostConfigFile = await _localFile;
+      final hostConfigFile = await localFile;
       String configData = await hostConfigFile.readAsString();
       if (configData == "Error") {
-        showCupertinoAlertDialog(
+        return showCupertinoAlertDialog(
             context: context, title: "检查失败!", content: "请先配置上传参数.");
-        return;
       }
       Map configMap = jsonDecode(configData);
       BaseOptions options = BaseOptions(
@@ -711,33 +748,28 @@ class HostConfigState extends State<HostConfig> {
         profileUrl,
       );
       if (response.statusCode == 200 && response.data['status'] == true) {
-        showCupertinoAlertDialog(
+        return showCupertinoAlertDialog(
             context: context,
             title: '通知',
             content:
                 '检测通过，您的配置信息为：\nhost:\n${configMap["host"]}\nstrategyId:\n${configMap["strategy_id"]}\nalbumId:\n${configMap["album_id"]}\ntoken:\n${configMap["token"]}');
       } else {
         if (response.statusCode == 403) {
-          showCupertinoAlertDialog(
+          return showCupertinoAlertDialog(
               context: context, title: '错误', content: '管理员关闭了接口功能');
-          return;
         } else if (response.statusCode == 401) {
-          showCupertinoAlertDialog(
+          return showCupertinoAlertDialog(
               context: context, title: '错误', content: '授权失败');
-          return;
         } else if (response.statusCode == 500) {
-          showCupertinoAlertDialog(
+          return showCupertinoAlertDialog(
               context: context, title: '错误', content: '服务器异常');
-          return;
         } else if (response.statusCode == 404) {
-          showCupertinoAlertDialog(
+          return showCupertinoAlertDialog(
               context: context, title: '错误', content: '接口不存在');
-          return;
         }
         if (response.data['status'] == false) {
-          showCupertinoAlertDialog(
+          return showCupertinoAlertDialog(
               context: context, title: '错误', content: response.data['message']);
-          return;
         }
       }
     } catch (e) {
@@ -746,12 +778,12 @@ class HostConfigState extends State<HostConfig> {
           methodName: 'checkHostConfig',
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
-      showCupertinoAlertDialog(
+      return showCupertinoAlertDialog(
           context: context, title: "检查失败!", content: e.toString());
     }
   }
 
-  Future<File> get _localFile async {
+  Future<File> get localFile async {
     final path = await _localPath;
     String defaultUser = await Global.getUser();
     return File('$path/${defaultUser}_host_config.txt');
@@ -764,7 +796,7 @@ class HostConfigState extends State<HostConfig> {
 
   Future<String> readHostConfig() async {
     try {
-      final file = await _localFile;
+      final file = await localFile;
       String contents = await file.readAsString();
       return contents;
     } catch (e) {
@@ -861,4 +893,12 @@ class HostConfigModel {
         'strategy_id': strategyId,
         'album_id': albumId,
       };
+
+  static List keysList = [
+    'remarkName',
+    'host',
+    'token',
+    'strategy_id',
+    'album_id',
+  ];
 }

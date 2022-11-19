@@ -63,17 +63,26 @@ class FTPConfigState extends State<FTPConfig> {
       _ftpPortController.text = configMap['ftpPort'];
       _ftpConfigMap['ftpType'] = configMap['ftpType'];
       _ftpConfigMap['isAnonymous'] = configMap['isAnonymous'].toString();
+
       if (configMap['ftpUser'] != 'None') {
         _ftpUserController.text = configMap['ftpUser'];
+      } else {
+        _ftpUserController.clear();
       }
       if (configMap['ftpPassword'] != 'None') {
         _ftpPasswordController.text = configMap['ftpPassword'];
+      } else {
+        _ftpPasswordController.clear();
       }
       if (configMap['uploadPath'] != 'None') {
         _ftpUploadPathController.text = configMap['uploadPath'];
+      } else {
+        _ftpUploadPathController.clear();
       }
       if (configMap['ftpHomeDir'] != 'None') {
         _ftpHomeDirController.text = configMap['ftpHomeDir'];
+      } else {
+        _ftpHomeDirController.clear();
       }
       setState(() {});
     } catch (e) {
@@ -118,6 +127,17 @@ class FTPConfigState extends State<FTPConfig> {
                   transition: TransitionType.cupertino);
             },
           ),
+          IconButton(
+            onPressed: () async {
+              await Application.router.navigateTo(
+                  context, '/configureStorePage?psHost=ftp',
+                  transition: TransitionType.cupertino);
+              await _initConfig();
+              setState(() {});
+            },
+            icon: const Icon(Icons.save_as_outlined,
+                color: Color.fromARGB(255, 255, 255, 255), size: 35),
+          )
         ],
       ),
       body: Form(
@@ -245,9 +265,30 @@ class FTPConfigState extends State<FTPConfig> {
             ListTile(
                 title: ElevatedButton(
               onPressed: () {
-                checkFTPConfig();
+                showDialog(
+                    context: context,
+                    barrierDismissible: false,
+                    builder: (context) {
+                      return NetLoadingDialog(
+                        outsideDismiss: false,
+                        loading: true,
+                        loadingText: "检查中...",
+                        requestCallBack: checkFTPConfig(),
+                      );
+                    });
               },
               child: const Text('检查当前配置'),
+            )),
+            ListTile(
+                title: ElevatedButton(
+              onPressed: () async {
+                await Application.router.navigateTo(
+                    context, '/configureStorePage?psHost=ftp',
+                    transition: TransitionType.cupertino);
+                await _initConfig();
+                setState(() {});
+              },
+              child: const Text('设置备用配置'),
             )),
             ListTile(
                 title: ElevatedButton(
@@ -321,8 +362,8 @@ class FTPConfigState extends State<FTPConfig> {
       ftpHomeDir = 'None';
     } else {
       ftpHomeDir = _ftpHomeDirController.text;
-      if (!ftpUploadPath.endsWith('/')) {
-        ftpUploadPath = '$ftpUploadPath/';
+      if (!ftpHomeDir.endsWith('/')) {
+        ftpHomeDir = '$ftpHomeDir/';
       }
     }
     final String isAnonymous = _ftpConfigMap['isAnonymous'].toString();
@@ -376,7 +417,7 @@ class FTPConfigState extends State<FTPConfig> {
               final ftpConfig = FTPConfigModel(ftpHost, ftpPort, ftpUser,
                   ftpPassword, ftpType, isAnonymous, ftpUploadPath, ftpHomeDir);
               final ftpConfigJson = jsonEncode(ftpConfig);
-              final ftpConfigFile = await _localFile;
+              final ftpConfigFile = await localFile;
               await ftpConfigFile.writeAsString(ftpConfigJson);
               return showCupertinoAlertDialog(
                   context: context, title: '成功', content: '配置成功');
@@ -386,7 +427,8 @@ class FTPConfigState extends State<FTPConfig> {
             }
           }
         } else {
-          final socket = await SSHSocket.connect(ftpHost,int.parse(ftpPort.toString()));
+          final socket =
+              await SSHSocket.connect(ftpHost, int.parse(ftpPort.toString()));
           final client = SSHClient(
             socket,
             username: ftpUser,
@@ -406,7 +448,7 @@ class FTPConfigState extends State<FTPConfig> {
             final ftpConfig = FTPConfigModel(ftpHost, ftpPort, ftpUser,
                 ftpPassword, ftpType, isAnonymous, ftpUploadPath, ftpHomeDir);
             final ftpConfigJson = jsonEncode(ftpConfig);
-            final ftpConfigFile = await _localFile;
+            final ftpConfigFile = await localFile;
             await ftpConfigFile.writeAsString(ftpConfigJson);
             return showCupertinoAlertDialog(
                 context: context, title: '成功', content: '配置成功');
@@ -435,15 +477,14 @@ class FTPConfigState extends State<FTPConfig> {
     }
   }
 
-  void checkFTPConfig() async {
+  checkFTPConfig() async {
     try {
-      final ftpConfigFile = await _localFile;
+      final ftpConfigFile = await localFile;
       String configData = await ftpConfigFile.readAsString();
 
       if (configData == "Error") {
-        showCupertinoAlertDialog(
+        return showCupertinoAlertDialog(
             context: context, title: "检查失败!", content: "请先配置上传参数.");
-        return;
       }
 
       Map configMap = jsonDecode(configData);
@@ -469,19 +510,19 @@ class FTPConfigState extends State<FTPConfig> {
         bool connectResult = await ftpConnect.connect();
         await ftpConnect.disconnect();
         if (connectResult == true) {
-          showCupertinoAlertDialog(
+          return showCupertinoAlertDialog(
             context: context,
             title: '通知',
             content:
                 '检测通过，您的配置信息为:\n用户名:\n${configMap["ftpHost"]}\n端口:\n${configMap["ftpPort"]}\n用户名:\n${configMap["ftpUser"]}\n密码:\n${configMap["ftpPassword"]}\n上传路径:\n${configMap["uploadPath"]}\n管理功能起始路径:\n${configMap["ftpHomeDir"]}',
           );
         } else {
-          showCupertinoAlertDialog(
+          return showCupertinoAlertDialog(
               context: context, title: '错误', content: '检查失败，请检查配置信息');
-          return;
         }
       } else {
-        final socket = await SSHSocket.connect(ftpHost, int.parse(ftpPort.toString()));
+        final socket =
+            await SSHSocket.connect(ftpHost, int.parse(ftpPort.toString()));
         final client = SSHClient(
           socket,
           username: ftpUser,
@@ -490,7 +531,7 @@ class FTPConfigState extends State<FTPConfig> {
           },
         );
         client.close();
-        showCupertinoAlertDialog(
+        return showCupertinoAlertDialog(
           context: context,
           title: '通知',
           content:
@@ -503,12 +544,12 @@ class FTPConfigState extends State<FTPConfig> {
           methodName: 'checkFTPConfig',
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
-      showCupertinoAlertDialog(
+      return showCupertinoAlertDialog(
           context: context, title: "检查失败!", content: e.toString());
     }
   }
 
-  Future<File> get _localFile async {
+  Future<File> get localFile async {
     final path = await _localPath;
     String defaultUser = await Global.getUser();
     return File('$path/${defaultUser}_ftp_config.txt');
@@ -521,7 +562,7 @@ class FTPConfigState extends State<FTPConfig> {
 
   Future<String> readFTPConfig() async {
     try {
-      final file = await _localFile;
+      final file = await localFile;
       String contents = await file.readAsString();
       return contents;
     } catch (e) {
@@ -630,4 +671,16 @@ class FTPConfigModel {
         'uploadPath': uploadPath,
         'ftpHomeDir': ftpHomeDir,
       };
+
+  static List keysList = [
+    'remarkName',
+    'ftpHost',
+    'ftpPort',
+    'ftpUser',
+    'ftpPassword',
+    'ftpType',
+    'isAnonymous',
+    'uploadPath',
+    'ftpHomeDir',
+  ];
 }

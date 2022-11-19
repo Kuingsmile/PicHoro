@@ -6,8 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:f_logs/f_logs.dart';
+import 'package:fluro/fluro.dart';
 import 'package:path_provider/path_provider.dart';
 
+import 'package:horopic/router/application.dart';
 import 'package:horopic/api/tencent_api.dart';
 import 'package:horopic/pages/loading.dart';
 import 'package:horopic/utils/common_functions.dart';
@@ -38,10 +40,10 @@ class TencentConfigState extends State<TencentConfig> {
   @override
   void initState() {
     super.initState();
-    _initCongfig();
+    _initConfig();
   }
 
-  _initCongfig() async {
+  _initConfig() async {
     try {
       Map configMap = await TencentManageAPI.getConfigMap();
       _secretIdController.text = configMap['secretId'];
@@ -51,12 +53,18 @@ class TencentConfigState extends State<TencentConfig> {
       _areaController.text = configMap['area'];
       if (configMap['path'] != 'None') {
         _pathController.text = configMap['path'];
+      } else {
+        _pathController.clear();
       }
       if (configMap['customUrl'] != 'None') {
         _customUrlController.text = configMap['customUrl'];
+      } else {
+        _customUrlController.clear();
       }
       if (configMap['options'] != 'None') {
         _optionsController.text = configMap['options'];
+      } else {
+        _optionsController.clear();
       }
     } catch (e) {
       FLog.error(
@@ -88,6 +96,19 @@ class TencentConfigState extends State<TencentConfig> {
         elevation: 0,
         centerTitle: true,
         title: const Text('腾讯云参数配置'),
+        actions: [
+          IconButton(
+            onPressed: () async {
+              await Application.router.navigateTo(
+                  context, '/configureStorePage?psHost=tencent',
+                  transition: TransitionType.cupertino);
+              await _initConfig();
+              setState(() {});
+            },
+            icon: const Icon(Icons.save_as_outlined,
+                color: Color.fromARGB(255, 255, 255, 255), size: 35),
+          )
+        ],
       ),
       body: Form(
         key: _formKey,
@@ -217,9 +238,30 @@ class TencentConfigState extends State<TencentConfig> {
             ListTile(
                 title: ElevatedButton(
               onPressed: () {
-                checkTencentConfig();
+                showDialog(
+                    context: context,
+                    barrierDismissible: false,
+                    builder: (context) {
+                      return NetLoadingDialog(
+                        outsideDismiss: false,
+                        loading: true,
+                        loadingText: "检查中...",
+                        requestCallBack: checkTencentConfig(),
+                      );
+                    });
               },
               child: const Text('检查当前配置'),
+            )),
+            ListTile(
+                title: ElevatedButton(
+              onPressed: () async {
+                await Application.router.navigateTo(
+                    context, '/configureStorePage?psHost=tencent',
+                    transition: TransitionType.cupertino);
+                await _initConfig();
+                setState(() {});
+              },
+              child: const Text('设置备用配置'),
             )),
             ListTile(
                 title: ElevatedButton(
@@ -383,7 +425,7 @@ class TencentConfigState extends State<TencentConfig> {
           final tencentConfig = TencentConfigModel(secretId, secretKey, bucket,
               appId, area, path, customUrl, options);
           final tencentConfigJson = jsonEncode(tencentConfig);
-          final tencentConfigFile = await _localFile;
+          final tencentConfigFile = await localFile;
           await tencentConfigFile.writeAsString(tencentConfigJson);
           return showCupertinoAlertDialog(
               context: context, title: '成功', content: '配置成功');
@@ -406,15 +448,14 @@ class TencentConfigState extends State<TencentConfig> {
     }
   }
 
-  void checkTencentConfig() async {
+  checkTencentConfig() async {
     try {
-      final tencentConfigFile = await _localFile;
+      final tencentConfigFile = await localFile;
       String configData = await tencentConfigFile.readAsString();
 
       if (configData == "Error") {
-        showCupertinoAlertDialog(
+        return showCupertinoAlertDialog(
             context: context, title: "检查失败!", content: "请先配置上传参数.");
-        return;
       }
 
       Map configMap = jsonDecode(configData);
@@ -474,9 +515,7 @@ class TencentConfigState extends State<TencentConfig> {
       });
 
       BaseOptions baseoptions = BaseOptions(
-        //连接服务器超时时间，单位是毫秒.
         connectTimeout: 30000,
-        //响应超时时间。
         receiveTimeout: 30000,
         sendTimeout: 30000,
       );
@@ -496,15 +535,14 @@ class TencentConfigState extends State<TencentConfig> {
       );
 
       if (response.statusCode == 204) {
-        showCupertinoAlertDialog(
+        return showCupertinoAlertDialog(
             context: context,
             title: '通知',
             content:
                 '检测通过，您的配置信息为:\nsecretId:\n${configMap['secretId']}\nsecretKey:\n${configMap['secretKey']}\nbucket:\n${configMap['bucket']}\nappId:\n${configMap['appId']}\narea:\n${configMap['area']}\npath:\n${configMap['path']}\ncustomUrl:\n${configMap['customUrl']}\noptions:\n${configMap['options']}');
       } else {
-        showCupertinoAlertDialog(
+        return showCupertinoAlertDialog(
             context: context, title: '错误', content: '检查失败，请检查配置信息');
-        return;
       }
     } catch (e) {
       FLog.error(
@@ -512,12 +550,12 @@ class TencentConfigState extends State<TencentConfig> {
           methodName: 'checkTencentConfig',
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
-      showCupertinoAlertDialog(
+      return showCupertinoAlertDialog(
           context: context, title: "检查失败!", content: e.toString());
     }
   }
 
-  Future<File> get _localFile async {
+  Future<File> get localFile async {
     final path = await _localPath;
     String defaultUser = await Global.getUser();
     return File('$path/${defaultUser}_tencent_config.txt');
@@ -530,7 +568,7 @@ class TencentConfigState extends State<TencentConfig> {
 
   Future<String> readTencentConfig() async {
     try {
-      final file = await _localFile;
+      final file = await localFile;
       String contents = await file.readAsString();
       return contents;
     } catch (e) {
@@ -638,4 +676,16 @@ class TencentConfigModel {
         'customUrl': customUrl,
         'options': options,
       };
+
+  static List keysList = [
+    'remarkName',
+    'secretId',
+    'secretKey',
+    'bucket',
+    'appId',
+    'area',
+    'path',
+    'customUrl',
+    'options',
+  ];
 }
