@@ -366,7 +366,6 @@ class PsHostHomePageState extends State<PsHostHomePage>
                     String currentPicHoroPasswd = await Global.getPassword();
                     var usernamecheck = await MySqlUtils.queryUser(
                         username: currentPicHoroUser);
-
                     if (usernamecheck == 'Empty') {
                       return showToast('请先去设置页面注册');
                     } else if (currentPicHoroPasswd !=
@@ -498,6 +497,44 @@ class PsHostHomePageState extends State<PsHostHomePage>
                         height: 80,
                       ),
                       const Text('SSH/SFTP'),
+                    ],
+                  ),
+                ),
+              ),
+              Positioned(
+                  top: 0,
+                  right: 0,
+                  child: Container(
+                    color: Colors.transparent,
+                    child: const Text(''),
+                  )),
+            ],
+          ),
+        ),
+        isDraggable: true,
+      ),
+      DraggableGridItem(
+        child: Card(
+          child: Stack(
+            children: [
+              Center(
+                child: InkWell(
+                  onTap: () async {
+                     Application.router.navigateTo(
+                      context,
+                      Routes.awsBucketList,
+                      transition: TransitionType.inFromRight,
+                    );
+                  },
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Image.asset(
+                        'assets/images/aws_s3.png',
+                        width: 80,
+                        height: 80,
+                      ),
+                      const Text('S3兼容平台'),
                     ],
                   ),
                 ),
