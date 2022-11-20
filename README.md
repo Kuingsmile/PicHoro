@@ -124,12 +124,11 @@ Github下载地址 [Github release](https://github.com/Kuingsmile/PicHoro/releas
 
 ### 依赖包修改
 
-本APP使用的部分依赖包需要手动修改源代码才可使用，修改修改的依赖包如下：
+本APP使用的部分依赖包需要手动修改源代码才可使用，需要修改的依赖包如下：
 
 #### flutter_speed_dial
 
 文件路径示例: `D:\flutter\.pub-cache\hosted\pub.flutter-io.cn\flutter_speed_dial-6.1.0+1\lib\src\speed_dial.dart`
-
 
 如下修改`dispose`函数：
 
@@ -154,7 +153,7 @@ Github下载地址 [Github release](https://github.com/Kuingsmile/PicHoro/releas
 
 文件路径示例: `D:\flutter\.pub-cache\hosted\pub.flutter-io.cn\minio_new-1.0.1\lib\src\minio.dart`
 
-1. queries['maxKeys']修改为queries['max-keys']
+1. `queries['maxKeys']`修改为`queries['max-keys']`
 2. 添加导入 `import 'package:xml2json/xml2json.dart';`
 3. 如下修改`listBuckets`函数
 
