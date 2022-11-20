@@ -130,15 +130,24 @@ Github下载地址 [Github release](https://github.com/Kuingsmile/PicHoro/releas
 
 文件路径示例: `D:\flutter\.pub-cache\hosted\pub.flutter-io.cn\flutter_speed_dial-6.1.0+1\lib\src\speed_dial.dart`
 
-如下修改：
+
+如下修改`dispose`函数：
 
 ```dart
-  //overlayEntry?.remove();
-    //overlayEntry?.dispose();
+@override
+  void dispose() {
+    if (widget.renderOverlay &&
+        (backgroundOverlay != null && backgroundOverlay!.mounted)) {
+      backgroundOverlay?.remove();
+    }
     if (overlayEntry != null && overlayEntry!.mounted) {
       overlayEntry?.remove();
       overlayEntry?.dispose();
     }
+    _controller.dispose();
+    widget.openCloseDial?.removeListener(_onOpenCloseDial);
+    super.dispose();
+  }
 ```
 
 #### minio_new
