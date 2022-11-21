@@ -714,9 +714,9 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
                     }
                     List sqlconfig = [];
                     sqlconfig.add(host);
-                    sqlconfig.add(token);
                     sqlconfig.add(strategyId);
                     sqlconfig.add(albumId);
+                    sqlconfig.add(token);
                     String defaultUser = await Global.getUser();
                     sqlconfig.add(defaultUser);
                     var queryLskypro =
