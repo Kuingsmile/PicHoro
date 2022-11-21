@@ -33,6 +33,7 @@ class PsHostHomePageState extends State<PsHostHomePage>
   }
 
   initOrder() {
+    psHostHomePageOrder.clear();
     List temppsHostHomePageOrder = Global.psHostHomePageOrder;
     setState(() {
       for (var i = 0; i < temppsHostHomePageOrder.length; i++) {
@@ -520,7 +521,7 @@ class PsHostHomePageState extends State<PsHostHomePage>
               Center(
                 child: InkWell(
                   onTap: () async {
-                     Application.router.navigateTo(
+                    Application.router.navigateTo(
                       context,
                       Routes.awsBucketList,
                       transition: TransitionType.inFromRight,
