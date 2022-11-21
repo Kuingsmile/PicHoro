@@ -2,6 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:horopic/utils/global.dart';
+import 'package:horopic/utils/common_functions.dart';
+import 'package:f_logs/f_logs.dart';
 
 // ignore: must_be_immutable
 class NetLoadingDialog extends StatefulWidget {
@@ -34,6 +36,11 @@ class _LoadingDialog extends State<NetLoadingDialog> {
         Global.operateDone = true;
         Navigator.pop(context);
       }).catchError((_) {
+        FLog.error(
+            className: 'NetLoadingDialog',
+            methodName: 'initState',
+            text: formatErrorMessage({}, _.toString()),
+            dataLogType: DataLogType.ERRORS.toString());
         Navigator.pop(context);
       });
     }
