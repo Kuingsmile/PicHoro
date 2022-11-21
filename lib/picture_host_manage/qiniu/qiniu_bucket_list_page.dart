@@ -130,7 +130,6 @@ class QiniuBucketListState
       if (allBucketList is! List) {
         allBucketList = [allBucketList];
       }
-      //TODO
       for (var i = 0; i < allBucketList.length; i++) {
         bucketMap.add({
           'name': allBucketList[i],
