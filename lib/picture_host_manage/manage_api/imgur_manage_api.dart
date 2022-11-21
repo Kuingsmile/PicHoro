@@ -107,7 +107,7 @@ class ImgurManageAPI {
       receiveTimeout: 30000,
       sendTimeout: 30000,
     );
-
+    
     options.headers = {
       "Authorization": "Bearer $accesstoken",
     };
