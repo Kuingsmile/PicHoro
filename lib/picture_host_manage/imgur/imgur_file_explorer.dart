@@ -61,26 +61,7 @@ class ImgurFileExplorerState
 
   _getFileList() async {
     try {
-      var res = await ImgurManageAPI.isEmptyAccount(
-        widget.userProfile['imguruser'],
-        widget.userProfile['accesstoken'],
-        widget.userProfile['proxy'],
-      );
-      if (res[0] == 'empty') {
-        if (mounted) {
-          setState(() {
-            state = loading_state.LoadState.EMPTY;
-          });
-        }
-        return;
-      } else if (res[0] == 'error') {
-        if (mounted) {
-          setState(() {
-            state = loading_state.LoadState.ERROR;
-          });
-        }
-        return;
-      }
+      
       //主页模式
       if (widget.albumInfo.isEmpty) {
         //查询相册
