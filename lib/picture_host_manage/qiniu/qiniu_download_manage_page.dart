@@ -278,7 +278,7 @@ class QiniuUpDownloadManagePageState extends State<QiniuUpDownloadManagePage> {
                 Icons.delete,
                 color: Colors.white,
               ),
-              Text('清空下载文件列表',
+              Text('清空下载列表',
                   style: TextStyle(
                       color: Colors.white,
                       fontSize: 16,
