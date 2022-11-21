@@ -275,7 +275,6 @@ class TencentBucketListState
               ),
             ),
             child: ListTile(
-              // dense: true,
               visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
               title: Text(
                 '${TencentManageAPI.areaCodeName[value]!}(${countBucketLocation(bucketMap, value)})',
@@ -389,12 +388,10 @@ class TencentBucketListState
             color: Color.fromARGB(255, 230, 230, 230),
           ),
           ListTile(
-            // dense: true,
             leading: const Icon(
               Icons.check_box_outlined,
               color: Color.fromARGB(255, 97, 141, 236),
             ),
-            // visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
             minLeadingWidth: 0,
             title: const Text('设为默认图床', style: TextStyle(fontSize: 15)),
             onTap: () async {
@@ -421,12 +418,10 @@ class TencentBucketListState
             color: Color.fromARGB(255, 230, 230, 230),
           ),
           ListTile(
-            //dense: true,
             leading: const Icon(
               Icons.info_outline,
               color: Color.fromARGB(255, 97, 141, 236),
             ),
-            // visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
             minLeadingWidth: 0,
             title: const Text('存储桶信息', style: TextStyle(fontSize: 15)),
             onTap: () {
@@ -444,9 +439,7 @@ class TencentBucketListState
               Icons.manage_accounts_outlined,
               color: Color.fromARGB(255, 97, 141, 236),
             ),
-            // visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
             minLeadingWidth: 0,
-            // dense: true,
             title: const Text('访问权限修改', style: TextStyle(fontSize: 15)),
             trailing: DropdownButton(
               alignment: Alignment.centerRight,
