@@ -215,7 +215,7 @@ class GithubUpDownloadManagePageState
               onDelete: (url) async {
                 var fileName =
                     "$savedDir${downloadManager.getFileNameFromUrl(url)}";
-                if (fileName.contains('?')){
+                if (fileName.contains('?')) {
                   fileName = fileName.substring(0, fileName.indexOf('?'));
                 }
                 var file = File(fileName);
@@ -283,7 +283,7 @@ class GithubUpDownloadManagePageState
                 Icons.delete,
                 color: Colors.white,
               ),
-              Text('清空下载文件列表',
+              Text('清空下载列表',
                   style: TextStyle(
                       color: Colors.white,
                       fontSize: 16,
