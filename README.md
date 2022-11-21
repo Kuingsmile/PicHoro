@@ -122,6 +122,34 @@ Github下载地址 [Github release](https://github.com/Kuingsmile/PicHoro/releas
 2. `git clone https://github.com/Kuingsmile/PicHoro.git` 并进入项目。
 3. Windows 推荐使用VScode编辑和调试代码。
 
+### 图床修改
+
+兰空图床的相册ID参数，限于以下两种情况下才会生效：
+    1. 基于付费企业版兰空图床搭建
+    2. 开源免费版需要自己或者联系管理员修改源代码文件，修改方式为打开 **/app/Services/ImageService.php**文件，修改第139行，原文件为
+
+```php
+            if ($albumId = $user->configs->get(UserConfigKey::DefaultAlbum)) {
+                if ($user->albums()->where('id', $albumId)->exists()) {
+                    $image->album_id = $albumId;
+                }
+            }
+```
+
+修改为
+
+```php
+           if ($request->has('album_id')) {
+                $image->album_id = $request->input('album_id');
+            } else {
+            if ($albumId = $user->configs->get(UserConfigKey::DefaultAlbum)) {
+                if ($user->albums()->where('id', $albumId)->exists()) {
+                    $image->album_id = $albumId;
+                }
+            }
+        }
+```
+
 ### 依赖包修改
 
 本APP使用的部分依赖包需要手动修改源代码才可使用，需要修改的依赖包如下：
@@ -166,7 +194,6 @@ Github下载地址 [Github release](https://github.com/Kuingsmile/PicHoro/releas
     final myTransformer = Xml2Json();
     myTransformer.parse(resp.body);
     Map responseMap = json.decode(myTransformer.toParker());
-    print(responseMap);
     List<Bucket> buckets = [];
     if (responseMap['ListAllMyBucketsResult'] == null ||
         responseMap['ListAllMyBucketsResult']['Buckets'] == null ||
