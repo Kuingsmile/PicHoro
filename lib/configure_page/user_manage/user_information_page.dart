@@ -35,6 +35,8 @@ import 'package:horopic/picture_host_configure/configure_page/upyun_configure.da
     as upyunhostclass;
 import 'package:horopic/picture_host_configure/configure_page/ftp_configure.dart'
     as ftphostclass;
+import 'package:horopic/picture_host_configure/configure_page/aws_configure.dart'
+    as awshostclass;
 import 'package:sqflite/sqflite.dart';
 
 class UserInformationPage extends StatefulWidget {
@@ -57,7 +59,7 @@ class UserInformationPageState
     'imgur': 'Imgur',
     'lsky.pro': '兰空图床',
     'ftp': 'FTP',
-    'aws':'S3兼容平台'
+    'aws': 'S3兼容平台'
   };
 
   @override
@@ -375,6 +377,39 @@ class UserInformationPageState
                   context: context, title: "错误", content: "拉取FTP配置失败,请重试!");
             }
           }
+          //拉取AWS S3配置
+          var awsresult = await MySqlUtils.queryAws(username: username);
+          if (awsresult == 'Error') {
+            return showCupertinoAlertDialog(
+                context: context, title: "错误", content: "获取S3云端信息失败,请重试!");
+          } else if (awsresult != 'Empty') {
+            try {
+              final awshostConfig = awshostclass.AwsConfigModel(
+                awsresult['accessKeyId'],
+                awsresult['secretAccessKey'],
+                awsresult['bucket'],
+                awsresult['endpoint'],
+                awsresult['region'],
+                awsresult['uploadPath'],
+                awsresult['customUrl'],
+              );
+              final awsConfigJson = jsonEncode(awshostConfig);
+              final directory = await getApplicationDocumentsDirectory();
+              File awsLocalFile =
+                  File('${directory.path}/${username}_aws_config.txt');
+              awsLocalFile.writeAsString(awsConfigJson);
+            } catch (e) {
+              FLog.error(
+                  className: 'UserInformationPageState',
+                  methodName: '_fetchconfig_awshost',
+                  text: formatErrorMessage({
+                    'username': username,
+                  }, e.toString()),
+                  dataLogType: DataLogType.ERRORS.toString());
+              return showCupertinoAlertDialog(
+                  context: context, title: "错误", content: "拉取S3配置失败,请重试!");
+            }
+          }
           //全部拉取完成后，提示用户
           return Fluttertoast.showToast(
               msg: "已拉取云端配置",
@@ -593,7 +628,7 @@ class UserInformationPageState
                   '5',
                   '6',
                   '7',
-                  '8'
+                  '8',
                   '9',
                   '10',
                   '11',

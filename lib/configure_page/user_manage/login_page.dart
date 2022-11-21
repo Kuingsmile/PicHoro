@@ -6,7 +6,11 @@ import 'package:path_provider/path_provider.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:f_logs/f_logs.dart';
+import 'package:fluro/fluro.dart';
 
+
+import 'package:horopic/router/application.dart';
+import 'package:horopic/router/routers.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/sql_utils.dart';
@@ -27,6 +31,11 @@ import 'package:horopic/picture_host_configure/configure_page/aliyun_configure.d
     as aliyunhostclass;
 import 'package:horopic/picture_host_configure/configure_page/upyun_configure.dart'
     as upyunhostclass;
+import 'package:horopic/picture_host_configure/configure_page/ftp_configure.dart'
+    as ftphostclass;
+import 'package:horopic/picture_host_configure/configure_page/aws_configure.dart'
+    as awshostclass;
+import 'package:horopic/picture_host_configure/configure_store/configure_store_file.dart';
 
 class APPPassword extends StatefulWidget {
   const APPPassword({Key? key}) : super(key: key);
@@ -38,6 +47,7 @@ class APPPassword extends StatefulWidget {
 class APPPasswordState extends State<APPPassword> {
   final _userNametext = TextEditingController();
   final _passwordcontroller = TextEditingController();
+  bool loginStatus = false;
 
   _saveuserpasswd() async {
     try {
@@ -53,9 +63,12 @@ class APPPasswordState extends State<APPPassword> {
         await Global.setPShost('lsky.pro');
         await Global.setShowedPBhost('lskypro');
         await Global.setLKformat('rawurl');
+        await ConfigureStoreFile().generateConfigureFile();
         //创建相册数据库
         Database db = await Global.getDatabase();
         await Global.setDatabase(db);
+        Database dbExtend = await Global.getDatabaseExtend();
+        await Global.setDatabaseExtend(dbExtend);
         //在数据库中创建用户
         var result = await MySqlUtils.insertUser(content: [
           _userNametext.text,
@@ -63,6 +76,7 @@ class APPPasswordState extends State<APPPassword> {
           Global.defaultPShost,
         ]);
         if (result == 'Success') {
+          await ConfigureStoreFile().generateConfigureFile();
           return showToast('创建用户成功');
         } else {
           return showToast('创建用户失败');
@@ -79,8 +93,13 @@ class APPPasswordState extends State<APPPassword> {
                 _passwordcontroller.text.toString());
             Database db = await Global.getDatabase();
             await Global.setDatabase(db);
+            Database dbExtend = await Global.getDatabaseExtend();
+            await Global.setDatabaseExtend(dbExtend);
+            await ConfigureStoreFile().generateConfigureFile();
+            loginStatus = true;
             return showToast('登录成功');
           } else {
+            await ConfigureStoreFile().generateConfigureFile();
             return showToast('已经登录');
           }
         } else {
@@ -123,6 +142,7 @@ class APPPasswordState extends State<APPPassword> {
                 lskyhostresult['host'],
                 lskyhostresult['token'],
                 lskyhostresult['strategy_id'],
+                lskyhostresult['album_id'],
               );
               final hostConfigJson = jsonEncode(hostConfig);
               final directory = await getApplicationDocumentsDirectory();
@@ -361,6 +381,73 @@ class APPPasswordState extends State<APPPassword> {
                   context: context, title: "错误", content: "拉取又拍云配置失败,请重试!");
             }
           }
+          //拉取FTP配置
+          var ftpresult = await MySqlUtils.queryFTP(username: username);
+          if (ftpresult == 'Error') {
+            return showCupertinoAlertDialog(
+                context: context, title: "错误", content: "获取FTP云端信息失败,请重试!");
+          } else if (ftpresult != 'Empty') {
+            try {
+              final ftphostConfig = ftphostclass.FTPConfigModel(
+                ftpresult['ftpHost'],
+                ftpresult['ftpPort'],
+                ftpresult['ftpUser'],
+                ftpresult['ftpPassword'],
+                ftpresult['ftpType'],
+                ftpresult['isAnonymous'],
+                ftpresult['uploadPath'],
+                ftpresult['ftpHomeDir'],
+              );
+              final ftpConfigJson = jsonEncode(ftphostConfig);
+              final directory = await getApplicationDocumentsDirectory();
+              File ftpLocalFile =
+                  File('${directory.path}/${username}_ftp_config.txt');
+              ftpLocalFile.writeAsString(ftpConfigJson);
+            } catch (e) {
+              FLog.error(
+                  className: 'UserInformationPageState',
+                  methodName: '_fetchconfig_ftphost',
+                  text: formatErrorMessage({
+                    'username': username,
+                  }, e.toString()),
+                  dataLogType: DataLogType.ERRORS.toString());
+              return showCupertinoAlertDialog(
+                  context: context, title: "错误", content: "拉取FTP配置失败,请重试!");
+            }
+          }
+          //拉取AWS S3配置
+          var awsresult = await MySqlUtils.queryAws(username: username);
+          if (awsresult == 'Error') {
+            return showCupertinoAlertDialog(
+                context: context, title: "错误", content: "获取S3云端信息失败,请重试!");
+          } else if (awsresult != 'Empty') {
+            try {
+              final awshostConfig = awshostclass.AwsConfigModel(
+                awsresult['accessKeyId'],
+                awsresult['secretAccessKey'],
+                awsresult['bucket'],
+                awsresult['endpoint'],
+                awsresult['region'],
+                awsresult['uploadPath'],
+                awsresult['customUrl'],
+              );
+              final awsConfigJson = jsonEncode(awshostConfig);
+              final directory = await getApplicationDocumentsDirectory();
+              File awsLocalFile =
+                  File('${directory.path}/${username}_aws_config.txt');
+              awsLocalFile.writeAsString(awsConfigJson);
+            } catch (e) {
+              FLog.error(
+                  className: 'UserInformationPageState',
+                  methodName: '_fetchconfig_awshost',
+                  text: formatErrorMessage({
+                    'username': username,
+                  }, e.toString()),
+                  dataLogType: DataLogType.ERRORS.toString());
+              return showCupertinoAlertDialog(
+                  context: context, title: "错误", content: "拉取S3配置失败,请重试!");
+            }
+          }
           //全部拉取完成后，提示用户
           return Fluttertoast.showToast(
               msg: "已拉取云端配置",
@@ -493,9 +580,17 @@ class APPPasswordState extends State<APPPassword> {
                           requestCallBack: _saveuserpasswd(),
                         );
                       });
-                  if (mounted) {
-                    Navigator.pop(context);
+                    if (mounted) {
+                    if (loginStatus == false) {
+                      Navigator.pop(context);
+                    } else {
+                      Navigator.pop(context);
+                      Application.router.navigateTo(
+                          context, Routes.userInformationPage,
+                          transition: TransitionType.inFromRight);
+                    }
                   }
+                  
                 },
                 child: const Text(
                   '注册或登录',
