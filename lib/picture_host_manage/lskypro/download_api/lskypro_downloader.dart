@@ -53,8 +53,7 @@ class DownloadManager {
         return;
       }
       setStatus(task, DownloadStatus.downloading);
-      print("download url: $url");
-      print("download savePath: $savePath");
+
       var file = File(savePath.toString());
       var partialFilePath = savePath + partialExtension;
       var partialFile = File(partialFilePath);
