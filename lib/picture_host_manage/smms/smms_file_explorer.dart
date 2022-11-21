@@ -633,7 +633,7 @@ class SmmsFileExplorerState
               ),
               const Center(
                   child: Text('没有文件哦，点击右上角添加吧\n刚上传的文件\n可能需要一段时间才能显示',
-                      textAlign: TextAlign.center,
+                  textAlign: TextAlign.center,
                       style: TextStyle(
                           fontSize: 20,
                           color: Color.fromARGB(136, 121, 118, 118))))
@@ -890,7 +890,7 @@ class SmmsFileExplorerState
         clearMemoryCacheIfFailed: true,
         retries: 5,
         height: 30,
-        fit: BoxFit.cover,
+        fit: BoxFit.fill,
         cache: true,
         border: Border.all(color: Colors.transparent, width: 2),
         borderRadius: const BorderRadius.all(Radius.circular(8)),
@@ -904,6 +904,7 @@ class SmmsFileExplorerState
           text: formatErrorMessage({'index': index}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
       String fileExtension = allInfoList[index]['url'].split('.').last;
+      fileExtension = fileExtension.toLowerCase();
       String iconPath = 'assets/icons/';
       if (fileExtension == '') {
         iconPath += '_blank.png';
