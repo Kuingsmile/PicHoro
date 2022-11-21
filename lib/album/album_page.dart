@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:io' as io;
 import 'package:flutter/material.dart';
 
 import 'package:extended_image/extended_image.dart';
@@ -58,7 +58,7 @@ class UploadedImagesState extends State<UploadedImages>
     'aliyun': '阿里云',
     'upyun': '又拍云',
     'PBhostExtend1': 'FTP',
-    'PBhostExtend2': 'S3兼容平台',
+    'PBhostExtend2': 'S3',
   };
 
   bool albumKeepAlive = true;
@@ -522,11 +522,11 @@ class UploadedImagesState extends State<UploadedImages>
                                         iconSize: 30),
                               )
                             : Global.defaultShowedPBhost == 'PBhostExtend1'
-                                ? File(currentShowedImagesDisplayAddressUrl[
+                                ? io.File(currentShowedImagesDisplayAddressUrl[
                                             index])
                                         .existsSync()
                                     ? ExtendedImage.file(
-                                        File(
+                                        io.File(
                                             currentShowedImagesDisplayAddressUrl[
                                                 index]),
                                         fit: BoxFit.fill,
@@ -1003,7 +1003,7 @@ class UploadedImagesState extends State<UploadedImages>
               showedImageId[
                   imagesIndex[i] + (_currentPage * _perPageItemSize) - i]);
           try {
-            await File(showedImageDisplayAddressUrl[
+            await io.File(showedImageDisplayAddressUrl[
                     imagesIndex[i] + _currentPage * _perPageItemSize - i])
                 .delete();
           } catch (e) {
@@ -1023,7 +1023,7 @@ class UploadedImagesState extends State<UploadedImages>
 
         if (deleteLocal) {
           try {
-            await File(showedImagePaths[
+            await io.File(showedImagePaths[
                     imagesIndex[i] + (_currentPage * _perPageItemSize) - i])
                 .delete();
           } catch (e) {
@@ -1094,7 +1094,7 @@ class UploadedImagesState extends State<UploadedImages>
             Global.defaultShowedPBhost,
             showedImageId[index + (_currentPage * _perPageItemSize)]);
         try {
-          await File(showedImageDisplayAddressUrl[
+          await io.File(showedImageDisplayAddressUrl[
                   index + _currentPage * _perPageItemSize])
               .delete();
         } catch (e) {
@@ -1116,7 +1116,7 @@ class UploadedImagesState extends State<UploadedImages>
 
       if (deleteLocal) {
         try {
-          await File(showedImagePaths[index + _currentPage * _perPageItemSize])
+          await io.File(showedImagePaths[index + _currentPage * _perPageItemSize])
               .delete();
         } catch (e) {
           FLog.error(
