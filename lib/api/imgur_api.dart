@@ -21,9 +21,7 @@ class ImgurImageUploadUtils {
     });
 
     BaseOptions options = BaseOptions(
-      //连接服务器超时时间，单位是毫秒.
       connectTimeout: 30000,
-      //响应超时时间。
       receiveTimeout: 30000,
       sendTimeout: 30000,
     );
@@ -33,7 +31,6 @@ class ImgurImageUploadUtils {
     Dio dio = Dio(options);
     String proxy = configMap["proxy"];
     String proxyClean = '';
-    //判断是否有代理
     if (proxy != 'None') {
       if (proxy.startsWith('http://') || proxy.startsWith('https://')) {
         proxyClean = proxy.split('://')[1];
@@ -96,9 +93,7 @@ class ImgurImageUploadUtils {
     String deletehash = deleteMapFromPictureKey["deletehash"];
 
     BaseOptions options = BaseOptions(
-      //连接服务器超时时间，单位是毫秒.
       connectTimeout: 30000,
-      //响应超时时间。
       receiveTimeout: 30000,
       sendTimeout: 30000,
     );
@@ -107,7 +102,6 @@ class ImgurImageUploadUtils {
     };
     Dio dio = Dio(options);
     String deleteUrl = "https://api.imgur.com/3/image/$deletehash";
-    //判断是否有代理
     String proxy = configMap["proxy"];
     String proxyClean = '';
     if (proxy != 'None') {
