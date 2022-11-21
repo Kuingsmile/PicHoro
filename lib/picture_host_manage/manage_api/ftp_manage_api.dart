@@ -14,7 +14,7 @@ import 'package:horopic/picture_host_configure/configure_page/ftp_configure.dart
 import 'package:horopic/utils/common_functions.dart';
 
 class FTPManageAPI {
-  static Future<File> get _localFile async {
+  static Future<File> get localFile async {
     final path = await _localPath;
     String defaultUser = await Global.getUser();
     return File('$path/${defaultUser}_ftp_config.txt');
@@ -27,7 +27,7 @@ class FTPManageAPI {
 
   static Future<String> readFTPConfig() async {
     try {
-      final file = await _localFile;
+      final file = await localFile;
       String contents = await file.readAsString();
       return contents;
     } catch (e) {
@@ -303,7 +303,7 @@ class FTPManageAPI {
         final ftpConfig = FTPConfigModel(ftpHost, ftpPort, ftpUser, ftpPassword,
             ftpType, isAnonymous, uploadPath, ftpHomeDir);
         final ftpConfigJson = jsonEncode(ftpConfig);
-        final ftpConfigFile = await _localFile;
+        final ftpConfigFile = await localFile;
         await ftpConfigFile.writeAsString(ftpConfigJson);
         return ['success'];
       } else {
