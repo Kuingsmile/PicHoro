@@ -36,30 +36,30 @@ class UpdateLogState extends State<UpdateLog> {
             return Markdown(
               data: snapshot.data!,
               selectable: true,
-              imageBuilder: (uri, title, alt) {
+              imageBuilder:  (uri, title, alt) {
                 return ExtendedImage.network(
-                  uri.toString(),
-                  fit: BoxFit.contain,
-                  mode: ExtendedImageMode.gesture,
-                  cache: true,
-                  loadStateChanged: (state) =>
-                      defaultLoadStateChanged(state, iconSize: 60),
-                  initGestureConfigHandler: (state) {
-                    return GestureConfig(
-                        minScale: 0.9,
-                        animationMinScale: 0.7,
-                        maxScale: 3.0,
-                        animationMaxScale: 3.5,
-                        speed: 1.0,
-                        inertialSpeed: 100.0,
-                        initialScale: 1.0,
-                        inPageView: true);
-                  },
-                );
+            uri.toString(),
+            fit: BoxFit.contain,
+            mode: ExtendedImageMode.gesture,
+            cache: true,
+            loadStateChanged: (state) =>
+                defaultLoadStateChanged(state, iconSize: 60),
+            initGestureConfigHandler: (state) {
+              return GestureConfig(
+                  minScale: 0.9,
+                  animationMinScale: 0.7,
+                  maxScale: 3.0,
+                  animationMaxScale: 3.5,
+                  speed: 1.0,
+                  inertialSpeed: 100.0,
+                  initialScale: 1.0,
+                  inPageView: true);
+            },
+          );
               },
-              onTapLink: (text, href, title) async {
+              onTapLink: (text, href, title) async{
                 Uri url = Uri.parse(href!);
-                await launchUrl(url);
+              await launchUrl(url);
               },
             );
           } else {
