@@ -73,41 +73,39 @@ class LskyproUpDownloadManagePageState
                 title: '通知',
                 onConfirm: () async {
                   Navigator.pop(context);
-                  Global.lskyproUploadList
-                      .remove(Global.lskyproUploadList[i]);
-                  await Global.setLskyproUploadList(
-                      Global.lskyproUploadList);
+                  Global.lskyproUploadList.remove(Global.lskyproUploadList[i]);
+                  await Global.setLskyproUploadList(Global.lskyproUploadList);
                   setState(() {});
                 });
           },
-          child:UploadListItem(
-          onUploadPlayPausedPressed: (path, fileName, configMap) async {
-            var task = uploadManager
-                .getUpload(jsonDecode(Global.lskyproUploadList[i])[1]);
-            if (task != null && !task.status.value.isCompleted) {
-              switch (task.status.value) {
-                case UploadStatus.uploading:
-                  await uploadManager.pauseUpload(path, fileName);
-                  break;
-                case UploadStatus.paused:
-                  await uploadManager.resumeUpload(path, fileName);
-                  break;
-              }
-              setState(() {});
-            } else {
-              await uploadManager.addUpload(path, fileName, configMap);
-              setState(() {});
-            }
-          },
-          onDelete: (path, fileName) async {
-            await uploadManager.removeUpload(path, fileName);
-            setState(() {});
-          },
-          path: jsonDecode(Global.lskyproUploadList[i])[0],
-          fileName: jsonDecode(Global.lskyproUploadList[i])[1],
-          configMap: jsonDecode(Global.lskyproUploadList[i])[2],
-          uploadTask: uploadManager
-              .getUpload(jsonDecode(Global.lskyproUploadList[i])[1]))));
+          child: UploadListItem(
+              onUploadPlayPausedPressed: (path, fileName, configMap) async {
+                var task = uploadManager
+                    .getUpload(jsonDecode(Global.lskyproUploadList[i])[1]);
+                if (task != null && !task.status.value.isCompleted) {
+                  switch (task.status.value) {
+                    case UploadStatus.uploading:
+                      await uploadManager.pauseUpload(path, fileName);
+                      break;
+                    case UploadStatus.paused:
+                      await uploadManager.resumeUpload(path, fileName);
+                      break;
+                  }
+                  setState(() {});
+                } else {
+                  await uploadManager.addUpload(path, fileName, configMap);
+                  setState(() {});
+                }
+              },
+              onDelete: (path, fileName) async {
+                await uploadManager.removeUpload(path, fileName);
+                setState(() {});
+              },
+              path: jsonDecode(Global.lskyproUploadList[i])[0],
+              fileName: jsonDecode(Global.lskyproUploadList[i])[1],
+              configMap: jsonDecode(Global.lskyproUploadList[i])[2],
+              uploadTask: uploadManager
+                  .getUpload(jsonDecode(Global.lskyproUploadList[i])[1]))));
     }
     List<Widget> list2 = [
       const Divider(
@@ -209,8 +207,7 @@ class LskyproUpDownloadManagePageState
                   setState(() {});
                 } else {
                   String fileName = url.substring(url.lastIndexOf('/') + 1);
-                  await downloadManager.addDownload(url,
-                      "$savedDir$fileName");
+                  await downloadManager.addDownload(url, "$savedDir$fileName");
                   setState(() {});
                 }
               },
@@ -282,7 +279,7 @@ class LskyproUpDownloadManagePageState
                 Icons.delete,
                 color: Colors.white,
               ),
-              Text('清空下载文件列表',
+              Text('清空下载列表',
                   style: TextStyle(
                       color: Colors.white,
                       fontSize: 16,
