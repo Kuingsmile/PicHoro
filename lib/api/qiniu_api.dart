@@ -180,7 +180,7 @@ class QiniuImageUploadUtils {
 
   static deleteApi({required Map deleteMap, required Map configMap}) async {
     String fileName = deleteMap['name'];
-    Map configMapFromPictureKey = jsonDecode(deleteMap['pictureKey']);
+    Map configMapFromPictureKey = jsonDecode(deleteMap['pictureKey']); 
 
     String accessKey = configMapFromPictureKey['accessKey'];
     String secretKey = configMapFromPictureKey['secretKey'];
@@ -190,7 +190,7 @@ class QiniuImageUploadUtils {
     if (qiniupath.startsWith('/')) {
       qiniupath = qiniupath.substring(1);
     }
-    if (fileName.startsWith('/')) {
+    if (fileName.startsWith('/')){
       fileName = fileName.substring(1);
     }
 
@@ -203,9 +203,7 @@ class QiniuImageUploadUtils {
     String encodedEntryURI = urlSafeBase64Encode(utf8.encode('$bucket:$key'));
 
     BaseOptions baseOptions = BaseOptions(
-      //连接服务器超时时间，单位是毫秒.
       connectTimeout: 30000,
-      //响应超时时间。
       receiveTimeout: 30000,
       sendTimeout: 30000,
     );
@@ -227,7 +225,6 @@ class QiniuImageUploadUtils {
     String deleteUrl = "http://rs.qiniuapi.com/delete/$encodedEntryURI";
 
     try {
-      //gtmd七牛云 官方文档写个POST请求，实际上要用DELETE请求
       var response = await dio.delete(deleteUrl);
       if (response.statusCode == 200) {
         return [
