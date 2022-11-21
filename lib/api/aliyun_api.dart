@@ -182,9 +182,7 @@ class AliyunImageUploadUtils {
         urlpath = fileName;
       }
       BaseOptions baseOptions = BaseOptions(
-        //连接服务器超时时间，单位是毫秒.
         connectTimeout: 30000,
-        //响应超时时间。
         receiveTimeout: 30000,
         sendTimeout: 30000,
       );
