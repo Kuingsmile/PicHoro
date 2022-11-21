@@ -11,7 +11,6 @@ import 'package:f_logs/f_logs.dart';
 import 'package:horopic/picture_host_manage/qiniu/download_api/qiniu_download_task.dart';
 import 'package:horopic/picture_host_manage/tencent/download_api/download_status.dart';
 import 'package:horopic/picture_host_manage/tencent/download_api/download_request.dart';
-import 'package:horopic/picture_host_manage/manage_api/aliyun_manage_api.dart';
 import 'package:horopic/utils/common_functions.dart';
 
 class DownloadManager {
