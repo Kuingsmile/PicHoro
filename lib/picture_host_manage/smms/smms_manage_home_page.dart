@@ -144,7 +144,6 @@ class SmmsManageHomePageState
 
   @override
   Widget buildSuccess() {
-    //a user profile page
     return ListView(children: [
       Center(
         child: Padding(
