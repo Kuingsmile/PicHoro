@@ -59,7 +59,7 @@ class UploadManager {
       String aliyunpath = configMap['path'];
 
       //格式化
-      if (aliyunpath != 'None') {
+      if (aliyunpath != 'None' && aliyunpath != '') {
         if (aliyunpath.startsWith('/')) {
           aliyunpath = aliyunpath.substring(1);
         }
