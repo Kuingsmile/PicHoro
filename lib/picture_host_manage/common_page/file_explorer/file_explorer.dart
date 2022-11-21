@@ -640,7 +640,7 @@ class FileExplorerState extends State<FileExplorer> {
           height: 40.0,
           cacheHeight: 90,
           cacheWidth: 90,
-          fit: BoxFit.cover,
+          fit: BoxFit.fill,
           filterQuality: FilterQuality.medium);
     } else {
       return Image.asset(selectIcon(my_path.extension(path)),
