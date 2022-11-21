@@ -1,11 +1,13 @@
 import 'package:dio/dio.dart';
 
-class UploadRequest{
+class UploadRequest {
   final String path;
+  final String name;
   var cancelToken = CancelToken();
 
   UploadRequest(
     this.path,
+    this.name,
   );
 
   @override
@@ -13,8 +15,9 @@ class UploadRequest{
       identical(this, other) ||
       other is UploadRequest &&
           runtimeType == other.runtimeType &&
-          path == other.path;
-  
+          path == other.path &&
+          name == other.name;
+
   @override
-  int get hashCode => path.hashCode;
+  int get hashCode => path.hashCode ^ name.hashCode;
 }
