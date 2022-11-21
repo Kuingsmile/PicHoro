@@ -358,9 +358,7 @@ class AllPShostState extends State<AllPShost> {
             showToast("请先登录");
           }
           BaseOptions options = BaseOptions(
-            //连接服务器超时时间，单位是毫秒.
             connectTimeout: 30000,
-            //响应超时时间。
             receiveTimeout: 30000,
             sendTimeout: 30000,
           );
@@ -446,9 +444,7 @@ class AllPShostState extends State<AllPShost> {
           }
 
           BaseOptions options = BaseOptions(
-            //连接服务器超时时间，单位是毫秒.
             connectTimeout: 30000,
-            //响应超时时间。
             receiveTimeout: 30000,
             sendTimeout: 30000,
           );
@@ -554,9 +550,7 @@ class AllPShostState extends State<AllPShost> {
         String validateURL = "https://api.imgur.com/3/image";
 
         BaseOptions options = BaseOptions(
-          //连接服务器超时时间，单位是毫秒.
           connectTimeout: 30000,
-          //响应超时时间。
           receiveTimeout: 30000,
           sendTimeout: 30000,
         );
@@ -673,7 +667,6 @@ class AllPShostState extends State<AllPShost> {
         sqlconfig.add(qiniuPath);
 
         sqlconfig.add(defaultUser);
-        //save asset image to app dir
         String assetPath = 'assets/validateImage/PicHoroValidate.jpeg';
         String appDir = await getApplicationDocumentsDirectory().then((value) {
           return value.path;
@@ -808,7 +801,6 @@ class AllPShostState extends State<AllPShost> {
           sqlconfig.add(tencentOptions);
 
           sqlconfig.add(defaultUser);
-          //save asset image to app dir
           String assetPath = 'assets/validateImage/PicHoroValidate.jpeg';
           String appDir =
               await getApplicationDocumentsDirectory().then((value) {
@@ -862,9 +854,7 @@ class AllPShostState extends State<AllPShost> {
           });
 
           BaseOptions baseoptions = BaseOptions(
-            //连接服务器超时时间，单位是毫秒.
             connectTimeout: 30000,
-            //响应超时时间。
             receiveTimeout: 30000,
             sendTimeout: 30000,
           );
@@ -984,7 +974,6 @@ class AllPShostState extends State<AllPShost> {
         sqlconfig.add(aliyunCustomUrl);
         sqlconfig.add(aliyunOptions);
         sqlconfig.add(defaultUser);
-        //save asset image to app dir
         String assetPath = 'assets/validateImage/PicHoroValidate.jpeg';
         String appDir = await getApplicationDocumentsDirectory().then((value) {
           return value.path;
@@ -1032,9 +1021,7 @@ class AllPShostState extends State<AllPShost> {
         });
 
         BaseOptions baseoptions = BaseOptions(
-          //连接服务器超时时间，单位是毫秒.
           connectTimeout: 30000,
-          //响应超时时间。
           receiveTimeout: 30000,
           sendTimeout: 30000,
         );
@@ -1183,9 +1170,7 @@ class AllPShostState extends State<AllPShost> {
         });
 
         BaseOptions baseoptions = BaseOptions(
-          //连接服务器超时时间，单位是毫秒.
           connectTimeout: 30000,
-          //响应超时时间。
           receiveTimeout: 30000,
           sendTimeout: 30000,
         );
@@ -1342,7 +1327,7 @@ class AllPShostState extends State<AllPShost> {
           },
           trailing: const Icon(Icons.arrow_forward_ios),
         ),
-        ListTile(
+         ListTile(
           title: const Text('S3兼容平台'),
           onTap: () {
             Application.router.navigateTo(context, Routes.awsPShostSelect,
@@ -1445,8 +1430,7 @@ class AllPShostState extends State<AllPShost> {
                         },
                       ),
                       SimpleDialogOption(
-                        child:
-                            const Text('S3兼容平台', textAlign: TextAlign.center),
+                        child: const Text('S3兼容平台', textAlign: TextAlign.center),
                         onPressed: () {
                           exportConfiguration('aws');
                           Navigator.pop(context);
