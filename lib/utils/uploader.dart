@@ -42,7 +42,6 @@ Future<File> get _localFile async {
   String defaultConfig = await Global.getPShost();
   String defaultUser = await Global.getUser();
 
-  //从本地读取
   return File(
       '${directory.path}/${defaultUser}_${pdconfig[defaultConfig]}.txt');
 }
