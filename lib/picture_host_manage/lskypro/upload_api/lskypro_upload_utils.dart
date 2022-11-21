@@ -6,7 +6,6 @@ import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:f_logs/f_logs.dart';
-import 'package:path/path.dart' as my_path;
 
 import 'package:horopic/picture_host_manage/lskypro/upload_api/lskypro_upload_request.dart';
 import 'package:horopic/pages/upload_pages/upload_status.dart';
