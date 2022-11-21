@@ -22,7 +22,6 @@ class AuthorInformation extends StatelessWidget {
               height: 50,
             ),
             GestureDetector(
-                //save to  album
                 onTap: () async {
                   showCupertinoAlertDialogWithConfirmFunc(
                       context: context,

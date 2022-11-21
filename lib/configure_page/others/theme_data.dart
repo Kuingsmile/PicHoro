@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-// Light Theme Color
-
 const MaterialColor light = MaterialColor(lightPrimaryValue, <int, Color>{
   50: Color(0xFFE9F2FD),
   100: Color(0xFFC7E0F9),
@@ -16,8 +14,6 @@ const MaterialColor light = MaterialColor(lightPrimaryValue, <int, Color>{
 });
 
 const int lightPrimaryValue = 0xFF4596EB;
-
-// Dark
 
 const MaterialColor dark = MaterialColor(_darkPrimaryValue, <int, Color>{
   50: Color(0xFFE2E3E3),
