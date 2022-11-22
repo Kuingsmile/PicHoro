@@ -12,7 +12,7 @@
      </a>
 </div>
 
-&emsp;&emsp;一款基于flutter的手机端云存储平台/图床管理和文件上传/下载工具，最新版本**V1.9.2**，与PicGo配置互通，可直接扫码导入，主要功能包括云存储平台和图床平台,以及云服务器的管理，文件上传和下载管理，以及各种格式的链接分享。
+&emsp;&emsp;一款基于flutter的手机端云存储平台/图床管理和文件上传/下载工具，最新版本**V1.9.3**，与PicGo配置互通，可直接扫码导入，主要功能包括云存储平台和图床平台,以及云服务器的管理，文件上传和下载管理，以及各种格式的链接分享。
 
 &emsp;&emsp;项目介绍和配置手册网址:
 
@@ -52,7 +52,7 @@
 
 Github下载地址 [Github release](https://github.com/Kuingsmile/PicHoro/releases)  
 
-我的个人网站提供的最新版本下载地址 [https://www.horosama.com/self_apk/PicHoro_V1.9.2.apk](https://www.horosama.com/self_apk/PicHoro_V1.9.2.apk)
+我的个人网站提供的最新版本下载地址 [https://www.horosama.com/self_apk/PicHoro_V1.9.3.apk](https://www.horosama.com/self_apk/PicHoro_V1.9.3.apk)
 
 ### IOS
 
@@ -72,7 +72,7 @@ Github下载地址 [Github release](https://github.com/Kuingsmile/PicHoro/releas
     <td><img src="http://imgx.horosama.com/admin_uploads/2022/10/2022_10_15_634a630b8b481.jpg" width="200" height="400" alt=""/></td>
   </tr>
    <tr>
-    <td><img src="http://imgx.horosama.com/admin_uploads/2022/11/2022_11_16_6374742c9b51d.jpg" width="200" height="400" alt=""/></td>
+    <td><img src="http://imgx.horosama.com/admin_uploads/2022/11/2022_11_22_637cb0e5de62c.jpg" width="200" height="400" alt=""/></td>
     <td><img src="http://imgx.horosama.com/admin_uploads/2022/10/2022_10_24_6356546ee6731.jpg" width="200" height="400" alt=""/></td>
     <td><img src="http://imgx.horosama.com/admin_uploads/2022/10/2022_10_24_6356548f45f14.jpg" width="200" height="400" alt=""/></td>
   </tr>
@@ -86,6 +86,17 @@ Github下载地址 [Github release](https://github.com/Kuingsmile/PicHoro/releas
 ## 最近更新
 
   详细更新日志请查看[更新日志](https://github.com/Kuingsmile/PicHoro/blob/main/Version_update_log.md "更新日志")
+
+
+- 2022-11-22: **V1.93**:
+
+  - 新增：现在进入联系作者界面时会自动复制作者QQ号到剪贴板。
+  - 优化：修改了连续上传模式的逻辑，由`拍照->校验->上传->拍照`改为`拍照->校验(异步上传)->拍照`，将上传操作修改为异步执行，提高用户体验。
+  - 优化：修改了部分提示信息。
+  - 优化：解决了上传界面和相册界面的右上角设置弹出栏，必须点击文字部分才能弹出窗口的问题。
+  - 优化：优化了APP的启动速度。
+  - 修复：修复了aws上传和下载列表会在APP关闭后被清空的问题。
+  - 修复：修复了批量复制链接时，从第二行开始，开头会多一个空格的问题。
 
 - 2022-11-21: **V1.92**:
 
