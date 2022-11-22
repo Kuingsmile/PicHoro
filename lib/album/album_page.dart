@@ -110,6 +110,180 @@ class UploadedImagesState extends State<UploadedImages>
                   Icons.settings,
                   size: 30,
                 ),
+                onSelected: (value) {
+                  if (value == 1) {
+                    showDialog(
+                      barrierDismissible: true,
+                      context: context,
+                      builder: (context) {
+                        return SimpleDialog(
+                          title: const Text(
+                            '选择默认链接格式',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          children: [
+                            SimpleDialogOption(
+                              child: Text(
+                                Global.defaultLKformat == 'rawurl'
+                                    ? 'URL格式 \u2713'
+                                    : 'URL格式',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Global.defaultLKformat == 'rawurl'
+                                      ? Colors.blue
+                                      : Colors.black,
+                                  fontWeight: Global.defaultLKformat == 'rawurl'
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                                ),
+                              ),
+                              onPressed: () async {
+                                await Global.setLKformat('rawurl');
+                                if (mounted) {
+                                  showToastWithContext(context, '已设置为URL格式');
+                                  Navigator.pop(context);
+                                }
+                              },
+                            ),
+                            SimpleDialogOption(
+                              child: Text(
+                                Global.defaultLKformat == 'html'
+                                    ? 'HTML格式 \u2713'
+                                    : 'HTML格式',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Global.defaultLKformat == 'html'
+                                      ? Colors.blue
+                                      : Colors.black,
+                                  fontWeight: Global.defaultLKformat == 'html'
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                                ),
+                              ),
+                              onPressed: () async {
+                                await Global.setLKformat('html');
+                                if (mounted) {
+                                  showToastWithContext(context, '已设置为HTML格式');
+                                  Navigator.pop(context);
+                                }
+                              },
+                            ),
+                            SimpleDialogOption(
+                              child: Text(
+                                Global.defaultLKformat == 'BBcode'
+                                    ? 'BBcode格式 \u2713'
+                                    : 'BBcode格式',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Global.defaultLKformat == 'BBcode'
+                                      ? Colors.blue
+                                      : Colors.black,
+                                  fontWeight: Global.defaultLKformat == 'BBcode'
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                                ),
+                              ),
+                              onPressed: () async {
+                                await Global.setLKformat('BBcode');
+                                if (mounted) {
+                                  showToastWithContext(context, '已设置为BBcode格式');
+                                  Navigator.pop(context);
+                                }
+                              },
+                            ),
+                            SimpleDialogOption(
+                              child: Text(
+                                Global.defaultLKformat == 'markdown'
+                                    ? 'markdown格式 \u2713'
+                                    : 'markdown格式',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Global.defaultLKformat == 'markdown'
+                                      ? Colors.blue
+                                      : Colors.black,
+                                  fontWeight:
+                                      Global.defaultLKformat == 'markdown'
+                                          ? FontWeight.bold
+                                          : FontWeight.normal,
+                                ),
+                              ),
+                              onPressed: () async {
+                                await Global.setLKformat('markdown');
+                                if (mounted) {
+                                  showToastWithContext(
+                                      context, '已设置为markdown格式');
+                                  Navigator.pop(context);
+                                }
+                              },
+                            ),
+                            SimpleDialogOption(
+                              child: Text(
+                                Global.defaultLKformat == 'markdown_with_link'
+                                    ? 'markdown格式(带链接) \u2713'
+                                    : 'markdown格式(带链接)',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Global.defaultLKformat ==
+                                          'markdown_with_link'
+                                      ? Colors.blue
+                                      : Colors.black,
+                                  fontWeight: Global.defaultLKformat ==
+                                          'markdown_with_link'
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                                ),
+                              ),
+                              onPressed: () async {
+                                await Global.setLKformat('markdown_with_link');
+                                if (mounted) {
+                                  showToastWithContext(
+                                      context, '已设置为md_link格式');
+                                  Navigator.pop(context);
+                                }
+                              },
+                            ),
+                            SimpleDialogOption(
+                              child: Text(
+                                Global.defaultLKformat == 'custom'
+                                    ? '自定义格式 \u2713'
+                                    : '自定义格式',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Global.defaultLKformat == 'custom'
+                                      ? Colors.blue
+                                      : Colors.black,
+                                  fontWeight: Global.defaultLKformat == 'custom'
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                                ),
+                              ),
+                              onPressed: () async {
+                                await Global.setLKformat('custom');
+                                if (mounted) {
+                                  showToastWithContext(context, '已设置为自定义格式');
+                                  Navigator.pop(context);
+                                }
+                              },
+                            ),
+                            SimpleDialogOption(
+                              child: TextFormField(
+                                textAlign: TextAlign.center,
+                                initialValue: Global.customLinkFormat,
+                                decoration: const InputDecoration(
+                                  hintText: r'使用$url和$fileName作为占位符',
+                                ),
+                                onChanged: (String value) async {
+                                  await Global.setCustomLinkFormat(value);
+                                },
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  }
+                },
                 position: PopupMenuPosition.under,
                 itemBuilder: (BuildContext context) {
                   return [
@@ -141,197 +315,9 @@ class UploadedImagesState extends State<UploadedImages>
                         ],
                       ),
                     ),
-                    PopupMenuItem(
-                      child: GestureDetector(
-                        onTap: () async {
-                          Navigator.pop(context);
-                          await showDialog(
-                            barrierDismissible: true,
-                            context: context,
-                            builder: (context) {
-                              return SimpleDialog(
-                                title: const Text(
-                                  '选择默认链接格式',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(fontWeight: FontWeight.bold),
-                                ),
-                                children: [
-                                  SimpleDialogOption(
-                                    child: Text(
-                                      Global.defaultLKformat == 'rawurl'
-                                          ? 'URL格式 \u2713'
-                                          : 'URL格式',
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        color:
-                                            Global.defaultLKformat == 'rawurl'
-                                                ? Colors.blue
-                                                : Colors.black,
-                                        fontWeight:
-                                            Global.defaultLKformat == 'rawurl'
-                                                ? FontWeight.bold
-                                                : FontWeight.normal,
-                                      ),
-                                    ),
-                                    onPressed: () async {
-                                      await Global.setLKformat('rawurl');
-                                      if (mounted) {
-                                        showToastWithContext(
-                                            context, '已设置为URL格式');
-                                        Navigator.pop(context);
-                                      }
-                                    },
-                                  ),
-                                  SimpleDialogOption(
-                                    child: Text(
-                                      Global.defaultLKformat == 'html'
-                                          ? 'HTML格式 \u2713'
-                                          : 'HTML格式',
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        color: Global.defaultLKformat == 'html'
-                                            ? Colors.blue
-                                            : Colors.black,
-                                        fontWeight:
-                                            Global.defaultLKformat == 'html'
-                                                ? FontWeight.bold
-                                                : FontWeight.normal,
-                                      ),
-                                    ),
-                                    onPressed: () async {
-                                      await Global.setLKformat('html');
-                                      if (mounted) {
-                                        showToastWithContext(
-                                            context, '已设置为HTML格式');
-                                        Navigator.pop(context);
-                                      }
-                                    },
-                                  ),
-                                  SimpleDialogOption(
-                                    child: Text(
-                                      Global.defaultLKformat == 'BBcode'
-                                          ? 'BBcode格式 \u2713'
-                                          : 'BBcode格式',
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        color:
-                                            Global.defaultLKformat == 'BBcode'
-                                                ? Colors.blue
-                                                : Colors.black,
-                                        fontWeight:
-                                            Global.defaultLKformat == 'BBcode'
-                                                ? FontWeight.bold
-                                                : FontWeight.normal,
-                                      ),
-                                    ),
-                                    onPressed: () async {
-                                      await Global.setLKformat('BBcode');
-                                      if (mounted) {
-                                        showToastWithContext(
-                                            context, '已设置为BBcode格式');
-                                        Navigator.pop(context);
-                                      }
-                                    },
-                                  ),
-                                  SimpleDialogOption(
-                                    child: Text(
-                                      Global.defaultLKformat == 'markdown'
-                                          ? 'markdown格式 \u2713'
-                                          : 'markdown格式',
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        color:
-                                            Global.defaultLKformat == 'markdown'
-                                                ? Colors.blue
-                                                : Colors.black,
-                                        fontWeight:
-                                            Global.defaultLKformat == 'markdown'
-                                                ? FontWeight.bold
-                                                : FontWeight.normal,
-                                      ),
-                                    ),
-                                    onPressed: () async {
-                                      await Global.setLKformat('markdown');
-                                      if (mounted) {
-                                        showToastWithContext(
-                                            context, '已设置为markdown格式');
-                                        Navigator.pop(context);
-                                      }
-                                    },
-                                  ),
-                                  SimpleDialogOption(
-                                    child: Text(
-                                      Global.defaultLKformat ==
-                                              'markdown_with_link'
-                                          ? 'markdown格式(带链接) \u2713'
-                                          : 'markdown格式(带链接)',
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        color: Global.defaultLKformat ==
-                                                'markdown_with_link'
-                                            ? Colors.blue
-                                            : Colors.black,
-                                        fontWeight: Global.defaultLKformat ==
-                                                'markdown_with_link'
-                                            ? FontWeight.bold
-                                            : FontWeight.normal,
-                                      ),
-                                    ),
-                                    onPressed: () async {
-                                      await Global.setLKformat(
-                                          'markdown_with_link');
-                                      if (mounted) {
-                                        showToastWithContext(
-                                            context, '已设置为md_link格式');
-                                        Navigator.pop(context);
-                                      }
-                                    },
-                                  ),
-                                  SimpleDialogOption(
-                                    child: Text(
-                                      Global.defaultLKformat == 'custom'
-                                          ? '自定义格式 \u2713'
-                                          : '自定义格式',
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        color:
-                                            Global.defaultLKformat == 'custom'
-                                                ? Colors.blue
-                                                : Colors.black,
-                                        fontWeight:
-                                            Global.defaultLKformat == 'custom'
-                                                ? FontWeight.bold
-                                                : FontWeight.normal,
-                                      ),
-                                    ),
-                                    onPressed: () async {
-                                      await Global.setLKformat('custom');
-                                      if (mounted) {
-                                        showToastWithContext(
-                                            context, '已设置为自定义格式');
-                                        Navigator.pop(context);
-                                      }
-                                    },
-                                  ),
-                                  SimpleDialogOption(
-                                    child: TextFormField(
-                                      textAlign: TextAlign.center,
-                                      initialValue: Global.customLinkFormat,
-                                      decoration: const InputDecoration(
-                                        hintText: r'使用$url和$fileName作为占位符',
-                                      ),
-                                      onChanged: (String value) async {
-                                        await Global.setCustomLinkFormat(value);
-                                      },
-                                    ),
-                                  ),
-                                ],
-                              );
-                            },
-                          );
-                        },
-                        child: const Text('选择默认链接格式'),
-                      ),
+                    const PopupMenuItem(
+                      value: 1,
+                      child: Text('选择默认链接格式'),
                     ),
                   ];
                 }),
@@ -1117,7 +1103,8 @@ class UploadedImagesState extends State<UploadedImages>
 
       if (deleteLocal) {
         try {
-          await io.File(showedImagePaths[index + _currentPage * _perPageItemSize])
+          await io.File(
+                  showedImagePaths[index + _currentPage * _perPageItemSize])
               .delete();
         } catch (e) {
           FLog.error(
