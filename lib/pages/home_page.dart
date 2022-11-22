@@ -197,20 +197,19 @@ class HomePageState extends State<HomePage>
     final io.File fileImage = io.File(pickedImage.path);
     Global.imagesList.clear();
     Global.imagesFileList.clear();
-    if (imageConstraint(context: context, image: fileImage)) {
-      //图片重命名
-      if (Global.iscustomRename == true) {
-        Global.imageFile = await renamePictureWithCustomFormat(fileImage);
-      } else if (Global.isTimeStamp == true) {
-        Global.imageFile = renamePictureWithTimestamp(fileImage);
-      } else if (Global.isRandomName == true) {
-        Global.imageFile = renamePictureWithRandomString(fileImage);
-      } else {
-        Global.imageFile = my_path.basename(fileImage.path);
-      }
-      Global.imagesList.add(Global.imageFile!);
-      Global.imagesFileList.add(fileImage);
+
+    //图片重命名
+    if (Global.iscustomRename == true) {
+      Global.imageFile = await renamePictureWithCustomFormat(fileImage);
+    } else if (Global.isTimeStamp == true) {
+      Global.imageFile = renamePictureWithTimestamp(fileImage);
+    } else if (Global.isRandomName == true) {
+      Global.imageFile = renamePictureWithRandomString(fileImage);
+    } else {
+      Global.imageFile = my_path.basename(fileImage.path);
     }
+    Global.imagesList.add(Global.imageFile!);
+    Global.imagesFileList.add(fileImage);
   }
 
   _imageFromNetwork() async {
@@ -245,20 +244,20 @@ class HomePageState extends State<HomePage>
           io.File file = io.File('$tempPath/Web$timeStamp$randomString.jpg');
           await file.writeAsBytes(response.bodyBytes);
           Global.imageFile = file.path;
-          if (imageConstraint(context: context, image: file)) {
-            //图片重命名
-            if (Global.iscustomRename == true) {
-              Global.imageFile = await renamePictureWithCustomFormat(file);
-            } else if (Global.isTimeStamp == true) {
-              Global.imageFile = await renamePictureWithTimestamp(file);
-            } else if (Global.isRandomName == true) {
-              Global.imageFile = await renamePictureWithRandomString(file);
-            } else {
-              Global.imageFile = my_path.basename(file.path);
-            }
-            Global.imagesList.add(Global.imageFile!);
-            Global.imagesFileList.add(file);
+
+          //图片重命名
+          if (Global.iscustomRename == true) {
+            Global.imageFile = await renamePictureWithCustomFormat(file);
+          } else if (Global.isTimeStamp == true) {
+            Global.imageFile = await renamePictureWithTimestamp(file);
+          } else if (Global.isRandomName == true) {
+            Global.imageFile = await renamePictureWithRandomString(file);
+          } else {
+            Global.imageFile = my_path.basename(file.path);
           }
+          Global.imagesList.add(Global.imageFile!);
+          Global.imagesFileList.add(file);
+
           successCount++;
         } catch (e) {
           FLog.error(
@@ -298,15 +297,24 @@ class HomePageState extends State<HomePage>
     }
     if (pickedImage == null) {
       if (Global.isCopyLink == true) {
-        await flutter_services.Clipboard.setData(
-            flutter_services.ClipboardData(text: clipboardList.toString()));
+        if (clipboardList.isEmpty) {
+          return showToast('未选择图片');
+        }
+        if (clipboardList.length == 1) {
+          await flutter_services.Clipboard.setData(
+              flutter_services.ClipboardData(text: clipboardList[0]));
+        } else {
+          await flutter_services.Clipboard.setData(
+              flutter_services.ClipboardData(
+                  text: clipboardList
+                      .toString()
+                      .substring(1, clipboardList.toString().length - 1)
+                      .replaceAll(', ', '\n')
+                      .replaceAll(',', '\n')));
+        }
         clipboardList.clear();
       }
-      return Fluttertoast.showToast(
-          msg: "未选择图片",
-          toastLength: Toast.LENGTH_SHORT,
-          timeInSecForIosWeb: 2,
-          fontSize: 16.0);
+      return showToast('链接已复制');
     }
 
     io.File fileImage = io.File(pickedImage.path);
@@ -321,18 +329,7 @@ class HomePageState extends State<HomePage>
       Global.imageFile = my_path.basename(fileImage.path);
     }
     Global.imageOriginalFile = fileImage;
-    await showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) {
-          return NetLoadingDialog(
-            outsideDismiss: false,
-            loading: true,
-            loadingText: "上传中...",
-            requestCallBack: _uploadAndBackToCamera(),
-          );
-        });
-
+    _uploadAndBackToCamera();
     if (Global.multiUpload == 'fail') {
       if (Global.isCopyLink == true) {
         if (clipboardList.length == 1) {
@@ -344,14 +341,14 @@ class HomePageState extends State<HomePage>
                   text: clipboardList
                       .toString()
                       .substring(1, clipboardList.toString().length - 1)
+                      .replaceAll(', ', '\n')
                       .replaceAll(',', '\n')));
         }
         clipboardList.clear();
       }
       return true;
-    } else {
-      _cameraAndBack();
     }
+    _cameraAndBack();
   }
 
   _uploadAndBackToCamera() async {
@@ -368,7 +365,6 @@ class HomePageState extends State<HomePage>
     } else if (uploadResult[0] == "success") {
       eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
       Map<String, dynamic> maps = {};
-      //
       if (Global.defaultPShost == 'sm.ms') {
         //["success", formatedURL, returnUrl, pictureKey]
         maps = {
@@ -562,20 +558,18 @@ class HomePageState extends State<HomePage>
     for (var i = 0; i < pickedImage.length; i++) {
       io.File? fileImage = await pickedImage[i].originFile;
 
-      if (imageConstraint(context: context, image: fileImage!)) {
-        if (Global.iscustomRename == true) {
-          Global.imageFile = await renamePictureWithCustomFormat(fileImage);
-        } else if (Global.isTimeStamp == true) {
-          Global.imageFile = await renamePictureWithTimestamp(fileImage);
-        } else if (Global.isRandomName == true) {
-          Global.imageFile = await renamePictureWithRandomString(fileImage);
-        } else {
-          Global.imageFile = my_path.basename(fileImage.path);
-        }
-
-        Global.imagesList.add(Global.imageFile!);
-        Global.imagesFileList.add(fileImage);
+      if (Global.iscustomRename == true) {
+        Global.imageFile = await renamePictureWithCustomFormat(fileImage!);
+      } else if (Global.isTimeStamp == true) {
+        Global.imageFile = await renamePictureWithTimestamp(fileImage!);
+      } else if (Global.isRandomName == true) {
+        Global.imageFile = await renamePictureWithRandomString(fileImage!);
+      } else {
+        Global.imageFile = my_path.basename(fileImage!.path);
       }
+
+      Global.imagesList.add(Global.imageFile!);
+      Global.imagesFileList.add(fileImage);
     }
   }
 
@@ -815,6 +809,7 @@ class HomePageState extends State<HomePage>
             text: clipboardList
                 .toString()
                 .substring(1, clipboardList.toString().length - 1)
+                .replaceAll(', ', '\n')
                 .replaceAll(',', '\n')));
         clipboardList.clear();
       }
@@ -848,6 +843,419 @@ class HomePageState extends State<HomePage>
           elevation: 0,
           actions: [
             PopupMenuButton(
+                onSelected: (value) {
+                  if (value == 1) {
+                    showDialog(
+                      barrierDismissible: true,
+                      context: context,
+                      builder: (context) {
+                        return SimpleDialog(
+                          title: const Text(
+                            '选择默认链接格式',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          children: [
+                            SimpleDialogOption(
+                              child: Text(
+                                Global.defaultLKformat == 'rawurl'
+                                    ? 'URL格式 \u2713'
+                                    : 'URL格式',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Global.defaultLKformat == 'rawurl'
+                                      ? Colors.blue
+                                      : Colors.black,
+                                  fontWeight: Global.defaultLKformat == 'rawurl'
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                                ),
+                              ),
+                              onPressed: () async {
+                                await Global.setLKformat('rawurl');
+                                if (mounted) {
+                                  showToastWithContext(context, '已设置为URL格式');
+                                  Navigator.pop(context);
+                                }
+                              },
+                            ),
+                            SimpleDialogOption(
+                              child: Text(
+                                Global.defaultLKformat == 'html'
+                                    ? 'HTML格式 \u2713'
+                                    : 'HTML格式',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Global.defaultLKformat == 'html'
+                                      ? Colors.blue
+                                      : Colors.black,
+                                  fontWeight: Global.defaultLKformat == 'html'
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                                ),
+                              ),
+                              onPressed: () async {
+                                await Global.setLKformat('html');
+                                if (mounted) {
+                                  showToastWithContext(context, '已设置为HTML格式');
+                                  Navigator.pop(context);
+                                }
+                              },
+                            ),
+                            SimpleDialogOption(
+                              child: Text(
+                                Global.defaultLKformat == 'BBcode'
+                                    ? 'BBcode格式 \u2713'
+                                    : 'BBcode格式',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Global.defaultLKformat == 'BBcode'
+                                      ? Colors.blue
+                                      : Colors.black,
+                                  fontWeight: Global.defaultLKformat == 'BBcode'
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                                ),
+                              ),
+                              onPressed: () async {
+                                await Global.setLKformat('BBcode');
+                                if (mounted) {
+                                  showToastWithContext(context, '已设置为BBcode格式');
+                                  Navigator.pop(context);
+                                }
+                              },
+                            ),
+                            SimpleDialogOption(
+                              child: Text(
+                                Global.defaultLKformat == 'markdown'
+                                    ? 'markdown格式 \u2713'
+                                    : 'markdown格式',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Global.defaultLKformat == 'markdown'
+                                      ? Colors.blue
+                                      : Colors.black,
+                                  fontWeight:
+                                      Global.defaultLKformat == 'markdown'
+                                          ? FontWeight.bold
+                                          : FontWeight.normal,
+                                ),
+                              ),
+                              onPressed: () async {
+                                await Global.setLKformat('markdown');
+                                if (mounted) {
+                                  showToastWithContext(
+                                      context, '已设置为markdown格式');
+                                  Navigator.pop(context);
+                                }
+                              },
+                            ),
+                            SimpleDialogOption(
+                              child: Text(
+                                Global.defaultLKformat == 'markdown_with_link'
+                                    ? 'markdown格式(带链接) \u2713'
+                                    : 'markdown格式(带链接)',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Global.defaultLKformat ==
+                                          'markdown_with_link'
+                                      ? Colors.blue
+                                      : Colors.black,
+                                  fontWeight: Global.defaultLKformat ==
+                                          'markdown_with_link'
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                                ),
+                              ),
+                              onPressed: () async {
+                                await Global.setLKformat('markdown_with_link');
+                                if (mounted) {
+                                  showToastWithContext(
+                                      context, '已设置为md_link格式');
+                                  Navigator.pop(context);
+                                }
+                              },
+                            ),
+                            SimpleDialogOption(
+                              child: Text(
+                                Global.defaultLKformat == 'custom'
+                                    ? '自定义格式 \u2713'
+                                    : '自定义格式',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Global.defaultLKformat == 'custom'
+                                      ? Colors.blue
+                                      : Colors.black,
+                                  fontWeight: Global.defaultLKformat == 'custom'
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                                ),
+                              ),
+                              onPressed: () async {
+                                await Global.setLKformat('custom');
+                                if (mounted) {
+                                  showToastWithContext(context, '已设置为自定义格式');
+                                  Navigator.pop(context);
+                                }
+                              },
+                            ),
+                            SimpleDialogOption(
+                              child: TextFormField(
+                                textAlign: TextAlign.center,
+                                initialValue: Global.customLinkFormat,
+                                decoration: const InputDecoration(
+                                  hintText: r'使用$url和$fileName作为占位符',
+                                ),
+                                onChanged: (String value) async {
+                                  await Global.setCustomLinkFormat(value);
+                                },
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  } else if (value == 2) {
+                    showDialog(
+                      barrierDismissible: true,
+                      context: context,
+                      builder: (context) {
+                        return SimpleDialog(
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10)),
+                          title: const Text(
+                            '选择重命名方式',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          children: [
+                            SimpleDialogOption(
+                              child: ListTile(
+                                title: const Text('开启时间戳重命名'),
+                                subtitle: const Text('优先级按照自定义>时间戳>随机字符串'),
+                                trailing: Switch(
+                                  value: Global.isTimeStamp,
+                                  onChanged: (value) async {
+                                    await Global.setTimeStamp(value);
+                                    if (mounted) {
+                                      if (value) {
+                                        showToastWithContext(
+                                            context, '已开启时间戳重命名');
+                                      } else {
+                                        showToastWithContext(
+                                            context, '已关闭时间戳重命名');
+                                      }
+                                      Navigator.pop(context);
+                                    }
+                                  },
+                                ),
+                              ),
+                            ),
+                            SimpleDialogOption(
+                              child: ListTile(
+                                title: const Text('开启随机字符串重命名'),
+                                subtitle: const Text('字符串长度固定为30'),
+                                trailing: Switch(
+                                  value: Global.isRandomName,
+                                  onChanged: (value) async {
+                                    await Global.setRandomName(value);
+                                    if (mounted) {
+                                      if (value) {
+                                        showToastWithContext(
+                                            context, '已开启随机字符串重命名');
+                                      } else {
+                                        showToastWithContext(
+                                            context, '已关闭随机字符串重命名');
+                                      }
+                                      Navigator.pop(context);
+                                    }
+                                  },
+                                ),
+                              ),
+                            ),
+                            SimpleDialogOption(
+                              child: ListTile(
+                                title: const Text('使用自定义重命名'),
+                                trailing: Switch(
+                                  value: Global.iscustomRename,
+                                  onChanged: (value) async {
+                                    await Global.setCustomeRename(value);
+                                    if (mounted) {
+                                      if (value) {
+                                        showToastWithContext(
+                                            context, '已开启自定义重命名');
+                                      } else {
+                                        showToastWithContext(
+                                            context, '已关闭自定义重命名');
+                                      }
+                                      Navigator.pop(context);
+                                    }
+                                  },
+                                ),
+                              ),
+                            ),
+                            SimpleDialogOption(
+                              child: TextFormField(
+                                textAlign: TextAlign.center,
+                                initialValue: Global.customRenameFormat,
+                                decoration: const InputDecoration(
+                                  label: Center(child: Text('自定义重命名格式')),
+                                  hintText: r'规则参考表格，可随意组合其它字符',
+                                ),
+                                onChanged: (String value) async {
+                                  await Global.setCustomeRenameFormat(value);
+                                },
+                              ),
+                            ),
+                            SimpleDialogOption(
+                              child: Container(
+                                  margin: const EdgeInsets.only(
+                                      left: 20, right: 20),
+                                  child: Table(
+                                    border: TableBorder.all(
+                                      color: Colors.black,
+                                      width: 1,
+                                      style: BorderStyle.solid,
+                                      borderRadius: BorderRadius.circular(5),
+                                    ),
+                                    children: const [
+                                      TableRow(
+                                        decoration: ShapeDecoration(
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.only(
+                                              topLeft: Radius.circular(5),
+                                              topRight: Radius.circular(5),
+                                            ),
+                                          ),
+                                          color: Colors.grey,
+                                        ),
+                                        children: [
+                                          TableCell(
+                                              child:
+                                                  Center(child: Text("占位符"))),
+                                          TableCell(
+                                              child: Center(child: Text("说明"))),
+                                        ],
+                                      ),
+                                      TableRow(
+                                        children: [
+                                          TableCell(
+                                              child:
+                                                  Center(child: Text("{Y}"))),
+                                          TableCell(
+                                              child: Center(
+                                                  child: Text("年份(2022)"))),
+                                        ],
+                                      ),
+                                      TableRow(
+                                        children: [
+                                          TableCell(
+                                              child:
+                                                  Center(child: Text("{y}"))),
+                                          TableCell(
+                                              child: Center(
+                                                  child: Text("两位数年份(22)"))),
+                                        ],
+                                      ),
+                                      TableRow(
+                                        children: [
+                                          TableCell(
+                                              child:
+                                                  Center(child: Text("{m}"))),
+                                          TableCell(
+                                              child: Center(
+                                                  child: Text("月份(01-12)"))),
+                                        ],
+                                      ),
+                                      TableRow(
+                                        children: [
+                                          TableCell(
+                                              child:
+                                                  Center(child: Text("{d}"))),
+                                          TableCell(
+                                              child: Center(
+                                                  child: Text("日期(01-31)"))),
+                                        ],
+                                      ),
+                                      TableRow(
+                                        children: [
+                                          TableCell(
+                                              child: Center(
+                                                  child: Text("{timestamp}"))),
+                                          TableCell(
+                                              child: Center(
+                                                  child: Text("时间戳(秒)"))),
+                                        ],
+                                      ),
+                                      TableRow(
+                                        children: [
+                                          TableCell(
+                                              child: Center(
+                                                  child: Text("{uuid}"))),
+                                          TableCell(
+                                              child:
+                                                  Center(child: Text("唯一字符串"))),
+                                        ],
+                                      ),
+                                      TableRow(
+                                        children: [
+                                          TableCell(
+                                              child:
+                                                  Center(child: Text("{md5}"))),
+                                          TableCell(
+                                              child:
+                                                  Center(child: Text("随机md5"))),
+                                        ],
+                                      ),
+                                      TableRow(
+                                        children: [
+                                          TableCell(
+                                              child: Center(
+                                                  child: Text("{md5-16}"))),
+                                          TableCell(
+                                              child: Center(
+                                                  child: Text("随机md5前16位"))),
+                                        ],
+                                      ),
+                                      TableRow(
+                                        children: [
+                                          TableCell(
+                                              child: Center(
+                                                  child: Text("{str-10}"))),
+                                          TableCell(
+                                              child: Center(
+                                                  child: Text("10位随机字符串"))),
+                                        ],
+                                      ),
+                                      TableRow(
+                                        children: [
+                                          TableCell(
+                                              child: Center(
+                                                  child: Text("{str-20}"))),
+                                          TableCell(
+                                              child: Center(
+                                                  child: Text("20位随机字符串"))),
+                                        ],
+                                      ),
+                                      TableRow(
+                                        children: [
+                                          TableCell(
+                                              child: Center(
+                                                  child: Text("{filename}"))),
+                                          TableCell(
+                                              child:
+                                                  Center(child: Text("原始文件名"))),
+                                        ],
+                                      ),
+                                    ],
+                                  )),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  }
+                },
                 icon: const Icon(
                   Icons.settings,
                   size: 30,
@@ -883,456 +1291,14 @@ class HomePageState extends State<HomePage>
                         ],
                       ),
                     ),
-                    PopupMenuItem(
-                      child: GestureDetector(
-                          behavior: HitTestBehavior.opaque,
-                          onTap: () async {
-                            Navigator.pop(context);
-                            await showDialog(
-                              barrierDismissible: true,
-                              context: context,
-                              builder: (context) {
-                                return SimpleDialog(
-                                  title: const Text(
-                                    '选择默认链接格式',
-                                    textAlign: TextAlign.center,
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.bold),
-                                  ),
-                                  children: [
-                                    SimpleDialogOption(
-                                      child: Text(
-                                        Global.defaultLKformat == 'rawurl'
-                                            ? 'URL格式 \u2713'
-                                            : 'URL格式',
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          color:
-                                              Global.defaultLKformat == 'rawurl'
-                                                  ? Colors.blue
-                                                  : Colors.black,
-                                          fontWeight:
-                                              Global.defaultLKformat == 'rawurl'
-                                                  ? FontWeight.bold
-                                                  : FontWeight.normal,
-                                        ),
-                                      ),
-                                      onPressed: () async {
-                                        await Global.setLKformat('rawurl');
-                                        if (mounted) {
-                                          showToastWithContext(
-                                              context, '已设置为URL格式');
-                                          Navigator.pop(context);
-                                        }
-                                      },
-                                    ),
-                                    SimpleDialogOption(
-                                      child: Text(
-                                        Global.defaultLKformat == 'html'
-                                            ? 'HTML格式 \u2713'
-                                            : 'HTML格式',
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          color:
-                                              Global.defaultLKformat == 'html'
-                                                  ? Colors.blue
-                                                  : Colors.black,
-                                          fontWeight:
-                                              Global.defaultLKformat == 'html'
-                                                  ? FontWeight.bold
-                                                  : FontWeight.normal,
-                                        ),
-                                      ),
-                                      onPressed: () async {
-                                        await Global.setLKformat('html');
-                                        if (mounted) {
-                                          showToastWithContext(
-                                              context, '已设置为HTML格式');
-                                          Navigator.pop(context);
-                                        }
-                                      },
-                                    ),
-                                    SimpleDialogOption(
-                                      child: Text(
-                                        Global.defaultLKformat == 'BBcode'
-                                            ? 'BBcode格式 \u2713'
-                                            : 'BBcode格式',
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          color:
-                                              Global.defaultLKformat == 'BBcode'
-                                                  ? Colors.blue
-                                                  : Colors.black,
-                                          fontWeight:
-                                              Global.defaultLKformat == 'BBcode'
-                                                  ? FontWeight.bold
-                                                  : FontWeight.normal,
-                                        ),
-                                      ),
-                                      onPressed: () async {
-                                        await Global.setLKformat('BBcode');
-                                        if (mounted) {
-                                          showToastWithContext(
-                                              context, '已设置为BBcode格式');
-                                          Navigator.pop(context);
-                                        }
-                                      },
-                                    ),
-                                    SimpleDialogOption(
-                                      child: Text(
-                                        Global.defaultLKformat == 'markdown'
-                                            ? 'markdown格式 \u2713'
-                                            : 'markdown格式',
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          color: Global.defaultLKformat ==
-                                                  'markdown'
-                                              ? Colors.blue
-                                              : Colors.black,
-                                          fontWeight: Global.defaultLKformat ==
-                                                  'markdown'
-                                              ? FontWeight.bold
-                                              : FontWeight.normal,
-                                        ),
-                                      ),
-                                      onPressed: () async {
-                                        await Global.setLKformat('markdown');
-                                        if (mounted) {
-                                          showToastWithContext(
-                                              context, '已设置为markdown格式');
-                                          Navigator.pop(context);
-                                        }
-                                      },
-                                    ),
-                                    SimpleDialogOption(
-                                      child: Text(
-                                        Global.defaultLKformat ==
-                                                'markdown_with_link'
-                                            ? 'markdown格式(带链接) \u2713'
-                                            : 'markdown格式(带链接)',
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          color: Global.defaultLKformat ==
-                                                  'markdown_with_link'
-                                              ? Colors.blue
-                                              : Colors.black,
-                                          fontWeight: Global.defaultLKformat ==
-                                                  'markdown_with_link'
-                                              ? FontWeight.bold
-                                              : FontWeight.normal,
-                                        ),
-                                      ),
-                                      onPressed: () async {
-                                        await Global.setLKformat(
-                                            'markdown_with_link');
-                                        if (mounted) {
-                                          showToastWithContext(
-                                              context, '已设置为md_link格式');
-                                          Navigator.pop(context);
-                                        }
-                                      },
-                                    ),
-                                    SimpleDialogOption(
-                                      child: Text(
-                                        Global.defaultLKformat == 'custom'
-                                            ? '自定义格式 \u2713'
-                                            : '自定义格式',
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          color:
-                                              Global.defaultLKformat == 'custom'
-                                                  ? Colors.blue
-                                                  : Colors.black,
-                                          fontWeight:
-                                              Global.defaultLKformat == 'custom'
-                                                  ? FontWeight.bold
-                                                  : FontWeight.normal,
-                                        ),
-                                      ),
-                                      onPressed: () async {
-                                        await Global.setLKformat('custom');
-                                        if (mounted) {
-                                          showToastWithContext(
-                                              context, '已设置为自定义格式');
-                                          Navigator.pop(context);
-                                        }
-                                      },
-                                    ),
-                                    SimpleDialogOption(
-                                      child: TextFormField(
-                                        textAlign: TextAlign.center,
-                                        initialValue: Global.customLinkFormat,
-                                        decoration: const InputDecoration(
-                                          hintText: r'使用$url和$fileName作为占位符',
-                                        ),
-                                        onChanged: (String value) async {
-                                          await Global.setCustomLinkFormat(
-                                              value);
-                                        },
-                                      ),
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
-                          },
-                          child: const Text('选择默认链接格式')),
+                    const PopupMenuItem(
+                      value: 1,
+                      child: Text('选择默认链接格式'),
                     ),
-                    PopupMenuItem(
-                        child: GestureDetector(
-                      behavior: HitTestBehavior.opaque,
-                      onTap: () async {
-                        Navigator.pop(context);
-                        await showDialog(
-                          barrierDismissible: true,
-                          context: context,
-                          builder: (context) {
-                            return SimpleDialog(
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10)),
-                              title: const Text(
-                                '选择重命名方式',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              children: [
-                                SimpleDialogOption(
-                                  child: ListTile(
-                                    title: const Text('开启时间戳重命名'),
-                                    subtitle: const Text('优先级按照自定义>时间戳>随机字符串'),
-                                    trailing: Switch(
-                                      value: Global.isTimeStamp,
-                                      onChanged: (value) async {
-                                        await Global.setTimeStamp(value);
-                                        if (mounted) {
-                                          if (value) {
-                                            showToastWithContext(
-                                                context, '已开启时间戳重命名');
-                                          } else {
-                                            showToastWithContext(
-                                                context, '已关闭时间戳重命名');
-                                          }
-                                          Navigator.pop(context);
-                                        }
-                                      },
-                                    ),
-                                  ),
-                                ),
-                                SimpleDialogOption(
-                                  child: ListTile(
-                                    title: const Text('开启随机字符串重命名'),
-                                    subtitle: const Text('字符串长度固定为30'),
-                                    trailing: Switch(
-                                      value: Global.isRandomName,
-                                      onChanged: (value) async {
-                                        await Global.setRandomName(value);
-                                        if (mounted) {
-                                          if (value) {
-                                            showToastWithContext(
-                                                context, '已开启随机字符串重命名');
-                                          } else {
-                                            showToastWithContext(
-                                                context, '已关闭随机字符串重命名');
-                                          }
-                                          Navigator.pop(context);
-                                        }
-                                      },
-                                    ),
-                                  ),
-                                ),
-                                SimpleDialogOption(
-                                  child: ListTile(
-                                    title: const Text('使用自定义重命名'),
-                                    trailing: Switch(
-                                      value: Global.iscustomRename,
-                                      onChanged: (value) async {
-                                        await Global.setCustomeRename(value);
-                                        if (mounted) {
-                                          if (value) {
-                                            showToastWithContext(
-                                                context, '已开启自定义重命名');
-                                          } else {
-                                            showToastWithContext(
-                                                context, '已关闭自定义重命名');
-                                          }
-                                          Navigator.pop(context);
-                                        }
-                                      },
-                                    ),
-                                  ),
-                                ),
-                                SimpleDialogOption(
-                                  child: TextFormField(
-                                    textAlign: TextAlign.center,
-                                    initialValue: Global.customRenameFormat,
-                                    decoration: const InputDecoration(
-                                      label: Center(child: Text('自定义重命名格式')),
-                                      hintText: r'规则参考表格，可随意组合其它字符',
-                                    ),
-                                    onChanged: (String value) async {
-                                      await Global.setCustomeRenameFormat(
-                                          value);
-                                    },
-                                  ),
-                                ),
-                                SimpleDialogOption(
-                                  child: Container(
-                                      margin: const EdgeInsets.only(
-                                          left: 20, right: 20),
-                                      child: Table(
-                                        border: TableBorder.all(
-                                          color: Colors.black,
-                                          width: 1,
-                                          style: BorderStyle.solid,
-                                          borderRadius:
-                                              BorderRadius.circular(5),
-                                        ),
-                                        children: const [
-                                          TableRow(
-                                            decoration: ShapeDecoration(
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius: BorderRadius.only(
-                                                  topLeft: Radius.circular(5),
-                                                  topRight: Radius.circular(5),
-                                                ),
-                                              ),
-                                              color: Colors.grey,
-                                            ),
-                                            children: [
-                                              TableCell(
-                                                  child: Center(
-                                                      child: Text("占位符"))),
-                                              TableCell(
-                                                  child: Center(
-                                                      child: Text("说明"))),
-                                            ],
-                                          ),
-                                          TableRow(
-                                            children: [
-                                              TableCell(
-                                                  child: Center(
-                                                      child: Text("{Y}"))),
-                                              TableCell(
-                                                  child: Center(
-                                                      child: Text("年份(2022)"))),
-                                            ],
-                                          ),
-                                          TableRow(
-                                            children: [
-                                              TableCell(
-                                                  child: Center(
-                                                      child: Text("{y}"))),
-                                              TableCell(
-                                                  child: Center(
-                                                      child:
-                                                          Text("两位数年份(22)"))),
-                                            ],
-                                          ),
-                                          TableRow(
-                                            children: [
-                                              TableCell(
-                                                  child: Center(
-                                                      child: Text("{m}"))),
-                                              TableCell(
-                                                  child: Center(
-                                                      child:
-                                                          Text("月份(01-12)"))),
-                                            ],
-                                          ),
-                                          TableRow(
-                                            children: [
-                                              TableCell(
-                                                  child: Center(
-                                                      child: Text("{d}"))),
-                                              TableCell(
-                                                  child: Center(
-                                                      child:
-                                                          Text("日期(01-31)"))),
-                                            ],
-                                          ),
-                                          TableRow(
-                                            children: [
-                                              TableCell(
-                                                  child: Center(
-                                                      child:
-                                                          Text("{timestamp}"))),
-                                              TableCell(
-                                                  child: Center(
-                                                      child: Text("时间戳(秒)"))),
-                                            ],
-                                          ),
-                                          TableRow(
-                                            children: [
-                                              TableCell(
-                                                  child: Center(
-                                                      child: Text("{uuid}"))),
-                                              TableCell(
-                                                  child: Center(
-                                                      child: Text("唯一字符串"))),
-                                            ],
-                                          ),
-                                          TableRow(
-                                            children: [
-                                              TableCell(
-                                                  child: Center(
-                                                      child: Text("{md5}"))),
-                                              TableCell(
-                                                  child: Center(
-                                                      child: Text("随机md5"))),
-                                            ],
-                                          ),
-                                          TableRow(
-                                            children: [
-                                              TableCell(
-                                                  child: Center(
-                                                      child: Text("{md5-16}"))),
-                                              TableCell(
-                                                  child: Center(
-                                                      child:
-                                                          Text("随机md5前16位"))),
-                                            ],
-                                          ),
-                                          TableRow(
-                                            children: [
-                                              TableCell(
-                                                  child: Center(
-                                                      child: Text("{str-10}"))),
-                                              TableCell(
-                                                  child: Center(
-                                                      child: Text("10位随机字符串"))),
-                                            ],
-                                          ),
-                                          TableRow(
-                                            children: [
-                                              TableCell(
-                                                  child: Center(
-                                                      child: Text("{str-20}"))),
-                                              TableCell(
-                                                  child: Center(
-                                                      child: Text("20位随机字符串"))),
-                                            ],
-                                          ),
-                                          TableRow(
-                                            children: [
-                                              TableCell(
-                                                  child: Center(
-                                                      child:
-                                                          Text("{filename}"))),
-                                              TableCell(
-                                                  child: Center(
-                                                      child: Text("原始文件名"))),
-                                            ],
-                                          ),
-                                        ],
-                                      )),
-                                ),
-                              ],
-                            );
-                          },
-                        );
-                      },
-                      child: const Text('文件重命名方式'),
-                    )),
+                    const PopupMenuItem(
+                      value: 2,
+                      child: Text('文件重命名方式'),
+                    ),
                   ];
                 }),
             IconButton(
