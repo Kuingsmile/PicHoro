@@ -814,6 +814,7 @@ class UpyunFileExplorerState
                             text: multiUrls
                                 .toString()
                                 .substring(1, multiUrls.toString().length - 1)
+                                .replaceAll(', ', '\n')
                                 .replaceAll(',', '\n')));
                     if (mounted) {
                       showToastWithContext(context, '已复制全部链接');

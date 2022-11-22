@@ -783,6 +783,7 @@ class UploadedImagesState extends State<UploadedImages>
                         text: multiUrls
                             .toString()
                             .substring(1, multiUrls.toString().length - 1)
+                            .replaceAll(', ', '\n')
                             .replaceAll(',', '\n')));
                     showToast('已复制全部链接');
                     return;
