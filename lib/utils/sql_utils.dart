@@ -21,7 +21,7 @@ class MySqlUtils {
     String encryptKey = passwordUser * 3;
     String to_encrypt = data + "保密占位符";
     DES3 des3CBC = DES3(key: encryptKey.codeUnits, mode: DESMode.CBC, iv: iv);
-    encrypted = des3CBC.encrypt(to_encrypt.codeUnits);
+    encrypted = des3CBC.encrypt(utf8.encode(to_encrypt));
     String encryptedString = hex.encode(encrypted);
     return encryptedString;
   }
@@ -33,7 +33,7 @@ class MySqlUtils {
     List<int> encrypted = hex.decode(encryptedString);
     DES3 des3CBC = DES3(key: encryptKey.codeUnits, mode: DESMode.CBC, iv: iv);
     decrypted = des3CBC.decrypt(encrypted);
-    String decryptedStr = String.fromCharCodes(decrypted);
+    String decryptedStr = utf8.decode(decrypted);
     String to_remove = "保密占位符";
     String decryptedString =
         decryptedStr.substring(0, decryptedStr.length - to_remove.length);
