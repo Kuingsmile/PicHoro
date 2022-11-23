@@ -12,7 +12,7 @@
      </a>
 </div>
 
-&emsp;&emsp;一款基于flutter的手机端云存储平台/图床管理和文件上传/下载工具，最新版本**V1.9.3**，与PicGo配置互通，可直接扫码导入，主要功能包括云存储平台和图床平台,以及云服务器的管理，文件上传和下载管理，以及各种格式的链接分享。
+&emsp;&emsp;一款基于flutter的手机端云存储平台/图床管理和文件上传/下载工具，最新版本**V1.9.4 beta 1**，与PicGo配置互通，可直接扫码导入，主要功能包括云存储平台和图床平台,以及云服务器的管理，文件上传和下载管理，以及各种格式的链接分享。
 
 &emsp;&emsp;项目介绍和配置手册网址:
 
@@ -52,7 +52,7 @@
 
 Github下载地址 [Github release](https://github.com/Kuingsmile/PicHoro/releases)  
 
-我的个人网站提供的最新版本下载地址 [https://www.horosama.com/self_apk/PicHoro_V1.9.3.apk](https://www.horosama.com/self_apk/PicHoro_V1.9.3.apk)
+我的个人网站提供的最新版本下载地址 [https://www.horosama.com/self_apk/PicHoro_V1.9.4b1.apk](https://www.horosama.com/self_apk/PicHoro_V1.9.4b1.apk)
 
 ### IOS
 
@@ -87,6 +87,9 @@ Github下载地址 [Github release](https://github.com/Kuingsmile/PicHoro/releas
 
   详细更新日志请查看[更新日志](https://github.com/Kuingsmile/PicHoro/blob/main/Version_update_log.md "更新日志")
 
+- 2022-11-24: **V1.94 beta 1**:
+
+  - 修复：修复了图床设置时，如果参数内包含中文，会导致报错的问题。
 
 - 2022-11-22: **V1.93**:
 
@@ -97,12 +100,6 @@ Github下载地址 [Github release](https://github.com/Kuingsmile/PicHoro/releas
   - 优化：优化了APP的启动速度。
   - 修复：修复了aws上传和下载列表会在APP关闭后被清空的问题。
   - 修复：修复了批量复制链接时，从第二行开始，开头会多一个空格的问题。
-
-- 2022-11-21: **V1.92**:
-
-  - 优化：更换了github和七牛云的图标，优化在深色模式下的显示效果
-  - 修复：修复了登录时没有同步FTP和S3平台配置的问题
-  - 修复：修复了注销登录后会导致图床管理页面无法正常显示的问题
   - 
 - 2022-10-02: **V1.00**:
   - 项目初始化，完成基本的上传功能，目前仅支持兰空图床，需要手动授予存储和相机权限
