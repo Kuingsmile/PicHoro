@@ -12,9 +12,9 @@ import 'package:horopic/utils/theme_provider.dart';
 @Author: Kuingsmile@Github
 @HomePage: https://www.horosama.com
 @e-mail: ma_shiqing@163.com
-@Date: 2022-11-19
+@Date: 2022-11-24
 @Description:PicHoro,一款云储存平台和图床管理工具
-@version: 1.9.1
+@version: 1.9.4 beta2
 */
 
 void main() async {
@@ -46,23 +46,14 @@ class MyAppState extends State<MyApp> {
         ChangeNotifierProvider.value(value: AppInfoProvider()),
       ],
       child: Consumer<AppInfoProvider>(builder: (context, appInfo, child) {
-        return appInfo.themeColor == 'light'
-            ? MaterialApp(
-                title: 'PicHoro',
-                debugShowCheckedModeBanner: false,
-                theme: lightThemeData,
-                initialRoute: '/',
-                onGenerateRoute: Application.router.generator,
-                builder: EasyLoading.init(),
-              )
-            : MaterialApp(
-                title: 'PicHoro',
-                debugShowCheckedModeBanner: false,
-                theme: darkThemeData,
-                initialRoute: '/',
-                onGenerateRoute: Application.router.generator,
-                builder: EasyLoading.init(),
-              );
+        return MaterialApp(
+          title: 'PicHoro',
+          debugShowCheckedModeBanner: false,
+          theme: themeDataMap[appInfo.keyThemeColor]!,
+          initialRoute: '/',
+          onGenerateRoute: Application.router.generator,
+          builder: EasyLoading.init(),
+        );
       }),
     );
   }
