@@ -240,6 +240,22 @@ void bottomPickerSheet(
       });
 }
 
+
+//title text
+Widget titleText(String title,
+    {double? fontsize = 20,
+    FontWeight fontWeight = FontWeight.bold,
+    Color? color = Colors.white}) {
+  return Text(
+    title,
+    style: TextStyle(
+      fontSize: fontsize,
+      color: color,
+      fontWeight: fontWeight,
+    ),
+  );
+}
+
 //random String Generator
 String randomStringGenerator(int length) {
   const chars =
