@@ -1228,8 +1228,46 @@ class AllPShostState extends State<AllPShost> {
         showToast("又拍云配置错误");
       }
     }
-
     return true;
+  }
+
+  SimpleDialogOption _buildSimpleDialogOption(
+      BuildContext context, String text, String value) {
+    return SimpleDialogOption(
+      child: Text(text, textAlign: TextAlign.center),
+      onPressed: () {
+        exportConfiguration(value);
+        Navigator.pop(context);
+      },
+    );
+  }
+
+  List<SimpleDialogOption> _buildSimpleDialogOptions(BuildContext context) {
+    List<SimpleDialogOption> options = [
+      SimpleDialogOption(
+        child: const Text('全部导出', textAlign: TextAlign.center),
+        onPressed: () {
+          exportAllConfiguration();
+          Navigator.pop(context);
+        },
+      ),
+    ];
+    Map temp = {
+      '阿里云': 'aliyun',
+      'FTP-SSH/SFTP': 'ftp',
+      'Github': 'github',
+      'Imgur': 'imgur',
+      '兰空图床': 'lankong',
+      '七牛云': 'qiniu',
+      'S3兼容平台': 'aws',
+      'SM.MS': 'smms',
+      '腾讯云': 'tcyun',
+      '又拍云': 'upyun',
+    };
+    temp.forEach((key, value) {
+      options.add(_buildSimpleDialogOption(context, key, value));
+    });
+    return options;
   }
 
   @override
@@ -1238,18 +1276,16 @@ class AllPShostState extends State<AllPShost> {
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
-        title: const Text(
+        title: titleText(
           '图床设置',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
         ),
       ),
       body: ListView(children: [
         ListTile(
-          tileColor: const Color.fromARGB(255, 188, 187, 238),
-          textColor: const Color.fromARGB(255, 11, 173, 19),
+          leading: const Icon(
+            Icons.camera_alt_outlined,
+          ),
+          minLeadingWidth: 0,
           title: const Text('二维码扫描导入PicGo配置'),
           onTap: () async {
             await _scan();
@@ -1327,7 +1363,7 @@ class AllPShostState extends State<AllPShost> {
           },
           trailing: const Icon(Icons.arrow_forward_ios),
         ),
-         ListTile(
+        ListTile(
           title: const Text('S3兼容平台'),
           onTap: () {
             Application.router.navigateTo(context, Routes.awsPShostSelect,
@@ -1377,93 +1413,14 @@ class AllPShostState extends State<AllPShost> {
                       textAlign: TextAlign.center,
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
-                    children: [
-                      SimpleDialogOption(
-                        child: const Text('全部导出', textAlign: TextAlign.center),
-                        onPressed: () {
-                          exportAllConfiguration();
-                          Navigator.pop(context);
-                        },
-                      ),
-                      SimpleDialogOption(
-                        child: const Text('阿里云', textAlign: TextAlign.center),
-                        onPressed: () {
-                          exportConfiguration('aliyun');
-                          Navigator.pop(context);
-                        },
-                      ),
-                      SimpleDialogOption(
-                        child: const Text('FTP-SSH/SFTP',
-                            textAlign: TextAlign.center),
-                        onPressed: () {
-                          exportConfiguration('ftp');
-                          Navigator.pop(context);
-                        },
-                      ),
-                      SimpleDialogOption(
-                        child:
-                            const Text('Github', textAlign: TextAlign.center),
-                        onPressed: () {
-                          exportConfiguration('github');
-                          Navigator.pop(context);
-                        },
-                      ),
-                      SimpleDialogOption(
-                        child: const Text('Imgur', textAlign: TextAlign.center),
-                        onPressed: () {
-                          exportConfiguration('imgur');
-                          Navigator.pop(context);
-                        },
-                      ),
-                      SimpleDialogOption(
-                        child: const Text('兰空图床', textAlign: TextAlign.center),
-                        onPressed: () {
-                          exportConfiguration('lankong');
-                          Navigator.pop(context);
-                        },
-                      ),
-                      SimpleDialogOption(
-                        child: const Text('七牛云', textAlign: TextAlign.center),
-                        onPressed: () {
-                          exportConfiguration('qiniu');
-                          Navigator.pop(context);
-                        },
-                      ),
-                      SimpleDialogOption(
-                        child: const Text('S3兼容平台', textAlign: TextAlign.center),
-                        onPressed: () {
-                          exportConfiguration('aws');
-                          Navigator.pop(context);
-                        },
-                      ),
-                      SimpleDialogOption(
-                        child: const Text('SM.MS', textAlign: TextAlign.center),
-                        onPressed: () {
-                          exportConfiguration('smms');
-                          Navigator.pop(context);
-                        },
-                      ),
-                      SimpleDialogOption(
-                        child: const Text('腾讯云', textAlign: TextAlign.center),
-                        onPressed: () {
-                          exportConfiguration('tcyun');
-                          Navigator.pop(context);
-                        },
-                      ),
-                      SimpleDialogOption(
-                        child: const Text('又拍云', textAlign: TextAlign.center),
-                        onPressed: () {
-                          exportConfiguration('upyun');
-                          Navigator.pop(context);
-                        },
-                      ),
-                    ],
+                    children: _buildSimpleDialogOptions(context),
                   );
                 },
               );
             },
             child: const Icon(
               Icons.outbox_outlined,
+              color: Colors.white,
               size: 30,
             ),
           )),
