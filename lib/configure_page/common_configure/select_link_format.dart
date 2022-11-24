@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:horopic/utils/global.dart';
+import 'package:horopic/utils/common_functions.dart';
 
 class LinkFormatSelect extends StatefulWidget {
   const LinkFormatSelect({Key? key}) : super(key: key);
@@ -14,75 +15,35 @@ class LinkFormatSelectState extends State<LinkFormatSelect> {
     super.initState();
   }
 
-  final List<String> linkFormat = [
-    'rawurl',
-    'html',
-    'BBcode',
-    'markdown',
-    'markdown_with_link',
-    'custom'
-  ];
+  ListTile _buildListTile(String title, String value) {
+    return ListTile(
+      title: Text(title),
+      trailing:
+          Global.defaultLKformat == value ? const Icon(Icons.check) : null,
+      onTap: () async {
+        await Global.setLKformat(value);
+        setState(() {});
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-         elevation: 0,
-         centerTitle: true,
-        title: const Text('链接格式选择'),
+        elevation: 0,
+        centerTitle: true,
+        title: titleText(
+          '链接格式选择',
+        ),
       ),
       body: ListView(
         children: [
-          ListTile(
-            title: const Text('URL格式'),
-            trailing: Global.defaultLKformat == 'rawurl'
-                ? const Icon(Icons.check)
-                : null,
-            onTap: () async {
-              await Global.setLKformat('rawurl');
-              setState(() {});
-            },
-          ),
-          ListTile(
-            trailing: Global.defaultLKformat == 'html'
-                ? const Icon(Icons.check)
-                : null,
-            title: const Text('HTML格式'),
-            onTap: () async {
-              await Global.setLKformat('html');
-              setState(() {});
-            },
-          ),
-          ListTile(
-            trailing: Global.defaultLKformat == 'BBcode'
-                ? const Icon(Icons.check)
-                : null,
-            title: const Text('BBcode格式'),
-            onTap: () async {
-              await Global.setLKformat('BBcode');
-              setState(() {});
-            },
-          ),
-          ListTile(
-            trailing: Global.defaultLKformat == 'markdown'
-                ? const Icon(Icons.check)
-                : null,
-            title: const Text('markdown格式'),
-            onTap: () async {
-              await Global.setLKformat('markdown');
-              setState(() {});
-            },
-          ),
-          ListTile(
-            trailing: Global.defaultLKformat == 'markdown_with_link'
-                ? const Icon(Icons.check)
-                : null,
-            title: const Text('markdown格式(带链接)'),
-            onTap: () async {
-              await Global.setLKformat('markdown_with_link');
-              setState(() {});
-            },
-          ),
+          _buildListTile('URL格式', 'rawurl'),
+          _buildListTile('HTML格式', 'html'),
+          _buildListTile('BBcode格式', 'BBcode'),
+          _buildListTile('Markdown格式', 'markdown'),
+          _buildListTile('Markdown格式(带链接)', 'markdown_with_link'),
           ListTile(
             trailing: Global.defaultLKformat == 'custom'
                 ? const Icon(Icons.check)
