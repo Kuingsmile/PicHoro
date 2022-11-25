@@ -89,7 +89,7 @@ class HomePageState extends State<HomePage>
 
   _createUploadListItem() {
     List<Widget> list = [];
-    for (var i = 0; i < uploadList.length; i++) {
+    for (var i =uploadList.length-1; i >= 0; i--) {
       list.add(ListItem(
           onUploadPlayPausedPressed: (path, fileName) async {
             var task = uploadManager.getUpload(uploadList[i][1]);
@@ -100,6 +100,8 @@ class HomePageState extends State<HomePage>
                   break;
                 case UploadStatus.paused:
                   await uploadManager.resumeUpload(path, fileName);
+                  break;
+                default:
                   break;
               }
               setState(() {});
@@ -1258,6 +1260,7 @@ class HomePageState extends State<HomePage>
                 },
                 icon: const Icon(
                   Icons.settings,
+                  color: Colors.white,
                   size: 30,
                 ),
                 position: PopupMenuPosition.under,
@@ -1321,12 +1324,9 @@ class HomePageState extends State<HomePage>
               },
             ),
           ],
-          title: const Text('PicHoro',
-              style: TextStyle(
-                fontSize: 22.0,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              )),
+          title: titleText(
+            'PicHoro',
+          ),
         ),
         body: uploadList.isEmpty
             ? Center(
@@ -1395,6 +1395,7 @@ class HomePageState extends State<HomePage>
                 },
                 child: const Icon(
                   Icons.camera_alt_outlined,
+                  color: Colors.white,
                   size: 30,
                 ),
               )),
@@ -1426,6 +1427,7 @@ class HomePageState extends State<HomePage>
                 },
                 child: const Icon(
                   Icons.image_outlined,
+                  color: Colors.white,
                   size: 30,
                 ),
               )),
@@ -1441,6 +1443,7 @@ class HomePageState extends State<HomePage>
                 },
                 child: const Icon(
                   Icons.camera,
+                  color: Colors.white,
                   size: 30,
                 ),
               )),
@@ -1482,6 +1485,7 @@ class HomePageState extends State<HomePage>
                 },
                 child: const Icon(
                   Icons.wifi,
+                  color: Colors.white,
                   size: 30,
                 ),
               )),
@@ -1492,7 +1496,8 @@ class HomePageState extends State<HomePage>
             buttonSize: const Size(41, 41),
             childrenButtonSize: const Size(40, 40),
             animatedIcon: AnimatedIcons.menu_close,
-            animatedIconTheme: const IconThemeData(size: 33.0),
+            animatedIconTheme:
+                const IconThemeData(color: Colors.white, size: 33.0),
             backgroundColor: Colors.blue,
             visible: true,
             curve: Curves.bounceIn,
@@ -1780,25 +1785,6 @@ class ListItemState extends State<ListItem> {
                         valueListenable: widget.uploadTask!.status,
                         builder: (context, value, child) {
                           switch (widget.uploadTask!.status.value) {
-                            case UploadStatus.uploading:
-                              return IconButton(
-                                  onPressed: () async {
-                                    await widget.onUploadPlayPausedPressed(
-                                        widget.path, widget.fileName);
-                                  },
-                                  icon: const Icon(
-                                    Icons.pause,
-                                    color: Colors.blue,
-                                  ));
-                            case UploadStatus.paused:
-                              return IconButton(
-                                onPressed: () async {
-                                  await widget.onUploadPlayPausedPressed(
-                                      widget.path, widget.fileName);
-                                },
-                                icon: const Icon(Icons.play_arrow),
-                                color: Colors.blue,
-                              );
                             case UploadStatus.completed:
                               return IconButton(
                                   onPressed: () {
@@ -1820,9 +1806,35 @@ class ListItemState extends State<ListItem> {
                                     Icons.cloud_upload_outlined,
                                     color: Colors.blue,
                                   ));
+                            default:
+                              return widget.uploadTask == null ||
+                                      widget.uploadTask!.status.value ==
+                                          UploadStatus.queued
+                                  ? const Icon(
+                                      Icons.query_builder_rounded,
+                                      color: Colors.blue,
+                                    )
+                                  : ValueListenableBuilder(
+                                      valueListenable:
+                                          widget.uploadTask!.progress,
+                                      builder: (context, value, child) {
+                                        return Container(
+                                          height: 20,
+                                          width: 20,
+                                          margin: const EdgeInsets.fromLTRB(
+                                              0, 0, 10, 0),
+                                          child: CircularProgressIndicator(
+                                            value: value,
+                                            strokeWidth: 4,
+                                            color: widget.uploadTask!.status
+                                                        .value ==
+                                                    UploadStatus.paused
+                                                ? Colors.grey
+                                                : Colors.blue,
+                                          ),
+                                        );
+                                      });
                           }
-                          return Text("${uploadStatus[value.toString()]}",
-                              style: const TextStyle(fontSize: 16));
                         })
                     : IconButton(
                         onPressed: () async {
@@ -1835,39 +1847,6 @@ class ListItemState extends State<ListItem> {
                         ))
               ],
             ),
-            if (widget.uploadTask != null &&
-                !widget.uploadTask!.status.value.isCompleted)
-              ValueListenableBuilder(
-                  valueListenable: widget.uploadTask!.progress,
-                  builder: (context, value, child) {
-                    return Container(
-                      margin: const EdgeInsets.symmetric(vertical: 4),
-                      child: LinearProgressIndicator(
-                        value: value,
-                        color: widget.uploadTask!.status.value ==
-                                UploadStatus.paused
-                            ? Colors.grey
-                            : Colors.amber,
-                      ),
-                    );
-                  }),
-            if (widget.uploadTask != null)
-              FutureBuilder<UploadStatus>(
-                  future: widget.uploadTask!.whenUploadComplete(),
-                  builder: (BuildContext context,
-                      AsyncSnapshot<UploadStatus> snapshot) {
-                    switch (snapshot.connectionState) {
-                      case ConnectionState.waiting:
-                        return const Text('请等待上传完成');
-                      default:
-                        if (snapshot.hasError) {
-                          return Text('错误: ${snapshot.error}');
-                        } else {
-                          return Text(
-                              '结果: ${uploadStatus[snapshot.data.toString()]}');
-                        }
-                    }
-                  })
           ],
         ),
       ),
