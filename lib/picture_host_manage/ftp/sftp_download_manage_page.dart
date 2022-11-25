@@ -66,7 +66,7 @@ class SFTPUpDownloadManagePageState extends State<SFTPUpDownloadManagePage> {
 
   _createUploadListItem() {
     List<Widget> list = [];
-    for (var i = 0; i < Global.ftpUploadList.length; i++) {
+    for (var i =  Global.ftpUploadList.length - 1; i >= 0; i--) {
       list.add(GestureDetector(
           onLongPress: () {
             showCupertinoAlertDialogWithConfirmFunc(
@@ -179,7 +179,7 @@ class SFTPUpDownloadManagePageState extends State<SFTPUpDownloadManagePage> {
 
   _createDownloadListItem() {
     List<Widget> list = [];
-    for (var i = 0; i < Global.ftpDownloadList.length; i++) {
+    for (var i =   Global.ftpDownloadList.length - 1; i >= 0; i--) {
       list.add(GestureDetector(
           onLongPress: () {
             showCupertinoAlertDialogWithConfirmFunc(

@@ -65,7 +65,7 @@ class AliyunUpDownloadManagePageState
 
   _createUploadListItem() {
     List<Widget> list = [];
-    for (var i = 0; i < Global.aliyunUploadList.length; i++) {
+    for (var i =  Global.aliyunUploadList.length - 1; i >= 0; i--) {
       list.add(GestureDetector(
           onLongPress: () {
             showCupertinoAlertDialogWithConfirmFunc(
@@ -178,7 +178,7 @@ class AliyunUpDownloadManagePageState
 
   _createDownloadListItem() {
     List<Widget> list = [];
-    for (var i = 0; i < Global.aliyunDownloadList.length; i++) {
+    for (var i =   Global.aliyunDownloadList.length - 1; i >= 0; i--) {
       list.add(GestureDetector(
           onLongPress: () {
             showCupertinoAlertDialogWithConfirmFunc(

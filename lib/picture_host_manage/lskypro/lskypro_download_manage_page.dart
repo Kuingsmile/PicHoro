@@ -64,7 +64,7 @@ class LskyproUpDownloadManagePageState
 
   _createUploadListItem() {
     List<Widget> list = [];
-    for (var i = 0; i < Global.lskyproUploadList.length; i++) {
+    for (var i = Global.lskyproUploadList.length - 1; i >= 0; i--) {
       list.add(GestureDetector(
           onLongPress: () {
             showCupertinoAlertDialogWithConfirmFunc(
@@ -177,7 +177,7 @@ class LskyproUpDownloadManagePageState
 
   _createDownloadListItem() {
     List<Widget> list = [];
-    for (var i = 0; i < Global.lskyproDownloadList.length; i++) {
+    for (var i =  Global.lskyproDownloadList.length - 1; i >= 0; i--) {
       list.add(GestureDetector(
           onLongPress: () {
             showCupertinoAlertDialogWithConfirmFunc(

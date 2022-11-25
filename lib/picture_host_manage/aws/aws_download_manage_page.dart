@@ -62,7 +62,7 @@ class AwsUpDownloadManagePageState extends State<AwsUpDownloadManagePage> {
 
   _createUploadListItem() {
     List<Widget> list = [];
-    for (var i = 0; i < Global.awsUploadList.length; i++) {
+    for (var i =  Global.awsUploadList.length - 1; i >= 0; i--) {
       list.add(GestureDetector(
           onLongPress: () {
             showCupertinoAlertDialogWithConfirmFunc(
@@ -175,7 +175,7 @@ class AwsUpDownloadManagePageState extends State<AwsUpDownloadManagePage> {
 
   _createDownloadListItem() {
     List<Widget> list = [];
-    for (var i = 0; i < Global.awsDownloadList.length; i++) {
+    for (var i = Global.awsDownloadList.length - 1; i >= 0; i--) {
       list.add(GestureDetector(
           onLongPress: () {
             showCupertinoAlertDialogWithConfirmFunc(

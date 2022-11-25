@@ -66,7 +66,7 @@ class GithubUpDownloadManagePageState
 
   _createUploadListItem() {
     List<Widget> list = [];
-    for (var i = 0; i < Global.githubUploadList.length; i++) {
+    for (var i =   Global.githubUploadList.length - 1; i >= 0; i--) {
       list.add(GestureDetector(
           onLongPress: () {
             showCupertinoAlertDialogWithConfirmFunc(
@@ -179,7 +179,7 @@ class GithubUpDownloadManagePageState
 
   _createDownloadListItem() {
     List<Widget> list = [];
-    for (var i = 0; i < Global.githubDownloadList.length; i++) {
+    for (var i =  Global.githubDownloadList.length - 1; i >= 0; i--) {
       list.add(GestureDetector(
           onLongPress: () {
             showCupertinoAlertDialogWithConfirmFunc(

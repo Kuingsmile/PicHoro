@@ -65,7 +65,7 @@ class QiniuUpDownloadManagePageState extends State<QiniuUpDownloadManagePage> {
 
   _createUploadListItem() {
     List<Widget> list = [];
-    for (var i = 0; i < Global.qiniuUploadList.length; i++) {
+    for (var i =  Global.qiniuUploadList.length - 1; i >= 0; i--) {
       list.add(GestureDetector(
           onLongPress: () {
             showCupertinoAlertDialogWithConfirmFunc(
@@ -178,7 +178,7 @@ class QiniuUpDownloadManagePageState extends State<QiniuUpDownloadManagePage> {
 
   _createDownloadListItem() {
     List<Widget> list = [];
-    for (var i = 0; i < Global.qiniuDownloadList.length; i++) {
+    for (var i =Global.qiniuDownloadList.length - 1; i >= 0; i--) {
       list.add(GestureDetector(
           onLongPress: () {
             showCupertinoAlertDialogWithConfirmFunc(

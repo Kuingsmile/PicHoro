@@ -63,7 +63,7 @@ class ImgurUpDownloadManagePageState extends State<ImgurUpDownloadManagePage> {
 
   _createUploadListItem() {
     List<Widget> list = [];
-    for (var i = 0; i < Global.imgurUploadList.length; i++) {
+    for (var i =   Global.imgurUploadList.length - 1; i >= 0; i--) {
       list.add(GestureDetector(
           onLongPress: () {
             showCupertinoAlertDialogWithConfirmFunc(
@@ -176,7 +176,7 @@ class ImgurUpDownloadManagePageState extends State<ImgurUpDownloadManagePage> {
 
   _createDownloadListItem() {
     List<Widget> list = [];
-    for (var i = 0; i < Global.imgurDownloadList.length; i++) {
+    for (var i =  Global.imgurDownloadList.length - 1; i >= 0; i--) {
       list.add(GestureDetector(
           onLongPress: () {
             showCupertinoAlertDialogWithConfirmFunc(

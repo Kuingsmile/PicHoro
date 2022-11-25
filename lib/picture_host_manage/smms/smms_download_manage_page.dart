@@ -66,7 +66,7 @@ class SmmsUpDownloadManagePageState extends State<SmmsUpDownloadManagePage> {
 
   _createUploadListItem() {
     List<Widget> list = [];
-    for (var i = 0; i < Global.smmsUploadList.length; i++) {
+    for (var i =Global.smmsUploadList.length - 1; i >= 0; i--) {
       list.add(GestureDetector(
           onLongPress: () {
             showCupertinoAlertDialogWithConfirmFunc(
@@ -179,7 +179,7 @@ class SmmsUpDownloadManagePageState extends State<SmmsUpDownloadManagePage> {
 
   _createDownloadListItem() {
     List<Widget> list = [];
-    for (var i = 0; i < Global.smmsDownloadList.length; i++) {
+    for (var i = Global.smmsDownloadList.length - 1; i >= 0; i--) {
       list.add(GestureDetector(
           onLongPress: () {
             showCupertinoAlertDialogWithConfirmFunc(

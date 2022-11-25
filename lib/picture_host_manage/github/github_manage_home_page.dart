@@ -88,7 +88,7 @@ class GithubManageHomePageState
   AppBar get appBar => AppBar(
         elevation: 0,
         centerTitle: true,
-        title: const Text('Github 个人信息'),
+        title: titleText('Github 个人信息'),
       );
 
   @override
@@ -245,42 +245,36 @@ class GithubManageHomePageState
       ),
       Column(
         children: [
-          Container(
-            color: const Color.fromARGB(255, 255, 247, 222),
-            child: ListTile(
-              leading:
-                  const Icon(Icons.folder_open_outlined, color: Colors.blue),
-              minLeadingWidth: 0,
-              title: const Text('我的仓库'),
-              trailing: const Icon(Icons.arrow_forward_ios),
-              onTap: () async {
-                Application.router
-                    .navigateTo(context,
-                        '/githubReposList?showedUsername=${Uri.encodeComponent(userProfile['login'])}',
-                        transition: TransitionType.cupertino)
-                    .then((value) => setState(() {
-                          initProfile();
-                        }));
-              },
-            ),
+          ListTile(
+            leading:
+                const Icon(Icons.folder_open_outlined, color: Colors.blue),
+            minLeadingWidth: 0,
+            title: const Text('我的仓库'),
+            trailing: const Icon(Icons.arrow_forward_ios),
+            onTap: () async {
+              Application.router
+                  .navigateTo(context,
+                      '/githubReposList?showedUsername=${Uri.encodeComponent(userProfile['login'])}',
+                      transition: TransitionType.cupertino)
+                  .then((value) => setState(() {
+                        initProfile();
+                      }));
+            },
           ),
           //他人仓库
-          Container(
-            color: const Color.fromARGB(255, 235, 252, 205),
-            child: ListTile(
-              leading:
-                  const Icon(Icons.folder_shared_outlined, color: Colors.blue),
-              minLeadingWidth: 0,
-              title: const Text('他人仓库'),
-              trailing: const Icon(Icons.arrow_forward_ios),
-              onTap: () async {
-                showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return otherRepo();
-                    });
-              },
-            ),
+          ListTile(
+            leading:
+                const Icon(Icons.folder_shared_outlined, color: Colors.blue),
+            minLeadingWidth: 0,
+            title: const Text('他人仓库'),
+            trailing: const Icon(Icons.arrow_forward_ios),
+            onTap: () async {
+              showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return otherRepo();
+                  });
+            },
           ),
           ListTile(
             leading: const Icon(Icons.person, color: Colors.blue),
