@@ -1,3 +1,9 @@
+/* 
+Copyright 2020 Mr.Yang All Rights Reserved
+Modified under MIT license
+See file LICENSE of original project at https://github.com/PicGo/flutter-picgo
+*/
+
 import 'dart:io' as io;
 import 'package:flutter/material.dart';
 
@@ -19,9 +25,6 @@ import 'package:horopic/utils/deleter.dart';
 import 'package:horopic/router/application.dart';
 import 'package:horopic/router/routers.dart';
 
-//一小部分代码参考了开源项目flutter-picgo 项目地址https://github.com/PicGo/flutter-picgo
-
-//show uploaded images
 class UploadedImages extends StatefulWidget {
   const UploadedImages({super.key});
 
