@@ -13,14 +13,20 @@ class UploadRequest {
   );
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is UploadRequest &&
-          runtimeType == other.runtimeType &&
-          path == other.path &&
-          name == other.name &&
-          configMap == other.configMap;
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+
+    if (other is UploadRequest) {
+      return other.runtimeType == runtimeType &&
+          other.path == path &&
+          other.name == name &&
+          other.configMap.toString() == configMap.toString();
+    } else {
+      return false;
+    }
+  }
 
   @override
-  int get hashCode => path.hashCode ^ name.hashCode ^ configMap.hashCode;
+  int get hashCode =>
+      path.hashCode ^ name.hashCode ^ configMap.toString().hashCode;
 }

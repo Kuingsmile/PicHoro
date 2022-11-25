@@ -92,6 +92,8 @@ class GithubUpDownloadManagePageState
                     case UploadStatus.paused:
                       await uploadManager.resumeUpload(path, fileName);
                       break;
+                    default:
+                      break;
                   }
                   setState(() {});
                 } else {
@@ -203,6 +205,8 @@ class GithubUpDownloadManagePageState
                       break;
                     case DownloadStatus.paused:
                       await downloadManager.resumeDownload(url);
+                      break;
+                    default:
                       break;
                   }
                   setState(() {});
@@ -520,9 +524,12 @@ class ListItemState extends State<ListItem> {
                                     Icons.download,
                                     color: Colors.blue,
                                   ));
+                            case DownloadStatus.queued:
+                              return const Icon(
+                                Icons.query_builder_rounded,
+                                color: Colors.blue,
+                              );
                           }
-                          return Text("${downloadStatus[value.toString()]}",
-                              style: const TextStyle(fontSize: 16));
                         })
                     : IconButton(
                         onPressed: () async {
@@ -550,23 +557,6 @@ class ListItemState extends State<ListItem> {
                       ),
                     );
                   }),
-            if (widget.downloadTask != null)
-              FutureBuilder<DownloadStatus>(
-                  future: widget.downloadTask!.whenDownloadComplete(),
-                  builder: (BuildContext context,
-                      AsyncSnapshot<DownloadStatus> snapshot) {
-                    switch (snapshot.connectionState) {
-                      case ConnectionState.waiting:
-                        return const Text('请等待下载完成');
-                      default:
-                        if (snapshot.hasError) {
-                          return Text('错误: ${snapshot.error}');
-                        } else {
-                          return Text(
-                              '结果: ${downloadStatus[snapshot.data.toString()]}');
-                        }
-                    }
-                  })
           ],
         ),
       ),
@@ -643,29 +633,6 @@ class UploadListItemState extends State<UploadListItem> {
                         valueListenable: widget.uploadTask!.status,
                         builder: (context, value, child) {
                           switch (widget.uploadTask!.status.value) {
-                            case UploadStatus.uploading:
-                              return IconButton(
-                                  onPressed: () async {
-                                    await widget.onUploadPlayPausedPressed(
-                                        widget.path,
-                                        widget.fileName,
-                                        widget.configMap);
-                                  },
-                                  icon: const Icon(
-                                    Icons.pause,
-                                    color: Colors.blue,
-                                  ));
-                            case UploadStatus.paused:
-                              return IconButton(
-                                onPressed: () async {
-                                  await widget.onUploadPlayPausedPressed(
-                                      widget.path,
-                                      widget.fileName,
-                                      widget.configMap);
-                                },
-                                icon: const Icon(Icons.play_arrow),
-                                color: Colors.blue,
-                              );
                             case UploadStatus.completed:
                               return IconButton(
                                   onPressed: () {
@@ -689,9 +656,35 @@ class UploadListItemState extends State<UploadListItem> {
                                     Icons.cloud_upload_outlined,
                                     color: Colors.blue,
                                   ));
+                            default:
+                              return widget.uploadTask == null ||
+                                      widget.uploadTask!.status.value ==
+                                          UploadStatus.queued
+                                  ? const Icon(
+                                      Icons.query_builder_rounded,
+                                      color: Colors.blue,
+                                    )
+                                  : ValueListenableBuilder(
+                                      valueListenable:
+                                          widget.uploadTask!.progress,
+                                      builder: (context, value, child) {
+                                        return Container(
+                                          height: 20,
+                                          width: 20,
+                                          margin: const EdgeInsets.fromLTRB(
+                                              0, 0, 10, 0),
+                                          child: CircularProgressIndicator(
+                                            value: value,
+                                            strokeWidth: 4,
+                                            color: widget.uploadTask!.status
+                                                        .value ==
+                                                    UploadStatus.paused
+                                                ? Colors.grey
+                                                : Colors.blue,
+                                          ),
+                                        );
+                                      });
                           }
-                          return Text("${uploadStatus[value.toString()]}",
-                              style: const TextStyle(fontSize: 16));
                         })
                     : IconButton(
                         onPressed: () async {
@@ -704,39 +697,6 @@ class UploadListItemState extends State<UploadListItem> {
                         ))
               ],
             ),
-            if (widget.uploadTask != null &&
-                !widget.uploadTask!.status.value.isCompleted)
-              ValueListenableBuilder(
-                  valueListenable: widget.uploadTask!.progress,
-                  builder: (context, value, child) {
-                    return Container(
-                      margin: const EdgeInsets.symmetric(vertical: 4),
-                      child: LinearProgressIndicator(
-                        value: value,
-                        color: widget.uploadTask!.status.value ==
-                                UploadStatus.paused
-                            ? Colors.grey
-                            : Colors.amber,
-                      ),
-                    );
-                  }),
-            if (widget.uploadTask != null)
-              FutureBuilder<UploadStatus>(
-                  future: widget.uploadTask!.whenUploadComplete(),
-                  builder: (BuildContext context,
-                      AsyncSnapshot<UploadStatus> snapshot) {
-                    switch (snapshot.connectionState) {
-                      case ConnectionState.waiting:
-                        return const Text('请等待上传完成');
-                      default:
-                        if (snapshot.hasError) {
-                          return Text('错误: ${snapshot.error}');
-                        } else {
-                          return Text(
-                              '结果: ${uploadStatus[snapshot.data.toString()]}');
-                        }
-                    }
-                  })
           ],
         ),
       ),

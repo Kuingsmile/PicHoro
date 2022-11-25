@@ -56,10 +56,10 @@ class UploadManager {
       String region = configMap['region'];
       String uploadPath = configMap['uploadPath'];
       if (endpoint.contains('amazonaws.com')) {
-      if (!endpoint.contains(region)) {
-        endpoint = 's3.$region.amazonaws.com';
+        if (!endpoint.contains(region)) {
+          endpoint = 's3.$region.amazonaws.com';
+        }
       }
-    }
 
       //云存储的路径
       String urlpath = '';
@@ -126,6 +126,10 @@ class UploadManager {
     while (_queue.isNotEmpty && runningTasks < maxConcurrentTasks) {
       runningTasks++;
       var currentRequest = _queue.removeFirst();
+      if (_cache[currentRequest.name]!.status.value.isCompleted) {
+        runningTasks--;
+        continue;
+      }
       upload(currentRequest.path, currentRequest.name, currentRequest.configMap,
           currentRequest.cancelToken);
       await Future.delayed(const Duration(milliseconds: 500), null);
@@ -152,7 +156,9 @@ class UploadManager {
 
   Future<UploadTask> _addUploadRequest(UploadRequest uploadRequest) async {
     if (_cache[uploadRequest.name] != null) {
-      if (!_cache[uploadRequest.name]!.status.value.isCompleted &&
+      if ((_cache[uploadRequest.name]!.status.value == UploadStatus.completed ||
+              _cache[uploadRequest.name]!.status.value ==
+                  UploadStatus.uploading) &&
           _cache[uploadRequest.name]!.request == uploadRequest) {
         return _cache[uploadRequest.name]!;
       } else {

@@ -19,8 +19,8 @@ class UploadRequest {
           runtimeType == other.runtimeType &&
           path == other.path &&
           name == other.name &&
-          configMap == other.configMap;
+          configMap.toString() == other.configMap.toString();
 
   @override
-  int get hashCode => path.hashCode ^ name.hashCode ^ configMap.hashCode;
+  int get hashCode => path.hashCode ^ name.hashCode ^ configMap.toString().hashCode;
 }

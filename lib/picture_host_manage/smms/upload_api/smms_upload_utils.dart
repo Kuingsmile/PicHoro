@@ -109,6 +109,10 @@ class UploadManager {
     while (_queue.isNotEmpty && runningTasks < maxConcurrentTasks) {
       runningTasks++;
       var currentRequest = _queue.removeFirst();
+      if (_cache[currentRequest.name]!.status.value.isCompleted) {
+        runningTasks--;
+        continue;
+      }
       upload(currentRequest.path, currentRequest.name, currentRequest.token,
           currentRequest.cancelToken);
       await Future.delayed(const Duration(milliseconds: 500), null);
@@ -135,7 +139,9 @@ class UploadManager {
 
   Future<UploadTask> _addUploadRequest(UploadRequest uploadRequest) async {
     if (_cache[uploadRequest.name] != null) {
-      if (!_cache[uploadRequest.name]!.status.value.isCompleted &&
+       if ((_cache[uploadRequest.name]!.status.value == UploadStatus.completed ||
+       _cache[uploadRequest.name]!.status.value == UploadStatus.uploading 
+       )&&
           _cache[uploadRequest.name]!.request == uploadRequest) {
         return _cache[uploadRequest.name]!;
       } else {
