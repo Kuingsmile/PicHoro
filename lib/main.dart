@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:provider/provider.dart';
 
-import 'package:horopic/configure_page/others/theme_data.dart';
 import 'package:horopic/router/application.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/theme_provider.dart';
@@ -12,9 +11,9 @@ import 'package:horopic/utils/theme_provider.dart';
 @Author: Kuingsmile@Github
 @HomePage: https://www.horosama.com
 @e-mail: ma_shiqing@163.com
-@Date: 2022-11-24
+@Date: 2022-11-25
 @Description:PicHoro,一款云储存平台和图床管理工具
-@version: 1.9.4 beta2
+@version: 1.9.5
 */
 
 void main() async {
