@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:horopic/album/load_state_change.dart';
+import 'package:horopic/utils/common_functions.dart';
 
 class ImagePreview extends StatefulWidget {
   final int index;
   final List images;
 
-  ImagePreview({Key? key, required this.index, required this.images})
+  const ImagePreview({Key? key, required this.index, required this.images})
       : super(key: key);
 
   @override
@@ -30,7 +31,7 @@ class ImagePreviewState extends State<ImagePreview> {
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
-        title: const Text('图片预览'),
+        title:  titleText('图片预览'),
       ),
       body: PageView.builder(
         controller: _pageController,
