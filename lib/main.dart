@@ -7,13 +7,14 @@ import 'package:horopic/router/application.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/theme_provider.dart';
 
+
 /*
 @Author: Kuingsmile@Github
 @HomePage: https://www.horosama.com
 @e-mail: ma_shiqing@163.com
-@Date: 2022-11-25
+@Date: 2022-12-02
 @Description:PicHoro,一款云储存平台和图床管理工具
-@version: 1.9.5
+@version: 1.9.6
 */
 
 void main() async {
@@ -27,6 +28,7 @@ void main() async {
         text: formatErrorMessage({}, e.toString()),
         dataLogType: DataLogType.ERRORS.toString());
   }
+
   runApp(const MyApp());
 }
 
