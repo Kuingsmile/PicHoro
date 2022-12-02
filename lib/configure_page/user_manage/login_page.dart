@@ -35,6 +35,8 @@ import 'package:horopic/picture_host_configure/configure_page/ftp_configure.dart
     as ftphostclass;
 import 'package:horopic/picture_host_configure/configure_page/aws_configure.dart'
     as awshostclass;
+import 'package:horopic/picture_host_configure/configure_page/alist_configure.dart'
+    as alisthostclass;
 import 'package:horopic/picture_host_configure/configure_store/configure_store_file.dart';
 
 class APPPassword extends StatefulWidget {
@@ -448,6 +450,38 @@ class APPPasswordState extends State<APPPassword> {
                   context: context, title: "错误", content: "拉取S3配置失败,请重试!");
             }
           }
+          //拉取alist配置
+          var alistresult =
+              await MySqlUtils.queryAlist(username: username);
+          if (alistresult == 'Error') {
+            return showCupertinoAlertDialog(
+                context: context, title: "错误", content: "获取Alist云端信息失败,请重试!");
+          } else if (alistresult != 'Empty') {
+            try {
+              final alistConfig = alisthostclass.AlistConfigModel(
+                alistresult['host'],
+                alistresult['alistusername'],
+                alistresult['password'],
+                alistresult['token'],
+                alistresult['uploadPath'],
+              );
+              final alistConfigJson = jsonEncode(alistConfig);
+              final directory = await getApplicationDocumentsDirectory();
+              File alistLocalFile =
+                  File('${directory.path}/${username}_alist_config.txt');
+              alistLocalFile.writeAsString(alistConfigJson);
+            } catch (e) {
+              FLog.error(
+                  className: 'APPPasswordState',
+                  methodName: '_fetchconfig_alist',
+                  text: formatErrorMessage({
+                    'username': username,
+                  }, e.toString()),
+                  dataLogType: DataLogType.ERRORS.toString());
+              return showCupertinoAlertDialog(
+                  context: context, title: "错误", content: "拉取Alist图床配置失败,请重试!");
+            }
+          }
           //全部拉取完成后，提示用户
           return Fluttertoast.showToast(
               msg: "已拉取云端配置",
@@ -478,7 +512,7 @@ class APPPasswordState extends State<APPPassword> {
       appBar: AppBar(
         centerTitle: true,
         elevation: 0,
-        title: const Text('登录'),
+        title: titleText('登录'),
       ),
       body: signUpPage(),
     );

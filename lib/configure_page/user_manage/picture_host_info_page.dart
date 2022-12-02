@@ -33,7 +33,8 @@ class PictureHostInfoPageState
     'imgur': 'Imgur',
     'lankong': '兰空图床',
     'ftp': 'FTP',
-    'aws': 'S3兼容平台'
+    'aws': 'S3兼容平台',
+    'alist': 'Alist V3',
   };
   final Map<String, dynamic> psNameRouterMap = {
     'smms': Routes.smmsPShostSelect,
@@ -45,7 +46,8 @@ class PictureHostInfoPageState
     'imgur': Routes.imgurPShostSelect,
     'lankong': Routes.lskyproPShostSelect,
     'ftp': Routes.ftpPShostSelect,
-    'aws': Routes.awsPShostSelect
+    'aws': Routes.awsPShostSelect,
+    'alist': Routes.alistPShostSelect,
   };
 
   @override
@@ -69,19 +71,21 @@ class PictureHostInfoPageState
         "aliyun": "$configPath/${defaultUser}_aliyun_config.txt",
         "upyun": "$configPath/${defaultUser}_upyun_config.txt",
         "ftp": "$configPath/${defaultUser}_ftp_config.txt",
-        "aws": "$configPath/${defaultUser}_aws_config.txt"
+        "aws": "$configPath/${defaultUser}_aws_config.txt",
+        "alist": "$configPath/${defaultUser}_alist_config.txt",
       };
       List pictureHostInfoList = [
-        'smms',
-        'lankong',
+        'alist',
+        'aliyun',
+        'aws',
+        'ftp',
         'github',
+        'lankong',
         'imgur',
         'qiniu',
+        'smms',
         'tcyun',
-        'aliyun',
         'upyun',
-        'ftp',
-        'aws'
       ];
 
       for (var i = 0; i < pictureHostInfoList.length; i++) {
@@ -129,7 +133,9 @@ class PictureHostInfoPageState
   AppBar get appBar => AppBar(
         elevation: 0,
         centerTitle: true,
-        title: const Text('图床配置'),
+        title: titleText(
+          '图床配置',
+        ),
       );
 
   @override
@@ -188,7 +194,8 @@ class PictureHostInfoPageState
       'aliyun': 'assets/icons/aliyun.png',
       'upyun': 'assets/icons/upyun.png',
       'ftp': 'assets/images/ftp.png',
-      'aws': 'assets/images/aws_s3.png'
+      'aws': 'assets/images/aws_s3.png',
+      'alist': 'assets/images/alist.png',
     };
     return Image.asset(iconMap[pshost]!, width: 30, height: 30);
   }
@@ -241,17 +248,15 @@ class PictureHostInfoPageState
               children: [
                 Padding(
                   padding: const EdgeInsets.only(left: 10),
-                  child: SelectableText(keys[i],
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        color: Colors.black,
-                      )),
-                ),
-                SelectableText(values[i],
+                  child: SelectableText(
+                    keys[i],
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      color: Colors.black54,
-                    )),
+                  ),
+                ),
+                SelectableText(
+                  values[i],
+                  textAlign: TextAlign.center,
+                ),
               ],
             ),
           ],

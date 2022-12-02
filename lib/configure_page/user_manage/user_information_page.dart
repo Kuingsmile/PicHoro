@@ -37,6 +37,8 @@ import 'package:horopic/picture_host_configure/configure_page/ftp_configure.dart
     as ftphostclass;
 import 'package:horopic/picture_host_configure/configure_page/aws_configure.dart'
     as awshostclass;
+import 'package:horopic/picture_host_configure/configure_page/alist_configure.dart'
+    as alisthostclass;
 import 'package:sqflite/sqflite.dart';
 
 class UserInformationPage extends StatefulWidget {
@@ -59,7 +61,8 @@ class UserInformationPageState
     'imgur': 'Imgur',
     'lsky.pro': '兰空图床',
     'ftp': 'FTP',
-    'aws': 'S3兼容平台'
+    'aws': 'S3兼容平台',
+    'alist': 'Alist V3'
   };
 
   @override
@@ -410,6 +413,37 @@ class UserInformationPageState
                   context: context, title: "错误", content: "拉取S3配置失败,请重试!");
             }
           }
+          //拉取alist配置
+          var alistresult = await MySqlUtils.queryAlist(username: username);
+          if (alistresult == 'Error') {
+            return showCupertinoAlertDialog(
+                context: context, title: "错误", content: "获取Alist云端信息失败,请重试!");
+          } else if (alistresult != 'Empty') {
+            try {
+              final alistConfig = alisthostclass.AlistConfigModel(
+                alistresult['host'],
+                alistresult['alistusername'],
+                alistresult['password'],
+                alistresult['token'],
+                alistresult['uploadPath'],
+              );
+              final alistConfigJson = jsonEncode(alistConfig);
+              final directory = await getApplicationDocumentsDirectory();
+              File alistLocalFile =
+                  File('${directory.path}/${username}_alist_config.txt');
+              alistLocalFile.writeAsString(alistConfigJson);
+            } catch (e) {
+              FLog.error(
+                  className: 'APPPasswordState',
+                  methodName: '_fetchconfig_alist',
+                  text: formatErrorMessage({
+                    'username': username,
+                  }, e.toString()),
+                  dataLogType: DataLogType.ERRORS.toString());
+              return showCupertinoAlertDialog(
+                  context: context, title: "错误", content: "拉取Alist图床配置失败,请重试!");
+            }
+          }
           //全部拉取完成后，提示用户
           return Fluttertoast.showToast(
               msg: "已拉取云端配置",
@@ -438,7 +472,9 @@ class UserInformationPageState
   AppBar get appBar => AppBar(
         elevation: 0,
         centerTitle: true,
-        title: const Text('用户信息'),
+        title: titleText(
+          '用户信息',
+        ),
       );
 
   @override
@@ -541,20 +577,15 @@ class UserInformationPageState
             trailing: Text(userProfile['pictureHost'].toString(),
                 style: const TextStyle(fontSize: 16)),
           ),
-          Container(
-            color: const Color.fromARGB(255, 250, 245, 231),
-            child: ListTile(
-              leading:
-                  const Icon(Icons.folder_open_outlined, color: Colors.blue),
-              minLeadingWidth: 0,
-              title: const Text('图床管理'),
-              trailing: const Icon(Icons.arrow_forward_ios),
-              onTap: () {
-                Application.router.navigateTo(
-                    context, Routes.pictureHostInfoPage,
-                    transition: TransitionType.inFromRight);
-              },
-            ),
+          ListTile(
+            leading: const Icon(Icons.folder_open_outlined, color: Colors.blue),
+            minLeadingWidth: 0,
+            title: const Text('图床管理'),
+            trailing: const Icon(Icons.arrow_forward_ios),
+            onTap: () {
+              Application.router.navigateTo(context, Routes.pictureHostInfoPage,
+                  transition: TransitionType.inFromRight);
+            },
           ),
           const SizedBox(height: 20),
           Row(mainAxisAlignment: MainAxisAlignment.center, children: [
@@ -619,6 +650,7 @@ class UserInformationPageState
                 await Global.setCustomeRenameFormat(r'{filename}');
                 await Global.setDeleteCloud(false);
                 await Global.setOperateDone(false);
+                await Global.setTodayAlistUpdate('19700101');
                 await Global.setpsHostHomePageOrder([
                   '0',
                   '1',
@@ -662,6 +694,11 @@ class UserInformationPageState
                 await Global.setGithubDownloadList([]);
                 await Global.setFtpUploadList([]);
                 await Global.setFtpDownloadList([]);
+                await Global.setAwsUploadList([]);
+                await Global.setAwsDownloadList([]);
+                await Global.setAlistUploadList([]);
+                await Global.setAlistDownloadList([]);
+
                 showToast('注销成功');
                 if (mounted) {
                   Navigator.pop(context);
