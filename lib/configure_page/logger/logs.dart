@@ -33,7 +33,6 @@ class LogPageState extends loading_state.BaseLoadingPageState<LogPage> {
         state = loading_state.LoadState.EMPTY;
         setState(() {});
       } else {
-        //截取一下，防止日志太多
         if (logs.length > 150) {
           logs = logs.sublist(logs.length - 150, logs.length);
         }
@@ -274,10 +273,14 @@ class LogPageState extends loading_state.BaseLoadingPageState<LogPage> {
   AppBar get appBar => AppBar(
         centerTitle: true,
         elevation: 0,
-        title: const Text('软件日志'),
+        title: titleText('软件日志',
+            ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.cleaning_services_sharp),
+            icon: const Icon(
+              Icons.cleaning_services_sharp,
+              color: Colors.white,
+            ),
             onPressed: () async {
               FLog.clearLogs();
               setState(() {
@@ -288,7 +291,7 @@ class LogPageState extends loading_state.BaseLoadingPageState<LogPage> {
             },
           ),
           IconButton(
-            icon: const Icon(Icons.file_present_outlined),
+            icon: const Icon(Icons.file_present_outlined, color: Colors.white),
             onPressed: () async {
               await showDialog(
                   context: context,
