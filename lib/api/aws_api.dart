@@ -8,7 +8,6 @@ import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/global.dart';
 
 class AwsImageUploadUtils {
-
   //上传接口
   static uploadApi(
       {required String path,
@@ -79,8 +78,13 @@ class AwsImageUploadUtils {
           displayUrl = '$customUrl$urlpath';
         }
       } else {
-        returnUrl = 'https://$endpoint/$urlpath';
-        displayUrl = 'https://$endpoint/$urlpath';
+        if (endpoint.contains('amazonaws.com')) {
+          returnUrl = 'https://$bucket.s3.$region.amazonaws.com/$urlpath';
+          displayUrl = 'https://$bucket.s3.$region.amazonaws.com/$urlpath';
+        } else {
+          returnUrl = 'https://$bucket.$endpoint/$urlpath';
+          displayUrl = 'https://$bucket.$endpoint/$urlpath';
+        }
       }
 
       String formatedURL = '';
@@ -115,7 +119,7 @@ class AwsImageUploadUtils {
     String endpoint = configMapFromPictureKey['endpoint'];
     String region = configMapFromPictureKey['region'];
     String uploadPath = configMapFromPictureKey['uploadPath'];
-   if (uploadPath != 'None') {
+    if (uploadPath != 'None') {
       if (uploadPath.startsWith('/')) {
         uploadPath = uploadPath.substring(1);
       }
@@ -146,22 +150,20 @@ class AwsImageUploadUtils {
         region: region,
       );
     }
-  
 
     try {
       await minio.removeObject(bucket, urlpath);
 
       return ['success'];
     } catch (e) {
-     
-        FLog.error(
-            className: "AwsImageUploadUtils",
-            methodName: "deleteApi",
-            text: formatErrorMessage({
-              'fileName': fileName,
-            }, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      
+      FLog.error(
+          className: "AwsImageUploadUtils",
+          methodName: "deleteApi",
+          text: formatErrorMessage({
+            'fileName': fileName,
+          }, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
+
       return [e.toString()];
     }
   }
