@@ -26,7 +26,8 @@ class CommonConfigState extends State<CommonConfig> {
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
-        title: const Text('通用设置'),
+        title: titleText('通用设置',
+           ),
       ),
       body: ListView(
         children: [
