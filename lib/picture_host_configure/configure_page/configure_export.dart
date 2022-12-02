@@ -8,3 +8,4 @@ export 'smms_configure.dart';
 export 'tencent_configure.dart';
 export 'upyun_configure.dart';
 export 'lskypro_configure.dart';
+export 'alist_configure.dart';
