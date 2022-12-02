@@ -111,7 +111,7 @@ class FTPConfigState extends State<FTPConfig> {
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
-        title: const Text('FTP参数配置'),
+        title: titleText('FTP参数配置'),
         actions: [
           IconButton(
             icon: const Icon(Icons.terminal, color: Colors.white, size: 33),
@@ -260,7 +260,7 @@ class FTPConfigState extends State<FTPConfig> {
                       });
                 }
               },
-              child: const Text('提交表单'),
+              child: titleText('提交表单',fontsize: null),
             )),
             ListTile(
                 title: ElevatedButton(
@@ -277,7 +277,7 @@ class FTPConfigState extends State<FTPConfig> {
                       );
                     });
               },
-              child: const Text('检查当前配置'),
+              child: titleText('检查当前配置',fontsize: null),
             )),
             ListTile(
                 title: ElevatedButton(
@@ -288,7 +288,7 @@ class FTPConfigState extends State<FTPConfig> {
                 await _initConfig();
                 setState(() {});
               },
-              child: const Text('设置备用配置'),
+              child: titleText('设置备用配置',fontsize: null),
             )),
             ListTile(
                 title: ElevatedButton(
@@ -309,10 +309,11 @@ class FTPConfigState extends State<FTPConfig> {
               },
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
-                  Icon(Icons.terminal_outlined),
-                  SizedBox(width: 10),
-                  Text('连接SSH终端'),
+                children:  [
+                  const Icon(Icons.terminal_outlined,
+                      color: Colors.white, ),
+                  const SizedBox(width: 10),
+                  titleText('连接SSH终端',fontsize: null),
                 ],
               ),
             )),
@@ -321,7 +322,7 @@ class FTPConfigState extends State<FTPConfig> {
               onPressed: () {
                 _setdefault();
               },
-              child: const Text('设为默认图床'),
+              child: titleText('设为默认图床',fontsize: null),
             )),
           ],
         ),

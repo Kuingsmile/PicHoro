@@ -75,7 +75,7 @@ class HostConfigState extends State<HostConfig> {
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
-        title: const Text('兰空图床参数配置'),
+        title: titleText('兰空图床参数配置'),
         actions: [
           IconButton(
             onPressed: () async {
@@ -166,21 +166,21 @@ class HostConfigState extends State<HostConfig> {
                       });
                 }
               },
-              child: const Text('提交完整表单'),
+              child: titleText('提交表单',fontsize: null),
             )),
             ListTile(
                 title: ElevatedButton(
               onPressed: () {
                 _getStrategyId();
               },
-              child: const Text('获取储存策略Id列表'),
+              child: titleText('获取储存策略Id列表',fontsize: null),
             )),
             ListTile(
               title: ElevatedButton(
                 onPressed: () {
                   _getAlbumId();
                 },
-                child: const Text('获取相册Id列表'),
+                child: titleText('获取相册Id列表',fontsize: null),
               ),
             ),
             ListTile(
@@ -198,7 +198,7 @@ class HostConfigState extends State<HostConfig> {
                       );
                     });
               },
-              child: const Text('检查当前配置'),
+              child: titleText('检查当前配置',fontsize: null),
             )),
               ListTile(
                 title: ElevatedButton(
@@ -209,14 +209,14 @@ class HostConfigState extends State<HostConfig> {
                 await _initConfig();
                 setState(() {});
               },
-              child: const Text('设置备用配置'),
+              child: titleText('设置备用配置',fontsize: null),
             )),
             ListTile(
                 title: ElevatedButton(
               onPressed: () {
                 _setdefault();
               },
-              child: const Text('设为默认图床'),
+              child: titleText('设为默认图床',fontsize: null),
             )),
             ListTile(
               title: const Center(

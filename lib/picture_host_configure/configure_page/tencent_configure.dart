@@ -95,7 +95,7 @@ class TencentConfigState extends State<TencentConfig> {
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
-        title: const Text('腾讯云参数配置'),
+        title: titleText('腾讯云参数配置'),
         actions: [
           IconButton(
             onPressed: () async {
@@ -146,7 +146,7 @@ class TencentConfigState extends State<TencentConfig> {
               controller: _bucketController,
               decoration: const InputDecoration(
                 label: Center(child: Text('bucket')),
-                hintText: '设定bucket',
+                hintText: '如test-12345678',
               ),
               textAlign: TextAlign.center,
               validator: (value) {
@@ -233,7 +233,7 @@ class TencentConfigState extends State<TencentConfig> {
                       });
                 }
               },
-              child: const Text('提交表单'),
+              child: titleText('提交表单',fontsize: null),
             )),
             ListTile(
                 title: ElevatedButton(
@@ -250,7 +250,7 @@ class TencentConfigState extends State<TencentConfig> {
                       );
                     });
               },
-              child: const Text('检查当前配置'),
+              child: titleText('检查当前配置',fontsize: null),
             )),
             ListTile(
                 title: ElevatedButton(
@@ -261,14 +261,14 @@ class TencentConfigState extends State<TencentConfig> {
                 await _initConfig();
                 setState(() {});
               },
-              child: const Text('设置备用配置'),
+              child: titleText('设置备用配置',fontsize: null),
             )),
             ListTile(
                 title: ElevatedButton(
               onPressed: () {
                 _setdefault();
               },
-              child: const Text('设为默认图床'),
+              child: titleText('设为默认图床',fontsize: null),
             )),
           ],
         ),

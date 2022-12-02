@@ -58,7 +58,7 @@ class SmmsConfigState extends State<SmmsConfig> {
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
-        title: const Text('SM.MS参数配置'),
+        title: titleText('SM.MS参数配置'),
         actions: [
           IconButton(
             onPressed: () async {
@@ -108,7 +108,7 @@ class SmmsConfigState extends State<SmmsConfig> {
                       });
                 }
               },
-              child: const Text('提交'),
+              child: titleText('提交表单',fontsize: null),
             )),
             ListTile(
                 title: ElevatedButton(
@@ -125,7 +125,7 @@ class SmmsConfigState extends State<SmmsConfig> {
                       );
                     });
               },
-              child: const Text('检查当前配置'),
+              child: titleText('检查当前配置',fontsize: null),
             )),
             ListTile(
                 title: ElevatedButton(
@@ -136,14 +136,14 @@ class SmmsConfigState extends State<SmmsConfig> {
                 await _initConfig();
                 setState(() {});
               },
-              child: const Text('设置备用配置'),
+              child: titleText('设置备用配置',fontsize: null),
             )),
             ListTile(
                 title: ElevatedButton(
               onPressed: () {
                 _setdefault();
               },
-              child: const Text('设为默认图床'),
+              child: titleText('设为默认图床',fontsize: null),
             )),
           ],
         ),

@@ -59,13 +59,12 @@ class AwsConfigState extends State<AwsConfig> {
       } else {
         _uploadPathController.clear();
       }
-      
+
       if (configMap['customUrl'] != 'None') {
         _customUrlController.text = configMap['customUrl'];
       } else {
         _customUrlController.clear();
       }
-
     } catch (e) {
       FLog.error(
           className: 'AwsConfigState',
@@ -93,7 +92,7 @@ class AwsConfigState extends State<AwsConfig> {
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
-        title: const Text('S3兼容平台配置'),
+        title: titleText('S3兼容平台配置'),
         actions: [
           IconButton(
             onPressed: () async {
@@ -219,7 +218,8 @@ class AwsConfigState extends State<AwsConfig> {
                       });
                 }
               },
-              child: const Text('提交表单'),
+              child:  titleText('提交表单',
+              fontsize: null),
             )),
             ListTile(
                 title: ElevatedButton(
@@ -236,7 +236,7 @@ class AwsConfigState extends State<AwsConfig> {
                       );
                     });
               },
-              child: const Text('检查当前配置'),
+              child: titleText('检查当前配置',fontsize: null),
             )),
             ListTile(
                 title: ElevatedButton(
@@ -247,14 +247,14 @@ class AwsConfigState extends State<AwsConfig> {
                 await _initConfig();
                 setState(() {});
               },
-              child: const Text('设置备用配置'),
+              child: titleText('设置备用配置',fontsize: null),
             )),
             ListTile(
                 title: ElevatedButton(
               onPressed: () {
                 _setdefault();
               },
-              child: const Text('设为默认图床'),
+              child: titleText('设为默认图床',fontsize: null),
             )),
           ],
         ),
@@ -356,7 +356,7 @@ class AwsConfigState extends State<AwsConfig> {
     }
   }
 
-   checkAwsConfig() async {
+  checkAwsConfig() async {
     try {
       final awsConfigFile = await localFile;
       String configData = await awsConfigFile.readAsString();
@@ -400,7 +400,7 @@ class AwsConfigState extends State<AwsConfig> {
           methodName: 'checkAwsConfig',
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
-     return  showCupertinoAlertDialog(
+      return showCupertinoAlertDialog(
           context: context, title: "检查失败!", content: e.toString());
     }
   }

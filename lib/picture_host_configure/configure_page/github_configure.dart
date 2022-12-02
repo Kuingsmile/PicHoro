@@ -83,7 +83,7 @@ class GithubConfigState extends State<GithubConfig> {
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
-        title: const Text('Github参数配置'),
+        title: titleText('Github参数配置'),
         actions: [
           IconButton(
             onPressed: () async {
@@ -189,7 +189,7 @@ class GithubConfigState extends State<GithubConfig> {
                       });
                 }
               },
-              child: const Text('提交表单'),
+              child: titleText('提交表单',fontsize: null),
             )),
             ListTile(
                 title: ElevatedButton(
@@ -206,7 +206,7 @@ class GithubConfigState extends State<GithubConfig> {
                       );
                     });
               },
-              child: const Text('检查当前配置'),
+              child: titleText('检查当前配置',fontsize: null),
             )),
             ListTile(
                 title: ElevatedButton(
@@ -217,14 +217,14 @@ class GithubConfigState extends State<GithubConfig> {
                 await _initConfig();
                 setState(() {});
               },
-              child: const Text('设置备用配置'),
+              child: titleText('设置备用配置',fontsize: null),
             )),
             ListTile(
                 title: ElevatedButton(
               onPressed: () {
                 _setdefault();
               },
-              child: const Text('设为默认图床'),
+              child: titleText('设为默认图床',fontsize: null),
             )),
           ],
         ),

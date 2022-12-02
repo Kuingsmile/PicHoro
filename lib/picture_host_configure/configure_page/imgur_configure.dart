@@ -67,7 +67,7 @@ class ImgurConfigState extends State<ImgurConfig> {
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
-        title: const Text('Imgur参数配置'),
+        title: titleText('Imgur参数配置'),
         actions: [
           IconButton(
             onPressed: () async {
@@ -125,7 +125,7 @@ class ImgurConfigState extends State<ImgurConfig> {
                       });
                 }
               },
-              child: const Text('提交'),
+              child: titleText('提交表单',fontsize: null),
             )),
             ListTile(
                 title: ElevatedButton(
@@ -142,7 +142,7 @@ class ImgurConfigState extends State<ImgurConfig> {
                       );
                     });
               },
-              child: const Text('检查当前配置'),
+              child: titleText('检查当前配置',fontsize: null),
             )),
              ListTile(
                 title: ElevatedButton(
@@ -153,14 +153,14 @@ class ImgurConfigState extends State<ImgurConfig> {
                 await _initConfig();
                 setState(() {});
               },
-              child: const Text('设置备用配置'),
+              child: titleText('设置备用配置',fontsize: null),
             )),
             ListTile(
                 title: ElevatedButton(
               onPressed: () {
                 _setdefault();
               },
-              child: const Text('设为默认图床'),
+              child: titleText('设为默认图床',fontsize: null),
             )),
           ],
         ),
