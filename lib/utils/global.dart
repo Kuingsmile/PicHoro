@@ -27,6 +27,7 @@ class Global {
   static bool iscustomRename = false; //是否自定义重命名
   static String customRenameFormat = r'{Y}_{m}_{d}_{uuid}'; //自定义重命名格式
   static bool operateDone = false;
+  static String todayAlistUpdate = '19700101';
   static List psHostHomePageOrder = [
     0,
     1,
@@ -73,8 +74,8 @@ class Global {
   static List<String> ftpUploadList = [];
   static List<String> awsDownloadList = [];
   static List<String> awsUploadList = [];
-
-
+  static List<String> alistDownloadList = [];
+  static List<String> alistUploadList = [];
 
   static final List iconList = [
     "_blank",
@@ -274,7 +275,6 @@ class Global {
     "wdl",
     "webm",
     "wki",
-    "wma",
     "wmf",
     "wmv",
     "wmvhd",
@@ -297,6 +297,104 @@ class Global {
     "yaml",
     "z",
     "zip",
+    "wma",
+  ];
+
+  static List textExt = [
+    "md",
+    "txt",
+    "json",
+    "yaml",
+    "yml",
+    "xml",
+    "html",
+    "htm",
+    "js",
+    "css",
+    "dart",
+    "java",
+    "py",
+    "php",
+    "c",
+    "cpp",
+    "h",
+    "hpp",
+    "go",
+    "sh",
+    "bat",
+    "cmd",
+    "log",
+    "ini",
+    "conf",
+    "config",
+    "properties",
+    "prop",
+    "rc",
+    "gitignore",
+    "gitkeep",
+    "gitattributes",
+    "gitmodules",
+    "gitconfig",
+    "csv",
+    "tsv",
+  ];
+
+  static List imgExt = [
+    'jpg',
+    'jpeg',
+    'png',
+    'gif',
+    'bmp',
+    'webp',
+    'svg',
+    'tif',
+    'tiff',
+    'ico',
+    'heif',
+  ];
+
+  static List chewieExt = [
+    "mp4",
+    "flv",
+    "m4v",
+    "mp3",
+    "avi",
+    "mpg",
+    "flac",
+    "wav",
+    "ogg",
+    "ts",
+    "webm",
+    "mts", 
+    "m2ts", //not validated
+    "aac",
+    "ogv", //not validated
+    "m4a",
+    "vob",
+    "amv", //not validated
+    "mpeg", //not validated
+  ];
+
+  static List vlcExt = [
+    "mkv",
+    "rmvb",
+    "mov",
+    "asf",
+    "3g2",
+    "3gp",
+    "rm",
+    "wmv",
+    "mxf", 
+  ];
+
+  static List subtitleFileExt = [
+    'srt',
+    'vtt',
+    'ass',
+    'sbv',
+    'dfxp',
+    'ssa',
+    'ttml'
   ];
 
   static getPShost() async {
@@ -796,5 +894,44 @@ class Global {
     List awsDownloadList =
         SpUtil.getStringList('key_awsDownloadList', defValue: [])!;
     return awsDownloadList;
+  }
+
+  static setAlistUploadList(List<String> alistUploadList) async {
+    await SpUtil.getInstance();
+    SpUtil.putStringList('key_alistUploadList', alistUploadList);
+    Global.alistUploadList = alistUploadList;
+  }
+
+  static getAlistUploadList() async {
+    await SpUtil.getInstance();
+    List alistUploadList =
+        SpUtil.getStringList('key_alistUploadList', defValue: [])!;
+    return alistUploadList;
+  }
+
+  static setAlistDownloadList(List<String> alistDownloadList) async {
+    await SpUtil.getInstance();
+    SpUtil.putStringList('key_alistDownloadList', alistDownloadList);
+    Global.alistDownloadList = alistDownloadList;
+  }
+
+  static getAlistDownloadList() async {
+    await SpUtil.getInstance();
+    List alistDownloadList =
+        SpUtil.getStringList('key_alistDownloadList', defValue: [])!;
+    return alistDownloadList;
+  }
+
+  static setTodayAlistUpdate(String todayAlistUpdate) async {
+    await SpUtil.getInstance();
+    SpUtil.putString('key_todayAlistUpdate', todayAlistUpdate);
+    Global.todayAlistUpdate = todayAlistUpdate;
+  }
+
+  static getTodayAlistUpdate() async {
+    await SpUtil.getInstance();
+    String todayAlistUpdate =
+        SpUtil.getString('key_todayAlistUpdate', defValue: '19700101')!;
+    return todayAlistUpdate;
   }
 }
