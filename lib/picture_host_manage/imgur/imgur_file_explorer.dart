@@ -61,7 +61,6 @@ class ImgurFileExplorerState
 
   _getFileList() async {
     try {
-      
       //主页模式
       if (widget.albumInfo.isEmpty) {
         //查询相册
@@ -225,6 +224,7 @@ class ImgurFileExplorerState
           PopupMenuButton(
               icon: const Icon(
                 Icons.sort,
+                color: Colors.white,
                 size: 25,
               ),
               position: PopupMenuPosition.under,
@@ -633,6 +633,7 @@ class ImgurFileExplorerState
             },
             icon: const Icon(
               Icons.add,
+              color: Colors.white,
               size: 30,
             ),
           ),
@@ -659,6 +660,7 @@ class ImgurFileExplorerState
               },
               icon: const Icon(
                 Icons.import_export,
+                color: Colors.white,
                 size: 25,
               )),
           IconButton(
@@ -814,6 +816,7 @@ class ImgurFileExplorerState
                 },
                 child: const Icon(
                   Icons.download,
+                  color: Colors.white,
                   size: 25,
                 ),
               )),
@@ -864,6 +867,7 @@ class ImgurFileExplorerState
                 },
                 child: const Icon(
                   Icons.copy,
+                  color: Colors.white,
                   size: 20,
                 ),
               )),
@@ -895,6 +899,7 @@ class ImgurFileExplorerState
                 },
                 child: const Icon(
                   Icons.check_circle_outline,
+                  color: Colors.white,
                   size: 25,
                 ),
               )),
@@ -1278,17 +1283,119 @@ class ImgurFileExplorerState
                               onTap: () async {
                                 String urlList = '';
                                 //预览图片
-                                int newImageIndex =
-                                    index - dirAllInfoList.length;
-                                for (int i = dirAllInfoList.length;
-                                    i < allInfoList.length;
-                                    i++) {
-                                  urlList +=
-                                      'https://search.pstatic.net/common?src=${allInfoList[i]['link']},';
+                                if (Global.imgExt.contains(allInfoList[index]
+                                        ['link']
+                                    .split('.')
+                                    .last
+                                    .toLowerCase())) {
+                                  int newImageIndex =
+                                      index - dirAllInfoList.length;
+                                  for (int i = dirAllInfoList.length;
+                                      i < allInfoList.length;
+                                      i++) {
+                                    urlList +=
+                                        'https://search.pstatic.net/common?src=${allInfoList[i]['link']},';
+                                  }
+                                  urlList =
+                                      urlList.substring(0, urlList.length - 1);
+                                  Application.router.navigateTo(this.context,
+                                      '${Routes.albumImagePreview}?index=$newImageIndex&images=${Uri.encodeComponent(urlList)}',
+                                      transition: TransitionType.none);
+                                } else if (Global.chewieExt.contains(
+                                    allInfoList[index]['link']
+                                        .split('.')
+                                        .last
+                                        .toLowerCase())) {
+                                  String shareUrl = '';
+                                  List videoList = [];
+                                  int newImageIndex =
+                                      index - dirAllInfoList.length;
+                                  for (int i = dirAllInfoList.length;
+                                      i < allInfoList.length;
+                                      i++) {
+                                    if (Global.chewieExt.contains(allInfoList[i]
+                                            ['link']
+                                        .split('.')
+                                        .last
+                                        .toLowerCase())) {
+                                      shareUrl = allInfoList[i]['link'];
+                                      videoList.add({
+                                        "url": shareUrl,
+                                        "name": allInfoList[i]['id'] +
+                                            '.' +
+                                            allInfoList[i]['link']
+                                                .split('.')
+                                                .last,
+                                      });
+                                    } else if (i < index) {
+                                      newImageIndex--;
+                                    }
+                                  }
+                                  Application.router.navigateTo(this.context,
+                                      '${Routes.netVideoPlayer}?videoList=${Uri.encodeComponent(jsonEncode(videoList))}&index=$newImageIndex&type=${Uri.encodeComponent('normal')}',
+                                      transition: TransitionType.none);
+                                } else if (Global.vlcExt.contains(
+                                    allInfoList[index]['link']
+                                        .split('.')
+                                        .last
+                                        .toLowerCase())) {
+                                  //vlc预览视频
+                                  String shareUrl = '';
+                                  String subUrl = '';
+                                  List videoList = [];
+                                  int newImageIndex =
+                                      index - dirAllInfoList.length;
+                                  Map subtitleFileMap = {};
+                                  for (int i = dirAllInfoList.length;
+                                      i < allInfoList.length;
+                                      i++) {
+                                    if (Global.subtitleFileExt.contains(
+                                        allInfoList[i]['link']
+                                            .split('.')
+                                            .last
+                                            .toLowerCase())) {
+                                      subUrl =
+                                          allInfoList[i]['link'].toString();
+                                      subtitleFileMap[allInfoList[i]['link']
+                                          .split('.')
+                                          .first] = subUrl;
+                                    }
+                                    if (Global.vlcExt.contains(
+                                        allInfoList[index]['link']
+                                            .split('.')
+                                            .last
+                                            .toLowerCase())) {
+                                      shareUrl =
+                                          allInfoList[i]['link'].toString();
+                                      videoList.add({
+                                        "url": shareUrl,
+                                        "name": allInfoList[i]['id'] +
+                                            '.' +
+                                            allInfoList[i]['link']
+                                                .split('.')
+                                                .last,
+                                        "subtitlePath": '',
+                                      });
+                                    } else if (i < index) {
+                                      newImageIndex--;
+                                    }
+                                  }
+                                  for (int i = 0; i < videoList.length; i++) {
+                                    if (subtitleFileMap.containsKey(videoList[i]
+                                            ['name']
+                                        .split('.')
+                                        .first)) {
+                                      videoList[i]['subtitlePath'] =
+                                          subtitleFileMap[videoList[i]['name']
+                                              .split('.')
+                                              .first];
+                                    }
+                                  }
+
+                                  Application.router.navigateTo(this.context,
+                                      '${Routes.netVideoPlayer}?videoList=${Uri.encodeComponent(jsonEncode(videoList))}&index=$newImageIndex&type=${Uri.encodeComponent('mkv')}',
+                                      transition: TransitionType.none);
                                 }
-                                Application.router.navigateTo(this.context,
-                                    '${Routes.albumImagePreview}?index=$newImageIndex&images=${Uri.encodeComponent(urlList)}',
-                                    transition: TransitionType.none);
                               },
                             ),
                           ),
