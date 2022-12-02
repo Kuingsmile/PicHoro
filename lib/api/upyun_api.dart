@@ -19,6 +19,10 @@ class UpyunImageUploadUtils {
     String url = configMap['url'];
     String options = configMap['options'];
     String upyunpath = configMap['path'];
+    if (options == ' ' || options.trim() == '') {
+      options = '';
+    }
+
     //格式化
     if (url != "None") {
       if (!url.startsWith('http') && !url.startsWith('https')) {
