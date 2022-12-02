@@ -170,6 +170,7 @@ class AwsFileExplorerState
           PopupMenuButton(
             icon: const Icon(
               Icons.sort,
+              color: Colors.white,
               size: 25,
             ),
             position: PopupMenuPosition.under,
@@ -625,6 +626,7 @@ class AwsFileExplorerState
               },
               icon: const Icon(
                 Icons.add,
+                color: Colors.white,
                 size: 30,
               )),
           IconButton(
@@ -649,6 +651,7 @@ class AwsFileExplorerState
               },
               icon: const Icon(
                 Icons.import_export,
+                color: Colors.white,
                 size: 25,
               )),
           IconButton(
@@ -762,6 +765,7 @@ class AwsFileExplorerState
                 },
                 child: const Icon(
                   Icons.download,
+                  color: Colors.white,
                   size: 25,
                 ),
               )),
@@ -827,6 +831,7 @@ class AwsFileExplorerState
                 },
                 child: const Icon(
                   Icons.copy,
+                  color: Colors.white,
                   size: 20,
                 ),
               )),
@@ -858,6 +863,7 @@ class AwsFileExplorerState
                 },
                 child: const Icon(
                   Icons.check_circle_outline,
+                  color: Colors.white,
                   size: 25,
                 ),
               )),
@@ -1339,28 +1345,16 @@ class AwsFileExplorerState
                               ),
                               onTap: () async {
                                 String urlList = '';
-                                List imageExt = [
-                                  'jpg',
-                                  'jpeg',
-                                  'png',
-                                  'gif',
-                                  'bmp',
-                                  'webp',
-                                  'svg',
-                                  'tif',
-                                  'tiff',
-                                  'ico',
-                                  'heif',
-                                ];
-                                //判断是否为图片
-                                if (!imageExt.contains(allInfoList[index]
+
+                                if (!supportedExtensions(allInfoList[index]
                                     .key
                                     .split('.')
                                     .last
                                     .toLowerCase())) {
-                                  showToast('只支持图片预览');
+                                  showToast('只支持图片文本和视频');
                                   return;
                                 }
+
                                 Map configMap =
                                     await AwsManageAPI.getConfigMap();
                                 String customUrl = configMap['customUrl'];
@@ -1373,28 +1367,168 @@ class AwsFileExplorerState
                                   }
                                   shareUrlPrefix = '$customUrl/';
                                 } else {
-                                  shareUrlPrefix = 'https://$endpoint/';
-                                }
-                                //预览图片
-                                int newImageIndex =
-                                    index - dirAllInfoList.length;
-                                for (int i = dirAllInfoList.length;
-                                    i < allInfoList.length;
-                                    i++) {
-                                  if (imageExt.contains(allInfoList[i]
-                                      .key
-                                      .split('.')
-                                      .last
-                                      .toLowerCase())) {
-                                    urlList +=
-                                        '${shareUrlPrefix + allInfoList[i].key},';
-                                  } else if (i < index) {
-                                    newImageIndex--;
+                                  if (endpoint.contains('amazonaws.com')) {
+                                    shareUrlPrefix =
+                                        'https://${widget.element['name']}.s3.${widget.element['region']}.amazonaws.com/';
+                                  } else {
+                                    shareUrlPrefix =
+                                        'https://${widget.element['name']}$endpoint/';
                                   }
                                 }
-                                Application.router.navigateTo(this.context,
-                                    '${Routes.albumImagePreview}?index=$newImageIndex&images=${Uri.encodeComponent(urlList)}',
-                                    transition: TransitionType.none);
+
+                                //预览图片
+                                if (Global.imgExt.contains(allInfoList[index]
+                                    .key
+                                    .split('.')
+                                    .last
+                                    .toLowerCase())) {
+                                  int newImageIndex =
+                                      index - dirAllInfoList.length;
+                                  for (int i = dirAllInfoList.length;
+                                      i < allInfoList.length;
+                                      i++) {
+                                    if (Global.imgExt.contains(allInfoList[i]
+                                        .key
+                                        .split('.')
+                                        .last
+                                        .toLowerCase())) {
+                                      urlList +=
+                                          '${shareUrlPrefix + allInfoList[i].key},';
+                                    } else if (i < index) {
+                                      newImageIndex--;
+                                    }
+                                  }
+                                  urlList =
+                                      urlList.substring(0, urlList.length - 1);
+                                  Application.router.navigateTo(this.context,
+                                      '${Routes.albumImagePreview}?index=$newImageIndex&images=${Uri.encodeComponent(urlList)}',
+                                      transition: TransitionType.none);
+                                } else if (allInfoList[index]
+                                        .key
+                                        .split('.')
+                                        .last
+                                        .toLowerCase() ==
+                                    'pdf') {
+                                  String shareUrl =
+                                      shareUrlPrefix + allInfoList[index].key;
+                                  Application.router.navigateTo(this.context,
+                                      '${Routes.pdfViewer}?url=${Uri.encodeComponent(shareUrl)}&fileName=${Uri.encodeComponent(allInfoList[index].key)}',
+                                      transition: TransitionType.none);
+                                } else if (Global.textExt.contains(
+                                    allInfoList[index]
+                                        .key
+                                        .split('.')
+                                        .last
+                                        .toLowerCase())) {
+                                  //预览文本
+                                  String shareUrl =
+                                      shareUrlPrefix + allInfoList[index].key;
+
+                                  showToast('开始获取文件');
+                                  String filePath = await downloadTxtFile(
+                                      shareUrl, allInfoList[index].key);
+                                  String fileName = allInfoList[index].key;
+                                  if (filePath == 'error') {
+                                    showToast('获取失败');
+                                    return;
+                                  }
+                                  Application.router.navigateTo(this.context,
+                                      '${Routes.mdPreview}?filePath=${Uri.encodeComponent(filePath)}&fileName=${Uri.encodeComponent(fileName)}',
+                                      transition: TransitionType.none);
+                                } else if (Global.chewieExt.contains(
+                                    allInfoList[index]
+                                        .key
+                                        .split('.')
+                                        .last
+                                        .toLowerCase())) {
+                                  String shareUrl = '';
+
+                                  List videoList = [];
+                                  int newImageIndex =
+                                      index - dirAllInfoList.length;
+                                  for (int i = dirAllInfoList.length;
+                                      i < allInfoList.length;
+                                      i++) {
+                                    if (Global.chewieExt.contains(allInfoList[i]
+                                        .key
+                                        .split('.')
+                                        .last
+                                        .toLowerCase())) {
+                                      shareUrl =
+                                          shareUrlPrefix + allInfoList[i].key;
+                                      videoList.add({
+                                        "url": shareUrl,
+                                        "name": allInfoList[i].key
+                                      });
+                                    } else if (i < index) {
+                                      newImageIndex--;
+                                    }
+                                  }
+                                  Application.router.navigateTo(this.context,
+                                      '${Routes.netVideoPlayer}?videoList=${Uri.encodeComponent(jsonEncode(videoList))}&index=$newImageIndex&type=${Uri.encodeComponent('normal')}',
+                                      transition: TransitionType.none);
+                                } else if (Global.vlcExt.contains(
+                                    allInfoList[index]
+                                        .key
+                                        .split('.')
+                                        .last
+                                        .toLowerCase())) {
+                                  //vlc预览视频
+                                  String shareUrl = '';
+                                  String subUrl = '';
+                                  List videoList = [];
+                                  int newImageIndex =
+                                      index - dirAllInfoList.length;
+                                  Map subtitleFileMap = {};
+                                  for (int i = dirAllInfoList.length;
+                                      i < allInfoList.length;
+                                      i++) {
+                                    if (Global.subtitleFileExt.contains(
+                                        allInfoList[i]
+                                            .key
+                                            .split('.')
+                                            .last
+                                            .toLowerCase())) {
+                                      subUrl =
+                                          shareUrlPrefix + allInfoList[i].key;
+                                      subtitleFileMap[allInfoList[i]
+                                          .key
+                                          .split('.')
+                                          .first] = subUrl;
+                                    }
+                                    if (Global.vlcExt.contains(
+                                        allInfoList[index]
+                                            .key
+                                            .split('.')
+                                            .last
+                                            .toLowerCase())) {
+                                      shareUrl =
+                                          shareUrlPrefix + allInfoList[i].key;
+                                      videoList.add({
+                                        "url": shareUrl,
+                                        "name": allInfoList[i].key,
+                                        "subtitlePath": '',
+                                      });
+                                    } else if (i < index) {
+                                      newImageIndex--;
+                                    }
+                                  }
+                                  for (int i = 0; i < videoList.length; i++) {
+                                    if (subtitleFileMap.containsKey(videoList[i]
+                                            ['name']
+                                        .split('.')
+                                        .first)) {
+                                      videoList[i]['subtitlePath'] =
+                                          subtitleFileMap[videoList[i]['name']
+                                              .split('.')
+                                              .first];
+                                    }
+                                  }
+
+                                  Application.router.navigateTo(this.context,
+                                      '${Routes.netVideoPlayer}?videoList=${Uri.encodeComponent(jsonEncode(videoList))}&index=$newImageIndex&type=${Uri.encodeComponent('mkv')}',
+                                      transition: TransitionType.none);
+                                }
                               },
                             ),
                           ),
