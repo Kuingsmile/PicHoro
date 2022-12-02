@@ -8,3 +8,4 @@ export 'smms_api.dart';
 export 'tencent_api.dart';
 export 'upyun_api.dart';
 export 'lskypro_api.dart';
+export 'alist_api.dart';
