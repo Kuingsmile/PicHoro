@@ -82,7 +82,7 @@ class LskyproManageHomePageState
   AppBar get appBar => AppBar(
         elevation: 0,
         centerTitle: true,
-        title: const Text('兰空图床信息'),
+        title: titleText('兰空图床信息'),
       );
 
   @override
@@ -171,23 +171,20 @@ class LskyproManageHomePageState
       ),
       Column(
         children: [
-          Container(
-            color: const Color.fromARGB(255, 255, 247, 222),
-            child: ListTile(
-              leading:
-                  const Icon(Icons.folder_open_outlined, color: Colors.blue),
-              minLeadingWidth: 0,
-              title: const Text('文件管理'),
-              trailing: const Icon(Icons.arrow_forward_ios),
-              onTap: () async {
-                Application.router
-                    .navigateTo(context,'${Routes.lskyproFileExplorer}?userProfile=${Uri.encodeComponent(jsonEncode(userProfile))}&albumInfo=${Uri.encodeComponent(jsonEncode(albumInfo))}',
-                        transition: TransitionType.cupertino)
-                    .then((value) => setState(() {
-                          initProfile();
-                        }));
-              },
-            ),
+          ListTile(
+            leading:
+                const Icon(Icons.folder_open_outlined, color: Colors.blue),
+            minLeadingWidth: 0,
+            title: const Text('文件管理'),
+            trailing: const Icon(Icons.arrow_forward_ios),
+            onTap: () async {
+              Application.router
+                  .navigateTo(context,'${Routes.lskyproFileExplorer}?userProfile=${Uri.encodeComponent(jsonEncode(userProfile))}&albumInfo=${Uri.encodeComponent(jsonEncode(albumInfo))}',
+                      transition: TransitionType.cupertino)
+                  .then((value) => setState(() {
+                        initProfile();
+                      }));
+            },
           ),
           ListTile(
             leading: const Icon(Icons.person, color: Colors.blue),
