@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:horopic/picture_host_manage/manage_api/aliyun_manage_api.dart';
+import 'package:horopic/utils/common_functions.dart';
 
 class AliyunBucketInformation extends StatefulWidget {
   final Map bucketMap;
@@ -22,7 +23,7 @@ class AliyunBucketInformationState extends State<AliyunBucketInformation> {
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
-        title: const Text('基本信息'),
+        title: titleText('基本信息'),
       ),
       body: ListView(
         children: [
