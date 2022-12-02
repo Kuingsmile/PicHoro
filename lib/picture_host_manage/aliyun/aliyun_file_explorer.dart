@@ -178,6 +178,7 @@ class AliyunFileExplorerState
           PopupMenuButton(
             icon: const Icon(
               Icons.sort,
+              color: Colors.white,
               size: 25,
             ),
             position: PopupMenuPosition.under,
@@ -638,6 +639,7 @@ class AliyunFileExplorerState
               },
               icon: const Icon(
                 Icons.add,
+                color: Colors.white,
                 size: 30,
               )),
           IconButton(
@@ -662,6 +664,7 @@ class AliyunFileExplorerState
               },
               icon: const Icon(
                 Icons.import_export,
+                color: Colors.white,
                 size: 25,
               )),
           IconButton(
@@ -770,6 +773,7 @@ class AliyunFileExplorerState
                 },
                 child: const Icon(
                   Icons.download,
+                  color: Colors.white,
                   size: 25,
                 ),
               )),
@@ -826,6 +830,7 @@ class AliyunFileExplorerState
                 },
                 child: const Icon(
                   Icons.copy,
+                  color: Colors.white,
                   size: 20,
                 ),
               )),
@@ -857,6 +862,7 @@ class AliyunFileExplorerState
                 },
                 child: const Icon(
                   Icons.check_circle_outline,
+                  color: Colors.white,
                   size: 25,
                 ),
               )),
@@ -1333,20 +1339,9 @@ class AliyunFileExplorerState
                               ),
                               onTap: () async {
                                 String urlList = '';
-                                List imageExt = [
-                                  'jpg',
-                                  'jpeg',
-                                  'png',
-                                  'gif',
-                                  'bmp',
-                                  'webp',
-                                  'tif',
-                                  'tiff',
-                                  'ico',
-                                  'heif',
-                                ];
                                 //判断是否为图片
-                                if (!imageExt.contains(allInfoList[index]['Key']
+                                if (!supportedExtensions(allInfoList[index]
+                                        ['Key']
                                     .split('.')
                                     .last
                                     .toLowerCase())) {
@@ -1372,24 +1367,150 @@ class AliyunFileExplorerState
                                   return;
                                 }
                                 //预览图片
-                                int newImageIndex =
-                                    index - dirAllInfoList.length;
-                                for (int i = dirAllInfoList.length;
-                                    i < allInfoList.length;
-                                    i++) {
-                                  if (imageExt.contains(allInfoList[i]['Key']
-                                      .split('.')
-                                      .last
-                                      .toLowerCase())) {
-                                    urlList +=
-                                        'https://${widget.element['name']}.${widget.element['location']}.aliyuncs.com/${allInfoList[i]['Key']},';
-                                  } else if (i < index) {
-                                    newImageIndex--;
+                                if (Global.imgExt.contains(allInfoList[index]
+                                        ['Key']
+                                    .split('.')
+                                    .last
+                                    .toLowerCase())) {
+                                  int newImageIndex =
+                                      index - dirAllInfoList.length;
+                                  for (int i = dirAllInfoList.length;
+                                      i < allInfoList.length;
+                                      i++) {
+                                    if (Global.imgExt.contains(allInfoList[i]
+                                            ['Key']
+                                        .split('.')
+                                        .last
+                                        .toLowerCase())) {
+                                      urlList +=
+                                          'https://${widget.element['name']}.${widget.element['location']}.aliyuncs.com/${allInfoList[i]['Key']},';
+                                    } else if (i < index) {
+                                      newImageIndex--;
+                                    }
                                   }
+                                  urlList =
+                                      urlList.substring(0, urlList.length - 1);
+                                  Application.router.navigateTo(this.context,
+                                      '${Routes.albumImagePreview}?index=$newImageIndex&images=${Uri.encodeComponent(urlList)}',
+                                      transition: TransitionType.none);
+                                } else if (allInfoList[index]['Key']
+                                        .split('.')
+                                        .last
+                                        .toLowerCase() ==
+                                    'pdf') {
+                                  String shareUrl = '';
+                                  shareUrl =
+                                      'https://${widget.element['name']}.${widget.element['location']}.aliyuncs.com/${allInfoList[index]['Key']}';
+                                  Application.router.navigateTo(this.context,
+                                      '${Routes.pdfViewer}?url=${Uri.encodeComponent(shareUrl)}&fileName=${Uri.encodeComponent(allInfoList[index]['Key'])}',
+                                      transition: TransitionType.none);
+                                } else if (Global.textExt.contains(
+                                    allInfoList[index]['Key']
+                                        .split('.')
+                                        .last
+                                        .toLowerCase())) {
+                                  String shareUrl = '';
+                                  shareUrl =
+                                      'https://${widget.element['name']}.${widget.element['location']}.aliyuncs.com/${allInfoList[index]['Key']}';
+                                  showToast('开始获取文件');
+                                  String filePath = await downloadTxtFile(
+                                      shareUrl, allInfoList[index]['Key']);
+                                  String fileName = allInfoList[index]['Key'];
+                                  if (filePath == 'error') {
+                                    showToast('获取失败');
+                                    return;
+                                  }
+                                  Application.router.navigateTo(this.context,
+                                      '${Routes.mdPreview}?filePath=${Uri.encodeComponent(filePath)}&fileName=${Uri.encodeComponent(fileName)}',
+                                      transition: TransitionType.none);
+                                } else if (Global.chewieExt.contains(
+                                    allInfoList[index]['Key']
+                                        .split('.')
+                                        .last
+                                        .toLowerCase())) {
+                                  //预览chewie视频
+                                  String shareUrl = '';
+                                  List videoList = [];
+                                  int newImageIndex =
+                                      index - dirAllInfoList.length;
+                                  for (int i = dirAllInfoList.length;
+                                      i < allInfoList.length;
+                                      i++) {
+                                    if (Global.chewieExt.contains(allInfoList[i]
+                                            ['Key']
+                                        .split('.')
+                                        .last
+                                        .toLowerCase())) {
+                                      shareUrl =
+                                          'https://${widget.element['name']}.${widget.element['location']}.aliyuncs.com/${allInfoList[i]['Key']}';
+                                      videoList.add({
+                                        "url": shareUrl,
+                                        "name": allInfoList[i]['Key']
+                                      });
+                                    } else if (i < index) {
+                                      newImageIndex--;
+                                    }
+                                  }
+                                  Application.router.navigateTo(this.context,
+                                      '${Routes.netVideoPlayer}?videoList=${Uri.encodeComponent(jsonEncode(videoList))}&index=$newImageIndex&type=${Uri.encodeComponent('normal')}',
+                                      transition: TransitionType.none);
+                                } else if (Global.vlcExt.contains(
+                                    allInfoList[index]['Key']
+                                        .split('.')
+                                        .last
+                                        .toLowerCase())) {
+                                  //vlc预览视频
+                                  String shareUrl = '';
+                                  String subUrl = '';
+                                  List videoList = [];
+                                  int newImageIndex =
+                                      index - dirAllInfoList.length;
+                                  Map subtitleFileMap = {};
+                                  for (int i = dirAllInfoList.length;
+                                      i < allInfoList.length;
+                                      i++) {
+                                    if (Global.subtitleFileExt.contains(
+                                        allInfoList[i]['Key']
+                                            .split('.')
+                                            .last
+                                            .toLowerCase())) {
+                                      subUrl =
+                                          'https://${widget.element['name']}.${widget.element['location']}.aliyuncs.com/${allInfoList[i]['Key']}';
+                                      subtitleFileMap[allInfoList[i]['Key']
+                                          .split('.')
+                                          .first] = subUrl;
+                                    }
+                                    if (Global.vlcExt.contains(
+                                        allInfoList[index]['Key']
+                                            .split('.')
+                                            .last
+                                            .toLowerCase())) {
+                                      shareUrl =
+                                          'https://${widget.element['name']}.${widget.element['location']}.aliyuncs.com/${allInfoList[i]['Key']}';
+                                      videoList.add({
+                                        "url": shareUrl,
+                                        "name": allInfoList[i]['Key'],
+                                        "subtitlePath": '',
+                                      });
+                                    } else if (i < index) {
+                                      newImageIndex--;
+                                    }
+                                  }
+                                  for (int i = 0; i < videoList.length; i++) {
+                                    if (subtitleFileMap.containsKey(videoList[i]
+                                            ['name']
+                                        .split('.')
+                                        .first)) {
+                                      videoList[i]['subtitlePath'] =
+                                          subtitleFileMap[videoList[i]['name']
+                                              .split('.')
+                                              .first];
+                                    }
+                                  }
+                                  Application.router.navigateTo(this.context,
+                                      '${Routes.netVideoPlayer}?videoList=${Uri.encodeComponent(jsonEncode(videoList))}&index=$newImageIndex&type=${Uri.encodeComponent('mkv')}',
+                                      transition: TransitionType.none);
                                 }
-                                Application.router.navigateTo(this.context,
-                                    '${Routes.albumImagePreview}?index=$newImageIndex&images=${Uri.encodeComponent(urlList)}',
-                                    transition: TransitionType.none);
                               },
                             ),
                           ),
