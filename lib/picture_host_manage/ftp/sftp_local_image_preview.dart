@@ -67,7 +67,7 @@ class SFTPLocalImagePreviewState extends State<SFTPLocalImagePreview> {
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
-        title: const Text('图片预览'),
+        title: titleText('图片预览'),
       ),
       body: FutureBuilder(
         future: downloadFile(),
