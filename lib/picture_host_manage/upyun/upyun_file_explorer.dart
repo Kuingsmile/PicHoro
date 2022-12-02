@@ -176,6 +176,7 @@ class UpyunFileExplorerState
           PopupMenuButton(
             icon: const Icon(
               Icons.sort,
+              color: Colors.white,
               size: 25,
             ),
             position: PopupMenuPosition.under,
@@ -637,6 +638,7 @@ class UpyunFileExplorerState
               },
               icon: const Icon(
                 Icons.add,
+                color: Colors.white,
                 size: 30,
               )),
           IconButton(
@@ -661,6 +663,7 @@ class UpyunFileExplorerState
               },
               icon: const Icon(
                 Icons.import_export,
+                color: Colors.white,
                 size: 25,
               )),
           IconButton(
@@ -771,6 +774,7 @@ class UpyunFileExplorerState
                 },
                 child: const Icon(
                   Icons.download,
+                  color: Colors.white,
                   size: 25,
                 ),
               )),
@@ -823,6 +827,7 @@ class UpyunFileExplorerState
                 },
                 child: const Icon(
                   Icons.copy,
+                  color: Colors.white,
                   size: 20,
                 ),
               )),
@@ -854,6 +859,7 @@ class UpyunFileExplorerState
                 },
                 child: const Icon(
                   Icons.check_circle_outline,
+                  color: Colors.white,
                   size: 25,
                 ),
               )),
@@ -1316,48 +1322,166 @@ class UpyunFileExplorerState
                               ),
                               onTap: () async {
                                 String urlList = '';
-                                List imageExt = [
-                                  'jpg',
-                                  'jpeg',
-                                  'png',
-                                  'gif',
-                                  'bmp',
-                                  'webp',
-                                  'tif',
-                                  'tiff',
-                                  'ico',
-                                  'heif',
-                                ];
+
                                 //判断是否为图片
-                                if (!imageExt.contains(allInfoList[index]
+                                if (!supportedExtensions(allInfoList[index]
+                                        ['name']
+                                    .split('.')
+                                    .last)) {
+                                  showToast('只支持图片文本和视频');
+                                  return;
+                                }
+                                //预览图片
+                                if (Global.imgExt.contains(allInfoList[index]
                                         ['name']
                                     .split('.')
                                     .last
                                     .toLowerCase())) {
-                                  showToast('只支持图片预览');
-                                  return;
-                                }
-                                //预览图片
-                                int newImageIndex =
-                                    index - dirAllInfoList.length;
-                                for (int i = dirAllInfoList.length;
-                                    i < allInfoList.length;
-                                    i++) {
-                                  if (imageExt.contains(allInfoList[i]['name']
-                                      .split('.')
-                                      .last
-                                      .toLowerCase())) {
-                                    urlList += widget.element['url'] +
-                                        widget.bucketPrefix +
-                                        allInfoList[i]['name'] +
-                                        ',';
-                                  } else if (i < index) {
-                                    newImageIndex--;
+                                  int newImageIndex =
+                                      index - dirAllInfoList.length;
+                                  for (int i = dirAllInfoList.length;
+                                      i < allInfoList.length;
+                                      i++) {
+                                    if (Global.imgExt.contains(allInfoList[i]
+                                            ['name']
+                                        .split('.')
+                                        .last
+                                        .toLowerCase())) {
+                                      urlList += widget.element['url'] +
+                                          widget.bucketPrefix +
+                                          allInfoList[i]['name'] +
+                                          ',';
+                                    } else if (i < index) {
+                                      newImageIndex--;
+                                    }
                                   }
+                                  urlList =
+                                      urlList.substring(0, urlList.length - 1);
+
+                                  Application.router.navigateTo(this.context,
+                                      '${Routes.albumImagePreview}?index=$newImageIndex&images=${Uri.encodeComponent(urlList)}',
+                                      transition: TransitionType.none);
+                                } else if (allInfoList[index]['name']
+                                        .split('.')
+                                        .last
+                                        .toLowerCase() ==
+                                    'pdf') {
+                                  //预览pdf
+                                  String shareUrl = widget.element['url'] +
+                                      widget.bucketPrefix +
+                                      allInfoList[index]['name'];
+                                  Application.router.navigateTo(this.context,
+                                      '${Routes.pdfViewer}?url=${Uri.encodeComponent(shareUrl)}&fileName=${Uri.encodeComponent(allInfoList[index]['name'])}',
+                                      transition: TransitionType.none);
+                                } else if (Global.textExt.contains(
+                                    allInfoList[index]['name']
+                                        .split('.')
+                                        .last
+                                        .toLowerCase())) {
+                                  String shareUrl = widget.element['url'] +
+                                      widget.bucketPrefix +
+                                      allInfoList[index]['name'];
+                                  showToast('开始获取文件');
+                                  String filePath = await downloadTxtFile(
+                                      shareUrl, allInfoList[index]['name']);
+                                  String fileName = allInfoList[index]['name'];
+                                  if (filePath == 'error') {
+                                    showToast('获取失败');
+                                    return;
+                                  }
+                                  Application.router.navigateTo(this.context,
+                                      '${Routes.mdPreview}?filePath=${Uri.encodeComponent(filePath)}&fileName=${Uri.encodeComponent(fileName)}',
+                                      transition: TransitionType.none);
+                                } else if (Global.chewieExt.contains(
+                                    allInfoList[index]['name']
+                                        .split('.')
+                                        .last
+                                        .toLowerCase())) {
+                                  String shareUrl = '';
+                                  List videoList = [];
+                                  int newImageIndex =
+                                      index - dirAllInfoList.length;
+                                  for (int i = dirAllInfoList.length;
+                                      i < allInfoList.length;
+                                      i++) {
+                                    if (Global.chewieExt.contains(allInfoList[i]
+                                            ['name']
+                                        .split('.')
+                                        .last
+                                        .toLowerCase())) {
+                                      shareUrl = widget.element['url'] +
+                                          widget.bucketPrefix +
+                                          allInfoList[i]['name'];
+                                      videoList.add({
+                                        "url": shareUrl,
+                                        "name": allInfoList[i]['name']
+                                      });
+                                    } else if (i < index) {
+                                      newImageIndex--;
+                                    }
+                                  }
+                                  Application.router.navigateTo(this.context,
+                                      '${Routes.netVideoPlayer}?videoList=${Uri.encodeComponent(jsonEncode(videoList))}&index=$newImageIndex&type=${Uri.encodeComponent('normal')}',
+                                      transition: TransitionType.none);
+                                } else if (Global.vlcExt.contains(
+                                    allInfoList[index]['name']
+                                        .split('.')
+                                        .last
+                                        .toLowerCase())) {
+                                  String shareUrl = '';
+                                  String subUrl = '';
+                                  List videoList = [];
+                                  int newImageIndex =
+                                      index - dirAllInfoList.length;
+                                  Map subtitleFileMap = {};
+                                  for (int i = dirAllInfoList.length;
+                                      i < allInfoList.length;
+                                      i++) {
+                                    if (Global.subtitleFileExt.contains(
+                                        allInfoList[i]['name']
+                                            .split('.')
+                                            .last
+                                            .toLowerCase())) {
+                                      subUrl = widget.element['url'] +
+                                          widget.bucketPrefix +
+                                          allInfoList[i]['name'];
+                                      subtitleFileMap[allInfoList[i]['name']
+                                          .split('.')
+                                          .first] = subUrl;
+                                    }
+                                    if (Global.vlcExt.contains(
+                                        allInfoList[index]['name']
+                                            .split('.')
+                                            .last
+                                            .toLowerCase())) {
+                                      shareUrl = widget.element['url'] +
+                                          widget.bucketPrefix +
+                                          allInfoList[i]['name'];
+                                      videoList.add({
+                                        "url": shareUrl,
+                                        "name": allInfoList[i]['name'],
+                                        "subtitlePath": '',
+                                      });
+                                    } else if (i < index) {
+                                      newImageIndex--;
+                                    }
+                                  }
+                                  for (int i = 0; i < videoList.length; i++) {
+                                    if (subtitleFileMap.containsKey(videoList[i]
+                                            ['name']
+                                        .split('.')
+                                        .first)) {
+                                      videoList[i]['subtitlePath'] =
+                                          subtitleFileMap[videoList[i]['name']
+                                              .split('.')
+                                              .first];
+                                    }
+                                  }
+
+                                  Application.router.navigateTo(this.context,
+                                      '${Routes.netVideoPlayer}?videoList=${Uri.encodeComponent(jsonEncode(videoList))}&index=$newImageIndex&type=${Uri.encodeComponent('mkv')}',
+                                      transition: TransitionType.none);
                                 }
-                                Application.router.navigateTo(this.context,
-                                    '${Routes.albumImagePreview}?index=$newImageIndex&images=${Uri.encodeComponent(urlList)}',
-                                    transition: TransitionType.none);
                               },
                             ),
                           ),
