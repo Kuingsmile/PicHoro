@@ -81,7 +81,7 @@ class QiniuBucketDomainAreaConfigState
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
-        title: Text('${widget.element['name']}配置'),
+        title: titleText('${widget.element['name']}配置'),
       ),
       body: Form(
         key: _formKey,
