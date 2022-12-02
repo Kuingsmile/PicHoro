@@ -22,7 +22,7 @@ class SmmsFileInformationState extends State<SmmsFileInformation> {
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
-        title: const Text('文件基本信息'),
+        title: titleText('文件基本信息'),
       ),
       body: ListView(
         children: [

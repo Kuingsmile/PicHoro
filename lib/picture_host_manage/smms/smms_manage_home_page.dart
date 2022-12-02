@@ -80,7 +80,7 @@ class SmmsManageHomePageState
   AppBar get appBar => AppBar(
         elevation: 0,
         centerTitle: true,
-        title: const Text('SM.MS图床信息'),
+        title: titleText('SM.MS图床信息'),
       );
 
   @override
@@ -169,23 +169,20 @@ class SmmsManageHomePageState
       ),
       Column(
         children: [
-          Container(
-            color: const Color.fromARGB(255, 255, 247, 222),
-            child: ListTile(
-              leading:
-                  const Icon(Icons.folder_open_outlined, color: Colors.blue),
-              minLeadingWidth: 0,
-              title: const Text('文件管理'),
-              trailing: const Icon(Icons.arrow_forward_ios),
-              onTap: () {
-                Application.router
-                    .navigateTo(context, Routes.smmsFileExplorer,
-                        transition: TransitionType.cupertino)
-                    .then((value) => setState(() {
-                          initProfile();
-                        }));
-              },
-            ),
+          ListTile(
+            leading:
+                const Icon(Icons.folder_open_outlined, color: Colors.blue),
+            minLeadingWidth: 0,
+            title: const Text('文件管理'),
+            trailing: const Icon(Icons.arrow_forward_ios),
+            onTap: () {
+              Application.router
+                  .navigateTo(context, Routes.smmsFileExplorer,
+                      transition: TransitionType.cupertino)
+                  .then((value) => setState(() {
+                        initProfile();
+                      }));
+            },
           ),
           ListTile(
             leading: const Icon(Icons.person, color: Colors.blue),
