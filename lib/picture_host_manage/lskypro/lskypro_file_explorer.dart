@@ -201,6 +201,7 @@ class LskyproFileExplorerState
           PopupMenuButton(
               icon: const Icon(
                 Icons.sort,
+                color: Colors.white,
                 size: 25,
               ),
               position: PopupMenuPosition.under,
@@ -475,7 +476,8 @@ class LskyproFileExplorerState
                               }
                               Map configMap =
                                   await LskyproManageAPI.getConfigMap();
-                              configMap['album_id'] = widget.albumInfo['id'] ?? 'None';
+                              configMap['album_id'] =
+                                  widget.albumInfo['id'] ?? 'None';
                               for (int i = 0; i < files.length; i++) {
                                 List uploadList = [
                                   files[i].path,
@@ -564,6 +566,7 @@ class LskyproFileExplorerState
             },
             icon: const Icon(
               Icons.add,
+              color: Colors.white,
               size: 30,
             ),
           ),
@@ -590,6 +593,7 @@ class LskyproFileExplorerState
               },
               icon: const Icon(
                 Icons.import_export,
+                color: Colors.white,
                 size: 25,
               )),
           IconButton(
@@ -739,6 +743,7 @@ class LskyproFileExplorerState
                 },
                 child: const Icon(
                   Icons.download,
+                  color: Colors.white,
                   size: 25,
                 ),
               )),
@@ -787,6 +792,7 @@ class LskyproFileExplorerState
                 },
                 child: const Icon(
                   Icons.copy,
+                  color: Colors.white,
                   size: 20,
                 ),
               )),
@@ -818,6 +824,7 @@ class LskyproFileExplorerState
                 },
                 child: const Icon(
                   Icons.check_circle_outline,
+                  color: Colors.white,
                   size: 25,
                 ),
               )),
@@ -980,8 +987,7 @@ class LskyproFileExplorerState
                                               showToast('删除成功');
                                               setState(() {
                                                 allInfoList.removeAt(index);
-                                                dirAllInfoList
-                                                      .removeAt(index);
+                                                dirAllInfoList.removeAt(index);
                                                 selectedFilesBool
                                                     .removeAt(index);
                                               });
@@ -1206,6 +1212,8 @@ class LskyproFileExplorerState
                                   urlList +=
                                       '${allInfoList[i]['links']['url']},';
                                 }
+                                urlList =
+                                    urlList.substring(0, urlList.length - 1);
                                 Application.router.navigateTo(this.context,
                                     '${Routes.albumImagePreview}?index=$newImageIndex&images=${Uri.encodeComponent(urlList)}',
                                     transition: TransitionType.none);
