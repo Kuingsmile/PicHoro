@@ -16,9 +16,19 @@ public final class GeneratedPluginRegistrant {
   private static final String TAG = "GeneratedPluginRegistrant";
   public static void registerWith(@NonNull FlutterEngine flutterEngine) {
     try {
+      flutterEngine.getPlugins().add(new de.bytepark.autoorientation.AutoOrientationPlugin());
+    } catch(Exception e) {
+      Log.e(TAG, "Error registering plugin auto_orientation, de.bytepark.autoorientation.AutoOrientationPlugin", e);
+    }
+    try {
       flutterEngine.getPlugins().add(new de.mintware.barcode_scan.BarcodeScanPlugin());
     } catch(Exception e) {
       Log.e(TAG, "Error registering plugin barcode_scan2, de.mintware.barcode_scan.BarcodeScanPlugin", e);
+    }
+    try {
+      flutterEngine.getPlugins().add(new io.flutter.plugins.camera.CameraPlugin());
+    } catch(Exception e) {
+      Log.e(TAG, "Error registering plugin camera_android, io.flutter.plugins.camera.CameraPlugin", e);
     }
     try {
       flutterEngine.getPlugins().add(new com.pinciat.external_path.ExternalPathPlugin());
@@ -39,6 +49,11 @@ public final class GeneratedPluginRegistrant {
       flutterEngine.getPlugins().add(new io.flutter.plugins.flutter_plugin_android_lifecycle.FlutterAndroidLifecyclePlugin());
     } catch(Exception e) {
       Log.e(TAG, "Error registering plugin flutter_plugin_android_lifecycle, io.flutter.plugins.flutter_plugin_android_lifecycle.FlutterAndroidLifecyclePlugin", e);
+    }
+    try {
+      flutterEngine.getPlugins().add(new software.solid.fluttervlcplayer.FlutterVlcPlayerPlugin());
+    } catch(Exception e) {
+      Log.e(TAG, "Error registering plugin flutter_vlc_player, software.solid.fluttervlcplayer.FlutterVlcPlayerPlugin", e);
     }
     try {
       flutterEngine.getPlugins().add(new io.github.ponnamkarthik.toast.fluttertoast.FlutterToastPlugin());
@@ -96,6 +111,11 @@ public final class GeneratedPluginRegistrant {
       Log.e(TAG, "Error registering plugin sqflite, com.tekartik.sqflite.SqflitePlugin", e);
     }
     try {
+      flutterEngine.getPlugins().add(new com.syncfusion.flutter.pdfviewer.SyncfusionFlutterPdfViewerPlugin());
+    } catch(Exception e) {
+      Log.e(TAG, "Error registering plugin syncfusion_flutter_pdfviewer, com.syncfusion.flutter.pdfviewer.SyncfusionFlutterPdfViewerPlugin", e);
+    }
+    try {
       flutterEngine.getPlugins().add(new io.flutter.plugins.urllauncher.UrlLauncherPlugin());
     } catch(Exception e) {
       Log.e(TAG, "Error registering plugin url_launcher_android, io.flutter.plugins.urllauncher.UrlLauncherPlugin", e);
@@ -104,6 +124,16 @@ public final class GeneratedPluginRegistrant {
       flutterEngine.getPlugins().add(new io.flutter.plugins.videoplayer.VideoPlayerPlugin());
     } catch(Exception e) {
       Log.e(TAG, "Error registering plugin video_player_android, io.flutter.plugins.videoplayer.VideoPlayerPlugin", e);
+    }
+    try {
+      flutterEngine.getPlugins().add(new creativemaybeno.wakelock.WakelockPlugin());
+    } catch(Exception e) {
+      Log.e(TAG, "Error registering plugin wakelock, creativemaybeno.wakelock.WakelockPlugin", e);
+    }
+    try {
+      flutterEngine.getPlugins().add(new io.flutter.plugins.webviewflutter.WebViewFlutterPlugin());
+    } catch(Exception e) {
+      Log.e(TAG, "Error registering plugin webview_flutter_android, io.flutter.plugins.webviewflutter.WebViewFlutterPlugin", e);
     }
   }
 }
