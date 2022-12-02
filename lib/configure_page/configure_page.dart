@@ -1,17 +1,18 @@
+
 import 'package:flutter/material.dart';
-import 'package:horopic/utils/global.dart';
+import 'package:flutter/services.dart';
 
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:r_upgrade/r_upgrade.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:fluro/fluro.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import 'package:horopic/utils/sql_utils.dart';
 import 'package:horopic/utils/permission.dart';
 import 'package:horopic/router/application.dart';
 import 'package:horopic/router/routers.dart';
 import 'package:horopic/utils/common_functions.dart';
+import 'package:horopic/utils/global.dart';
 
 class ConfigurePage extends StatefulWidget {
   const ConfigurePage({Key? key}) : super(key: key);
@@ -23,6 +24,7 @@ class ConfigurePage extends StatefulWidget {
 class ConfigurePageState extends State<ConfigurePage>
     with AutomaticKeepAliveClientMixin<ConfigurePage> {
   String version = ' ';
+  String latestVersion = ' ';
 
   @override
   bool get wantKeepAlive => false;
@@ -35,8 +37,15 @@ class ConfigurePageState extends State<ConfigurePage>
 
   void _getVersion() async {
     final PackageInfo info = await PackageInfo.fromPlatform();
+    String remoteVersion = ' ';
+    try {
+      remoteVersion = await MySqlUtils.getCurrentVersion();
+    } catch (e) {
+      remoteVersion = ' ';
+    }
     setState(() {
       version = info.version;
+      latestVersion = remoteVersion;
     });
   }
 
@@ -85,12 +94,8 @@ class ConfigurePageState extends State<ConfigurePage>
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
-        title: const Text(
+        title: titleText(
           '设置页面',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
         ),
       ),
       body: ListView(
@@ -113,7 +118,13 @@ class ConfigurePageState extends State<ConfigurePage>
                     ),
                     const SizedBox(height: 20),
                     Center(
-                      child: Text('v$version'),
+                      child: latestVersion == ' ' || latestVersion == version
+                          ? Text(
+                              'v$version',
+                            )
+                          : Text(
+                              '当前: v$version   最新: v$latestVersion',
+                            ),
                     )
                   ],
                 ),
@@ -172,7 +183,10 @@ class ConfigurePageState extends State<ConfigurePage>
           ),
           ListTile(
             title: const Text('联系作者'),
-            onTap: () {
+            onTap: () async {
+              String qq = '845216974';
+              await Clipboard.setData(ClipboardData(text: qq));
+              showToast('作者QQ已复制');
               Application.router.navigateTo(
                   this.context, Routes.authorInformation,
                   transition: TransitionType.cupertino);
@@ -189,7 +203,15 @@ class ConfigurePageState extends State<ConfigurePage>
             trailing: const Icon(Icons.arrow_forward_ios),
           ),
           ListTile(
-            title: const Text('立即更新'),
+            title: latestVersion == ' ' || latestVersion == version
+                ? const Text('检查更新')
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: const [
+                      Text('有新版本！', style: TextStyle(color: Colors.amber)),
+                      Icon(Icons.upload, color: Colors.green),
+                    ],
+                  ),
             onTap: () async {
               await Permissionutils.askPermissionRequestInstallPackage();
               _checkUpdate();
@@ -205,10 +227,13 @@ class ConfigurePageState extends State<ConfigurePage>
             trailing: const Icon(Icons.arrow_forward_ios),
           ),
           ListTile(
-            title: const Text('软件官网'),
+            title: const Text('使用手册'),
             onTap: () async {
-              Uri url = Uri.parse('https://pichoro.horosama.com');
-              await launchUrl(url);
+              Application.router.navigateTo(
+                context,
+                '${Routes.webviewPage}?url=${Uri.encodeComponent('https://pichoro.horosama.com')}&title=${Uri.encodeComponent('使用手册')}&enableJs=${Uri.encodeComponent('true')}',
+                transition: TransitionType.inFromRight,
+              );
             },
             trailing: const Icon(Icons.arrow_forward_ios),
           ),
