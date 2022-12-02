@@ -133,8 +133,8 @@ class GithubReposListState
   AppBar get appBar => AppBar(
         elevation: 0,
         centerTitle: true,
-        title: Text('${widget.showedUsername}的仓库',
-            style: const TextStyle(fontSize: 16)),
+        title: titleText('${widget.showedUsername}的仓库',fontsize: 16
+           ),
         actions: [
           IconButton(
             onPressed: () async {

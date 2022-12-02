@@ -234,7 +234,7 @@ class GithubNewRepoConfigState extends State<GithubNewRepoConfig> {
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
-        title: const Text('新建仓库'),
+        title: titleText('新建仓库'),
       ),
       body: ListView(
         children: [

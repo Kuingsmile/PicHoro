@@ -22,7 +22,7 @@ class GithubRepoInformationState extends State<GithubRepoInformation> {
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
-        title: const Text('仓库信息'),
+        title: titleText('仓库信息'),
       ),
       body: ListView(
         children: [
