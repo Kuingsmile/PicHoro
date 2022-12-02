@@ -154,7 +154,7 @@ class TencentBucketListState
   AppBar get appBar => AppBar(
         elevation: 0,
         centerTitle: true,
-        title: const Text('腾讯云存储桶列表'),
+        title: titleText('腾讯云存储桶列表'),
         actions: [
           IconButton(
             onPressed: () async {
@@ -163,7 +163,7 @@ class TencentBucketListState
                   transition: TransitionType.cupertino);
               _onRefresh();
             },
-            icon: const Icon(Icons.add),
+            icon: const Icon(Icons.add,color: Colors.white,),
             iconSize: 35,
           )
         ],

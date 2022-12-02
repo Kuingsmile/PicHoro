@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:horopic/picture_host_manage/manage_api/tencent_manage_api.dart';
+import 'package:horopic/utils/common_functions.dart';
 
 class BucketInformation extends StatefulWidget {
   final Map bucketMap;
@@ -22,7 +23,7 @@ class BucketInformationState extends State<BucketInformation> {
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
-        title: const Text('基本信息'),
+        title: titleText('基本信息'),
       ),
       body: ListView(
         children: [

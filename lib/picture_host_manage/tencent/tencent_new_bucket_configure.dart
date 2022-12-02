@@ -41,7 +41,7 @@ class NewBucketConfigState extends State<NewBucketConfig> {
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
-        title: const Text('新建存储桶'),
+        title: titleText('新建存储桶'),
       ),
       body: ListView(
         children: [
