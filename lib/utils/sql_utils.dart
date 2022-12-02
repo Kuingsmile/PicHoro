@@ -1676,4 +1676,121 @@ class MySqlUtils {
       await conn.close();
     }
   }
+
+    static queryAlist({required String username}) async {
+    var conn = await MySqlConnection.connect(settings);
+    try {
+      var results = await conn
+          .query('select * from alist where username = ?', [username]);
+
+      if (results.isEmpty) {
+        return "Empty";
+      }
+      Map<String, dynamic> resultsMap = {};
+      resultsMap.clear();
+      for (var row in results) {
+        //第一列是id
+        String host = await decryptSelf(row[1].toString());
+        String alistusername = await decryptSelf(row[2].toString());
+        String password = await decryptSelf(row[3].toString());
+        String token = await decryptSelf(row[4].toString());
+        String uploadPath = await decryptSelf(row[5].toString());
+
+        resultsMap['host'] = host;
+        resultsMap['alistusername'] = alistusername;
+        resultsMap['password'] = password;
+        resultsMap['token'] = token;
+        resultsMap['uploadPath'] = uploadPath;
+      }
+      return resultsMap;
+    } catch (e) {
+      FLog.error(
+          className: 'MySqlUtils',
+          methodName: 'queryAlist',
+          text: formatErrorMessage({'username': username}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
+      return "Error";
+    } finally {
+      await conn.close();
+    }
+  }
+
+  static insertAlist({required List content}) async {
+    var conn = await MySqlConnection.connect(settings);
+    try {
+      String host = content[0].toString();
+      String alistusername = content[1].toString();
+      String password = content[2].toString();
+      String token = content[3].toString();
+      String uploadPath = content[4].toString();
+      String username = content[5].toString();
+
+      String encryptedHost = await encryptSelf(host);
+      String encryptedAlistusername = await encryptSelf(alistusername);
+      String encryptedPassword = await encryptSelf(password);
+      String encryptedToken = await encryptSelf(token);
+      String encryptedUploadPath = await encryptSelf(uploadPath);
+
+      await conn.query(
+          "insert into alist (host,alistusername,password,token,uploadPath,username) values (?,?,?,?,?,?)",
+          [
+            encryptedHost,
+            encryptedAlistusername,
+            encryptedPassword,
+            encryptedToken,
+            encryptedUploadPath,
+            username
+          ]);
+      return 'Success';
+    } catch (e) {
+      FLog.error(
+          className: 'MySqlUtils',
+          methodName: 'insertAlist',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
+      return "Error";
+    } finally {
+      await conn.close();
+    }
+  }
+
+  static updateAlist({required List content}) async {
+    var conn = await MySqlConnection.connect(settings);
+
+    try {
+      String host = content[0].toString();
+      String alistusername = content[1].toString();
+      String password = content[2].toString();
+      String token = content[3].toString();
+      String uploadPath = content[4].toString();
+      String username = content[5].toString();
+
+      String encryptedHost = await encryptSelf(host);
+      String encryptedAlistusername = await encryptSelf(alistusername);
+      String encryptedPassword = await encryptSelf(password);
+      String encryptedToken = await encryptSelf(token);
+      String encryptedUploadPath = await encryptSelf(uploadPath);
+
+      await conn.query(
+          "update alist set host = ?,alistusername = ?,password = ?,token = ?,uploadPath = ? where username = ?",
+          [
+            encryptedHost,
+            encryptedAlistusername,
+            encryptedPassword,
+            encryptedToken,
+            encryptedUploadPath,
+            username
+          ]);
+      return 'Success';
+    } catch (e) {
+      FLog.error(
+          className: 'MySqlUtils',
+          methodName: 'updateAlist',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
+      return "Error";
+    } finally {
+      await conn.close();
+    }
+  }
 }
