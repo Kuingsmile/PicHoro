@@ -121,16 +121,13 @@ class SmmsFileExplorerState
           },
         ),
         titleSpacing: 0,
-        title: const Text('SM.MS文件浏览',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 15,
-              fontWeight: FontWeight.bold,
-            )),
+        title: titleText('SM.MS文件浏览',
+            ),
         actions: [
           PopupMenuButton(
               icon: const Icon(
                 Icons.sort,
+                color: Colors.white,
                 size: 25,
               ),
               position: PopupMenuPosition.under,
@@ -364,6 +361,7 @@ class SmmsFileExplorerState
             },
             icon: const Icon(
               Icons.add,
+              color: Colors.white,
               size: 30,
             ),
           ),
@@ -384,6 +382,7 @@ class SmmsFileExplorerState
               },
               icon: const Icon(
                 Icons.import_export,
+                color: Colors.white,
                 size: 25,
               )),
           IconButton(
@@ -516,6 +515,7 @@ class SmmsFileExplorerState
                 },
                 child: const Icon(
                   Icons.download,
+                  color: Colors.white,
                   size: 25,
                 ),
               )),
@@ -563,6 +563,7 @@ class SmmsFileExplorerState
                 },
                 child: const Icon(
                   Icons.copy,
+                  color: Colors.white,
                   size: 20,
                 ),
               )),
@@ -594,6 +595,7 @@ class SmmsFileExplorerState
                 },
                 child: const Icon(
                   Icons.check_circle_outline,
+                  color: Colors.white,
                   size: 25,
                 ),
               )),
@@ -836,6 +838,7 @@ class SmmsFileExplorerState
                               for (var i = 0; i < allInfoList.length; i++) {
                                 urlList += allInfoList[i]['url'] + ',';
                               }
+                              urlList = urlList.substring(0, urlList.length - 1);
 
                               Application.router.navigateTo(this.context,
                                   '${Routes.albumImagePreview}?index=$index&images=${Uri.encodeComponent(urlList)}',
