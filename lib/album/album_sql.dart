@@ -26,7 +26,7 @@ List<String> allPBhost = [
 List<String> allPBhostExtend = [
   'PBhostExtend1', //ftp
   'PBhostExtend2', //aws
-  'PBhostExtend3', //扩展图床3
+  'PBhostExtend3', //alist
   'PBhostExtend4', //扩展图床4
   'PBhostExtend5', //扩展图床5
   'PBhostExtend6', //扩展图床6
@@ -88,6 +88,7 @@ Map<String, String> pBhostToTableName = {
   'tencent': 'tencent',
   'ftp' :'PBhostExtend1',
   'aws' :'PBhostExtend2',
+  'alist' :'PBhostExtend3',
 };
 
 List<String> tableKeysList = [

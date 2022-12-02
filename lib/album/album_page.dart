@@ -62,6 +62,7 @@ class UploadedImagesState extends State<UploadedImages>
     'upyun': '又拍云',
     'PBhostExtend1': 'FTP',
     'PBhostExtend2': 'S3',
+    'PBhostExtend3': 'Alist',
   };
 
   bool albumKeepAlive = true;
@@ -94,13 +95,9 @@ class UploadedImagesState extends State<UploadedImages>
     super.build(context);
     return Scaffold(
       appBar: AppBar(
-          title: Text(
-              '${nameToPara[Global.defaultShowedPBhost]}相册 - 第${_currentPage + 1}页',
-              style: const TextStyle(
-                fontSize: 20,
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              )),
+          title: titleText(
+            '${nameToPara[Global.defaultShowedPBhost]}相册 - 第${_currentPage + 1}页',
+          ),
           centerTitle: true,
           systemOverlayStyle: const SystemUiOverlayStyle(
             statusBarColor: Colors.transparent,
@@ -111,6 +108,7 @@ class UploadedImagesState extends State<UploadedImages>
             PopupMenuButton(
                 icon: const Icon(
                   Icons.settings,
+                  color: Colors.white,
                   size: 30,
                 ),
                 onSelected: (value) {
@@ -457,6 +455,11 @@ class UploadedImagesState extends State<UploadedImages>
                     Application.router.navigateTo(context,
                         '${Routes.albumImagePreview}?index=$index&images=${Uri.encodeComponent(urlList)}',
                         transition: TransitionType.none);
+                  } else if (Global.defaultShowedPBhost == 'PBhostExtend3') {
+                    String urlList = currentShowedImagesUrl.join(',');
+                    Application.router.navigateTo(context,
+                        '${Routes.albumImagePreview}?index=$index&images=${Uri.encodeComponent(urlList)}',
+                        transition: TransitionType.none);
                   }
                 },
                 onDoubleTap: () =>
@@ -483,7 +486,8 @@ class UploadedImagesState extends State<UploadedImages>
                                 Global.defaultShowedPBhost == 'tencent' ||
                                 Global.defaultShowedPBhost == 'smms' ||
                                 Global.defaultShowedPBhost == 'lskypro' ||
-                                Global.defaultShowedPBhost == 'PBhostExtend2'
+                                Global.defaultShowedPBhost == 'PBhostExtend2' ||
+                                Global.defaultShowedPBhost == 'PBhostExtend3'
                             ? ExtendedImage.network(
                                 currentShowedImagesDisplayAddressUrl[index]
                                         .contains('raw.githubusercontent.com')
@@ -593,6 +597,16 @@ class UploadedImagesState extends State<UploadedImages>
                         ),
                         children: [
                           SimpleDialogOption(
+                            child: const Text('Alist V3',
+                                textAlign: TextAlign.center),
+                            onPressed: () {
+                              Global.setShowedPBhost('PBhostExtend3');
+                              Navigator.pop(context);
+                              _currentPage = 0;
+                              _onRefresh();
+                            },
+                          ),
+                          SimpleDialogOption(
                             child:
                                 const Text('阿里云', textAlign: TextAlign.center),
                             onPressed: () {
@@ -699,6 +713,7 @@ class UploadedImagesState extends State<UploadedImages>
                 },
                 child: const Icon(
                   Icons.switch_left_outlined,
+                  color: Colors.white,
                   size: 30,
                 ),
               )),
@@ -724,6 +739,7 @@ class UploadedImagesState extends State<UploadedImages>
                 },
                 child: const Icon(
                   Icons.home_outlined,
+                  color: Colors.white,
                   size: 30,
                 ),
               )),
@@ -778,7 +794,10 @@ class UploadedImagesState extends State<UploadedImages>
                     return;
                   }
                 },
-                child: const Icon(Icons.copy),
+                child: const Icon(
+                  Icons.copy,
+                  color: Colors.white,
+                ),
               )),
           const SizedBox(width: 10),
           SizedBox(
@@ -806,7 +825,10 @@ class UploadedImagesState extends State<UploadedImages>
                     });
                   }
                 },
-                child: const Icon(Icons.check_circle_outline),
+                child: const Icon(
+                  Icons.check_circle_outline,
+                  color: Colors.white,
+                ),
               )),
         ],
       ),
@@ -985,8 +1007,7 @@ class UploadedImagesState extends State<UploadedImages>
             return;
           }
         }
-        if (Global.defaultShowedPBhost == 'PBhostExtend1' ||
-            Global.defaultShowedPBhost == 'PBhostExtend2') {
+        if (Global.defaultShowedPBhost == 'PBhostExtend1' ) {
           await AlbumSQL.deleteData(
               Global.imageDBExtend!,
               Global.defaultShowedPBhost,
@@ -1003,6 +1024,13 @@ class UploadedImagesState extends State<UploadedImages>
                 text: formatErrorMessage({}, e.toString()),
                 dataLogType: DataLogType.ERRORS.toString());
           }
+        } else if (Global.defaultShowedPBhost == 'PBhostExtend2' ||
+            Global.defaultShowedPBhost == 'PBhostExtend3') {
+          await AlbumSQL.deleteData(
+              Global.imageDBExtend!,
+              Global.defaultShowedPBhost,
+              showedImageId[
+                  imagesIndex[i] + (_currentPage * _perPageItemSize) - i]);
         } else {
           await AlbumSQL.deleteData(
               Global.imageDB!,
@@ -1094,7 +1122,8 @@ class UploadedImagesState extends State<UploadedImages>
               text: formatErrorMessage({}, e.toString()),
               dataLogType: DataLogType.ERRORS.toString());
         }
-      } else if (Global.defaultShowedPBhost == 'PBhostExtend2') {
+      } else if (Global.defaultShowedPBhost == 'PBhostExtend2' ||
+          Global.defaultShowedPBhost == 'PBhostExtend3') {
         await AlbumSQL.deleteData(
             Global.imageDBExtend!,
             Global.defaultShowedPBhost,
@@ -1204,7 +1233,8 @@ class UploadedImagesState extends State<UploadedImages>
     );
     //默认图床的图片ID
     if (Global.defaultShowedPBhost == 'PBhostExtend1' ||
-        Global.defaultShowedPBhost == 'PBhostExtend2') {
+        Global.defaultShowedPBhost == 'PBhostExtend2' ||
+        Global.defaultShowedPBhost == 'PBhostExtend3') {
       showedImageId = imageListExtend[Global.defaultShowedPBhost]!;
     } else {
       showedImageId = imageList[Global.defaultShowedPBhost]!;
@@ -1219,7 +1249,8 @@ class UploadedImagesState extends State<UploadedImages>
     for (int i = 0; i < showedImageId.length; i++) {
       List<Map<String, dynamic>> maps;
       if (Global.defaultShowedPBhost == 'PBhostExtend1' ||
-          Global.defaultShowedPBhost == 'PBhostExtend2') {
+          Global.defaultShowedPBhost == 'PBhostExtend2' ||
+          Global.defaultShowedPBhost == 'PBhostExtend3') {
         maps = await AlbumSQL.queryData(Global.imageDBExtend!,
             Global.defaultShowedPBhost, showedImageId[i]);
       } else {
@@ -1355,6 +1386,25 @@ class UploadedImagesState extends State<UploadedImages>
           showedImageUrl.add('http://' + maps[0]['url']);
         } else {
           showedImageUrl.add(maps[0]['url']);
+        }
+        if (!maps[0]['hostSpecificArgA'].toString().startsWith('https://') &&
+            !maps[0]['hostSpecificArgA'].toString().startsWith('http://')) {
+          showedImageDisplayAddressUrl
+              // ignore: prefer_interpolation_to_compose_strings
+              .add('http://' + maps[0]['hostSpecificArgA']);
+        } else {
+          showedImageDisplayAddressUrl.add(maps[0]['hostSpecificArgA']);
+        }
+        showedImageName.add(maps[0]['name']);
+        showedImagePictureKey.add(maps[0]['pictureKey']);
+        showedImagePaths.add(maps[0]['path']);
+      } else if (Global.defaultShowedPBhost == 'PBhostExtend3') {
+        if (!maps[0]['hostSpecificArgB'].toString().startsWith('https://') &&
+            !maps[0]['hostSpecificArgB'].toString().startsWith('http://')) {
+          // ignore: prefer_interpolation_to_compose_strings
+          showedImageUrl.add('http://' + maps[0]['hostSpecificArgB']);
+        } else {
+          showedImageUrl.add(maps[0]['hostSpecificArgB']);
         }
         if (!maps[0]['hostSpecificArgA'].toString().startsWith('https://') &&
             !maps[0]['hostSpecificArgA'].toString().startsWith('http://')) {

@@ -20,7 +20,7 @@ class EmptyDatabaseState extends State<EmptyDatabase> {
     'Imgur',
     '七牛云',
     '腾讯云',
-    '阿里云',
+    
     '又拍云',
   ];
   final _tableNameList = [
@@ -90,6 +90,22 @@ class EmptyDatabaseState extends State<EmptyDatabase> {
             },
           );
         });
+    ListTile alistEmpty = ListTile(
+        title: const Center(child: Text('Alist V3')),
+        onTap: () async {
+          showCupertinoAlertDialogWithConfirmFunc(
+            title: '通知',
+            content: '是否确定清空Alist数据库？',
+            context: context,
+            onConfirm: () async {
+              Navigator.pop(context);
+              await AlbumSQL.deleteTable(
+                  Global.imageDBExtend!, 'PBhostExtend3');
+              showToast('已清空Alist数据库');
+              eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
+            },
+          );
+        });
     ListTile allEmpty = ListTile(
         title: const Center(child: Text('所有数据库')),
         onTap: () async {
@@ -112,6 +128,7 @@ class EmptyDatabaseState extends State<EmptyDatabase> {
         });
     listTiles.add(ftpEmpty);
     listTiles.add(awsEmpty);
+    listTiles.add(alistEmpty);
     listTiles.add(allEmpty);
     return listTiles;
   }
@@ -122,7 +139,7 @@ class EmptyDatabaseState extends State<EmptyDatabase> {
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
-        title: const Text('选择需要清空的数据库'),
+        title: titleText('选择需要清空的数据库'),
       ),
       body: ListView(
         children: getListTiles(context),
