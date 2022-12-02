@@ -112,7 +112,7 @@ class UpyunLogInState extends State<UpyunLogIn> {
       appBar: AppBar(
         centerTitle: true,
         elevation: 0,
-        title: const Text('登录又拍云'),
+        title: titleText('登录又拍云'),
       ),
       body: signUpPage(),
     );

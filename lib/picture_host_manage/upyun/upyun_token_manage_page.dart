@@ -38,7 +38,7 @@ class UpyunTokenManageState extends State<UpyunTokenManage> {
       appBar: AppBar(
         centerTitle: true,
         elevation: 0,
-        title: const Text('又拍云Token管理'),
+        title: titleText('又拍云Token管理'),
       ),
       body: Center(
         child: Column(

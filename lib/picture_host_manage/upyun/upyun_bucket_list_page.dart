@@ -165,7 +165,7 @@ class UpyunBucketListState
   AppBar get appBar => AppBar(
         elevation: 0,
         centerTitle: true,
-        title: const Text('又拍云存储桶列表'),
+        title: titleText('又拍云存储桶列表'),
         actions: [
           IconButton(
             onPressed: () async {
@@ -173,7 +173,7 @@ class UpyunBucketListState
                   context, Routes.upyunTokenManagePage,
                   transition: TransitionType.cupertino);
             },
-            icon: const Icon(Icons.perm_identity),
+            icon: const Icon(Icons.perm_identity,color: Colors.white,),
             iconSize: 35,
           ),
           IconButton(
@@ -183,7 +183,7 @@ class UpyunBucketListState
                   transition: TransitionType.cupertino);
               _onRefresh();
             },
-            icon: const Icon(Icons.add),
+            icon: const Icon(Icons.add,color: Colors.white,),
             iconSize: 35,
           ),
         ],
