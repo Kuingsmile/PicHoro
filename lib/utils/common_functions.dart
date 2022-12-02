@@ -4,7 +4,6 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:path/path.dart' as my_path;
@@ -14,6 +13,8 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:fluro/fluro.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:flustars_flutter3/flustars_flutter3.dart';
+import 'package:f_logs/f_logs.dart';
 
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/router/application.dart';
@@ -48,6 +49,58 @@ Map<String, Function> linkGenerateDict = {
   'markdown_with_link': generateMarkdownWithLinkFormatedUrl,
   'custom': generateCustomFormatedUrl,
 };
+
+getToday(String format) {
+  String today = DateUtil.formatDate(DateTime.now(), format: format);
+  return today;
+}
+
+supportedExtensions(String ext) {
+  String extLowerCase = ext.toLowerCase();
+  if (!Global.imgExt.contains(extLowerCase) &&
+      !Global.textExt.contains(extLowerCase) &&
+      !Global.chewieExt.contains(extLowerCase) &&
+      !Global.vlcExt.contains(extLowerCase) &&
+      extLowerCase != 'pdf') {
+    return false;
+  } else {
+    return true;
+  }
+}
+
+downloadTxtFile(String urlpath, String fileName) async {
+    try {
+      BaseOptions baseOptions = BaseOptions(
+        sendTimeout: 30000,
+        receiveTimeout: 30000,
+        connectTimeout: 30000,
+      );
+      Dio dio = Dio(baseOptions);
+      String tempDir = (await getTemporaryDirectory()).path;
+      var tempfile = File('$tempDir/$fileName');
+      var response = await dio.download(
+        urlpath,
+        tempfile.path,
+        deleteOnError: false,
+        options: Options(
+          headers: {},
+        ),
+      );
+      if (response.statusCode == 200) {
+        return tempfile.path;
+      } else {
+        return 'error';
+      }
+    } catch (e) {
+      FLog.error(
+          className: "common_functions",
+          methodName: "downloadFile",
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
+    }
+    return 'error';
+  }
+
 
 //弹出对话框
 showAlertDialog({
@@ -239,7 +292,6 @@ void bottomPickerSheet(
         ));
       });
 }
-
 
 //title text
 Widget titleText(String title,
@@ -511,6 +563,8 @@ mainInit() async {
   Global.setCustomeRename(iscustomRename);
   String initCustomRenameFormat = await Global.getCustomeRenameFormat();
   Global.setCustomeRenameFormat(initCustomRenameFormat);
+  String todayAlistUpdate = await Global.getTodayAlistUpdate();
+  Global.setTodayAlistUpdate(todayAlistUpdate);
 
   //初始化图床相册数据库
   Database db = await Global.getDatabase();
@@ -525,24 +579,19 @@ mainInit() async {
   Routes.configureRoutes(router);
   //初始化图床管理页面排列顺序
   List<String> psHostHomePageOrder = await Global.getpsHostHomePageOrder();
-  if (psHostHomePageOrder.length < 22) {
-    psHostHomePageOrder.addAll([
-      '9',
-      '10',
-      '11',
-      '12',
-      '13',
-      '14',
-      '15',
-      '16',
-      '17',
-      '18',
-      '19',
-      '20',
-      '21'
-    ]);
+  if (psHostHomePageOrder.length <= 22) {
+    int length = psHostHomePageOrder.length;
+    for (int i = length; i < 22; i++) {
+      psHostHomePageOrder.add(i.toString());
+    }
+  } else if (psHostHomePageOrder.length > 22) {
+    for (int i = 0; i < 22; i++) {
+      psHostHomePageOrder.clear();
+      psHostHomePageOrder.add(i.toString());
+    }
   }
   await Global.setpsHostHomePageOrder(psHostHomePageOrder);
+
   //初始化上传下载列表
   List<String> tencentUploadList = await Global.getTencentUploadList();
   Global.setTencentUploadList(tencentUploadList);
@@ -586,6 +635,10 @@ mainInit() async {
   Global.setAwsUploadList(awsUploadList);
   List<String> awsDownloadList = await Global.getAwsDownloadList();
   Global.setAwsDownloadList(awsDownloadList);
+  List<String> alistUploadList = await Global.getAlistUploadList();
+  Global.setAlistUploadList(alistUploadList);
+  List<String> alistDownloadList = await Global.getAlistDownloadList();
+  Global.setAlistDownloadList(alistDownloadList);
 }
 
 //获得小图标，图片预览
