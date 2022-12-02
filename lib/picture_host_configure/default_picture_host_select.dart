@@ -30,7 +30,8 @@ class DefaultPShostSelectState extends State<DefaultPShostSelect> {
     'aliyun',
     'upyun',
     'ftp',
-    'aws'
+    'aws',
+    'alist'
   ];
 
   @override
@@ -39,10 +40,22 @@ class DefaultPShostSelectState extends State<DefaultPShostSelect> {
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
-        title: const Text('默认图床选择'),
+        title:  titleText('默认图床选择'),
       ),
       body: ListView(
         children: [
+          ListTile(
+            title: const Text('Alist V3'),
+            trailing: Global.defaultPShost == 'alist'
+                ? const Icon(Icons.check)
+                : null,
+            onTap: () async {
+              await setdefaultPShostRemoteAndLocal('alist');
+              eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
+              eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
+              setState(() {});
+            },
+          ),
           ListTile(
             title: const Text('阿里云'),
             trailing: Global.defaultPShost == 'aliyun'
@@ -180,6 +193,7 @@ setdefaultPShostRemoteAndLocal(String psHost) async {
     'upyun': MySqlUtils.queryUpyun,
     'ftp': MySqlUtils.queryFTP,
     'aws': MySqlUtils.queryAws,
+    'alist': MySqlUtils.queryAlist,
   };
 
   try {
@@ -237,6 +251,8 @@ setdefaultPShostRemoteAndLocal(String psHost) async {
         await Global.setShowedPBhost('PBhostExtend1');
       } else if (psHost == 'aws') {
         await Global.setShowedPBhost('PBhostExtend2');
+      } else if (psHost == 'alist') {
+        await Global.setShowedPBhost('PBhostExtend3');
       }
       return Fluttertoast.showToast(
           msg: "已经是默认配置",
@@ -273,6 +289,8 @@ setdefaultPShostRemoteAndLocal(String psHost) async {
           await Global.setShowedPBhost('PBhostExtend1');
         } else if (psHost == 'aws') {
           await Global.setShowedPBhost('PBhostExtend2');
+        } else if (psHost == 'alist') {
+          await Global.setShowedPBhost('PBhostExtend3');
         }
         showToast('已设置$psHost为默认图床');
       } else {
