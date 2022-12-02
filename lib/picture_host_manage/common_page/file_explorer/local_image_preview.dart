@@ -35,7 +35,7 @@ class LocalImagePreviewState extends State<LocalImagePreview> {
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
-        title: const Text('图片预览'),
+        title: titleText('图片预览'),
       ),
       body: PageView.builder(
         controller: _pageController,
