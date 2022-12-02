@@ -111,7 +111,7 @@ class ImgurLogInState extends State<ImgurLogIn> {
       appBar: AppBar(
         centerTitle: true,
         elevation: 0,
-        title: const Text('登录Imgur'),
+        title: titleText('登录Imgur'),
       ),
       body: signUpPage(),
     );

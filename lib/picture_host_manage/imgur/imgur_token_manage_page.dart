@@ -47,7 +47,7 @@ class ImgurTokenManageState extends State<ImgurTokenManage> {
       appBar: AppBar(
         centerTitle: true,
         elevation: 0,
-        title: const Text('Imgur账户管理'),
+        title: titleText('Imgur账户管理'),
       ),
       body: Center(
         child: ListView(
