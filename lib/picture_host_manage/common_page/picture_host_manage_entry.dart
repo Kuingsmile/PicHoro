@@ -11,6 +11,7 @@ import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/picture_host_manage/manage_api/upyun_manage_api.dart';
 import 'package:horopic/picture_host_manage/manage_api/imgur_manage_api.dart';
 import 'package:horopic/picture_host_manage/manage_api/ftp_manage_api.dart';
+import 'package:horopic/picture_host_manage/manage_api/alist_manage_api.dart';
 
 class PsHostHomePage extends StatefulWidget {
   const PsHostHomePage({super.key});
@@ -56,7 +57,7 @@ class PsHostHomePageState extends State<PsHostHomePage>
             children: [
               Center(
                 child: InkWell(
-                  onTap: () {
+                  onTap: () async {
                     Application.router.navigateTo(
                       context,
                       Routes.tencentBucketList,
@@ -69,7 +70,7 @@ class PsHostHomePageState extends State<PsHostHomePage>
                       Image.asset(
                         'assets/icons/tcyun.png',
                         width: 80,
-                        height: 80,
+                        height: 75,
                       ),
                       const Text('腾讯云'),
                     ],
@@ -107,7 +108,7 @@ class PsHostHomePageState extends State<PsHostHomePage>
                       Image.asset(
                         'assets/icons/smms.png',
                         width: 80,
-                        height: 80,
+                        height: 75,
                       ),
                       const Text('SM.MS'),
                     ],
@@ -145,7 +146,7 @@ class PsHostHomePageState extends State<PsHostHomePage>
                       Image.asset(
                         'assets/icons/aliyun.png',
                         width: 80,
-                        height: 80,
+                        height: 75,
                       ),
                       const Text('阿里云'),
                     ],
@@ -183,7 +184,7 @@ class PsHostHomePageState extends State<PsHostHomePage>
                       Image.asset(
                         'assets/icons/qiniu.png',
                         width: 80,
-                        height: 80,
+                        height: 75,
                       ),
                       const Text('七牛云'),
                     ],
@@ -262,7 +263,7 @@ class PsHostHomePageState extends State<PsHostHomePage>
                     Image.asset(
                       'assets/icons/upyun.png',
                       width: 80,
-                      height: 80,
+                      height: 75,
                     ),
                     const Text('又拍云'),
                   ],
@@ -299,7 +300,7 @@ class PsHostHomePageState extends State<PsHostHomePage>
                       Image.asset(
                         'assets/icons/lskypro.png',
                         width: 80,
-                        height: 80,
+                        height: 75,
                       ),
                       const Text('兰空图床'),
                     ],
@@ -337,7 +338,7 @@ class PsHostHomePageState extends State<PsHostHomePage>
                       Image.asset(
                         'assets/icons/github.png',
                         width: 80,
-                        height: 80,
+                        height: 75,
                       ),
                       const Text('Github'),
                     ],
@@ -427,7 +428,7 @@ class PsHostHomePageState extends State<PsHostHomePage>
                       Image.asset(
                         'assets/icons/fakesmms.png',
                         width: 70,
-                        height: 80,
+                        height: 75,
                       ),
                       const Text('Imgur'),
                     ],
@@ -495,7 +496,7 @@ class PsHostHomePageState extends State<PsHostHomePage>
                       Image.asset(
                         'assets/images/ftp.png',
                         width: 80,
-                        height: 80,
+                        height: 75,
                       ),
                       const Text('SSH/SFTP'),
                     ],
@@ -533,9 +534,102 @@ class PsHostHomePageState extends State<PsHostHomePage>
                       Image.asset(
                         'assets/images/aws_s3.png',
                         width: 80,
-                        height: 80,
+                        height: 75,
                       ),
                       const Text('S3兼容平台'),
+                    ],
+                  ),
+                ),
+              ),
+              Positioned(
+                  top: 0,
+                  right: 0,
+                  child: Container(
+                    color: Colors.transparent,
+                    child: const Text(''),
+                  )),
+            ],
+          ),
+        ),
+        isDraggable: true,
+      ),
+      DraggableGridItem(
+        child: Card(
+          child: Stack(
+            children: [
+              Center(
+                child: InkWell(
+                  onTap: () async {
+                    showToast('开始校验');
+                    try {
+                      String currentUser = await Global.getUser();
+                      String defaultPassword = await Global.getPassword();
+                      var queryuser =
+                          await MySqlUtils.queryUser(username: currentUser);
+                      if (queryuser == 'Empty') {
+                        return showToast('请先登录');
+                      } else if (queryuser['password'] != defaultPassword) {
+                        return showToast('请先登录');
+                      }
+                      var queryAlist =
+                          await MySqlUtils.queryAlist(username: currentUser);
+                      if (queryAlist == 'Empty') {
+                        return showToast('请先去配置Alist');
+                      }
+                      String today = getToday('yyyyMMdd');
+
+                      var refreshToken = await AlistManageAPI.refreshToken();
+                      if (refreshToken[0] != 'success') {
+                        showToast('刷新Token失败');
+                        return;
+                      } else {
+                        await Global.setTodayAlistUpdate(today);
+                      }
+                      var bucketListResponse =
+                          await AlistManageAPI.getBucketList();
+                      if (bucketListResponse[0] != 'success') {
+                        Map configMap = await AlistManageAPI.getConfigMap();
+                        String prefix = configMap['uploadPath'];
+                        if (prefix == 'None') {
+                          prefix = '/';
+                        }
+                        if (!prefix.endsWith('/')) {
+                          prefix += '/';
+                        }
+                        Map element = {
+                          'mount_path': prefix == '/'
+                              ? '/'
+                              : prefix.substring(0, prefix.length - 1),
+                          'driver': 'BaiduNetdisk',
+                          'addition': jsonEncode({'download_api': 'offical'})
+                        };
+                        if (mounted) {
+                          Application.router.navigateTo(context,
+                              '${Routes.alistFileExplorer}?element=${Uri.encodeComponent(jsonEncode(element))}&bucketPrefix=${Uri.encodeComponent(prefix)}&refresh=${Uri.encodeComponent('doNotRefresh')}',
+                              transition: TransitionType.cupertino);
+                        }
+                      } else {
+                        if (mounted) {
+                          Application.router.navigateTo(
+                            context,
+                            Routes.alistBucketList,
+                            transition: TransitionType.inFromRight,
+                          );
+                        }
+                      }
+                    } catch (e) {
+                      showToast('校验失败');
+                    }
+                  },
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Image.asset(
+                        'assets/images/alist.png',
+                        width: 80,
+                        height: 75,
+                      ),
+                      const Text('Alist'),
                     ],
                   ),
                 ),
@@ -561,13 +655,26 @@ class PsHostHomePageState extends State<PsHostHomePage>
       appBar: AppBar(
         centerTitle: true,
         elevation: 0,
-        title: const Text(
-          '图床管理-拖动排序',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
+        title: titleText(
+          '图床管理-长按拖动',
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.restart_alt_rounded,
+                color: Colors.white, size: 30),
+            onPressed: () async {
+              List<String> order = [];
+              for (int i = 0; i < 22; i++) {
+                order.add(i.toString());
+              }
+              await Global.setpsHostHomePageOrder(order);
+              setState(() {
+                initOrder();
+              });
+              showToast('已重置排序');
+            },
+          ),
+        ],
       ),
       body: DraggableGridViewBuilder(
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
