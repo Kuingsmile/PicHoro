@@ -18,14 +18,7 @@ import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/sql_utils.dart';
 import 'package:horopic/utils/common_functions.dart';
 
-import 'package:horopic/picture_host_configure/configure_page/lskypro_configure.dart';
-import 'package:horopic/picture_host_configure/configure_page/smms_configure.dart';
-import 'package:horopic/picture_host_configure/configure_page/github_configure.dart';
-import 'package:horopic/picture_host_configure/configure_page/tencent_configure.dart';
-import 'package:horopic/picture_host_configure/configure_page/upyun_configure.dart';
-import 'package:horopic/picture_host_configure/configure_page/imgur_configure.dart';
-import 'package:horopic/picture_host_configure/configure_page/qiniu_configure.dart';
-import 'package:horopic/picture_host_configure/configure_page/aliyun_configure.dart';
+import 'package:horopic/picture_host_configure/configure_page/configure_export.dart';
 
 import 'package:horopic/pages/loading.dart';
 
@@ -154,6 +147,7 @@ class AllPShostState extends State<AllPShost> {
         "upyun": "$configPath/${defaultUser}_upyun_config.txt",
         "ftp": "$configPath/${defaultUser}_ftp_config.txt",
         "aws": "$configPath/${defaultUser}_aws_config.txt",
+        "alist": "$configPath/${defaultUser}_alist_config.txt",
       };
       String config = await File(configFilePath[pshost]!).readAsString();
       Map<String, dynamic> configMap = jsonDecode(config);
@@ -191,6 +185,7 @@ class AllPShostState extends State<AllPShost> {
         "upyun": "$configPath/${defaultUser}_upyun_config.txt",
         "ftp": "$configPath/${defaultUser}_ftp_config.txt",
         "aws": "$configPath/${defaultUser}_aws_config.txt",
+        "alist": "$configPath/${defaultUser}_alist_config.txt",
       };
       Map<String, dynamic> configMap = {};
       for (var key in configFilePath.keys) {
@@ -1253,16 +1248,18 @@ class AllPShostState extends State<AllPShost> {
       ),
     ];
     Map temp = {
+      "Alist V3": 'alist',
       '阿里云': 'aliyun',
-      'FTP-SSH/SFTP': 'ftp',
-      'Github': 'github',
-      'Imgur': 'imgur',
-      '兰空图床': 'lankong',
-      '七牛云': 'qiniu',
-      'S3兼容平台': 'aws',
+      'FTP-SSH/SFTP' : 'ftp',
+      'Github' : 'github',
+      'Imgur' : 'imgur',
+      '兰空图床' : 'lankong',
+      '七牛云' :'qiniu',
+      'S3兼容平台':'aws',
       'SM.MS': 'smms',
       '腾讯云': 'tcyun',
       '又拍云': 'upyun',
+      
     };
     temp.forEach((key, value) {
       options.add(_buildSimpleDialogOption(context, key, value));
@@ -1311,6 +1308,14 @@ class AllPShostState extends State<AllPShost> {
           title: const Text('默认图床选择'),
           onTap: () {
             Application.router.navigateTo(context, Routes.defaultPShostSelect,
+                transition: TransitionType.cupertino);
+          },
+          trailing: const Icon(Icons.arrow_forward_ios),
+        ),
+         ListTile(
+          title: const Text('Alist V3'),
+          onTap: () {
+            Application.router.navigateTo(context, Routes.alistPShostSelect,
                 transition: TransitionType.cupertino);
           },
           trailing: const Icon(Icons.arrow_forward_ios),
@@ -1413,7 +1418,7 @@ class AllPShostState extends State<AllPShost> {
                       textAlign: TextAlign.center,
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
-                    children: _buildSimpleDialogOptions(context),
+                    children:_buildSimpleDialogOptions(context),
                   );
                 },
               );
