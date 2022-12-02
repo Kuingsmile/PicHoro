@@ -83,13 +83,14 @@ class HomePageState extends State<HomePage>
   @override
   void dispose() {
     actionEventBus.cancel();
-    super.dispose();
+    
     clipboardList.clear();
+    super.dispose();
   }
 
   _createUploadListItem() {
     List<Widget> list = [];
-    for (var i =uploadList.length-1; i >= 0; i--) {
+    for (var i = uploadList.length - 1; i >= 0; i--) {
       list.add(ListItem(
           onUploadPlayPausedPressed: (path, fileName) async {
             var task = uploadManager.getUpload(uploadList[i][1]);
@@ -516,9 +517,26 @@ class HomePageState extends State<HomePage>
         for (int i = 0; i < letter.length; i++) {
           maps['hostSpecificArg${letter[i]}'] = 'test';
         }
+      } else if (Global.defaultPShost == 'alist') {
+        // ["success", formatedURL, returnUrl, pictureKey, displayUrl,hostPicUrl]
+        maps = {
+          'path': path,
+          'name': name,
+          'url': uploadResult[2], //alist文件原始地址
+          'PBhost': Global.defaultPShost,
+          'pictureKey': uploadResult[3],
+          'hostSpecificArgA': uploadResult[4], //实际展示的是displayUrl
+          'hostSpecificArgB': uploadResult[5], //源站地址，访问后会302跳转到returnUrl
+        };
+        List letter = 'CDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+        for (int i = 0; i < letter.length; i++) {
+          maps['hostSpecificArg${letter[i]}'] = 'test';
+        }
       }
 
-      if (Global.defaultPShost == 'ftp') {
+      if (Global.defaultPShost == 'ftp' ||
+          Global.defaultPShost == 'aws' ||
+          Global.defaultPShost == 'alist') {
         await AlbumSQL.insertData(Global.imageDBExtend!,
             pBhostToTableName[Global.defaultPShost]!, maps);
       } else {
@@ -742,9 +760,26 @@ class HomePageState extends State<HomePage>
           for (int i = 0; i < letter.length; i++) {
             maps['hostSpecificArg${letter[i]}'] = 'test';
           }
+        } else if (Global.defaultPShost == 'alist') {
+          // ["success", formatedURL, returnUrl, pictureKey, displayUrl,hostPicUrl]
+          maps = {
+            'path': path,
+            'name': name,
+            'url': uploadResult[2], //alist文件原始地址
+            'PBhost': Global.defaultPShost,
+            'pictureKey': uploadResult[3],
+            'hostSpecificArgA': uploadResult[4], //实际展示的是displayUrl
+            'hostSpecificArgB': uploadResult[5], //源站地址，访问后会302跳转到returnUrl
+          };
+          List letter = 'CDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+          for (int i = 0; i < letter.length; i++) {
+            maps['hostSpecificArg${letter[i]}'] = 'test';
+          }
         }
 
-        if (Global.defaultPShost == 'ftp' || Global.defaultPShost == 'aws') {
+        if (Global.defaultPShost == 'ftp' ||
+            Global.defaultPShost == 'aws' ||
+            Global.defaultPShost == 'alist') {
           await AlbumSQL.insertData(Global.imageDBExtend!,
               pBhostToTableName[Global.defaultPShost]!, maps);
         } else {
@@ -1690,6 +1725,27 @@ class HomePageState extends State<HomePage>
                         children: [
                           SimpleDialogOption(
                               child: ListTile(
+                            dense: true,
+                            visualDensity: VisualDensity.compact,
+                            title: Text('Alist V3',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                    color: Global.defaultPShost == 'alist'
+                                        ? Colors.amber
+                                        : const Color.fromARGB(
+                                            255, 97, 180, 248))),
+                            onTap: () async {
+                              Navigator.pop(context);
+                              await setdefaultPShostRemoteAndLocal('alist');
+                              eventBus.fire(
+                                  AlbumRefreshEvent(albumKeepAlive: false));
+                              setState(() {});
+                            },
+                          )),
+                          SimpleDialogOption(
+                              child: ListTile(
+                                dense: true,
+                            visualDensity: VisualDensity.compact,
                             title: Text('S3兼容平台',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
