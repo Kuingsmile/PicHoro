@@ -210,6 +210,7 @@ class SFTPFileExplorerState
           PopupMenuButton(
             icon: const Icon(
               Icons.sort,
+              color: Colors.white,
               size: 25,
             ),
             position: PopupMenuPosition.under,
@@ -661,6 +662,7 @@ class SFTPFileExplorerState
               },
               icon: const Icon(
                 Icons.add,
+                color: Colors.white,
                 size: 30,
               )),
           IconButton(
@@ -685,6 +687,7 @@ class SFTPFileExplorerState
               },
               icon: const Icon(
                 Icons.import_export,
+                color: Colors.white,
                 size: 25,
               )),
           IconButton(
@@ -792,6 +795,7 @@ class SFTPFileExplorerState
                 },
                 child: const Icon(
                   Icons.download,
+                  color: Colors.white,
                   size: 25,
                 ),
               )),
@@ -839,6 +843,7 @@ class SFTPFileExplorerState
                 },
                 child: const Icon(
                   Icons.copy,
+                  color: Colors.white,
                   size: 20,
                 ),
               )),
@@ -870,6 +875,7 @@ class SFTPFileExplorerState
                 },
                 child: const Icon(
                   Icons.check_circle_outline,
+                  color: Colors.white,
                   size: 25,
                 ),
               )),
@@ -1283,34 +1289,25 @@ class SFTPFileExplorerState
                                 },
                               ),
                               onTap: () async {
-                                List imageExt = [
-                                  'jpg',
-                                  'jpeg',
-                                  'png',
-                                  'gif',
-                                  'bmp',
-                                  'webp',
-                                  'svg',
-                                  'tif',
-                                  'tiff',
-                                  'ico',
-                                  'md',
-                                  'heif',
-                                ];
                                 //判断是否为图片
-                                if (!imageExt.contains(allInfoList[index]
+                                if (!Global.imgExt.contains(allInfoList[index]
+                                            ['name']
+                                        .split('.')
+                                        .last
+                                        .toLowerCase()) &&
+                                    !Global.textExt.contains(allInfoList[index]
+                                            ['name']
+                                        .split('.')
+                                        .last
+                                        .toLowerCase())) {
+                                  showToast('不支持的文件类型');
+                                  return;
+                                }
+                                if (Global.imgExt.contains(allInfoList[index]
                                         ['name']
                                     .split('.')
                                     .last
                                     .toLowerCase())) {
-                                  showToast('只支持图片和markdown预览');
-                                  return;
-                                }
-                                if (allInfoList[index]['name']
-                                        .split('.')
-                                        .last
-                                        .toLowerCase() !=
-                                    'md') {
                                   //预览图片
                                   Map configMapTemp =
                                       await FTPManageAPI.getConfigMap();
@@ -1321,11 +1318,11 @@ class SFTPFileExplorerState
                                   Application.router.navigateTo(this.context,
                                       '${Routes.sftpLocalImagePreview}?configMap=${Uri.encodeComponent(jsonEncode(configMapTemp))}&image=${Uri.encodeComponent(imagePath)}',
                                       transition: TransitionType.none);
-                                } else if (allInfoList[index]['name']
+                                } else if (Global.textExt.contains(
+                                    allInfoList[index]['name']
                                         .split('.')
                                         .last
-                                        .toLowerCase() ==
-                                    'md') {
+                                        .toLowerCase())) {
                                   showToast('开始加载，请稍候');
                                   Map configMapTemp =
                                       await FTPManageAPI.getConfigMap();
