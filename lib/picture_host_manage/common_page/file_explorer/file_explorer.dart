@@ -62,12 +62,15 @@ class FileExplorerState extends State<FileExplorer> {
           my_path.basename(widget.currentDirPath),
           style: const TextStyle(
             fontSize: 18,
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
           ),
         ),
         actions: [
           PopupMenuButton(
               icon: const Icon(
                 Icons.sort,
+                color: Colors.white,
                 size: 30,
               ),
               position: PopupMenuPosition.under,
@@ -324,7 +327,6 @@ class FileExplorerState extends State<FileExplorer> {
                                   child: ListTile(
                                     minLeadingWidth: 0,
                                     minVerticalPadding: 0,
-                                    //dense: true,
                                     leading: Image.asset(
                                       'assets/icons/folder.png',
                                       width: 30,
@@ -430,7 +432,6 @@ class FileExplorerState extends State<FileExplorer> {
                                   child: ListTile(
                                     minLeadingWidth: 0,
                                     minVerticalPadding: 0,
-                                    //dense: true,
                                     leading:
                                         imageIcon(currentFiles[index].path),
                                     title: Text(
@@ -467,7 +468,7 @@ class FileExplorerState extends State<FileExplorer> {
                                         '.svg',
                                         '.tiff',
                                         '.ico',
-                                        '.raw',
+                                        '.gif',
                                       ];
                                       if (imageTypeList.contains(my_path
                                           .extension(currentFiles[index].path)
@@ -486,6 +487,8 @@ class FileExplorerState extends State<FileExplorer> {
                                         for (var element in imgList) {
                                           imgListStr += '$element,';
                                         }
+                                        imgListStr = imgListStr.substring(
+                                            0, imgListStr.length - 1);
                                         Application.router.navigateTo(context,
                                             '${Routes.localImagePreview}?index=$newindex&images=${Uri.encodeComponent(imgListStr)}',
                                             transition: TransitionType.none);
@@ -568,6 +571,7 @@ class FileExplorerState extends State<FileExplorer> {
                 },
                 child: const Icon(
                   Icons.check_circle_outline,
+                  color: Colors.white,
                   size: 30,
                 ),
               )),
@@ -667,12 +671,10 @@ class FileExplorerState extends State<FileExplorer> {
             color: Color.fromARGB(255, 230, 230, 230),
           ),
           ListTile(
-              // dense: true,
               leading: const Icon(
                 Icons.edit_note_rounded,
                 color: Color.fromARGB(255, 97, 141, 236),
               ),
-              //  visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
               minLeadingWidth: 0,
               title: const Text('重命名'),
               onTap: () async {
@@ -684,12 +686,10 @@ class FileExplorerState extends State<FileExplorer> {
             color: Color.fromARGB(255, 230, 230, 230),
           ),
           ListTile(
-              //  dense: true,
               leading: const Icon(
                 Icons.delete_outline,
                 color: Color.fromARGB(255, 240, 85, 131),
               ),
-              //   visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
               minLeadingWidth: 0,
               title: const Text('删除'),
               onTap: () {
