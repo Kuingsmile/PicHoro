@@ -81,6 +81,8 @@ Github下载地址 [Github release](https://github.com/Kuingsmile/PicHoro/releas
 
 ## 应用截图
 
+<div><video controls src="https://user-images.githubusercontent.com/96409857/205264099-a3a5d040-df75-4ae2-9773-f4d61fe3fb0a.mp4" muted="false"></video></div>
+
 <table rules="none">
   <tr>
     <td><img src="https://user-images.githubusercontent.com/96409857/203718727-ceac86b4-8cb5-49c5-8ee3-bcfce51710cb.jpg" width="200" height="400" alt=""/></td>
