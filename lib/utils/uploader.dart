@@ -17,10 +17,9 @@ Map<String, String> pdconfig = {
   'aliyun': 'aliyun_config',
   'tencent': 'tencent_config',
   'github': 'github_config',
-  'gitee': 'gitee_config',
-  'weibo': 'weibo_config',
   'ftp': 'ftp_config',
   'aws': 'aws_config',
+  'alist': 'alist_config',
 };
 
 Map<String, Function> uploadFunc = {
@@ -34,6 +33,7 @@ Map<String, Function> uploadFunc = {
   'upyun': UpyunImageUploadUtils.uploadApi,
   'ftp': FTPImageUploadUtils.uploadApi,
   'aws': AwsImageUploadUtils.uploadApi,
+  'alist': AlistImageUploadUtils.uploadApi,
 };
 
 //获取图床配置文件
