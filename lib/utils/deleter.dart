@@ -22,6 +22,7 @@ Map<String, String> pdconfig = {
   'weibo': 'weibo_config',
   'ftp': 'ftp_config',
   'aws': 'aws_config',
+  'alist': 'alist_config',
 };
 
 Map<String, Function> deleteFunc = {
@@ -35,6 +36,7 @@ Map<String, Function> deleteFunc = {
   'upyun': UpyunImageUploadUtils.deleteApi,
   'PBhostExtend1': FTPImageUploadUtils.deleteApi,//FTP
   'PBhostExtend2': AwsImageUploadUtils.deleteApi,//AWS
+  'PBhostExtend3': AlistImageUploadUtils.deleteApi,//Alist
 };
 
 //获取图床配置文件
@@ -42,17 +44,20 @@ Future<File> get _localFile async {
   final directory = await getApplicationDocumentsDirectory();
   String defaultConfig = await Global.getShowedPBhost();
   String defaultUser = await Global.getUser();
-  if (defaultConfig == 'lskypro') {
-    defaultConfig = 'lsky.pro';
-  } else if (defaultConfig == 'smms') {
-    defaultConfig = 'sm.ms';
-  } else if (defaultConfig == 'PBhostExtend1') {
-    defaultConfig = 'ftp';
-  } else if (defaultConfig == 'PBhostExtend2') {
-    defaultConfig = 'aws';
+  switch (defaultConfig) {
+    case 'lskypro':
+      return File('${directory.path}/${defaultUser}_${pdconfig['lsky.pro']}.txt');
+    case 'smms':
+      return File('${directory.path}/${defaultUser}_${pdconfig['sm.ms']}.txt');
+    case 'PBhostExtend1':
+      return File('${directory.path}/${defaultUser}_${pdconfig['ftp']}.txt');
+    case 'PBhostExtend2':
+      return File('${directory.path}/${defaultUser}_${pdconfig['aws']}.txt');
+    case 'PBhostExtend3':
+      return File('${directory.path}/${defaultUser}_${pdconfig['alist']}.txt');
+    default:
+      return File('${directory.path}/${defaultUser}_${pdconfig[defaultConfig]}.txt');
   }
-  return File(
-      '${directory.path}/${defaultUser}_${pdconfig[defaultConfig]}.txt');
 }
 
 //读取图床配置文件
