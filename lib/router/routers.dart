@@ -6,6 +6,7 @@ import 'package:fluro/fluro.dart';
 import 'package:horopic/router/router_handler.dart';
 
 class Routes {
+  static String webviewPage = '/webview';
   static String root = "/";
   static String homePage = "/homePage";
   static String albumUploadedImages = "/albumUploadedImages";
@@ -26,7 +27,9 @@ class Routes {
   static String upyunPShostSelect = "/upyunPShostSelect";
   static String ftpPShostSelect = "/ftpPShostSelect";
   static String awsPShostSelect = "/awsPShostSelect";
+  static String alistPShostSelect = "/alistPShostSelect";
   static String configureStorePage = "/configureStorePage";
+  static String alistConfigureStoreEditPage = "/alistConfigureStoreEditPage";
   static String aliyunConfigureStoreEditPage = "/aliyunConfigureStoreEditPage";
   static String awsConfigureStoreEditPage = "/awsConfigureStoreEditPage";
   static String ftpConfigureStoreEditPage = "/ftpConfigureStoreEditPage";
@@ -104,6 +107,16 @@ class Routes {
   static String awsFileExplorer = "/awsFileExplorer";
   static String awsFileInformation = "/awsFileInformation";
   static String awsUpDownloadManagePage = "/awsUpDownloadManagePage";
+  static String alistBucketList = "/alistBucketList";
+  static String alistBucketInformation = "/alistBucketInformation";
+  static String alistNewBucketConfig = "/alistNewBucketConfig";
+  static String newAlistBucketNavigation = "/newAlistBucketNavigation";
+  static String alistFileExplorer = "/alistFileExplorer";
+  static String alistFileInformation = "/alistFileInformation";
+  static String alistUpDownloadManagePage = "/alistUpDownloadManagePage";
+  static String netVideoPlayer = "/netVideoPlayer";
+  static String pdfViewer = "/pdfViewer";
+
 
   static void configureRoutes(FluroRouter router) {
     router.notFoundHandler = Handler(
@@ -113,6 +126,7 @@ class Routes {
       }
       return null;
     });
+    router.define(webviewPage,handler: webviewHandler);
     router.define(root, handler: rootHandler);
     router.define(homePage, handler: homePageHandler);
     router.define(albumUploadedImages, handler: albumUploadedImagesHandler);
@@ -132,6 +146,8 @@ class Routes {
     router.define(upyunPShostSelect, handler: upyunPShostSelectHandler);
     router.define(ftpPShostSelect, handler: ftpPShostSelectHandler);
     router.define(awsPShostSelect, handler: awsPShostSelectHandler);
+    router.define(alistPShostSelect, handler: alistPShostSelectHandler);
+    router.define(alistConfigureStoreEditPage, handler: alistConfigureStoreEditPageHandler);
     router.define(aliyunConfigureStoreEditPage, handler: aliyunConfigureStoreEditPageHandler);
     router.define(awsConfigureStoreEditPage, handler: awsConfigureStoreEditPageHandler);
     router.define(ftpConfigureStoreEditPage, handler: ftpConfigureStoreEditPageHandler);
@@ -222,5 +238,14 @@ class Routes {
     router.define(awsFileInformation, handler: awsFileInformationHandler);
     router.define(awsUpDownloadManagePage, handler: awsDownloadFileHandler);
     router.define(configureStorePage, handler: configureStorePageHandler);
+    router.define(alistBucketList, handler: alistBucketListHandler);
+    router.define(alistBucketInformation, handler: alistBucketInformationHandler);
+    router.define(alistNewBucketConfig, handler: newAlistBucketHandler);
+    router.define(newAlistBucketNavigation, handler: newAlistBucketNavigationHandler);
+    router.define(alistFileExplorer, handler: alistFileExplorerHandler);
+    router.define(alistFileInformation, handler: alistFileInformationHandler);
+    router.define(alistUpDownloadManagePage, handler: alistDownloadFileHandler);
+    router.define(netVideoPlayer, handler: netVideoPlayerHandler);
+    router.define(pdfViewer, handler: pdfViewerHandler);
   }
 }

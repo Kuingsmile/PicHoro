@@ -2,8 +2,10 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 
 import 'package:fluro/fluro.dart';
-import 'package:horopic/pages/pichoro_app.dart';
 
+import 'package:horopic/utils/web_view.dart';
+
+import 'package:horopic/pages/pichoro_app.dart';
 import 'package:horopic/pages/home_page.dart';
 
 import 'package:horopic/album/album_page.dart';
@@ -38,6 +40,7 @@ import 'package:horopic/picture_host_manage/tencent/tencent_file_information_pag
 
 import 'package:horopic/picture_host_manage/common_page/file_explorer/file_explorer.dart';
 import 'package:horopic/picture_host_manage/common_page/file_explorer/local_image_preview.dart';
+import 'package:horopic/picture_host_manage/common_page/file_explorer/net_video_player.dart';
 
 import 'package:horopic/picture_host_manage/smms/smms_manage_home_page.dart';
 import 'package:horopic/picture_host_manage/smms/smms_file_explorer.dart';
@@ -93,12 +96,31 @@ import 'package:horopic/picture_host_manage/ftp/sftp_local_image_preview.dart';
 import 'package:horopic/picture_host_manage/ftp/sftp_download_manage_page.dart';
 
 import 'package:horopic/picture_host_manage/common_page/file_explorer/md_preview.dart';
+import 'package:horopic/picture_host_manage/common_page/file_explorer/pdf_viewer.dart';
 
 import 'package:horopic/picture_host_manage/aws/aws_bucket_list_page.dart';
 import 'package:horopic/picture_host_manage/aws/aws_new_bucket_configure.dart';
 import 'package:horopic/picture_host_manage/aws/aws_file_explorer.dart';
 import 'package:horopic/picture_host_manage/aws/aws_file_information_page.dart';
 import 'package:horopic/picture_host_manage/aws/aws_download_manage_page.dart';
+
+import 'package:horopic/picture_host_manage/alist/alist_bucket_list_page.dart';
+import 'package:horopic/picture_host_manage/alist/alist_bucket_information_page.dart';
+import 'package:horopic/picture_host_manage/alist/alist_new_bucket_configure.dart';
+import 'package:horopic/picture_host_manage/alist/alist_new_bucket_router.dart';
+import 'package:horopic/picture_host_manage/alist/alist_file_explorer.dart';
+import 'package:horopic/picture_host_manage/alist/alist_file_information_page.dart';
+import 'package:horopic/picture_host_manage/alist/alist_download_manage_page.dart';
+
+
+//webview
+Handler webviewHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  String url = params['url']!.first;
+  String title = params['title']!.first;
+  bool enableJs = params['enableJs']!.first == 'true';
+  return WebViewPage(url: url, title: title, enableJs: enableJs);
+});
 
 //root
 Handler rootHandler = Handler(
@@ -229,6 +251,12 @@ var awsPShostSelectHandler = Handler(
   return const AwsConfig();
 });
 
+//alist图床配置页面
+var alistPShostSelectHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  return const AlistConfig();
+});
+
 //备用配置查看页面
 
 var configureStorePageHandler = Handler(
@@ -238,6 +266,18 @@ var configureStorePageHandler = Handler(
     psHost: psHost,
   );
 });
+
+//alist备用配置编辑页面
+var alistConfigureStoreEditPageHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  String storeKey = params['storeKey']!.first;
+  Map psInfo = json.decode(params['psInfo']!.first);
+  return AlistConfigureStoreEdit(
+    storeKey: storeKey,
+    psInfo: psInfo,
+  );
+});
+
 
 //aliyun备用配置编辑页面
 var aliyunConfigureStoreEditPageHandler = Handler(
@@ -450,6 +490,19 @@ var fileExplorerHandler = Handler(
   return FileExplorer(
     currentDirPath: currentDirPath,
     rootPath: rootPath,
+  );
+});
+
+//视频播放页面
+var netVideoPlayerHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  var videoList = json.decode(params['videoList']!.first);
+  int index = int.parse(params['index']!.first);
+  String type = params['type']!.first;
+  return NetVideoPlayer(
+    videoList: videoList,
+    index: index,
+    type: type,
   );
 });
 
@@ -903,4 +956,83 @@ var awsDownloadFileHandler = Handler(
   String tabIndex = params['tabIndex']!.first;
   return AwsUpDownloadManagePage(
       bucketName: bucketName, downloadPath: downloadPath, tabIndex: tabIndex);
+});
+
+
+//Alist存储桶列表页面
+var alistBucketListHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  return const AlistBucketList();
+});
+
+
+//Alist存储桶详情页面
+var alistBucketInformationHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  var bucketMap = json.decode(params['bucketMap']!.first);
+  return AlistBucketInformation(
+    bucketMap: bucketMap,
+  );
+});
+
+//Alist新建存储桶页面
+var newAlistBucketHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+      String driver = params['driver']!.first;
+      String update = params['update']!.first;
+      Map<String, dynamic> bucketMap = json.decode(params['bucketMap']!.first);
+  return  AlistNewBucketConfig(
+    driver: driver,
+    update: update,
+    bucketMap: bucketMap,
+  );
+});
+
+//Alist新建存储导航页面
+var newAlistBucketNavigationHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  return const AlistNewBucketRouter();
+});
+
+//Alist存储桶文件列表页面
+var alistFileExplorerHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  var element = json.decode(params['element']!.first);
+  var bucketPrefix = params['bucketPrefix']!.first;
+  String refresh = params['refresh']!.first;
+  return AlistFileExplorer(
+    element: element,
+    bucketPrefix: bucketPrefix,
+    refresh: refresh,
+  );
+});
+
+//Alist文件详情页面
+var alistFileInformationHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  var fileMap = json.decode(params['fileMap']!.first);
+  return AlistFileInformation(
+    fileMap: fileMap,
+  );
+});
+
+//Alist存储下载文件页面
+var alistDownloadFileHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  var bucketName = params['bucketName']!.first;
+  String downloadPath = params['downloadPath']!.first;
+  String tabIndex = params['tabIndex']!.first;
+  return AlistUpDownloadManagePage(
+      bucketName: bucketName, downloadPath: downloadPath, tabIndex: tabIndex);
+});
+
+//pdfviewer
+var pdfViewerHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  String url = params['url']!.first;
+  String fileName = params['fileName']!.first;
+  return PdfViewer(
+    url: url,
+    fileName: fileName,
+  );
 });
