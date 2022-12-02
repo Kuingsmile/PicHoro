@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter/services.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:extended_image/extended_image.dart';
+
 import 'package:horopic/album/load_state_change.dart';
+import 'package:horopic/utils/common_functions.dart';
+
 
 class UpdateLog extends StatefulWidget {
   const UpdateLog({Key? key}) : super(key: key);
@@ -27,7 +29,8 @@ class UpdateLogState extends State<UpdateLog> {
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
-        title: const Text('更新日志'),
+        title: titleText('更新日志',
+            ),
       ),
       body: FutureBuilder(
         future: _future,

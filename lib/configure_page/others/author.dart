@@ -12,7 +12,7 @@ class AuthorInformation extends StatelessWidget {
         appBar: AppBar(
           elevation: 0,
           centerTitle: true,
-          title: const Text('作者信息'),
+          title: titleText('作者信息'),
         ),
         body: Center(
             child: ListView(
@@ -23,6 +23,7 @@ class AuthorInformation extends StatelessWidget {
             ),
             GestureDetector(
                 onTap: () async {
+                  
                   showCupertinoAlertDialogWithConfirmFunc(
                       context: context,
                       title: '保存到相册',
