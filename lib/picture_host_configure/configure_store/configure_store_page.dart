@@ -33,9 +33,11 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
     'sm.ms': 'SM.MS',
     'imgur': 'Imgur',
     'lsky.pro': '兰空图床',
+    'alist': 'Alist V3',
   };
 
   Map psNameToRouter = {
+    'alist': '/alistConfigureStoreEditPage',
     'aliyun': '/aliyunConfigureStoreEditPage',
     'aws': '/awsConfigureStoreEditPage',
     'ftp': '/ftpConfigureStoreEditPage',
@@ -155,7 +157,7 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
       appBar: AppBar(
         centerTitle: true,
         elevation: 0,
-        title: Text(psNameTranslate[widget.psHost]!),
+        title: titleText(psNameTranslate[widget.psHost]!),
         actions: [
           IconButton(
             icon: const Icon(
@@ -213,7 +215,8 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
                 await Clipboard.setData(ClipboardData(text: result));
                 showToast('已导出到剪贴板');
               },
-              child: const Icon(Icons.outbox_outlined),
+              child: const Icon(Icons.outbox_outlined,
+                  color: Colors.white,),
             ),
           ),
           const SizedBox(
@@ -242,7 +245,8 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
                   return;
                 }
               },
-              child: const Icon(Icons.inbox_outlined),
+              child: const Icon(Icons.inbox_outlined,
+                  color: Colors.white,),
             ),
           ),
         ],
@@ -1038,6 +1042,72 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
                     FLog.error(
                         className: 'UpyunConfigureStorePage',
                         methodName: 'saveUpyunConfig',
+                        text: formatErrorMessage({}, e.toString()),
+                        dataLogType: DataLogType.ERRORS.toString());
+                    return showToast('保存失败');
+                  }
+                } else if (widget.psHost == 'alist') {
+                  try {
+                    String host = psInfo['host']!;
+                    String alistusername = psInfo['alistusername']!;
+                    String password = psInfo['password']!;
+                    String token = psInfo['token']!;
+                    String uploadPath = psInfo['uploadPath']!;
+                    bool valid = validateUndetermined([
+                      host,
+                      token,
+                    ]);
+                    if (!valid) {
+                      showToast('请先去设置参数');
+                      return;
+                    }
+                    if (uploadPath == ConfigureTemplate.placeholder) {
+                      uploadPath = 'None';
+                    }
+                    List sqlconfig = [];
+                    sqlconfig.add(host);
+                    sqlconfig.add(alistusername);
+                    sqlconfig.add(password);
+                    sqlconfig.add(token);
+                    sqlconfig.add(uploadPath);
+                    String defaultUser = await Global.getUser();
+                    sqlconfig.add(defaultUser);
+                    var queryAlist =
+                        await MySqlUtils.queryAlist(username: defaultUser);
+                    var queryuser =
+                        await MySqlUtils.queryUser(username: defaultUser);
+                    if (queryuser == 'Empty') {
+                      return showToast('请先登录');
+                    }
+                    var sqlResult = '';
+
+                    if (queryAlist == 'Empty') {
+                      sqlResult =
+                          await MySqlUtils.insertAlist(content: sqlconfig);
+                    } else {
+                      sqlResult =
+                          await MySqlUtils.updateAlist(content: sqlconfig);
+                    }
+                    if (sqlResult == "Success") {
+                      final alistConfig = AlistConfigModel(
+                        host,
+                        alistusername,
+                        password,
+                        token,
+                        uploadPath,
+                      );
+                      final alistConfigJson = jsonEncode(alistConfig);
+                      final alistConfigFile =
+                          await AlistConfigState().localFile;
+                      await alistConfigFile.writeAsString(alistConfigJson);
+                      return showToast('设置成功');
+                    } else {
+                      return showToast('设置失败');
+                    }
+                  } catch (e) {
+                    FLog.error(
+                        className: 'AlistConfigureStorePage',
+                        methodName: 'saveAlistConfig',
                         text: formatErrorMessage({}, e.toString()),
                         dataLogType: DataLogType.ERRORS.toString());
                     return showToast('保存失败');

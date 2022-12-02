@@ -13,8 +13,10 @@ class ConfigureTemplate {
     'github': githubConfigureTemplate,
     'sm.ms': smmsConfigureTemplate,
     'imgur': imgurConfigureTemplate,
+    'alist': alistConfigureTemplate,
   };
 
+  static List alistConfigureTemplateKeys = AlistConfigModel.keysList;
   static List aliyunConfigureTemplateKeys = AliyunConfigModel.keysList;
   static List awsConfigureTemplateKeys = AwsConfigModel.keysList;
   static List ftpConfigureTemplateKeys = FTPConfigModel.keysList;
@@ -25,6 +27,10 @@ class ConfigureTemplate {
   static List smmsConfigureTemplateKeys = SmmsConfigModel.keysList;
   static List tencentConfigureTemplateKeys = TencentConfigModel.keysList;
   static List upyunConfigureTemplateKeys = UpyunConfigModel.keysList;
+
+  static final Map<String, String> alistConfigureTemplate = {
+    for (var k in alistConfigureTemplateKeys) k: placeholder
+  };
 
   static final Map<String, String> aliyunConfigureTemplate = {
     for (var k in aliyunConfigureTemplateKeys) k: placeholder
