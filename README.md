@@ -12,7 +12,7 @@
      </a>
 </div>
 
-&emsp;&emsp;一款基于flutter的手机端云存储平台/图床管理和文件上传/下载工具，最新版本**V1.9.6**，与PicGo配置互通，可直接扫码导入，主要功能包括云存储/图床/云服务器平台,以及网盘管理（通过[Alist](https://alist.nn.ci/zh/))，文件上传和下载管理，以及各种格式的链接分享。
+&emsp;&emsp;一款基于flutter的手机端云存储平台/图床管理和文件上传/下载工具，最新版本**V1.9.7**，与PicGo配置互通，可直接扫码导入，主要功能包括云存储/图床/云服务器平台,以及网盘管理（通过[Alist](https://alist.nn.ci/zh/))，文件上传和下载管理，以及各种格式的链接分享。
 
 &emsp;&emsp;支持多种图片/PDF/文本文件/音视频的在线预览和播放，具体支持的格式请查看[支持的格式列表](https://github.com/Kuingsmile/PicHoro/blob/main/supported_format.md "支持的格式列表")
 
@@ -33,11 +33,12 @@
 - [X] FTP-SSH/SFTP (上传/相册-**V1.90**，文件管理-**V1.90**)
 - [X] 兼容S3 API接口的平台 (上传/相册-**V1.91**，文件管理-**V1.91**)
 - [X] Alist V3 (上传/相册-**V1.96**，文件管理-**V1.96**)
+- [X] WebDav (上传/相册-**V1.97**，文件管理-**V1.97**)
 
 ## 特色功能
 
 - **支持直接管理云存储/图床，包括新建/删除/修改存储桶，创建/删除目录和文件，上传和下载文件和照片等**
-- **可通过Alist V3管理多种网盘**
+- **可通过Alist V3或WebDav管理多种网盘**
 - **支持预览多种格式的文件，包括图片/PDF/文本文件/音视频等**
 - **支持SSH/SFTP，可视化管理文件，内置SSH终端可直接管理云服务器**
 - **支持扫描二维码将PicGo(v2.3.0-beta.2以上版本)配置文件直接导入PicHoro**
@@ -61,6 +62,7 @@
 |腾讯云|✅|✅|✅|✅|
 |又拍云|✅|✅|✅|✅|
 |七牛云|✅|✅|✅|✅|
+|WebDav|✅|✅|✅|✅|
 |FTP|  ✅|❌|✅|❌|
 |Github|✅|❌|✅|❌|
 |Imgur|✅|❌|❌|✅|
@@ -73,7 +75,7 @@
 
 Github下载地址 [Github release](https://github.com/Kuingsmile/PicHoro/releases)  
 
-我的个人网站提供的最新版本下载地址 [https://www.horosama.com/self_apk/PicHoro_V1.9.6.apk](https://www.horosama.com/self_apk/PicHoro_V1.9.6.apk)
+我的个人网站提供的最新版本下载地址 [https://www.horosama.com/self_apk/PicHoro_V1.9.7.apk](https://www.horosama.com/self_apk/PicHoro_V1.9.7.apk)
 
 ### IOS
 
@@ -109,6 +111,11 @@ Github下载地址 [Github release](https://github.com/Kuingsmile/PicHoro/releas
 ## 最近更新
 
   详细更新日志请查看[更新日志](https://github.com/Kuingsmile/PicHoro/blob/main/Version_update_log.md "更新日志")
+
+- 2022-12-05: **V1.97**:
+  - 新增：添加了对**WebDAV**的支持，使用坚果云webdav和Alist V3的webdav测试通过。
+  - 新增：Alist V3现在可以不登录访问了，只需要设置Alist域名，即可在管理页面中查看文件。
+  - 修复：修复了清空相册数据库页面没有显示阿里云的问题。
 
 - 2022-12-02: **V1.96**:
 
