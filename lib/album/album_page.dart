@@ -5,6 +5,7 @@ See file LICENSE of original project at https://github.com/PicGo/flutter-picgo
 */
 
 import 'dart:io' as io;
+import 'dart:convert';
 import 'package:flutter/material.dart';
 
 import 'package:extended_image/extended_image.dart';
@@ -63,6 +64,7 @@ class UploadedImagesState extends State<UploadedImages>
     'PBhostExtend1': 'FTP',
     'PBhostExtend2': 'S3',
     'PBhostExtend3': 'Alist',
+    'PBhostExtend4': 'WebDAV',
   };
 
   bool albumKeepAlive = true;
@@ -88,6 +90,13 @@ class UploadedImagesState extends State<UploadedImages>
   void dispose() {
     actionEventBus.cancel();
     super.dispose();
+  }
+
+  getUrlAndAuth(String rawurl) {
+    RegExp regExp = RegExp(r'Basic (.*)');
+    String url = rawurl.replaceAll(regExp, '');
+    var match = regExp.firstMatch(rawurl);
+    return [url, match![1]];
   }
 
   @override
@@ -460,6 +469,26 @@ class UploadedImagesState extends State<UploadedImages>
                     Application.router.navigateTo(context,
                         '${Routes.albumImagePreview}?index=$index&images=${Uri.encodeComponent(urlList)}',
                         transition: TransitionType.none);
+                  } else if (Global.defaultShowedPBhost == 'PBhostExtend4') {
+                    List trueUrlList = [];
+                    List headersList = [];
+                    RegExp reg = RegExp(r'Basic (.*)');
+
+                    for (int i = 0;
+                        i < currentShowedImagesDisplayAddressUrl.length;
+                        i++) {
+                      String trueUrl = currentShowedImagesDisplayAddressUrl[i]
+                          .replaceAll(reg, '');
+                      headersList.add({
+                        'Authorization': reg.firstMatch(
+                            currentShowedImagesDisplayAddressUrl[i])![0],
+                      });
+                      trueUrlList.add(trueUrl);
+                    }
+                    String urlList = trueUrlList.join(',');
+                    Application.router.navigateTo(context,
+                        '${Routes.webdavImagePreview}?index=$index&images=${Uri.encodeComponent(urlList)}&headersList=${Uri.encodeComponent(jsonEncode(headersList))}',
+                        transition: TransitionType.none);
                   }
                 },
                 onDoubleTap: () =>
@@ -538,8 +567,36 @@ class UploadedImagesState extends State<UploadedImages>
                                       )
                                     : const Icon(Icons.error,
                                         size: 30, color: Colors.red)
-                                : const Icon(Icons.error,
-                                    size: 30, color: Colors.red),
+                                : Global.defaultShowedPBhost == 'PBhostExtend4'
+                                    ? ExtendedImage.network(
+                                            currentShowedImagesDisplayAddressUrl[
+                                                index].replaceAll(
+                                                    RegExp(r'Basic (.*)'), ''),
+                                        clearMemoryCacheIfFailed: true,
+                                        retries: 5,
+                                        height: 150,
+                                        fit: BoxFit.fill,
+                                        headers: {
+                                          'Authorization': 
+                                              RegExp(r'Basic (.*)')
+                                                  .firstMatch(
+                                                      currentShowedImagesDisplayAddressUrl[
+                                                          index])![0]!
+                                        },
+                                        cache: false,
+                                        border: Border.all(
+                                            color: selectedImagesBool[index]
+                                                ? Colors.red
+                                                : Colors.transparent,
+                                            width: 2),
+                                        borderRadius: const BorderRadius.all(
+                                            Radius.circular(8)),
+                                        loadStateChanged: (state) =>
+                                            defaultLoadStateChanged(state,
+                                                iconSize: 30),
+                                      )
+                                    : const Icon(Icons.error,
+                                        size: 30, color: Colors.red),
                       ),
                     ),
                     Positioned(
@@ -701,6 +758,16 @@ class UploadedImagesState extends State<UploadedImages>
                                 const Text('又拍云', textAlign: TextAlign.center),
                             onPressed: () {
                               Global.setShowedPBhost('upyun');
+                              Navigator.pop(context);
+                              _currentPage = 0;
+                              _onRefresh();
+                            },
+                          ),
+                          SimpleDialogOption(
+                            child: const Text('WebDAV',
+                                textAlign: TextAlign.center),
+                            onPressed: () {
+                              Global.setShowedPBhost('PBhostExtend4');
                               Navigator.pop(context);
                               _currentPage = 0;
                               _onRefresh();
@@ -1007,7 +1074,7 @@ class UploadedImagesState extends State<UploadedImages>
             return;
           }
         }
-        if (Global.defaultShowedPBhost == 'PBhostExtend1' ) {
+        if (Global.defaultShowedPBhost == 'PBhostExtend1') {
           await AlbumSQL.deleteData(
               Global.imageDBExtend!,
               Global.defaultShowedPBhost,
@@ -1025,7 +1092,8 @@ class UploadedImagesState extends State<UploadedImages>
                 dataLogType: DataLogType.ERRORS.toString());
           }
         } else if (Global.defaultShowedPBhost == 'PBhostExtend2' ||
-            Global.defaultShowedPBhost == 'PBhostExtend3') {
+            Global.defaultShowedPBhost == 'PBhostExtend3' ||
+            Global.defaultShowedPBhost == 'PBhostExtend4') {
           await AlbumSQL.deleteData(
               Global.imageDBExtend!,
               Global.defaultShowedPBhost,
@@ -1123,7 +1191,8 @@ class UploadedImagesState extends State<UploadedImages>
               dataLogType: DataLogType.ERRORS.toString());
         }
       } else if (Global.defaultShowedPBhost == 'PBhostExtend2' ||
-          Global.defaultShowedPBhost == 'PBhostExtend3') {
+          Global.defaultShowedPBhost == 'PBhostExtend3' ||
+          Global.defaultShowedPBhost == 'PBhostExtend4') {
         await AlbumSQL.deleteData(
             Global.imageDBExtend!,
             Global.defaultShowedPBhost,
@@ -1234,7 +1303,8 @@ class UploadedImagesState extends State<UploadedImages>
     //默认图床的图片ID
     if (Global.defaultShowedPBhost == 'PBhostExtend1' ||
         Global.defaultShowedPBhost == 'PBhostExtend2' ||
-        Global.defaultShowedPBhost == 'PBhostExtend3') {
+        Global.defaultShowedPBhost == 'PBhostExtend3' ||
+        Global.defaultShowedPBhost == 'PBhostExtend4') {
       showedImageId = imageListExtend[Global.defaultShowedPBhost]!;
     } else {
       showedImageId = imageList[Global.defaultShowedPBhost]!;
@@ -1250,7 +1320,8 @@ class UploadedImagesState extends State<UploadedImages>
       List<Map<String, dynamic>> maps;
       if (Global.defaultShowedPBhost == 'PBhostExtend1' ||
           Global.defaultShowedPBhost == 'PBhostExtend2' ||
-          Global.defaultShowedPBhost == 'PBhostExtend3') {
+          Global.defaultShowedPBhost == 'PBhostExtend3' ||
+          Global.defaultShowedPBhost == 'PBhostExtend4') {
         maps = await AlbumSQL.queryData(Global.imageDBExtend!,
             Global.defaultShowedPBhost, showedImageId[i]);
       } else {
@@ -1405,6 +1476,25 @@ class UploadedImagesState extends State<UploadedImages>
           showedImageUrl.add('http://' + maps[0]['hostSpecificArgB']);
         } else {
           showedImageUrl.add(maps[0]['hostSpecificArgB']);
+        }
+        if (!maps[0]['hostSpecificArgA'].toString().startsWith('https://') &&
+            !maps[0]['hostSpecificArgA'].toString().startsWith('http://')) {
+          showedImageDisplayAddressUrl
+              // ignore: prefer_interpolation_to_compose_strings
+              .add('http://' + maps[0]['hostSpecificArgA']);
+        } else {
+          showedImageDisplayAddressUrl.add(maps[0]['hostSpecificArgA']);
+        }
+        showedImageName.add(maps[0]['name']);
+        showedImagePictureKey.add(maps[0]['pictureKey']);
+        showedImagePaths.add(maps[0]['path']);
+      } else if (Global.defaultShowedPBhost == 'PBhostExtend4') {
+        if (!maps[0]['url'].toString().startsWith('https://') &&
+            !maps[0]['url'].toString().startsWith('http://')) {
+          // ignore: prefer_interpolation_to_compose_strings
+          showedImageUrl.add('http://' + maps[0]['url']);
+        } else {
+          showedImageUrl.add(maps[0]['url']);
         }
         if (!maps[0]['hostSpecificArgA'].toString().startsWith('https://') &&
             !maps[0]['hostSpecificArgA'].toString().startsWith('http://')) {

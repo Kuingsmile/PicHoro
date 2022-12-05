@@ -148,6 +148,7 @@ class AllPShostState extends State<AllPShost> {
         "ftp": "$configPath/${defaultUser}_ftp_config.txt",
         "aws": "$configPath/${defaultUser}_aws_config.txt",
         "alist": "$configPath/${defaultUser}_alist_config.txt",
+        "webdav": "$configPath/${defaultUser}_webdav_config.txt",
       };
       String config = await File(configFilePath[pshost]!).readAsString();
       Map<String, dynamic> configMap = jsonDecode(config);
@@ -186,6 +187,7 @@ class AllPShostState extends State<AllPShost> {
         "ftp": "$configPath/${defaultUser}_ftp_config.txt",
         "aws": "$configPath/${defaultUser}_aws_config.txt",
         "alist": "$configPath/${defaultUser}_alist_config.txt",
+        "webdav": "$configPath/${defaultUser}_webdav_config.txt",
       };
       Map<String, dynamic> configMap = {};
       for (var key in configFilePath.keys) {
@@ -1259,7 +1261,7 @@ class AllPShostState extends State<AllPShost> {
       'SM.MS': 'smms',
       '腾讯云': 'tcyun',
       '又拍云': 'upyun',
-      
+      'WebDAV': 'webdav',
     };
     temp.forEach((key, value) {
       options.add(_buildSimpleDialogOption(context, key, value));
@@ -1396,6 +1398,14 @@ class AllPShostState extends State<AllPShost> {
           title: const Text('又拍云存储'),
           onTap: () {
             Application.router.navigateTo(context, Routes.upyunPShostSelect,
+                transition: TransitionType.cupertino);
+          },
+          trailing: const Icon(Icons.arrow_forward_ios),
+        ),
+        ListTile(
+          title: const Text('WebDAV'),
+          onTap: () {
+            Application.router.navigateTo(context, Routes.webdavPShostSelect,
                 transition: TransitionType.cupertino);
           },
           trailing: const Icon(Icons.arrow_forward_ios),

@@ -16,6 +16,7 @@ import 'package:dartssh2/dartssh2.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:minio_new/minio.dart';
+import 'package:webdav_client/webdav_client.dart' as webdav;
 
 import 'package:horopic/pages/upload_pages/upload_request.dart';
 import 'package:horopic/pages/upload_pages/upload_status.dart';
@@ -29,6 +30,7 @@ import 'package:horopic/album/album_sql.dart';
 import 'package:horopic/api/tencent_api.dart';
 import 'package:horopic/api/qiniu_api.dart';
 import 'package:horopic/picture_host_manage/manage_api/alist_manage_api.dart';
+import 'package:horopic/picture_host_manage/manage_api/webdav_manage_api.dart';
 import 'package:horopic/picture_host_configure/configure_page/alist_configure.dart';
 
 class UploadManager {
@@ -1181,7 +1183,7 @@ class UploadManager {
         String token = configMap['token'];
         String today = getToday('yyyyMMdd');
         String alistToday = await Global.getTodayAlistUpdate();
-        if (alistToday != today) {
+        if (alistToday != today && token != '') {
           var res = await AlistManageAPI.getToken(configMap['host'],
               configMap['alistusername'], configMap['password']);
           if (res[0] == 'success') {
@@ -1351,6 +1353,57 @@ class UploadManager {
             }
           }
         }
+      } else if (defaultPH == 'webdav') {
+        String formatedURL = '';
+        webdav.Client client = await WebdavManageAPI.getWebdavClient();
+        String uploadPath = configMap['uploadPath'];
+
+        if (uploadPath == 'None') {
+          uploadPath = '/';
+        } else {
+          if (!uploadPath.startsWith('/')) {
+            uploadPath = '/$uploadPath';
+          }
+          if (!uploadPath.endsWith('/')) {
+            uploadPath = '$uploadPath/';
+          }
+        }
+        String filePath = uploadPath + fileName;
+        print('path: $filePath');
+        await client.writeFromFile(path, filePath);
+
+        String returnUrl = configMap['host'] + filePath;
+        String displayUrl = returnUrl+ generateBasicAuth(configMap['webdavusername'], configMap['password']);
+
+        eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
+        Map<String, dynamic> maps = {};
+
+        if (Global.isCopyLink == true) {
+          formatedURL =
+              linkGenerateDict[Global.defaultLKformat]!(returnUrl, fileName);
+        } else {
+          formatedURL = returnUrl;
+        }
+        await Clipboard.setData(ClipboardData(text: formatedURL));
+
+        Map pictureKeyMap = Map.from(configMap);
+        pictureKeyMap['pictureKey'] = filePath;
+        String pictureKey = jsonEncode(pictureKeyMap);
+        maps = {
+          'path': path,
+          'name': fileName,
+          'url': returnUrl,
+          'PBhost': Global.defaultPShost,
+          'pictureKey': pictureKey,
+          'hostSpecificArgA': displayUrl,
+        };
+        List letter = 'BCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+        for (int i = 0; i < letter.length; i++) {
+          maps['hostSpecificArg${letter[i]}'] = 'test';
+        }
+        await AlbumSQL.insertData(Global.imageDBExtend!,
+            pBhostToTableName[Global.defaultPShost]!, maps);
+        setStatus(task, UploadStatus.completed);
       }
     } catch (e) {
       FLog.error(

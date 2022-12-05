@@ -34,6 +34,7 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
     'imgur': 'Imgur',
     'lsky.pro': '兰空图床',
     'alist': 'Alist V3',
+    'webdav': 'WebDAV',
   };
 
   Map psNameToRouter = {
@@ -48,6 +49,7 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
     'sm.ms': '/smmsConfigureStoreEditPage',
     'tencent': '/tencentConfigureStoreEditPage',
     'upyun': '/upyunConfigureStoreEditPage',
+    'webdav': '/webdavConfigureStoreEditPage',
   };
 
   @override
@@ -1055,7 +1057,6 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
                     String uploadPath = psInfo['uploadPath']!;
                     bool valid = validateUndetermined([
                       host,
-                      token,
                     ]);
                     if (!valid) {
                       showToast('请先去设置参数');
@@ -1063,6 +1064,12 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
                     }
                     if (uploadPath == ConfigureTemplate.placeholder) {
                       uploadPath = 'None';
+                    }
+                    if (alistusername == ConfigureTemplate.placeholder) {
+                      alistusername = 'None';
+                    }
+                    if (password == ConfigureTemplate.placeholder) {
+                      password = 'None';
                     }
                     List sqlconfig = [];
                     sqlconfig.add(host);
@@ -1108,6 +1115,70 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
                     FLog.error(
                         className: 'AlistConfigureStorePage',
                         methodName: 'saveAlistConfig',
+                        text: formatErrorMessage({}, e.toString()),
+                        dataLogType: DataLogType.ERRORS.toString());
+                    return showToast('保存失败');
+                  }
+                } else if (widget.psHost == 'webdav') {
+                  try {
+                    String host = psInfo['host']!;
+                    String webdavusername = psInfo['webdavusername']!;
+                    String password = psInfo['password']!;
+                    String uploadPath = psInfo['uploadPath']!;
+                    bool valid = validateUndetermined([
+                      host,
+                      webdavusername,
+                      password,
+                    ]);
+                    if (!valid) {
+                      showToast('请先去设置参数');
+                      return;
+                    }
+                    if (uploadPath == ConfigureTemplate.placeholder) {
+                      uploadPath = 'None';
+                    }
+                    List sqlconfig = [];
+                    sqlconfig.add(host);
+                    sqlconfig.add(webdavusername);
+                    sqlconfig.add(password);
+                    sqlconfig.add(uploadPath);
+                    String defaultUser = await Global.getUser();
+                    sqlconfig.add(defaultUser);
+                    var queryWebdav =
+                        await MySqlUtils.queryWebdav(username: defaultUser);
+                    var queryuser =
+                        await MySqlUtils.queryUser(username: defaultUser);
+                    if (queryuser == 'Empty') {
+                      return showToast('请先登录');
+                    }
+                    var sqlResult = '';
+
+                    if (queryWebdav == 'Empty') {
+                      sqlResult =
+                          await MySqlUtils.insertWebdav(content: sqlconfig);
+                    } else {
+                      sqlResult =
+                          await MySqlUtils.updateWebdav(content: sqlconfig);
+                    }
+                    if (sqlResult == "Success") {
+                      final webdavConfig = WebdavConfigModel(
+                        host,
+                        webdavusername,
+                        password,
+                        uploadPath,
+                      );
+                      final webdavConfigJson = jsonEncode(webdavConfig);
+                      final webdavConfigFile =
+                          await WebdavConfigState().localFile;
+                      await webdavConfigFile.writeAsString(webdavConfigJson);
+                      return showToast('设置成功');
+                    } else {
+                      return showToast('设置失败');
+                    }
+                  } catch (e) {
+                    FLog.error(
+                        className: 'WebdavConfigureStorePage',
+                        methodName: 'saveWebdavConfig',
                         text: formatErrorMessage({}, e.toString()),
                         dataLogType: DataLogType.ERRORS.toString());
                     return showToast('保存失败');

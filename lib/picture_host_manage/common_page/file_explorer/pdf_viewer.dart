@@ -10,11 +10,13 @@ import 'package:horopic/utils/common_functions.dart';
 class PdfViewer extends StatefulWidget {
   final String url;
   final String fileName;
+  final Map<String,String>? headers;
 
   const PdfViewer({
     Key? key,
     required this.url,
     required this.fileName,
+    required this.headers,
   }) : super(key: key);
 
   @override
@@ -137,6 +139,7 @@ class PdfViewerState extends State<PdfViewer> {
       body: SfPdfViewer.network(
         widget.url,
         key: _pdfViewerKey,
+        headers: widget.headers,
         controller: _pdfViewerController,
         onTextSelectionChanged: (PdfTextSelectionChangedDetails details) {
           if (details.selectedText == null && _overlayEntry != null) {

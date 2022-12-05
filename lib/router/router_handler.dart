@@ -112,6 +112,10 @@ import 'package:horopic/picture_host_manage/alist/alist_file_explorer.dart';
 import 'package:horopic/picture_host_manage/alist/alist_file_information_page.dart';
 import 'package:horopic/picture_host_manage/alist/alist_download_manage_page.dart';
 
+import 'package:horopic/picture_host_manage/webdav/webdav_file_explorer.dart';
+import 'package:horopic/picture_host_manage/webdav/webdav_file_information_page.dart';
+import 'package:horopic/picture_host_manage/webdav/webdav_pic_preview.dart';
+import 'package:horopic/picture_host_manage/webdav/webdav_download_manage_page.dart';
 
 //webview
 Handler webviewHandler = Handler(
@@ -148,6 +152,19 @@ var albumImagePreviewHandler = Handler(
   return ImagePreview(
     index: int.parse(index),
     images: images,
+  );
+});
+
+//webdav图片预览
+var webdavImagePreviewHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  var index = params['index']!.first;
+  List images = params['images']!.first.split(',');
+  List headersList = json.decode(params['headersList']!.first);
+  return WebdavImagePreview(
+    index: int.parse(index),
+    images: images,
+    headersList: headersList,
   );
 });
 
@@ -257,6 +274,12 @@ var alistPShostSelectHandler = Handler(
   return const AlistConfig();
 });
 
+//webdav图床配置页面
+var webdavPShostSelectHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  return const WebdavConfig();
+});
+
 //备用配置查看页面
 
 var configureStorePageHandler = Handler(
@@ -277,7 +300,6 @@ var alistConfigureStoreEditPageHandler = Handler(
     psInfo: psInfo,
   );
 });
-
 
 //aliyun备用配置编辑页面
 var aliyunConfigureStoreEditPageHandler = Handler(
@@ -384,6 +406,17 @@ var upyunConfigureStoreEditPageHandler = Handler(
   String storeKey = params['storeKey']!.first;
   Map psInfo = json.decode(params['psInfo']!.first);
   return UpyunConfigureStoreEdit(
+    storeKey: storeKey,
+    psInfo: psInfo,
+  );
+});
+
+//webdav备用配置编辑页面
+var webdavConfigureStoreEditPageHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  String storeKey = params['storeKey']!.first;
+  Map psInfo = json.decode(params['psInfo']!.first);
+  return WebdavConfigureStoreEdit(
     storeKey: storeKey,
     psInfo: psInfo,
   );
@@ -499,10 +532,13 @@ var netVideoPlayerHandler = Handler(
   var videoList = json.decode(params['videoList']!.first);
   int index = int.parse(params['index']!.first);
   String type = params['type']!.first;
+  Map<String, String> headers =
+      Map<String, String>.from(json.decode(params['headers']!.first));
   return NetVideoPlayer(
     videoList: videoList,
     index: index,
     type: type,
+    headers: headers,
   );
 });
 
@@ -958,13 +994,11 @@ var awsDownloadFileHandler = Handler(
       bucketName: bucketName, downloadPath: downloadPath, tabIndex: tabIndex);
 });
 
-
 //Alist存储桶列表页面
 var alistBucketListHandler = Handler(
     handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
   return const AlistBucketList();
 });
-
 
 //Alist存储桶详情页面
 var alistBucketInformationHandler = Handler(
@@ -978,10 +1012,10 @@ var alistBucketInformationHandler = Handler(
 //Alist新建存储桶页面
 var newAlistBucketHandler = Handler(
     handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
-      String driver = params['driver']!.first;
-      String update = params['update']!.first;
-      Map<String, dynamic> bucketMap = json.decode(params['bucketMap']!.first);
-  return  AlistNewBucketConfig(
+  String driver = params['driver']!.first;
+  String update = params['update']!.first;
+  Map<String, dynamic> bucketMap = json.decode(params['bucketMap']!.first);
+  return AlistNewBucketConfig(
     driver: driver,
     update: update,
     bucketMap: bucketMap,
@@ -1031,8 +1065,41 @@ var pdfViewerHandler = Handler(
     handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
   String url = params['url']!.first;
   String fileName = params['fileName']!.first;
+  Map<String, String>? headers =
+      Map<String, String>.from(json.decode(params['headers']!.first));
   return PdfViewer(
     url: url,
     fileName: fileName,
+    headers: headers,
   );
+});
+
+//Webdav存储桶文件列表页面
+var webdavFileExplorerHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  var element = json.decode(params['element']!.first);
+  var bucketPrefix = params['bucketPrefix']!.first;
+  return WebdavFileExplorer(
+    element: element,
+    bucketPrefix: bucketPrefix,
+  );
+});
+
+//Webdav文件详情页面
+var webdavFileInformationHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  var fileMap = json.decode(params['fileMap']!.first);
+  return WebdavFileInformation(
+    fileMap: fileMap,
+  );
+});
+
+//Webdav存储下载文件页面
+var webdavDownloadFileHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  var bucketName = params['bucketName']!.first;
+  String downloadPath = params['downloadPath']!.first;
+  String tabIndex = params['tabIndex']!.first;
+  return WebdavUpDownloadManagePage(
+      bucketName: bucketName, downloadPath: downloadPath, tabIndex: tabIndex);
 });

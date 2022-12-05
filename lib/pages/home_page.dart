@@ -532,11 +532,26 @@ class HomePageState extends State<HomePage>
         for (int i = 0; i < letter.length; i++) {
           maps['hostSpecificArg${letter[i]}'] = 'test';
         }
+      } else if (Global.defaultPShost == 'webdav') {
+        // ["success", formatedURL, returnUrl, pictureKey, displayUrl]
+        maps = {
+          'path': path,
+          'name': name,
+          'url': uploadResult[2], //alist文件原始地址
+          'PBhost': Global.defaultPShost,
+          'pictureKey': uploadResult[3],
+          'hostSpecificArgA': uploadResult[4], //实际展示的是displayUrl
+        };
+        List letter = 'BCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+        for (int i = 0; i < letter.length; i++) {
+          maps['hostSpecificArg${letter[i]}'] = 'test';
+        }
       }
 
       if (Global.defaultPShost == 'ftp' ||
           Global.defaultPShost == 'aws' ||
-          Global.defaultPShost == 'alist') {
+          Global.defaultPShost == 'alist'||
+          Global.defaultPShost == 'webdav') {
         await AlbumSQL.insertData(Global.imageDBExtend!,
             pBhostToTableName[Global.defaultPShost]!, maps);
       } else {
@@ -775,11 +790,26 @@ class HomePageState extends State<HomePage>
           for (int i = 0; i < letter.length; i++) {
             maps['hostSpecificArg${letter[i]}'] = 'test';
           }
+        } else if (Global.defaultPShost == 'webdav') {
+        // ["success", formatedURL, returnUrl, pictureKey, displayUrl]
+        maps = {
+          'path': path,
+          'name': name,
+          'url': uploadResult[2], //alist文件原始地址
+          'PBhost': Global.defaultPShost,
+          'pictureKey': uploadResult[3],
+          'hostSpecificArgA': uploadResult[4], //实际展示的是displayUrl
+        };
+        List letter = 'BCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+        for (int i = 0; i < letter.length; i++) {
+          maps['hostSpecificArg${letter[i]}'] = 'test';
         }
+      }
 
         if (Global.defaultPShost == 'ftp' ||
             Global.defaultPShost == 'aws' ||
-            Global.defaultPShost == 'alist') {
+            Global.defaultPShost == 'alist'||
+            Global.defaultPShost == 'webdav') {
           await AlbumSQL.insertData(Global.imageDBExtend!,
               pBhostToTableName[Global.defaultPShost]!, maps);
         } else {
@@ -1756,6 +1786,25 @@ class HomePageState extends State<HomePage>
                             onTap: () async {
                               Navigator.pop(context);
                               await setdefaultPShostRemoteAndLocal('aws');
+                              eventBus.fire(
+                                  AlbumRefreshEvent(albumKeepAlive: false));
+                              setState(() {});
+                            },
+                          )),
+                          SimpleDialogOption(
+                              child: ListTile(
+                                dense: true,
+                            visualDensity: VisualDensity.compact,
+                            title: Text('WebDAV',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                    color: Global.defaultPShost == 'webdav'
+                                        ? Colors.amber
+                                        : const Color.fromARGB(
+                                            255, 97, 180, 248))),
+                            onTap: () async {
+                              Navigator.pop(context);
+                              await setdefaultPShostRemoteAndLocal('webdav');
                               eventBus.fire(
                                   AlbumRefreshEvent(albumKeepAlive: false));
                               setState(() {});

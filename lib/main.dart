@@ -7,14 +7,13 @@ import 'package:horopic/router/application.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/theme_provider.dart';
 
-
 /*
 @Author: Kuingsmile@Github
 @HomePage: https://www.horosama.com
 @e-mail: ma_shiqing@163.com
-@Date: 2022-12-02
+@Date: 2022-12-05
 @Description:PicHoro,一款云储存平台和图床管理工具
-@version: 1.9.6
+@version: 1.9.7
 */
 
 void main() async {

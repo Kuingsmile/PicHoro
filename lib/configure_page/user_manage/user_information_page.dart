@@ -39,6 +39,8 @@ import 'package:horopic/picture_host_configure/configure_page/aws_configure.dart
     as awshostclass;
 import 'package:horopic/picture_host_configure/configure_page/alist_configure.dart'
     as alisthostclass;
+import 'package:horopic/picture_host_configure/configure_page/webdav_configure.dart'
+    as webdavhostclass;
 import 'package:sqflite/sqflite.dart';
 
 class UserInformationPage extends StatefulWidget {
@@ -62,7 +64,8 @@ class UserInformationPageState
     'lsky.pro': '兰空图床',
     'ftp': 'FTP',
     'aws': 'S3兼容平台',
-    'alist': 'Alist V3'
+    'alist': 'Alist V3',
+    'webdav': 'WebDAV',
   };
 
   @override
@@ -81,7 +84,253 @@ class UserInformationPageState
     });
   }
 
-  _fetchconfig(String username, String password) async {
+  @override
+  AppBar get appBar => AppBar(
+        elevation: 0,
+        centerTitle: true,
+        title: titleText(
+          '用户信息',
+        ),
+      );
+
+  @override
+  Widget buildEmpty() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Image.asset(
+            'assets/images/empty.png',
+            width: 100,
+            height: 100,
+          ),
+          const Text('暂无数据',
+              style: TextStyle(
+                  fontSize: 20, color: Color.fromARGB(136, 121, 118, 118)))
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget buildError() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Text('加载失败',
+              style: TextStyle(
+                  fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))),
+          ElevatedButton(
+            style: ButtonStyle(
+              backgroundColor: MaterialStateProperty.all(Colors.blue),
+            ),
+            onPressed: () {
+              setState(() {
+                state = loading_state.LoadState.LOADING;
+              });
+            },
+            child: const Text('重新加载'),
+          )
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget buildLoading() {
+    return const Center(
+      child: SizedBox(
+        width: 30,
+        height: 30,
+        child: CircularProgressIndicator(
+          strokeWidth: 2,
+          backgroundColor: Colors.transparent,
+          valueColor: AlwaysStoppedAnimation(Colors.blue),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget buildSuccess() {
+    return ListView(children: [
+      Center(
+        child: Padding(
+          padding: const EdgeInsets.all(3.0),
+          child: Padding(
+            padding: const EdgeInsets.only(top: 20),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                CircleAvatar(
+                  radius: MediaQuery.of(context).size.width / 10,
+                  backgroundColor: Colors.transparent,
+                  backgroundImage:
+                      const Image(image: AssetImage('assets/app_icon.png'))
+                          .image,
+                ),
+                const SizedBox(height: 20),
+              ],
+            ),
+          ),
+        ),
+      ),
+      Column(
+        children: [
+          ListTile(
+            leading: const Icon(Icons.person, color: Colors.blue),
+            minLeadingWidth: 0,
+            title: const Text('用户名'),
+            trailing: Text(userProfile['username'].toString(),
+                style: const TextStyle(fontSize: 16)),
+          ),
+          ListTile(
+            leading: const Icon(Icons.image_outlined, color: Colors.blue),
+            minLeadingWidth: 0,
+            title: const Text('当前图床'),
+            trailing: Text(userProfile['pictureHost'].toString(),
+                style: const TextStyle(fontSize: 16)),
+          ),
+          ListTile(
+            leading: const Icon(Icons.folder_open_outlined, color: Colors.blue),
+            minLeadingWidth: 0,
+            title: const Text('图床管理'),
+            trailing: const Icon(Icons.arrow_forward_ios),
+            onTap: () {
+              Application.router.navigateTo(context, Routes.pictureHostInfoPage,
+                  transition: TransitionType.inFromRight);
+            },
+          ),
+          const SizedBox(height: 20),
+          Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+            CupertinoButton(
+              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+              color: const Color.fromARGB(255, 11, 148, 240),
+              child: const Text('云端拉取'),
+              onPressed: () async {
+                String currentusername = await Global.getUser();
+                var usernamecheck =
+                    await MySqlUtils.queryUser(username: currentusername);
+                String currentpassword = await Global.getPassword();
+                try {
+                  if (usernamecheck['password'] == currentpassword) {
+                    showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (context) {
+                          return NetLoadingDialog(
+                            outsideDismiss: false,
+                            loading: true,
+                            loadingText: "配置中...",
+                            requestCallBack:
+                                fetchconfig(context,currentusername, currentpassword),
+                          );
+                        });
+                  }
+                } catch (e) {
+                  FLog.error(
+                      className: 'UserInformationPageState',
+                      methodName: '云端拉取',
+                      text: formatErrorMessage({
+                        'username': currentusername,
+                      }, e.toString()),
+                      dataLogType: DataLogType.ERRORS.toString());
+                  return showCupertinoAlertDialog(
+                      context: context, title: "错误", content: "拉取失败,请重试!");
+                }
+              },
+            ),
+            const SizedBox(width: 20),
+            CupertinoButton(
+              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+              color: const Color.fromARGB(255, 187, 197, 202),
+              child: const Text('注销登录'),
+              onPressed: () async {
+                await Global.setUser(' ');
+                await Global.setPassword(' ');
+                await Global.setPShost('lsky.pro');
+                await Global.setLKformat('rawurl');
+                await Global.setTimeStamp(false);
+                await Global.setRandomName(false);
+                await Global.setCustomeRename(false);
+                await Global.setCopyLink(true);
+                Database db = await Global.getDatabase();
+                await Global.setDatabase(db);
+                Database dbExtend = await Global.getDatabaseExtend();
+                await Global.setDatabaseExtend(dbExtend);
+                await Global.setShowedPBhost('lskypro');
+                await Global.setDeleteLocal(false);
+                await Global.setCustomLinkFormat(r'[$fileName]($url)');
+                await Global.setCustomeRenameFormat(r'{filename}');
+                await Global.setDeleteCloud(false);
+                await Global.setOperateDone(false);
+                await Global.setTodayAlistUpdate('19700101');
+                await Global.setpsHostHomePageOrder([
+                  '0',
+                  '1',
+                  '2',
+                  '3',
+                  '4',
+                  '5',
+                  '6',
+                  '7',
+                  '8',
+                  '9',
+                  '10',
+                  '11',
+                  '12',
+                  '13',
+                  '14',
+                  '15',
+                  '16',
+                  '17',
+                  '18',
+                  '19',
+                  '20',
+                  '21',
+                ]);
+                await Global.setTencentUploadList([]);
+                await Global.setTencentDownloadList([]);
+                await Global.setAliyunUploadList([]);
+                await Global.setAliyunDownloadList([]);
+                await Global.setQiniuUploadList([]);
+                await Global.setQiniuDownloadList([]);
+                await Global.setLskyproUploadList([]);
+                await Global.setLskyproDownloadList([]);
+                await Global.setUpyunUploadList([]);
+                await Global.setUpyunDownloadList([]);
+                await Global.setImgurUploadList([]);
+                await Global.setImgurDownloadList([]);
+                await Global.setSmmsUploadList([]);
+                await Global.setSmmsDownloadList([]);
+                await Global.setSmmsSavedNameList([]);
+                await Global.setGithubUploadList([]);
+                await Global.setGithubDownloadList([]);
+                await Global.setFtpUploadList([]);
+                await Global.setFtpDownloadList([]);
+                await Global.setAwsUploadList([]);
+                await Global.setAwsDownloadList([]);
+                await Global.setAlistUploadList([]);
+                await Global.setAlistDownloadList([]);
+                await Global.setWebdavUploadList([]);
+                await Global.setWebdavDownloadList([]);
+                showToast('注销成功');
+                if (mounted) {
+                  Navigator.pop(context);
+                }
+              },
+            ),
+          ]),
+        ],
+      ),
+    ]);
+  }
+}
+
+
+  fetchconfig(BuildContext context,String username, String password) async {
     try {
       var usernamecheck = await MySqlUtils.queryUser(username: username);
       if (usernamecheck == 'Empty') {
@@ -444,6 +693,36 @@ class UserInformationPageState
                   context: context, title: "错误", content: "拉取Alist图床配置失败,请重试!");
             }
           }
+           //拉取webdav配置
+          var webdavresult = await MySqlUtils.queryWebdav(username: username);
+          if (webdavresult == 'Error') {
+            return showCupertinoAlertDialog(
+                context: context, title: "错误", content: "获取Webdav云端信息失败,请重试!");
+          } else if (webdavresult != 'Empty') {
+            try {
+              final webdavConfig = webdavhostclass.WebdavConfigModel(
+                webdavresult['host'],
+                webdavresult['webdavusername'],
+                webdavresult['password'],
+                webdavresult['uploadPath'],
+              );
+              final webdavConfigJson = jsonEncode(webdavConfig);
+              final directory = await getApplicationDocumentsDirectory();
+              File alistLocalFile =
+                  File('${directory.path}/${username}_webdav_config.txt');
+              alistLocalFile.writeAsString(webdavConfigJson);
+            } catch (e) {
+              FLog.error(
+                  className: 'APPPasswordState',
+                  methodName: '_fetchconfig_webdav',
+                  text: formatErrorMessage({
+                    'username': username,
+                  }, e.toString()),
+                  dataLogType: DataLogType.ERRORS.toString());
+              return showCupertinoAlertDialog(
+                  context: context, title: "错误", content: "拉取Webdav图床配置失败,请重试!");
+            }
+          }
           //全部拉取完成后，提示用户
           return Fluttertoast.showToast(
               msg: "已拉取云端配置",
@@ -467,247 +746,3 @@ class UserInformationPageState
           context: context, title: "错误", content: "拉取失败,请重试!");
     }
   }
-
-  @override
-  AppBar get appBar => AppBar(
-        elevation: 0,
-        centerTitle: true,
-        title: titleText(
-          '用户信息',
-        ),
-      );
-
-  @override
-  Widget buildEmpty() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Image.asset(
-            'assets/images/empty.png',
-            width: 100,
-            height: 100,
-          ),
-          const Text('暂无数据',
-              style: TextStyle(
-                  fontSize: 20, color: Color.fromARGB(136, 121, 118, 118)))
-        ],
-      ),
-    );
-  }
-
-  @override
-  Widget buildError() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Text('加载失败',
-              style: TextStyle(
-                  fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))),
-          ElevatedButton(
-            style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.all(Colors.blue),
-            ),
-            onPressed: () {
-              setState(() {
-                state = loading_state.LoadState.LOADING;
-              });
-            },
-            child: const Text('重新加载'),
-          )
-        ],
-      ),
-    );
-  }
-
-  @override
-  Widget buildLoading() {
-    return const Center(
-      child: SizedBox(
-        width: 30,
-        height: 30,
-        child: CircularProgressIndicator(
-          strokeWidth: 2,
-          backgroundColor: Colors.transparent,
-          valueColor: AlwaysStoppedAnimation(Colors.blue),
-        ),
-      ),
-    );
-  }
-
-  @override
-  Widget buildSuccess() {
-    return ListView(children: [
-      Center(
-        child: Padding(
-          padding: const EdgeInsets.all(3.0),
-          child: Padding(
-            padding: const EdgeInsets.only(top: 20),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                CircleAvatar(
-                  radius: MediaQuery.of(context).size.width / 10,
-                  backgroundColor: Colors.transparent,
-                  backgroundImage:
-                      const Image(image: AssetImage('assets/app_icon.png'))
-                          .image,
-                ),
-                const SizedBox(height: 20),
-              ],
-            ),
-          ),
-        ),
-      ),
-      Column(
-        children: [
-          ListTile(
-            leading: const Icon(Icons.person, color: Colors.blue),
-            minLeadingWidth: 0,
-            title: const Text('用户名'),
-            trailing: Text(userProfile['username'].toString(),
-                style: const TextStyle(fontSize: 16)),
-          ),
-          ListTile(
-            leading: const Icon(Icons.image_outlined, color: Colors.blue),
-            minLeadingWidth: 0,
-            title: const Text('当前图床'),
-            trailing: Text(userProfile['pictureHost'].toString(),
-                style: const TextStyle(fontSize: 16)),
-          ),
-          ListTile(
-            leading: const Icon(Icons.folder_open_outlined, color: Colors.blue),
-            minLeadingWidth: 0,
-            title: const Text('图床管理'),
-            trailing: const Icon(Icons.arrow_forward_ios),
-            onTap: () {
-              Application.router.navigateTo(context, Routes.pictureHostInfoPage,
-                  transition: TransitionType.inFromRight);
-            },
-          ),
-          const SizedBox(height: 20),
-          Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-            CupertinoButton(
-              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-              color: const Color.fromARGB(255, 11, 148, 240),
-              child: const Text('云端拉取'),
-              onPressed: () async {
-                String currentusername = await Global.getUser();
-                var usernamecheck =
-                    await MySqlUtils.queryUser(username: currentusername);
-                String currentpassword = await Global.getPassword();
-                try {
-                  if (usernamecheck['password'] == currentpassword) {
-                    showDialog(
-                        context: context,
-                        barrierDismissible: false,
-                        builder: (context) {
-                          return NetLoadingDialog(
-                            outsideDismiss: false,
-                            loading: true,
-                            loadingText: "配置中...",
-                            requestCallBack:
-                                _fetchconfig(currentusername, currentpassword),
-                          );
-                        });
-                  }
-                } catch (e) {
-                  FLog.error(
-                      className: 'UserInformationPageState',
-                      methodName: '云端拉取',
-                      text: formatErrorMessage({
-                        'username': currentusername,
-                      }, e.toString()),
-                      dataLogType: DataLogType.ERRORS.toString());
-                  return showCupertinoAlertDialog(
-                      context: context, title: "错误", content: "拉取失败,请重试!");
-                }
-              },
-            ),
-            const SizedBox(width: 20),
-            CupertinoButton(
-              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-              color: const Color.fromARGB(255, 187, 197, 202),
-              child: const Text('注销登录'),
-              onPressed: () async {
-                await Global.setUser(' ');
-                await Global.setPassword(' ');
-                await Global.setPShost('lsky.pro');
-                await Global.setLKformat('rawurl');
-                await Global.setTimeStamp(false);
-                await Global.setRandomName(false);
-                await Global.setCustomeRename(false);
-                await Global.setCopyLink(true);
-                Database db = await Global.getDatabase();
-                await Global.setDatabase(db);
-                Database dbExtend = await Global.getDatabaseExtend();
-                await Global.setDatabaseExtend(dbExtend);
-                await Global.setShowedPBhost('lskypro');
-                await Global.setDeleteLocal(false);
-                await Global.setCustomLinkFormat(r'[$fileName]($url)');
-                await Global.setCustomeRenameFormat(r'{filename}');
-                await Global.setDeleteCloud(false);
-                await Global.setOperateDone(false);
-                await Global.setTodayAlistUpdate('19700101');
-                await Global.setpsHostHomePageOrder([
-                  '0',
-                  '1',
-                  '2',
-                  '3',
-                  '4',
-                  '5',
-                  '6',
-                  '7',
-                  '8',
-                  '9',
-                  '10',
-                  '11',
-                  '12',
-                  '13',
-                  '14',
-                  '15',
-                  '16',
-                  '17',
-                  '18',
-                  '19',
-                  '20',
-                  '21',
-                ]);
-                await Global.setTencentUploadList([]);
-                await Global.setTencentDownloadList([]);
-                await Global.setAliyunUploadList([]);
-                await Global.setAliyunDownloadList([]);
-                await Global.setQiniuUploadList([]);
-                await Global.setQiniuDownloadList([]);
-                await Global.setLskyproUploadList([]);
-                await Global.setLskyproDownloadList([]);
-                await Global.setUpyunUploadList([]);
-                await Global.setUpyunDownloadList([]);
-                await Global.setImgurUploadList([]);
-                await Global.setImgurDownloadList([]);
-                await Global.setSmmsUploadList([]);
-                await Global.setSmmsDownloadList([]);
-                await Global.setSmmsSavedNameList([]);
-                await Global.setGithubUploadList([]);
-                await Global.setGithubDownloadList([]);
-                await Global.setFtpUploadList([]);
-                await Global.setFtpDownloadList([]);
-                await Global.setAwsUploadList([]);
-                await Global.setAwsDownloadList([]);
-                await Global.setAlistUploadList([]);
-                await Global.setAlistDownloadList([]);
-
-                showToast('注销成功');
-                if (mounted) {
-                  Navigator.pop(context);
-                }
-              },
-            ),
-          ]),
-        ],
-      ),
-    ]);
-  }
-}

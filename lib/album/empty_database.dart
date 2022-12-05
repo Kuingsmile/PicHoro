@@ -20,7 +20,7 @@ class EmptyDatabaseState extends State<EmptyDatabase> {
     'Imgur',
     '七牛云',
     '腾讯云',
-    
+    '阿里云',
     '又拍云',
   ];
   final _tableNameList = [
@@ -106,6 +106,22 @@ class EmptyDatabaseState extends State<EmptyDatabase> {
             },
           );
         });
+    ListTile webdavEmpty = ListTile(
+        title: const Center(child: Text('WebDAV')),
+        onTap: () async {
+          showCupertinoAlertDialogWithConfirmFunc(
+            title: '通知',
+            content: '是否确定清空WebDAV数据库？',
+            context: context,
+            onConfirm: () async {
+              Navigator.pop(context);
+              await AlbumSQL.deleteTable(
+                  Global.imageDBExtend!, 'PBhostExtend4');
+              showToast('已清空WebDAV数据库');
+              eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
+            },
+          );
+        });
     ListTile allEmpty = ListTile(
         title: const Center(child: Text('所有数据库')),
         onTap: () async {
@@ -129,6 +145,7 @@ class EmptyDatabaseState extends State<EmptyDatabase> {
     listTiles.add(ftpEmpty);
     listTiles.add(awsEmpty);
     listTiles.add(alistEmpty);
+    listTiles.add(webdavEmpty);
     listTiles.add(allEmpty);
     return listTiles;
   }

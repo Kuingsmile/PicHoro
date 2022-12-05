@@ -11,6 +11,7 @@ class Routes {
   static String homePage = "/homePage";
   static String albumUploadedImages = "/albumUploadedImages";
   static String albumImagePreview = "/albumImagePreview";
+  static String webdavImagePreview = "/webdavImagePreview";
   static String localImagePreview = "/localImagePreview";
   static String configurePage = "/configurePage";
   static String configurePageLogger = "/configurePageLogger";
@@ -28,6 +29,7 @@ class Routes {
   static String ftpPShostSelect = "/ftpPShostSelect";
   static String awsPShostSelect = "/awsPShostSelect";
   static String alistPShostSelect = "/alistPShostSelect";
+  static String webdavPShostSelect = "/webdavPShostSelect";
   static String configureStorePage = "/configureStorePage";
   static String alistConfigureStoreEditPage = "/alistConfigureStoreEditPage";
   static String aliyunConfigureStoreEditPage = "/aliyunConfigureStoreEditPage";
@@ -40,6 +42,7 @@ class Routes {
   static String smmsConfigureStoreEditPage = "/smmsConfigureStoreEditPage";
   static String tencentConfigureStoreEditPage = "/tencentConfigureStoreEditPage";
   static String upyunConfigureStoreEditPage = "/upyunConfigureStoreEditPage";
+  static String webdavConfigureStoreEditPage = "/webdavConfigureStoreEditPage";
   static String commonConfig = "/commonConfig";
   static String renameFile = "/renameFile";
   static String linkFormatSelect = "/linkFormatSelect";
@@ -116,7 +119,9 @@ class Routes {
   static String alistUpDownloadManagePage = "/alistUpDownloadManagePage";
   static String netVideoPlayer = "/netVideoPlayer";
   static String pdfViewer = "/pdfViewer";
-
+  static String webdavFileExplorer = "/webdavFileExplorer";
+  static String webdavFileInformation = "/webdavFileInformation";
+  static String webdavUpDownloadManagePage = "/webdavUpDownloadManagePage";
 
   static void configureRoutes(FluroRouter router) {
     router.notFoundHandler = Handler(
@@ -131,6 +136,7 @@ class Routes {
     router.define(homePage, handler: homePageHandler);
     router.define(albumUploadedImages, handler: albumUploadedImagesHandler);
     router.define(albumImagePreview, handler: albumImagePreviewHandler);
+    router.define(webdavImagePreview, handler: webdavImagePreviewHandler);
     router.define(localImagePreview, handler: localImagePreviewHandler);
     router.define(configurePage, handler: configurePageHandler);
     router.define(appPassword, handler: appPasswordHandler);
@@ -147,6 +153,7 @@ class Routes {
     router.define(ftpPShostSelect, handler: ftpPShostSelectHandler);
     router.define(awsPShostSelect, handler: awsPShostSelectHandler);
     router.define(alistPShostSelect, handler: alistPShostSelectHandler);
+    router.define(webdavPShostSelect, handler: webdavPShostSelectHandler);
     router.define(alistConfigureStoreEditPage, handler: alistConfigureStoreEditPageHandler);
     router.define(aliyunConfigureStoreEditPage, handler: aliyunConfigureStoreEditPageHandler);
     router.define(awsConfigureStoreEditPage, handler: awsConfigureStoreEditPageHandler);
@@ -158,6 +165,7 @@ class Routes {
     router.define(smmsConfigureStoreEditPage, handler: smmsConfigureStoreEditPageHandler);
     router.define(tencentConfigureStoreEditPage, handler: tencentConfigureStoreEditPageHandler);
     router.define(upyunConfigureStoreEditPage, handler: upyunConfigureStoreEditPageHandler);
+    router.define(webdavConfigureStoreEditPage, handler: webdavConfigureStoreEditPageHandler);
     router.define(commonConfig, handler: commonConfigHandler);
     router.define(renameFile, handler: renameFileHandler);
     router.define(linkFormatSelect, handler: linkFormatSelectHandler);
@@ -247,5 +255,8 @@ class Routes {
     router.define(alistUpDownloadManagePage, handler: alistDownloadFileHandler);
     router.define(netVideoPlayer, handler: netVideoPlayerHandler);
     router.define(pdfViewer, handler: pdfViewerHandler);
+    router.define(webdavFileExplorer, handler: webdavFileExplorerHandler);
+    router.define(webdavFileInformation, handler: webdavFileInformationHandler);
+    router.define(webdavUpDownloadManagePage, handler: webdavDownloadFileHandler);
   }
 }

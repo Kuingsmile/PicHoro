@@ -23,6 +23,7 @@ Map<String, String> pdconfig = {
   'ftp': 'ftp_config',
   'aws': 'aws_config',
   'alist': 'alist_config',
+  'webdav': 'webdav_config',
 };
 
 Map<String, Function> deleteFunc = {
@@ -37,6 +38,7 @@ Map<String, Function> deleteFunc = {
   'PBhostExtend1': FTPImageUploadUtils.deleteApi,//FTP
   'PBhostExtend2': AwsImageUploadUtils.deleteApi,//AWS
   'PBhostExtend3': AlistImageUploadUtils.deleteApi,//Alist
+  'PBhostExtend4': WebdavImageUploadUtils.deleteApi,//Webdav
 };
 
 //获取图床配置文件
@@ -55,6 +57,8 @@ Future<File> get _localFile async {
       return File('${directory.path}/${defaultUser}_${pdconfig['aws']}.txt');
     case 'PBhostExtend3':
       return File('${directory.path}/${defaultUser}_${pdconfig['alist']}.txt');
+    case 'PBhostExtend4':
+      return File('${directory.path}/${defaultUser}_${pdconfig['webdav']}.txt');
     default:
       return File('${directory.path}/${defaultUser}_${pdconfig[defaultConfig]}.txt');
   }

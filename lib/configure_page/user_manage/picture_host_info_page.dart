@@ -35,6 +35,7 @@ class PictureHostInfoPageState
     'ftp': 'FTP',
     'aws': 'S3兼容平台',
     'alist': 'Alist V3',
+    'webdav': 'WebDAV',
   };
   final Map<String, dynamic> psNameRouterMap = {
     'smms': Routes.smmsPShostSelect,
@@ -48,6 +49,7 @@ class PictureHostInfoPageState
     'ftp': Routes.ftpPShostSelect,
     'aws': Routes.awsPShostSelect,
     'alist': Routes.alistPShostSelect,
+    'webdav': Routes.webdavPShostSelect,
   };
 
   @override
@@ -73,6 +75,7 @@ class PictureHostInfoPageState
         "ftp": "$configPath/${defaultUser}_ftp_config.txt",
         "aws": "$configPath/${defaultUser}_aws_config.txt",
         "alist": "$configPath/${defaultUser}_alist_config.txt",
+        "webdav": "$configPath/${defaultUser}_webdav_config.txt",
       };
       List pictureHostInfoList = [
         'alist',
@@ -86,6 +89,7 @@ class PictureHostInfoPageState
         'smms',
         'tcyun',
         'upyun',
+        'webdav',
       ];
 
       for (var i = 0; i < pictureHostInfoList.length; i++) {
@@ -196,6 +200,7 @@ class PictureHostInfoPageState
       'ftp': 'assets/images/ftp.png',
       'aws': 'assets/images/aws_s3.png',
       'alist': 'assets/images/alist.png',
+      'webdav': 'assets/images/webdav.png',
     };
     return Image.asset(iconMap[pshost]!, width: 30, height: 30);
   }

@@ -31,7 +31,8 @@ class DefaultPShostSelectState extends State<DefaultPShostSelect> {
     'upyun',
     'ftp',
     'aws',
-    'alist'
+    'alist',
+    'webdav',
   ];
 
   @override
@@ -40,7 +41,7 @@ class DefaultPShostSelectState extends State<DefaultPShostSelect> {
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
-        title:  titleText('默认图床选择'),
+        title: titleText('默认图床选择'),
       ),
       body: ListView(
         children: [
@@ -174,6 +175,18 @@ class DefaultPShostSelectState extends State<DefaultPShostSelect> {
               setState(() {});
             },
           ),
+          ListTile(
+            title: const Text('WebDAV'),
+            trailing: Global.defaultPShost == 'webdav'
+                ? const Icon(Icons.check)
+                : null,
+            onTap: () async {
+              await setdefaultPShostRemoteAndLocal('webdav');
+              eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
+              eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
+              setState(() {});
+            },
+          ),
         ],
       ),
     );
@@ -194,6 +207,7 @@ setdefaultPShostRemoteAndLocal(String psHost) async {
     'ftp': MySqlUtils.queryFTP,
     'aws': MySqlUtils.queryAws,
     'alist': MySqlUtils.queryAlist,
+    'webdav': MySqlUtils.queryWebdav,
   };
 
   try {
@@ -253,6 +267,8 @@ setdefaultPShostRemoteAndLocal(String psHost) async {
         await Global.setShowedPBhost('PBhostExtend2');
       } else if (psHost == 'alist') {
         await Global.setShowedPBhost('PBhostExtend3');
+      } else if (psHost == 'webdav') {
+        await Global.setShowedPBhost('PBhostExtend4');
       }
       return Fluttertoast.showToast(
           msg: "已经是默认配置",
@@ -291,6 +307,8 @@ setdefaultPShostRemoteAndLocal(String psHost) async {
           await Global.setShowedPBhost('PBhostExtend2');
         } else if (psHost == 'alist') {
           await Global.setShowedPBhost('PBhostExtend3');
+        } else if (psHost == 'webdav') {
+          await Global.setShowedPBhost('PBhostExtend4');
         }
         showToast('已设置$psHost为默认图床');
       } else {

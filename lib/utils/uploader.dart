@@ -20,6 +20,7 @@ Map<String, String> pdconfig = {
   'ftp': 'ftp_config',
   'aws': 'aws_config',
   'alist': 'alist_config',
+  'webdav': 'webdav_config',
 };
 
 Map<String, Function> uploadFunc = {
@@ -34,6 +35,7 @@ Map<String, Function> uploadFunc = {
   'ftp': FTPImageUploadUtils.uploadApi,
   'aws': AwsImageUploadUtils.uploadApi,
   'alist': AlistImageUploadUtils.uploadApi,
+  'webdav': WebdavImageUploadUtils.uploadApi,
 };
 
 //获取图床配置文件

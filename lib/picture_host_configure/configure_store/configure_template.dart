@@ -14,6 +14,7 @@ class ConfigureTemplate {
     'sm.ms': smmsConfigureTemplate,
     'imgur': imgurConfigureTemplate,
     'alist': alistConfigureTemplate,
+    'webdav': webdavConfigureTemplate,
   };
 
   static List alistConfigureTemplateKeys = AlistConfigModel.keysList;
@@ -27,6 +28,7 @@ class ConfigureTemplate {
   static List smmsConfigureTemplateKeys = SmmsConfigModel.keysList;
   static List tencentConfigureTemplateKeys = TencentConfigModel.keysList;
   static List upyunConfigureTemplateKeys = UpyunConfigModel.keysList;
+  static List webdavConfigureTemplateKeys = WebdavConfigModel.keysList;
 
   static final Map<String, String> alistConfigureTemplate = {
     for (var k in alistConfigureTemplateKeys) k: placeholder
@@ -70,5 +72,9 @@ class ConfigureTemplate {
 
   static final Map<String, String> upyunConfigureTemplate = {
     for (var k in upyunConfigureTemplateKeys) k: placeholder
+  };
+
+  static final Map<String, String> webdavConfigureTemplate = {
+    for (var k in webdavConfigureTemplateKeys) k: placeholder
   };
 }
