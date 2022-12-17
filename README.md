@@ -12,7 +12,7 @@
      </a>
 </div>
 
-&emsp;&emsp;一款基于flutter的手机端云存储平台/图床管理和文件上传/下载工具，最新版本**V1.9.7**，与PicGo配置互通，可直接扫码导入，主要功能包括云存储/图床/云服务器平台,以及网盘管理（通过[Alist](https://alist.nn.ci/zh/))，文件上传和下载管理，以及各种格式的链接分享。
+&emsp;&emsp;一款基于flutter的手机端云存储平台/图床管理和文件上传/下载工具，最新版本**V1.9.8**，与PicGo配置互通，可直接扫码导入，主要功能包括云存储/图床/云服务器平台,以及网盘管理（通过[Alist](https://alist.nn.ci/zh/))，文件上传和下载管理，以及各种格式的链接分享。
 
 &emsp;&emsp;支持多种图片/PDF/文本文件/音视频的在线预览和播放，具体支持的格式请查看[支持的格式列表](https://github.com/Kuingsmile/PicHoro/blob/main/supported_format.md "支持的格式列表")
 
@@ -39,6 +39,7 @@
 
 - **支持直接管理云存储/图床，包括新建/删除/修改存储桶，创建/删除目录和文件，上传和下载文件和照片等**
 - **可通过Alist V3或WebDav管理多种网盘**
+- **支持图片压缩功能，可压缩为webp/jpg/png格式**
 - **支持预览多种格式的文件，包括图片/PDF/文本文件/音视频等**
 - **支持SSH/SFTP，可视化管理文件，内置SSH终端可直接管理云服务器**
 - **支持扫描二维码将PicGo(v2.3.0-beta.2以上版本)配置文件直接导入PicHoro**
@@ -75,7 +76,7 @@
 
 Github下载地址 [Github release](https://github.com/Kuingsmile/PicHoro/releases)  
 
-我的个人网站提供的最新版本下载地址 [https://www.horosama.com/self_apk/PicHoro_V1.9.7.apk](https://www.horosama.com/self_apk/PicHoro_V1.9.7.apk)
+我的个人网站提供的最新版本下载地址 [https://www.horosama.com/self_apk/PicHoro_V1.9.8.apk](https://www.horosama.com/self_apk/PicHoro_V1.9.8.apk)
 
 ### IOS
 
@@ -111,6 +112,11 @@ Github下载地址 [Github release](https://github.com/Kuingsmile/PicHoro/releas
 ## 最近更新
 
   详细更新日志请查看[更新日志](https://github.com/Kuingsmile/PicHoro/blob/main/Version_update_log.md "更新日志")
+
+- 2022-12-18: **V1.98**:
+  - 新增：添加了图片压缩功能，现在可以选择在上传图片前先进行压缩了，可选压缩后格式为jpg、png和webp，并且可以自定义最小宽度、最小高度和压缩后质量。
+  - 新增：S3 API兼容平台上传时现在会主动修改content-type。
+  - 优化：添加了webp文件格式的图标。
 
 - 2022-12-05: **V1.97**:
   - 新增：添加了对**WebDAV**的支持，使用坚果云webdav和Alist V3的webdav测试通过。
