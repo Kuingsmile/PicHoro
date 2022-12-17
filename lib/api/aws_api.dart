@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:f_logs/f_logs.dart';
 import 'package:flutter/foundation.dart';
 import 'package:minio_new/minio.dart';
+import 'package:path/path.dart' as my_path;
 
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/global.dart';
@@ -61,10 +62,13 @@ class AwsImageUploadUtils {
 
     try {
       Stream<Uint8List> stream = File(path).openRead().cast();
+      String? contentType =
+          getContentType(my_path.extension(path).substring(1));
       await minio.putObject(
         bucket,
         urlpath,
         stream,
+        metadata: contentType == null ? null : {"Content-Type": contentType},
       );
       String returnUrl = '';
       String displayUrl = '';
