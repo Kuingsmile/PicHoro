@@ -4,6 +4,7 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:path/path.dart' as my_path;
@@ -50,6 +51,10 @@ Map<String, Function> linkGenerateDict = {
   'custom': generateCustomFormatedUrl,
 };
 
+generateBasicAuth(String username, String password) {
+  return 'Basic ${base64Encode(utf8.encode('$username:$password'))}';
+}
+
 getToday(String format) {
   String today = DateUtil.formatDate(DateTime.now(), format: format);
   return today;
@@ -68,39 +73,39 @@ supportedExtensions(String ext) {
   }
 }
 
-downloadTxtFile(String urlpath, String fileName) async {
-    try {
-      BaseOptions baseOptions = BaseOptions(
-        sendTimeout: 30000,
-        receiveTimeout: 30000,
-        connectTimeout: 30000,
-      );
-      Dio dio = Dio(baseOptions);
-      String tempDir = (await getTemporaryDirectory()).path;
-      var tempfile = File('$tempDir/$fileName');
-      var response = await dio.download(
-        urlpath,
-        tempfile.path,
-        deleteOnError: false,
-        options: Options(
-          headers: {},
-        ),
-      );
-      if (response.statusCode == 200) {
-        return tempfile.path;
-      } else {
-        return 'error';
-      }
-    } catch (e) {
-      FLog.error(
-          className: "common_functions",
-          methodName: "downloadFile",
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+downloadTxtFile(
+    String urlpath, String fileName, Map<String, dynamic>? headers) async {
+  try {
+    BaseOptions baseOptions = BaseOptions(
+      sendTimeout: 30000,
+      receiveTimeout: 30000,
+      connectTimeout: 30000,
+    );
+    Dio dio = Dio(baseOptions);
+    String tempDir = (await getTemporaryDirectory()).path;
+    var tempfile = File('$tempDir/$fileName');
+    var response = await dio.download(
+      urlpath,
+      tempfile.path,
+      deleteOnError: false,
+      options: Options(
+        headers: headers ?? {},
+      ),
+    );
+    if (response.statusCode == 200) {
+      return tempfile.path;
+    } else {
+      return 'error';
     }
-    return 'error';
+  } catch (e) {
+    FLog.error(
+        className: "common_functions",
+        methodName: "downloadFile",
+        text: formatErrorMessage({}, e.toString()),
+        dataLogType: DataLogType.ERRORS.toString());
   }
-
+  return 'error';
+}
 
 //弹出对话框
 showAlertDialog({
@@ -566,6 +571,18 @@ mainInit() async {
   String todayAlistUpdate = await Global.getTodayAlistUpdate();
   Global.setTodayAlistUpdate(todayAlistUpdate);
 
+  //初始化图片压缩选项
+  bool isCompress = await Global.getisCompress();
+  Global.setisCompress(isCompress);
+  int minWidth = await Global.getminWidth();
+  Global.setminWidth(minWidth);
+  int minHeight = await Global.getminHeight();
+  Global.setminHeight(minHeight);
+  int quality = await Global.getquality();
+  Global.setquality(quality);
+  String defaultCompressFormat = await Global.getdefaultCompressFormat();
+  Global.setdefaultCompressFormat(defaultCompressFormat);
+
   //初始化图床相册数据库
   Database db = await Global.getDatabase();
   await Global.setDatabase(db);
@@ -639,6 +656,10 @@ mainInit() async {
   Global.setAlistUploadList(alistUploadList);
   List<String> alistDownloadList = await Global.getAlistDownloadList();
   Global.setAlistDownloadList(alistDownloadList);
+  List<String> webdavUploadList = await Global.getWebdavUploadList();
+  Global.setWebdavUploadList(webdavUploadList);
+  List<String> webdavDownloadList = await Global.getWebdavDownloadList();
+  Global.setWebdavDownloadList(webdavDownloadList);
 }
 
 //获得小图标，图片预览
