@@ -28,6 +28,11 @@ class Global {
   static String customRenameFormat = r'{Y}_{m}_{d}_{uuid}'; //自定义重命名格式
   static bool operateDone = false;
   static String todayAlistUpdate = '19700101';
+  static bool isCompress = false;
+  static int minWidth = 1920;
+  static int minHeight = 1080;
+  static int quality = 80;
+  static String defaultCompressFormat = 'webp';
   static List psHostHomePageOrder = [
     0,
     1,
@@ -76,6 +81,8 @@ class Global {
   static List<String> awsUploadList = [];
   static List<String> alistDownloadList = [];
   static List<String> alistUploadList = [];
+  static List<String> webdavDownloadList = [];
+  static List<String> webdavUploadList = [];
 
   static final List iconList = [
     "3g2",
@@ -273,6 +280,7 @@ class Global {
     "wav",
     "wdl",
     "webm",
+    "webp",
     "wki",
     "wma",
     "wmf",
@@ -585,6 +593,67 @@ class Global {
     await SpUtil.getInstance();
     bool operateDone = SpUtil.getBool('key_operateDone', defValue: false)!;
     return operateDone;
+  }
+
+  static getisCompress() async {
+    await SpUtil.getInstance();
+    bool isCompress = SpUtil.getBool('key_isCompress', defValue: false)!;
+    return isCompress;
+  }
+
+  static setisCompress(bool isCompress) async {
+    await SpUtil.getInstance();
+    SpUtil.putBool('key_isCompress', isCompress);
+    Global.isCompress = isCompress;
+  }
+
+  static getminWidth() async {
+    await SpUtil.getInstance();
+    int minWidth = SpUtil.getInt('key_minWidth', defValue: 1920)!;
+    return minWidth;
+  }
+
+  static setminWidth(int minWidth) async {
+    await SpUtil.getInstance();
+    SpUtil.putInt('key_minWidth', minWidth);
+    Global.minWidth = minWidth;
+  }
+
+  static getminHeight() async {
+    await SpUtil.getInstance();
+    int minHeight = SpUtil.getInt('key_minHeight', defValue: 1080)!;
+    return minHeight;
+  }
+
+  static setminHeight(int minHeight) async {
+    await SpUtil.getInstance();
+    SpUtil.putInt('key_minHeight', minHeight);
+    Global.minHeight = minHeight;
+  }
+
+  static getquality() async {
+    await SpUtil.getInstance();
+    int quality = SpUtil.getInt('key_quality', defValue: 80)!;
+    return quality;
+  }
+
+  static setquality(int quality) async {
+    await SpUtil.getInstance();
+    SpUtil.putInt('key_quality', quality);
+    Global.quality = quality;
+  }
+
+  static getdefaultCompressFormat() async {
+    await SpUtil.getInstance();
+    String defaultCompressFormat =
+        SpUtil.getString('key_defaultCompressFormat', defValue: 'webp')!;
+    return defaultCompressFormat;
+  }
+
+  static setdefaultCompressFormat(String defaultCompressFormat) async {
+    await SpUtil.getInstance();
+    SpUtil.putString('key_defaultCompressFormat', defaultCompressFormat);
+    Global.defaultCompressFormat = defaultCompressFormat;
   }
 
   static setpsHostHomePageOrder(List<String> psHostHomePageOrder) async {
@@ -920,6 +989,32 @@ class Global {
     List alistDownloadList =
         SpUtil.getStringList('key_alistDownloadList', defValue: [])!;
     return alistDownloadList;
+  }
+
+  static setWebdavUploadList(List<String> webdavUploadList) async {
+    await SpUtil.getInstance();
+    SpUtil.putStringList('key_webdavUploadList', webdavUploadList);
+    Global.webdavUploadList = webdavUploadList;
+  }
+
+  static getWebdavUploadList() async {
+    await SpUtil.getInstance();
+    List webdavUploadList =
+        SpUtil.getStringList('key_webdavUploadList', defValue: [])!;
+    return webdavUploadList;
+  }
+
+  static setWebdavDownloadList(List<String> webdavDownloadList) async {
+    await SpUtil.getInstance();
+    SpUtil.putStringList('key_webdavDownloadList', webdavDownloadList);
+    Global.webdavDownloadList = webdavDownloadList;
+  }
+
+  static getWebdavDownloadList() async {
+    await SpUtil.getInstance();
+    List webdavDownloadList =
+        SpUtil.getStringList('key_webdavDownloadList', defValue: [])!;
+    return webdavDownloadList;
   }
 
   static setTodayAlistUpdate(String todayAlistUpdate) async {
