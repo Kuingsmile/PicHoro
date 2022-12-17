@@ -26,6 +26,7 @@ import 'package:horopic/router/application.dart';
 import 'package:horopic/router/routers.dart';
 import 'package:horopic/picture_host_manage/common_page/loading_state.dart'
     as loading_state;
+import 'package:horopic/utils/image_compress.dart';
 
 class LskyproFileExplorer extends StatefulWidget {
   final Map userProfile;
@@ -476,9 +477,24 @@ class LskyproFileExplorerState
                               }
                               Map configMap =
                                   await LskyproManageAPI.getConfigMap();
-                              configMap['album_id'] =
-                                  widget.albumInfo['id'] ?? 'None';
+                              configMap['album_id'] = widget.albumInfo['id'] ?? 'None';
                               for (int i = 0; i < files.length; i++) {
+                                 File compressedFile;
+                                  if (Global.isCompress == true) {
+                                    ImageCompress imageCompress =
+                                        ImageCompress();
+                                    compressedFile =
+                                        await imageCompress.compressAndGetFile(
+                                            files[i].path,
+                                            my_path.basename(files[i].path),
+                                            Global.defaultCompressFormat,
+                                            minHeight: Global.minHeight,
+                                            minWidth: Global.minWidth,
+                                            quality: Global.quality);
+                                    files[i] = compressedFile;
+                                  } else {
+                                    compressedFile = files[i];
+                                  }
                                 List uploadList = [
                                   files[i].path,
                                   my_path.basename(files[i].path),
@@ -987,7 +1003,8 @@ class LskyproFileExplorerState
                                               showToast('删除成功');
                                               setState(() {
                                                 allInfoList.removeAt(index);
-                                                dirAllInfoList.removeAt(index);
+                                                dirAllInfoList
+                                                      .removeAt(index);
                                                 selectedFilesBool
                                                     .removeAt(index);
                                               });
@@ -1212,8 +1229,7 @@ class LskyproFileExplorerState
                                   urlList +=
                                       '${allInfoList[i]['links']['url']},';
                                 }
-                                urlList =
-                                    urlList.substring(0, urlList.length - 1);
+                                urlList = urlList.substring(0, urlList.length - 1);
                                 Application.router.navigateTo(this.context,
                                     '${Routes.albumImagePreview}?index=$newImageIndex&images=${Uri.encodeComponent(urlList)}',
                                     transition: TransitionType.none);

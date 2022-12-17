@@ -24,6 +24,7 @@ import 'package:horopic/picture_host_manage/common_page/loading_state.dart'
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/pages/loading.dart';
+import 'package:horopic/utils/image_compress.dart';
 
 bool isCoverFile = false;
 
@@ -451,6 +452,27 @@ class UpyunFileExplorerState
                                 configMap['url'] = widget.element['url'];
                                 configMap['path'] = widget.bucketPrefix;
                                 for (int i = 0; i < files.length; i++) {
+                                  File compressedFile;
+                                  if (Global.imgExt.contains(my_path
+                                      .extension(files[i].path)
+                                      .toLowerCase()
+                                      .substring(1))) {
+                                    if (Global.isCompress == true) {
+                                      ImageCompress imageCompress =
+                                          ImageCompress();
+                                      compressedFile = await imageCompress
+                                          .compressAndGetFile(
+                                              files[i].path,
+                                              my_path.basename(files[i].path),
+                                              Global.defaultCompressFormat,
+                                              minHeight: Global.minHeight,
+                                              minWidth: Global.minWidth,
+                                              quality: Global.quality);
+                                      files[i] = compressedFile;
+                                    } else {
+                                      compressedFile = files[i];
+                                    }
+                                  }
                                   List uploadList = [
                                     files[i].path,
                                     my_path.basename(files[i].path),
@@ -512,6 +534,22 @@ class UpyunFileExplorerState
                                 configMap['url'] = widget.element['url'];
                                 configMap['path'] = widget.bucketPrefix;
                                 for (int i = 0; i < files.length; i++) {
+                                  File compressedFile;
+                                  if (Global.isCompress == true) {
+                                    ImageCompress imageCompress =
+                                        ImageCompress();
+                                    compressedFile =
+                                        await imageCompress.compressAndGetFile(
+                                            files[i].path,
+                                            my_path.basename(files[i].path),
+                                            Global.defaultCompressFormat,
+                                            minHeight: Global.minHeight,
+                                            minWidth: Global.minWidth,
+                                            quality: Global.quality);
+                                    files[i] = compressedFile;
+                                  } else {
+                                    compressedFile = files[i];
+                                  }
                                   List uploadList = [
                                     files[i].path,
                                     my_path.basename(files[i].path),
@@ -1370,8 +1408,9 @@ class UpyunFileExplorerState
                                   String shareUrl = widget.element['url'] +
                                       widget.bucketPrefix +
                                       allInfoList[index]['name'];
+                                  Map<String, dynamic> headers = {};
                                   Application.router.navigateTo(this.context,
-                                      '${Routes.pdfViewer}?url=${Uri.encodeComponent(shareUrl)}&fileName=${Uri.encodeComponent(allInfoList[index]['name'])}',
+                                      '${Routes.pdfViewer}?url=${Uri.encodeComponent(shareUrl)}&fileName=${Uri.encodeComponent(allInfoList[index]['name'])}&headers=${Uri.encodeComponent(jsonEncode(headers))}',
                                       transition: TransitionType.none);
                                 } else if (Global.textExt.contains(
                                     allInfoList[index]['name']
@@ -1383,7 +1422,9 @@ class UpyunFileExplorerState
                                       allInfoList[index]['name'];
                                   showToast('开始获取文件');
                                   String filePath = await downloadTxtFile(
-                                      shareUrl, allInfoList[index]['name']);
+                                      shareUrl,
+                                      allInfoList[index]['name'],
+                                      null);
                                   String fileName = allInfoList[index]['name'];
                                   if (filePath == 'error') {
                                     showToast('获取失败');
@@ -1420,8 +1461,9 @@ class UpyunFileExplorerState
                                       newImageIndex--;
                                     }
                                   }
+                                  Map<String, dynamic> headers = {};
                                   Application.router.navigateTo(this.context,
-                                      '${Routes.netVideoPlayer}?videoList=${Uri.encodeComponent(jsonEncode(videoList))}&index=$newImageIndex&type=${Uri.encodeComponent('normal')}',
+                                      '${Routes.netVideoPlayer}?videoList=${Uri.encodeComponent(jsonEncode(videoList))}&index=$newImageIndex&type=${Uri.encodeComponent('normal')}&headers=${Uri.encodeComponent(jsonEncode(headers))}',
                                       transition: TransitionType.none);
                                 } else if (Global.vlcExt.contains(
                                     allInfoList[index]['name']
@@ -1477,9 +1519,9 @@ class UpyunFileExplorerState
                                               .first];
                                     }
                                   }
-
+                                  Map<String, dynamic> headers = {};
                                   Application.router.navigateTo(this.context,
-                                      '${Routes.netVideoPlayer}?videoList=${Uri.encodeComponent(jsonEncode(videoList))}&index=$newImageIndex&type=${Uri.encodeComponent('mkv')}',
+                                      '${Routes.netVideoPlayer}?videoList=${Uri.encodeComponent(jsonEncode(videoList))}&index=$newImageIndex&type=${Uri.encodeComponent('mkv')}&headers=${Uri.encodeComponent(jsonEncode(headers))}',
                                       transition: TransitionType.none);
                                 }
                               },

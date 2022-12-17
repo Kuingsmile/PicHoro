@@ -24,6 +24,7 @@ import 'package:horopic/picture_host_manage/common_page/loading_state.dart'
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/pages/loading.dart';
+import 'package:horopic/utils/image_compress.dart';
 
 class WebdavFileExplorer extends StatefulWidget {
   final Map element;
@@ -430,6 +431,27 @@ class WebdavFileExplorerState
                                     await WebdavManageAPI.getConfigMap();
                                 configMap['uploadPath'] = widget.bucketPrefix;
                                 for (int i = 0; i < files.length; i++) {
+                                   File compressedFile;
+                                  if (Global.imgExt.contains(my_path
+                                      .extension(files[i].path)
+                                      .toLowerCase()
+                                      .substring(1))) {
+                                    if (Global.isCompress == true) {
+                                      ImageCompress imageCompress =
+                                          ImageCompress();
+                                      compressedFile = await imageCompress
+                                          .compressAndGetFile(
+                                              files[i].path,
+                                              my_path.basename(files[i].path),
+                                              Global.defaultCompressFormat,
+                                              minHeight: Global.minHeight,
+                                              minWidth: Global.minWidth,
+                                              quality: Global.quality);
+                                      files[i] = compressedFile;
+                                    } else {
+                                      compressedFile = files[i];
+                                    }
+                                  }
                                   List uploadList = [
                                     files[i].path,
                                     my_path.basename(files[i].path),
@@ -493,6 +515,22 @@ class WebdavFileExplorerState
                                     await WebdavManageAPI.getConfigMap();
                                 configMap['uploadPath'] = widget.bucketPrefix;
                                 for (int i = 0; i < files.length; i++) {
+                                   File compressedFile;
+                                  if (Global.isCompress == true) {
+                                    ImageCompress imageCompress =
+                                        ImageCompress();
+                                    compressedFile =
+                                        await imageCompress.compressAndGetFile(
+                                            files[i].path,
+                                            my_path.basename(files[i].path),
+                                            Global.defaultCompressFormat,
+                                            minHeight: Global.minHeight,
+                                            minWidth: Global.minWidth,
+                                            quality: Global.quality);
+                                    files[i] = compressedFile;
+                                  } else {
+                                    compressedFile = files[i];
+                                  }
                                   List uploadList = [
                                     files[i].path,
                                     my_path.basename(files[i].path),

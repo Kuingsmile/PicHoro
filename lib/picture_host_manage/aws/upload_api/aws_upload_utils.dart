@@ -7,6 +7,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:f_logs/f_logs.dart';
 import 'package:minio_new/minio.dart';
+import 'package:path/path.dart' as my_path;
 
 import 'package:horopic/picture_host_manage/aws/upload_api/aws_upload_request.dart';
 import 'package:horopic/pages/upload_pages/upload_status.dart';
@@ -86,8 +87,12 @@ class UploadManager {
 
       int fileSize = File(path).lengthSync();
       Stream<Uint8List> stream = File(path).openRead().cast();
+      String? contentType =
+          getContentType(my_path.extension(path).substring(1));
 
-      await minio.putObject(bucket, urlpath, stream, onProgress: (int sent) {
+      await minio.putObject(bucket, urlpath, stream,
+          metadata: contentType == null ? null : {"Content-Type": contentType},
+          onProgress: (int sent) {
         getUpload(fileName)?.progress.value = sent / fileSize;
       });
 

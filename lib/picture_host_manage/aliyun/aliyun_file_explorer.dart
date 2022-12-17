@@ -24,6 +24,7 @@ import 'package:horopic/picture_host_manage/common_page/loading_state.dart'
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/pages/loading.dart';
+import 'package:horopic/utils/image_compress.dart';
 
 bool isCoverFile = false;
 
@@ -450,6 +451,27 @@ class AliyunFileExplorerState
                                 configMap['area'] = widget.element['location'];
                                 configMap['path'] = widget.bucketPrefix;
                                 for (int i = 0; i < files.length; i++) {
+                                  File compressedFile;
+                                  if (Global.imgExt.contains(my_path
+                                      .extension(files[i].path)
+                                      .toLowerCase()
+                                      .substring(1))) {
+                                    if (Global.isCompress == true) {
+                                      ImageCompress imageCompress =
+                                          ImageCompress();
+                                      compressedFile = await imageCompress
+                                          .compressAndGetFile(
+                                              files[i].path,
+                                              my_path.basename(files[i].path),
+                                              Global.defaultCompressFormat,
+                                              minHeight: Global.minHeight,
+                                              minWidth: Global.minWidth,
+                                              quality: Global.quality);
+                                      files[i] = compressedFile;
+                                    } else {
+                                      compressedFile = files[i];
+                                    }
+                                  }
                                   List uploadList = [
                                     files[i].path,
                                     my_path.basename(files[i].path),
@@ -509,6 +531,22 @@ class AliyunFileExplorerState
                                 configMap['area'] = widget.element['location'];
                                 configMap['path'] = widget.bucketPrefix;
                                 for (int i = 0; i < files.length; i++) {
+                                   File compressedFile;
+                                  if (Global.isCompress == true) {
+                                    ImageCompress imageCompress =
+                                        ImageCompress();
+                                    compressedFile =
+                                        await imageCompress.compressAndGetFile(
+                                            files[i].path,
+                                            my_path.basename(files[i].path),
+                                            Global.defaultCompressFormat,
+                                            minHeight: Global.minHeight,
+                                            minWidth: Global.minWidth,
+                                            quality: Global.quality);
+                                    files[i] = compressedFile;
+                                  } else {
+                                    compressedFile = files[i];
+                                  }
                                   List uploadList = [
                                     files[i].path,
                                     my_path.basename(files[i].path),
@@ -1401,8 +1439,9 @@ class AliyunFileExplorerState
                                   String shareUrl = '';
                                   shareUrl =
                                       'https://${widget.element['name']}.${widget.element['location']}.aliyuncs.com/${allInfoList[index]['Key']}';
+                                  Map<String, dynamic> headers = {};
                                   Application.router.navigateTo(this.context,
-                                      '${Routes.pdfViewer}?url=${Uri.encodeComponent(shareUrl)}&fileName=${Uri.encodeComponent(allInfoList[index]['Key'])}',
+                                      '${Routes.pdfViewer}?url=${Uri.encodeComponent(shareUrl)}&fileName=${Uri.encodeComponent(allInfoList[index]['Key'])}&headers=${Uri.encodeComponent(jsonEncode(headers))}',
                                       transition: TransitionType.none);
                                 } else if (Global.textExt.contains(
                                     allInfoList[index]['Key']
@@ -1414,7 +1453,7 @@ class AliyunFileExplorerState
                                       'https://${widget.element['name']}.${widget.element['location']}.aliyuncs.com/${allInfoList[index]['Key']}';
                                   showToast('开始获取文件');
                                   String filePath = await downloadTxtFile(
-                                      shareUrl, allInfoList[index]['Key']);
+                                      shareUrl, allInfoList[index]['Key'],null);
                                   String fileName = allInfoList[index]['Key'];
                                   if (filePath == 'error') {
                                     showToast('获取失败');
@@ -1451,8 +1490,9 @@ class AliyunFileExplorerState
                                       newImageIndex--;
                                     }
                                   }
+                                  Map<String, dynamic> headers = {};
                                   Application.router.navigateTo(this.context,
-                                      '${Routes.netVideoPlayer}?videoList=${Uri.encodeComponent(jsonEncode(videoList))}&index=$newImageIndex&type=${Uri.encodeComponent('normal')}',
+                                      '${Routes.netVideoPlayer}?videoList=${Uri.encodeComponent(jsonEncode(videoList))}&index=$newImageIndex&type=${Uri.encodeComponent('normal')}&headers=${Uri.encodeComponent(jsonEncode(headers))}',
                                       transition: TransitionType.none);
                                 } else if (Global.vlcExt.contains(
                                     allInfoList[index]['Key']
@@ -1506,9 +1546,9 @@ class AliyunFileExplorerState
                                               .split('.')
                                               .first];
                                     }
-                                  }
+                                  }Map<String, dynamic> headers = {};
                                   Application.router.navigateTo(this.context,
-                                      '${Routes.netVideoPlayer}?videoList=${Uri.encodeComponent(jsonEncode(videoList))}&index=$newImageIndex&type=${Uri.encodeComponent('mkv')}',
+                                      '${Routes.netVideoPlayer}?videoList=${Uri.encodeComponent(jsonEncode(videoList))}&index=$newImageIndex&type=${Uri.encodeComponent('mkv')}&headers=${Uri.encodeComponent(jsonEncode(headers))}',
                                       transition: TransitionType.none);
                                 }
                               },

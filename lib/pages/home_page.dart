@@ -9,6 +9,7 @@ import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 import 'package:flutter/services.dart' as flutter_services;
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:f_logs/f_logs.dart';
+import 'package:fluro/fluro.dart';
 import 'package:http/http.dart' as my_http;
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as my_path;
@@ -24,6 +25,9 @@ import 'package:horopic/utils/uploader.dart';
 import 'package:horopic/pages/upload_pages/upload_task.dart';
 import 'package:horopic/pages/upload_pages/upload_utils.dart';
 import 'package:horopic/pages/upload_pages/upload_status.dart';
+
+import 'package:horopic/utils/image_compress.dart';
+
 
 Map uploadStatus = {
   'UploadStatus.uploading': "上传中",
@@ -83,7 +87,7 @@ class HomePageState extends State<HomePage>
   @override
   void dispose() {
     actionEventBus.cancel();
-    
+
     clipboardList.clear();
     super.dispose();
   }
@@ -198,6 +202,7 @@ class HomePageState extends State<HomePage>
       return;
     }
     final io.File fileImage = io.File(pickedImage.path);
+
     Global.imagesList.clear();
     Global.imagesFileList.clear();
 
@@ -211,8 +216,20 @@ class HomePageState extends State<HomePage>
     } else {
       Global.imageFile = my_path.basename(fileImage.path);
     }
-    Global.imagesList.add(Global.imageFile!);
-    Global.imagesFileList.add(fileImage);
+    io.File compressedFile;
+    if (Global.isCompress == true) {
+      ImageCompress imageCompress = ImageCompress();
+      compressedFile = await imageCompress.compressAndGetFile(
+          pickedImage.path, Global.imageFile!, Global.defaultCompressFormat,
+          minHeight: Global.minHeight,
+          minWidth: Global.minWidth,
+          quality: Global.quality);
+      Global.imagesList.add(my_path.basename(compressedFile.path));
+    } else {
+      compressedFile = fileImage;
+      Global.imagesList.add(Global.imageFile!);
+    }
+    Global.imagesFileList.add(compressedFile);
   }
 
   _imageFromNetwork() async {
@@ -258,9 +275,20 @@ class HomePageState extends State<HomePage>
           } else {
             Global.imageFile = my_path.basename(file.path);
           }
-          Global.imagesList.add(Global.imageFile!);
-          Global.imagesFileList.add(file);
-
+          io.File compressedFile;
+          if (Global.isCompress == true) {
+            ImageCompress imageCompress = ImageCompress();
+            compressedFile = await imageCompress.compressAndGetFile(
+                file.path, Global.imageFile!, Global.defaultCompressFormat,
+                minHeight: Global.minHeight,
+                minWidth: Global.minWidth,
+                quality: Global.quality);
+            Global.imagesList.add(my_path.basename(compressedFile.path));
+          } else {
+            compressedFile = file;
+            Global.imagesList.add(Global.imageFile!);
+          }
+          Global.imagesFileList.add(compressedFile);
           successCount++;
         } catch (e) {
           FLog.error(
@@ -332,6 +360,7 @@ class HomePageState extends State<HomePage>
       Global.imageFile = my_path.basename(fileImage.path);
     }
     Global.imageOriginalFile = fileImage;
+
     _uploadAndBackToCamera();
     if (Global.multiUpload == 'fail') {
       if (Global.isCopyLink == true) {
@@ -355,6 +384,22 @@ class HomePageState extends State<HomePage>
   }
 
   _uploadAndBackToCamera() async {
+    io.File compressedFile;
+    if (Global.isCompress == true) {
+      ImageCompress imageCompress = ImageCompress();
+      compressedFile = await imageCompress.compressAndGetFile(
+          Global.imageOriginalFile!.path,
+          Global.imageFile!,
+          Global.defaultCompressFormat,
+          minHeight: Global.minHeight,
+          minWidth: Global.minWidth,
+          quality: Global.quality);
+      Global.imageOriginalFile = compressedFile;
+      Global.imageFile = my_path.basename(compressedFile.path);
+    } else {
+      compressedFile = Global.imageOriginalFile!;
+      Global.imageOriginalFile = compressedFile;
+    }
     String path = Global.imageOriginalFile!.path;
     String name = Global.imageFile!.split('/').last;
     Global.imageFile = null;
@@ -550,7 +595,7 @@ class HomePageState extends State<HomePage>
 
       if (Global.defaultPShost == 'ftp' ||
           Global.defaultPShost == 'aws' ||
-          Global.defaultPShost == 'alist'||
+          Global.defaultPShost == 'alist' ||
           Global.defaultPShost == 'webdav') {
         await AlbumSQL.insertData(Global.imageDBExtend!,
             pBhostToTableName[Global.defaultPShost]!, maps);
@@ -603,8 +648,21 @@ class HomePageState extends State<HomePage>
         Global.imageFile = my_path.basename(fileImage!.path);
       }
 
-      Global.imagesList.add(Global.imageFile!);
-      Global.imagesFileList.add(fileImage);
+      io.File compressedFile;
+      if (Global.isCompress == true) {
+        ImageCompress imageCompress = ImageCompress();
+        compressedFile = await imageCompress.compressAndGetFile(
+            fileImage.path, Global.imageFile!, Global.defaultCompressFormat,
+            minHeight: Global.minHeight,
+            minWidth: Global.minWidth,
+            quality: Global.quality);
+        Global.imagesList.add(my_path.basename(compressedFile.path));
+      } else {
+        compressedFile = fileImage;
+        Global.imagesList.add(Global.imageFile!);
+      }
+      Global.imagesFileList.add(compressedFile);
+
     }
   }
 
@@ -791,24 +849,24 @@ class HomePageState extends State<HomePage>
             maps['hostSpecificArg${letter[i]}'] = 'test';
           }
         } else if (Global.defaultPShost == 'webdav') {
-        // ["success", formatedURL, returnUrl, pictureKey, displayUrl]
-        maps = {
-          'path': path,
-          'name': name,
-          'url': uploadResult[2], //alist文件原始地址
-          'PBhost': Global.defaultPShost,
-          'pictureKey': uploadResult[3],
-          'hostSpecificArgA': uploadResult[4], //实际展示的是displayUrl
-        };
-        List letter = 'BCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-        for (int i = 0; i < letter.length; i++) {
-          maps['hostSpecificArg${letter[i]}'] = 'test';
+          // ["success", formatedURL, returnUrl, pictureKey, displayUrl]
+          maps = {
+            'path': path,
+            'name': name,
+            'url': uploadResult[2], //alist文件原始地址
+            'PBhost': Global.defaultPShost,
+            'pictureKey': uploadResult[3],
+            'hostSpecificArgA': uploadResult[4], //实际展示的是displayUrl
+          };
+          List letter = 'BCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+          for (int i = 0; i < letter.length; i++) {
+            maps['hostSpecificArg${letter[i]}'] = 'test';
+          }
         }
-      }
 
         if (Global.defaultPShost == 'ftp' ||
             Global.defaultPShost == 'aws' ||
-            Global.defaultPShost == 'alist'||
+            Global.defaultPShost == 'alist' ||
             Global.defaultPShost == 'webdav') {
           await AlbumSQL.insertData(Global.imageDBExtend!,
               pBhostToTableName[Global.defaultPShost]!, maps);
@@ -1774,7 +1832,7 @@ class HomePageState extends State<HomePage>
                           )),
                           SimpleDialogOption(
                               child: ListTile(
-                                dense: true,
+                            dense: true,
                             visualDensity: VisualDensity.compact,
                             title: Text('S3兼容平台',
                                 textAlign: TextAlign.center,
@@ -1793,7 +1851,7 @@ class HomePageState extends State<HomePage>
                           )),
                           SimpleDialogOption(
                               child: ListTile(
-                                dense: true,
+                            dense: true,
                             visualDensity: VisualDensity.compact,
                             title: Text('WebDAV',
                                 textAlign: TextAlign.center,

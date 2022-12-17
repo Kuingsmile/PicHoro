@@ -24,6 +24,7 @@ import 'package:horopic/router/application.dart';
 import 'package:horopic/router/routers.dart';
 import 'package:horopic/picture_host_manage/common_page/loading_state.dart'
     as loading_state;
+import 'package:horopic/utils/image_compress.dart';
 
 class ImgurFileExplorer extends StatefulWidget {
   final Map userProfile;
@@ -501,6 +502,21 @@ class ImgurFileExplorerState
                               configMap['albumhash'] =
                                   widget.albumInfo['id'] ?? 'None';
                               for (int i = 0; i < files.length; i++) {
+                                File compressedFile;
+                                if (Global.isCompress == true) {
+                                  ImageCompress imageCompress = ImageCompress();
+                                  compressedFile =
+                                      await imageCompress.compressAndGetFile(
+                                          files[i].path,
+                                          my_path.basename(files[i].path),
+                                          Global.defaultCompressFormat,
+                                          minHeight: Global.minHeight,
+                                          minWidth: Global.minWidth,
+                                          quality: Global.quality);
+                                  files[i] = compressedFile;
+                                } else {
+                                  compressedFile = files[i];
+                                }
                                 List uploadList = [
                                   files[i].path,
                                   my_path.basename(files[i].path),
@@ -1331,8 +1347,9 @@ class ImgurFileExplorerState
                                       newImageIndex--;
                                     }
                                   }
+                                  Map<String, dynamic> headers = {};
                                   Application.router.navigateTo(this.context,
-                                      '${Routes.netVideoPlayer}?videoList=${Uri.encodeComponent(jsonEncode(videoList))}&index=$newImageIndex&type=${Uri.encodeComponent('normal')}',
+                                      '${Routes.netVideoPlayer}?videoList=${Uri.encodeComponent(jsonEncode(videoList))}&index=$newImageIndex&type=${Uri.encodeComponent('normal')}&headers=${Uri.encodeComponent(jsonEncode(headers))}',
                                       transition: TransitionType.none);
                                 } else if (Global.vlcExt.contains(
                                     allInfoList[index]['link']
@@ -1391,9 +1408,10 @@ class ImgurFileExplorerState
                                               .first];
                                     }
                                   }
+                                  Map<String, dynamic> headers = {};
 
                                   Application.router.navigateTo(this.context,
-                                      '${Routes.netVideoPlayer}?videoList=${Uri.encodeComponent(jsonEncode(videoList))}&index=$newImageIndex&type=${Uri.encodeComponent('mkv')}',
+                                      '${Routes.netVideoPlayer}?videoList=${Uri.encodeComponent(jsonEncode(videoList))}&index=$newImageIndex&type=${Uri.encodeComponent('mkv')}&headers=${Uri.encodeComponent(jsonEncode(headers))}',
                                       transition: TransitionType.none);
                                 }
                               },
