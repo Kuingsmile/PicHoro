@@ -1,30 +1,11 @@
 import 'dart:io';
 import 'dart:convert';
 
-import 'package:f_logs/f_logs.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'package:horopic/api/api.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/common_functions.dart';
-
-//默认图床参数和配置文件名对应关系
-Map<String, String> pdconfig = {
-  'lsky.pro': 'host_config',
-  'sm.ms': 'smms_config',
-  'imgur': 'imgur_config',
-  'upyun': 'upyun_config',
-  'qiniu': 'qiniu_config',
-  'aliyun': 'aliyun_config',
-  'tencent': 'tencent_config',
-  'github': 'github_config',
-  'gitee': 'gitee_config',
-  'weibo': 'weibo_config',
-  'ftp': 'ftp_config',
-  'aws': 'aws_config',
-  'alist': 'alist_config',
-  'webdav': 'webdav_config',
-};
 
 Map<String, Function> deleteFunc = {
   'lskypro': LskyproImageUploadUtils.deleteApi,
@@ -48,19 +29,19 @@ Future<File> get _localFile async {
   String defaultUser = await Global.getUser();
   switch (defaultConfig) {
     case 'lskypro':
-      return File('${directory.path}/${defaultUser}_${pdconfig['lsky.pro']}.txt');
+      return File('${directory.path}/${defaultUser}_${getpdconfig('lsky.pro')}.txt');
     case 'smms':
-      return File('${directory.path}/${defaultUser}_${pdconfig['sm.ms']}.txt');
+      return File('${directory.path}/${defaultUser}_${getpdconfig('sm.ms')}.txt');
     case 'PBhostExtend1':
-      return File('${directory.path}/${defaultUser}_${pdconfig['ftp']}.txt');
+      return File('${directory.path}/${defaultUser}_${getpdconfig('ftp')}.txt');
     case 'PBhostExtend2':
-      return File('${directory.path}/${defaultUser}_${pdconfig['aws']}.txt');
+      return File('${directory.path}/${defaultUser}_${getpdconfig('aws')}.txt');
     case 'PBhostExtend3':
-      return File('${directory.path}/${defaultUser}_${pdconfig['alist']}.txt');
+      return File('${directory.path}/${defaultUser}_${getpdconfig('alist')}.txt');
     case 'PBhostExtend4':
-      return File('${directory.path}/${defaultUser}_${pdconfig['webdav']}.txt');
+      return File('${directory.path}/${defaultUser}_${getpdconfig('webdav')}.txt');
     default:
-      return File('${directory.path}/${defaultUser}_${pdconfig[defaultConfig]}.txt');
+      return File('${directory.path}/${defaultUser}_${getpdconfig(defaultConfig)}.txt');
   }
 }
 
@@ -71,11 +52,12 @@ Future<String> readHostConfig() async {
     String contents = await file.readAsString();
     return contents;
   } catch (e) {
-    FLog.error(
-        className: "Deleter",
-        methodName: "readHostConfig",
-        text: formatErrorMessage({}, e.toString()),
-        dataLogType: DataLogType.ERRORS.toString());
+    flogErr(
+      e,
+      {},
+      'Deleter',
+      "readPictureHostConfig",
+    );
     return "Error";
   }
 }
@@ -93,12 +75,12 @@ deleterentry(Map deleteConfig) async {
         deleteMap: deleteConfig, configMap: configMap);
     return result;
   } catch (e) {
-    FLog.error(
-        className: "Deleter",
-        methodName: "deleterentry",
-        text: formatErrorMessage({
-        }, e.toString()),
-        dataLogType: DataLogType.ERRORS.toString());
+    flogErr(
+      e,
+      {},
+      'Deleter',
+      "deleterentry",
+    );
     return ["Error"];
   }
 }
