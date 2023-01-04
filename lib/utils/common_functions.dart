@@ -112,13 +112,14 @@ downloadTxtFile(
       return 'error';
     }
   } catch (e) {
-    FLog.error(
-        className: "common_functions",
-        methodName: "downloadTxtFile",
-        text: formatErrorMessage({}, e.toString()),
-        dataLogType: DataLogType.ERRORS.toString());
+    flogErr(
+      e,
+      {},
+      'common_functions',
+      "downloadTxtFile",
+    );
+    return 'error';
   }
-  return 'error';
 }
 
 //弹出对话框
