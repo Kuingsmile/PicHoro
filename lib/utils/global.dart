@@ -33,6 +33,9 @@ class Global {
   static int minHeight = 1080;
   static int quality = 80;
   static String defaultCompressFormat = 'webp';
+  static int defaultOutTime = 30000;
+  static String multipartString =
+      "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW";
   static List psHostHomePageOrder = [
     0,
     1,
@@ -401,7 +404,7 @@ class Global {
     'sbv',
     'ssa',
     'ttml'
-    'vtt',
+        'vtt',
     'srt',
   ];
 
