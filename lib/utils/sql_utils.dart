@@ -4,13 +4,14 @@ import 'dart:convert';
 import 'package:convert/convert.dart';
 import 'package:crypto/crypto.dart';
 import 'package:dart_des/dart_des.dart';
-import 'package:f_logs/f_logs.dart';
 import 'package:mysql1/mysql1.dart';
 
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/common_functions.dart';
 
 class MySqlUtils {
+  static String currentClassName = 'MySqlUtils';
+
   static List<int> iv = "保密占位符";
   static List<int> encrypted = [];
   static List<int> decrypted = [];
@@ -52,27 +53,12 @@ class MySqlUtils {
       password: "保密占位符",
       db: "保密占位符");
 
-  static Map<String, String> tablePShost = {'lsky.pro': 'lankong'};
-
   static getCurrentVersion() async {
     var conn = await MySqlConnection.connect(settings);
     var results =
         await conn.query('select * from version where stable=?', ['current']);
     for (var row in results) {
       return row[1].toString();
-    }
-  }
-
-  static query({required String table_name, required String username}) async {
-    var conn = await MySqlConnection.connect(settings);
-    try {
-      var results = await conn
-          .query('select * from $table_name where username = ?', [username]);
-      return results;
-    } catch (e) {
-      return "Error";
-    } finally {
-      await conn.close();
     }
   }
 
@@ -96,133 +82,37 @@ class MySqlUtils {
       }
       return resultsMap;
     } catch (e) {
+      flogErr(
+        e,
+        {'username': username},
+        currentClassName,
+        "queryUser",
+      );
       return "Error";
     } finally {
       await conn.close();
     }
   }
 
-  static queryLankong({required String username}) async {
+  static insertUser({required List content}) async {
     var conn = await MySqlConnection.connect(settings);
     try {
-      var results = await conn
-          .query('select * from lankong where username = ?', [username]);
-      if (results.isEmpty) {
-        return "Empty";
-      }
-      Map<String, dynamic> resultsMap = {};
-      resultsMap.clear();
-      for (var row in results) {
-        String host = await decryptSelf(row[1].toString());
-        String strategyId = await decryptSelf(row[2].toString());
-        String albumId = await decryptSelf(row[3].toString());
-        String token = await decryptSelf(row[4].toString());
-        resultsMap['host'] = host;
-        resultsMap['strategy_id'] = strategyId;
-        resultsMap['album_id'] = albumId;
-        resultsMap['token'] = token;
-      }
-      return resultsMap;
-    } catch (e) {
-      FLog.error(
-          className: 'MySqlUtils',
-          methodName: 'queryLankong',
-          text: formatErrorMessage({'username': username}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
-      return "Error";
-    } finally {
-      await conn.close();
-    }
-  }
-
-  static insertLankong({required List content}) async {
-    var conn = await MySqlConnection.connect(settings);
-    try {
-      String hosts = content[0].toString();
-      String strategyId = content[1].toString();
-      String albumId = content[2].toString();
-      String token = content[3].toString();
-      String username = content[4].toString();
-      String encryptedHost = await encryptSelf(hosts);
-      String encryptedStrategyId = await encryptSelf(strategyId);
-      String encryptedAlbumId = await encryptSelf(albumId);
-      String encryptedToken = await encryptSelf(token);
+      String valuename = content[0].toString();
+      String valuepassword = content[1].toString();
+      String valuedefaultPShost = content[2].toString();
+      String encryptedPassword = await encryptSelf(valuepassword);
 
       await conn.query(
-          "insert into lankong (hosts,strategy_id,album_id,token,username) values (?,?,?,?,?)",
-          [
-            encryptedHost,
-            encryptedStrategyId,
-            encryptedAlbumId,
-            encryptedToken,
-            username
-          ]);
+          "insert into users (username,password,defaultPShost) values (?,?,?)",
+          [valuename, encryptedPassword, valuedefaultPShost]);
       return 'Success';
     } catch (e) {
-      FLog.error(
-          className: 'MySqlUtils',
-          methodName: 'insertLankong',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
-      return "Error";
-    } finally {
-      await conn.close();
-    }
-  }
-
-  static updateLankong({required List content}) async {
-    var conn = await MySqlConnection.connect(settings);
-
-    try {
-      String hosts = content[0].toString();
-      String strategyId = content[1].toString();
-      String albumId = content[2].toString();
-      String token = content[3].toString();
-      String username = content[4].toString();
-      String encryptedHost = await encryptSelf(hosts);
-      String encryptedStrategyId = await encryptSelf(strategyId);
-      String encryptedAlbumId = await encryptSelf(albumId);
-      String encryptedToken = await encryptSelf(token);
-
-      await conn.query(
-          "update lankong set hosts = ?,strategy_id = ?,album_id = ?,token = ? where username = ?",
-          [
-            encryptedHost,
-            encryptedStrategyId,
-            encryptedAlbumId,
-            encryptedToken,
-            username
-          ]);
-      return 'Success';
-    } catch (e) {
-      FLog.error(
-          className: 'MySqlUtils',
-          methodName: 'updateLankong',
-          text: formatErrorMessage({'content': content}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
-      return "Error";
-    } finally {
-      await conn.close();
-    }
-  }
-
-  static updateLankong({required List content}) async {
-    var conn = await MySqlConnection.connect(settings);
-
-    try {
-      String hosts = content[0].toString();
-      String strategy_id = content[1].toString();
-      String token = content[2].toString();
-      String username = content[3].toString();
-      String encryptedHost = await encryptSelf(hosts);
-      String encryptedStrategy_id = await encryptSelf(strategy_id);
-      String encryptedToken = await encryptSelf(token);
-
-      var results = await conn.query(
-          "update lankong set hosts = ?,strategy_id = ?,token = ? where username = ?",
-          [encryptedHost, encryptedStrategy_id, encryptedToken, username]);
-      return 'Success';
-    } catch (e) {
+      flogErr(
+        e,
+        {},
+        currentClassName,
+        "insertUser",
+      );
       return "Error";
     } finally {
       await conn.close();
@@ -237,943 +127,494 @@ class MySqlUtils {
       String valuedefaultPShost = content[2].toString();
       String encryptedPassword = await encryptSelf(valuepassword);
 
-      var results = await conn.query(
+      await conn.query(
           "update users set password = ?,defaultPShost = ? where username = ?",
           [encryptedPassword, valuedefaultPShost, valuename]);
       return 'Success';
     } catch (e) {
+      flogErr(
+        e,
+        {},
+        currentClassName,
+        "updateUser",
+      );
       return "Error";
     } finally {
       await conn.close();
     }
+  }
+
+  static queryBase({
+    required String username,
+    required String tablename,
+    required List paramNames,
+    required bool isID,
+  }) async {
+    var conn = await MySqlConnection.connect(settings);
+    try {
+      var results = await conn
+          .query('select * from $tablename where username = ?', [username]);
+      if (results.isEmpty) {
+        return "Empty";
+      }
+      Map<String, dynamic> resultsMap = {};
+      resultsMap.clear();
+      for (var row in results) {
+        if (isID) {
+          resultsMap['id'] = row[0];
+        }
+        for (int i = 0; i < paramNames.length; i++) {
+          String paramName = paramNames[i];
+          String paramValue = await decryptSelf(row[i + 1].toString());
+          resultsMap[paramName] = paramValue;
+        }
+      }
+      return resultsMap;
+    } catch (e) {
+      flogErr(
+        e,
+        {'username': username},
+        currentClassName,
+        'query$tablename',
+      );
+      return "Error";
+    } finally {
+      await conn.close();
+    }
+  }
+
+  static insertBase({
+    required List content,
+    required String tablename,
+    required List paramNames,
+  }) async {
+    var conn = await MySqlConnection.connect(settings);
+    try {
+      int paraNum = paramNames.length;
+      List paraToInsert = [];
+      for (int i = 0; i < paraNum; i++) {
+        var _ = await encryptSelf(content[i].toString());
+        paraToInsert.add(_);
+      }
+      paraToInsert.add(content[paraNum].toString());
+      String paraNamesString = '${paramNames.join(",")},username';
+      String questionMark = '${'?,' * paraNum}?';
+
+      String insertCommand =
+          "insert into $tablename ($paraNamesString) values ($questionMark)";
+      await conn.query(insertCommand, paraToInsert);
+      return 'Success';
+    } catch (e) {
+      flogErr(
+        e,
+        {},
+        currentClassName,
+        'insert$tablename',
+      );
+      return "Error";
+    } finally {
+      await conn.close();
+    }
+  }
+
+  static updateBase({
+    required List content,
+    required String tablename,
+    required List paramNames,
+  }) async {
+    var conn = await MySqlConnection.connect(settings);
+    try {
+      int paraNum = paramNames.length;
+      List paraToInsert = [];
+      String paramNamesString = '';
+      for (int i = 0; i < paraNum; i++) {
+        var _ = await encryptSelf(content[i].toString());
+        paraToInsert.add(_);
+        paramNamesString += '${paramNames[i]} = ?,';
+      }
+      paraToInsert.add(content[paraNum].toString());
+      paramNamesString =
+          paramNamesString.substring(0, paramNamesString.length - 1);
+
+      String updateCommand =
+          "update $tablename set $paramNamesString where username = ?";
+      await conn.query(updateCommand, paraToInsert);
+      return 'Success';
+    } catch (e) {
+      flogErr(
+        e,
+        {},
+        currentClassName,
+        'update$tablename',
+      );
+      return "Error";
+    } finally {
+      await conn.close();
+    }
+  }
+
+  static queryLankong({required String username}) async {
+    var result = await queryBase(
+      username: username,
+      tablename: 'lankong',
+      paramNames: ['host', 'strategy_id', 'album_id', 'token'],
+      isID: false,
+    );
+    return result;
+  }
+
+  static insertLankong({required List content}) async {
+    var result = await insertBase(
+        content: content,
+        tablename: 'lankong',
+        paramNames: ['hosts', 'strategy_id', 'album_id', 'token']);
+    return result;
+  }
+
+  static updateLankong({required List content}) async {
+    var result = await updateBase(
+        content: content,
+        tablename: 'lankong',
+        paramNames: ['hosts', 'strategy_id', 'album_id', 'token']);
+    return result;
   }
 
   static querySmms({required String username}) async {
-    var conn = await MySqlConnection.connect(settings);
-    try {
-      var results =
-          await conn.query('select * from smms where username = ?', [username]);
-      if (results.isEmpty) {
-        return "Empty";
-      }
-      Map<String, dynamic> resultsMap = {};
-      resultsMap.clear();
-      for (var row in results) {
-        String token = await decryptSelf(row[1].toString());
-        resultsMap['token'] = token;
-      }
-      return resultsMap;
-    } catch (e) {
-      //print(e);
-      return "Error";
-    } finally {
-      await conn.close();
-    }
+    var result = await queryBase(
+      username: username,
+      tablename: 'smms',
+      paramNames: ['token'],
+      isID: false,
+    );
+    return result;
   }
 
   static insertSmms({required List content}) async {
-    var conn = await MySqlConnection.connect(settings);
-    try {
-      String token = content[0].toString();
-      String username = content[1].toString();
-
-      String encryptedToken = await encryptSelf(token);
-
-      var results = await conn.query(
-          "insert into smms (token,username) values (?,?)",
-          [encryptedToken, username]);
-      return 'Success';
-    } catch (e) {
-      return "Error";
-    } finally {
-      await conn.close();
-    }
+    var result = await insertBase(
+        content: content, tablename: 'smms', paramNames: ['token']);
+    return result;
   }
 
   static updateSmms({required List content}) async {
-    var conn = await MySqlConnection.connect(settings);
-
-    try {
-      String token = content[0].toString();
-      String username = content[1].toString();
-
-      String encryptedToken = await encryptSelf(token);
-
-      var results = await conn.query(
-          "update smms set token = ? where username = ?",
-          [encryptedToken, username]);
-      return 'Success';
-    } catch (e) {
-      return "Error";
-    } finally {
-      await conn.close();
-    }
+    var result = await updateBase(
+        content: content, tablename: 'smms', paramNames: ['token']);
+    return result;
   }
 
   static queryGithub({required String username}) async {
-    var conn = await MySqlConnection.connect(settings);
-    try {
-      var results = await conn
-          .query('select * from github where username = ?', [username]);
-      if (results.isEmpty) {
-        return "Empty";
-      }
-      Map<String, dynamic> resultsMap = {};
-      resultsMap.clear();
-      for (var row in results) {
-        String githubusername = await decryptSelf(row[1].toString());
-        String repo = await decryptSelf(row[2].toString());
-        String token = await decryptSelf(row[3].toString());
-        String storePath = await decryptSelf(row[4].toString());
-        String branch = await decryptSelf(row[5].toString());
-        String customDomain = await decryptSelf(row[6].toString());
-
-        resultsMap['githubusername'] = githubusername;
-        resultsMap['repo'] = repo;
-        resultsMap['token'] = token;
-        resultsMap['storePath'] = storePath;
-        resultsMap['branch'] = branch;
-        resultsMap['customDomain'] = customDomain;
-      }
-      return resultsMap;
-    } catch (e) {
-      return "Error";
-    } finally {
-      await conn.close();
-    }
+    var result = await queryBase(
+      username: username,
+      tablename: 'github',
+      paramNames: [
+        'githubusername',
+        'repo',
+        'token',
+        'storePath',
+        'branch',
+        'customDomain'
+      ],
+      isID: false,
+    );
+    return result;
   }
 
   static insertGithub({required List content}) async {
-    var conn = await MySqlConnection.connect(settings);
-    try {
-      String githubusername = content[0].toString();
-      String repo = content[1].toString();
-      String token = content[2].toString();
-      String storePath = content[3].toString();
-      String branch = content[4].toString();
-      String customDomain = content[5].toString();
-      String username = content[6].toString();
-
-      String encryptedGithubusername = await encryptSelf(githubusername);
-      String encryptedRepo = await encryptSelf(repo);
-      String encryptedToken = await encryptSelf(token);
-      String encryptedStorePath = await encryptSelf(storePath);
-      String encryptedBranch = await encryptSelf(branch);
-      String encryptedCustomDomain = await encryptSelf(customDomain);
-
-      var results = await conn.query(
-          "insert into github (githubusername,repo,token,storePath,branch,customDomain,username) values (?,?,?,?,?,?,?)",
-          [
-            encryptedGithubusername,
-            encryptedRepo,
-            encryptedToken,
-            encryptedStorePath,
-            encryptedBranch,
-            encryptedCustomDomain,
-            username
-          ]);
-      return 'Success';
-    } catch (e) {
-      return "Error";
-    } finally {
-      await conn.close();
-    }
+    var result = await insertBase(
+        content: content,
+        tablename: 'github',
+        paramNames: [
+          'githubusername',
+          'repo',
+          'token',
+          'storePath',
+          'branch',
+          'customDomain'
+        ]);
+    return result;
   }
 
   static updateGithub({required List content}) async {
-    var conn = await MySqlConnection.connect(settings);
-
-    try {
-      String githubusername = content[0].toString();
-      String repo = content[1].toString();
-      String token = content[2].toString();
-      String storePath = content[3].toString();
-      String branch = content[4].toString();
-      String customDomain = content[5].toString();
-      String username = content[6].toString();
-
-      String encryptedGithubusername = await encryptSelf(githubusername);
-      String encryptedRepo = await encryptSelf(repo);
-      String encryptedToken = await encryptSelf(token);
-      String encryptedStorePath = await encryptSelf(storePath);
-      String encryptedBranch = await encryptSelf(branch);
-      String encryptedCustomDomain = await encryptSelf(customDomain);
-
-      var results = await conn.query(
-          "update github set githubusername = ?,repo = ?,token = ?,storePath = ?,branch = ?,customDomain = ? where username = ?",
-          [
-            encryptedGithubusername,
-            encryptedRepo,
-            encryptedToken,
-            encryptedStorePath,
-            encryptedBranch,
-            encryptedCustomDomain,
-            username
-          ]);
-      return 'Success';
-    } catch (e) {
-      return "Error";
-    } finally {
-      await conn.close();
-    }
+    var result = await updateBase(
+        content: content,
+        tablename: 'github',
+        paramNames: [
+          'githubusername',
+          'repo',
+          'token',
+          'storePath',
+          'branch',
+          'customDomain'
+        ]);
+    return result;
   }
 
   static queryImgur({required String username}) async {
-    var conn = await MySqlConnection.connect(settings);
-    try {
-      var results = await conn
-          .query('select * from imgur where username = ?', [username]);
-
-      if (results.isEmpty) {
-        return "Empty";
-      }
-      Map<String, dynamic> resultsMap = {};
-      resultsMap.clear();
-      for (var row in results) {
-        //第一列是id
-        String clientId = await decryptSelf(row[1].toString());
-        String proxy = await decryptSelf(row[2].toString());
-
-        resultsMap['clientId'] = clientId;
-        resultsMap['proxy'] = proxy;
-      }
-      return resultsMap;
-    } catch (e) {
-      return "Error";
-    } finally {
-      await conn.close();
-    }
+    var result = await queryBase(
+      username: username,
+      tablename: 'imgur',
+      paramNames: ['clientId', 'proxy'],
+      isID: false,
+    );
+    return result;
   }
 
   static insertImgur({required List content}) async {
-    var conn = await MySqlConnection.connect(settings);
-    try {
-      String clientId = content[0].toString();
-      String proxy = content[1].toString();
-      String username = content[2].toString();
-
-      String encryptedClientId = await encryptSelf(clientId);
-      String encryptedProxy = await encryptSelf(proxy);
-
-      var results = await conn.query(
-          "insert into imgur (clientId,proxy,username) values (?,?,?)",
-          [encryptedClientId, encryptedProxy, username]);
-      return 'Success';
-    } catch (e) {
-      return "Error";
-    } finally {
-      await conn.close();
-    }
+    var result =
+        await insertBase(content: content, tablename: 'imgur', paramNames: [
+      'clientId',
+      'proxy',
+    ]);
+    return result;
   }
 
   static updateImgur({required List content}) async {
-    var conn = await MySqlConnection.connect(settings);
-
-    try {
-      String clientId = content[0].toString();
-      String proxy = content[1].toString();
-      String username = content[2].toString();
-      String encryptedClientId = await encryptSelf(clientId);
-      String encryptedProxy = await encryptSelf(proxy);
-      var results = await conn.query(
-          "update imgur set clientId = ?,proxy = ? where username = ?",
-          [encryptedClientId, encryptedProxy, username]);
-      return 'Success';
-    } catch (e) {
-      return "Error";
-    } finally {
-      await conn.close();
-    }
+    var result =
+        await updateBase(content: content, tablename: 'imgur', paramNames: [
+      'clientId',
+      'proxy',
+    ]);
+    return result;
   }
 
   static queryQiniu({required String username}) async {
-    var conn = await MySqlConnection.connect(settings);
-    try {
-      var results = await conn
-          .query('select * from qiniu where username = ?', [username]);
-
-      if (results.isEmpty) {
-        return "Empty";
-      }
-      Map<String, dynamic> resultsMap = {};
-      resultsMap.clear();
-      for (var row in results) {
-        //第一列是id
-        String accessKey = await decryptSelf(row[1].toString());
-        String secretKey = await decryptSelf(row[2].toString());
-        String bucket = await decryptSelf(row[3].toString());
-        String url = await decryptSelf(row[4].toString());
-        String area = await decryptSelf(row[5].toString());
-        String options = await decryptSelf(row[6].toString());
-        String path = await decryptSelf(row[7].toString());
-
-        resultsMap['accessKey'] = accessKey;
-        resultsMap['secretKey'] = secretKey;
-        resultsMap['bucket'] = bucket;
-        resultsMap['url'] = url;
-        resultsMap['area'] = area;
-        resultsMap['options'] = options;
-        resultsMap['path'] = path;
-      }
-      return resultsMap;
-    } catch (e) {
-      return "Error";
-    } finally {
-      await conn.close();
-    }
+    var result = await queryBase(
+      username: username,
+      tablename: 'qiniu',
+      paramNames: [
+        'accessKey',
+        'secretKey',
+        'bucket',
+        'url',
+        'area',
+        'options',
+        'path'
+      ],
+      isID: false,
+    );
+    return result;
   }
 
   static insertQiniu({required List content}) async {
-    var conn = await MySqlConnection.connect(settings);
-    try {
-      String accessKey = content[0].toString();
-      String secretKey = content[1].toString();
-      String bucket = content[2].toString();
-      String url = content[3].toString();
-      String area = content[4].toString();
-      String options = content[5].toString();
-      String path = content[6].toString();
-      String username = content[7].toString();
-
-      String encryptedAccessKey = await encryptSelf(accessKey);
-      String encryptedSecretKey = await encryptSelf(secretKey);
-      String encryptedBucket = await encryptSelf(bucket);
-      String encryptedUrl = await encryptSelf(url);
-      String encryptedArea = await encryptSelf(area);
-      String encryptedOptions = await encryptSelf(options);
-      String encryptedPath = await encryptSelf(path);
-
-      var results = await conn.query(
-          "insert into qiniu (accessKey,secretKey,bucket,url,area,options,path,username) values (?,?,?,?,?,?,?,?)",
-          [
-            encryptedAccessKey,
-            encryptedSecretKey,
-            encryptedBucket,
-            encryptedUrl,
-            encryptedArea,
-            encryptedOptions,
-            encryptedPath,
-            username
-          ]);
-      return 'Success';
-    } catch (e) {
-      return "Error";
-    } finally {
-      await conn.close();
-    }
+    var result = await insertBase(
+        content: content,
+        tablename: 'qiniu',
+        paramNames: [
+          'accessKey',
+          'secretKey',
+          'bucket',
+          'url',
+          'area',
+          'options',
+          'path'
+        ]);
+    return result;
   }
 
   static updateQiniu({required List content}) async {
-    var conn = await MySqlConnection.connect(settings);
-
-    try {
-      String accessKey = content[0].toString();
-      String secretKey = content[1].toString();
-      String bucket = content[2].toString();
-      String url = content[3].toString();
-      String area = content[4].toString();
-      String options = content[5].toString();
-      String path = content[6].toString();
-      String username = content[7].toString();
-
-      String encryptedAccessKey = await encryptSelf(accessKey);
-      String encryptedSecretKey = await encryptSelf(secretKey);
-      String encryptedBucket = await encryptSelf(bucket);
-      String encryptedUrl = await encryptSelf(url);
-      String encryptedArea = await encryptSelf(area);
-      String encryptedOptions = await encryptSelf(options);
-      String encryptedPath = await encryptSelf(path);
-
-      var results = await conn.query(
-          "update qiniu set accessKey = ?,secretKey = ?,bucket = ?,url = ?,area = ?,options = ?,path = ? where username = ?",
-          [
-            encryptedAccessKey,
-            encryptedSecretKey,
-            encryptedBucket,
-            encryptedUrl,
-            encryptedArea,
-            encryptedOptions,
-            encryptedPath,
-            username
-          ]);
-      return 'Success';
-    } catch (e) {
-      return "Error";
-    } finally {
-      await conn.close();
-    }
+    var result = await updateBase(
+        content: content,
+        tablename: 'qiniu',
+        paramNames: [
+          'accessKey',
+          'secretKey',
+          'bucket',
+          'url',
+          'area',
+          'options',
+          'path'
+        ]);
+    return result;
   }
 
   static queryTencent({required String username}) async {
-    var conn = await MySqlConnection.connect(settings);
-    try {
-      var results = await conn
-          .query('select * from tencent where username = ?', [username]);
-
-      if (results.isEmpty) {
-        return "Empty";
-      }
-      Map<String, dynamic> resultsMap = {};
-      resultsMap.clear();
-      for (var row in results) {
-        //第一列是id
-        String secretId = await decryptSelf(row[1].toString());
-        String secretKey = await decryptSelf(row[2].toString());
-        String bucket = await decryptSelf(row[3].toString());
-        String appId = await decryptSelf(row[4].toString());
-        String area = await decryptSelf(row[5].toString());
-        String path = await decryptSelf(row[6].toString());
-        String customUrl = await decryptSelf(row[7].toString());
-        String options = await decryptSelf(row[8].toString());
-
-        resultsMap['secretId'] = secretId;
-        resultsMap['secretKey'] = secretKey;
-        resultsMap['bucket'] = bucket;
-        resultsMap['appId'] = appId;
-        resultsMap['area'] = area;
-        resultsMap['path'] = path;
-        resultsMap['customUrl'] = customUrl;
-        resultsMap['options'] = options;
-      }
-      return resultsMap;
-    } catch (e) {
-      return "Error";
-    } finally {
-      await conn.close();
-    }
+    var result = await queryBase(
+      username: username,
+      tablename: 'tencent',
+      paramNames: [
+        'secretId',
+        'secretKey',
+        'bucket',
+        'appId',
+        'area',
+        'path',
+        'customUrl',
+        'options'
+      ],
+      isID: false,
+    );
+    return result;
   }
 
   static insertTencent({required List content}) async {
-    var conn = await MySqlConnection.connect(settings);
-    try {
-      String secretId = content[0].toString();
-      String secretKey = content[1].toString();
-      String bucket = content[2].toString();
-      String appId = content[3].toString();
-      String area = content[4].toString();
-      String path = content[5].toString();
-      String customUrl = content[6].toString();
-      String options = content[7].toString();
-      String username = content[8].toString();
-
-      String encryptedSecretId = await encryptSelf(secretId);
-      String encryptedSecretKey = await encryptSelf(secretKey);
-      String encryptedBucket = await encryptSelf(bucket);
-      String encryptedAppId = await encryptSelf(appId);
-      String encryptedArea = await encryptSelf(area);
-      String encryptedPath = await encryptSelf(path);
-      String encryptedCustomUrl = await encryptSelf(customUrl);
-      String encryptedOptions = await encryptSelf(options);
-
-      var results = await conn.query(
-          "insert into tencent (secretId,secretKey,bucket,appId,area,path,customUrl,options,username) values (?,?,?,?,?,?,?,?,?)",
-          [
-            encryptedSecretId,
-            encryptedSecretKey,
-            encryptedBucket,
-            encryptedAppId,
-            encryptedArea,
-            encryptedPath,
-            encryptedCustomUrl,
-            encryptedOptions,
-            username
-          ]);
-      return 'Success';
-    } catch (e) {
-      return "Error";
-    } finally {
-      await conn.close();
-    }
+    var result =
+        await insertBase(content: content, tablename: 'tencent', paramNames: [
+      'secretId',
+      'secretKey',
+      'bucket',
+      'appId',
+      'area',
+      'path',
+      'customUrl',
+      'options',
+    ]);
+    return result;
   }
 
   static updateTencent({required List content}) async {
-    var conn = await MySqlConnection.connect(settings);
-
-    try {
-      String secretId = content[0].toString();
-      String secretKey = content[1].toString();
-      String bucket = content[2].toString();
-      String appId = content[3].toString();
-      String area = content[4].toString();
-      String path = content[5].toString();
-      String customUrl = content[6].toString();
-      String options = content[7].toString();
-      String username = content[8].toString();
-
-      String encryptedSecretId = await encryptSelf(secretId);
-      String encryptedSecretKey = await encryptSelf(secretKey);
-      String encryptedBucket = await encryptSelf(bucket);
-      String encryptedAppId = await encryptSelf(appId);
-      String encryptedArea = await encryptSelf(area);
-      String encryptedPath = await encryptSelf(path);
-      String encryptedCustomUrl = await encryptSelf(customUrl);
-      String encryptedOptions = await encryptSelf(options);
-
-      var results = await conn.query(
-          "update tencent set secretId = ?,secretKey = ?,bucket = ?,appId = ?,area = ?,path = ?,customUrl = ?,options = ? where username = ?",
-          [
-            encryptedSecretId,
-            encryptedSecretKey,
-            encryptedBucket,
-            encryptedAppId,
-            encryptedArea,
-            encryptedPath,
-            encryptedCustomUrl,
-            encryptedOptions,
-            username
-          ]);
-      return 'Success';
-    } catch (e) {
-      return "Error";
-    } finally {
-      await conn.close();
-    }
+    var result =
+        await updateBase(content: content, tablename: 'tencent', paramNames: [
+      'secretId',
+      'secretKey',
+      'bucket',
+      'appId',
+      'area',
+      'path',
+      'customUrl',
+      'options',
+    ]);
+    return result;
   }
 
   static queryAliyun({required String username}) async {
-    var conn = await MySqlConnection.connect(settings);
-    try {
-      var results = await conn
-          .query('select * from aliyun where username = ?', [username]);
-
-      if (results.isEmpty) {
-        return "Empty";
-      }
-      Map<String, dynamic> resultsMap = {};
-      resultsMap.clear();
-      for (var row in results) {
-        //第一列是id
-        String keyId = await decryptSelf(row[1].toString());
-        String keySecret = await decryptSelf(row[2].toString());
-        String bucket = await decryptSelf(row[3].toString());
-        String area = await decryptSelf(row[4].toString());
-        String path = await decryptSelf(row[5].toString());
-        String customUrl = await decryptSelf(row[6].toString());
-        String options = await decryptSelf(row[7].toString());
-
-        resultsMap['keyId'] = keyId;
-        resultsMap['keySecret'] = keySecret;
-        resultsMap['bucket'] = bucket;
-        resultsMap['area'] = area;
-        resultsMap['path'] = path;
-        resultsMap['customUrl'] = customUrl;
-        resultsMap['options'] = options;
-      }
-      return resultsMap;
-    } catch (e) {
-      return "Error";
-    } finally {
-      await conn.close();
-    }
+    var result = await queryBase(
+      username: username,
+      tablename: 'aliyun',
+      paramNames: [
+        'keyId',
+        'keySecret',
+        'bucket',
+        'area',
+        'path',
+        'customUrl',
+        'options'
+      ],
+      isID: false,
+    );
+    return result;
   }
 
   static insertAliyun({required List content}) async {
-    var conn = await MySqlConnection.connect(settings);
-    try {
-      String keyId = content[0].toString();
-      String keySecret = content[1].toString();
-      String bucket = content[2].toString();
-      String area = content[3].toString();
-      String path = content[4].toString();
-      String customUrl = content[5].toString();
-      String options = content[6].toString();
-      String username = content[7].toString();
-
-      String encryptedKeyId = await encryptSelf(keyId);
-      String encryptedKeySecret = await encryptSelf(keySecret);
-      String encryptedBucket = await encryptSelf(bucket);
-      String encryptedArea = await encryptSelf(area);
-      String encryptedPath = await encryptSelf(path);
-      String encryptedCustomUrl = await encryptSelf(customUrl);
-      String encryptedOptions = await encryptSelf(options);
-
-      var results = await conn.query(
-          "insert into aliyun (keyId,keySecret,bucket,area,path,customUrl,options,username) values (?,?,?,?,?,?,?,?)",
-          [
-            encryptedKeyId,
-            encryptedKeySecret,
-            encryptedBucket,
-            encryptedArea,
-            encryptedPath,
-            encryptedCustomUrl,
-            encryptedOptions,
-            username
-          ]);
-      return 'Success';
-    } catch (e) {
-      return "Error";
-    } finally {
-      await conn.close();
-    }
+    var result = await insertBase(
+        content: content,
+        tablename: 'aliyun',
+        paramNames: [
+          'keyId',
+          'keySecret',
+          'bucket',
+          'area',
+          'path',
+          'customUrl',
+          'options'
+        ]);
+    return result;
   }
 
   static updateAliyun({required List content}) async {
-    var conn = await MySqlConnection.connect(settings);
-
-    try {
-      String keyId = content[0].toString();
-      String keySecret = content[1].toString();
-      String bucket = content[2].toString();
-      String area = content[3].toString();
-      String path = content[4].toString();
-      String customUrl = content[5].toString();
-      String options = content[6].toString();
-      String username = content[7].toString();
-
-      String encryptedKeyId = await encryptSelf(keyId);
-      String encryptedKeySecret = await encryptSelf(keySecret);
-      String encryptedBucket = await encryptSelf(bucket);
-      String encryptedArea = await encryptSelf(area);
-      String encryptedPath = await encryptSelf(path);
-      String encryptedCustomUrl = await encryptSelf(customUrl);
-      String encryptedOptions = await encryptSelf(options);
-
-      var results = await conn.query(
-          "update aliyun set keyId = ?,keySecret = ?,bucket = ?,area = ?,path = ?,customUrl = ?,options = ? where username = ?",
-          [
-            encryptedKeyId,
-            encryptedKeySecret,
-            encryptedBucket,
-            encryptedArea,
-            encryptedPath,
-            encryptedCustomUrl,
-            encryptedOptions,
-            username
-          ]);
-      return 'Success';
-    } catch (e) {
-      return "Error";
-    } finally {
-      await conn.close();
-    }
+    var result = await updateBase(
+        content: content,
+        tablename: 'aliyun',
+        paramNames: [
+          'keyId',
+          'keySecret',
+          'bucket',
+          'area',
+          'path',
+          'customUrl',
+          'options'
+        ]);
+    return result;
   }
 
   static queryUpyun({required String username}) async {
-    var conn = await MySqlConnection.connect(settings);
-    try {
-      var results = await conn
-          .query('select * from upyun where username = ?', [username]);
-
-      if (results.isEmpty) {
-        return "Empty";
-      }
-      Map<String, dynamic> resultsMap = {};
-      resultsMap.clear();
-      for (var row in results) {
-        //第一列是id
-        String bucket = await decryptSelf(row[1].toString());
-        String upyunOperator = await decryptSelf(row[2].toString());
-        String password = await decryptSelf(row[3].toString());
-        String url = await decryptSelf(row[4].toString());
-        String opptions = await decryptSelf(row[5].toString());
-        String path = await decryptSelf(row[6].toString());
-
-        resultsMap['bucket'] = bucket;
-        resultsMap['operator'] = upyunOperator;
-        resultsMap['password'] = password;
-        resultsMap['url'] = url;
-        resultsMap['options'] = opptions;
-        resultsMap['path'] = path;
-      }
-      return resultsMap;
-    } catch (e) {
-      return "Error";
-    } finally {
-      await conn.close();
-    }
+    var result = await queryBase(
+      username: username,
+      tablename: 'upyun',
+      paramNames: ['bucket', 'operator', 'password', 'url', 'options', 'path'],
+      isID: false,
+    );
+    return result;
   }
 
   static insertUpyun({required List content}) async {
-    var conn = await MySqlConnection.connect(settings);
-    try {
-      String bucket = content[0].toString();
-      String upyunOperator = content[1].toString();
-      String password = content[2].toString();
-      String url = content[3].toString();
-      String opptions = content[4].toString();
-      String path = content[5].toString();
-      String username = content[6].toString();
-
-      String encryptedBucket = await encryptSelf(bucket);
-      String encryptedOperator = await encryptSelf(upyunOperator);
-      String encryptedPassword = await encryptSelf(password);
-      String encryptedUrl = await encryptSelf(url);
-      String encryptedOptions = await encryptSelf(opptions);
-      String encryptedPath = await encryptSelf(path);
-
-      var results = await conn.query(
-          "insert into upyun (bucket,operator,password,url,options,path,username) values (?,?,?,?,?,?,?)",
-          [
-            encryptedBucket,
-            encryptedOperator,
-            encryptedPassword,
-            encryptedUrl,
-            encryptedOptions,
-            encryptedPath,
-            username
-          ]);
-      return 'Success';
-    } catch (e) {
-      return "Error";
-    } finally {
-      await conn.close();
-    }
+    var result = await insertBase(
+        content: content,
+        tablename: 'upyun',
+        paramNames: [
+          'bucket',
+          'operator',
+          'password',
+          'url',
+          'options',
+          'path'
+        ]);
+    return result;
   }
 
   static updateUpyun({required List content}) async {
-    var conn = await MySqlConnection.connect(settings);
-
-    try {
-      String bucket = content[0].toString();
-      String upyunOperator = content[1].toString();
-      String password = content[2].toString();
-      String url = content[3].toString();
-      String opptions = content[4].toString();
-      String path = content[5].toString();
-      String username = content[6].toString();
-
-      String encryptedBucket = await encryptSelf(bucket);
-      String encryptedOperator = await encryptSelf(upyunOperator);
-      String encryptedPassword = await encryptSelf(password);
-      String encryptedUrl = await encryptSelf(url);
-      String encryptedOptions = await encryptSelf(opptions);
-      String encryptedPath = await encryptSelf(path);
-
-      var results = await conn.query(
-          "update upyun set bucket = ?,operator = ?,password = ?,url = ?,options = ?,path = ? where username = ?",
-          [
-            encryptedBucket,
-            encryptedOperator,
-            encryptedPassword,
-            encryptedUrl,
-            encryptedOptions,
-            encryptedPath,
-            username
-          ]);
-      return 'Success';
-    } catch (e) {
-      return "Error";
-    } finally {
-      await conn.close();
-    }
+    var result = await updateBase(
+        content: content,
+        tablename: 'upyun',
+        paramNames: [
+          'bucket',
+          'operator',
+          'password',
+          'url',
+          'options',
+          'path'
+        ]);
+    return result;
   }
 
   static queryUpyunManage({required String username}) async {
-    var conn = await MySqlConnection.connect(settings);
-    try {
-      var results = await conn
-          .query('select * from upyunmanage where username = ?', [username]);
-
-      if (results.isEmpty) {
-        return "Empty";
-      }
-      Map<String, dynamic> resultsMap = {};
-      resultsMap.clear();
-      for (var row in results) {
-        //第一列是id
-        String email = await decryptSelf(row[1].toString());
-        String password = await decryptSelf(row[2].toString());
-        String token = await decryptSelf(row[3].toString());
-        String tokenname = await decryptSelf(row[4].toString());
-        resultsMap['email'] = email;
-        resultsMap['password'] = password;
-        resultsMap['token'] = token;
-        resultsMap['tokenname'] = tokenname;
-      }
-      return resultsMap;
-    } catch (e) {
-      FLog.error(
-          className: 'MySqlUtils',
-          methodName: 'queryUpyunManage',
-          text: formatErrorMessage({'username': username}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
-      return "Error";
-    } finally {
-      await conn.close();
-    }
+    var result = await queryBase(
+      username: username,
+      tablename: 'upyunmanage',
+      paramNames: ['email', 'password', 'token', 'tokenname'],
+      isID: false,
+    );
+    return result;
   }
 
   static insertUpyunManage({required List content}) async {
-    var conn = await MySqlConnection.connect(settings);
-    try {
-      String email = content[0].toString();
-      String password = content[1].toString();
-      String token = content[2].toString();
-      String tokenName = content[3].toString();
-      String username = content[4].toString();
-
-      String encryptedEmail = await encryptSelf(email);
-      String encryptedPassword = await encryptSelf(password);
-      String encryptedToken = await encryptSelf(token);
-      String encryptedTokenName = await encryptSelf(tokenName);
-
-      await conn.query(
-          "insert into upyunmanage (email,password,token,tokenname,username) values (?,?,?,?,?)",
-          [
-            encryptedEmail,
-            encryptedPassword,
-            encryptedToken,
-            encryptedTokenName,
-            username
-          ]);
-      return 'Success';
-    } catch (e) {
-      FLog.error(
-          className: 'MySqlUtils',
-          methodName: 'insertUpyunManage',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
-      return "Error";
-    } finally {
-      await conn.close();
-    }
+    var result = await insertBase(
+        content: content,
+        tablename: 'upyunmanage',
+        paramNames: ['email', 'password', 'token', 'tokenname']);
+    return result;
   }
 
   static updateUpyunManage({required List content}) async {
-    var conn = await MySqlConnection.connect(settings);
-
-    try {
-      String email = content[0].toString();
-      String password = content[1].toString();
-      String token = content[2].toString();
-      String tokenName = content[3].toString();
-      String username = content[4].toString();
-
-      String encryptedEmail = await encryptSelf(email);
-      String encryptedPassword = await encryptSelf(password);
-      String encryptedToken = await encryptSelf(token);
-      String encryptedTokenName = await encryptSelf(tokenName);
-
-      await conn.query(
-          "update upyunmanage set email = ?,password = ?,token = ?,tokenname = ? where username = ?",
-          [
-            encryptedEmail,
-            encryptedPassword,
-            encryptedToken,
-            encryptedTokenName,
-            username
-          ]);
-      return 'Success';
-    } catch (e) {
-      FLog.error(
-          className: 'MySqlUtils',
-          methodName: 'updateUpyunManage',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
-      return "Error";
-    } finally {
-      await conn.close();
-    }
+    var result = await updateBase(
+        content: content,
+        tablename: 'upyunmanage',
+        paramNames: ['email', 'password', 'token', 'tokenname']);
+    return result;
   }
 
   static queryUpyunOperator({required String username}) async {
-    var conn = await MySqlConnection.connect(settings);
-    try {
-      var results = await conn
-          .query('select * from upyunoperator where username = ?', [username]);
-
-      if (results.isEmpty) {
-        return "Empty";
-      }
-      Map<String, dynamic> resultsMap = {};
-      resultsMap.clear();
-      for (var row in results) {
-        //第一列是id
-        int id = row[0];
-        String bucket = await decryptSelf(row[1].toString());
-        String email = await decryptSelf(row[2].toString());
-        String operator = await decryptSelf(row[3].toString());
-        String password = await decryptSelf(row[4].toString());
-        resultsMap['id'] = id;
-        resultsMap['bucket'] = bucket;
-        resultsMap['email'] = email;
-        resultsMap['operator'] = operator;
-        resultsMap['password'] = password;
-      }
-      return resultsMap;
-    } catch (e) {
-      FLog.error(
-          className: 'MySqlUtils',
-          methodName: 'queryUpyunOperator',
-          text: formatErrorMessage({'username': username}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
-      return "Error";
-    } finally {
-      await conn.close();
-    }
+    var result = await queryBase(
+      username: username,
+      tablename: 'upyunoperator',
+      paramNames: ['bucket', 'email', 'operator', 'password'],
+      isID: true,
+    );
+    return result;
   }
 
   static insertUpyunOperator({required List content}) async {
-    var conn = await MySqlConnection.connect(settings);
-    try {
-      String bucket = content[0].toString();
-      String email = content[1].toString();
-      String operator = content[2].toString();
-      String password = content[3].toString();
-      String username = content[4].toString();
-
-      String encryptedBucket = await encryptSelf(bucket);
-      String encryptedEmail = await encryptSelf(email);
-      String encryptedOperator = await encryptSelf(operator);
-      String encryptedPassword = await encryptSelf(password);
-
-      await conn.query(
-          "insert into upyunoperator (bucket,email,operator,password,username) values (?,?,?,?,?)",
-          [
-            encryptedBucket,
-            encryptedEmail,
-            encryptedOperator,
-            encryptedPassword,
-            username
-          ]);
-      return 'Success';
-    } catch (e) {
-      FLog.error(
-          className: 'MySqlUtils',
-          methodName: 'insertUpyunOperator',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
-      return "Error";
-    } finally {
-      await conn.close();
-    }
+    var result = await insertBase(
+        content: content,
+        tablename: 'upyunoperator',
+        paramNames: ['bucket', 'email', 'operator', 'password']);
+    return result;
   }
 
   static updateUpyunOperator({required List content}) async {
-    var conn = await MySqlConnection.connect(settings);
-
-    try {
-      String bucket = content[0].toString();
-      String email = content[1].toString();
-      String operator = content[2].toString();
-      String password = content[3].toString();
-      String username = content[4].toString();
-
-      String encryptedBucket = await encryptSelf(bucket);
-      String encryptedEmail = await encryptSelf(email);
-      String encryptedOperator = await encryptSelf(operator);
-      String encryptedPassword = await encryptSelf(password);
-
-      await conn.query(
-          "update upyunoperator set bucket = ?,email = ?,operator = ?,password = ? where username = ?",
-          [
-            encryptedBucket,
-            encryptedEmail,
-            encryptedOperator,
-            encryptedPassword,
-            username
-          ]);
-      return 'Success';
-    } catch (e) {
-      FLog.error(
-          className: 'MySqlUtils',
-          methodName: 'updateUpyunOperator',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
-      return "Error";
-    } finally {
-      await conn.close();
-    }
+    var result = await updateBase(
+        content: content,
+        tablename: 'upyunoperator',
+        paramNames: ['bucket', 'email', 'operator', 'password']);
+    return result;
   }
 
   static deleteUpyunOperator({required int id}) async {
@@ -1182,11 +623,12 @@ class MySqlUtils {
       await conn.query('delete from upyunoperator where id = ?', [id]);
       return 'Success';
     } catch (e) {
-      FLog.error(
-          className: 'MySqlUtils',
-          methodName: 'deleteUpyunOperator',
-          text: formatErrorMessage({'id': id}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(
+        e,
+        {'id': id},
+        currentClassName,
+        'deleteUpyunOperator',
+      );
       return "Error";
     } finally {
       await conn.close();
@@ -1194,91 +636,43 @@ class MySqlUtils {
   }
 
   static queryQiniuManage({required String username}) async {
-    var conn = await MySqlConnection.connect(settings);
-    try {
-      var results = await conn
-          .query('select * from qiniumanage where username = ?', [username]);
-
-      if (results.isEmpty) {
-        return "Empty";
-      }
-      Map<String, dynamic> resultsMap = {};
-      resultsMap.clear();
-      for (var row in results) {
-        //第一列是id
-        int id = row[0];
-        String bucket = await decryptSelf(row[1].toString());
-        String domain = await decryptSelf(row[2].toString());
-        String area = await decryptSelf(row[3].toString());
-        resultsMap['id'] = id;
-        resultsMap['bucket'] = bucket;
-        resultsMap['domain'] = domain;
-        resultsMap['area'] = area;
-      }
-      return resultsMap;
-    } catch (e) {
-      FLog.error(
-          className: 'MySqlUtils',
-          methodName: 'queryQiniuManage',
-          text: formatErrorMessage({'username': username}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
-      return "Error";
-    } finally {
-      await conn.close();
-    }
+    var result = await queryBase(
+      username: username,
+      tablename: 'qiniumanage',
+      paramNames: ['bucket', 'domain', 'area'],
+      isID: true,
+    );
+    return result;
   }
 
   static insertQiniuManage({required List content}) async {
-    var conn = await MySqlConnection.connect(settings);
-    try {
-      String bucket = content[0].toString();
-      String domain = content[1].toString();
-      String area = content[2].toString();
-      String username = content[3].toString();
-
-      String encryptedBucket = await encryptSelf(bucket);
-      String encryptedDomain = await encryptSelf(domain);
-      String encryptedArea = await encryptSelf(area);
-
-      await conn.query(
-          "insert into qiniumanage (bucket,domain,area,username) values (?,?,?,?)",
-          [encryptedBucket, encryptedDomain, encryptedArea, username]);
-      return 'Success';
-    } catch (e) {
-      FLog.error(
-          className: 'MySqlUtils',
-          methodName: 'insertQiniuManage',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
-      return "Error";
-    } finally {
-      await conn.close();
-    }
+    var result = await insertBase(
+        content: content,
+        tablename: 'qiniumanage',
+        paramNames: ['bucket', 'domain', 'area']);
+    return result;
   }
 
   static updateQiniuManage({required List content}) async {
+    var result = await updateBase(
+        content: content,
+        tablename: 'qiniumanage',
+        paramNames: ['bucket', 'domain', 'area']);
+    return result;
+  }
+
+  static insertUserCount({required List content}) async {
     var conn = await MySqlConnection.connect(settings);
-
     try {
-      String bucket = content[0].toString();
-      String domain = content[1].toString();
-      String area = content[2].toString();
-      String username = content[3].toString();
-
-      String encryptedBucket = await encryptSelf(bucket);
-      String encryptedDomain = await encryptSelf(domain);
-      String encryptedArea = await encryptSelf(area);
+      String opentime = content[0].toString();
+      String version = content[1].toString();
+      String username = content[2].toString();
 
       await conn.query(
-          "update qiniumanage set bucket = ?,domain = ?,area = ? where username = ?",
-          [encryptedBucket, encryptedDomain, encryptedArea, username]);
+          "insert into usercount (opentime,version,username) values (?,?,?)",
+          [opentime, version, username]);
       return 'Success';
     } catch (e) {
-      FLog.error(
-          className: 'MySqlUtils',
-          methodName: 'updateQiniuManage',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
       return "Error";
     } finally {
       await conn.close();
@@ -1286,511 +680,202 @@ class MySqlUtils {
   }
 
   static queryFTP({required String username}) async {
-    var conn = await MySqlConnection.connect(settings);
-    try {
-      var results =
-          await conn.query('select * from ftp where username = ?', [username]);
-
-      if (results.isEmpty) {
-        return "Empty";
-      }
-      Map<String, dynamic> resultsMap = {};
-      resultsMap.clear();
-      for (var row in results) {
-        //第一列是id
-        String ftpHost = await decryptSelf(row[1].toString());
-        String ftpPort = await decryptSelf(row[2].toString());
-        String ftpUser = await decryptSelf(row[3].toString());
-        String ftpPassword = await decryptSelf(row[4].toString());
-        String ftpType = await decryptSelf(row[5].toString());
-        String isAnonymous = await decryptSelf(row[6].toString());
-        String uploadPath = await decryptSelf(row[7].toString());
-        String ftpHomeDir = await decryptSelf(row[8].toString());
-
-        resultsMap['ftpHost'] = ftpHost;
-        resultsMap['ftpPort'] = ftpPort;
-        resultsMap['ftpUser'] = ftpUser;
-        resultsMap['ftpPassword'] = ftpPassword;
-        resultsMap['ftpType'] = ftpType;
-        resultsMap['isAnonymous'] = isAnonymous;
-        resultsMap['uploadPath'] = uploadPath;
-        resultsMap['ftpHomeDir'] = ftpHomeDir;
-      }
-      return resultsMap;
-    } catch (e) {
-      FLog.error(
-          className: 'MySqlUtils',
-          methodName: 'queryFTP',
-          text: formatErrorMessage({'username': username}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
-      return "Error";
-    } finally {
-      await conn.close();
-    }
+    var result = await queryBase(
+        username: username,
+        tablename: 'ftp',
+        paramNames: [
+          'ftpHost',
+          'ftpPort',
+          'ftpUser',
+          'ftpPassword',
+          'ftpType',
+          'isAnonymous',
+          'uploadPath',
+          'ftpHomeDir',
+        ],
+        isID: false);
+    return result;
   }
 
   static insertFTP({required List content}) async {
-    var conn = await MySqlConnection.connect(settings);
-    try {
-      String ftpHost = content[0].toString();
-      String ftpPort = content[1].toString();
-      String ftpUser = content[2].toString();
-      String ftpPassword = content[3].toString();
-      String ftpType = content[4].toString();
-      String isAnonymous = content[5].toString();
-      String uploadPath = content[6].toString();
-      String ftpHomeDir = content[7].toString();
-      String username = content[8].toString();
-
-      String encryptedFtpHost = await encryptSelf(ftpHost);
-      String encryptedFtpPort = await encryptSelf(ftpPort);
-      String encryptedFtpUser = await encryptSelf(ftpUser);
-      String encryptedFtpPassword = await encryptSelf(ftpPassword);
-      String encryptedFtpType = await encryptSelf(ftpType);
-      String encryptedIsAnonymous = await encryptSelf(isAnonymous);
-      String encryptedUploadPath = await encryptSelf(uploadPath);
-      String encryptedFtpHomeDir = await encryptSelf(ftpHomeDir);
-
-      await conn.query(
-          "insert into ftp (ftpHost,ftpPort,ftpUser,ftpPassword,ftpType,isAnonymous,uploadPath,ftpHomeDir,username) values (?,?,?,?,?,?,?,?,?)",
-          [
-            encryptedFtpHost,
-            encryptedFtpPort,
-            encryptedFtpUser,
-            encryptedFtpPassword,
-            encryptedFtpType,
-            encryptedIsAnonymous,
-            encryptedUploadPath,
-            encryptedFtpHomeDir,
-            username
-          ]);
-      return 'Success';
-    } catch (e) {
-      FLog.error(
-          className: 'MySqlUtils',
-          methodName: 'insertFTP',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
-      return "Error";
-    } finally {
-      await conn.close();
-    }
+    var result =
+        await insertBase(content: content, tablename: 'ftp', paramNames: [
+      'ftpHost',
+      'ftpPort',
+      'ftpUser',
+      'ftpPassword',
+      'ftpType',
+      'isAnonymous',
+      'uploadPath',
+      'ftpHomeDir'
+    ]);
+    return result;
   }
 
   static updateFTP({required List content}) async {
-    var conn = await MySqlConnection.connect(settings);
-
-    try {
-      String ftpHost = content[0].toString();
-      String ftpPort = content[1].toString();
-      String ftpUser = content[2].toString();
-      String ftpPassword = content[3].toString();
-      String ftpType = content[4].toString();
-      String isAnonymous = content[5].toString();
-      String uploadPath = content[6].toString();
-      String ftpHomeDir = content[7].toString();
-      String username = content[8].toString();
-
-      String encryptedFtpHost = await encryptSelf(ftpHost);
-      String encryptedFtpPort = await encryptSelf(ftpPort);
-      String encryptedFtpUser = await encryptSelf(ftpUser);
-      String encryptedFtpPassword = await encryptSelf(ftpPassword);
-      String encryptedFtpType = await encryptSelf(ftpType);
-      String encryptedIsAnonymous = await encryptSelf(isAnonymous);
-      String encryptedUploadPath = await encryptSelf(uploadPath);
-      String encryptedFtpHomeDir = await encryptSelf(ftpHomeDir);
-
-      await conn.query(
-          "update ftp set ftpHost = ?,ftpPort = ?,ftpUser = ?,ftpPassword = ?,ftpType = ?,isAnonymous = ?,uploadPath = ?,ftpHomeDir = ? where username = ?",
-          [
-            encryptedFtpHost,
-            encryptedFtpPort,
-            encryptedFtpUser,
-            encryptedFtpPassword,
-            encryptedFtpType,
-            encryptedIsAnonymous,
-            encryptedUploadPath,
-            encryptedFtpHomeDir,
-            username
-          ]);
-      return 'Success';
-    } catch (e) {
-      FLog.error(
-          className: 'MySqlUtils',
-          methodName: 'updateFTP',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
-      return "Error";
-    } finally {
-      await conn.close();
-    }
+    var result =
+        await updateBase(content: content, tablename: 'ftp', paramNames: [
+      'ftpHost',
+      'ftpPort',
+      'ftpUser',
+      'ftpPassword',
+      'ftpType',
+      'isAnonymous',
+      'uploadPath',
+      'ftpHomeDir'
+    ]);
+    return result;
   }
 
   static queryImgurManage({required String username}) async {
-    var conn = await MySqlConnection.connect(settings);
-    try {
-      var results = await conn
-          .query('select * from imgurmanage where username = ?', [username]);
-
-      if (results.isEmpty) {
-        return "Empty";
-      }
-      Map<String, dynamic> resultsMap = {};
-      resultsMap.clear();
-      for (var row in results) {
-        //第一列是id
-        String imguruser = await decryptSelf(row[1].toString());
-        String clientid = await decryptSelf(row[2].toString());
-        String clientsecret = await decryptSelf(row[3].toString());
-        String accesstoken = await decryptSelf(row[4].toString());
-        String proxy = await decryptSelf(row[5].toString());
-
-        resultsMap['imguruser'] = imguruser;
-        resultsMap['clientid'] = clientid;
-        resultsMap['clientsecret'] = clientsecret;
-        resultsMap['accesstoken'] = accesstoken;
-        resultsMap['proxy'] = proxy;
-      }
-      return resultsMap;
-    } catch (e) {
-      FLog.error(
-          className: 'MySqlUtils',
-          methodName: 'queryImgurManage',
-          text: formatErrorMessage({'username': username}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
-      return "Error";
-    } finally {
-      await conn.close();
-    }
+    var result = await queryBase(
+        username: username,
+        tablename: 'imgurmanage',
+        paramNames: [
+          'imguruser',
+          'clientid',
+          'clientsecret',
+          'accesstoken',
+          'proxy'
+        ],
+        isID: false);
+    return result;
   }
 
   static insertImgurManage({required List content}) async {
-    var conn = await MySqlConnection.connect(settings);
-    try {
-      String imguruser = content[0].toString();
-      String clientid = content[1].toString();
-      String clientsecret = content[2].toString();
-      String accesstoken = content[3].toString();
-      String proxy = content[4].toString();
-      String username = content[5].toString();
-
-      String encryptedImguruser = await encryptSelf(imguruser);
-      String encryptedClientid = await encryptSelf(clientid);
-      String encryptedClientsecret = await encryptSelf(clientsecret);
-      String encryptedAccesstoken = await encryptSelf(accesstoken);
-      String encryptedProxy = await encryptSelf(proxy);
-
-      await conn.query(
-          "insert into imgurmanage (imguruser,clientid,clientsecret,accesstoken,proxy,username) values (?,?,?,?,?,?)",
-          [
-            encryptedImguruser,
-            encryptedClientid,
-            encryptedClientsecret,
-            encryptedAccesstoken,
-            encryptedProxy,
-            username
-          ]);
-      return 'Success';
-    } catch (e) {
-      FLog.error(
-          className: 'MySqlUtils',
-          methodName: 'insertImgurManage',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
-      return "Error";
-    } finally {
-      await conn.close();
-    }
+    var result = await insertBase(
+        content: content,
+        tablename: 'imgurmanage',
+        paramNames: [
+          'imguruser',
+          'clientid',
+          'clientsecret',
+          'accesstoken',
+          'proxy'
+        ]);
+    return result;
   }
 
   static updateImgurManage({required List content}) async {
-    var conn = await MySqlConnection.connect(settings);
-
-    try {
-      String imguruser = content[0].toString();
-      String clientid = content[1].toString();
-      String clientsecret = content[2].toString();
-      String accesstoken = content[3].toString();
-      String proxy = content[4].toString();
-      String username = content[5].toString();
-
-      String encryptedImguruser = await encryptSelf(imguruser);
-      String encryptedClientid = await encryptSelf(clientid);
-      String encryptedClientsecret = await encryptSelf(clientsecret);
-      String encryptedAccesstoken = await encryptSelf(accesstoken);
-      String encryptedProxy = await encryptSelf(proxy);
-
-      await conn.query(
-          "update imgurmanage set imguruser = ?,clientid = ?,clientsecret = ?,accesstoken = ?,proxy = ? where username = ?",
-          [
-            encryptedImguruser,
-            encryptedClientid,
-            encryptedClientsecret,
-            encryptedAccesstoken,
-            encryptedProxy,
-            username
-          ]);
-      return 'Success';
-    } catch (e) {
-      FLog.error(
-          className: 'MySqlUtils',
-          methodName: 'updateImgurManage',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
-      return "Error";
-    } finally {
-      await conn.close();
-    }
+    var result = await updateBase(
+        content: content,
+        tablename: 'imgurmanage',
+        paramNames: [
+          'imguruser',
+          'clientid',
+          'clientsecret',
+          'accesstoken',
+          'proxy'
+        ]);
+    return result;
   }
 
-      static queryAws({required String username}) async {
-    var conn = await MySqlConnection.connect(settings);
-    try {
-      var results =
-          await conn.query('select * from aws where username = ?', [username]);
-
-      if (results.isEmpty) {
-        return "Empty";
-      }
-      Map<String, dynamic> resultsMap = {};
-      resultsMap.clear();
-      for (var row in results) {
-        //第一列是id
-        String accessKeyID = await decryptSelf(row[1].toString());
-        String secretAccessKey = await decryptSelf(row[2].toString());
-        String bucket = await decryptSelf(row[3].toString());
-        String endpoint = await decryptSelf(row[4].toString());
-        String region = await decryptSelf(row[5].toString());
-        String uploadPath = await decryptSelf(row[6].toString());
-        String customUrl = await decryptSelf(row[7].toString());
-
-        resultsMap['accessKeyID'] = accessKeyID;
-        resultsMap['secretAccessKey'] = secretAccessKey;
-        resultsMap['bucket'] = bucket;
-        resultsMap['endpoint'] = endpoint;
-        resultsMap['region'] = region;
-        resultsMap['uploadPath'] = uploadPath;
-        resultsMap['customUrl'] = customUrl;
-      }
-      return resultsMap;
-    } catch (e) {
-      FLog.error(
-          className: 'MySqlUtils',
-          methodName: 'queryAws',
-          text: formatErrorMessage({'username': username}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
-      return "Error";
-    } finally {
-      await conn.close();
-    }
+  static queryAws({required String username}) async {
+    var result = await queryBase(
+        username: username,
+        tablename: 'aws',
+        paramNames: [
+          'accessKeyId',
+          'secretAccessKey',
+          'bucket',
+          'endpoint',
+          'region',
+          'uploadPath',
+          'customUrl'
+        ],
+        isID: false);
+    return result;
   }
 
   static insertAws({required List content}) async {
-    var conn = await MySqlConnection.connect(settings);
-    try {
-      String accessKeyID = content[0].toString();
-      String secretAccessKey = content[1].toString();
-      String bucket = content[2].toString();
-      String endpoint = content[3].toString();
-      String region = content[4].toString();
-      String uploadPath = content[5].toString();
-      String customUrl = content[6].toString();
-      String username = content[7].toString();
-
-      String encryptedAccessKeyID = await encryptSelf(accessKeyID);
-      String encryptedSecretAccessKey = await encryptSelf(secretAccessKey);
-      String encryptedBucket = await encryptSelf(bucket);
-      String encryptedEndpoint = await encryptSelf(endpoint);
-      String encryptedRegion = await encryptSelf(region);
-      String encryptedUploadPath = await encryptSelf(uploadPath);
-      String encryptedCustomUrl = await encryptSelf(customUrl);
-
-
-      await conn.query(
-          "insert into aws (accessKeyID,secretAccessKey,bucket,endpoint,region,uploadPath,customUrl,username) values (?,?,?,?,?,?,?,?)",
-          [
-            encryptedAccessKeyID,
-            encryptedSecretAccessKey,
-            encryptedBucket,
-            encryptedEndpoint,
-            encryptedRegion,
-            encryptedUploadPath,
-            encryptedCustomUrl,
-            username
-          ]);
-      return 'Success';
-    } catch (e) {
-      FLog.error(
-          className: 'MySqlUtils',
-          methodName: 'insertAws',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
-      return "Error";
-    } finally {
-      await conn.close();
-    }
+    var result =
+        await insertBase(content: content, tablename: 'aws', paramNames: [
+      'accessKeyID',
+      'secretAccessKey',
+      'bucket',
+      'endpoint',
+      'region',
+      'uploadPath',
+      'customUrl'
+    ]);
+    return result;
   }
 
   static updateAws({required List content}) async {
-    var conn = await MySqlConnection.connect(settings);
-
-    try {
-      String accessKeyID = content[0].toString();
-      String secretAccessKey = content[1].toString();
-      String bucket = content[2].toString();
-      String endpoint = content[3].toString();
-      String region = content[4].toString();
-      String uploadPath = content[5].toString();
-      String customUrl = content[6].toString();
-      String username = content[7].toString();
-
-      String encryptedAccessKeyID = await encryptSelf(accessKeyID);
-      String encryptedSecretAccessKey = await encryptSelf(secretAccessKey);
-      String encryptedBucket = await encryptSelf(bucket);
-      String encryptedEndpoint = await encryptSelf(endpoint);
-      String encryptedRegion = await encryptSelf(region);
-      String encryptedUploadPath = await encryptSelf(uploadPath);
-      String encryptedCustomUrl = await encryptSelf(customUrl);
-      
-      await conn.query(
-          "update aws set accessKeyID = ?,secretAccessKey = ?,bucket = ?,endpoint = ?,region = ?,uploadPath = ?,customUrl = ? where username = ?",
-          [
-            encryptedAccessKeyID,
-            encryptedSecretAccessKey,
-            encryptedBucket,
-            encryptedEndpoint,
-            encryptedRegion,
-            encryptedUploadPath,
-            encryptedCustomUrl,
-            username
-          ]);
-      return 'Success';
-    } catch (e) {
-      FLog.error(
-          className: 'MySqlUtils',
-          methodName: 'updateAws',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
-      return "Error";
-    } finally {
-      await conn.close();
-    }
+    var result =
+        await updateBase(content: content, tablename: 'aws', paramNames: [
+      'accessKeyID',
+      'secretAccessKey',
+      'bucket',
+      'endpoint',
+      'region',
+      'uploadPath',
+      'customUrl'
+    ]);
+    return result;
   }
 
-    static queryAlist({required String username}) async {
-    var conn = await MySqlConnection.connect(settings);
-    try {
-      var results = await conn
-          .query('select * from alist where username = ?', [username]);
-
-      if (results.isEmpty) {
-        return "Empty";
-      }
-      Map<String, dynamic> resultsMap = {};
-      resultsMap.clear();
-      for (var row in results) {
-        //第一列是id
-        String host = await decryptSelf(row[1].toString());
-        String alistusername = await decryptSelf(row[2].toString());
-        String password = await decryptSelf(row[3].toString());
-        String token = await decryptSelf(row[4].toString());
-        String uploadPath = await decryptSelf(row[5].toString());
-
-        resultsMap['host'] = host;
-        resultsMap['alistusername'] = alistusername;
-        resultsMap['password'] = password;
-        resultsMap['token'] = token;
-        resultsMap['uploadPath'] = uploadPath;
-      }
-      return resultsMap;
-    } catch (e) {
-      FLog.error(
-          className: 'MySqlUtils',
-          methodName: 'queryAlist',
-          text: formatErrorMessage({'username': username}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
-      return "Error";
-    } finally {
-      await conn.close();
-    }
+  static queryAlist({required String username}) async {
+    var result = await queryBase(
+        username: username,
+        tablename: 'alist',
+        paramNames: [
+          'host',
+          'alistusername',
+          'password',
+          'token',
+          'uploadPath',
+        ],
+        isID: false);
+    return result;
   }
 
   static insertAlist({required List content}) async {
-    var conn = await MySqlConnection.connect(settings);
-    try {
-      String host = content[0].toString();
-      String alistusername = content[1].toString();
-      String password = content[2].toString();
-      String token = content[3].toString();
-      String uploadPath = content[4].toString();
-      String username = content[5].toString();
-
-      String encryptedHost = await encryptSelf(host);
-      String encryptedAlistusername = await encryptSelf(alistusername);
-      String encryptedPassword = await encryptSelf(password);
-      String encryptedToken = await encryptSelf(token);
-      String encryptedUploadPath = await encryptSelf(uploadPath);
-
-      await conn.query(
-          "insert into alist (host,alistusername,password,token,uploadPath,username) values (?,?,?,?,?,?)",
-          [
-            encryptedHost,
-            encryptedAlistusername,
-            encryptedPassword,
-            encryptedToken,
-            encryptedUploadPath,
-            username
-          ]);
-      return 'Success';
-    } catch (e) {
-      FLog.error(
-          className: 'MySqlUtils',
-          methodName: 'insertAlist',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
-      return "Error";
-    } finally {
-      await conn.close();
-    }
+    var result =
+        await insertBase(content: content, tablename: 'alist', paramNames: [
+      'host',
+      'alistusername',
+      'password',
+      'token',
+      'uploadPath',
+    ]);
+    return result;
   }
 
   static updateAlist({required List content}) async {
-    var conn = await MySqlConnection.connect(settings);
+    var result =
+        await updateBase(content: content, tablename: 'alist', paramNames: [
+      'host',
+      'alistusername',
+      'password',
+      'token',
+      'uploadPath',
+    ]);
+    return result;
+  }
 
-    try {
-      String host = content[0].toString();
-      String alistusername = content[1].toString();
-      String password = content[2].toString();
-      String token = content[3].toString();
-      String uploadPath = content[4].toString();
-      String username = content[5].toString();
+  static queryWebdav({required String username}) async {
+    var result = await queryBase(
+        username: username,
+        tablename: 'webdav',
+        paramNames: ['host', 'webdavusername', 'password', 'uploadPath'],
+        isID: false);
+    return result;
+  }
 
-      String encryptedHost = await encryptSelf(host);
-      String encryptedAlistusername = await encryptSelf(alistusername);
-      String encryptedPassword = await encryptSelf(password);
-      String encryptedToken = await encryptSelf(token);
-      String encryptedUploadPath = await encryptSelf(uploadPath);
+  static insertWebdav({required List content}) async {
+    var result = await insertBase(
+        content: content,
+        tablename: 'webdav',
+        paramNames: ['host', 'webdavusername', 'password', 'uploadPath']);
+    return result;
+  }
 
-      await conn.query(
-          "update alist set host = ?,alistusername = ?,password = ?,token = ?,uploadPath = ? where username = ?",
-          [
-            encryptedHost,
-            encryptedAlistusername,
-            encryptedPassword,
-            encryptedToken,
-            encryptedUploadPath,
-            username
-          ]);
-      return 'Success';
-    } catch (e) {
-      FLog.error(
-          className: 'MySqlUtils',
-          methodName: 'updateAlist',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
-      return "Error";
-    } finally {
-      await conn.close();
-    }
+  static updateWebdav({required List content}) async {
+    var result = await updateBase(
+        content: content,
+        tablename: 'webdav',
+        paramNames: ['host', 'webdavusername', 'password', 'uploadPath']);
+    return result;
   }
 }
