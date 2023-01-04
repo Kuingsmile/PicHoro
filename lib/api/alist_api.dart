@@ -1,15 +1,15 @@
 import 'dart:io';
 import 'dart:convert';
 import 'package:dio/dio.dart';
-import 'package:f_logs/f_logs.dart';
 
+import 'package:horopic/picture_host_manage/manage_api/alist_manage_api.dart';
 import 'package:horopic/picture_host_configure/configure_page/alist_configure.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/sql_utils.dart';
-import 'package:horopic/picture_host_manage/manage_api/alist_manage_api.dart';
 
 class AlistImageUploadUtils {
+  static String currentClassName = "AlistImageUploadUtils";
   //上传接口
   static uploadApi(
       {required String path,
@@ -23,7 +23,7 @@ class AlistImageUploadUtils {
     String token = configMap['token'];
     String today = getToday('yyyyMMdd');
     String alistToday = await Global.getTodayAlistUpdate();
-    if (alistToday != today) {
+    if (alistToday != today && token != '') {
       var res = await AlistManageAPI.getToken(
           configMap['host'], configMap['alistusername'], configMap['password']);
       if (res[0] == 'success') {
@@ -81,19 +81,14 @@ class AlistImageUploadUtils {
     }
     String filePath = uploadPath + name;
 
-    BaseOptions options = BaseOptions(
-      connectTimeout: 30000,
-      receiveTimeout: 30000,
-      sendTimeout: 30000,
-    );
+    BaseOptions options = setBaseOptions();
     File uploadFile = File(path);
     int contentLength = await uploadFile.length().then((value) {
       return value;
     });
     options.headers = {
       "Authorization": token,
-      "Content-Type":
-          "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW",
+      "Content-Type": Global.multipartString,
       "file-path": Uri.encodeComponent(filePath),
       "Content-Length": contentLength,
     };
@@ -106,11 +101,7 @@ class AlistImageUploadUtils {
           response.data!['message'] == 'success') {
         String infoGetUrl = configMap["host"] + "/api/fs/get";
         String refreshUrl = configMap["host"] + "/api/fs/list";
-        BaseOptions getOptions = BaseOptions(
-          connectTimeout: 30000,
-          receiveTimeout: 30000,
-          sendTimeout: 30000,
-        );
+        BaseOptions getOptions = setBaseOptions();
         getOptions.headers = {
           "Authorization": configMap["token"],
           "Content-Type": "application/json",
@@ -173,29 +164,19 @@ class AlistImageUploadUtils {
           }
         }
       } else {
-        return ["failed"];
+        return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
-        FLog.error(
-            className: "AlistImageUploadUtils",
-            methodName: "uploadApi",
-            text: formatErrorMessage({
-              'path': path,
-              'name': name,
-            }, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "AlistImageUploadUtils",
-            methodName: "uploadApi",
-            text: formatErrorMessage({
-              'path': path,
-              'name': name,
-            }, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
-      return [e.toString()];
+      flogErr(
+        e,
+        {
+          'path': path,
+          'name': name,
+        },
+        currentClassName,
+        "deleteApi",
+      );
+      return ['failed'];
     }
   }
 
@@ -209,7 +190,7 @@ class AlistImageUploadUtils {
     String token = configMap['token'];
     String today = getToday('yyyyMMdd');
     String alistToday = await Global.getTodayAlistUpdate();
-    if (alistToday != today) {
+    if (alistToday != today && token != '') {
       var res = await AlistManageAPI.getToken(
           configMap['host'], configMap['alistusername'], configMap['password']);
       if (res[0] == 'success') {
@@ -255,11 +236,7 @@ class AlistImageUploadUtils {
         return ['failed'];
       }
     }
-    BaseOptions options = BaseOptions(
-      connectTimeout: 30000,
-      receiveTimeout: 30000,
-      sendTimeout: 30000,
-    );
+    BaseOptions options = setBaseOptions();
     options.headers = {
       "Authorization": configMap["token"],
       "Content-Type": "application/json",
@@ -274,24 +251,16 @@ class AlistImageUploadUtils {
           "success",
         ];
       } else {
-        return ["failed"];
+        return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
-        FLog.error(
-            className: "AlistImageUploadUtils",
-            methodName: "deleteApi",
-            text: formatErrorMessage({}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "AlistImageUploadUtils",
-            methodName: "deleteApi",
-            text: formatErrorMessage({}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
-      return [e.toString()];
+      flogErr(
+        e,
+        {},
+        currentClassName,
+        "deleteApi",
+      );
+      return ['failed'];
     }
   }
 }
