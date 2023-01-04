@@ -6,15 +6,6 @@ import 'package:horopic/api/api.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/common_functions.dart';
 
-//默认图床参数和配置文件名对应关系
-String getpdconfig(String defaultConfig) {
-  return defaultConfig == 'lsky.pro'
-      ? 'host_config'
-      : defaultConfig == 'sm.ms'
-          ? 'smms_config'
-          : '${defaultConfig}_config';
-}
-
 Map<String, Function> uploadFunc = {
   'lsky.pro': LskyproImageUploadUtils.uploadApi,
   'sm.ms': SmmsImageUploadUtils.uploadApi,
