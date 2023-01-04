@@ -4,7 +4,6 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:path/path.dart' as my_path;
@@ -62,6 +61,7 @@ getToday(String format) {
 
 supportedExtensions(String ext) {
   String extLowerCase = ext.toLowerCase();
+
   if (!Global.imgExt.contains(extLowerCase) &&
       !Global.textExt.contains(extLowerCase) &&
       !Global.chewieExt.contains(extLowerCase) &&
@@ -73,17 +73,22 @@ supportedExtensions(String ext) {
   }
 }
 
+BaseOptions setBaseOptions() {
+  BaseOptions baseOptions = BaseOptions(
+    sendTimeout: Global.defaultOutTime,
+    receiveTimeout: Global.defaultOutTime,
+    connectTimeout: Global.defaultOutTime,
+  );
+  return baseOptions;
+}
+
 downloadTxtFile(
     String urlpath, String fileName, Map<String, dynamic>? headers) async {
+  BaseOptions baseOptions = setBaseOptions();
+  Dio dio = Dio(baseOptions);
+  String tempDir = (await getTemporaryDirectory()).path;
+  var tempfile = File('$tempDir/$fileName');
   try {
-    BaseOptions baseOptions = BaseOptions(
-      sendTimeout: 30000,
-      receiveTimeout: 30000,
-      connectTimeout: 30000,
-    );
-    Dio dio = Dio(baseOptions);
-    String tempDir = (await getTemporaryDirectory()).path;
-    var tempfile = File('$tempDir/$fileName');
     var response = await dio.download(
       urlpath,
       tempfile.path,
@@ -100,7 +105,7 @@ downloadTxtFile(
   } catch (e) {
     FLog.error(
         className: "common_functions",
-        methodName: "downloadFile",
+        methodName: "downloadTxtFile",
         text: formatErrorMessage({}, e.toString()),
         dataLogType: DataLogType.ERRORS.toString());
   }
@@ -513,6 +518,18 @@ formatErrorMessage(
   return formateTemplate;
 }
 
+//错误日志生成函数
+flogErr(Object e, Map parameters, String className, String methodName) {
+  FLog.error(
+      className: className,
+      methodName: methodName,
+      text: e is DioError
+          ? formatErrorMessage(parameters, e.toString(),
+              isDioError: true, dioErrorMessage: e)
+          : formatErrorMessage(parameters, e.toString()),
+      dataLogType: DataLogType.ERRORS.toString());
+}
+
 //清理下载的apk文件
 Future<void> deleteApkFile() async {
   try {
@@ -543,6 +560,7 @@ mainInit() async {
   String initUser = await Global.getUser();
   await Global.setUser(initUser);
   deleteApkFile();
+
   String initPassword = await Global.getPassword();
   await Global.setPassword(initPassword);
   String initPShost = await Global.getPShost();
