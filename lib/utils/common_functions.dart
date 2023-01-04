@@ -40,6 +40,15 @@ Map uploadStatus = {
   'UploadStatus.paused': "暂停",
 };
 
+//默认图床参数和配置文件名对应关系
+String getpdconfig(String defaultConfig) {
+  return defaultConfig == 'lsky.pro'
+      ? 'host_config'
+      : defaultConfig == 'sm.ms'
+          ? 'smms_config'
+          : '${defaultConfig}_config';
+}
+
 //defaultLKformat和对应的转换函数
 Map<String, Function> linkGenerateDict = {
   'rawurl': generateUrl,
@@ -560,7 +569,6 @@ mainInit() async {
   String initUser = await Global.getUser();
   await Global.setUser(initUser);
   deleteApkFile();
-
   String initPassword = await Global.getPassword();
   await Global.setPassword(initPassword);
   String initPShost = await Global.getPShost();
