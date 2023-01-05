@@ -6,14 +6,13 @@ import 'dart:io';
 import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import 'package:f_logs/f_logs.dart';
 import 'package:path/path.dart' as my_path;
 
-import 'package:horopic/picture_host_manage/tencent/upload_api/tencent_upload_request.dart';
+import 'package:horopic/picture_host_manage/common_page/pnc_upload_request.dart';
+import 'package:horopic/picture_host_manage/common_page/pnc_upload_task.dart';
 import 'package:horopic/pages/upload_pages/upload_status.dart';
-import 'package:horopic/picture_host_manage/tencent/upload_api/tencent_upload_task.dart';
-
 import 'package:horopic/utils/common_functions.dart';
+import 'package:horopic/utils/global.dart';
 import 'package:horopic/api/tencent_api.dart';
 
 class UploadManager {
@@ -104,19 +103,14 @@ class UploadManager {
             filename: my_path.basename(path)),
       });
 
-      BaseOptions baseoptions = BaseOptions(
-        connectTimeout: 30000,
-        receiveTimeout: 30000,
-        sendTimeout: 30000,
-      );
+      BaseOptions baseoptions = setBaseOptions();
       File uploadFile = File(path);
       String contentLength = await uploadFile.length().then((value) {
         return value.toString();
       });
       baseoptions.headers = {
         'Host': host,
-        'Content-Type':
-            'multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW',
+        'Content-Type': Global.multipartString,
         'Content-Length': contentLength,
       };
       Dio dio = Dio(baseoptions);
@@ -130,14 +124,14 @@ class UploadManager {
         setStatus(task, UploadStatus.completed);
       }
     } catch (e) {
-      FLog.error(
-          className: 'tencentUploadManager',
-          methodName: 'upload',
-          text: formatErrorMessage({
+      flogErr(
+          e,
+          {
             'path': path,
             'fileName': fileName,
-          }, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+          },
+          'tencentUploadManager',
+          'upload');
       var task = getUpload(fileName)!;
       if (task.status.value != UploadStatus.canceled &&
           task.status.value != UploadStatus.completed) {
@@ -192,12 +186,11 @@ class UploadManager {
   }
 
   Future<UploadTask> _addUploadRequest(UploadRequest uploadRequest) async {
-
     if (_cache[uploadRequest.name] != null) {
-       if ((_cache[uploadRequest.name]!.status.value == UploadStatus.completed ||
-       _cache[uploadRequest.name]!.status.value == UploadStatus.uploading 
-       )&&
-         _cache[uploadRequest.name]!.request == uploadRequest) {
+      if ((_cache[uploadRequest.name]!.status.value == UploadStatus.completed ||
+              _cache[uploadRequest.name]!.status.value ==
+                  UploadStatus.uploading) &&
+          _cache[uploadRequest.name]!.request == uploadRequest) {
         return _cache[uploadRequest.name]!;
       } else {
         _queue.remove(_cache[uploadRequest.name]);
