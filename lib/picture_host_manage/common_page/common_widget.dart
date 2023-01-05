@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:horopic/picture_host_manage/common_page/upload/pnc_upload_task.dart';
 import 'package:horopic/picture_host_manage/common_page/download/pnc_download_task.dart';
@@ -190,9 +192,13 @@ class ListItemState extends State<ListItem> {
                     child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      '文件名:${widget.url.split('/').last}',
-                    ),
+                    Text(widget.url.contains('/')
+                        ? '文件名:${widget.url.split('/').last}'
+                        : widget.url.contains('object') &&
+                                widget.url.contains('bucket') && 
+                                widget.url.contains('region')
+                            ? '文件名:${jsonDecode(widget.url)['object'].split('/').last}'
+                            : '文件名:${widget.url}'),
                     if (widget.downloadTask != null)
                       ValueListenableBuilder(
                           valueListenable: widget.downloadTask!.status,
