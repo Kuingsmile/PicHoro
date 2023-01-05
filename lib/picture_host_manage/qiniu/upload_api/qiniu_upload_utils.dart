@@ -5,10 +5,9 @@ import 'dart:io';
 import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import 'package:f_logs/f_logs.dart';
 
-import 'package:horopic/picture_host_manage/qiniu/upload_api/qiniu_upload_request.dart';
-import 'package:horopic/picture_host_manage/qiniu/upload_api/qiniu_upload_task.dart';
+import 'package:horopic/picture_host_manage/common_page/upload/pnc_upload_request.dart';
+import 'package:horopic/picture_host_manage/common_page/upload/pnc_upload_task.dart';
 import 'package:horopic/pages/upload_pages/upload_status.dart';
 import 'package:horopic/api/qiniu_api.dart';
 import 'package:horopic/utils/common_functions.dart';
@@ -82,11 +81,7 @@ class UploadManager {
         "token": uploadToken,
         "file": await MultipartFile.fromFile(path, filename: fileName),
       });
-      BaseOptions baseoptions = BaseOptions(
-        connectTimeout: 30000,
-        receiveTimeout: 30000,
-        sendTimeout: 30000,
-      );
+      BaseOptions baseoptions = setBaseOptions();
       baseoptions.headers = {
         'Authorization': 'UpToken $uploadToken',
       };
@@ -102,14 +97,14 @@ class UploadManager {
         setStatus(task, UploadStatus.completed);
       }
     } catch (e) {
-      FLog.error(
-          className: 'QiniuUploadManager',
-          methodName: 'upload',
-          text: formatErrorMessage({
+      flogErr(
+          e,
+          {
             'path': path,
             'fileName': fileName,
-          }, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+          },
+          'QiniuUploadManager',
+          'upload');
       var task = getUpload(fileName)!;
       if (task.status.value != UploadStatus.canceled &&
           task.status.value != UploadStatus.completed) {
@@ -165,9 +160,9 @@ class UploadManager {
 
   Future<UploadTask> _addUploadRequest(UploadRequest uploadRequest) async {
     if (_cache[uploadRequest.name] != null) {
-       if ((_cache[uploadRequest.name]!.status.value == UploadStatus.completed ||
-       _cache[uploadRequest.name]!.status.value == UploadStatus.uploading 
-       )&&
+      if ((_cache[uploadRequest.name]!.status.value == UploadStatus.completed ||
+              _cache[uploadRequest.name]!.status.value ==
+                  UploadStatus.uploading) &&
           _cache[uploadRequest.name]!.request == uploadRequest) {
         return _cache[uploadRequest.name]!;
       } else {
