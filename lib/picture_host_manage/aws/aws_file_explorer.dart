@@ -476,7 +476,7 @@ class AwsFileExplorerState
                                 if (mounted) {
                                   Application.router
                                       .navigateTo(context,
-                                          '/awsUpDownloadManagePage?bucketName=${widget.element['name']}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=0',
+                                          '/baseUpDownloadManagePage?bucketName=${widget.element['name']}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=0&currentListIndex=2',
                                           transition:
                                               TransitionType.inFromRight)
                                       .then((value) {
@@ -551,7 +551,7 @@ class AwsFileExplorerState
                                 if (mounted) {
                                   Application.router
                                       .navigateTo(context,
-                                          '/awsUpDownloadManagePage?bucketName=${widget.element['name']}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=0',
+                                          '/baseUpDownloadManagePage?bucketName=${widget.element['name']}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=0&currentListIndex=2',
                                           transition:
                                               TransitionType.inFromRight)
                                       .then((value) {
@@ -680,7 +680,7 @@ class AwsFileExplorerState
                 if (mounted) {
                   Application.router
                       .navigateTo(context,
-                          '/awsUpDownloadManagePage?bucketName=${widget.element['name']}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=$index',
+                          '/baseUpDownloadManagePage?bucketName=${widget.element['name']}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=$index&currentListIndex=2',
                           transition: TransitionType.inFromRight)
                       .then((value) {
                     _getBucketList();
@@ -798,7 +798,7 @@ class AwsFileExplorerState
                           ExternalPath.DIRECTORY_DOWNLOADS);
                   // ignore: use_build_context_synchronously
                   Application.router.navigateTo(context,
-                      '/awsUpDownloadManagePage?bucketName=${widget.element['name']}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=1',
+                      '/baseUpDownloadManagePage?bucketName=${widget.element['name']}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=1&currentListIndex=2',
                       transition: TransitionType.inFromRight);
                 },
                 child: const Icon(

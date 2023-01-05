@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:fluro/fluro.dart';
 
 import 'package:horopic/utils/web_view.dart';
-import 'package:horopic/utils/global.dart';
 
 import 'package:horopic/pages/pichoro_app.dart';
 import 'package:horopic/pages/home_page.dart';
@@ -101,7 +100,6 @@ import 'package:horopic/picture_host_manage/aws/aws_bucket_list_page.dart';
 import 'package:horopic/picture_host_manage/aws/aws_new_bucket_configure.dart';
 import 'package:horopic/picture_host_manage/aws/aws_file_explorer.dart';
 import 'package:horopic/picture_host_manage/aws/aws_file_information_page.dart';
-import 'package:horopic/picture_host_manage/aws/aws_download_manage_page.dart';
 
 import 'package:horopic/picture_host_manage/alist/alist_bucket_list_page.dart';
 import 'package:horopic/picture_host_manage/alist/alist_bucket_information_page.dart';
@@ -948,16 +946,6 @@ var awsFileInformationHandler = Handler(
   return AwsFileInformation(
     fileMap: fileMap,
   );
-});
-
-//Aws存储下载文件页面
-var awsDownloadFileHandler = Handler(
-    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
-  var bucketName = params['bucketName']!.first;
-  String downloadPath = params['downloadPath']!.first;
-  String tabIndex = params['tabIndex']!.first;
-  return AwsUpDownloadManagePage(
-      bucketName: bucketName, downloadPath: downloadPath, tabIndex: tabIndex);
 });
 
 //Alist存储桶列表页面

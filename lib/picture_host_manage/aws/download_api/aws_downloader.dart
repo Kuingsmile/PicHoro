@@ -10,9 +10,9 @@ import 'package:flutter/foundation.dart';
 import 'package:f_logs/f_logs.dart';
 import 'package:minio_new/minio.dart';
 
-import 'package:horopic/picture_host_manage/aws/download_api/aws_download_task.dart';
-import 'package:horopic/picture_host_manage/tencent/download_api/download_status.dart';
-import 'package:horopic/picture_host_manage/tencent/download_api/download_request.dart';
+import 'package:horopic/picture_host_manage/common_page/download/pnc_download_task.dart';
+import 'package:horopic/picture_host_manage/common_page/download/pnc_download_status.dart';
+import 'package:horopic/picture_host_manage/common_page/download/pnc_download_request.dart';
 import 'package:horopic/picture_host_manage/manage_api/aws_manage_api.dart';
 import 'package:horopic/utils/common_functions.dart';
 

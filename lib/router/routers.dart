@@ -106,7 +106,6 @@ class Routes {
   static String awsNewBucketConfig = "/awsNewBucketConfig";
   static String awsFileExplorer = "/awsFileExplorer";
   static String awsFileInformation = "/awsFileInformation";
-  static String awsUpDownloadManagePage = "/awsUpDownloadManagePage";
   static String alistBucketList = "/alistBucketList";
   static String alistBucketInformation = "/alistBucketInformation";
   static String alistNewBucketConfig = "/alistNewBucketConfig";
@@ -236,7 +235,6 @@ class Routes {
     router.define(awsNewBucketConfig, handler: newAwsBucketHandler);
     router.define(awsFileExplorer, handler: awsFileExplorerHandler);
     router.define(awsFileInformation, handler: awsFileInformationHandler);
-    router.define(awsUpDownloadManagePage, handler: awsDownloadFileHandler);
     router.define(configureStorePage, handler: configureStorePageHandler);
     router.define(alistBucketList, handler: alistBucketListHandler);
     router.define(alistBucketInformation, handler: alistBucketInformationHandler);
