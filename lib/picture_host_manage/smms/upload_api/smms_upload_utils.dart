@@ -5,11 +5,10 @@ import 'dart:io';
 import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import 'package:f_logs/f_logs.dart';
 import 'package:path/path.dart' as my_path;
 
-import 'package:horopic/picture_host_manage/smms/upload_api/smms_upload_task.dart';
-import 'package:horopic/picture_host_manage/smms/upload_api/smms_upload_request.dart';
+import 'package:horopic/picture_host_manage/common_page/upload/pnc_upload_task.dart';
+import 'package:horopic/picture_host_manage/common_page/upload/pnc_upload_request.dart';
 import 'package:horopic/pages/upload_pages/upload_status.dart';
 import 'package:horopic/utils/common_functions.dart';
 
@@ -39,7 +38,7 @@ class UploadManager {
   }
 
   Future<void> upload(
-      String path, String fileName, String token, canceltoken) async {
+      String path, String fileName, Map configMap, canceltoken) async {
     try {
       var task = getUpload(fileName);
 
@@ -54,11 +53,8 @@ class UploadManager {
             filename: my_path.basename(path)),
         "format": "json",
       });
-      BaseOptions options = BaseOptions(
-        connectTimeout: 30000,
-        receiveTimeout: 30000,
-        sendTimeout: 30000,
-      );
+      String token = configMap['token'];
+      BaseOptions options = setBaseOptions();
       options.headers = {
         "Authorization": token,
         "Content-Type": "multipart/form-data",
@@ -76,14 +72,15 @@ class UploadManager {
         setStatus(task, UploadStatus.completed);
       }
     } catch (e) {
-      FLog.error(
-          className: 'smmsUploadManager',
-          methodName: 'upload',
-          text: formatErrorMessage({
+      flogErr(
+          e,
+          {
             'path': path,
             'fileName': fileName,
-          }, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+            'configMap': configMap,
+          },
+          'smmsUploadManager',
+          'upload');
       var task = getUpload(fileName)!;
       if (task.status.value != UploadStatus.canceled &&
           task.status.value != UploadStatus.completed) {
@@ -113,7 +110,7 @@ class UploadManager {
         runningTasks--;
         continue;
       }
-      upload(currentRequest.path, currentRequest.name, currentRequest.token,
+      upload(currentRequest.path, currentRequest.name, currentRequest.configMap,
           currentRequest.cancelToken);
       await Future.delayed(const Duration(milliseconds: 500), null);
     }
@@ -130,18 +127,18 @@ class UploadManager {
   }
 
   Future<UploadTask?> addUpload(
-      String path, String fileName, String token) async {
+      String path, String fileName, Map<String, dynamic> configMap) async {
     if (path.isNotEmpty && fileName.isNotEmpty) {
-      return await _addUploadRequest(UploadRequest(path, fileName, token));
+      return await _addUploadRequest(UploadRequest(path, fileName, configMap));
     }
     return null;
   }
 
   Future<UploadTask> _addUploadRequest(UploadRequest uploadRequest) async {
     if (_cache[uploadRequest.name] != null) {
-       if ((_cache[uploadRequest.name]!.status.value == UploadStatus.completed ||
-       _cache[uploadRequest.name]!.status.value == UploadStatus.uploading 
-       )&&
+      if ((_cache[uploadRequest.name]!.status.value == UploadStatus.completed ||
+              _cache[uploadRequest.name]!.status.value ==
+                  UploadStatus.uploading) &&
           _cache[uploadRequest.name]!.request == uploadRequest) {
         return _cache[uploadRequest.name]!;
       } else {
@@ -149,7 +146,7 @@ class UploadManager {
       }
     }
     _queue.add(UploadRequest(
-        uploadRequest.path, uploadRequest.name, uploadRequest.token));
+        uploadRequest.path, uploadRequest.name, uploadRequest.configMap));
     var task = UploadTask(_queue.last);
     _cache[uploadRequest.name] = task;
     _startExecution();
@@ -204,10 +201,10 @@ class UploadManager {
     return _cache.values as List<UploadTask>;
   }
 
-  Future<void> addBatchUploads(
-      List<String> paths, List<String> names, List<String> tokens) async {
+  Future<void> addBatchUploads(List<String> paths, List<String> names,
+      List<Map<String, dynamic>> configMaps) async {
     for (var i = 0; i < paths.length; i++) {
-      await addUpload(paths[i], names[i], tokens[i]);
+      await addUpload(paths[i], names[i], configMaps[i]);
     }
   }
 

@@ -29,7 +29,6 @@ import 'package:horopic/picture_host_manage/common_page/loading_state.dart'
 
 import 'package:horopic/utils/image_compress.dart';
 
-
 class SmmsFileExplorer extends StatefulWidget {
   const SmmsFileExplorer({
     Key? key,
@@ -124,8 +123,9 @@ class SmmsFileExplorerState
           },
         ),
         titleSpacing: 0,
-        title: titleText('SM.MS文件浏览',
-            ),
+        title: titleText(
+          'SM.MS文件浏览',
+        ),
         actions: [
           PopupMenuButton(
               icon: const Icon(
@@ -281,28 +281,26 @@ class SmmsFileExplorerState
                               }
                               Map configMap =
                                   await SmmsManageAPI.getConfigMap();
-                              String token = configMap['token'];
                               for (int i = 0; i < files.length; i++) {
-                                 File compressedFile;
-                                  if (Global.isCompress == true) {
-                                    ImageCompress imageCompress =
-                                        ImageCompress();
-                                    compressedFile =
-                                        await imageCompress.compressAndGetFile(
-                                            files[i].path,
-                                            my_path.basename(files[i].path),
-                                            Global.defaultCompressFormat,
-                                            minHeight: Global.minHeight,
-                                            minWidth: Global.minWidth,
-                                            quality: Global.quality);
-                                    files[i] = compressedFile;
-                                  } else {
-                                    compressedFile = files[i];
-                                  }
+                                File compressedFile;
+                                if (Global.isCompress == true) {
+                                  ImageCompress imageCompress = ImageCompress();
+                                  compressedFile =
+                                      await imageCompress.compressAndGetFile(
+                                          files[i].path,
+                                          my_path.basename(files[i].path),
+                                          Global.defaultCompressFormat,
+                                          minHeight: Global.minHeight,
+                                          minWidth: Global.minWidth,
+                                          quality: Global.quality);
+                                  files[i] = compressedFile;
+                                } else {
+                                  compressedFile = files[i];
+                                }
                                 List uploadList = [
                                   files[i].path,
                                   my_path.basename(files[i].path),
-                                  token
+                                  configMap
                                 ];
                                 String uploadListStr = jsonEncode(uploadList);
                                 Global.smmsUploadList.add(uploadListStr);
@@ -655,7 +653,7 @@ class SmmsFileExplorerState
               ),
               const Center(
                   child: Text('没有文件哦，点击右上角添加吧\n刚上传的文件\n可能需要一段时间才能显示',
-                  textAlign: TextAlign.center,
+                      textAlign: TextAlign.center,
                       style: TextStyle(
                           fontSize: 20,
                           color: Color.fromARGB(136, 121, 118, 118))))
@@ -857,7 +855,8 @@ class SmmsFileExplorerState
                               for (var i = 0; i < allInfoList.length; i++) {
                                 urlList += allInfoList[i]['url'] + ',';
                               }
-                              urlList = urlList.substring(0, urlList.length - 1);
+                              urlList =
+                                  urlList.substring(0, urlList.length - 1);
 
                               Application.router.navigateTo(this.context,
                                   '${Routes.albumImagePreview}?index=$index&images=${Uri.encodeComponent(urlList)}',

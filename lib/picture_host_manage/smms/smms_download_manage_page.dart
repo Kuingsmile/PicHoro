@@ -4,29 +4,19 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluro/fluro.dart';
-import 'package:f_logs/f_logs.dart';
 import 'package:external_path/external_path.dart';
 
-import 'package:horopic/picture_host_manage/smms/download_api/smms_downloader.dart';
-import 'package:horopic/picture_host_manage/smms/download_api/smms_download_task.dart';
-import 'package:horopic/picture_host_manage/tencent/download_api/download_status.dart';
 import 'package:horopic/picture_host_manage/smms/upload_api/smms_upload_utils.dart';
+import 'package:horopic/picture_host_manage/smms/download_api/smms_downloader.dart';
+import 'package:horopic/picture_host_manage/common_page/download/pnc_download_task.dart';
+import 'package:horopic/picture_host_manage/common_page/download/pnc_download_status.dart';
+import 'package:horopic/picture_host_manage/common_page/upload/pnc_upload_task.dart';
 import 'package:horopic/pages/upload_pages/upload_status.dart';
-import 'package:horopic/picture_host_manage/smms/upload_api/smms_upload_task.dart';
 import 'package:horopic/router/application.dart';
 import 'package:horopic/router/routers.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/global.dart';
 //修改自flutter_download_manager包 https://github.com/nabil6391/flutter_download_manager 作者@nabil6391
-
-Map downloadStatus = {
-  'DownloadStatus.downloading': "下载中",
-  'DownloadStatus.paused': "暂停",
-  'DownloadStatus.canceled': "取消",
-  'DownloadStatus.failed': "失败",
-  'DownloadStatus.completed': "完成",
-  'DownloadStatus.queued': "排队中",
-};
 
 class SmmsUpDownloadManagePage extends StatefulWidget {
   String downloadPath;
@@ -45,7 +35,7 @@ class SmmsUpDownloadManagePageState extends State<SmmsUpDownloadManagePage> {
   var uploadManager = UploadManager();
   List<String> uploadPathList = [];
   List<String> uploadFileNameList = [];
-  List<String> uploadTokenList = [];
+  List<Map<String, dynamic>> uploadConfigMapList = [];
   var savedDir = '';
 
   @override
@@ -59,14 +49,15 @@ class SmmsUpDownloadManagePageState extends State<SmmsUpDownloadManagePage> {
         var currentElement = jsonDecode(Global.smmsUploadList[i]);
         uploadPathList.add(currentElement[0]);
         uploadFileNameList.add(currentElement[1]);
-        uploadTokenList.add(currentElement[2]);
+        Map<String, dynamic> tempMap = currentElement[2];
+        uploadConfigMapList.add(tempMap);
       }
     }
   }
 
   _createUploadListItem() {
     List<Widget> list = [];
-    for (var i =Global.smmsUploadList.length - 1; i >= 0; i--) {
+    for (var i = Global.smmsUploadList.length - 1; i >= 0; i--) {
       list.add(GestureDetector(
           onLongPress: () {
             showCupertinoAlertDialogWithConfirmFunc(
@@ -81,7 +72,7 @@ class SmmsUpDownloadManagePageState extends State<SmmsUpDownloadManagePage> {
                 });
           },
           child: UploadListItem(
-              onUploadPlayPausedPressed: (path, fileName, token) async {
+              onUploadPlayPausedPressed: (path, fileName, configMap) async {
                 var task = uploadManager
                     .getUpload(jsonDecode(Global.smmsUploadList[i])[1]);
                 if (task != null && !task.status.value.isCompleted) {
@@ -97,7 +88,7 @@ class SmmsUpDownloadManagePageState extends State<SmmsUpDownloadManagePage> {
                   }
                   setState(() {});
                 } else {
-                  await uploadManager.addUpload(path, fileName, token);
+                  await uploadManager.addUpload(path, fileName, configMap);
                   setState(() {});
                 }
               },
@@ -107,7 +98,7 @@ class SmmsUpDownloadManagePageState extends State<SmmsUpDownloadManagePage> {
               },
               path: jsonDecode(Global.smmsUploadList[i])[0],
               fileName: jsonDecode(Global.smmsUploadList[i])[1],
-              token: jsonDecode(Global.smmsUploadList[i])[2],
+              configMap: jsonDecode(Global.smmsUploadList[i])[2],
               uploadTask: uploadManager
                   .getUpload(jsonDecode(Global.smmsUploadList[i])[1]))));
     }
@@ -122,7 +113,7 @@ class SmmsUpDownloadManagePageState extends State<SmmsUpDownloadManagePage> {
           TextButton(
               onPressed: () async {
                 await uploadManager.addBatchUploads(
-                    uploadPathList, uploadFileNameList, uploadTokenList);
+                    uploadPathList, uploadFileNameList, uploadConfigMapList);
                 setState(() {});
               },
               child: const Text(
@@ -224,14 +215,14 @@ class SmmsUpDownloadManagePageState extends State<SmmsUpDownloadManagePage> {
                 try {
                   await file.delete();
                 } catch (e) {
-                  FLog.error(
-                      className: 'SmmsUpDownloadManagePageState',
-                      methodName: '_createDownloadListItem',
-                      text: formatErrorMessage({
+                  flogErr(
+                      e,
+                      {
                         'url': url,
                         'fileName': fileName,
-                      }, e.toString()),
-                      dataLogType: DataLogType.ERRORS.toString());
+                      },
+                      'SmmsUpDownloadManagePageState',
+                      '_createDownloadListItem');
                 }
                 await downloadManager.removeDownload(url);
                 setState(() {});
@@ -576,19 +567,19 @@ class ListItemState extends State<ListItem> {
 }
 
 class UploadListItem extends StatefulWidget {
-  Function(String, String, String) onUploadPlayPausedPressed;
+  Function(String, String, Map<String, dynamic>) onUploadPlayPausedPressed;
   Function(String, String) onDelete;
   UploadTask? uploadTask;
   String path;
   String fileName;
-  String token;
+  Map<String, dynamic> configMap;
   UploadListItem(
       {Key? key,
       required this.onUploadPlayPausedPressed,
       required this.onDelete,
       required this.path,
       required this.fileName,
-      required this.token,
+      required this.configMap,
       this.uploadTask})
       : super(key: key);
 
@@ -661,7 +652,7 @@ class UploadListItemState extends State<UploadListItem> {
                                     await widget.onUploadPlayPausedPressed(
                                         widget.path,
                                         widget.fileName,
-                                        widget.token);
+                                        widget.configMap);
                                   },
                                   icon: const Icon(
                                     Icons.cloud_upload_outlined,
@@ -700,7 +691,7 @@ class UploadListItemState extends State<UploadListItem> {
                     : IconButton(
                         onPressed: () async {
                           await widget.onUploadPlayPausedPressed(
-                              widget.path, widget.fileName, widget.token);
+                              widget.path, widget.fileName, widget.configMap);
                         },
                         icon: const Icon(
                           Icons.cloud_upload_outlined,
