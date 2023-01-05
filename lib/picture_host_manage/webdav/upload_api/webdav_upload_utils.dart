@@ -8,8 +8,8 @@ import 'package:flutter/foundation.dart';
 import 'package:f_logs/f_logs.dart';
 
 import 'package:horopic/pages/upload_pages/upload_status.dart';
-import 'package:horopic/picture_host_manage/common_page/pnc_upload_request.dart';
-import 'package:horopic/picture_host_manage/common_page/pnc_upload_task.dart';
+import 'package:horopic/picture_host_manage/common_page/upload/pnc_upload_request.dart';
+import 'package:horopic/picture_host_manage/common_page/upload/pnc_upload_task.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/picture_host_manage/manage_api/webdav_manage_api.dart';
 

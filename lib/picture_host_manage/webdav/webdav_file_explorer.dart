@@ -474,7 +474,7 @@ class WebdavFileExplorerState
                                 if (mounted) {
                                   Application.router
                                       .navigateTo(context,
-                                          '/webdavUpDownloadManagePage?bucketName=${Uri.encodeComponent(bucketName)}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=0',
+                                          '/baseUpDownloadManagePage?bucketName=${Uri.encodeComponent(bucketName)}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=0&currentListIndex=11',
                                           transition:
                                               TransitionType.inFromRight)
                                       .then((value) {
@@ -553,7 +553,7 @@ class WebdavFileExplorerState
                                 if (mounted) {
                                   Application.router
                                       .navigateTo(context,
-                                          '/webdavUpDownloadManagePage?bucketName=${Uri.encodeComponent(bucketName)}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=0',
+                                          '/baseUpDownloadManagePage?bucketName=${Uri.encodeComponent(bucketName)}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=0&currentListIndex=11',
                                           transition:
                                               TransitionType.inFromRight)
                                       .then((value) {
@@ -690,7 +690,7 @@ class WebdavFileExplorerState
                 if (mounted) {
                   Application.router
                       .navigateTo(context,
-                          '/webdavUpDownloadManagePage?bucketName=${Uri.encodeComponent(bucketName)}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=$index',
+                          '/baseUpDownloadManagePage?bucketName=${Uri.encodeComponent(bucketName)}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=$index&currentListIndex=11',
                           transition: TransitionType.inFromRight)
                       .then((value) {
                     _getBucketList();
@@ -812,7 +812,7 @@ class WebdavFileExplorerState
                                         : widget.bucketPrefix;
                   // ignore: use_build_context_synchronously
                   Application.router.navigateTo(context,
-                      '/webdavUpDownloadManagePage?bucketName=${Uri.encodeComponent(bucketName)}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=1',
+                      '/baseUpDownloadManagePage?bucketName=${Uri.encodeComponent(bucketName)}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=0&currentListIndex=11',
                       transition: TransitionType.inFromRight);
                 },
                 child: const Icon(

@@ -2,21 +2,21 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 
-import 'package:horopic/picture_host_manage/common_page/pnc_upload_request.dart';
-import 'package:horopic/pages/upload_pages/upload_status.dart';
+import 'package:horopic/picture_host_manage/common_page/download/pnc_download_status.dart';
+import 'package:horopic/picture_host_manage/common_page/download/pnc_download_request.dart';
 
-class UploadTask {
-  final UploadRequest request;
-  ValueNotifier<UploadStatus> status = ValueNotifier(UploadStatus.queued);
+class DownloadTask {
+  final DownloadRequest request;
+  ValueNotifier<DownloadStatus> status = ValueNotifier(DownloadStatus.queued);
   ValueNotifier<double> progress = ValueNotifier(0);
 
-  UploadTask(
+  DownloadTask(
     this.request,
   );
 
-  Future<UploadStatus> whenUploadComplete(
+  Future<DownloadStatus> whenDownloadComplete(
       {Duration timeout = const Duration(hours: 2)}) async {
-    var completer = Completer<UploadStatus>();
+    var completer = Completer<DownloadStatus>();
 
     if (status.value.isCompleted) {
       completer.complete(status.value);
