@@ -68,6 +68,9 @@ class SmmsUpDownloadManagePageState extends State<SmmsUpDownloadManagePage> {
                   Navigator.pop(context);
                   Global.smmsUploadList.remove(Global.smmsUploadList[i]);
                   await Global.setSmmsUploadList(Global.smmsUploadList);
+                  uploadPathList.removeAt(i);
+                  uploadFileNameList.removeAt(i);
+                  uploadConfigMapList.removeAt(i);
                   setState(() {});
                 });
           },
