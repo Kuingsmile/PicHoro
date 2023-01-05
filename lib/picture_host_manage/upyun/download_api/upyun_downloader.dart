@@ -8,9 +8,9 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:f_logs/f_logs.dart';
 
-import 'package:horopic/picture_host_manage/upyun/download_api/upyun_download_task.dart';
-import 'package:horopic/picture_host_manage/tencent/download_api/download_status.dart';
-import 'package:horopic/picture_host_manage/tencent/download_api/download_request.dart';
+import 'package:horopic/picture_host_manage/common_page/download/pnc_download_task.dart';
+import 'package:horopic/picture_host_manage/common_page/download/pnc_download_status.dart';
+import 'package:horopic/picture_host_manage/common_page/download/pnc_download_request.dart';
 import 'package:horopic/utils/common_functions.dart';
 
 class DownloadManager {
@@ -169,6 +169,7 @@ class DownloadManager {
         savedDir = ".";
       }
 
+    
       String downloadFilename = '';
       if (savedDir.endsWith("/")) {
         downloadFilename = savedDir + getFileNameFromUrl(url);
