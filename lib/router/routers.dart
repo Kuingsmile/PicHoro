@@ -15,6 +15,7 @@ class Routes {
   static String localImagePreview = "/localImagePreview";
   static String configurePage = "/configurePage";
   static String configurePageLogger = "/configurePageLogger";
+  static String compressConfigurePage = "/compressConfigurePage";
   static String appPassword = "/appPassword";
   static String allPShost = "/allPShost";
   static String defaultPShostSelect = "/defaultPShostSelect";
@@ -55,7 +56,6 @@ class Routes {
   static String tencentFileExplorer = "/tencentFileExplorer";
   static String tencentFileInformation = "/tencentFileInformation";
   static String tencentBucketList = "/tencentBucketList";
-  static String tencentUpDownloadManagePage = "/tencentUpDownloadManagePage";
   static String fileExplorer = "/fileExplorer";
   static String smmsManageHomePage = "/smmsManageHomePage";
   static String smmsFileExplorer = "/smmsFileExplorer";
@@ -68,21 +68,18 @@ class Routes {
   static String aliyunBucketInformation = "/aliyunBucketInformation";
   static String aliyunFileExplorer = "/aliyunFileExplorer";
   static String aliyunFileInformation = "/aliyunFileInformation";
-  static String aliyunUpDownloadManagePage = "/aliyunUpDownloadManagePage";
   static String upyunLogIn = '/upyunLogIn';
   static String upyunFileExplorer = "/upyunFileExplorer";
   static String upyunBucketList = "/upyunBucketList";
   static String upyunBucketInformation = "/upyunBucketInformation";
   static String upyunTokenManagePage = "/upyunTokenManagePage";
   static String upyunNewBucketConfig = "/upyunNewBucketConfig";
-  static String upyunUpDownloadManagePage = "/upyunUpDownloadManagePage";
   static String upyunFileInformationPage = "/upyunFileInformationPage";
   static String qiniuBucketList = "/qiniuBucketList";
   static String qiniuNewBucketConfig = "/qiniuNewBucketConfig";
   static String qiniuBucketDomainAreaConfig = "/qiniuBucketDomainAreaConfig";
   static String qiniuFileExplorer = "/qiniuFileExplorer";
   static String qiniuFileInformation = "/qiniuFileInformation";
-  static String qiniuUpDownloadManagePage = "/qiniuUpDownloadManagePage";
   static String lskyproManageHomePage = "/lskyproManageHomePage";
   static String lskyproFileExplorer = "/lskyproFileExplorer";
   static String lskyproFileInformation = "/lskyproFileInformation";
@@ -121,7 +118,7 @@ class Routes {
   static String pdfViewer = "/pdfViewer";
   static String webdavFileExplorer = "/webdavFileExplorer";
   static String webdavFileInformation = "/webdavFileInformation";
-  static String webdavUpDownloadManagePage = "/webdavUpDownloadManagePage";
+  static String baseUpDownloadManagePage = "/baseUpDownloadManagePage";
 
   static void configureRoutes(FluroRouter router) {
     router.notFoundHandler = Handler(
@@ -139,6 +136,7 @@ class Routes {
     router.define(webdavImagePreview, handler: webdavImagePreviewHandler);
     router.define(localImagePreview, handler: localImagePreviewHandler);
     router.define(configurePage, handler: configurePageHandler);
+    router.define(compressConfigurePage, handler: compressConfigureHandler);
     router.define(appPassword, handler: appPasswordHandler);
     router.define(allPShost, handler: allPShostHandler);
     router.define(defaultPShostSelect, handler: defaultPShostSelectHandler);
@@ -180,8 +178,6 @@ class Routes {
     router.define(tencentFileInformation,
         handler: tencentFileInformationHandler);
     router.define(tencentBucketList, handler: tencentBucketListHandler);
-    router.define(tencentUpDownloadManagePage,
-        handler: tencentDownloadFileHandler);
     router.define(fileExplorer, handler: fileExplorerHandler);
     router.define(smmsManageHomePage, handler: smmsManageHomePageHandler);
     router.define(smmsFileExplorer, handler: smmsFileExplorerHandler);
@@ -196,8 +192,6 @@ class Routes {
     router.define(aliyunFileExplorer, handler: aliyunFileExplorerHandler);
     router.define(aliyunFileInformation, handler: aliyunFileInformationHandler);
     router.define(configurePageLogger, handler: logsHandler);
-    router.define(aliyunUpDownloadManagePage,
-        handler: aliyunDownloadFileHandler);
     router.define(upyunFileExplorer, handler: upyunFileExplorerHandler);
     router.define(upyunLogIn, handler: upyunLogInHandler);
     router.define(upyunBucketList, handler: upyunBucketListHandler);
@@ -205,7 +199,6 @@ class Routes {
         handler: upyunBucketInformationHandler);
     router.define(upyunTokenManagePage, handler: upyunTokenManageHandler);
     router.define(upyunNewBucketConfig, handler: newUpyunBucketHandler);
-    router.define(upyunUpDownloadManagePage, handler: upyunDownloadFileHandler);
     router.define(upyunFileInformationPage,
         handler: upyunFileInformationHandler);
     router.define(qiniuBucketList, handler: qiniuBucketListHandler);
@@ -214,7 +207,6 @@ class Routes {
         handler: qiniuBucketDomainAreaConfigHandler);
     router.define(qiniuFileExplorer, handler: qiniuFileExplorerHandler);
     router.define(qiniuFileInformation, handler: qiniuFileInformationHandler);
-    router.define(qiniuUpDownloadManagePage, handler: qiniuDownloadFileHandler);
     router.define(lskyproManageHomePage, handler: lskyproManageHomePageHandler);
     router.define(lskyproFileExplorer, handler: lskyproFileExplorerHandler);
     router.define(lskyproFileInformation,
@@ -257,6 +249,6 @@ class Routes {
     router.define(pdfViewer, handler: pdfViewerHandler);
     router.define(webdavFileExplorer, handler: webdavFileExplorerHandler);
     router.define(webdavFileInformation, handler: webdavFileInformationHandler);
-    router.define(webdavUpDownloadManagePage, handler: webdavDownloadFileHandler);
+    router.define(baseUpDownloadManagePage, handler: baseDownloadFileHandler);
   }
 }

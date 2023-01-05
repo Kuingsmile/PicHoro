@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:fluro/fluro.dart';
 
 import 'package:horopic/utils/web_view.dart';
+import 'package:horopic/utils/global.dart';
 
 import 'package:horopic/pages/pichoro_app.dart';
 import 'package:horopic/pages/home_page.dart';
@@ -18,6 +19,7 @@ import 'package:horopic/configure_page/common_configure/common_configure.dart';
 import 'package:horopic/configure_page/common_configure/select_link_format.dart';
 import 'package:horopic/configure_page/common_configure/select_default_picture_host.dart';
 import 'package:horopic/configure_page/common_configure/rename_uploaded_file.dart';
+import 'package:horopic/configure_page/common_configure/compress_configure.dart';
 import 'package:horopic/configure_page/others/update_log.dart';
 import 'package:horopic/configure_page/others/author.dart';
 import 'package:horopic/configure_page/others/select_theme.dart';
@@ -35,12 +37,12 @@ import 'package:horopic/picture_host_manage/tencent/tencent_bucket_list_page.dar
 import 'package:horopic/picture_host_manage/tencent/tencent_bucket_information_page.dart';
 import 'package:horopic/picture_host_manage/tencent/tencent_new_bucket_configure.dart';
 import 'package:horopic/picture_host_manage/tencent/tencent_file_explorer.dart';
-import 'package:horopic/picture_host_manage/tencent/tencent_download_manage_page.dart';
 import 'package:horopic/picture_host_manage/tencent/tencent_file_information_page.dart';
 
 import 'package:horopic/picture_host_manage/common_page/file_explorer/file_explorer.dart';
 import 'package:horopic/picture_host_manage/common_page/file_explorer/local_image_preview.dart';
 import 'package:horopic/picture_host_manage/common_page/file_explorer/net_video_player.dart';
+import 'package:horopic/picture_host_manage/common_page/base_download_manage_page.dart';
 
 import 'package:horopic/picture_host_manage/smms/smms_manage_home_page.dart';
 import 'package:horopic/picture_host_manage/smms/smms_file_explorer.dart';
@@ -51,7 +53,6 @@ import 'package:horopic/picture_host_manage/aliyun/aliyun_bucket_list_page.dart'
 import 'package:horopic/picture_host_manage/aliyun/aliyun_new_bucket_configure.dart';
 import 'package:horopic/picture_host_manage/aliyun/aliyun_bucket_information_page.dart';
 import 'package:horopic/picture_host_manage/aliyun/aliyun_file_explorer.dart';
-import 'package:horopic/picture_host_manage/aliyun/aliyun_download_manage_page.dart';
 import 'package:horopic/picture_host_manage/aliyun/aliyun_file_information_page.dart';
 
 import 'package:horopic/picture_host_manage/upyun/upyun_login.dart';
@@ -60,7 +61,6 @@ import 'package:horopic/picture_host_manage/upyun/upyun_bucket_list_page.dart';
 import 'package:horopic/picture_host_manage/upyun/upyun_bucket_information_page.dart';
 import 'package:horopic/picture_host_manage/upyun/upyun_token_manage_page.dart';
 import 'package:horopic/picture_host_manage/upyun/upyun_new_bucket_configure.dart';
-import 'package:horopic/picture_host_manage/upyun/upyun_download_manage_page.dart';
 import 'package:horopic/picture_host_manage/upyun/upyun_file_information_page.dart';
 
 import 'package:horopic/picture_host_manage/qiniu/qiniu_bucket_list_page.dart';
@@ -68,7 +68,6 @@ import 'package:horopic/picture_host_manage/qiniu/qiniu_new_bucket_configure.dar
 import 'package:horopic/picture_host_manage/qiniu/qiniu_bucket_domain_area_set.dart';
 import 'package:horopic/picture_host_manage/qiniu/qiniu_file_explorer.dart';
 import 'package:horopic/picture_host_manage/qiniu/qiniu_file_information_page.dart';
-import 'package:horopic/picture_host_manage/qiniu/qiniu_download_manage_page.dart';
 
 import 'package:horopic/picture_host_manage/lskypro/lskypro_manage_home_page.dart';
 import 'package:horopic/picture_host_manage/lskypro/lskypro_file_explorer.dart';
@@ -115,7 +114,7 @@ import 'package:horopic/picture_host_manage/alist/alist_download_manage_page.dar
 import 'package:horopic/picture_host_manage/webdav/webdav_file_explorer.dart';
 import 'package:horopic/picture_host_manage/webdav/webdav_file_information_page.dart';
 import 'package:horopic/picture_host_manage/webdav/webdav_pic_preview.dart';
-import 'package:horopic/picture_host_manage/webdav/webdav_download_manage_page.dart';
+
 
 //webview
 Handler webviewHandler = Handler(
@@ -183,6 +182,12 @@ var localImagePreviewHandler = Handler(
 var configurePageHandler = Handler(
     handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
   return const ConfigurePage();
+});
+
+//图片压缩设置页面
+var compressConfigureHandler = Handler(
+    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
+  return const CompressConfigure();
 });
 
 //日志
@@ -496,16 +501,6 @@ var tencentFileExplorerHandler = Handler(
   );
 });
 
-//腾讯云存储下载文件页面
-var tencentDownloadFileHandler = Handler(
-    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
-  var bucketName = params['bucketName']!.first;
-  String downloadPath = params['downloadPath']!.first;
-  String tabIndex = params['tabIndex']!.first;
-  return TencentUpDownloadManagePage(
-      bucketName: bucketName, downloadPath: downloadPath, tabIndex: tabIndex);
-});
-
 //阿里云文件详情页面
 var tencentFileInformationHandler = Handler(
     handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
@@ -625,16 +620,6 @@ var aliyunFileInformationHandler = Handler(
   );
 });
 
-//阿里云存储下载文件页面
-var aliyunDownloadFileHandler = Handler(
-    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
-  var bucketName = params['bucketName']!.first;
-  String downloadPath = params['downloadPath']!.first;
-  String tabIndex = params['tabIndex']!.first;
-  return AliyunUpDownloadManagePage(
-      bucketName: bucketName, downloadPath: downloadPath, tabIndex: tabIndex);
-});
-
 //又拍云登录页面
 var upyunLogInHandler = Handler(
     handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
@@ -688,15 +673,6 @@ var newUpyunBucketHandler = Handler(
   return const UpyunNewBucketConfig();
 });
 
-//又拍云存储下载文件页面
-var upyunDownloadFileHandler = Handler(
-    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
-  var bucketName = params['bucketName']!.first;
-  String downloadPath = params['downloadPath']!.first;
-  String tabIndex = params['tabIndex']!.first;
-  return UpyunUpDownloadManagePage(
-      bucketName: bucketName, downloadPath: downloadPath, tabIndex: tabIndex);
-});
 
 //七牛云存储桶列表页面
 var qiniuBucketListHandler = Handler(
@@ -737,16 +713,6 @@ var qiniuFileInformationHandler = Handler(
   return QiniuFileInformation(
     fileMap: fileMap,
   );
-});
-
-//七牛云存储下载文件页面
-var qiniuDownloadFileHandler = Handler(
-    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
-  var bucketName = params['bucketName']!.first;
-  String downloadPath = params['downloadPath']!.first;
-  String tabIndex = params['tabIndex']!.first;
-  return QiniuUpDownloadManagePage(
-      bucketName: bucketName, downloadPath: downloadPath, tabIndex: tabIndex);
 });
 
 //lskypro图床管理首页
@@ -1094,12 +1060,18 @@ var webdavFileInformationHandler = Handler(
   );
 });
 
-//Webdav存储下载文件页面
-var webdavDownloadFileHandler = Handler(
+//通用下载文件页面
+var baseDownloadFileHandler = Handler(
     handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
   var bucketName = params['bucketName']!.first;
   String downloadPath = params['downloadPath']!.first;
   String tabIndex = params['tabIndex']!.first;
-  return WebdavUpDownloadManagePage(
-      bucketName: bucketName, downloadPath: downloadPath, tabIndex: tabIndex);
+  int currentListIndex = int.parse(params['currentListIndex']!.first);
+
+  return BaseUpDownloadManagePage(
+    bucketName: bucketName,
+    downloadPath: downloadPath,
+    tabIndex: tabIndex,
+    currentListIndex: currentListIndex,
+  );
 });

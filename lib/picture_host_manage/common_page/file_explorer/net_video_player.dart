@@ -12,12 +12,14 @@ class NetVideoPlayer extends StatefulWidget {
   final List videoList;
   final int index;
   final String type;
+  final Map<String, String> headers;
 
   const NetVideoPlayer({
     Key? key,
     required this.videoList,
     required this.index,
     required this.type,
+    required this.headers,
   }) : super(key: key);
 
   @override
@@ -72,7 +74,9 @@ class _NetVideoPlayerState extends State<NetVideoPlayer> {
     _currActiveIdx = widget.index;
     if (widget.type == 'normal') {
       _videoPlayerController = VideoPlayerController.network(
-          widget.videoList[_currActiveIdx]['url']);
+          widget.videoList[_currActiveIdx]['url'],
+          httpHeaders: widget.headers
+          );
       _chewieController = ChewieController(
         videoPlayerController: _videoPlayerController,
         aspectRatio: 16 / 9,
@@ -456,8 +460,9 @@ class _NetVideoPlayerState extends State<NetVideoPlayer> {
             });
             String nextVideoUrl = widget.videoList[activeIndex]['url'];
             if (widget.type == 'normal') {
+              
               _videoPlayerController =
-                  VideoPlayerController.network(nextVideoUrl);
+                  VideoPlayerController.network(nextVideoUrl,httpHeaders: widget.headers);
               _chewieController = ChewieController(
                 videoPlayerController: _videoPlayerController,
                 aspectRatio: 16 / 9,
@@ -502,8 +507,8 @@ class _NetVideoPlayerState extends State<NetVideoPlayer> {
     if (widget.type == 'normal') {
       showControlNotifier.dispose();
       orientationNotifier.dispose();
-      await _videoPlayerController.dispose();
       _chewieController.dispose();
+      await _videoPlayerController.dispose();
     } else {
       try {
         await _controller.stop();
