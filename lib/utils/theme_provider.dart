@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flustars_flutter3/flustars_flutter3.dart';
 import 'package:horopic/configure_page/others/theme_data.dart';
 
-
 Map themeDataMap = {
   'light': lightThemeData,
   'green': greenThemeData,
@@ -45,7 +44,7 @@ class AppInfoProvider with ChangeNotifier {
     }
     notifyListeners();
     await SpUtil.getInstance();
-    SpUtil.putString('key_theme_color', themeColor);
-    _keyThemeColor = themeColor;
+    SpUtil.putString('key_theme_color', _themeColor);
+    _keyThemeColor = _themeColor;
   }
 }
