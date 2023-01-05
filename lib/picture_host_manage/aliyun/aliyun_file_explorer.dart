@@ -488,7 +488,7 @@ class AliyunFileExplorerState
                                 if (mounted) {
                                   Application.router
                                       .navigateTo(context,
-                                          '/aliyunUpDownloadManagePage?bucketName=${widget.element['name']}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=0',
+                                          '/baseUpDownloadManagePage?bucketName=${widget.element['name']}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=0&currentListIndex=1',
                                           transition:
                                               TransitionType.inFromRight)
                                       .then((value) {
@@ -563,7 +563,7 @@ class AliyunFileExplorerState
                                 if (mounted) {
                                   Application.router
                                       .navigateTo(context,
-                                          '/aliyunUpDownloadManagePage?bucketName=${widget.element['name']}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=0',
+                                          '/baseUpDownloadManagePage?bucketName=${widget.element['name']}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=0&currentListIndex=1',
                                           transition:
                                               TransitionType.inFromRight)
                                       .then((value) {
@@ -693,7 +693,7 @@ class AliyunFileExplorerState
                 if (mounted) {
                   Application.router
                       .navigateTo(context,
-                          '/aliyunUpDownloadManagePage?bucketName=${widget.element['name']}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=$index',
+                          '/baseUpDownloadManagePage?bucketName=${widget.element['name']}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=$index&currentListIndex=1',
                           transition: TransitionType.inFromRight)
                       .then((value) {
                     _getBucketList();
@@ -806,7 +806,7 @@ class AliyunFileExplorerState
                           ExternalPath.DIRECTORY_DOWNLOADS);
                   // ignore: use_build_context_synchronously
                   Application.router.navigateTo(context,
-                      '/aliyunUpDownloadManagePage?bucketName=${widget.element['name']}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=1',
+                      '/baseUpDownloadManagePage?bucketName=${widget.element['name']}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=1&currentListIndex=1',
                       transition: TransitionType.inFromRight);
                 },
                 child: const Icon(

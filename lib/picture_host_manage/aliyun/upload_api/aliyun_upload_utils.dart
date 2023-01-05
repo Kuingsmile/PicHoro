@@ -7,14 +7,14 @@ import 'package:collection/collection.dart';
 import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import 'package:f_logs/f_logs.dart';
 import 'package:path/path.dart' as my_path;
 
-import 'package:horopic/picture_host_manage/aliyun/upload_api/aliyun_upload_request.dart';
+import 'package:horopic/picture_host_manage/common_page/upload/pnc_upload_request.dart';
+import 'package:horopic/picture_host_manage/common_page/upload/pnc_upload_task.dart';
 import 'package:horopic/pages/upload_pages/upload_status.dart';
-import 'package:horopic/picture_host_manage/aliyun/upload_api/aliyun_upload_task.dart';
 
 import 'package:horopic/utils/common_functions.dart';
+import 'package:horopic/utils/global.dart';
 
 class UploadManager {
   final Map<String, UploadTask> _cache = <String, UploadTask>{};
@@ -101,19 +101,14 @@ class UploadManager {
         formMap['x-oss-content-type'] = getContentType(my_path.extension(path));
       }
       FormData formData = FormData.fromMap(formMap);
-      BaseOptions baseoptions = BaseOptions(
-        connectTimeout: 30000,
-        receiveTimeout: 30000,
-        sendTimeout: 30000,
-      );
+      BaseOptions baseoptions = setBaseOptions();
       File uploadFile = File(path);
       String contentLength = await uploadFile.length().then((value) {
         return value.toString();
       });
       baseoptions.headers = {
         'Host': host,
-        'Content-Type':
-            'multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW',
+        'Content-Type': Global.multipartString,
         'Content-Length': contentLength,
       };
       Dio dio = Dio(baseoptions);
@@ -127,14 +122,14 @@ class UploadManager {
         setStatus(task, UploadStatus.completed);
       }
     } catch (e) {
-      FLog.error(
-          className: 'AliyunUploadManager',
-          methodName: 'upload',
-          text: formatErrorMessage({
+      flogErr(
+          e,
+          {
             'path': path,
             'fileName': fileName,
-          }, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+          },
+          'AliyunUploadManager',
+          'upload');
       var task = getUpload(fileName)!;
       if (task.status.value != UploadStatus.canceled &&
           task.status.value != UploadStatus.completed) {
@@ -160,7 +155,7 @@ class UploadManager {
     while (_queue.isNotEmpty && runningTasks < maxConcurrentTasks) {
       runningTasks++;
       var currentRequest = _queue.removeFirst();
-       if (_cache[currentRequest.name]!.status.value.isCompleted) {
+      if (_cache[currentRequest.name]!.status.value.isCompleted) {
         runningTasks--;
         continue;
       }
@@ -191,8 +186,8 @@ class UploadManager {
   Future<UploadTask> _addUploadRequest(UploadRequest uploadRequest) async {
     if (_cache[uploadRequest.name] != null) {
       if ((_cache[uploadRequest.name]!.status.value == UploadStatus.completed ||
-       _cache[uploadRequest.name]!.status.value == UploadStatus.uploading 
-       )&&
+              _cache[uploadRequest.name]!.status.value ==
+                  UploadStatus.uploading) &&
           _cache[uploadRequest.name]!.request == uploadRequest) {
         return _cache[uploadRequest.name]!;
       } else {
