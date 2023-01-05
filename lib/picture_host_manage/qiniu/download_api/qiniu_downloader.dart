@@ -6,7 +6,6 @@ import 'package:collection/collection.dart';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import 'package:f_logs/f_logs.dart';
 
 import 'package:horopic/picture_host_manage/common_page/download/pnc_download_task.dart';
 import 'package:horopic/picture_host_manage/common_page/download/pnc_download_status.dart';

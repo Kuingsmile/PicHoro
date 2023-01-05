@@ -213,11 +213,7 @@ class GithubFileExplorerState
 
   downloadFile(String urlpath, String fileName) async {
     try {
-      BaseOptions baseOptions = BaseOptions(
-        sendTimeout: 30000,
-        receiveTimeout: 30000,
-        connectTimeout: 30000,
-      );
+      BaseOptions baseOptions = setBaseOptions();
       Dio dio = Dio(baseOptions);
       String tempDir = (await getTemporaryDirectory()).path;
       var tempfile = File('$tempDir/$fileName');
@@ -539,7 +535,7 @@ class GithubFileExplorerState
                                 if (mounted) {
                                   Application.router
                                       .navigateTo(context,
-                                          '/githubUpDownloadManagePage?userName=${Uri.encodeComponent(widget.element['showedUsername'])}&repoName=${Uri.encodeComponent(widget.element['name'])}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=0',
+                                          '/baseUpDownloadManagePage?userName=${Uri.encodeComponent(widget.element['showedUsername'])}&repoName=${Uri.encodeComponent(widget.element['name'])}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=0&currentListIndex=4',
                                           transition:
                                               TransitionType.inFromRight)
                                       .then((value) {
@@ -623,7 +619,7 @@ class GithubFileExplorerState
                                 if (mounted) {
                                   Application.router
                                       .navigateTo(context,
-                                          '/githubUpDownloadManagePage?userName=${Uri.encodeComponent(widget.element['showedUsername'])}&repoName=${Uri.encodeComponent(widget.element['name'])}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=0',
+                                          '/baseUpDownloadManagePage?userName=${Uri.encodeComponent(widget.element['showedUsername'])}&repoName=${Uri.encodeComponent(widget.element['name'])}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=0&currentListIndex=4',
                                           transition:
                                               TransitionType.inFromRight)
                                       .then((value) {
@@ -763,7 +759,7 @@ class GithubFileExplorerState
                 if (mounted) {
                   Application.router
                       .navigateTo(context,
-                          '/githubUpDownloadManagePage?userName=${Uri.encodeComponent(widget.element['showedUsername'])}&repoName=${Uri.encodeComponent(widget.element['name'])}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=$index',
+                          '/baseUpDownloadManagePage?userName=${Uri.encodeComponent(widget.element['showedUsername'])}&repoName=${Uri.encodeComponent(widget.element['name'])}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=$index&currentListIndex=4',
                           transition: TransitionType.inFromRight)
                       .then((value) {
                     _getBucketList();
@@ -879,7 +875,7 @@ class GithubFileExplorerState
                             ExternalPath.DIRECTORY_DOWNLOADS);
                     // ignore: use_build_context_synchronously
                     Application.router.navigateTo(context,
-                        '/githubUpDownloadManagePage?userName=${Uri.encodeComponent(widget.element['showedUsername'])}&repoName=${Uri.encodeComponent(widget.element['name'])}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=1',
+                        '/baseUpDownloadManagePage?userName=${Uri.encodeComponent(widget.element['showedUsername'])}&repoName=${Uri.encodeComponent(widget.element['name'])}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=1&currentListIndex=4',
                         transition: TransitionType.inFromRight);
                   } else {
                     List downloadList = [];
@@ -913,7 +909,7 @@ class GithubFileExplorerState
                             ExternalPath.DIRECTORY_DOWNLOADS);
                     // ignore: use_build_context_synchronously
                     Application.router.navigateTo(context,
-                        '/githubUpDownloadManagePage?userName=${Uri.encodeComponent(widget.element['showedUsername'])}&repoName=${Uri.encodeComponent(widget.element['name'])}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=1',
+                        '/baseUpDownloadManagePage?userName=${Uri.encodeComponent(widget.element['showedUsername'])}&repoName=${Uri.encodeComponent(widget.element['name'])}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=1&currentListIndex=4',
                         transition: TransitionType.inFromRight);
                   }
                 },

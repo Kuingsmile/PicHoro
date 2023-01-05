@@ -7,11 +7,10 @@ import 'dart:convert';
 import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import 'package:f_logs/f_logs.dart';
 
-import 'package:horopic/picture_host_manage/github/upload_api/github_upload_request.dart';
+import 'package:horopic/picture_host_manage/common_page/upload/pnc_upload_request.dart';
+import 'package:horopic/picture_host_manage/common_page/upload/pnc_upload_task.dart';
 import 'package:horopic/pages/upload_pages/upload_status.dart';
-import 'package:horopic/picture_host_manage/github/upload_api/github_upload_task.dart';
 
 import 'package:horopic/utils/common_functions.dart';
 
@@ -58,11 +57,7 @@ class UploadManager {
         'branch': configMap["default_branch"], //分支
       };
 
-      BaseOptions baseoptions = BaseOptions(
-        connectTimeout: 300000,
-        receiveTimeout: 300000,
-        sendTimeout: 300000,
-      );
+      BaseOptions baseoptions = setBaseOptions();
       baseoptions.headers = {
         "Authorization": configMap["token"],
         "Accept": "application/vnd.github+json",
@@ -94,14 +89,15 @@ class UploadManager {
         setStatus(task, UploadStatus.completed);
       }
     } catch (e) {
-      FLog.error(
-          className: 'githubUploadManager',
-          methodName: 'upload',
-          text: formatErrorMessage({
+      flogErr(
+          e,
+          {
             'path': path,
             'fileName': fileName,
-          }, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+          },
+          'githubUploadManager',
+          'upload');
+
       var task = getUpload(fileName)!;
       if (task.status.value != UploadStatus.canceled &&
           task.status.value != UploadStatus.completed) {
