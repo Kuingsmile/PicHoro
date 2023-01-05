@@ -141,6 +141,9 @@ class SmmsUpDownloadManagePageState extends State<SmmsUpDownloadManagePage> {
           TextButton(
               onPressed: () async {
                 await Global.setSmmsUploadList([]);
+                uploadPathList.clear();
+                uploadFileNameList.clear();
+                uploadConfigMapList.clear();
                 setState(() {});
               },
               child: const Text(
