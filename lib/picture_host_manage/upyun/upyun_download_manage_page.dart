@@ -12,7 +12,7 @@ import 'package:horopic/picture_host_manage/upyun/download_api/upyun_download_ta
 import 'package:horopic/picture_host_manage/tencent/download_api/download_status.dart';
 import 'package:horopic/picture_host_manage/upyun/upload_api/upyun_upload_utils.dart';
 import 'package:horopic/pages/upload_pages/upload_status.dart';
-import 'package:horopic/picture_host_manage/upyun/upload_api/upyun_upload_task.dart';
+import 'package:horopic/picture_host_manage/common_page/pnc_upload_task.dart';
 import 'package:horopic/router/application.dart';
 import 'package:horopic/router/routers.dart';
 import 'package:horopic/utils/common_functions.dart';
