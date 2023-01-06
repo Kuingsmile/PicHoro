@@ -79,7 +79,7 @@ class ConfigurePageState extends State<ConfigurePage>
 
   _update(String remoteVersion) async {
     String url =
-        'https://www.horosama.com/self_apk/PicHoro_V$remoteVersion.apk';
+        'https://pichoro.msq.pub/PicHoro_V$remoteVersion.apk';
     RUpgrade.upgrade(url,
         fileName: 'PicHoro_V$remoteVersion.apk',
         isAutoRequestInstall: true,
