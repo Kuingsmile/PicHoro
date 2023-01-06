@@ -5,12 +5,11 @@ import 'dart:io';
 import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import 'package:f_logs/f_logs.dart';
 import 'package:dartssh2/dartssh2.dart';
 
-import 'package:horopic/picture_host_manage/ftp/upload_api/sftp_upload_request.dart';
+import 'package:horopic/picture_host_manage/common_page/upload/pnc_upload_request.dart';
+import 'package:horopic/picture_host_manage/common_page/upload/pnc_upload_task.dart';
 import 'package:horopic/pages/upload_pages/upload_status.dart';
-import 'package:horopic/picture_host_manage/ftp/upload_api/sftp_upload_task.dart';
 import 'package:horopic/utils/common_functions.dart';
 
 class UploadManager {
@@ -93,14 +92,14 @@ class UploadManager {
         rethrow;
       }
     } catch (e) {
-      FLog.error(
-          className: 'sftpUploadManager',
-          methodName: 'upload',
-          text: formatErrorMessage({
+      flogErr(
+          e,
+          {
             'path': path,
             'fileName': fileName,
-          }, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+          },
+          'sftpUploadManager',
+          'upload');
       var task = getUpload(fileName)!;
       if (task.status.value != UploadStatus.canceled &&
           task.status.value != UploadStatus.completed) {
@@ -157,8 +156,8 @@ class UploadManager {
   Future<UploadTask> _addUploadRequest(UploadRequest uploadRequest) async {
     if (_cache[uploadRequest.name] != null) {
       if ((_cache[uploadRequest.name]!.status.value == UploadStatus.completed ||
-       _cache[uploadRequest.name]!.status.value == UploadStatus.uploading 
-       )&&
+              _cache[uploadRequest.name]!.status.value ==
+                  UploadStatus.uploading) &&
           _cache[uploadRequest.name]!.request == uploadRequest) {
         return _cache[uploadRequest.name]!;
       } else {

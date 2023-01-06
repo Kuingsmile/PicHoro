@@ -69,6 +69,7 @@ class BaseUpDownloadManagePage extends StatefulWidget {
   final String userName;
   final String repoName;
   final String albumName;
+  final String ftpHost;
   final String bucketName;
   String downloadPath;
   String tabIndex;
@@ -78,6 +79,7 @@ class BaseUpDownloadManagePage extends StatefulWidget {
     required this.userName,
     required this.repoName,
     required this.albumName,
+    required this.ftpHost,
     required this.bucketName,
     required this.downloadPath,
     required this.tabIndex,
@@ -232,6 +234,10 @@ class BaseUpDownloadManagePageState extends State<BaseUpDownloadManagePage> {
       case 'github':
         savedDir =
             '${widget.downloadPath}/PicHoro/Download/github/${widget.userName}/${widget.repoName}/';
+        break;
+      case 'ftp':
+        savedDir =
+            '${widget.downloadPath}/PicHoro/Download/ftp/${widget.ftpHost}/';
         break;
       default:
         savedDir =
@@ -403,7 +409,8 @@ class BaseUpDownloadManagePageState extends State<BaseUpDownloadManagePage> {
                   setState(() {});
                 } else {
                   if (currentPShost == 'github' ||
-                      currentPShost == 'lsky.pro') {
+                      currentPShost == 'lsky.pro' ||
+                      currentPShost == 'ftp') {
                     String fileName = url.substring(url.lastIndexOf('/') + 1);
                     await downloadManager.addDownload(
                         url, "$savedDir$fileName");

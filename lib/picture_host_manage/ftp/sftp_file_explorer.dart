@@ -514,7 +514,7 @@ class SFTPFileExplorerState
                                 if (mounted) {
                                   Application.router
                                       .navigateTo(context,
-                                          '/sftpUpDownloadManagePage?ftpHost=${widget.element['ftpHost']}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=0',
+                                          '/baseUpDownloadManagePage?ftpHost=${widget.element['ftpHost']}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=0&currentListIndex=3',
                                           transition:
                                               TransitionType.inFromRight)
                                       .then((value) {
@@ -586,7 +586,7 @@ class SFTPFileExplorerState
                                 if (mounted) {
                                   Application.router
                                       .navigateTo(context,
-                                          '/sftpUpDownloadManagePage?ftpHost=${widget.element['ftpHost']}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=0',
+                                          '/baseUpDownloadManagePage?ftpHost=${widget.element['ftpHost']}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=0&currentListIndex=3',
                                           transition:
                                               TransitionType.inFromRight)
                                       .then((value) {
@@ -716,7 +716,7 @@ class SFTPFileExplorerState
                 if (mounted) {
                   Application.router
                       .navigateTo(context,
-                          '/sftpUpDownloadManagePage?ftpHost=${widget.element['ftpHost']}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=$index',
+                          '/baseUpDownloadManagePage?ftpHost=${widget.element['ftpHost']}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=$index&currentListIndex=3',
                           transition: TransitionType.inFromRight)
                       .then((value) {
                     _getBucketList();
@@ -828,7 +828,7 @@ class SFTPFileExplorerState
                           ExternalPath.DIRECTORY_DOWNLOADS);
 // ignore: use_build_context_synchronously
                   Application.router.navigateTo(context,
-                      '/sftpUpDownloadManagePage?ftpHost=${widget.element['ftpHost']}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=1',
+                      '/baseUpDownloadManagePage?ftpHost=${widget.element['ftpHost']}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=1&currentListIndex=3',
                       transition: TransitionType.inFromRight);
                 },
                 child: const Icon(

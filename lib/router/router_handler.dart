@@ -89,7 +89,6 @@ import 'package:horopic/picture_host_manage/ftp/sftp_file_explorer.dart';
 import 'package:horopic/picture_host_manage/ftp/sftp_file_information_page.dart';
 import 'package:horopic/picture_host_manage/ftp/ssh_terminal.dart';
 import 'package:horopic/picture_host_manage/ftp/sftp_local_image_preview.dart';
-import 'package:horopic/picture_host_manage/ftp/sftp_download_manage_page.dart';
 
 import 'package:horopic/picture_host_manage/common_page/file_explorer/md_preview.dart';
 import 'package:horopic/picture_host_manage/common_page/file_explorer/pdf_viewer.dart';
@@ -867,16 +866,6 @@ var sftplocalImagePreviewHandler = Handler(
   );
 });
 
-//sftp存储下载文件页面
-var sftpDownloadFileHandler = Handler(
-    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
-  var ftpHost = params['ftpHost']!.first;
-  String downloadPath = params['downloadPath']!.first;
-  String tabIndex = params['tabIndex']!.first;
-  return SFTPUpDownloadManagePage(
-      ftpHost: ftpHost, downloadPath: downloadPath, tabIndex: tabIndex);
-});
-
 //md文件预览
 var mdFilePreviewHandler = Handler(
     handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
@@ -1026,6 +1015,7 @@ var baseDownloadFileHandler = Handler(
   String userName = params['userName'] == null ? '' : params['userName']!.first;
   String repoName = params['repoName'] == null ? '' : params['repoName']!.first;
   String albumName = params['albumName'] == null ? '' : params['albumName']!.first;
+  String ftpHost = params['ftpHost'] == null ? '' : params['ftpHost']!.first;
   var bucketName = params['bucketName']== null ? '' : params['bucketName']!.first;
   String downloadPath = params['downloadPath']!.first;
   String tabIndex = params['tabIndex']!.first;
@@ -1035,6 +1025,7 @@ var baseDownloadFileHandler = Handler(
     userName: userName,
     repoName: repoName,
     albumName: albumName,
+    ftpHost: ftpHost,
     bucketName: bucketName,
     downloadPath: downloadPath,
     tabIndex: tabIndex,

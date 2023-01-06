@@ -98,7 +98,6 @@ class Routes {
   static String sftpFileInformation = "/sftpFileInformation";
   static String sshTerminal = "/sshTerminal";
   static String sftpLocalImagePreview = "/sftpLocalImagePreview";
-  static String sftpUpDownloadManagePage = "/sftpUpDownloadManagePage";
   static String mdPreview = "/mdPreview";
   static String awsBucketList = "/awsBucketList";
   static String awsNewBucketConfig = "/awsNewBucketConfig";
@@ -223,7 +222,6 @@ class Routes {
     router.define(sftpFileInformation, handler: sftpFileInformationHandler);
     router.define(sshTerminal, handler: sshTerminalHandler);
     router.define(sftpLocalImagePreview, handler: sftplocalImagePreviewHandler);
-    router.define(sftpUpDownloadManagePage, handler: sftpDownloadFileHandler);
     router.define(mdPreview, handler: mdFilePreviewHandler);
     router.define(awsBucketList, handler: awsBucketListHandler);
     router.define(awsNewBucketConfig, handler: newAwsBucketHandler);
