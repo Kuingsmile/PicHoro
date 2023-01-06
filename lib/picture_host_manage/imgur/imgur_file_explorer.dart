@@ -539,7 +539,7 @@ class ImgurFileExplorerState
                                 }
                                 Application.router
                                     .navigateTo(context,
-                                        '/imgurUpDownloadManagePage?albumName=${Uri.encodeComponent(albumName)}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=0',
+                                        '/baseUpDownloadManagePage?albumName=${Uri.encodeComponent(albumName)}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=0&currentListIndex=5',
                                         transition: TransitionType.inFromRight)
                                     .then((value) {
                                   _getFileList();
@@ -670,7 +670,7 @@ class ImgurFileExplorerState
                 }
                 if (mounted) {
                   Application.router.navigateTo(context,
-                      '/imgurUpDownloadManagePage?albumName=${Uri.encodeComponent(albumName)}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=$index',
+                      '/baseUpDownloadManagePage?albumName=${Uri.encodeComponent(albumName)}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=$index&currentListIndex=5',
                       transition: TransitionType.inFromRight);
                 }
               },
@@ -826,7 +826,7 @@ class ImgurFileExplorerState
                   }
                   if (mounted) {
                     Application.router.navigateTo(context,
-                        '/imgurUpDownloadManagePage?albumName=${Uri.encodeComponent(albumName)}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=1',
+                        '/baseUpDownloadManagePage?albumName=${Uri.encodeComponent(albumName)}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=1&currentListIndex=5',
                         transition: TransitionType.inFromRight);
                   }
                 },

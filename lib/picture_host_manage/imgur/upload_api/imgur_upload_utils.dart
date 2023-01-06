@@ -5,12 +5,11 @@ import 'dart:io';
 import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import 'package:f_logs/f_logs.dart';
 import 'package:dio_proxy_adapter/dio_proxy_adapter.dart';
 
-import 'package:horopic/picture_host_manage/imgur/upload_api/imgur_upload_request.dart';
+import 'package:horopic/picture_host_manage/common_page/upload/pnc_upload_request.dart';
+import 'package:horopic/picture_host_manage/common_page/upload/pnc_upload_task.dart';
 import 'package:horopic/pages/upload_pages/upload_status.dart';
-import 'package:horopic/picture_host_manage/imgur/upload_api/imgur_upload_task.dart';
 
 import 'package:horopic/utils/common_functions.dart';
 
@@ -70,11 +69,7 @@ class UploadManager {
           "description": "Uploaded by PicHoro",
         });
       }
-      BaseOptions baseoptions = BaseOptions(
-        connectTimeout: 30000,
-        receiveTimeout: 30000,
-        sendTimeout: 30000,
-      );
+      BaseOptions baseoptions = setBaseOptions();
       baseoptions.headers = {
         "Authorization": "Bearer $accesstoken",
       };
@@ -101,14 +96,14 @@ class UploadManager {
         setStatus(task, UploadStatus.completed);
       }
     } catch (e) {
-      FLog.error(
-          className: 'imgurUploadManager',
-          methodName: 'upload',
-          text: formatErrorMessage({
+      flogErr(
+          e,
+          {
             'path': path,
             'fileName': fileName,
-          }, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+          },
+          'imgurUploadManager',
+          'upload');
       var task = getUpload(fileName)!;
       if (task.status.value != UploadStatus.canceled &&
           task.status.value != UploadStatus.completed) {

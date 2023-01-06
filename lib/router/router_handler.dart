@@ -83,7 +83,6 @@ import 'package:horopic/picture_host_manage/imgur/imgur_login.dart';
 import 'package:horopic/picture_host_manage/imgur/imgur_file_explorer.dart';
 import 'package:horopic/picture_host_manage/imgur/imgur_token_manage_page.dart';
 import 'package:horopic/picture_host_manage/imgur/imgur_file_information_page.dart';
-import 'package:horopic/picture_host_manage/imgur/imgur_download_manage_page.dart';
 
 import 'package:horopic/picture_host_manage/ftp/sftp_file_explorer.dart';
 import 'package:horopic/picture_host_manage/ftp/sftp_file_information_page.dart';
@@ -816,16 +815,6 @@ var imgurFileInformationHandler = Handler(
   return ImgurFileInformation(
     fileMap: fileMap,
   );
-});
-
-//imgur存储下载文件页面
-var imgurDownloadFileHandler = Handler(
-    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
-  var albumName = params['albumName']!.first;
-  String downloadPath = params['downloadPath']!.first;
-  String tabIndex = params['tabIndex']!.first;
-  return ImgurUpDownloadManagePage(
-      albumName: albumName, downloadPath: downloadPath, tabIndex: tabIndex);
 });
 
 //SFTP文件列表页面

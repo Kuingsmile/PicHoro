@@ -93,7 +93,6 @@ class Routes {
   static String imgurFileExplorer = "/imgurFileExplorer";
   static String imgurTokenManagePage = "/imgurTokenManagePage";
   static String imgurFileInformation = "/imgurFileInformation";
-  static String imgurUpDownloadManagePage = "/imgurUpDownloadManagePage";
   static String sftpFileExplorer = "/sftpFileExplorer";
   static String sftpFileInformation = "/sftpFileInformation";
   static String sshTerminal = "/sshTerminal";
@@ -217,7 +216,6 @@ class Routes {
     router.define(imgurFileExplorer, handler: imgurFileExplorerHandler);
     router.define(imgurTokenManagePage, handler: imgurTokenManageHandler);
     router.define(imgurFileInformation, handler: imgurFileInformationHandler);
-    router.define(imgurUpDownloadManagePage, handler: imgurDownloadFileHandler);
     router.define(sftpFileExplorer, handler: sftpFileExplorerHandler);
     router.define(sftpFileInformation, handler: sftpFileInformationHandler);
     router.define(sshTerminal, handler: sshTerminalHandler);
