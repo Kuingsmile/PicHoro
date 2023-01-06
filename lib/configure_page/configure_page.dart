@@ -1,6 +1,4 @@
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:r_upgrade/r_upgrade.dart';
@@ -78,8 +76,7 @@ class ConfigurePageState extends State<ConfigurePage>
   }
 
   _update(String remoteVersion) async {
-    String url =
-        'https://pichoro.msq.pub/PicHoro_V$remoteVersion.apk';
+    String url = 'https://pichoro.msq.pub/PicHoro_V$remoteVersion.apk';
     RUpgrade.upgrade(url,
         fileName: 'PicHoro_V$remoteVersion.apk',
         isAutoRequestInstall: true,
@@ -182,11 +179,8 @@ class ConfigurePageState extends State<ConfigurePage>
             trailing: const Icon(Icons.arrow_forward_ios),
           ),
           ListTile(
-            title: const Text('联系作者'),
+            title: const Text('微信交流群'),
             onTap: () async {
-              String qq = '845216974';
-              await Clipboard.setData(ClipboardData(text: qq));
-              showToast('作者QQ已复制');
               Application.router.navigateTo(
                   this.context, Routes.authorInformation,
                   transition: TransitionType.cupertino);

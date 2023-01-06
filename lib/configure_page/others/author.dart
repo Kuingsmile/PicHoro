@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'dart:io';
+import 'package:dio/dio.dart';
 import 'package:external_path/external_path.dart';
+import 'package:extended_image/extended_image.dart';
+import 'package:horopic/album/load_state_change.dart';
 import 'package:horopic/utils/common_functions.dart';
 
 class AuthorInformation extends StatelessWidget {
@@ -12,7 +13,7 @@ class AuthorInformation extends StatelessWidget {
         appBar: AppBar(
           elevation: 0,
           centerTitle: true,
-          title: titleText('作者信息'),
+          title: titleText('交流群-长按保存二维码'),
         ),
         body: Center(
             child: ListView(
@@ -23,7 +24,6 @@ class AuthorInformation extends StatelessWidget {
             ),
             GestureDetector(
                 onTap: () async {
-                  
                   showCupertinoAlertDialogWithConfirmFunc(
                       context: context,
                       title: '保存到相册',
@@ -33,23 +33,34 @@ class AuthorInformation extends StatelessWidget {
                         var path = await ExternalPath
                             .getExternalStoragePublicDirectory(
                                 ExternalPath.DIRECTORY_DCIM);
-                        var assetFilePath = '$path/PicHoro_author.jpg';
-                        String assetPath = 'assets/qq_author.jpg';
-                        File assetFile = File(assetFilePath);
-                        if (!assetFile.existsSync()) {
-                          ByteData data = await rootBundle.load(assetPath);
-                          List<int> bytes = data.buffer.asUint8List(
-                              data.offsetInBytes, data.lengthInBytes);
-                          await assetFile.writeAsBytes(bytes);
+                        String fileurl = 'https://pichoro.msq.pub/wechat.png';
+                        try {
+                          await Dio().download(fileurl, '$path/wechat.png');
+                          showToast('保存成功');
+                        } catch (e) {
+                          showToast('保存失败');
                         }
-                        showToast('保存成功');
                       });
                 },
                 child: Center(
-                  child: Image.asset(
-                    'assets/qq_author.jpg',
-                    width: 400,
-                    height: 300,
+                  child: ExtendedImage.network(
+                    'https://pichoro.msq.pub/wechat.png',
+                    fit: BoxFit.contain,
+                    mode: ExtendedImageMode.gesture,
+                    cache: true,
+                    loadStateChanged: (state) =>
+                        defaultLoadStateChanged(state, iconSize: 60),
+                    initGestureConfigHandler: (state) {
+                      return GestureConfig(
+                          minScale: 0.9,
+                          animationMinScale: 0.7,
+                          maxScale: 3.0,
+                          animationMaxScale: 3.5,
+                          speed: 1.0,
+                          inertialSpeed: 100.0,
+                          initialScale: 1.0,
+                          inPageView: true);
+                    },
                   ),
                 )),
           ],
