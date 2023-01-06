@@ -138,7 +138,7 @@ Github下载地址 [Github release](https://github.com/Kuingsmile/PicHoro/releas
 
 功能建议和bug反馈群：
 
-![image](https://user-images.githubusercontent.com/96409857/210031652-7c6c90b3-2faa-4643-bbc0-6eb9975f347f.png)
+![image](https://pichoro.msq.pub/wechat.png)
 
 开发进度可以查看 [Projects](https://github.com/Kuingsmile/PicHoro/projects)，会同步更新开发进度。
 
