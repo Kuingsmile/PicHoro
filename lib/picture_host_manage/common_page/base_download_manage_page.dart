@@ -66,12 +66,18 @@ import 'package:horopic/picture_host_manage/webdav/download_api/webdav_downloade
 //修改自flutter_download_manager包 https://github.com/nabil6391/flutter_download_manager 作者@nabil6391
 
 class BaseUpDownloadManagePage extends StatefulWidget {
+  final String userName;
+  final String repoName;
+  final String albumName;
   final String bucketName;
   String downloadPath;
   String tabIndex;
   int currentListIndex;
   BaseUpDownloadManagePage({
     Key? key,
+    required this.userName,
+    required this.repoName,
+    required this.albumName,
     required this.bucketName,
     required this.downloadPath,
     required this.tabIndex,
@@ -100,7 +106,6 @@ class BaseUpDownloadManagePageState extends State<BaseUpDownloadManagePage> {
 
   @override
   void initState() {
-    
     super.initState();
 
     List psHosts = [
@@ -210,7 +215,7 @@ class BaseUpDownloadManagePageState extends State<BaseUpDownloadManagePage> {
     downloadManager = downloadManagers[widget.currentListIndex];
     uploadManager = uploadManagers[widget.currentListIndex];
     currentPShost = psHosts[widget.currentListIndex];
-    if (currentPShost=='qiniu'){
+    if (currentPShost == 'qiniu') {
       showToast('请注意设置为公开存储，否则无法下载');
     }
     currentUploadList = uploadLists[widget.currentListIndex];
@@ -220,6 +225,14 @@ class BaseUpDownloadManagePageState extends State<BaseUpDownloadManagePage> {
     currentUploadManager = uploadManagers[widget.currentListIndex];
     currentDownloadManager = downloadManagers[widget.currentListIndex];
     switch (currentPShost) {
+      case 'lsky.pro':
+        savedDir =
+            '${widget.downloadPath}/PicHoro/Download/lskypro/${widget.albumName}/';
+        break;
+      case 'github':
+        savedDir =
+            '${widget.downloadPath}/PicHoro/Download/github/${widget.userName}/${widget.repoName}/';
+        break;
       default:
         savedDir =
             '${widget.downloadPath}/PicHoro/Download/$currentPShost/${widget.bucketName}/';
@@ -296,7 +309,6 @@ class BaseUpDownloadManagePageState extends State<BaseUpDownloadManagePage> {
         children: [
           TextButton(
               onPressed: () async {
-                
                 await uploadManager.addBatchUploads(
                     uploadPathList, uploadFileNameList, uploadConfigMapList);
                 setState(() {});
@@ -390,14 +402,25 @@ class BaseUpDownloadManagePageState extends State<BaseUpDownloadManagePage> {
                   }
                   setState(() {});
                 } else {
-                  await downloadManager.addDownload(url,
-                      "$savedDir${downloadManager.getFileNameFromUrl(url)}");
+                  if (currentPShost == 'github' ||
+                      currentPShost == 'lsky.pro') {
+                    String fileName = url.substring(url.lastIndexOf('/') + 1);
+                    await downloadManager.addDownload(
+                        url, "$savedDir$fileName");
+                  } else {
+                    await downloadManager.addDownload(url,
+                        "$savedDir${downloadManager.getFileNameFromUrl(url)}");
+                  }
+
                   setState(() {});
                 }
               },
               onDelete: (url) async {
                 var fileName =
                     "$savedDir${downloadManager.getFileNameFromUrl(url)}";
+                if (currentPShost == 'github' && fileName.contains('?')) {
+                  fileName = fileName.substring(0, fileName.indexOf('?'));
+                }
                 var file = File(fileName);
                 try {
                   await file.delete();
@@ -435,6 +458,10 @@ class BaseUpDownloadManagePageState extends State<BaseUpDownloadManagePage> {
                 await ExternalPath.getExternalStoragePublicDirectory(
                     ExternalPath.DIRECTORY_DOWNLOADS);
             switch (currentPShost) {
+              case 'lsky.pro':
+                externalStorageDirectory =
+                    '$externalStorageDirectory/PicHoro/Download/lskypro';
+                break;
               default:
                 externalStorageDirectory =
                     '$externalStorageDirectory/PicHoro/Download/$currentPShost';

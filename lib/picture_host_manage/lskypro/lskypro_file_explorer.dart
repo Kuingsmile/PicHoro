@@ -155,11 +155,7 @@ class LskyproFileExplorerState
         }
       }
     } catch (e) {
-      FLog.error(
-          className: 'LskyproFileExplorerState',
-          methodName: '_getFileList',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {}, 'LskyproFileExplorerState', '_getFileList');
       state = loading_state.LoadState.ERROR;
     }
     if (mounted) {
@@ -477,24 +473,24 @@ class LskyproFileExplorerState
                               }
                               Map configMap =
                                   await LskyproManageAPI.getConfigMap();
-                              configMap['album_id'] = widget.albumInfo['id'] ?? 'None';
+                              configMap['album_id'] =
+                                  widget.albumInfo['id'] ?? 'None';
                               for (int i = 0; i < files.length; i++) {
-                                 File compressedFile;
-                                  if (Global.isCompress == true) {
-                                    ImageCompress imageCompress =
-                                        ImageCompress();
-                                    compressedFile =
-                                        await imageCompress.compressAndGetFile(
-                                            files[i].path,
-                                            my_path.basename(files[i].path),
-                                            Global.defaultCompressFormat,
-                                            minHeight: Global.minHeight,
-                                            minWidth: Global.minWidth,
-                                            quality: Global.quality);
-                                    files[i] = compressedFile;
-                                  } else {
-                                    compressedFile = files[i];
-                                  }
+                                File compressedFile;
+                                if (Global.isCompress == true) {
+                                  ImageCompress imageCompress = ImageCompress();
+                                  compressedFile =
+                                      await imageCompress.compressAndGetFile(
+                                          files[i].path,
+                                          my_path.basename(files[i].path),
+                                          Global.defaultCompressFormat,
+                                          minHeight: Global.minHeight,
+                                          minWidth: Global.minWidth,
+                                          quality: Global.quality);
+                                  files[i] = compressedFile;
+                                } else {
+                                  compressedFile = files[i];
+                                }
                                 List uploadList = [
                                   files[i].path,
                                   my_path.basename(files[i].path),
@@ -517,7 +513,7 @@ class LskyproFileExplorerState
                                 }
                                 Application.router
                                     .navigateTo(context,
-                                        '/lskyproUpDownloadManagePage?albumName=${Uri.encodeComponent(albumName)}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=0',
+                                        '/baseUpDownloadManagePage?albumName=${Uri.encodeComponent(albumName)}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=0&currentListIndex=6',
                                         transition: TransitionType.inFromRight)
                                     .then((value) {
                                   _getFileList();
@@ -562,13 +558,13 @@ class LskyproFileExplorerState
                               _getFileList();
                               setState(() {});
                             } catch (e) {
-                              FLog.error(
-                                  className: 'lskyproManagePage',
-                                  methodName: 'uploadNetworkFileEntry',
-                                  text: formatErrorMessage({
+                              flogErr(
+                                  e,
+                                  {
                                     'url': url,
-                                  }, e.toString()),
-                                  dataLogType: DataLogType.ERRORS.toString());
+                                  },
+                                  'lskyproManagePage',
+                                  'uploadNetworkFileEntry');
                               if (mounted) {
                                 showToastWithContext(context, '错误');
                               }
@@ -603,7 +599,7 @@ class LskyproFileExplorerState
                 }
                 if (mounted) {
                   Application.router.navigateTo(context,
-                      '/lskyproUpDownloadManagePage?albumName=${Uri.encodeComponent(albumName)}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=$index',
+                      '/baseUpDownloadManagePage?albumName=${Uri.encodeComponent(albumName)}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=$index&currentListIndex=6',
                       transition: TransitionType.inFromRight);
                 }
               },
@@ -641,11 +637,7 @@ class LskyproFileExplorerState
                     showToast('删除完成');
                     return;
                   } catch (e) {
-                    FLog.error(
-                        className: 'LskyproManagePage',
-                        methodName: 'deleteAll_button',
-                        text: formatErrorMessage({}, e.toString()),
-                        dataLogType: DataLogType.ERRORS.toString());
+                    flogErr(e, {}, 'LskyproManagePage', 'deleteAll_button');
                     showToast('删除失败');
                   }
                 },
@@ -682,13 +674,13 @@ class LskyproFileExplorerState
         });
       }
     } catch (e) {
-      FLog.error(
-          className: "LskyproManagePage",
-          methodName: "deleteAll",
-          text: formatErrorMessage({
+      flogErr(
+          e,
+          {
             'toDelete': toDelete,
-          }, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+          },
+          'LskyproManagePage',
+          'deleteAll');
       rethrow;
     }
   }
@@ -753,7 +745,7 @@ class LskyproFileExplorerState
                   }
                   if (mounted) {
                     Application.router.navigateTo(context,
-                        '/lskyproUpDownloadManagePage?albumName=${Uri.encodeComponent(albumName)}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=1',
+                        '/baseUpDownloadManagePage?albumName=${Uri.encodeComponent(albumName)}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=1&currentListIndex=6',
                         transition: TransitionType.inFromRight);
                   }
                 },
@@ -1003,8 +995,7 @@ class LskyproFileExplorerState
                                               showToast('删除成功');
                                               setState(() {
                                                 allInfoList.removeAt(index);
-                                                dirAllInfoList
-                                                      .removeAt(index);
+                                                dirAllInfoList.removeAt(index);
                                                 selectedFilesBool
                                                     .removeAt(index);
                                               });
@@ -1229,7 +1220,8 @@ class LskyproFileExplorerState
                                   urlList +=
                                       '${allInfoList[i]['links']['url']},';
                                 }
-                                urlList = urlList.substring(0, urlList.length - 1);
+                                urlList =
+                                    urlList.substring(0, urlList.length - 1);
                                 Application.router.navigateTo(this.context,
                                     '${Routes.albumImagePreview}?index=$newImageIndex&images=${Uri.encodeComponent(urlList)}',
                                     transition: TransitionType.none);
@@ -1294,11 +1286,7 @@ class LskyproFileExplorerState
             defaultLoadStateChanged(state, iconSize: 30),
       );
     } catch (e) {
-      FLog.error(
-          className: 'LskyproFileExplorer',
-          methodName: 'iconImageLoad',
-          text: formatErrorMessage({'index': index}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {'index': index}, 'LskyproFileExplorer', 'iconImageLoad');
       String fileExtension = allInfoList[index]['links']['url'].split('.').last;
       fileExtension = fileExtension.toLowerCase();
       String iconPath = 'assets/icons/';

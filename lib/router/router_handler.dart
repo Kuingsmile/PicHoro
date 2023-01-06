@@ -71,7 +71,6 @@ import 'package:horopic/picture_host_manage/qiniu/qiniu_file_information_page.da
 import 'package:horopic/picture_host_manage/lskypro/lskypro_manage_home_page.dart';
 import 'package:horopic/picture_host_manage/lskypro/lskypro_file_explorer.dart';
 import 'package:horopic/picture_host_manage/lskypro/lskypro_file_information_page.dart';
-import 'package:horopic/picture_host_manage/lskypro/lskypro_download_manage_page.dart';
 
 import 'package:horopic/picture_host_manage/github/github_manage_home_page.dart';
 import 'package:horopic/picture_host_manage/github/github_repos_list_page.dart';
@@ -79,7 +78,6 @@ import 'package:horopic/picture_host_manage/github/github_repo_information_page.
 import 'package:horopic/picture_host_manage/github/github_new_repo_configure.dart';
 import 'package:horopic/picture_host_manage/github/github_file_explorer.dart';
 import 'package:horopic/picture_host_manage/github/github_file_information_page.dart';
-import 'package:horopic/picture_host_manage/github/github_download_manage_page.dart';
 
 import 'package:horopic/picture_host_manage/imgur/imgur_login.dart';
 import 'package:horopic/picture_host_manage/imgur/imgur_file_explorer.dart';
@@ -112,7 +110,6 @@ import 'package:horopic/picture_host_manage/alist/alist_download_manage_page.dar
 import 'package:horopic/picture_host_manage/webdav/webdav_file_explorer.dart';
 import 'package:horopic/picture_host_manage/webdav/webdav_file_information_page.dart';
 import 'package:horopic/picture_host_manage/webdav/webdav_pic_preview.dart';
-
 
 //webview
 Handler webviewHandler = Handler(
@@ -671,7 +668,6 @@ var newUpyunBucketHandler = Handler(
   return const UpyunNewBucketConfig();
 });
 
-
 //七牛云存储桶列表页面
 var qiniuBucketListHandler = Handler(
     handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
@@ -739,16 +735,6 @@ var lskyproFileInformationHandler = Handler(
   );
 });
 
-//lskypro存储下载文件页面
-var lskyproDownloadFileHandler = Handler(
-    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
-  var albumName = params['albumName']!.first;
-  String downloadPath = params['downloadPath']!.first;
-  String tabIndex = params['tabIndex']!.first;
-  return LskyproUpDownloadManagePage(
-      albumName: albumName, downloadPath: downloadPath, tabIndex: tabIndex);
-});
-
 //github图床管理首页
 var githubManageHomePageHandler = Handler(
     handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
@@ -797,20 +783,6 @@ var githubFileInformationHandler = Handler(
   return GithubFileInformation(
     fileMap: fileMap,
   );
-});
-
-//Github存储下载文件页面
-var githubDownloadFileHandler = Handler(
-    handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
-  var userName = params['userName']!.first;
-  var repoName = params['repoName']!.first;
-  String downloadPath = params['downloadPath']!.first;
-  String tabIndex = params['tabIndex']!.first;
-  return GithubUpDownloadManagePage(
-      userName: userName,
-      repoName: repoName,
-      downloadPath: downloadPath,
-      tabIndex: tabIndex);
 });
 
 //Imgur登录页面
@@ -1051,12 +1023,18 @@ var webdavFileInformationHandler = Handler(
 //通用下载文件页面
 var baseDownloadFileHandler = Handler(
     handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
-  var bucketName = params['bucketName']!.first;
+  String userName = params['userName'] == null ? '' : params['userName']!.first;
+  String repoName = params['repoName'] == null ? '' : params['repoName']!.first;
+  String albumName = params['albumName'] == null ? '' : params['albumName']!.first;
+  var bucketName = params['bucketName']== null ? '' : params['bucketName']!.first;
   String downloadPath = params['downloadPath']!.first;
   String tabIndex = params['tabIndex']!.first;
   int currentListIndex = int.parse(params['currentListIndex']!.first);
 
   return BaseUpDownloadManagePage(
+    userName: userName,
+    repoName: repoName,
+    albumName: albumName,
     bucketName: bucketName,
     downloadPath: downloadPath,
     tabIndex: tabIndex,

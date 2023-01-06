@@ -83,14 +83,12 @@ class Routes {
   static String lskyproManageHomePage = "/lskyproManageHomePage";
   static String lskyproFileExplorer = "/lskyproFileExplorer";
   static String lskyproFileInformation = "/lskyproFileInformation";
-  static String lskyproUpDownloadManagePage = "/lskyproUpDownloadManagePage";
   static String githubManageHomePage = "/githubManageHomePage";
   static String githubReposList = "/githubReposList";
   static String githubRepoInformation = "/githubRepoInformation";
   static String githubNewRepoConfig = "/githubNewRepoConfig";
   static String githubFileExplorer = "/githubFileExplorer";
   static String githubFileInformation = "/githubFileInformation";
-  static String githubUpDownloadManagePage = "/githubUpDownloadManagePage";
   static String imgurLogIn = "/imgurLogIn";
   static String imgurFileExplorer = "/imgurFileExplorer";
   static String imgurTokenManagePage = "/imgurTokenManagePage";
@@ -210,16 +208,12 @@ class Routes {
     router.define(lskyproFileExplorer, handler: lskyproFileExplorerHandler);
     router.define(lskyproFileInformation,
         handler: lskyproFileInformationHandler);
-    router.define(lskyproUpDownloadManagePage,
-        handler: lskyproDownloadFileHandler);
     router.define(githubManageHomePage, handler: githubManageHomePageHandler);
     router.define(githubReposList, handler: githubReposListHandler);
     router.define(githubRepoInformation, handler: githubRepoInformationHandler);
     router.define(githubNewRepoConfig, handler: githubNewRepoConfigHandler);
     router.define(githubFileExplorer, handler: githubFileExplorerHandler);
     router.define(githubFileInformation, handler: githubFileInformationHandler);
-    router.define(githubUpDownloadManagePage,
-        handler: githubDownloadFileHandler);
     router.define(imgurLogIn, handler: imgurLogInHandler);
     router.define(imgurFileExplorer, handler: imgurFileExplorerHandler);
     router.define(imgurTokenManagePage, handler: imgurTokenManageHandler);
