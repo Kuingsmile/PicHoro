@@ -90,10 +90,10 @@ Github下载地址 [Github release](https://github.com/Kuingsmile/PicHoro/releas
   <tr>
     <td><img src="https://user-images.githubusercontent.com/96409857/203718727-ceac86b4-8cb5-49c5-8ee3-bcfce51710cb.jpg" width="200" height="400" alt=""/></td>
     <td><img src="https://user-images.githubusercontent.com/96409857/203718378-fd4cf22f-b801-4356-9a8b-9d51a0db0e54.jpg" width="200" height="400" alt=""/></td>
-    <td><img src="https://user-images.githubusercontent.com/96409857/203718175-6616cd6d-0d7d-4eab-9f6f-6686db9468ec.png" width="200" height="400" alt=""/></td>
+    <td><img src="https://user-images.githubusercontent.com/96409857/211286619-63e406aa-0736-4581-bd9e-adde92209dba.png" width="200" height="400" alt=""/></td>
   </tr>
    <tr>
-    <td><img src="https://user-images.githubusercontent.com/96409857/203718982-448828ff-3ad1-4d93-9c7f-ece9d69d34c4.jpg" width="200" height="400" alt=""/></td>
+    <td><img src="https://user-images.githubusercontent.com/96409857/211286730-2e0c05b3-5093-4738-8378-7d2c273a694b.png" width="200" height="400" alt=""/></td>
     <td><img src="https://user-images.githubusercontent.com/96409857/203719066-b6e45be8-eb8f-49da-bea2-78f3d4379591.jpg" width="200" height="400" alt=""/></td>
     <td><img src="https://user-images.githubusercontent.com/96409857/203719617-b54a49bb-d9f9-4917-a68a-b4a46f951ee0.png" width="200" height="400" alt=""/></td>
   </tr>
