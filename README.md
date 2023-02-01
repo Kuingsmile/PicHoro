@@ -284,7 +284,7 @@ Github下载地址 [Github release](https://github.com/Kuingsmile/PicHoro/releas
 
 [MIT](https://opensource.org/licenses/MIT)
 
-Copyright (c) 2022 Kuingsmile
+Copyright (c) 2022-present, Kuingsmile
 
 ## Github star
 
