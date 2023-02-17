@@ -16,6 +16,8 @@
 
 &emsp;&emsp;支持多种图片/PDF/文本文件/音视频的在线预览和播放，具体支持的格式请查看[支持的格式列表](https://github.com/Kuingsmile/PicHoro/blob/main/supported_format.md "支持的格式列表")
 
+桌面端如果也希望进行图床管理，推荐使用我的另一个项目`PicList`，[https://github.com/Kuingsmile/PicList](https://github.com/Kuingsmile/PicList)
+
 &emsp;&emsp;项目介绍和配置手册网址:
 
 &emsp;&emsp;[https://pichoro.horosama.com](https://pichoro.horosama.com)
