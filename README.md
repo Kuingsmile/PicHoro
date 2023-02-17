@@ -1,15 +1,9 @@
 <div align="center">
   <img src="http://imgx.horosama.com/admin_uploads/2022/10/2022_10_05_633d79e401694.png" alt="">
   <h1>PicHoro</h1>
-  <a href="https://github.com/Kuingsmile/PicHoro/releases">
-    <img src="https://img.shields.io/github/downloads/Kuingsmile/PicHoro/total.svg?style=flat-square" alt="">
-  </a>
   <a href="https://github.com/Kuingsmile/PicHoro/releases/latest">
     <img src="https://img.shields.io/github/release/Kuingsmile/PicHoro.svg?style=flat-square" alt="">
   </a>
-  <a href="https://github.com/Kuingsmile/PicHoro">
-     <img src="https://img.shields.io/github/stars/Kuingsmile/PicHoro.svg?style=flat-square" alt="">
-     </a>
 </div>
 
 &emsp;&emsp;一款基于flutter的手机端云存储平台/图床管理和文件上传/下载工具，最新版本**V1.9.9**，与PicGo配置互通，可直接扫码导入，主要功能包括云存储/图床/云服务器平台,以及网盘管理（通过[Alist](https://alist.nn.ci/zh/))，文件上传和下载管理，以及各种格式的链接分享。
