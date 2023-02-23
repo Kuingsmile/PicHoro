@@ -260,7 +260,7 @@ class FTPConfigState extends State<FTPConfig> {
                       });
                 }
               },
-              child: titleText('提交表单',fontsize: null),
+              child: titleText('提交表单', fontsize: null),
             )),
             ListTile(
                 title: ElevatedButton(
@@ -277,7 +277,7 @@ class FTPConfigState extends State<FTPConfig> {
                       );
                     });
               },
-              child: titleText('检查当前配置',fontsize: null),
+              child: titleText('检查当前配置', fontsize: null),
             )),
             ListTile(
                 title: ElevatedButton(
@@ -288,7 +288,7 @@ class FTPConfigState extends State<FTPConfig> {
                 await _initConfig();
                 setState(() {});
               },
-              child: titleText('设置备用配置',fontsize: null),
+              child: titleText('设置备用配置', fontsize: null),
             )),
             ListTile(
                 title: ElevatedButton(
@@ -309,11 +309,13 @@ class FTPConfigState extends State<FTPConfig> {
               },
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children:  [
-                  const Icon(Icons.terminal_outlined,
-                      color: Colors.white, ),
+                children: [
+                  const Icon(
+                    Icons.terminal_outlined,
+                    color: Colors.white,
+                  ),
                   const SizedBox(width: 10),
-                  titleText('连接SSH终端',fontsize: null),
+                  titleText('连接SSH终端', fontsize: null),
                 ],
               ),
             )),
@@ -322,7 +324,7 @@ class FTPConfigState extends State<FTPConfig> {
               onPressed: () {
                 _setdefault();
               },
-              child: titleText('设为默认图床',fontsize: null),
+              child: titleText('设为默认图床', fontsize: null),
             )),
           ],
         ),

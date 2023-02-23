@@ -38,12 +38,8 @@ class FTPImageUploadUtils {
         if (uploadPath == 'None') {
           uploadPath = '/';
         }
-        if (!uploadPath.startsWith('/')) {
-          uploadPath = '/$uploadPath';
-        }
-        if (!uploadPath.endsWith('/')) {
-          uploadPath = '$uploadPath/';
-        }
+        uploadPath =
+            '/${uploadPath.replaceAll(RegExp(r'^/*'), '').replaceAll(RegExp(r'/*$'), '')}/';
         String urlPath = uploadPath + name;
         var file = await sftp.open(urlPath,
             mode: SftpFileOpenMode.create | SftpFileOpenMode.write);
@@ -251,7 +247,8 @@ class FTPImageUploadUtils {
     try {
       if (ftpType == 'SFTP') {
         try {
-          final socket = await SSHSocket.connect(ftpHost, int.parse(ftpPort.toString()));
+          final socket =
+              await SSHSocket.connect(ftpHost, int.parse(ftpPort.toString()));
           final client = SSHClient(
             socket,
             username: ftpUser,

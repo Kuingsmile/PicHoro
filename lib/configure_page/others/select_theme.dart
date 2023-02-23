@@ -14,10 +14,8 @@ class ChangeThemeState extends State<ChangeTheme> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          elevation: 0,
-          centerTitle: true,
-          title: titleText('主题设置')),
+        appBar:
+            AppBar(elevation: 0, centerTitle: true, title: titleText('主题设置')),
         body: Consumer<AppInfoProvider>(builder: (context, appinfo, child) {
           return ListView(
             children: [
@@ -50,7 +48,6 @@ class ChangeThemeState extends State<ChangeTheme> {
               ),
               const SizedBox(
                 height: 15,
-              
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -135,7 +132,6 @@ class ChangeThemeState extends State<ChangeTheme> {
                   const SizedBox(
                     width: 10,
                   ),
-
                   SizedBox(
                     width: 30,
                     height: 40,

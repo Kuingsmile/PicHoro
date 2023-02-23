@@ -12,6 +12,7 @@ import 'package:horopic/pages/upload_pages/upload_status.dart';
 import 'package:horopic/picture_host_manage/alist/upload_api/alist_upload_task.dart';
 
 import 'package:horopic/utils/common_functions.dart';
+import 'package:horopic/utils/global.dart';
 
 class UploadManager {
   final Map<String, UploadTask> _cache = <String, UploadTask>{};
@@ -71,16 +72,11 @@ class UploadManager {
       int contentLength = await uploadFile.length().then((value) {
         return value;
       });
-      BaseOptions baseoptions = BaseOptions(
-        connectTimeout: 30000,
-        receiveTimeout: 30000,
-        sendTimeout: 30000,
-      );
+      BaseOptions baseoptions = setBaseOptions();
 
       baseoptions.headers = {
         "Authorization": configMap["token"],
-        "Content-Type":
-            "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW",
+        "Content-Type": Global.multipartString,
         "file-path": Uri.encodeComponent(filePath),
         "Content-Length": contentLength,
       };

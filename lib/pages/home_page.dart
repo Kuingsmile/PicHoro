@@ -9,7 +9,6 @@ import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 import 'package:flutter/services.dart' as flutter_services;
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:f_logs/f_logs.dart';
-import 'package:fluro/fluro.dart';
 import 'package:http/http.dart' as my_http;
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as my_path;
@@ -27,7 +26,6 @@ import 'package:horopic/pages/upload_pages/upload_utils.dart';
 import 'package:horopic/pages/upload_pages/upload_status.dart';
 
 import 'package:horopic/utils/image_compress.dart';
-
 
 Map uploadStatus = {
   'UploadStatus.uploading': "上传中",
@@ -662,7 +660,6 @@ class HomePageState extends State<HomePage>
         Global.imagesList.add(Global.imageFile!);
       }
       Global.imagesFileList.add(compressedFile);
-
     }
   }
 

@@ -273,8 +273,9 @@ class LogPageState extends loading_state.BaseLoadingPageState<LogPage> {
   AppBar get appBar => AppBar(
         centerTitle: true,
         elevation: 0,
-        title: titleText('软件日志',
-            ),
+        title: titleText(
+          '软件日志',
+        ),
         actions: [
           IconButton(
             icon: const Icon(

@@ -22,5 +22,6 @@ class UploadRequest {
           configMap.toString() == other.configMap.toString();
 
   @override
-  int get hashCode => path.hashCode ^ name.hashCode ^ configMap.toString().hashCode;
+  int get hashCode =>
+      path.hashCode ^ name.hashCode ^ configMap.toString().hashCode;
 }

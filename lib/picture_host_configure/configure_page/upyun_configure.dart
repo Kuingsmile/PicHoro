@@ -48,8 +48,7 @@ class UpyunConfigState extends State<UpyunConfig> {
       _operatorController.text = configMap['operator'];
       _passwordController.text = configMap['password'];
       _urlController.text = configMap['url'];
-      if (configMap['options'] != 'None' || 
-          configMap['options'].trim() != '') {
+      if (configMap['options'] != 'None' || configMap['options'].trim() != '') {
         _optionsController.text = configMap['options'];
       } else {
         _optionsController.clear();
@@ -198,7 +197,7 @@ class UpyunConfigState extends State<UpyunConfig> {
                       });
                 }
               },
-              child: titleText('提交表单',fontsize: null),
+              child: titleText('提交表单', fontsize: null),
             )),
             ListTile(
                 title: ElevatedButton(
@@ -215,7 +214,7 @@ class UpyunConfigState extends State<UpyunConfig> {
                       );
                     });
               },
-              child: titleText('检查当前配置',fontsize: null),
+              child: titleText('检查当前配置', fontsize: null),
             )),
             ListTile(
                 title: ElevatedButton(
@@ -226,14 +225,14 @@ class UpyunConfigState extends State<UpyunConfig> {
                 await _initConfig();
                 setState(() {});
               },
-              child: titleText('设置备用配置',fontsize: null),
+              child: titleText('设置备用配置', fontsize: null),
             )),
             ListTile(
                 title: ElevatedButton(
               onPressed: () {
                 _setdefault();
               },
-              child: titleText('设为默认图床',fontsize: null),
+              child: titleText('设为默认图床', fontsize: null),
             )),
           ],
         ),
@@ -336,18 +335,13 @@ class UpyunConfigState extends State<UpyunConfig> {
         'file': await MultipartFile.fromFile(assetFilePath, filename: key),
       });
 
-      BaseOptions baseoptions = BaseOptions(
-        connectTimeout: 30000,
-        receiveTimeout: 30000,
-        sendTimeout: 30000,
-      );
+      BaseOptions baseoptions = setBaseOptions();
       String contentLength = await assetFile.length().then((value) {
         return value.toString();
       });
       baseoptions.headers = {
         'Host': 'v0.api.upyun.com',
-        'Content-Type':
-            'multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW',
+        'Content-Type': Global.multipartString,
         'Content-Length': contentLength,
         'Date': date,
         'Authorization': authorization,
@@ -456,18 +450,13 @@ class UpyunConfigState extends State<UpyunConfig> {
         'file': await MultipartFile.fromFile(assetFilePath, filename: key),
       });
 
-      BaseOptions baseoptions = BaseOptions(
-        connectTimeout: 30000,
-        receiveTimeout: 30000,
-        sendTimeout: 30000,
-      );
+      BaseOptions baseoptions = setBaseOptions();
       String contentLength = await assetFile.length().then((value) {
         return value.toString();
       });
       baseoptions.headers = {
         'Host': 'v0.api.upyun.com',
-        'Content-Type':
-            'multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW',
+        'Content-Type': Global.multipartString,
         'Content-Length': contentLength,
         'Date': date,
         'Authorization': authorization,

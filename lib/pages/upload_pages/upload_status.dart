@@ -1,4 +1,4 @@
-enum UploadStatus {queued, uploading, completed, failed,paused,canceled}
+enum UploadStatus { queued, uploading, completed, failed, paused, canceled }
 
 extension UploadStatueExtension on UploadStatus {
   bool get isCompleted {

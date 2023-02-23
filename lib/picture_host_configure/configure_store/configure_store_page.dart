@@ -217,8 +217,10 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
                 await Clipboard.setData(ClipboardData(text: result));
                 showToast('已导出到剪贴板');
               },
-              child: const Icon(Icons.outbox_outlined,
-                  color: Colors.white,),
+              child: const Icon(
+                Icons.outbox_outlined,
+                color: Colors.white,
+              ),
             ),
           ),
           const SizedBox(
@@ -247,8 +249,10 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
                   return;
                 }
               },
-              child: const Icon(Icons.inbox_outlined,
-                  color: Colors.white,),
+              child: const Icon(
+                Icons.inbox_outlined,
+                color: Colors.white,
+              ),
             ),
           ),
         ],

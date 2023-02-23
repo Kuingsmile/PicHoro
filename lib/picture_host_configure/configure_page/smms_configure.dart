@@ -108,12 +108,12 @@ class SmmsConfigState extends State<SmmsConfig> {
                       });
                 }
               },
-              child: titleText('提交表单',fontsize: null),
+              child: titleText('提交表单', fontsize: null),
             )),
             ListTile(
                 title: ElevatedButton(
               onPressed: () {
-                 showDialog(
+                showDialog(
                     context: context,
                     barrierDismissible: false,
                     builder: (context) {
@@ -125,7 +125,7 @@ class SmmsConfigState extends State<SmmsConfig> {
                       );
                     });
               },
-              child: titleText('检查当前配置',fontsize: null),
+              child: titleText('检查当前配置', fontsize: null),
             )),
             ListTile(
                 title: ElevatedButton(
@@ -136,14 +136,14 @@ class SmmsConfigState extends State<SmmsConfig> {
                 await _initConfig();
                 setState(() {});
               },
-              child: titleText('设置备用配置',fontsize: null),
+              child: titleText('设置备用配置', fontsize: null),
             )),
             ListTile(
                 title: ElevatedButton(
               onPressed: () {
                 _setdefault();
               },
-              child: titleText('设为默认图床',fontsize: null),
+              child: titleText('设为默认图床', fontsize: null),
             )),
           ],
         ),
@@ -169,11 +169,7 @@ class SmmsConfigState extends State<SmmsConfig> {
       }
       String validateURL = "https://smms.app/api/v2/profile";
       // String validateURL = "https://sm.ms/api/v2/profile";被墙了
-      BaseOptions options = BaseOptions(
-        connectTimeout: 30000,
-        receiveTimeout: 30000,
-        sendTimeout: 30000,
-      );
+      BaseOptions options = setBaseOptions();
       options.headers = {
         "Content-Type": 'multipart/form-data',
         "Authorization": token,
@@ -226,7 +222,7 @@ class SmmsConfigState extends State<SmmsConfig> {
     }
   }
 
-   checkSmmsConfig() async {
+  checkSmmsConfig() async {
     try {
       final smmsConfigFile = await localFile;
       String configData = await smmsConfigFile.readAsString();
@@ -235,11 +231,7 @@ class SmmsConfigState extends State<SmmsConfig> {
             context: context, title: "检查失败!", content: "请先配置上传参数.");
       }
       Map configMap = jsonDecode(configData);
-      BaseOptions options = BaseOptions(
-        connectTimeout: 30000,
-        receiveTimeout: 30000,
-        sendTimeout: 30000,
-      );
+      BaseOptions options = setBaseOptions();
       options.headers = {
         "Authorization": configMap["token"],
         "Content-Type": "multipart/form-data",
@@ -256,7 +248,6 @@ class SmmsConfigState extends State<SmmsConfig> {
       } else if (response.data['status'] == false) {
         return showCupertinoAlertDialog(
             context: context, title: '错误', content: response.data['message']);
-      
       } else {
         return showCupertinoAlertDialog(
             context: context, title: '错误', content: '未知错误');

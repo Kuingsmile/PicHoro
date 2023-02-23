@@ -231,6 +231,10 @@ class BaseUpDownloadManagePageState extends State<BaseUpDownloadManagePage> {
         savedDir =
             '${widget.downloadPath}/PicHoro/Download/lskypro/${widget.albumName}/';
         break;
+      case 'imgur':
+        savedDir =
+            '${widget.downloadPath}/PicHoro/Download/imgur/${widget.albumName}/';
+        break;
       case 'github':
         savedDir =
             '${widget.downloadPath}/PicHoro/Download/github/${widget.userName}/${widget.repoName}/';
@@ -408,9 +412,8 @@ class BaseUpDownloadManagePageState extends State<BaseUpDownloadManagePage> {
                   }
                   setState(() {});
                 } else {
-                  if (currentPShost == 'github' ||
-                      currentPShost == 'lsky.pro' ||
-                      currentPShost == 'ftp') {
+                  List case1 = ['github', 'lsky.pro', 'ftp', 'imgur'];
+                  if (case1.contains(currentPShost)) {
                     String fileName = url.substring(url.lastIndexOf('/') + 1);
                     await downloadManager.addDownload(
                         url, "$savedDir$fileName");

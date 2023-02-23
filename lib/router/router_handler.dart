@@ -1003,9 +1003,11 @@ var baseDownloadFileHandler = Handler(
     handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
   String userName = params['userName'] == null ? '' : params['userName']!.first;
   String repoName = params['repoName'] == null ? '' : params['repoName']!.first;
-  String albumName = params['albumName'] == null ? '' : params['albumName']!.first;
+  String albumName =
+      params['albumName'] == null ? '' : params['albumName']!.first;
   String ftpHost = params['ftpHost'] == null ? '' : params['ftpHost']!.first;
-  var bucketName = params['bucketName']== null ? '' : params['bucketName']!.first;
+  var bucketName =
+      params['bucketName'] == null ? '' : params['bucketName']!.first;
   String downloadPath = params['downloadPath']!.first;
   String tabIndex = params['tabIndex']!.first;
   int currentListIndex = int.parse(params['currentListIndex']!.first);

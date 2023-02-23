@@ -7,7 +7,6 @@ import 'package:extended_image/extended_image.dart';
 import 'package:horopic/album/load_state_change.dart';
 import 'package:horopic/utils/common_functions.dart';
 
-
 class UpdateLog extends StatefulWidget {
   const UpdateLog({Key? key}) : super(key: key);
 
@@ -30,8 +29,9 @@ class UpdateLogState extends State<UpdateLog> {
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
-        title: titleText('更新日志',
-            ),
+        title: titleText(
+          '更新日志',
+        ),
       ),
       body: FutureBuilder(
         future: _future,
@@ -40,30 +40,30 @@ class UpdateLogState extends State<UpdateLog> {
             return Markdown(
               data: snapshot.data!,
               selectable: true,
-              imageBuilder:  (uri, title, alt) {
+              imageBuilder: (uri, title, alt) {
                 return ExtendedImage.network(
-            uri.toString(),
-            fit: BoxFit.contain,
-            mode: ExtendedImageMode.gesture,
-            cache: true,
-            loadStateChanged: (state) =>
-                defaultLoadStateChanged(state, iconSize: 60),
-            initGestureConfigHandler: (state) {
-              return GestureConfig(
-                  minScale: 0.9,
-                  animationMinScale: 0.7,
-                  maxScale: 3.0,
-                  animationMaxScale: 3.5,
-                  speed: 1.0,
-                  inertialSpeed: 100.0,
-                  initialScale: 1.0,
-                  inPageView: true);
-            },
-          );
+                  uri.toString(),
+                  fit: BoxFit.contain,
+                  mode: ExtendedImageMode.gesture,
+                  cache: true,
+                  loadStateChanged: (state) =>
+                      defaultLoadStateChanged(state, iconSize: 60),
+                  initGestureConfigHandler: (state) {
+                    return GestureConfig(
+                        minScale: 0.9,
+                        animationMinScale: 0.7,
+                        maxScale: 3.0,
+                        animationMaxScale: 3.5,
+                        speed: 1.0,
+                        inertialSpeed: 100.0,
+                        initialScale: 1.0,
+                        inPageView: true);
+                  },
+                );
               },
-              onTapLink: (text, href, title) async{
+              onTapLink: (text, href, title) async {
                 Uri url = Uri.parse(href!);
-              await launchUrl(url);
+                await launchUrl(url);
               },
             );
           } else {

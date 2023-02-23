@@ -16,10 +16,10 @@ Map<String, Function> deleteFunc = {
   'tencent': TencentImageUploadUtils.deleteApi,
   'aliyun': AliyunImageUploadUtils.deleteApi,
   'upyun': UpyunImageUploadUtils.deleteApi,
-  'PBhostExtend1': FTPImageUploadUtils.deleteApi,//FTP
-  'PBhostExtend2': AwsImageUploadUtils.deleteApi,//AWS
-  'PBhostExtend3': AlistImageUploadUtils.deleteApi,//Alist
-  'PBhostExtend4': WebdavImageUploadUtils.deleteApi,//Webdav
+  'PBhostExtend1': FTPImageUploadUtils.deleteApi, //FTP
+  'PBhostExtend2': AwsImageUploadUtils.deleteApi, //AWS
+  'PBhostExtend3': AlistImageUploadUtils.deleteApi, //Alist
+  'PBhostExtend4': WebdavImageUploadUtils.deleteApi, //Webdav
 };
 
 //获取图床配置文件
@@ -29,19 +29,24 @@ Future<File> get _localFile async {
   String defaultUser = await Global.getUser();
   switch (defaultConfig) {
     case 'lskypro':
-      return File('${directory.path}/${defaultUser}_${getpdconfig('lsky.pro')}.txt');
+      return File(
+          '${directory.path}/${defaultUser}_${getpdconfig('lsky.pro')}.txt');
     case 'smms':
-      return File('${directory.path}/${defaultUser}_${getpdconfig('sm.ms')}.txt');
+      return File(
+          '${directory.path}/${defaultUser}_${getpdconfig('sm.ms')}.txt');
     case 'PBhostExtend1':
       return File('${directory.path}/${defaultUser}_${getpdconfig('ftp')}.txt');
     case 'PBhostExtend2':
       return File('${directory.path}/${defaultUser}_${getpdconfig('aws')}.txt');
     case 'PBhostExtend3':
-      return File('${directory.path}/${defaultUser}_${getpdconfig('alist')}.txt');
+      return File(
+          '${directory.path}/${defaultUser}_${getpdconfig('alist')}.txt');
     case 'PBhostExtend4':
-      return File('${directory.path}/${defaultUser}_${getpdconfig('webdav')}.txt');
+      return File(
+          '${directory.path}/${defaultUser}_${getpdconfig('webdav')}.txt');
     default:
-      return File('${directory.path}/${defaultUser}_${getpdconfig(defaultConfig)}.txt');
+      return File(
+          '${directory.path}/${defaultUser}_${getpdconfig(defaultConfig)}.txt');
   }
 }
 

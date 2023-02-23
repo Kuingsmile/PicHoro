@@ -54,11 +54,7 @@ class LskyproManageAPI {
     Map configMap = await getConfigMap();
     String token = configMap["token"];
     String host = configMap["host"];
-    BaseOptions options = BaseOptions(
-      connectTimeout: 30000,
-      receiveTimeout: 30000,
-      sendTimeout: 30000,
-    );
+    BaseOptions options = setBaseOptions();
     options.headers = {
       "Authorization": token,
       "Accept": "application/json",
@@ -95,11 +91,7 @@ class LskyproManageAPI {
     Map configMap = await getConfigMap();
     String token = configMap["token"];
     String host = configMap["host"];
-    BaseOptions options = BaseOptions(
-      connectTimeout: 30000,
-      receiveTimeout: 30000,
-      sendTimeout: 30000,
-    );
+    BaseOptions options = setBaseOptions();
     options.headers = {
       "Authorization": token,
       "Accept": "application/json",
@@ -153,11 +145,7 @@ class LskyproManageAPI {
     Map configMap = await getConfigMap();
     String token = configMap["token"];
     String host = configMap["host"];
-    BaseOptions options = BaseOptions(
-      connectTimeout: 30000,
-      receiveTimeout: 30000,
-      sendTimeout: 30000,
-    );
+    BaseOptions options = setBaseOptions();
     options.headers = {
       "Authorization": token,
       "Accept": "application/json",
@@ -220,11 +208,7 @@ class LskyproManageAPI {
     Map<String, dynamic> formdata = {
       "key": deleteKey,
     };
-    BaseOptions options = BaseOptions(
-      connectTimeout: 30000,
-      receiveTimeout: 30000,
-      sendTimeout: 30000,
-    );
+    BaseOptions options = setBaseOptions();
     options.headers = {
       "Authorization": token,
       "Accept": "application/json",
@@ -265,11 +249,7 @@ class LskyproManageAPI {
     Map<String, dynamic> formdata = {
       "id": id,
     };
-    BaseOptions options = BaseOptions(
-      connectTimeout: 30000,
-      receiveTimeout: 30000,
-      sendTimeout: 30000,
-    );
+    BaseOptions options = setBaseOptions();
     options.headers = {
       "Authorization": token,
       "Accept": "application/json",
@@ -317,11 +297,7 @@ class LskyproManageAPI {
         "strategy_id": configMap["strategy_id"],
       });
     }
-    BaseOptions options = BaseOptions(
-      connectTimeout: 30000,
-      receiveTimeout: 30000,
-      sendTimeout: 30000,
-    );
+    BaseOptions options = setBaseOptions();
     options.headers = {
       "Authorization": token,
       "Accept": "application/json",
@@ -355,6 +331,7 @@ class LskyproManageAPI {
     }
   }
 
+  
   static uploadNetworkFile(String fileLink) async {
     try {
       String filename =

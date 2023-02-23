@@ -229,7 +229,7 @@ class WebdavConfigState extends State<WebdavConfig> {
 
     if (uploadPath.isEmpty || uploadPath == '/' || uploadPath.trim() == '') {
       uploadPath = 'None';
-    } else{
+    } else {
       if (!uploadPath.startsWith('/')) {
         uploadPath = '/$uploadPath';
       }

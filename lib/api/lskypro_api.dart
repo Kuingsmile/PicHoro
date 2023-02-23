@@ -18,12 +18,12 @@ class LskyproImageUploadUtils {
     String albumId = configMap['album_id'];
     if (configMap["strategy_id"] == "None") {
       formdata = FormData.fromMap({});
-    } else if (albumId=='None') {
+    } else if (albumId == 'None') {
       formdata = FormData.fromMap({
         "file": await MultipartFile.fromFile(path, filename: name),
         "strategy_id": configMap["strategy_id"],
       });
-    }else{
+    } else {
       formdata = FormData.fromMap({
         "file": await MultipartFile.fromFile(path, filename: name),
         "strategy_id": configMap["strategy_id"],
@@ -31,11 +31,7 @@ class LskyproImageUploadUtils {
       });
     }
 
-    BaseOptions options = BaseOptions(
-      connectTimeout: 30000,
-      receiveTimeout: 30000,
-      sendTimeout: 30000,
-    );
+    BaseOptions options = setBaseOptions();
     options.headers = {
       "Authorization": configMap["token"],
       "Accept": "application/json",
@@ -93,18 +89,14 @@ class LskyproImageUploadUtils {
     Map<String, dynamic> formdata = {
       "key": configMapFromPictureKey["deletekey"],
     };
-    BaseOptions options = BaseOptions(
-      connectTimeout: 30000,
-      receiveTimeout: 30000,
-      sendTimeout: 30000,
-    );
+    BaseOptions options = setBaseOptions();
     options.headers = {
       "Authorization": configMapFromPictureKey["token"],
       "Accept": "application/json",
     };
     Dio dio = Dio(options);
-    String deleteUrl =
-        configMapFromPictureKey["host"] + "/api/v1/images/${configMapFromPictureKey["deletekey"]}";
+    String deleteUrl = configMapFromPictureKey["host"] +
+        "/api/v1/images/${configMapFromPictureKey["deletekey"]}";
     try {
       var response = await dio.delete(deleteUrl, data: formdata);
       if (response.statusCode == 200 && response.data!['status'] == true) {

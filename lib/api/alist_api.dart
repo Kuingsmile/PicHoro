@@ -8,6 +8,7 @@ import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/sql_utils.dart';
 
+
 class AlistImageUploadUtils {
   static String currentClassName = "AlistImageUploadUtils";
   //上传接口

@@ -163,11 +163,7 @@ class TencentManageAPI {
     String authorization =
         tecentAuthorization(method, urlpath, header, secretId, secretKey, {});
 
-    BaseOptions baseoptions = BaseOptions(
-      sendTimeout: 30000,
-      receiveTimeout: 30000,
-      connectTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = {
       'Authorization': authorization,
       'Host': host,
@@ -246,11 +242,7 @@ class TencentManageAPI {
     String authorization =
         tecentAuthorization(method, urlpath, header, secretId, secretKey, {});
 
-    BaseOptions baseoptions = BaseOptions(
-      sendTimeout: 30000,
-      receiveTimeout: 30000,
-      connectTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = header;
     baseoptions.headers['Authorization'] = authorization;
     Dio dio = Dio(baseoptions);
@@ -305,11 +297,7 @@ class TencentManageAPI {
     String authorization =
         tecentAuthorization(method, urlpath, header, secretId, secretKey, {});
 
-    BaseOptions baseoptions = BaseOptions(
-      sendTimeout: 30000,
-      receiveTimeout: 30000,
-      connectTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = header;
     baseoptions.headers['Authorization'] = authorization;
     Dio dio = Dio(baseoptions);
@@ -357,11 +345,7 @@ class TencentManageAPI {
     String authorization = tecentAuthorization(
         method, urlpath, header, secretId, secretKey, {'acl': ''});
 
-    BaseOptions baseoptions = BaseOptions(
-      sendTimeout: 30000,
-      receiveTimeout: 30000,
-      connectTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = header;
     baseoptions.headers['Authorization'] = authorization;
     Dio dio = Dio(baseoptions);
@@ -415,11 +399,7 @@ class TencentManageAPI {
     String authorization = tecentAuthorization(
         method, urlpath, header, secretId, secretKey, {'acl': ''});
 
-    BaseOptions baseoptions = BaseOptions(
-      sendTimeout: 30000,
-      receiveTimeout: 30000,
-      connectTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = header;
     baseoptions.headers['Authorization'] = authorization;
     Dio dio = Dio(baseoptions);
@@ -535,11 +515,7 @@ class TencentManageAPI {
     String authorization = tecentAuthorization(
         method, urlpath, header, secretId, secretKey, query);
 
-    BaseOptions baseoptions = BaseOptions(
-      sendTimeout: 30000,
-      receiveTimeout: 30000,
-      connectTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = header;
     baseoptions.headers['Authorization'] = authorization;
     Dio dio = Dio(baseoptions);
@@ -568,7 +544,6 @@ class TencentManageAPI {
             if (response.statusCode == 200) {
               if (tempMap['ListBucketResult']['Contents'] != null) {
                 if (tempMap['ListBucketResult']['Contents'] is! List) {
-                 
                   tempMap['ListBucketResult']
                       ['Contents'] = [tempMap['ListBucketResult']['Contents']];
                 }
@@ -595,7 +570,8 @@ class TencentManageAPI {
                   responseMap['ListBucketResult']['CommonPrefixes'] =
                       tempMap['ListBucketResult']['CommonPrefixes'];
                 } else {
-                  if (responseMap['ListBucketResult']['CommonPrefixes'] is! List) {
+                  if (responseMap['ListBucketResult']['CommonPrefixes']
+                      is! List) {
                     responseMap['ListBucketResult']['CommonPrefixes'] = [
                       responseMap['ListBucketResult']['CommonPrefixes']
                     ];
@@ -666,11 +642,7 @@ class TencentManageAPI {
     String authorization =
         tecentAuthorization(method, urlpath, header, secretId, secretKey, {});
 
-    BaseOptions baseoptions = BaseOptions(
-      sendTimeout: 30000,
-      receiveTimeout: 30000,
-      connectTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = header;
     baseoptions.headers['Authorization'] = authorization;
     Dio dio = Dio(baseoptions);
@@ -779,11 +751,7 @@ class TencentManageAPI {
     String authorization =
         tecentAuthorization(method, urlpath, header, secretId, secretKey, {});
 
-    BaseOptions baseoptions = BaseOptions(
-      sendTimeout: 30000,
-      receiveTimeout: 30000,
-      connectTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = header;
     baseoptions.headers['Authorization'] = authorization;
     Dio dio = Dio(baseoptions);
@@ -882,11 +850,7 @@ class TencentManageAPI {
     String authorization =
         tecentAuthorization(method, urlpath, header, secretId, secretKey, {});
 
-    BaseOptions baseoptions = BaseOptions(
-      sendTimeout: 30000,
-      receiveTimeout: 30000,
-      connectTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = header;
     baseoptions.headers['Authorization'] = authorization;
     Dio dio = Dio(baseoptions);
@@ -941,11 +905,7 @@ class TencentManageAPI {
     String authorization =
         tecentAuthorization(method, urlpath, header, secretId, secretKey, {});
 
-    BaseOptions baseoptions = BaseOptions(
-      sendTimeout: 30000,
-      receiveTimeout: 30000,
-      connectTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = header;
     baseoptions.headers['Authorization'] = authorization;
     Dio dio = Dio(baseoptions);
@@ -1026,19 +986,14 @@ class TencentManageAPI {
       'file': await MultipartFile.fromFile(filepath, filename: filename),
     });
 
-    BaseOptions baseoptions = BaseOptions(
-      sendTimeout: 30000,
-      receiveTimeout: 30000,
-      connectTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     File uploadFile = File(filepath);
     String contentLength = await uploadFile.length().then((value) {
       return value.toString();
     });
     baseoptions.headers = {
       'Host': host,
-      'Content-Type':
-          'multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW',
+      'Content-Type': Global.multipartString,
       'Content-Length': contentLength,
     };
     Dio dio = Dio(baseoptions);

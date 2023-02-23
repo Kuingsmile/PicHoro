@@ -23,18 +23,14 @@ class AwsImageUploadUtils {
     String customUrl = configMap['customUrl'];
 
     if (customUrl != "None") {
-      if (!customUrl.startsWith('http') && !customUrl.startsWith('https')) {
+      if (!customUrl.startsWith(RegExp(r'http(s)?://'))) {
         customUrl = 'http://$customUrl';
       }
     }
 
     if (uploadPath != 'None') {
-      if (uploadPath.startsWith('/')) {
-        uploadPath = uploadPath.substring(1);
-      }
-      if (!uploadPath.endsWith('/')) {
-        uploadPath = '$uploadPath/';
-      }
+      uploadPath =
+          '${uploadPath.replaceAll(RegExp(r'^/*'), '').replaceAll(RegExp(r'/*$'), '')}/';
     }
     //云存储的路径
     String urlpath = '';

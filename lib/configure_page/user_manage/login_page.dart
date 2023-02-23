@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:f_logs/f_logs.dart';
@@ -66,7 +65,7 @@ class APPPasswordState extends State<APPPassword> {
             await Global.setPassword(_passwordcontroller.text);
             await Global.setPShost(usernamecheck['defaultPShost']);
             // ignore: use_build_context_synchronously
-            await fetchconfig(context,_userNametext.text.toString(),
+            await fetchconfig(context, _userNametext.text.toString(),
                 _passwordcontroller.text.toString());
             Database db = await Global.getDatabase();
             await Global.setDatabase(db);

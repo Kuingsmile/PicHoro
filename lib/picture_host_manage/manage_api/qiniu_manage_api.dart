@@ -209,11 +209,7 @@ signingStr=signingStr+<body>
     String authorization = await qiniuAuthorization(
         method, urlpath, null, host, null, null, '', accessKey, secretKey);
     authorization = 'Qiniu $authorization';
-    BaseOptions baseoptions = BaseOptions(
-      sendTimeout: 30000,
-      receiveTimeout: 30000,
-      connectTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = {
       'Authorization': authorization,
       'Host': host,
@@ -260,11 +256,7 @@ signingStr=signingStr+<body>
     String authorization = await qiniuAuthorization(method, urlpath, null, host,
         'application/json', null, '', accessKey, secretKey);
 
-    BaseOptions baseoptions = BaseOptions(
-      sendTimeout: 30000,
-      receiveTimeout: 30000,
-      connectTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = {
       'Authorization': 'Qiniu $authorization',
       'Host': host,
@@ -317,11 +309,7 @@ signingStr=signingStr+<body>
     String authorization = await qiniuAuthorization(method, urlpath, null, host,
         'application/json', null, '', accessKey, secretKey);
 
-    BaseOptions baseoptions = BaseOptions(
-      sendTimeout: 30000,
-      receiveTimeout: 30000,
-      connectTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = {
       'Authorization': 'Qiniu $authorization',
       'Host': host,
@@ -369,11 +357,7 @@ signingStr=signingStr+<body>
     String authorization = await qiniuAuthorization(method, urlpath, null, host,
         'application/x-www-form-urlencoded', null, '', accessKey, secretKey);
 
-    BaseOptions baseoptions = BaseOptions(
-      sendTimeout: 30000,
-      receiveTimeout: 30000,
-      connectTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     Dio dio = Dio(baseoptions);
     try {
       var response = await dio.get(
@@ -428,11 +412,7 @@ signingStr=signingStr+<body>
     String authorization = await qiniuAuthorization(method, urlpath, null, host,
         'application/x-www-form-urlencoded', null, '', accessKey, secretKey);
 
-    BaseOptions baseoptions = BaseOptions(
-      sendTimeout: 30000,
-      receiveTimeout: 30000,
-      connectTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     Dio dio = Dio(baseoptions);
     try {
       var response = await dio.post(
@@ -597,11 +577,7 @@ signingStr=signingStr+<body>
         accessKey,
         secretKey);
 
-    BaseOptions baseoptions = BaseOptions(
-      sendTimeout: 30000,
-      receiveTimeout: 30000,
-      connectTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     Dio dio = Dio(baseoptions);
 
     try {
@@ -751,11 +727,7 @@ signingStr=signingStr+<body>
       "file": '',
     });
 
-    BaseOptions baseoptions = BaseOptions(
-      sendTimeout: 30000,
-      receiveTimeout: 30000,
-      connectTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     Dio dio = Dio(baseoptions);
 
     try {
@@ -815,11 +787,7 @@ signingStr=signingStr+<body>
     String authorization = await qiniuAuthorization(method, urlpath, null, host,
         'application/x-www-form-urlencoded', null, '', accessKey, secretKey);
 
-    BaseOptions baseoptions = BaseOptions(
-      sendTimeout: 30000,
-      receiveTimeout: 30000,
-      connectTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     Dio dio = Dio(baseoptions);
 
     try {
@@ -928,11 +896,7 @@ signingStr=signingStr+<body>
     String authorization = await qiniuAuthorization(method, urlpath, null, host,
         'application/x-www-form-urlencoded', null, '', accessKey, secretKey);
 
-    BaseOptions baseoptions = BaseOptions(
-      sendTimeout: 30000,
-      receiveTimeout: 30000,
-      connectTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     Dio dio = Dio(baseoptions);
 
     try {
@@ -1008,11 +972,7 @@ signingStr=signingStr+<body>
     String authorization = await qiniuAuthorization(method, urlpath, null, host,
         contentType, null, bodyString, accessKey, secretKey);
 
-    BaseOptions baseoptions = BaseOptions(
-      sendTimeout: 30000,
-      receiveTimeout: 30000,
-      connectTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     Dio dio = Dio(baseoptions);
     try {
       var response = await dio.post(

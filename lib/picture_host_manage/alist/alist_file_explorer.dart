@@ -449,7 +449,7 @@ class AlistFileExplorerState
                                         ? "None"
                                         : widget.bucketPrefix;
                                 for (int i = 0; i < files.length; i++) {
-                                   File compressedFile;
+                                  File compressedFile;
                                   if (Global.imgExt.contains(my_path
                                       .extension(files[i].path)
                                       .toLowerCase()
@@ -530,7 +530,7 @@ class AlistFileExplorerState
                                         ? "None"
                                         : widget.bucketPrefix;
                                 for (int i = 0; i < files.length; i++) {
-                                   File compressedFile;
+                                  File compressedFile;
                                   if (Global.isCompress == true) {
                                     ImageCompress imageCompress =
                                         ImageCompress();
@@ -1514,8 +1514,7 @@ class AlistFileExplorerState
                                       newImageIndex--;
                                     }
                                   }
-                                  Map<String, dynamic> headers = {
-                                  };
+                                  Map<String, dynamic> headers = {};
                                   Application.router.navigateTo(this.context,
                                       '${Routes.netVideoPlayer}?videoList=${Uri.encodeComponent(jsonEncode(videoList))}&index=$newImageIndex&type=${Uri.encodeComponent('normal')}&headers=${Uri.encodeComponent(jsonEncode(headers))}',
                                       transition: TransitionType.none);

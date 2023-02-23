@@ -23,18 +23,14 @@ class AliyunImageUploadUtils {
     String options = configMap['options'];
     //格式化
     if (customUrl != "None") {
-      if (!customUrl.startsWith('http') && !customUrl.startsWith('https')) {
+      if (!customUrl.startsWith(RegExp(r'http(s)?://'))) {
         customUrl = 'http://$customUrl';
       }
     }
     //格式化
     if (aliyunpath != 'None') {
-      if (aliyunpath.startsWith('/')) {
-        aliyunpath = aliyunpath.substring(1);
-      }
-      if (!aliyunpath.endsWith('/')) {
-        aliyunpath = '$aliyunpath/';
-      }
+      aliyunpath =
+          '${aliyunpath.replaceAll(RegExp(r'^/*'), '').replaceAll(RegExp(r'/*$'), '')}/';
     }
     String host = '$bucket.$area.aliyuncs.com';
     //云存储的路径
@@ -69,19 +65,14 @@ class AliyunImageUploadUtils {
       formMap['x-oss-content-type'] = getContentType(my_path.extension(path));
     }
     FormData formData = FormData.fromMap(formMap);
-    BaseOptions baseoptions = BaseOptions(
-      connectTimeout: 30000,
-      receiveTimeout: 30000,
-      sendTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     File uploadFile = File(path);
     String contentLength = await uploadFile.length().then((value) {
       return value.toString();
     });
     baseoptions.headers = {
       'Host': host,
-      'Content-Type':
-          'multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW',
+      'Content-Type': Global.multipartString,
       'Content-Length': contentLength,
     };
     Dio dio = Dio(baseoptions);
@@ -181,11 +172,7 @@ class AliyunImageUploadUtils {
         deleteHost = '$deleteHost/$fileName';
         urlpath = fileName;
       }
-      BaseOptions baseOptions = BaseOptions(
-        connectTimeout: 30000,
-        receiveTimeout: 30000,
-        sendTimeout: 30000,
-      );
+      BaseOptions baseOptions = setBaseOptions();
       String authorization = 'OSS $keyId:';
       var date = HttpDate.format(DateTime.now());
       String verb = 'DELETE';

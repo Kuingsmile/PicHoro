@@ -16,7 +16,8 @@ class WebdavConfigureStoreEdit extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  WebdavConfigureStoreEditState createState() => WebdavConfigureStoreEditState();
+  WebdavConfigureStoreEditState createState() =>
+      WebdavConfigureStoreEditState();
 }
 
 class WebdavConfigureStoreEditState extends State<WebdavConfigureStoreEdit> {
@@ -95,7 +96,7 @@ class WebdavConfigureStoreEditState extends State<WebdavConfigureStoreEdit> {
               ),
               textAlign: TextAlign.center,
             ),
-              TextFormField(
+            TextFormField(
               controller: _hostController,
               decoration: const InputDecoration(
                 label: Center(child: Text('域名')),

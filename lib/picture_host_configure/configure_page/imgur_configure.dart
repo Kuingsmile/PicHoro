@@ -125,7 +125,7 @@ class ImgurConfigState extends State<ImgurConfig> {
                       });
                 }
               },
-              child: titleText('提交表单',fontsize: null),
+              child: titleText('提交表单', fontsize: null),
             )),
             ListTile(
                 title: ElevatedButton(
@@ -142,9 +142,9 @@ class ImgurConfigState extends State<ImgurConfig> {
                       );
                     });
               },
-              child: titleText('检查当前配置',fontsize: null),
+              child: titleText('检查当前配置', fontsize: null),
             )),
-             ListTile(
+            ListTile(
                 title: ElevatedButton(
               onPressed: () async {
                 await Application.router.navigateTo(
@@ -153,14 +153,14 @@ class ImgurConfigState extends State<ImgurConfig> {
                 await _initConfig();
                 setState(() {});
               },
-              child: titleText('设置备用配置',fontsize: null),
+              child: titleText('设置备用配置', fontsize: null),
             )),
             ListTile(
                 title: ElevatedButton(
               onPressed: () {
                 _setdefault();
               },
-              child: titleText('设为默认图床',fontsize: null),
+              child: titleText('设为默认图床', fontsize: null),
             )),
           ],
         ),
@@ -200,11 +200,7 @@ class ImgurConfigState extends State<ImgurConfig> {
           "https://dss0.bdstatic.com/5aV1bjqh_Q23odCf/static/superman/img/logo/logo_white-d0c9fe2af5.png";
       String validateURL = "https://api.imgur.com/3/image";
 
-      BaseOptions options = BaseOptions(
-        connectTimeout: 30000,
-        receiveTimeout: 30000,
-        sendTimeout: 30000,
-      );
+      BaseOptions options = setBaseOptions();
       options.headers = {
         "Authorization": "Client-ID $clientId",
       };
@@ -277,11 +273,7 @@ class ImgurConfigState extends State<ImgurConfig> {
       }
       Map configMap = jsonDecode(configData);
 
-      BaseOptions options = BaseOptions(
-        connectTimeout: 30000,
-        receiveTimeout: 30000,
-        sendTimeout: 30000,
-      );
+      BaseOptions options = setBaseOptions();
       options.headers = {
         "Authorization": "Client-ID ${configMap['clientId']}",
       };

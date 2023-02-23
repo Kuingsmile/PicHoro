@@ -531,7 +531,7 @@ class AliyunFileExplorerState
                                 configMap['area'] = widget.element['location'];
                                 configMap['path'] = widget.bucketPrefix;
                                 for (int i = 0; i < files.length; i++) {
-                                   File compressedFile;
+                                  File compressedFile;
                                   if (Global.isCompress == true) {
                                     ImageCompress imageCompress =
                                         ImageCompress();
@@ -1453,7 +1453,9 @@ class AliyunFileExplorerState
                                       'https://${widget.element['name']}.${widget.element['location']}.aliyuncs.com/${allInfoList[index]['Key']}';
                                   showToast('开始获取文件');
                                   String filePath = await downloadTxtFile(
-                                      shareUrl, allInfoList[index]['Key'],null);
+                                      shareUrl,
+                                      allInfoList[index]['Key'],
+                                      null);
                                   String fileName = allInfoList[index]['Key'];
                                   if (filePath == 'error') {
                                     showToast('获取失败');
@@ -1546,7 +1548,8 @@ class AliyunFileExplorerState
                                               .split('.')
                                               .first];
                                     }
-                                  }Map<String, dynamic> headers = {};
+                                  }
+                                  Map<String, dynamic> headers = {};
                                   Application.router.navigateTo(this.context,
                                       '${Routes.netVideoPlayer}?videoList=${Uri.encodeComponent(jsonEncode(videoList))}&index=$newImageIndex&type=${Uri.encodeComponent('mkv')}&headers=${Uri.encodeComponent(jsonEncode(headers))}',
                                       transition: TransitionType.none);

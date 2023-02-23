@@ -26,8 +26,9 @@ class CommonConfigState extends State<CommonConfig> {
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
-        title: titleText('通用设置',
-           ),
+        title: titleText(
+          '通用设置',
+        ),
       ),
       body: ListView(
         children: [
@@ -54,6 +55,26 @@ class CommonConfigState extends State<CommonConfig> {
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () {
               Application.router.navigateTo(context, Routes.linkFormatSelect,
+                  transition: TransitionType.cupertino);
+            },
+          ),
+          ListTile(
+            title: const Text('上传前是否压缩图片'),
+            subtitle: const Text('大图片压缩耗时，请按需开启'),
+            trailing: Switch(
+              value: Global.isCompress,
+              onChanged: (value) async {
+                await Global.setisCompress(value);
+                setState(() {});
+              },
+            ),
+          ),
+          ListTile(
+            title: const Text('图片压缩细节设置'),
+            trailing: const Icon(Icons.arrow_forward_ios),
+            onTap: () {
+              Application.router.navigateTo(
+                  context, Routes.compressConfigurePage,
                   transition: TransitionType.cupertino);
             },
           ),

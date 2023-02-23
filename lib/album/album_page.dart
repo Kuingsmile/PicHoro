@@ -569,19 +569,19 @@ class UploadedImagesState extends State<UploadedImages>
                                         size: 30, color: Colors.red)
                                 : Global.defaultShowedPBhost == 'PBhostExtend4'
                                     ? ExtendedImage.network(
-                                            currentShowedImagesDisplayAddressUrl[
-                                                index].replaceAll(
-                                                    RegExp(r'Basic (.*)'), ''),
+                                        currentShowedImagesDisplayAddressUrl[
+                                                index]
+                                            .replaceAll(
+                                                RegExp(r'Basic (.*)'), ''),
                                         clearMemoryCacheIfFailed: true,
                                         retries: 5,
                                         height: 150,
                                         fit: BoxFit.fill,
                                         headers: {
-                                          'Authorization': 
-                                              RegExp(r'Basic (.*)')
-                                                  .firstMatch(
-                                                      currentShowedImagesDisplayAddressUrl[
-                                                          index])![0]!
+                                          'Authorization': RegExp(r'Basic (.*)')
+                                              .firstMatch(
+                                                  currentShowedImagesDisplayAddressUrl[
+                                                      index])![0]!
                                         },
                                         cache: false,
                                         border: Border.all(

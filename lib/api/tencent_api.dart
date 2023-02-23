@@ -69,18 +69,14 @@ class TencentImageUploadUtils {
     String options = configMap['options'];
 
     if (customUrl != "None") {
-      if (!customUrl.startsWith('http') && !customUrl.startsWith('https')) {
+      if (!customUrl.startsWith(RegExp(r'http(s)?://'))) {
         customUrl = 'http://$customUrl';
       }
     }
 
     if (tencentpath != 'None') {
-      if (tencentpath.startsWith('/')) {
-        tencentpath = tencentpath.substring(1);
-      }
-      if (!tencentpath.endsWith('/')) {
-        tencentpath = '$tencentpath/';
-      }
+      tencentpath =
+          '${tencentpath.replaceAll(RegExp(r'^/*'), '').replaceAll(RegExp(r'/*$'), '')}/';
     }
     String host = '$bucket.cos.$area.myqcloud.com';
     //云存储的路径
@@ -118,19 +114,14 @@ class TencentImageUploadUtils {
       'q-signature': singature,
       'file': await MultipartFile.fromFile(path, filename: name),
     });
-    BaseOptions baseoptions = BaseOptions(
-      connectTimeout: 30000,
-      receiveTimeout: 30000,
-      sendTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     File uploadFile = File(path);
     String contentLength = await uploadFile.length().then((value) {
       return value.toString();
     });
     baseoptions.headers = {
       'Host': host,
-      'Content-Type':
-          'multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW',
+      'Content-Type': Global.multipartString,
       'Content-Length': contentLength,
     };
     Dio dio = Dio(baseoptions);
@@ -230,11 +221,7 @@ class TencentImageUploadUtils {
       deleteHost = '$deleteHost/$fileName';
       urlpath = '/$fileName';
     }
-    BaseOptions baseOptions = BaseOptions(
-      connectTimeout: 30000,
-      receiveTimeout: 30000,
-      sendTimeout: 30000,
-    );
+    BaseOptions baseOptions = setBaseOptions();
     Map<String, dynamic> headers = {
       'Host': '$bucket.cos.$area.myqcloud.com',
     };

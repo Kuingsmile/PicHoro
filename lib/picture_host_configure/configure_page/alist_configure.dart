@@ -30,6 +30,7 @@ class AlistConfigState extends State<AlistConfig> {
   final _passwdController = TextEditingController();
   final _uploadPathController = TextEditingController();
   String _tokenController = '';
+  bool _isAnonymous = false;
 
   @override
   void initState() {
@@ -41,9 +42,18 @@ class AlistConfigState extends State<AlistConfig> {
     try {
       Map configMap = await AlistManageAPI.getConfigMap();
       _hostController.text = configMap['host'];
-      _usernameController.text = configMap['alistusername'];
-      _passwdController.text = configMap['password'];
       _tokenController = configMap['token'];
+      if (configMap['alistusername'] != 'None' &&
+          configMap['alistusername'] != null) {
+        _usernameController.text = configMap['alistusername'];
+      } else {
+        _usernameController.clear();
+      }
+      if (configMap['password'] != 'None' && configMap['password'] != null) {
+        _passwdController.text = configMap['password'];
+      } else {
+        _passwdController.clear();
+      }
       if (configMap['uploadPath'] != 'None' &&
           configMap['uploadPath'] != null) {
         _uploadPathController.text = configMap['uploadPath'];
@@ -117,7 +127,7 @@ class AlistConfigState extends State<AlistConfig> {
             TextFormField(
               controller: _usernameController,
               decoration: const InputDecoration(
-                label: Center(child: Text('用户名')),
+                label: Center(child: Text('可选：用户名')),
                 hintText: '设定用户名',
               ),
               textAlign: TextAlign.center,
@@ -126,7 +136,7 @@ class AlistConfigState extends State<AlistConfig> {
               controller: _passwdController,
               obscureText: true,
               decoration: const InputDecoration(
-                label: Center(child: Text('密码')),
+                label: Center(child: Text('可选：密码')),
                 hintText: '输入密码',
               ),
               textAlign: TextAlign.center,
@@ -135,10 +145,21 @@ class AlistConfigState extends State<AlistConfig> {
               controller: _uploadPathController,
               decoration: const InputDecoration(
                 contentPadding: EdgeInsets.zero,
-                label: Center(child: Text('储存路径')),
+                label: Center(child: Text('可选：储存路径')),
                 hintText: '例如: /百度网盘/图床',
               ),
               textAlign: TextAlign.center,
+            ),
+            ListTile(
+              title: const Text('是否匿名访问'),
+              trailing: Switch(
+                value: _isAnonymous,
+                onChanged: (value) {
+                  setState(() {
+                    _isAnonymous = value;
+                  });
+                },
+              ),
             ),
             ListTile(
                 title: ElevatedButton(
@@ -221,13 +242,64 @@ class AlistConfigState extends State<AlistConfig> {
       host = host.substring(0, host.length - 1);
     }
     if (!host.startsWith('http://') && !host.startsWith('https://')) {
-      host = 'https://$host';
+      host = 'http://$host';
     }
     String token = '';
-    if (_tokenController.isEmpty &&
-        (_usernameController.text.isEmpty || _passwdController.text.isEmpty)) {
-      showToast('用户名或密码为空');
-      return;
+    if (_isAnonymous) {
+      String uploadPath = _uploadPathController.text;
+
+      if (uploadPath.isEmpty || uploadPath == '/' || uploadPath.trim() == '') {
+        uploadPath = 'None';
+      }
+      String sqlResult = '';
+      try {
+        List sqlconfig = [];
+        sqlconfig.add(host);
+        sqlconfig.add('None');
+        sqlconfig.add('None');
+        sqlconfig.add('');
+        sqlconfig.add(uploadPath);
+
+        String defaultUser = await Global.getUser();
+        sqlconfig.add(defaultUser);
+        var queryalist = await MySqlUtils.queryAlist(username: defaultUser);
+        var queryuser = await MySqlUtils.queryUser(username: defaultUser);
+        if (queryuser == 'Empty') {
+          return showCupertinoAlertDialog(
+              context: context, title: '错误', content: '用户不存在,请先登录');
+        } else if (queryalist == 'Empty') {
+          sqlResult = await MySqlUtils.insertAlist(content: sqlconfig);
+        } else {
+          sqlResult = await MySqlUtils.updateAlist(content: sqlconfig);
+        }
+      } catch (e) {
+        FLog.error(
+            className: 'AlistConfigPage',
+            methodName: '_saveAlistConfig',
+            text: formatErrorMessage({}, e.toString()),
+            dataLogType: DataLogType.ERRORS.toString());
+        return showCupertinoAlertDialog(
+            context: context, title: '错误', content: e.toString());
+      }
+      if (sqlResult == "Success") {
+        final alistConfig =
+            AlistConfigModel(host, 'None', 'None', '', uploadPath);
+        final alistConfigJson = jsonEncode(alistConfig);
+        final alistConfigFile = await localFile;
+        alistConfigFile.writeAsString(alistConfigJson);
+        setState(() {});
+        return showCupertinoAlertDialog(
+            context: context,
+            barrierDismissible: false,
+            title: '配置成功',
+            content: '配置成功,请返回上一页');
+      } else {
+        return showCupertinoAlertDialog(
+            context: context,
+            barrierDismissible: false,
+            title: '配置失败',
+            content: '数据库错误');
+      }
     }
     if (_usernameController.text.isNotEmpty &&
         _passwdController.text.isNotEmpty) {
@@ -310,11 +382,7 @@ class AlistConfigState extends State<AlistConfig> {
       if (uploadPath.isEmpty || uploadPath == '/' || uploadPath.trim() == '') {
         uploadPath = 'None';
       }
-      BaseOptions options = BaseOptions(
-        connectTimeout: 30000,
-        receiveTimeout: 30000,
-        sendTimeout: 30000,
-      );
+      BaseOptions options = setBaseOptions();
       Map<String, dynamic> query = {
         'group': 0,
       };
@@ -395,11 +463,37 @@ class AlistConfigState extends State<AlistConfig> {
             context: context, title: "检查失败!", content: "请先配置上传参数.");
       }
       Map configMap = jsonDecode(configData);
-      BaseOptions options = BaseOptions(
-        connectTimeout: 30000,
-        receiveTimeout: 30000,
-        sendTimeout: 30000,
-      );
+      String token = configMap['token'];
+      String uploadPath = configMap['uploadPath'];
+
+      if (token == '') {
+        BaseOptions options = setBaseOptions();
+        Map<String, dynamic> dataMap = {
+          "page": 1,
+          "path": uploadPath == 'None' ? '/' : uploadPath,
+          "per_page": 1000,
+          "refresh": false,
+        };
+        options.headers = {
+          "Authorization": configMap["token"],
+          "Content-type": "application/json",
+        };
+        String profileUrl = configMap["host"] + "/api/fs/list'";
+        Dio dio = Dio(options);
+        var response = await dio.post(profileUrl, data: dataMap);
+        if (response.statusCode == 200 &&
+            response.data['message'] == 'success') {
+          return showCupertinoAlertDialog(
+              context: context,
+              title: '通知',
+              content:
+                  '检测通过，您的配置信息为：\nhost:\n${configMap["host"]}\nalist用户名:\n${configMap["alistusername"]}\n密码:\n${configMap["password"]}\ntoken:\n${configMap["token"]}\nuploadPath:\n${configMap["uploadPath"]}');
+        } else {
+          return showCupertinoAlertDialog(
+              context: context, title: '通知', content: '检测失败，请检查配置信息');
+        }
+      }
+      BaseOptions options = setBaseOptions();
       Map<String, dynamic> query = {
         'group': 0,
       };

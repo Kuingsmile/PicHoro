@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:path_provider/path_provider.dart';
 
-
 class ImageCompress {
   int minWidth = 1920;
   int minHeight = 1080;

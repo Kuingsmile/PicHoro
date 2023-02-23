@@ -162,11 +162,7 @@ class AliyunManageAPI {
     String host = 'oss-cn-hangzhou.aliyuncs.com';
     String authorization = await aliyunAuthorization(
         method, canonicalizedResource, {}, contentMd5, contentType);
-    BaseOptions baseoptions = BaseOptions(
-      sendTimeout: 30000,
-      receiveTimeout: 30000,
-      connectTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = {
       'Authorization': authorization,
       'Date': HttpDate.format(DateTime.now()),
@@ -229,11 +225,7 @@ class AliyunManageAPI {
     }
     var body =
         '<CreateBucketConfiguration><DataRedundancyType>ZRS</DataRedundancyType></CreateBucketConfiguration>';
-    BaseOptions baseoptions = BaseOptions(
-      sendTimeout: 30000,
-      receiveTimeout: 30000,
-      connectTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = {
       'Date': HttpDate.format(DateTime.now()),
       'x-oss-acl': xCosACL,
@@ -296,11 +288,7 @@ class AliyunManageAPI {
     String urlpath = '/$bucket/?acl';
     String host = '$bucket.$region.aliyuncs.com';
 
-    BaseOptions baseoptions = BaseOptions(
-      sendTimeout: 30000,
-      receiveTimeout: 30000,
-      connectTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = {
       'Date': HttpDate.format(DateTime.now()),
     };
@@ -352,11 +340,7 @@ class AliyunManageAPI {
     String urlpath = '/$bucket/';
 
     String host = '$bucket.$region.aliyuncs.com';
-    BaseOptions baseoptions = BaseOptions(
-      sendTimeout: 30000,
-      receiveTimeout: 30000,
-      connectTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = {
       'Date': HttpDate.format(DateTime.now()),
       'content-type': 'application/json',
@@ -405,11 +389,7 @@ class AliyunManageAPI {
     String urlpath = '/$bucket/?acl';
 
     String host = '$bucket.$region.aliyuncs.com';
-    BaseOptions baseoptions = BaseOptions(
-      sendTimeout: 30000,
-      receiveTimeout: 30000,
-      connectTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     Map<String, dynamic> header = {
       'Date': HttpDate.format(DateTime.now()),
       'x-oss-acl': newACL,
@@ -526,11 +506,7 @@ class AliyunManageAPI {
     String urlpath = '/$bucket/';
 
     String host = '$bucket.$region.aliyuncs.com';
-    BaseOptions baseoptions = BaseOptions(
-      sendTimeout: 30000,
-      receiveTimeout: 30000,
-      connectTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = {
       'Date': HttpDate.format(DateTime.now()),
     };
@@ -558,7 +534,7 @@ class AliyunManageAPI {
           while (tempMap['ListBucketResult']['IsTruncated'] == 'true') {
             marker = tempMap['ListBucketResult']['NextContinuationToken'];
             query['continuation-token'] = marker;
-             urlpath = '/$bucket/?continuation-token=$marker';
+            urlpath = '/$bucket/?continuation-token=$marker';
             baseoptions.headers = {
               'Date': HttpDate.format(DateTime.now()),
             };
@@ -674,11 +650,7 @@ class AliyunManageAPI {
 
     String urlpath = '/$bucket/$newName';
     String xOssCopySource = '/$bucket/${Uri.encodeComponent(key)}';
-    BaseOptions baseoptions = BaseOptions(
-      sendTimeout: 30000,
-      receiveTimeout: 30000,
-      connectTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = {
       'Date': HttpDate.format(DateTime.now()),
       'x-oss-copy-source': xOssCopySource,
@@ -733,11 +705,7 @@ class AliyunManageAPI {
     String urlpath = '/$bucket/$key';
     String host = '$bucket.$region.aliyuncs.com';
 
-    BaseOptions baseoptions = BaseOptions(
-      sendTimeout: 30000,
-      receiveTimeout: 30000,
-      connectTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     String contentMD5 = '';
     String contentType = 'application/json';
     baseoptions.headers = {
@@ -886,11 +854,7 @@ class AliyunManageAPI {
     if (urlpath.substring(urlpath.length - 1) != '/') {
       urlpath = '$urlpath/';
     }
-    BaseOptions baseoptions = BaseOptions(
-      sendTimeout: 30000,
-      receiveTimeout: 30000,
-      connectTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     String contentMD5 = '';
     String contentType = 'application/json';
     baseoptions.headers = {
@@ -984,19 +948,14 @@ class AliyunManageAPI {
     }
     FormData formData = FormData.fromMap(formMap);
 
-    BaseOptions baseoptions = BaseOptions(
-      sendTimeout: 30000,
-      receiveTimeout: 30000,
-      connectTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     File uploadFile = File(filepath);
     String contentLength = await uploadFile.length().then((value) {
       return value.toString();
     });
     baseoptions.headers = {
       'Host': host,
-      'Content-Type':
-          'multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW',
+      'Content-Type': Global.multipartString,
       'Content-Length': contentLength,
     };
     Dio dio = Dio(baseoptions);

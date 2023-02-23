@@ -80,7 +80,7 @@ class UploadManager {
         String customUrl = configMap['customUrl'];
         String options = configMap['options'];
         if (customUrl != "None") {
-          if (!customUrl.startsWith('http') && !customUrl.startsWith('https')) {
+          if (!customUrl.startsWith(RegExp(r'http(s)?://'))) {
             customUrl = 'http://$customUrl';
           }
         }
@@ -130,19 +130,14 @@ class UploadManager {
           'file': await MultipartFile.fromFile(path,
               filename: my_path.basename(path)),
         });
-        BaseOptions baseoptions = BaseOptions(
-          connectTimeout: 30000,
-          receiveTimeout: 30000,
-          sendTimeout: 30000,
-        );
+        BaseOptions baseoptions = setBaseOptions();
         File uploadFile = File(path);
         String contentLength = await uploadFile.length().then((value) {
           return value.toString();
         });
         baseoptions.headers = {
           'Host': host,
-          'Content-Type':
-              'multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW',
+          'Content-Type': Global.multipartString,
           'Content-Length': contentLength,
         };
         response = await dio.post(
@@ -265,19 +260,14 @@ class UploadManager {
           'file': await MultipartFile.fromFile(path,
               filename: my_path.basename(path)),
         });
-        BaseOptions baseoptions = BaseOptions(
-          connectTimeout: 30000,
-          receiveTimeout: 30000,
-          sendTimeout: 30000,
-        );
+        BaseOptions baseoptions = setBaseOptions();
         File uploadFile = File(path);
         String contentLength = await uploadFile.length().then((value) {
           return value.toString();
         });
         baseoptions.headers = {
           'Host': host,
-          'Content-Type':
-              'multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW',
+          'Content-Type': Global.multipartString,
           'Content-Length': contentLength,
         };
         Dio dio = Dio(baseoptions);
@@ -387,11 +377,7 @@ class UploadManager {
           "file": await MultipartFile.fromFile(path,
               filename: my_path.basename(path)),
         });
-        BaseOptions baseoptions = BaseOptions(
-          connectTimeout: 30000,
-          receiveTimeout: 30000,
-          sendTimeout: 30000,
-        );
+        BaseOptions baseoptions = setBaseOptions();
         //不需要加Content-Type，host，Content-Length
         baseoptions.headers = {
           'Authorization': 'UpToken $uploadToken',
@@ -507,18 +493,13 @@ class UploadManager {
           'file': await MultipartFile.fromFile(path,
               filename: my_path.basename(path)),
         });
-        BaseOptions baseoptions = BaseOptions(
-          connectTimeout: 30000,
-          receiveTimeout: 30000,
-          sendTimeout: 30000,
-        );
+        BaseOptions baseoptions = setBaseOptions();
         String contentLength = await uploadFile.length().then((value) {
           return value.toString();
         });
         baseoptions.headers = {
           'Host': 'v0.api.upyun.com',
-          'Content-Type':
-              'multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW',
+          'Content-Type': Global.multipartString,
           'Content-Length': contentLength,
           'Date': date,
           'Authorization': authorization,
@@ -599,11 +580,7 @@ class UploadManager {
             "album_id": configMap["album_id"],
           });
         }
-        BaseOptions options = BaseOptions(
-          connectTimeout: 30000,
-          receiveTimeout: 30000,
-          sendTimeout: 30000,
-        );
+        BaseOptions options = setBaseOptions();
         options.headers = {
           "Authorization": configMap["token"],
           "Accept": "application/json",
@@ -658,11 +635,7 @@ class UploadManager {
               filename: my_path.basename(path)),
           "format": "json",
         });
-        BaseOptions options = BaseOptions(
-          connectTimeout: 30000,
-          receiveTimeout: 30000,
-          sendTimeout: 30000,
-        );
+        BaseOptions options = setBaseOptions();
         options.headers = {
           "Authorization": configMap["token"],
           "Content-Type": "multipart/form-data",
@@ -713,11 +686,7 @@ class UploadManager {
           'content': base64Image,
           'branch': configMap["branch"], //分支
         };
-        BaseOptions options = BaseOptions(
-          connectTimeout: 30000,
-          receiveTimeout: 30000,
-          sendTimeout: 30000,
-        );
+        BaseOptions options = setBaseOptions();
         options.headers = {
           "Authorization": configMap["token"],
           "Accept": "application/vnd.github+json",
@@ -809,11 +778,7 @@ class UploadManager {
         FormData formdata = FormData.fromMap({
           "image": base64Image,
         });
-        BaseOptions options = BaseOptions(
-          connectTimeout: 30000,
-          receiveTimeout: 30000,
-          sendTimeout: 30000,
-        );
+        BaseOptions options = setBaseOptions();
         options.headers = {
           "Authorization": "Client-ID ${configMap["clientId"]}",
         };
@@ -1244,19 +1209,14 @@ class UploadManager {
         //云存储的路径
         String filePath = uploadPath + fileName;
 
-        BaseOptions options = BaseOptions(
-          connectTimeout: 30000,
-          receiveTimeout: 30000,
-          sendTimeout: 30000,
-        );
+        BaseOptions options = setBaseOptions();
         File uploadFile = File(path);
         int contentLength = await uploadFile.length().then((value) {
           return value;
         });
         options.headers = {
           "Authorization": token,
-          "Content-Type":
-              "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW",
+          "Content-Type": Global.multipartString,
           "file-path": Uri.encodeComponent(filePath),
           "Content-Length": contentLength,
         };
@@ -1274,11 +1234,7 @@ class UploadManager {
             response.data!['message'] == 'success') {
           String infoGetUrl = configMap["host"] + "/api/fs/get";
           String refreshUrl = configMap["host"] + "/api/fs/list";
-          BaseOptions getOptions = BaseOptions(
-            connectTimeout: 30000,
-            receiveTimeout: 30000,
-            sendTimeout: 30000,
-          );
+          BaseOptions getOptions = setBaseOptions();
           getOptions.headers = {
             "Authorization": configMap["token"],
             "Content-Type": "application/json",
@@ -1369,11 +1325,12 @@ class UploadManager {
           }
         }
         String filePath = uploadPath + fileName;
-        print('path: $filePath');
         await client.writeFromFile(path, filePath);
 
         String returnUrl = configMap['host'] + filePath;
-        String displayUrl = returnUrl+ generateBasicAuth(configMap['webdavusername'], configMap['password']);
+        String displayUrl = returnUrl +
+            generateBasicAuth(
+                configMap['webdavusername'], configMap['password']);
 
         eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
         Map<String, dynamic> maps = {};

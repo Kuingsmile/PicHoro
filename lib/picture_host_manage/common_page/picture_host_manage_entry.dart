@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:fluro/fluro.dart';
 import 'package:flutter_draggable_gridview/flutter_draggable_gridview.dart';
+import 'package:horopic/picture_host_manage/manage_api/webdav_manage_api.dart';
 
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/sql_utils.dart';
@@ -576,6 +577,29 @@ class PsHostHomePageState extends State<PsHostHomePage>
                       if (queryAlist == 'Empty') {
                         return showToast('请先去配置Alist');
                       }
+                      if (queryAlist['token'] == '') {
+                        Map configMap = await AlistManageAPI.getConfigMap();
+                        String prefix = configMap['uploadPath'];
+                        if (prefix == 'None') {
+                          prefix = '/';
+                        }
+                        if (!prefix.endsWith('/')) {
+                          prefix += '/';
+                        }
+                        Map element = {
+                          'mount_path': prefix == '/'
+                              ? '/'
+                              : prefix.substring(0, prefix.length - 1),
+                          'driver': 'BaiduNetdisk',
+                          'addition': jsonEncode({'download_api': 'offical'})
+                        };
+                        if (mounted) {
+                          Application.router.navigateTo(context,
+                              '${Routes.alistFileExplorer}?element=${Uri.encodeComponent(jsonEncode(element))}&bucketPrefix=${Uri.encodeComponent(prefix)}&refresh=${Uri.encodeComponent('doNotRefresh')}',
+                              transition: TransitionType.cupertino);
+                          return;
+                        }
+                      }
                       String today = getToday('yyyyMMdd');
 
                       var refreshToken = await AlistManageAPI.refreshToken();
@@ -630,6 +654,57 @@ class PsHostHomePageState extends State<PsHostHomePage>
                         height: 75,
                       ),
                       const Text('Alist'),
+                    ],
+                  ),
+                ),
+              ),
+              Positioned(
+                  top: 0,
+                  right: 0,
+                  child: Container(
+                    color: Colors.transparent,
+                    child: const Text(''),
+                  )),
+            ],
+          ),
+        ),
+        isDraggable: true,
+      ),
+      DraggableGridItem(
+        child: Card(
+          child: Stack(
+            children: [
+              Center(
+                child: InkWell(
+                  onTap: () async {
+                    try {
+                      Map configMap = await WebdavManageAPI.getConfigMap();
+                      String prefix = configMap['uploadPath'];
+                      if (prefix == 'None') {
+                        prefix = '/';
+                      }
+                      if (!prefix.endsWith('/')) {
+                        prefix += '/';
+                      }
+                      Map element = configMap;
+                      if (mounted) {
+                        Application.router.navigateTo(context,
+                            '${Routes.webdavFileExplorer}?element=${Uri.encodeComponent(jsonEncode(element))}&bucketPrefix=${Uri.encodeComponent(prefix)}',
+                            transition: TransitionType.cupertino);
+                      }
+                    } catch (e) {
+                      showToast('请先配置Webdav');
+                    }
+                  },
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Image.asset(
+                        'assets/images/webdav.png',
+                        width: 80,
+                        height: 75,
+                      ),
+                      const Text('Webdav'),
                     ],
                   ),
                 ),

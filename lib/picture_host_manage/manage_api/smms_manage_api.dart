@@ -48,11 +48,7 @@ class SmmsManageAPI {
     Map configMap = await getConfigMap();
     String token = configMap['token'];
 
-    BaseOptions baseoptions = BaseOptions(
-      sendTimeout: 30000,
-      receiveTimeout: 30000,
-      connectTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = {
       'Authorization': token,
       'Content-Type': 'multipart/form-data',
@@ -91,11 +87,7 @@ class SmmsManageAPI {
     Map configMap = await getConfigMap();
     String token = configMap['token'];
 
-    BaseOptions baseoptions = BaseOptions(
-      sendTimeout: 30000,
-      receiveTimeout: 30000,
-      connectTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = {
       'Authorization': token,
       'Content-Type': 'multipart/form-data',
@@ -139,11 +131,7 @@ class SmmsManageAPI {
       "smfile": await MultipartFile.fromFile(path, filename: filename),
       "format": "json",
     });
-    BaseOptions options = BaseOptions(
-      connectTimeout: 30000,
-      receiveTimeout: 30000,
-      sendTimeout: 30000,
-    );
+    BaseOptions options = setBaseOptions();
     options.headers = {
       "Authorization": configMap["token"],
       "Content-Type": "multipart/form-data",
@@ -316,11 +304,7 @@ class SmmsManageAPI {
       "format": "json",
     };
 
-    BaseOptions options = BaseOptions(
-      connectTimeout: 30000,
-      receiveTimeout: 30000,
-      sendTimeout: 30000,
-    );
+    BaseOptions options = setBaseOptions();
     options.headers = {
       "Authorization": configMap["token"],
     };

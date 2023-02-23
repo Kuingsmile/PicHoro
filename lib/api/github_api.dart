@@ -20,24 +20,16 @@ class GithubImageUploadUtils {
       'branch': configMap["branch"], //分支
     };
 
-    BaseOptions options = BaseOptions(
-      connectTimeout: 30000,
-      receiveTimeout: 30000,
-      sendTimeout: 30000,
-    );
+    BaseOptions options = setBaseOptions();
 
     options.headers = {
       "Authorization": configMap["token"],
       "Accept": "application/vnd.github+json",
     };
     String trimedPath = configMap['storePath'].toString().trim();
-
-    if (trimedPath.startsWith('/')) {
-      trimedPath = trimedPath.substring(1);
-    }
-    if (trimedPath.endsWith('/')) {
-      trimedPath = trimedPath.substring(0, trimedPath.length - 1);
-    }
+    trimedPath = trimedPath
+        .replaceAll(RegExp(r'^/+'), '')
+        .replaceAll(RegExp(r'/+$'), '');
     Dio dio = Dio(options);
     String uploadUrl = '';
     if (trimedPath == 'None') {
@@ -121,13 +113,7 @@ class GithubImageUploadUtils {
       "sha": configMapFromPictureKey['sha'],
       "branch": configMapFromPictureKey["branch"],
     };
-    BaseOptions options = BaseOptions(
-      //连接服务器超时时间，单位是毫秒.
-      connectTimeout: 30000,
-      //响应超时时间。
-      receiveTimeout: 30000,
-      sendTimeout: 30000,
-    );
+    BaseOptions options = setBaseOptions();
     options.headers = {
       "Authorization": configMapFromPictureKey["token"],
       "Accept": "application/vnd.github+json",
@@ -135,12 +121,11 @@ class GithubImageUploadUtils {
 
     Dio dio = Dio(options);
     String trimedPath = configMapFromPictureKey['storePath'].toString().trim();
-    if (trimedPath.startsWith('/')) {
-      trimedPath = trimedPath.substring(1);
-    }
-    if (trimedPath.endsWith('/')) {
-      trimedPath = trimedPath.substring(0, trimedPath.length - 1);
-    }
+
+    trimedPath = trimedPath
+        .replaceAll(RegExp(r'^/+'), '')
+        .replaceAll(RegExp(r'/+$'), '');
+
     String deleteUrl = '';
     if (trimedPath == 'None') {
       deleteUrl =

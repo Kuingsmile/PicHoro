@@ -16,8 +16,7 @@ class SmmsConfigureStoreEdit extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  SmmsConfigureStoreEditState createState() =>
-      SmmsConfigureStoreEditState();
+  SmmsConfigureStoreEditState createState() => SmmsConfigureStoreEditState();
 }
 
 class SmmsConfigureStoreEditState extends State<SmmsConfigureStoreEdit> {
@@ -64,7 +63,7 @@ class SmmsConfigureStoreEditState extends State<SmmsConfigureStoreEdit> {
       appBar: AppBar(
         centerTitle: true,
         elevation: 0,
-        title: const Text('备用配置设置'),
+        title: titleText('备用配置设置'),
       ),
       body: Form(
         key: _formKey,
@@ -78,7 +77,7 @@ class SmmsConfigureStoreEditState extends State<SmmsConfigureStoreEdit> {
               ),
               textAlign: TextAlign.center,
             ),
-             TextFormField(
+            TextFormField(
               controller: _tokenController,
               decoration: const InputDecoration(
                 label: Center(child: Text('Token')),
@@ -98,7 +97,7 @@ class SmmsConfigureStoreEditState extends State<SmmsConfigureStoreEdit> {
                 _importConfig();
                 setState(() {});
               },
-              child: const Text('导入当前图床配置'),
+              child: titleText('导入当前图床配置', fontsize: null),
             )),
             ListTile(
                 title: ElevatedButton(
@@ -108,7 +107,7 @@ class SmmsConfigureStoreEditState extends State<SmmsConfigureStoreEdit> {
                   Navigator.pop(context, true);
                 }
               },
-              child: const Text('保存配置'),
+              child: titleText('保存配置', fontsize: null),
             )),
           ],
         ),
@@ -134,7 +133,6 @@ class SmmsConfigureStoreEditState extends State<SmmsConfigureStoreEdit> {
       if (remarkName.isEmpty || remarkName.trim().isEmpty) {
         remarkName = ConfigureTemplate.placeholder;
       }
-
 
       Map psInfo = {
         'remarkName': remarkName,

@@ -218,8 +218,7 @@ class AwsConfigState extends State<AwsConfig> {
                       });
                 }
               },
-              child:  titleText('提交表单',
-              fontsize: null),
+              child: titleText('提交表单', fontsize: null),
             )),
             ListTile(
                 title: ElevatedButton(
@@ -236,7 +235,7 @@ class AwsConfigState extends State<AwsConfig> {
                       );
                     });
               },
-              child: titleText('检查当前配置',fontsize: null),
+              child: titleText('检查当前配置', fontsize: null),
             )),
             ListTile(
                 title: ElevatedButton(
@@ -247,14 +246,14 @@ class AwsConfigState extends State<AwsConfig> {
                 await _initConfig();
                 setState(() {});
               },
-              child: titleText('设置备用配置',fontsize: null),
+              child: titleText('设置备用配置', fontsize: null),
             )),
             ListTile(
                 title: ElevatedButton(
               onPressed: () {
                 _setdefault();
               },
-              child: titleText('设为默认图床',fontsize: null),
+              child: titleText('设为默认图床', fontsize: null),
             )),
           ],
         ),

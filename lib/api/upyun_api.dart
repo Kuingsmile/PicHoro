@@ -25,7 +25,7 @@ class UpyunImageUploadUtils {
 
     //格式化
     if (url != "None") {
-      if (!url.startsWith('http') && !url.startsWith('https')) {
+      if (!url.startsWith(RegExp(r'http(s)?://'))) {
         url = 'http://$url';
       }
     }
@@ -70,18 +70,13 @@ class UpyunImageUploadUtils {
       'policy': base64Policy,
       'file': await MultipartFile.fromFile(path, filename: name),
     });
-    BaseOptions baseoptions = BaseOptions(
-      connectTimeout: 30000,
-      receiveTimeout: 30000,
-      sendTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     String contentLength = await uploadFile.length().then((value) {
       return value.toString();
     });
     baseoptions.headers = {
       'Host': 'v0.api.upyun.com',
-      'Content-Type':
-          'multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW',
+      'Content-Type': Global.multipartString,
       'Content-Length': contentLength,
       'Date': date,
       'Authorization': authorization,
@@ -174,11 +169,7 @@ class UpyunImageUploadUtils {
       deleteHost = '$deleteHost/$bucket/$fileName';
       urlpath = fileName;
     }
-    BaseOptions baseOptions = BaseOptions(
-      connectTimeout: 30000,
-      receiveTimeout: 30000,
-      sendTimeout: 30000,
-    );
+    BaseOptions baseOptions = setBaseOptions();
     var date = HttpDate.format(DateTime.now());
     String method = 'DELETE';
     String uri = '/$bucket/$urlpath';

@@ -41,7 +41,8 @@ class Routes {
   static String lskyproConfigureStoreEditPage = "/lskyConfigureStoreEditPage";
   static String qiniuConfigureStoreEditPage = "/qiniuConfigureStoreEditPage";
   static String smmsConfigureStoreEditPage = "/smmsConfigureStoreEditPage";
-  static String tencentConfigureStoreEditPage = "/tencentConfigureStoreEditPage";
+  static String tencentConfigureStoreEditPage =
+      "/tencentConfigureStoreEditPage";
   static String upyunConfigureStoreEditPage = "/upyunConfigureStoreEditPage";
   static String webdavConfigureStoreEditPage = "/webdavConfigureStoreEditPage";
   static String commonConfig = "/commonConfig";
@@ -123,7 +124,7 @@ class Routes {
       }
       return null;
     });
-    router.define(webviewPage,handler: webviewHandler);
+    router.define(webviewPage, handler: webviewHandler);
     router.define(root, handler: rootHandler);
     router.define(homePage, handler: homePageHandler);
     router.define(albumUploadedImages, handler: albumUploadedImagesHandler);
@@ -147,18 +148,30 @@ class Routes {
     router.define(awsPShostSelect, handler: awsPShostSelectHandler);
     router.define(alistPShostSelect, handler: alistPShostSelectHandler);
     router.define(webdavPShostSelect, handler: webdavPShostSelectHandler);
-    router.define(alistConfigureStoreEditPage, handler: alistConfigureStoreEditPageHandler);
-    router.define(aliyunConfigureStoreEditPage, handler: aliyunConfigureStoreEditPageHandler);
-    router.define(awsConfigureStoreEditPage, handler: awsConfigureStoreEditPageHandler);
-    router.define(ftpConfigureStoreEditPage, handler: ftpConfigureStoreEditPageHandler);
-    router.define(githubConfigureStoreEditPage, handler: githubConfigureStoreEditPageHandler);
-    router.define(imgurConfigureStoreEditPage, handler: imgurConfigureStoreEditPageHandler);
-    router.define(lskyproConfigureStoreEditPage, handler: lskyproConfigureStoreEditPageHandler);
-    router.define(qiniuConfigureStoreEditPage, handler: qiniuConfigureStoreEditPageHandler);
-    router.define(smmsConfigureStoreEditPage, handler: smmsConfigureStoreEditPageHandler);
-    router.define(tencentConfigureStoreEditPage, handler: tencentConfigureStoreEditPageHandler);
-    router.define(upyunConfigureStoreEditPage, handler: upyunConfigureStoreEditPageHandler);
-    router.define(webdavConfigureStoreEditPage, handler: webdavConfigureStoreEditPageHandler);
+    router.define(alistConfigureStoreEditPage,
+        handler: alistConfigureStoreEditPageHandler);
+    router.define(aliyunConfigureStoreEditPage,
+        handler: aliyunConfigureStoreEditPageHandler);
+    router.define(awsConfigureStoreEditPage,
+        handler: awsConfigureStoreEditPageHandler);
+    router.define(ftpConfigureStoreEditPage,
+        handler: ftpConfigureStoreEditPageHandler);
+    router.define(githubConfigureStoreEditPage,
+        handler: githubConfigureStoreEditPageHandler);
+    router.define(imgurConfigureStoreEditPage,
+        handler: imgurConfigureStoreEditPageHandler);
+    router.define(lskyproConfigureStoreEditPage,
+        handler: lskyproConfigureStoreEditPageHandler);
+    router.define(qiniuConfigureStoreEditPage,
+        handler: qiniuConfigureStoreEditPageHandler);
+    router.define(smmsConfigureStoreEditPage,
+        handler: smmsConfigureStoreEditPageHandler);
+    router.define(tencentConfigureStoreEditPage,
+        handler: tencentConfigureStoreEditPageHandler);
+    router.define(upyunConfigureStoreEditPage,
+        handler: upyunConfigureStoreEditPageHandler);
+    router.define(webdavConfigureStoreEditPage,
+        handler: webdavConfigureStoreEditPageHandler);
     router.define(commonConfig, handler: commonConfigHandler);
     router.define(renameFile, handler: renameFileHandler);
     router.define(linkFormatSelect, handler: linkFormatSelectHandler);
@@ -227,9 +240,11 @@ class Routes {
     router.define(awsFileInformation, handler: awsFileInformationHandler);
     router.define(configureStorePage, handler: configureStorePageHandler);
     router.define(alistBucketList, handler: alistBucketListHandler);
-    router.define(alistBucketInformation, handler: alistBucketInformationHandler);
+    router.define(alistBucketInformation,
+        handler: alistBucketInformationHandler);
     router.define(alistNewBucketConfig, handler: newAlistBucketHandler);
-    router.define(newAlistBucketNavigation, handler: newAlistBucketNavigationHandler);
+    router.define(newAlistBucketNavigation,
+        handler: newAlistBucketNavigationHandler);
     router.define(alistFileExplorer, handler: alistFileExplorerHandler);
     router.define(alistFileInformation, handler: alistFileInformationHandler);
     router.define(alistUpDownloadManagePage, handler: alistDownloadFileHandler);

@@ -193,9 +193,9 @@ class ListItemState extends State<ListItem> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(widget.url.contains('/')
-                        ? '文件名:${widget.url.split('/').last}'
+                        ? '文件名：${widget.url.split('/').last.split('?').first}'
                         : widget.url.contains('object') &&
-                                widget.url.contains('bucket') && 
+                                widget.url.contains('bucket') &&
                                 widget.url.contains('region')
                             ? '文件名:${jsonDecode(widget.url)['object'].split('/').last}'
                             : '文件名:${widget.url}'),

@@ -59,11 +59,7 @@ class GithubManageAPI {
     String token = configMap['token'];
     String host = 'https://api.github.com/users/$githubusername';
 
-    BaseOptions baseoptions = BaseOptions(
-      sendTimeout: 30000,
-      receiveTimeout: 30000,
-      connectTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = {
       'Authorization': token,
       'Accept': 'application/vnd.github+json',
@@ -105,11 +101,7 @@ class GithubManageAPI {
     int page = 1;
     int perPage = 10;
 
-    BaseOptions baseoptions = BaseOptions(
-      sendTimeout: 30000,
-      receiveTimeout: 30000,
-      connectTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = {
       'Authorization': token,
       'Accept': 'application/vnd.github+json',
@@ -171,11 +163,7 @@ class GithubManageAPI {
     int page = 1;
     int perPage = 10;
 
-    BaseOptions baseoptions = BaseOptions(
-      sendTimeout: 30000,
-      receiveTimeout: 30000,
-      connectTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = {
       'Authorization': token,
       'Accept': 'application/vnd.github+json',
@@ -233,11 +221,7 @@ class GithubManageAPI {
     String token = configMap['token'];
     String host = 'https://api.github.com/user/repos';
 
-    BaseOptions baseoptions = BaseOptions(
-      sendTimeout: 30000,
-      receiveTimeout: 30000,
-      connectTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = {
       'Authorization': token,
       'Accept': 'application/vnd.github+json',
@@ -280,11 +264,7 @@ class GithubManageAPI {
     String host =
         'https://api.github.com/repos/$username/$repoName/branches/$branch';
 
-    BaseOptions baseoptions = BaseOptions(
-      sendTimeout: 30000,
-      receiveTimeout: 30000,
-      connectTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = {
       'Authorization': token,
       'Accept': 'application/vnd.github+json',
@@ -331,11 +311,7 @@ class GithubManageAPI {
     String host =
         'https://api.github.com/repos/$username/$repoName/git/trees/$sha';
 
-    BaseOptions baseoptions = BaseOptions(
-      sendTimeout: 30000,
-      receiveTimeout: 30000,
-      connectTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = {
       'Authorization': token,
       'Accept': 'application/vnd.github+json',
@@ -382,11 +358,7 @@ class GithubManageAPI {
     String host =
         'https://api.github.com/repos/$username/$repoName/contents/$bucketPrefix';
 
-    BaseOptions baseoptions = BaseOptions(
-      sendTimeout: 30000,
-      receiveTimeout: 30000,
-      connectTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = {
       'Authorization': token,
       'Accept': 'application/vnd.github+json',
@@ -439,11 +411,7 @@ class GithubManageAPI {
     String host =
         'https://api.github.com/repos/$username/$repoName/contents/$filePath';
 
-    BaseOptions baseoptions = BaseOptions(
-      sendTimeout: 30000,
-      receiveTimeout: 30000,
-      connectTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = {
       'Authorization': token,
       'Accept': 'application/vnd.github+json',
@@ -490,11 +458,7 @@ class GithubManageAPI {
     String host =
         'https://api.github.com/repos/$username/$repoName/contents/$path';
 
-    BaseOptions baseoptions = BaseOptions(
-      sendTimeout: 30000,
-      receiveTimeout: 30000,
-      connectTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = {
       'Authorization': token,
       'Accept': 'application/vnd.github+json',
@@ -687,11 +651,7 @@ class GithubManageAPI {
       'branch': element['default_branch'],
     };
 
-    BaseOptions baseoptions = BaseOptions(
-      connectTimeout: 30000,
-      receiveTimeout: 30000,
-      sendTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
 
     baseoptions.headers = {
       'Authorization': token,
@@ -754,11 +714,7 @@ class GithubManageAPI {
       'branch': element['default_branch'],
     };
 
-    BaseOptions baseoptions = BaseOptions(
-      connectTimeout: 30000,
-      receiveTimeout: 30000,
-      sendTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
 
     baseoptions.headers = {
       'Authorization': token,

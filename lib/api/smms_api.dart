@@ -15,11 +15,7 @@ class SmmsImageUploadUtils {
       "format": "json",
     });
 
-    BaseOptions options = BaseOptions(
-      connectTimeout: 30000,
-      receiveTimeout: 30000,
-      sendTimeout: 30000,
-    );
+    BaseOptions options = setBaseOptions();
     options.headers = {
       "Authorization": configMap["token"],
       "Content-Type": "multipart/form-data",
@@ -73,11 +69,7 @@ class SmmsImageUploadUtils {
       "format": "json",
     };
 
-    BaseOptions options = BaseOptions(
-      connectTimeout: 30000,
-      receiveTimeout: 30000,
-      sendTimeout: 30000,
-    );
+    BaseOptions options = setBaseOptions();
     options.headers = {
       "Authorization": configMap["token"],
     };

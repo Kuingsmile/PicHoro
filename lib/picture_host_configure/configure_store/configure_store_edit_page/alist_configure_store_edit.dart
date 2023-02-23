@@ -124,7 +124,7 @@ class AlistConfigureStoreEditState extends State<AlistConfigureStoreEdit> {
             TextFormField(
               controller: _alistusernameController,
               decoration: const InputDecoration(
-                label: Center(child: Text('用户名')),
+                label: Center(child: Text('可选：用户名')),
                 hintText: '设定用户名',
               ),
               textAlign: TextAlign.center,
@@ -133,7 +133,7 @@ class AlistConfigureStoreEditState extends State<AlistConfigureStoreEdit> {
               controller: _passwordController,
               obscureText: true,
               decoration: const InputDecoration(
-                label: Center(child: Text('密码')),
+                label: Center(child: Text('可选：密码')),
                 hintText: '输入密码',
               ),
               textAlign: TextAlign.center,
@@ -141,22 +141,16 @@ class AlistConfigureStoreEditState extends State<AlistConfigureStoreEdit> {
             TextFormField(
               controller: _tokenController,
               decoration: const InputDecoration(
-                label: Center(child: Text('Token')),
+                label: Center(child: Text('可选：Token')),
                 hintText: '请输入Token',
               ),
               textAlign: TextAlign.center,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return '请输入Token';
-                }
-                return null;
-              },
             ),
             TextFormField(
               controller: _uploadPathController,
               decoration: const InputDecoration(
                 contentPadding: EdgeInsets.zero,
-                label: Center(child: Text('储存路径')),
+                label: Center(child: Text('可选：储存路径')),
                 hintText: '例如: /百度网盘/图床',
               ),
               textAlign: TextAlign.center,
@@ -189,9 +183,13 @@ class AlistConfigureStoreEditState extends State<AlistConfigureStoreEdit> {
     try {
       Map configMap = await AlistManageAPI.getConfigMap();
       _hostController.text = configMap['host'];
-      _alistusernameController.text = configMap['alistusername'];
-      _passwordController.text = configMap['password'];
       _tokenController.text = configMap['token'];
+      if (configMap['alistusername'] != 'None') {
+        _alistusernameController.text = configMap['alistusername'];
+      }
+      if (configMap['password'] != 'None') {
+        _passwordController.text = configMap['password'];
+      }
 
       if (configMap['uploadPath'] != 'None') {
         _uploadPathController.text = configMap['uploadPath'];
@@ -221,8 +219,21 @@ class AlistConfigureStoreEditState extends State<AlistConfigureStoreEdit> {
       if (remarkName.isEmpty || remarkName.trim().isEmpty) {
         remarkName = ConfigureTemplate.placeholder;
       }
+      if (alistusername.isEmpty || alistusername.trim().isEmpty) {
+        alistusername = ConfigureTemplate.placeholder;
+      }
+      if (password.isEmpty || password.trim().isEmpty) {
+        password = ConfigureTemplate.placeholder;
+      }
       if (uploadPath.isEmpty || uploadPath == '/' || uploadPath.trim() == '') {
         uploadPath = ConfigureTemplate.placeholder;
+      } else {
+        if (!uploadPath.startsWith('/')) {
+          uploadPath = '/$uploadPath';
+        }
+        if (!uploadPath.endsWith('/')) {
+          uploadPath = '$uploadPath/';
+        }
       }
 
       Map psInfo = {

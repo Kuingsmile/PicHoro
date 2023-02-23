@@ -189,7 +189,7 @@ class GithubConfigState extends State<GithubConfig> {
                       });
                 }
               },
-              child: titleText('提交表单',fontsize: null),
+              child: titleText('提交表单', fontsize: null),
             )),
             ListTile(
                 title: ElevatedButton(
@@ -206,7 +206,7 @@ class GithubConfigState extends State<GithubConfig> {
                       );
                     });
               },
-              child: titleText('检查当前配置',fontsize: null),
+              child: titleText('检查当前配置', fontsize: null),
             )),
             ListTile(
                 title: ElevatedButton(
@@ -217,14 +217,14 @@ class GithubConfigState extends State<GithubConfig> {
                 await _initConfig();
                 setState(() {});
               },
-              child: titleText('设置备用配置',fontsize: null),
+              child: titleText('设置备用配置', fontsize: null),
             )),
             ListTile(
                 title: ElevatedButton(
               onPressed: () {
                 _setdefault();
               },
-              child: titleText('设为默认图床',fontsize: null),
+              child: titleText('设为默认图床', fontsize: null),
             )),
           ],
         ),
@@ -295,11 +295,7 @@ class GithubConfigState extends State<GithubConfig> {
         return showCupertinoAlertDialog(
             context: context, title: '错误', content: '用户不存在,请先登录');
       }
-      BaseOptions options = BaseOptions(
-        connectTimeout: 30000,
-        receiveTimeout: 30000,
-        sendTimeout: 30000,
-      );
+      BaseOptions options = setBaseOptions();
       options.headers = {
         "Accept": 'application/vnd.github+json',
         "Authorization": token,
@@ -366,11 +362,7 @@ class GithubConfigState extends State<GithubConfig> {
       }
 
       Map configMap = jsonDecode(configData);
-      BaseOptions options = BaseOptions(
-        connectTimeout: 30000,
-        receiveTimeout: 30000,
-        sendTimeout: 30000,
-      );
+      BaseOptions options = setBaseOptions();
       options.headers = {
         "Authorization": configMap["token"],
         "Accept": 'application/vnd.github+json',

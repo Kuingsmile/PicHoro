@@ -14,7 +14,6 @@ import 'package:horopic/picture_host_manage/manage_api/alist_manage_api.dart';
 
 import 'package:horopic/utils/common_functions.dart';
 
-
 class AlistBucketList extends StatefulWidget {
   const AlistBucketList({Key? key}) : super(key: key);
 
@@ -51,7 +50,6 @@ class AlistBucketListState
   initBucketList() async {
     bucketMap.clear();
     try {
-
       var bucketListResponse = await AlistManageAPI.getBucketList();
       //判断是否获取成功
       if (bucketListResponse[0] != 'success') {
@@ -380,11 +378,11 @@ class AlistBucketListState
             ),
             minLeadingWidth: 0,
             title: const Text('修改配置', style: TextStyle(fontSize: 15)),
-            onTap: ()async {
-              String update= 'true';
-             await Application.router.navigateTo(context,
-              '${Routes.alistNewBucketConfig}?driver=${Uri.encodeComponent(element['driver'])}&update=${Uri.encodeComponent(update)}&bucketMap=${Uri.encodeComponent(jsonEncode(element))}',
-              transition: TransitionType.cupertino);
+            onTap: () async {
+              String update = 'true';
+              await Application.router.navigateTo(context,
+                  '${Routes.alistNewBucketConfig}?driver=${Uri.encodeComponent(element['driver'])}&update=${Uri.encodeComponent(update)}&bucketMap=${Uri.encodeComponent(jsonEncode(element))}',
+                  transition: TransitionType.cupertino);
               _onRefresh();
             },
           ),

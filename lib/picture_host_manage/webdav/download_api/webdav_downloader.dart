@@ -6,7 +6,6 @@ import 'package:collection/collection.dart';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import 'package:f_logs/f_logs.dart';
 
 import 'package:horopic/picture_host_manage/common_page/download/pnc_download_task.dart';
 import 'package:horopic/picture_host_manage/common_page/download/pnc_download_status.dart';
@@ -139,25 +138,14 @@ class DownloadManager {
         }
       }
     } catch (e) {
-      if (e is DioError) {
-        FLog.error(
-            className: 'webdav_DownloadManager',
-            methodName: 'download',
-            text: formatErrorMessage({
-              'url': url,
-              'savePath': savePath,
-            }, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: 'webdav_DownloadManager',
-            methodName: 'download',
-            text: formatErrorMessage({
-              'url': url,
-              'savePath': savePath,
-            }, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogErr(
+          e,
+          {
+            'url': url,
+            'savePath': savePath,
+          },
+          'webdavDownloadManager',
+          'download');
       var task = getDownload(url)!;
       if (task.status.value != DownloadStatus.canceled &&
           task.status.value != DownloadStatus.paused) {

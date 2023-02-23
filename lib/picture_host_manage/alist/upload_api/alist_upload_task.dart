@@ -27,10 +27,10 @@ class UploadTask {
     var listener;
     listener = () {
       if (status.value.isCompleted) {
-        try{
-        completer.complete(status.value);
-        status.removeListener(listener);
-        } catch(e){
+        try {
+          completer.complete(status.value);
+          status.removeListener(listener);
+        } catch (e) {
           FLog.error(
               className: 'alistUploadTask',
               methodName: 'whenUploadComplete',
@@ -45,5 +45,4 @@ class UploadTask {
 
     return completer.future.timeout(timeout);
   }
-
 }

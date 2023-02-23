@@ -20,11 +20,7 @@ class ImgurImageUploadUtils {
       "image": base64Image,
     });
 
-    BaseOptions options = BaseOptions(
-      connectTimeout: 30000,
-      receiveTimeout: 30000,
-      sendTimeout: 30000,
-    );
+    BaseOptions options = setBaseOptions();
     options.headers = {
       "Authorization": "Client-ID ${configMap["clientId"]}",
     };
@@ -32,7 +28,7 @@ class ImgurImageUploadUtils {
     String proxy = configMap["proxy"];
     String proxyClean = '';
     if (proxy != 'None') {
-      if (proxy.startsWith('http://') || proxy.startsWith('https://')) {
+      if (proxy.startsWith(RegExp(r'^https?://'))) {
         proxyClean = proxy.split('://')[1];
       } else {
         proxyClean = proxy;
@@ -92,11 +88,7 @@ class ImgurImageUploadUtils {
     Map deleteMapFromPictureKey = jsonDecode(deleteMap['pictureKey']);
     String deletehash = deleteMapFromPictureKey["deletehash"];
 
-    BaseOptions options = BaseOptions(
-      connectTimeout: 30000,
-      receiveTimeout: 30000,
-      sendTimeout: 30000,
-    );
+    BaseOptions options = setBaseOptions();
     options.headers = {
       "Authorization": "Client-ID ${deleteMapFromPictureKey["clientId"]}",
     };

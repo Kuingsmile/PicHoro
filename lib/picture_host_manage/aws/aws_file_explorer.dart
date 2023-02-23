@@ -519,7 +519,7 @@ class AwsFileExplorerState
                                 configMap['region'] = widget.element['region'];
                                 configMap['uploadPath'] = widget.bucketPrefix;
                                 for (int i = 0; i < files.length; i++) {
-                                   File compressedFile;
+                                  File compressedFile;
                                   if (Global.isCompress == true) {
                                     ImageCompress imageCompress =
                                         ImageCompress();
@@ -1465,7 +1465,7 @@ class AwsFileExplorerState
 
                                   showToast('开始获取文件');
                                   String filePath = await downloadTxtFile(
-                                      shareUrl, allInfoList[index].key,null);
+                                      shareUrl, allInfoList[index].key, null);
                                   String fileName = allInfoList[index].key;
                                   if (filePath == 'error') {
                                     showToast('获取失败');

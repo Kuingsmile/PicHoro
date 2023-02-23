@@ -61,7 +61,7 @@ class LinkFormatSelectState extends State<LinkFormatSelect> {
                 textAlign: TextAlign.center,
                 initialValue: Global.customLinkFormat,
                 decoration: const InputDecoration(
-                  labelText: '自定义格式',
+                  label: Center(child: Text('自定义格式')),
                   hintText: r'使用$url和$fileName作为占位符',
                 ),
                 onChanged: (String value) async {

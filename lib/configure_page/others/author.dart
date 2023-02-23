@@ -47,7 +47,7 @@ class AuthorInformation extends StatelessWidget {
                     'https://pichoro.msq.pub/wechat.png',
                     fit: BoxFit.contain,
                     mode: ExtendedImageMode.gesture,
-                    cache: true,
+                    cache: false,
                     loadStateChanged: (state) =>
                         defaultLoadStateChanged(state, iconSize: 60),
                     initGestureConfigHandler: (state) {

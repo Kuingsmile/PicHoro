@@ -93,11 +93,7 @@ class AlistManageAPI {
       'Username': username,
     };
 
-    BaseOptions baseoptions = BaseOptions(
-      sendTimeout: 30000,
-      receiveTimeout: 30000,
-      connectTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = {
       "Content-Type": "application/json",
     };
@@ -188,11 +184,7 @@ class AlistManageAPI {
     String token = configMap['token'];
     String url = '$host/api/admin/storage/list';
 
-    BaseOptions baseoptions = BaseOptions(
-      sendTimeout: 30000,
-      receiveTimeout: 30000,
-      connectTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = {
       "Authorization": token,
     };
@@ -233,11 +225,7 @@ class AlistManageAPI {
     String enableUrl = '$host/api/admin/storage/enable';
     String disableUrl = '$host/api/admin/storage/disable';
 
-    BaseOptions baseoptions = BaseOptions(
-      sendTimeout: 30000,
-      receiveTimeout: 30000,
-      connectTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = {
       "Authorization": token,
     };
@@ -290,11 +278,7 @@ class AlistManageAPI {
     String token = configMap['token'];
     String url = '$host/api/admin/storage/delete';
 
-    BaseOptions baseoptions = BaseOptions(
-      sendTimeout: 30000,
-      receiveTimeout: 30000,
-      connectTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = {
       "Authorization": token,
     };
@@ -339,11 +323,7 @@ class AlistManageAPI {
     String token = configMap['token'];
     String url = '$host/api/admin/storage/create';
 
-    BaseOptions baseoptions = BaseOptions(
-      sendTimeout: 30000,
-      receiveTimeout: 30000,
-      connectTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = {
       "Authorization": token,
       "Content-Type": "application/json",
@@ -386,11 +366,7 @@ class AlistManageAPI {
     String token = configMap['token'];
     String url = '$host/api/admin/storage/update';
 
-    BaseOptions baseoptions = BaseOptions(
-      sendTimeout: 30000,
-      receiveTimeout: 30000,
-      connectTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = {
       "Authorization": token,
       "Content-Type": "application/json",
@@ -488,17 +464,120 @@ class AlistManageAPI {
     }
   }
 
+  static getTotalPage(
+    String folder,
+    String refresh,
+  ) async {
+    Map configMap = await getConfigMap();
+    String host = configMap['host'];
+    String token = configMap['token'];
+    String url = '$host/api/fs/list';
+
+    BaseOptions baseoptions = setBaseOptions();
+    baseoptions.headers = {
+      "Authorization": token,
+      "Content-Type": "application/json",
+    };
+    Map<String, dynamic> dataMap = {
+      "page": 1,
+      "path": folder,
+      "per_page": 1,
+      "refresh": refresh == 'Refresh' ? true : false,
+    };
+    Dio dio = Dio(baseoptions);
+    try {
+      var response = await dio.post(
+        url,
+        data: dataMap,
+      );
+      if (response.statusCode == 200 && response.data['message'] == 'success') {
+        if (response.data['data']['total'] == 0) {
+          return ['success', 0];
+        }
+        int totalPage = (response.data['data']['total'] / 50).ceil();
+        return ['success', totalPage];
+      } else {
+        return ['failed'];
+      }
+    } catch (e) {
+      if (e is DioError) {
+        FLog.error(
+            className: "AlistManageAPI",
+            methodName: "getTotalPage",
+            text: formatErrorMessage({}, e.toString(),
+                isDioError: true, dioErrorMessage: e),
+            dataLogType: DataLogType.ERRORS.toString());
+      } else {
+        FLog.error(
+            className: "AlistManageAPI",
+            methodName: "getTotalPage",
+            text: formatErrorMessage({}, e.toString()),
+            dataLogType: DataLogType.ERRORS.toString());
+      }
+      return [e.toString()];
+    }
+  }
+
+  static listFolderByPage(String folder, String refresh, int page) async {
+    Map configMap = await getConfigMap();
+    String host = configMap['host'];
+    String token = configMap['token'];
+    String url = '$host/api/fs/list';
+
+    BaseOptions baseoptions = setBaseOptions();
+    baseoptions.headers = {
+      "Authorization": token,
+      "Content-Type": "application/json",
+    };
+    Map<String, dynamic> dataMap = {
+      "page": page,
+      "path": folder,
+      "per_page": 50,
+      "refresh": refresh == 'Refresh' ? true : false,
+    };
+    Dio dio = Dio(baseoptions);
+    List fileList = [];
+    try {
+      var response = await dio.post(
+        url,
+        data: dataMap,
+      );
+      if (response.statusCode == 200 && response.data['message'] == 'success') {
+        if (response.data['data']['total'] == 0) {
+          return ['success', fileList];
+        }
+        fileList = response.data['data']['content'];
+
+        return ['success', fileList];
+      } else {
+        return ['failed'];
+      }
+    } catch (e) {
+      if (e is DioError) {
+        FLog.error(
+            className: "AlistManageAPI",
+            methodName: "listFolderByPage",
+            text: formatErrorMessage({}, e.toString(),
+                isDioError: true, dioErrorMessage: e),
+            dataLogType: DataLogType.ERRORS.toString());
+      } else {
+        FLog.error(
+            className: "AlistManageAPI",
+            methodName: "listFolderByPage",
+            text: formatErrorMessage({}, e.toString()),
+            dataLogType: DataLogType.ERRORS.toString());
+      }
+      return [e.toString()];
+    }
+  }
+
   static listFolder(String folder, String refresh) async {
     Map configMap = await getConfigMap();
     String host = configMap['host'];
     String token = configMap['token'];
     String url = '$host/api/fs/list';
 
-    BaseOptions baseoptions = BaseOptions(
-      sendTimeout: 30000,
-      receiveTimeout: 30000,
-      connectTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = {
       "Authorization": token,
       "Content-Type": "application/json",
@@ -572,11 +651,7 @@ class AlistManageAPI {
     String token = configMap['token'];
     String url = '$host/api/fs/get';
 
-    BaseOptions baseoptions = BaseOptions(
-      sendTimeout: 30000,
-      receiveTimeout: 30000,
-      connectTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = {
       "Authorization": token,
       "Content-Type": "application/json",
@@ -620,11 +695,7 @@ class AlistManageAPI {
     String token = configMap['token'];
     String url = '$host/api/fs/mkdir';
 
-    BaseOptions baseoptions = BaseOptions(
-      sendTimeout: 30000,
-      receiveTimeout: 30000,
-      connectTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = {
       "Authorization": token,
       "Content-Type": "application/json",
@@ -668,11 +739,7 @@ class AlistManageAPI {
     String token = configMap['token'];
     String url = '$host/api/fs/rename';
 
-    BaseOptions baseoptions = BaseOptions(
-      sendTimeout: 30000,
-      receiveTimeout: 30000,
-      connectTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = {
       "Authorization": token,
       "Content-Type": "application/json",
@@ -717,11 +784,7 @@ class AlistManageAPI {
     String token = configMap['token'];
     String url = '$host/api/fs/remove';
 
-    BaseOptions baseoptions = BaseOptions(
-      sendTimeout: 30000,
-      receiveTimeout: 30000,
-      connectTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = {
       "Authorization": token,
       "Content-Type": "application/json",
@@ -781,15 +844,10 @@ class AlistManageAPI {
       return value;
     });
 
-    BaseOptions baseoptions = BaseOptions(
-      sendTimeout: 30000,
-      receiveTimeout: 30000,
-      connectTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = {
       "Authorization": configMap["token"],
-      "Content-Type":
-          "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW",
+      "Content-Type": Global.multipartString,
       "file-path": Uri.encodeComponent(filePath),
       "Content-Length": contentLength,
     };

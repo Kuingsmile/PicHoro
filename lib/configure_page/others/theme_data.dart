@@ -190,6 +190,3 @@ final ThemeData goldThemeData = ThemeData(
   primaryColor: gold,
   fontFamily: "iconfont",
 );
-
-
-

@@ -247,11 +247,7 @@ class AllPShostState extends State<AllPShost> {
         }
         String validateURL = "https://smms.app/api/v2/profile";
         // String validateURL = "https://sm.ms/api/v2/profile";被墙了
-        BaseOptions options = BaseOptions(
-          connectTimeout: 30000,
-          receiveTimeout: 30000,
-          sendTimeout: 30000,
-        );
+        BaseOptions options = setBaseOptions();
         options.headers = {
           "Content-Type": 'multipart/form-data',
           "Authorization": smmsToken,
@@ -354,11 +350,7 @@ class AllPShostState extends State<AllPShost> {
           if (queryuser == 'Empty') {
             showToast("请先登录");
           }
-          BaseOptions options = BaseOptions(
-            connectTimeout: 30000,
-            receiveTimeout: 30000,
-            sendTimeout: 30000,
-          );
+          BaseOptions options = setBaseOptions();
           options.headers = {
             "Accept": 'application/vnd.github+json',
             "Authorization": token,
@@ -440,11 +432,7 @@ class AllPShostState extends State<AllPShost> {
             lanKongalbumId = 'None';
           }
 
-          BaseOptions options = BaseOptions(
-            connectTimeout: 30000,
-            receiveTimeout: 30000,
-            sendTimeout: 30000,
-          );
+          BaseOptions options = setBaseOptions();
           options.headers = {
             "Accept": "application/json",
             "Authorization": lankongToken,
@@ -546,11 +534,7 @@ class AllPShostState extends State<AllPShost> {
             "https://dss0.bdstatic.com/5aV1bjqh_Q23odCf/static/superman/img/logo/logo_white-d0c9fe2af5.png";
         String validateURL = "https://api.imgur.com/3/image";
 
-        BaseOptions options = BaseOptions(
-          connectTimeout: 30000,
-          receiveTimeout: 30000,
-          sendTimeout: 30000,
-        );
+        BaseOptions options = setBaseOptions();
         options.headers = {
           "Authorization": "Client-ID $imgurclientId",
         };
@@ -850,18 +834,13 @@ class AllPShostState extends State<AllPShost> {
             'file': await MultipartFile.fromFile(assetFilePath, filename: key),
           });
 
-          BaseOptions baseoptions = BaseOptions(
-            connectTimeout: 30000,
-            receiveTimeout: 30000,
-            sendTimeout: 30000,
-          );
+          BaseOptions baseoptions = setBaseOptions();
           String contentLength = await assetFile.length().then((value) {
             return value.toString();
           });
           baseoptions.headers = {
             'Host': host,
-            'Content-Type':
-                'multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW',
+            'Content-Type': Global.multipartString,
             'Content-Length': contentLength,
           };
           Dio dio = Dio(baseoptions);
@@ -1017,18 +996,13 @@ class AllPShostState extends State<AllPShost> {
           'file': await MultipartFile.fromFile(assetFilePath, filename: key),
         });
 
-        BaseOptions baseoptions = BaseOptions(
-          connectTimeout: 30000,
-          receiveTimeout: 30000,
-          sendTimeout: 30000,
-        );
+        BaseOptions baseoptions = setBaseOptions();
         String contentLength = await assetFile.length().then((value) {
           return value.toString();
         });
         baseoptions.headers = {
           'Host': host,
-          'Content-Type':
-              'multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW',
+          'Content-Type': Global.multipartString,
           'Content-Length': contentLength,
         };
         Dio dio = Dio(baseoptions);
@@ -1166,18 +1140,13 @@ class AllPShostState extends State<AllPShost> {
           'file': await MultipartFile.fromFile(assetFilePath, filename: key),
         });
 
-        BaseOptions baseoptions = BaseOptions(
-          connectTimeout: 30000,
-          receiveTimeout: 30000,
-          sendTimeout: 30000,
-        );
+        BaseOptions baseoptions = setBaseOptions();
         String contentLength = await assetFile.length().then((value) {
           return value.toString();
         });
         baseoptions.headers = {
           'Host': 'v0.api.upyun.com',
-          'Content-Type':
-              'multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW',
+          'Content-Type': Global.multipartString,
           'Content-Length': contentLength,
           'Date': date,
           'Authorization': authorization,
@@ -1252,12 +1221,12 @@ class AllPShostState extends State<AllPShost> {
     Map temp = {
       "Alist V3": 'alist',
       '阿里云': 'aliyun',
-      'FTP-SSH/SFTP' : 'ftp',
-      'Github' : 'github',
-      'Imgur' : 'imgur',
-      '兰空图床' : 'lankong',
-      '七牛云' :'qiniu',
-      'S3兼容平台':'aws',
+      'FTP-SSH/SFTP': 'ftp',
+      'Github': 'github',
+      'Imgur': 'imgur',
+      '兰空图床': 'lankong',
+      '七牛云': 'qiniu',
+      'S3兼容平台': 'aws',
       'SM.MS': 'smms',
       '腾讯云': 'tcyun',
       '又拍云': 'upyun',
@@ -1314,7 +1283,7 @@ class AllPShostState extends State<AllPShost> {
           },
           trailing: const Icon(Icons.arrow_forward_ios),
         ),
-         ListTile(
+        ListTile(
           title: const Text('Alist V3'),
           onTap: () {
             Application.router.navigateTo(context, Routes.alistPShostSelect,
@@ -1428,7 +1397,7 @@ class AllPShostState extends State<AllPShost> {
                       textAlign: TextAlign.center,
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
-                    children:_buildSimpleDialogOptions(context),
+                    children: _buildSimpleDialogOptions(context),
                   );
                 },
               );

@@ -166,21 +166,21 @@ class HostConfigState extends State<HostConfig> {
                       });
                 }
               },
-              child: titleText('提交表单',fontsize: null),
+              child: titleText('提交表单', fontsize: null),
             )),
             ListTile(
                 title: ElevatedButton(
               onPressed: () {
                 _getStrategyId();
               },
-              child: titleText('获取储存策略Id列表',fontsize: null),
+              child: titleText('获取储存策略Id列表', fontsize: null),
             )),
             ListTile(
               title: ElevatedButton(
                 onPressed: () {
                   _getAlbumId();
                 },
-                child: titleText('获取相册Id列表',fontsize: null),
+                child: titleText('获取相册Id列表', fontsize: null),
               ),
             ),
             ListTile(
@@ -198,9 +198,9 @@ class HostConfigState extends State<HostConfig> {
                       );
                     });
               },
-              child: titleText('检查当前配置',fontsize: null),
+              child: titleText('检查当前配置', fontsize: null),
             )),
-              ListTile(
+            ListTile(
                 title: ElevatedButton(
               onPressed: () async {
                 await Application.router.navigateTo(
@@ -209,14 +209,14 @@ class HostConfigState extends State<HostConfig> {
                 await _initConfig();
                 setState(() {});
               },
-              child: titleText('设置备用配置',fontsize: null),
+              child: titleText('设置备用配置', fontsize: null),
             )),
             ListTile(
                 title: ElevatedButton(
               onPressed: () {
                 _setdefault();
               },
-              child: titleText('设为默认图床',fontsize: null),
+              child: titleText('设为默认图床', fontsize: null),
             )),
             ListTile(
               title: const Center(
@@ -258,11 +258,7 @@ class HostConfigState extends State<HostConfig> {
       String token = 'Bearer ';
       final username = _usernameController.text;
       final passwd = _passwdController.text;
-      BaseOptions options = BaseOptions(
-        connectTimeout: 30000,
-        receiveTimeout: 30000,
-        sendTimeout: 30000,
-      );
+      BaseOptions options = setBaseOptions();
       options.headers = {
         "Accept": "application/json",
       };
@@ -280,11 +276,7 @@ class HostConfigState extends State<HostConfig> {
         if (response.statusCode == 200 && response.data['status'] == true) {
           token = token + response.data['data']['token'].toString();
           String strategiesUrl = '$host/api/v1/strategies';
-          BaseOptions strategiesOptions = BaseOptions(
-            connectTimeout: 30000,
-            receiveTimeout: 30000,
-            sendTimeout: 30000,
-          );
+          BaseOptions strategiesOptions = setBaseOptions();
           strategiesOptions.headers = {
             "Accept": "application/json",
             "Authorization": token,
@@ -346,11 +338,7 @@ class HostConfigState extends State<HostConfig> {
       try {
         String host = _hostController.text;
         String strategiesUrl = '$host/api/v1/strategies';
-        BaseOptions strategiesOptions = BaseOptions(
-          connectTimeout: 30000,
-          receiveTimeout: 30000,
-          sendTimeout: 30000,
-        );
+        BaseOptions strategiesOptions = setBaseOptions();
         strategiesOptions.headers = {
           "Accept": "application/json",
           "Authorization": _tokenController,
@@ -405,11 +393,7 @@ class HostConfigState extends State<HostConfig> {
       String token = 'Bearer ';
       final username = _usernameController.text;
       final passwd = _passwdController.text;
-      BaseOptions options = BaseOptions(
-        connectTimeout: 30000,
-        receiveTimeout: 30000,
-        sendTimeout: 30000,
-      );
+      BaseOptions options = setBaseOptions();
       options.headers = {
         "Accept": "application/json",
       };
@@ -427,11 +411,7 @@ class HostConfigState extends State<HostConfig> {
         if (response.statusCode == 200 && response.data['status'] == true) {
           token = token + response.data['data']['token'].toString();
           String strategiesUrl = '$host/api/v1/albums';
-          BaseOptions strategiesOptions = BaseOptions(
-            connectTimeout: 30000,
-            receiveTimeout: 30000,
-            sendTimeout: 30000,
-          );
+          BaseOptions strategiesOptions = setBaseOptions();
           strategiesOptions.headers = {
             "Accept": "application/json",
             "Authorization": token,
@@ -494,11 +474,7 @@ class HostConfigState extends State<HostConfig> {
       try {
         String host = _hostController.text;
         String strategiesUrl = '$host/api/v1/albums';
-        BaseOptions strategiesOptions = BaseOptions(
-          connectTimeout: 30000,
-          receiveTimeout: 30000,
-          sendTimeout: 30000,
-        );
+        BaseOptions strategiesOptions = setBaseOptions();
         strategiesOptions.headers = {
           "Accept": "application/json",
           "Authorization": _tokenController,
@@ -552,11 +528,7 @@ class HostConfigState extends State<HostConfig> {
       final passwd = _passwdController.text;
 
       final strategyId = _strategyIdController.text;
-      BaseOptions options = BaseOptions(
-        connectTimeout: 30000,
-        receiveTimeout: 30000,
-        sendTimeout: 30000,
-      );
+      BaseOptions options = setBaseOptions();
       options.headers = {
         "Accept": "application/json",
       };
@@ -658,11 +630,7 @@ class HostConfigState extends State<HostConfig> {
         albumID = _albumIdController.text;
       }
       final strategyId = _strategyIdController.text;
-      BaseOptions options = BaseOptions(
-        connectTimeout: 30000,
-        receiveTimeout: 30000,
-        sendTimeout: 30000,
-      );
+      BaseOptions options = setBaseOptions();
       options.headers = {
         "Accept": "application/json",
         "Authorization": _tokenController,
@@ -733,11 +701,7 @@ class HostConfigState extends State<HostConfig> {
             context: context, title: "检查失败!", content: "请先配置上传参数.");
       }
       Map configMap = jsonDecode(configData);
-      BaseOptions options = BaseOptions(
-        connectTimeout: 30000,
-        receiveTimeout: 30000,
-        sendTimeout: 30000,
-      );
+      BaseOptions options = setBaseOptions();
       options.headers = {
         "Authorization": configMap["token"],
         "Accept": "application/json",

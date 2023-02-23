@@ -168,7 +168,10 @@ class AwsBucketListState
                   transition: TransitionType.cupertino);
               _onRefresh();
             },
-            icon: const Icon(Icons.add,color: Colors.white,),
+            icon: const Icon(
+              Icons.add,
+              color: Colors.white,
+            ),
             iconSize: 35,
           )
         ],

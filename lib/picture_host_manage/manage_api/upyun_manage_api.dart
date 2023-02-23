@@ -132,11 +132,7 @@ class UpyunManageAPI {
   }
 
   static getToken(String email, String password) async {
-    BaseOptions baseoptions = BaseOptions(
-      sendTimeout: 30000,
-      receiveTimeout: 30000,
-      connectTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     String randomString = randomStringGenerator(32);
     String randomStringForName = randomStringGenerator(20);
     Dio dio = Dio(baseoptions);
@@ -177,11 +173,7 @@ class UpyunManageAPI {
   }
 
   static checkToken(String token) async {
-    BaseOptions baseoptions = BaseOptions(
-      sendTimeout: 30000,
-      receiveTimeout: 30000,
-      connectTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = {
       'Authorization': 'Bearer $token',
     };
@@ -215,11 +207,7 @@ class UpyunManageAPI {
   }
 
   static deleteToken(String token, String tokenname) async {
-    BaseOptions baseoptions = BaseOptions(
-      sendTimeout: 30000,
-      receiveTimeout: 30000,
-      connectTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = {
       'Authorization': 'Bearer $token',
     };
@@ -264,11 +252,7 @@ class UpyunManageAPI {
     }
     String token = configMap['token'];
     String host = 'https://api.upyun.com/buckets';
-    BaseOptions baseoptions = BaseOptions(
-      sendTimeout: 30000,
-      receiveTimeout: 30000,
-      connectTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = {
       'Authorization': 'Bearer $token',
     };
@@ -339,11 +323,7 @@ class UpyunManageAPI {
 
     String host = 'https://api.upyun.com/buckets/info';
 
-    BaseOptions baseoptions = BaseOptions(
-      sendTimeout: 30000,
-      receiveTimeout: 30000,
-      connectTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = {
       'Authorization': 'Bearer $token',
     };
@@ -389,11 +369,7 @@ class UpyunManageAPI {
     String password = configMap['password'];
     String host = 'https://api.upyun.com/buckets/delete';
 
-    BaseOptions baseoptions = BaseOptions(
-      sendTimeout: 30000,
-      receiveTimeout: 30000,
-      connectTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = {
       'Authorization': 'Bearer $token',
     };
@@ -439,11 +415,7 @@ class UpyunManageAPI {
     String token = configMap['token'];
     String host = 'https://api.upyun.com/buckets';
 
-    BaseOptions baseoptions = BaseOptions(
-      sendTimeout: 30000,
-      receiveTimeout: 30000,
-      connectTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = {
       'Authorization': 'Bearer $token',
     };
@@ -491,11 +463,7 @@ class UpyunManageAPI {
     String token = configMap['token'];
     String host = 'https://api.upyun.com/buckets/operators';
 
-    BaseOptions baseoptions = BaseOptions(
-      sendTimeout: 30000,
-      receiveTimeout: 30000,
-      connectTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = {
       'Authorization': 'Bearer $token',
     };
@@ -540,11 +508,7 @@ class UpyunManageAPI {
     String token = configMap['token'];
     String host = 'https://api.upyun.com/buckets/operators';
 
-    BaseOptions baseoptions = BaseOptions(
-      sendTimeout: 30000,
-      receiveTimeout: 30000,
-      connectTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = {
       'Authorization': 'Bearer $token',
     };
@@ -592,11 +556,7 @@ class UpyunManageAPI {
     String token = configMap['token'];
     String host = 'https://api.upyun.com/buckets/operators';
 
-    BaseOptions baseoptions = BaseOptions(
-      sendTimeout: 30000,
-      receiveTimeout: 30000,
-      connectTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = {
       'Authorization': 'Bearer $token',
     };
@@ -729,11 +689,7 @@ class UpyunManageAPI {
     String password = element['password'];
     String authorization =
         await upyunAuthorization(method, uri, '', operator, password);
-    BaseOptions baseoptions = BaseOptions(
-      sendTimeout: 30000,
-      receiveTimeout: 30000,
-      connectTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = {
       'Authorization': authorization,
       'accept': 'application/json',
@@ -824,11 +780,7 @@ class UpyunManageAPI {
     String uri = '/$bucket$prefix$newfolder/';
     String authorization =
         await upyunAuthorization(method, uri, '', operator, password);
-    BaseOptions baseoptions = BaseOptions(
-      sendTimeout: 30000,
-      receiveTimeout: 30000,
-      connectTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = {
       'Authorization': authorization,
       'folder': 'true',
@@ -884,11 +836,7 @@ class UpyunManageAPI {
     String uri = '/$bucket$prefix$key';
     String authorization =
         await upyunAuthorization(method, uri, '', operator, password);
-    BaseOptions baseoptions = BaseOptions(
-      sendTimeout: 30000,
-      receiveTimeout: 30000,
-      connectTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = {
       'Authorization': authorization,
       'Date': HttpDate.format(DateTime.now()),
@@ -1080,11 +1028,7 @@ class UpyunManageAPI {
     String uri = '/$bucket$prefix$newKey';
     String authorization = await upyunAuthorization(
         method, uri, '', operatorName, operatorPassword);
-    BaseOptions baseoptions = BaseOptions(
-      sendTimeout: 30000,
-      receiveTimeout: 30000,
-      connectTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = {
       'Authorization': authorization,
       'Date': HttpDate.format(DateTime.now()),
@@ -1187,20 +1131,13 @@ class UpyunManageAPI {
       'policy': base64Policy,
       'file': await MultipartFile.fromFile(filepath, filename: filename),
     });
-    BaseOptions baseoptions = BaseOptions(
-      //连接服务器超时时间，单位是毫秒.
-      connectTimeout: 30000,
-      //响应超时时间。
-      receiveTimeout: 30000,
-      sendTimeout: 30000,
-    );
+    BaseOptions baseoptions = setBaseOptions();
     String contentLength = await uploadFile.length().then((value) {
       return value.toString();
     });
     baseoptions.headers = {
       'Host': 'v0.api.upyun.com',
-      'Content-Type':
-          'multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW',
+      'Content-Type': Global.multipartString,
       'Content-Length': contentLength,
       'Date': date,
       'Authorization': authorization,

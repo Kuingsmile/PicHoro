@@ -52,11 +52,7 @@ class ImgurManageAPI {
   }
 
   static checkToken(String username, String accesstoken, String proxy) async {
-    BaseOptions options = BaseOptions(
-      connectTimeout: 30000,
-      receiveTimeout: 30000,
-      sendTimeout: 30000,
-    );
+    BaseOptions options = setBaseOptions();
     options.headers = {
       "Authorization": "Bearer $accesstoken",
     };
@@ -102,11 +98,7 @@ class ImgurManageAPI {
 
   //get album list
   static getAlbumList(String username, String accesstoken, String proxy) async {
-    BaseOptions options = BaseOptions(
-      connectTimeout: 30000,
-      receiveTimeout: 30000,
-      sendTimeout: 30000,
-    );
+    BaseOptions options = setBaseOptions();
     
     options.headers = {
       "Authorization": "Bearer $accesstoken",
@@ -166,11 +158,7 @@ class ImgurManageAPI {
 
   //get album info
   static getAlbumInfo(String clienID, String albumhash, String proxy) async {
-    BaseOptions options = BaseOptions(
-      connectTimeout: 30000,
-      receiveTimeout: 30000,
-      sendTimeout: 30000,
-    );
+    BaseOptions options = setBaseOptions();
     options.headers = {
       "Authorization": "Client-ID $clienID",
     };
@@ -217,11 +205,7 @@ class ImgurManageAPI {
   //get all images
   static getImagesList(
       String username, String accesstoken, String proxy) async {
-    BaseOptions options = BaseOptions(
-      connectTimeout: 30000,
-      receiveTimeout: 30000,
-      sendTimeout: 30000,
-    );
+    BaseOptions options = setBaseOptions();
     options.headers = {
       "Authorization": "Bearer $accesstoken",
     };
@@ -295,11 +279,7 @@ class ImgurManageAPI {
 
   //get images of album
   static getAlbumImages(String clientID, String albumHash, String proxy) async {
-    BaseOptions options = BaseOptions(
-      connectTimeout: 30000,
-      receiveTimeout: 30000,
-      sendTimeout: 30000,
-    );
+    BaseOptions options = setBaseOptions();
     options.headers = {
       "Authorization": "Client-ID $clientID",
     };
@@ -392,11 +372,7 @@ class ImgurManageAPI {
 
   //create album
   static createAlbum(String accesstoken, String title, String proxy) async {
-    BaseOptions options = BaseOptions(
-      connectTimeout: 30000,
-      receiveTimeout: 30000,
-      sendTimeout: 30000,
-    );
+    BaseOptions options = setBaseOptions();
     options.headers = {
       "Authorization": "Bearer $accesstoken",
       "Content-Type": "application/json",
@@ -448,11 +424,7 @@ class ImgurManageAPI {
 
   //delete album
   static deleteAlbum(String accesstoken, String albumHash, String proxy) async {
-    BaseOptions options = BaseOptions(
-      connectTimeout: 30000,
-      receiveTimeout: 30000,
-      sendTimeout: 30000,
-    );
+    BaseOptions options = setBaseOptions();
     options.headers = {
       "Authorization": "Bearer $accesstoken",
     };
@@ -500,11 +472,7 @@ class ImgurManageAPI {
 
   //delete image
   static deleteImage(String accesstoken, String imageHash, String proxy) async {
-    BaseOptions options = BaseOptions(
-      connectTimeout: 30000,
-      receiveTimeout: 30000,
-      sendTimeout: 30000,
-    );
+    BaseOptions options = setBaseOptions();
     options.headers = {
       "Authorization": "Bearer $accesstoken",
     };
@@ -571,11 +539,7 @@ class ImgurManageAPI {
       });
     }
 
-    BaseOptions options = BaseOptions(
-      connectTimeout: 30000,
-      receiveTimeout: 30000,
-      sendTimeout: 30000,
-    );
+    BaseOptions options = setBaseOptions();
     options.headers = {
       "Authorization": "Bearer $accesstoken",
     };
