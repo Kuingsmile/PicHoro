@@ -36,6 +36,7 @@ class Global {
   static int defaultOutTime = 30000;
   static String multipartString =
       "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW";
+  static Map<String, String> bucketCustomUrl = {};
   static List psHostHomePageOrder = [
     0,
     1,
@@ -546,6 +547,20 @@ class Global {
     await SpUtil.getInstance();
     bool isDeleteLocal = SpUtil.getBool('key_isDeleteLocal', defValue: false)!;
     return isDeleteLocal;
+  }
+
+  static getBucketCustomUrl() async {
+    await SpUtil.getInstance();
+    Map<String, String> bucketCustomUrl = SpUtil.getObj(
+        'key_bucketCustomUrl', (v) => Map<String, String>.from(v),
+        defValue: {})!;
+    return bucketCustomUrl;
+  }
+
+  static setBucketCustomUrl(Map<String, String> bucketCustomUrl) async {
+    await SpUtil.getInstance();
+    SpUtil.putObject('key_bucketCustomUrl', bucketCustomUrl);
+    Global.bucketCustomUrl = bucketCustomUrl;
   }
 
   static setCustomLinkFormat(String customLinkFormat) async {

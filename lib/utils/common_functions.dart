@@ -566,6 +566,7 @@ mainInit() async {
   await Permissionutils.askPermissionGallery();
   await Permissionutils.askPermissionManageExternalStorage();
   await Permissionutils.askPermissionMediaLibrary();
+  await Permissionutils.askPermissionRequestInstallPackage();
   //初始化全局信息，会在APP启动时执行
   String initUser = await Global.getUser();
   await Global.setUser(initUser);
@@ -597,6 +598,8 @@ mainInit() async {
   Global.setCustomeRenameFormat(initCustomRenameFormat);
   String todayAlistUpdate = await Global.getTodayAlistUpdate();
   Global.setTodayAlistUpdate(todayAlistUpdate);
+  Map<String, String> bucketCustomUrl = await Global.getBucketCustomUrl();
+  Global.setBucketCustomUrl(bucketCustomUrl);
 
   //初始化图片压缩选项
   bool isCompress = await Global.getisCompress();

@@ -14,6 +14,8 @@ import 'package:horopic/picture_host_manage/manage_api/aws_manage_api.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/sql_utils.dart';
+import 'package:horopic/picture_host_manage/alist/alist_file_explorer.dart'
+    show RenameDialog, RenameDialogContent;
 
 class AwsBucketList extends StatefulWidget {
   const AwsBucketList({Key? key}) : super(key: key);
@@ -28,6 +30,7 @@ class AwsBucketListState
 
   RefreshController refreshController =
       RefreshController(initialRefresh: false);
+  TextEditingController vc = TextEditingController();
 
   @override
   void initState() {
@@ -107,6 +110,12 @@ class AwsBucketListState
         });
       }
       for (var i = 0; i < bucketMap.length; i++) {
+        if (Global.bucketCustomUrl.containsKey('s3-${bucketMap[i]['name']}')) {
+          bucketMap[i]['customUrl'] =
+              Global.bucketCustomUrl['s3-${bucketMap[i]['name']}'];
+        } else {
+          bucketMap[i]['customUrl'] = '';
+        }
         var regionResponse =
             await AwsManageAPI.getBucketRegion(bucketMap[i]['name']);
         if (regionResponse[0] != 'success') {
@@ -346,6 +355,60 @@ class AwsBucketListState
             ),
             subtitle: Text(element['CreationDate'],
                 style: const TextStyle(fontSize: 12)),
+          ),
+          const Divider(
+            height: 0.1,
+            color: Color.fromARGB(255, 230, 230, 230),
+          ),
+          ListTile(
+            leading: const Icon(
+              Icons.link_sharp,
+              color: Color.fromARGB(255, 97, 141, 236),
+            ),
+            minLeadingWidth: 0,
+            title: const Text('设置自定义链接', style: TextStyle(fontSize: 15)),
+            onTap: () async {
+              Navigator.pop(context);
+              showDialog(
+                  barrierDismissible: false,
+                  context: context,
+                  builder: (context) {
+                    return RenameDialog(
+                      contentWidget: RenameDialogContent(
+                        title: Global
+                                    .bucketCustomUrl['s3-${element['name']}'] ==
+                                ''
+                            ? '设置自定义链接'
+                            : Global.bucketCustomUrl['s3-${element['name']}'] ==
+                                    null
+                                ? '设置自定义链接'
+                                : Global
+                                            .bucketCustomUrl[
+                                                's3-${element['name']}']!
+                                            .length >
+                                        20
+                                    ? '${Global.bucketCustomUrl['s3-${element['name']}']!.substring(0, 20)}...'
+                                    : Global.bucketCustomUrl[
+                                        's3-${element['name']}']!,
+                        okBtnTap: () async {
+                          if (!vc.text.startsWith(RegExp(r'http|https'))) {
+                            showToast('链接必须以http或https开头');
+                            return;
+                          }
+                          bucketMap[bucketMap.indexOf(element)]['customUrl'] =
+                              vc.text;
+                          Global.bucketCustomUrl['s3-${element['name']}'] =
+                              vc.text;
+                          Global.setBucketCustomUrl(Global.bucketCustomUrl);
+                          showToast('设置成功');
+                        },
+                        vc: vc,
+                        cancelBtnTap: () {},
+                        stateBoolText: '',
+                      ),
+                    );
+                  });
+            },
           ),
           const Divider(
             height: 0.1,

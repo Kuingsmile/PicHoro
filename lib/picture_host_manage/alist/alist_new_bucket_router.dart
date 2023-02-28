@@ -24,7 +24,7 @@ class AlistNewBucketRouterState extends State<AlistNewBucketRouter> {
         trailing: const Icon(Icons.navigate_next),
         title: Text(driversShowedName[i]),
         onTap: () {
-          String update = 'false';
+          String update='false';
           Application.router.navigateTo(context,
               '${Routes.alistNewBucketConfig}?driver=${Uri.encodeComponent(drivers[i])}&update=${Uri.encodeComponent(update)}&bucketMap=${Uri.encodeComponent(jsonEncode({}))}',
               transition: TransitionType.cupertino);

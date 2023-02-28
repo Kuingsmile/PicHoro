@@ -3,10 +3,11 @@ import 'package:horopic/utils/common_functions.dart';
 
 class AwsFileInformation extends StatefulWidget {
   final Map fileMap;
-  const AwsFileInformation({Key? key, required this.fileMap}) : super(key: key);
+  const AwsFileInformation({Key? key, required this.fileMap})
+      : super(key: key);
 
   @override
-  AwsFileInformationState createState() => AwsFileInformationState();
+ AwsFileInformationState createState() => AwsFileInformationState();
 }
 
 class AwsFileInformationState extends State<AwsFileInformation> {
@@ -31,20 +32,18 @@ class AwsFileInformationState extends State<AwsFileInformation> {
           ),
           ListTile(
             title: const Text('文件大小'),
-            subtitle:
-                SelectableText(getFileSize(int.parse(widget.fileMap['Size']))),
+            subtitle: SelectableText(getFileSize(int.parse(widget.fileMap['Size']))),
           ),
           ListTile(
             isThreeLine: true,
             title: const Text('文件创建时间'),
-            subtitle: SelectableText(
-                widget.fileMap['LastModified'].toString().substring(0, 19)),
+            subtitle: SelectableText(widget.fileMap['LastModified'].toString().substring(0, 19)),
           ),
           ListTile(
             title: const Text('文件etag'),
-            subtitle:
-                SelectableText(widget.fileMap['ETag'].replaceAll('"', '')),
+            subtitle: SelectableText(widget.fileMap['ETag'].replaceAll('"', '')),
           ),
+          
         ],
       ),
     );

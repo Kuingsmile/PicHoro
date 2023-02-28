@@ -823,17 +823,23 @@ class AwsFileExplorerState
                     return;
                   } else {
                     Map configMap = await AwsManageAPI.getConfigMap();
-                    String customUrl = configMap['customUrl'];
+                    String customUrl = widget.element['customUrl'] == null ||
+                            widget.element['customUrl'] == ''
+                        ? 'None'
+                        : widget.element['customUrl'];
                     String endpoint = configMap['endpoint'];
                     String shareUrlPrefix = '';
                     if (customUrl != 'None') {
-                      if (customUrl.endsWith('/')) {
-                        customUrl =
-                            customUrl.substring(0, customUrl.length - 1);
-                      }
-                      shareUrlPrefix = '$customUrl/';
+                      shareUrlPrefix =
+                          '$customUrl/'.replaceAll(RegExp(r'\/+$'), '/');
                     } else {
-                      shareUrlPrefix = 'https://$endpoint/';
+                      if (endpoint.contains('amazonaws.com')) {
+                        shareUrlPrefix =
+                            'https://${widget.element['name']}.s3.${widget.element['region']}.amazonaws.com/';
+                      } else {
+                        shareUrlPrefix =
+                            'https://${widget.element['name']}.$endpoint/';
+                      }
                     }
                     List multiUrls = [];
                     for (int i = 0; i < allInfoList.length; i++) {
@@ -1251,7 +1257,11 @@ class AwsFileExplorerState
                               onPressed: (BuildContext context) async {
                                 Map configMap =
                                     await AwsManageAPI.getConfigMap();
-                                String customUrl = configMap['customUrl'];
+                                String customUrl =
+                                    widget.element['customUrl'] == null ||
+                                            widget.element['customUrl'] == ''
+                                        ? 'None'
+                                        : widget.element['customUrl'];
                                 String endpoint = configMap['endpoint'];
                                 String shareUrl = '';
                                 if (customUrl != 'None') {
@@ -1263,9 +1273,14 @@ class AwsFileExplorerState
                                       '$customUrl/${allInfoList[index].key}';
                                   Share.share(shareUrl);
                                 } else {
-                                  shareUrl =
-                                      'https://$endpoint/${allInfoList[index].key}';
-                                  Share.share(shareUrl);
+                                  if (endpoint.contains('amazonaws.com')) {
+                                    shareUrl =
+                                        'https://${widget.element['name']}.s3.${widget.element['region']}.amazonaws.com/${allInfoList[index].key}';
+                                  } else {
+                                    shareUrl =
+                                        'https://${widget.element['name']}.$endpoint/${allInfoList[index].key}';
+                                    Share.share(shareUrl);
+                                  }
                                 }
                               },
                               autoClose: true,
@@ -1395,22 +1410,23 @@ class AwsFileExplorerState
 
                                 Map configMap =
                                     await AwsManageAPI.getConfigMap();
-                                String customUrl = configMap['customUrl'];
+                                String customUrl =
+                                    widget.element['customUrl'] == null ||
+                                            widget.element['customUrl'] == ''
+                                        ? 'None'
+                                        : widget.element['customUrl'];
                                 String endpoint = configMap['endpoint'];
                                 String shareUrlPrefix = '';
                                 if (customUrl != 'None') {
-                                  if (customUrl.endsWith('/')) {
-                                    customUrl = customUrl.substring(
-                                        0, customUrl.length - 1);
-                                  }
-                                  shareUrlPrefix = '$customUrl/';
+                                  shareUrlPrefix = '$customUrl/'
+                                      .replaceAll(RegExp(r'\/+$'), '/');
                                 } else {
                                   if (endpoint.contains('amazonaws.com')) {
                                     shareUrlPrefix =
                                         'https://${widget.element['name']}.s3.${widget.element['region']}.amazonaws.com/';
                                   } else {
                                     shareUrlPrefix =
-                                        'https://${widget.element['name']}$endpoint/';
+                                        'https://${widget.element['name']}.$endpoint/';
                                   }
                                 }
 
@@ -1676,16 +1692,22 @@ class AwsFileExplorerState
             title: const Text('复制链接(设置中的默认格式)'),
             onTap: () async {
               Map configMap = await AwsManageAPI.getConfigMap();
-              String customUrl = configMap['customUrl'];
+              String customUrl = widget.element['customUrl'] == null ||
+                      widget.element['customUrl'] == ''
+                  ? 'None'
+                  : widget.element['customUrl'];
               String endpoint = configMap['endpoint'];
               String shareUrlPrefix = '';
               if (customUrl != 'None') {
-                if (customUrl.endsWith('/')) {
-                  customUrl = customUrl.substring(0, customUrl.length - 1);
-                }
-                shareUrlPrefix = '$customUrl/';
+                shareUrlPrefix = '$customUrl/'.replaceAll(RegExp(r'\/+$'), '/');
               } else {
-                shareUrlPrefix = 'https://$endpoint/';
+                if (endpoint.contains('amazonaws.com')) {
+                  shareUrlPrefix =
+                      'https://${widget.element['name']}.s3.${widget.element['region']}.amazonaws.com/';
+                } else {
+                  shareUrlPrefix =
+                      'https://${widget.element['name']}.$endpoint/';
+                }
               }
               String format = await Global.getLKformat();
               String shareUrl = shareUrlPrefix + allInfoList[index].key;

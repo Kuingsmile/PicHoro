@@ -75,7 +75,8 @@ class _NetVideoPlayerState extends State<NetVideoPlayer> {
     if (widget.type == 'normal') {
       _videoPlayerController = VideoPlayerController.network(
           widget.videoList[_currActiveIdx]['url'],
-          httpHeaders: widget.headers);
+          httpHeaders: widget.headers
+          );
       _chewieController = ChewieController(
         videoPlayerController: _videoPlayerController,
         aspectRatio: 16 / 9,
@@ -459,9 +460,9 @@ class _NetVideoPlayerState extends State<NetVideoPlayer> {
             });
             String nextVideoUrl = widget.videoList[activeIndex]['url'];
             if (widget.type == 'normal') {
-              _videoPlayerController = VideoPlayerController.network(
-                  nextVideoUrl,
-                  httpHeaders: widget.headers);
+              
+              _videoPlayerController =
+                  VideoPlayerController.network(nextVideoUrl,httpHeaders: widget.headers);
               _chewieController = ChewieController(
                 videoPlayerController: _videoPlayerController,
                 aspectRatio: 16 / 9,

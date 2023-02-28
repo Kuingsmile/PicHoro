@@ -14,6 +14,8 @@ import 'package:horopic/picture_host_manage/manage_api/aliyun_manage_api.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/sql_utils.dart';
+import 'package:horopic/picture_host_manage/alist/alist_file_explorer.dart'
+    show RenameDialog, RenameDialogContent;
 
 class AliyunBucketList extends StatefulWidget {
   const AliyunBucketList({Key? key}) : super(key: key);
@@ -29,6 +31,7 @@ class AliyunBucketListState
 
   RefreshController refreshController =
       RefreshController(initialRefresh: false);
+  TextEditingController vc = TextEditingController();
 
   @override
   void initState() {
@@ -114,6 +117,10 @@ class AliyunBucketListState
           'name': allBucketList[i]['Name'],
           'location': allBucketList[i]['Location'],
           'CreationDate': formatedTime,
+          'customUrl': Global.bucketCustomUrl
+                  .containsKey('aliyun-${allBucketList[i]['Name']}')
+              ? Global.bucketCustomUrl['aliyun-${allBucketList[i]['Name']}']
+              : '',
         });
       }
       if (mounted) {
@@ -368,6 +375,61 @@ class AliyunBucketListState
             ),
             subtitle: Text(element['CreationDate'].substring(0, 19),
                 style: const TextStyle(fontSize: 12)),
+          ),
+          const Divider(
+            height: 0.1,
+            color: Color.fromARGB(255, 230, 230, 230),
+          ),
+          ListTile(
+            leading: const Icon(
+              Icons.link_sharp,
+              color: Color.fromARGB(255, 97, 141, 236),
+            ),
+            minLeadingWidth: 0,
+            title: const Text('设置自定义链接', style: TextStyle(fontSize: 15)),
+            onTap: () async {
+              Navigator.pop(context);
+              showDialog(
+                  barrierDismissible: false,
+                  context: context,
+                  builder: (context) {
+                    return RenameDialog(
+                      contentWidget: RenameDialogContent(
+                        title: Global.bucketCustomUrl[
+                                    'aliyun-${element['name']}'] ==
+                                ''
+                            ? '设置自定义链接'
+                            : Global.bucketCustomUrl[
+                                        'aliyun-${element['name']}'] ==
+                                    null
+                                ? '设置自定义链接'
+                                : Global
+                                            .bucketCustomUrl[
+                                                'aliyun-${element['name']}']!
+                                            .length >
+                                        20
+                                    ? '${Global.bucketCustomUrl['aliyun-${element['name']}']!.substring(0, 20)}...'
+                                    : Global.bucketCustomUrl[
+                                        'aliyun-${element['name']}']!,
+                        okBtnTap: () async {
+                          if (!vc.text.startsWith(RegExp(r'http|https'))) {
+                            showToast('链接必须以http或https开头');
+                            return;
+                          }
+                          bucketMap[bucketMap.indexOf(element)]['customUrl'] =
+                              vc.text;
+                          Global.bucketCustomUrl['aliyun-${element['name']}'] =
+                              vc.text;
+                          Global.setBucketCustomUrl(Global.bucketCustomUrl);
+                          showToast('设置成功');
+                        },
+                        vc: vc,
+                        cancelBtnTap: () {},
+                        stateBoolText: '',
+                      ),
+                    );
+                  });
+            },
           ),
           const Divider(
             height: 0.1,

@@ -836,6 +836,18 @@ class AliyunFileExplorerState
                     showToastWithContext(context, '请先选择文件');
                     return;
                   } else {
+                    String shareUrlPrefix = '';
+                    String customUrl = widget.element['customUrl'] == null ||
+                            widget.element['customUrl'] == ''
+                        ? 'None'
+                        : widget.element['customUrl'];
+                    if (customUrl != 'None') {
+                      shareUrlPrefix =
+                          '$customUrl/'.replaceAll(RegExp(r'\/+$'), '/');
+                    } else {
+                      shareUrlPrefix =
+                          'https://${widget.element['name']}.${widget.element['location']}.aliyuncs.com/';
+                    }
                     List multiUrls = [];
                     for (int i = 0; i < allInfoList.length; i++) {
                       if (selectedFilesBool[i]) {
@@ -843,20 +855,16 @@ class AliyunFileExplorerState
                         String rawurl = '';
                         String fileName = '';
                         if (i < dirAllInfoList.length) {
-                          rawurl =
-                              'https://${widget.element['name']}.${widget.element['location']}.aliyuncs.com/${allInfoList[i]['Prefix']}';
-
+                          rawurl = '$shareUrlPrefix${allInfoList[i]['Prefix']}';
                           fileName = allInfoList[i]['Prefix'];
                         } else {
-                          rawurl =
-                              'https://${widget.element['name']}.${widget.element['location']}.aliyuncs.com/${allInfoList[i]['Key']}';
+                          rawurl = '$shareUrlPrefix${allInfoList[i]['Key']}';
                           fileName = allInfoList[i]['Key'].substring(
                               allInfoList[i]['Key'].lastIndexOf('/') + 1);
                         }
                         finalFormatedurl =
                             linkGenerateDict[Global.defaultLKformat]!(
                                 rawurl, fileName);
-
                         multiUrls.add(finalFormatedurl);
                       }
                     }
@@ -1264,8 +1272,21 @@ class AliyunFileExplorerState
                           children: [
                             SlidableAction(
                               onPressed: (BuildContext context) {
-                                String shareUrl =
-                                    'https://${widget.element['name']}.${widget.element['location']}.aliyuncs.com/${allInfoList[index]['Key']}';
+                                String shareUrl = '';
+                                String customUrl =
+                                    widget.element['customUrl'] == null ||
+                                            widget.element['customUrl'] == ''
+                                        ? 'None'
+                                        : widget.element['customUrl'];
+                                if (customUrl != 'None') {
+                                  shareUrl = '$customUrl/'
+                                      .replaceAll(RegExp(r'\/+$'), '/');
+                                } else {
+                                  shareUrl =
+                                      'https://${widget.element['name']}.${widget.element['location']}.aliyuncs.com/';
+                                }
+                                shareUrl =
+                                    '$shareUrl${allInfoList[index]['Key']}';
                                 Share.share(shareUrl);
                               },
                               autoClose: true,
@@ -1674,8 +1695,18 @@ class AliyunFileExplorerState
             title: const Text('复制链接(设置中的默认格式)'),
             onTap: () async {
               String format = await Global.getLKformat();
-              String shareUrl =
-                  'https://${widget.element['name']}.${widget.element['location']}.aliyuncs.com/${allInfoList[index]['Key']}';
+              String shareUrlPrefix = '';
+              String customUrl = widget.element['customUrl'] == null ||
+                      widget.element['customUrl'] == ''
+                  ? 'None'
+                  : widget.element['customUrl'];
+              if (customUrl != 'None') {
+                shareUrlPrefix = '$customUrl/'.replaceAll(RegExp(r'\/+$'), '/');
+              } else {
+                shareUrlPrefix =
+                    'https://${widget.element['name']}.${widget.element['location']}.aliyuncs.com/';
+              }
+              String shareUrl = '$shareUrlPrefix${allInfoList[index]['Key']}';
               String filename = my_path.basename(allInfoList[index]['Key']);
               String formatedLink =
                   linkGenerateDict[format]!(shareUrl, filename);

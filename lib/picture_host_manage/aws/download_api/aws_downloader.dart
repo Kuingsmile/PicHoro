@@ -67,6 +67,7 @@ class DownloadManager {
       if (fileExist) {
         setStatus(task, DownloadStatus.completed);
       } else if (partialFileExist) {
+
         Map urlMap = jsonDecode(url);
         String urlpath = urlMap['object'];
         String region = urlMap['region'];

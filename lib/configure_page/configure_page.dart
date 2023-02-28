@@ -6,7 +6,6 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:fluro/fluro.dart';
 
 import 'package:horopic/utils/sql_utils.dart';
-import 'package:horopic/utils/permission.dart';
 import 'package:horopic/router/application.dart';
 import 'package:horopic/router/routers.dart';
 import 'package:horopic/utils/common_functions.dart';
@@ -207,7 +206,6 @@ class ConfigurePageState extends State<ConfigurePage>
                     ],
                   ),
             onTap: () async {
-              await Permissionutils.askPermissionRequestInstallPackage();
               _checkUpdate();
             },
             trailing: const Icon(Icons.arrow_forward_ios),

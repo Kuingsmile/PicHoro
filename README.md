@@ -6,7 +6,7 @@
   </a>
 </div>
 
-&emsp;&emsp;一款基于flutter的手机端云存储平台/图床管理和文件上传/下载工具，最新版本**V1.9.9**，与PicGo配置互通，可直接扫码导入，主要功能包括云存储/图床/云服务器平台,以及网盘管理（通过[Alist](https://alist.nn.ci/zh/))，文件上传和下载管理，以及各种格式的链接分享。
+&emsp;&emsp;一款基于flutter的手机端云存储平台/图床管理和文件上传/下载工具，最新版本**V1.10.0**，与PicGo配置互通，可直接扫码导入，主要功能包括云存储/图床/云服务器平台,以及网盘管理（通过[Alist](https://alist.nn.ci/zh/))，文件上传和下载管理，以及各种格式的链接分享。
 
 &emsp;&emsp;支持多种图片/PDF/文本文件/音视频的在线预览和播放，具体支持的格式请查看[支持的格式列表](https://github.com/Kuingsmile/PicHoro/blob/main/supported_format.md "支持的格式列表")
 
@@ -72,7 +72,7 @@
 
 Github下载地址 [Github release](https://github.com/Kuingsmile/PicHoro/releases)  
 
-我的个人网站提供的最新版本下载地址 [https://pichoro.msq.pub/PicHoro_V1.9.9.apk](https://pichoro.msq.pub/PicHoro_V1.9.9.apk)
+我的个人网站提供的最新版本下载地址 [https://pichoro.msq.pub/PicHoro_V1.10.0.apk](https://pichoro.msq.pub/PicHoro_V1.10.0.apk)
 
 ### IOS
 
@@ -109,6 +109,13 @@ Github下载地址 [Github release](https://github.com/Kuingsmile/PicHoro/releas
 
   详细更新日志请查看[更新日志](https://github.com/Kuingsmile/PicHoro/blob/main/Version_update_log.md "更新日志")
 
+- 2023-02-28: **V1.10.0**:
+  - 新增：s3/阿里云/腾讯云等平台现在可以单独为存储桶设置自定义域名了。
+  - 新增：现在会在安装或者启动时获取安装未知应用权限，避免APP无法启动。
+  - 维护：部分代码精简
+  - 修复：修复了s3平台文件地址错误的问题。
+  - 修复：修复了图片缓存导致相同地址的图片无法更新的问题。
+
 - 2023-01-05: **V1.99**:
   - 新增：更换了版本升级使用的下载地址为cdn加速地址，优化了下载速度。
   - 新增：将作者QQ二维码修改为软件反馈交流群二维码。
@@ -116,11 +123,6 @@ Github下载地址 [Github release](https://github.com/Kuingsmile/PicHoro/releas
   - 修复：修复了设置主题为自动后，APP无法正常启动的问题。
   - 修复：修复了在上传下载页面删除上传任务后，使用`全部开始`按钮仍然会上传已删除的任务的问题。
   - 修复：修复了在进入webdav上传下载页面时，自动切换标签页没有正常作用的问题。
-
-- 2022-12-18: **V1.98**:
-  - 新增：添加了图片压缩功能，现在可以选择在上传图片前先进行压缩了，可选压缩后格式为jpg、png和webp，并且可以自定义最小宽度、最小高度和压缩后质量。
-  - 新增：S3 API兼容平台上传时现在会主动修改content-type。
-  - 优化：添加了webp文件格式的图标。
 
 ## 开发计划
 

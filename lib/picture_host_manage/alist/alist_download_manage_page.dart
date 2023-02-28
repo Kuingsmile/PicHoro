@@ -203,9 +203,9 @@ class AlistUpDownloadManagePageState extends State<AlistUpDownloadManagePage> {
                 });
           },
           child: ListItem(
-              onDownloadPlayPausedPressed: (url, fileName, configMap) async {
-                var task = downloadManager
-                    .getDownload(jsonDecode(Global.alistDownloadList[i])[0]);
+              onDownloadPlayPausedPressed: (url, fileName,configMap) async {
+                var task =
+                    downloadManager.getDownload(jsonDecode(Global.alistDownloadList[i])[0]);
                 if (task != null && !task.status.value.isCompleted) {
                   switch (task.status.value) {
                     case DownloadStatus.downloading:
@@ -220,7 +220,7 @@ class AlistUpDownloadManagePageState extends State<AlistUpDownloadManagePage> {
                   setState(() {});
                 } else {
                   await downloadManager.addDownload(
-                      url, "$savedDir$fileName", fileName, configMap);
+                      url, "$savedDir$fileName", fileName,configMap);
                   setState(() {});
                 }
               },
@@ -305,8 +305,8 @@ class AlistUpDownloadManagePageState extends State<AlistUpDownloadManagePage> {
         children: [
           TextButton(
               onPressed: () async {
-                await downloadManager.addBatchDownloads(downloadUrlList,
-                    savedDir, downloadFileNameList, downloadConfigMapList);
+                await downloadManager.addBatchDownloads(
+                    downloadUrlList, savedDir, downloadFileNameList,downloadConfigMapList);
                 setState(() {});
               },
               child: const Text(
@@ -424,7 +424,7 @@ class ListItem extends StatefulWidget {
   DownloadTask? downloadTask;
   String url;
   String fileName;
-  Map<String, dynamic> configMap;
+   Map<String, dynamic> configMap;
   ListItem(
       {Key? key,
       required this.onDownloadPlayPausedPressed,
@@ -490,9 +490,7 @@ class ListItemState extends State<ListItem> {
                               return IconButton(
                                   onPressed: () async {
                                     await widget.onDownloadPlayPausedPressed(
-                                        widget.url,
-                                        widget.fileName,
-                                        widget.configMap);
+                                        widget.url, widget.fileName, widget.configMap);
                                   },
                                   icon: const Icon(
                                     Icons.pause,
@@ -502,9 +500,7 @@ class ListItemState extends State<ListItem> {
                               return IconButton(
                                 onPressed: () async {
                                   await widget.onDownloadPlayPausedPressed(
-                                      widget.url,
-                                      widget.fileName,
-                                      widget.configMap);
+                                      widget.url, widget.fileName, widget.configMap);
                                 },
                                 icon: const Icon(Icons.play_arrow),
                                 color: Colors.blue,
@@ -524,9 +520,7 @@ class ListItemState extends State<ListItem> {
                               return IconButton(
                                   onPressed: () async {
                                     await widget.onDownloadPlayPausedPressed(
-                                        widget.url,
-                                        widget.fileName,
-                                        widget.configMap);
+                                        widget.url, widget.fileName, widget.configMap);
                                   },
                                   icon: const Icon(
                                     Icons.download,

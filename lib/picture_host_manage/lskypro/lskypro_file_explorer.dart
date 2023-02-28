@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:external_path/external_path.dart';
 import 'package:fluro/fluro.dart';
-import 'package:f_logs/f_logs.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:flutter/services.dart' as flutter_services;

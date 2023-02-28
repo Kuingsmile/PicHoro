@@ -14,6 +14,8 @@ import 'package:horopic/picture_host_manage/manage_api/tencent_manage_api.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/sql_utils.dart';
+import 'package:horopic/picture_host_manage/alist/alist_file_explorer.dart'
+    show RenameDialog, RenameDialogContent;
 
 class TencentBucketList extends StatefulWidget {
   const TencentBucketList({Key? key}) : super(key: key);
@@ -29,6 +31,7 @@ class TencentBucketListState
 
   RefreshController refreshController =
       RefreshController(initialRefresh: false);
+  TextEditingController vc = TextEditingController();
 
   @override
   void initState() {
@@ -109,6 +112,10 @@ class TencentBucketListState
           'name': allBucketList[i]['Name'],
           'location': allBucketList[i]['Location'],
           'CreationDate': formatedTime,
+          'customUrl': Global.bucketCustomUrl
+                  .containsKey('tcyun-${allBucketList[i]['Name']}')
+              ? Global.bucketCustomUrl['tcyun-${allBucketList[i]['Name']}']
+              : '',
         });
       }
       if (mounted) {
@@ -163,7 +170,10 @@ class TencentBucketListState
                   transition: TransitionType.cupertino);
               _onRefresh();
             },
-            icon: const Icon(Icons.add,color: Colors.white,),
+            icon: const Icon(
+              Icons.add,
+              color: Colors.white,
+            ),
             iconSize: 35,
           )
         ],
@@ -382,6 +392,61 @@ class TencentBucketListState
             ),
             subtitle: Text(element['CreationDate'],
                 style: const TextStyle(fontSize: 12)),
+          ),
+          const Divider(
+            height: 0.1,
+            color: Color.fromARGB(255, 230, 230, 230),
+          ),
+          ListTile(
+            leading: const Icon(
+              Icons.link_sharp,
+              color: Color.fromARGB(255, 97, 141, 236),
+            ),
+            minLeadingWidth: 0,
+            title: const Text('设置自定义链接', style: TextStyle(fontSize: 15)),
+            onTap: () async {
+              Navigator.pop(context);
+              showDialog(
+                  barrierDismissible: false,
+                  context: context,
+                  builder: (context) {
+                    return RenameDialog(
+                      contentWidget: RenameDialogContent(
+                        title: Global.bucketCustomUrl[
+                                    'tcyun-${element['name']}'] ==
+                                ''
+                            ? '设置自定义链接'
+                            : Global.bucketCustomUrl[
+                                        'tcyun-${element['name']}'] ==
+                                    null
+                                ? '设置自定义链接'
+                                : Global
+                                            .bucketCustomUrl[
+                                                'tcyun-${element['name']}']!
+                                            .length >
+                                        20
+                                    ? '${Global.bucketCustomUrl['tcyun-${element['name']}']!.substring(0, 20)}...'
+                                    : Global.bucketCustomUrl[
+                                        'tcyun-${element['name']}']!,
+                        okBtnTap: () async {
+                          if (!vc.text.startsWith(RegExp(r'http|https'))) {
+                            showToast('链接必须以http或https开头');
+                            return;
+                          }
+                          bucketMap[bucketMap.indexOf(element)]['customUrl'] =
+                              vc.text;
+                          Global.bucketCustomUrl['tcyun-${element['name']}'] =
+                              vc.text;
+                          Global.setBucketCustomUrl(Global.bucketCustomUrl);
+                          showToast('设置成功');
+                        },
+                        vc: vc,
+                        cancelBtnTap: () {},
+                        stateBoolText: '',
+                      ),
+                    );
+                  });
+            },
           ),
           const Divider(
             height: 0.1,

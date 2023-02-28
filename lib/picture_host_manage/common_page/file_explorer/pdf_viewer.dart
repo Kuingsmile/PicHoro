@@ -10,7 +10,7 @@ import 'package:horopic/utils/common_functions.dart';
 class PdfViewer extends StatefulWidget {
   final String url;
   final String fileName;
-  final Map<String, String>? headers;
+  final Map<String,String>? headers;
 
   const PdfViewer({
     Key? key,

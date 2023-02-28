@@ -554,7 +554,7 @@ class SFTPFileExplorerState
                                     await FTPManageAPI.getConfigMap();
                                 configMap['uploadPath'] = widget.bucketPrefix;
                                 for (int i = 0; i < files.length; i++) {
-                                  File compressedFile;
+                                   File compressedFile;
                                   if (Global.isCompress == true) {
                                     ImageCompress imageCompress =
                                         ImageCompress();

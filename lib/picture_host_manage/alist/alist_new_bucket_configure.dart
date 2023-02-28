@@ -225,9 +225,9 @@ class AlistNewBucketConfigState extends State<AlistNewBucketConfig> {
         list.add(
           ListTile(
             title: Center(
-                child: Text(configList[i]['required'] == true
-                    ? configList[i]['translate'] + '*'
-                    : '可选:${configList[i]['translate']}')),
+                 child: Text(configList[i]['required'] == true
+                   ? configList[i]['translate'] + '*'
+                   : '可选:${configList[i]['translate']}')),
             subtitle: TextFormField(
               textAlign: TextAlign.center,
               initialValue:
