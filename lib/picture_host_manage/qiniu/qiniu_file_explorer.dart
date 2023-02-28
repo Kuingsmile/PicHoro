@@ -25,6 +25,12 @@ import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/pages/loading.dart';
 import 'package:horopic/utils/image_compress.dart';
+import 'package:horopic/picture_host_manage/aws/aws_file_explorer.dart'
+    show
+        RenameDialog,
+        RenameDialogContent,
+        NewFolderDialog,
+        NewFolderDialogContent;
 
 bool isCoverFile = false;
 
@@ -539,7 +545,7 @@ class QiniuFileExplorerState
                                 configMap['area'] = widget.element['area'];
                                 configMap['path'] = widget.bucketPrefix;
                                 for (int i = 0; i < files.length; i++) {
-                                   File compressedFile;
+                                  File compressedFile;
                                   if (Global.isCompress == true) {
                                     ImageCompress imageCompress =
                                         ImageCompress();
@@ -1503,7 +1509,9 @@ class QiniuFileExplorerState
 
                                   showToast('开始获取文件');
                                   String filePath = await downloadTxtFile(
-                                      shareUrl, allInfoList[index]['key'],null);
+                                      shareUrl,
+                                      allInfoList[index]['key'],
+                                      null);
                                   String fileName = allInfoList[index]['key'];
                                   if (filePath == 'error') {
                                     showToast('获取失败');
@@ -2000,282 +2008,5 @@ class QiniuFileExplorerState
         ],
       ),
     );
-  }
-}
-
-class RenameDialog extends AlertDialog {
-  RenameDialog({super.key, required Widget contentWidget})
-      : super(
-          content: contentWidget,
-          contentPadding: EdgeInsets.zero,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(30),
-            //side: BorderSide(color: Colors.blue, width: 3)
-          ),
-        );
-}
-
-//弹出框 修改自https://www.jianshu.com/p/4144837a789b
-double btnHeight = 60;
-double borderWidth = 2;
-
-class RenameDialogContent extends StatefulWidget {
-  String title;
-  String cancelBtnTitle;
-  String okBtnTitle;
-  VoidCallback cancelBtnTap;
-  VoidCallback okBtnTap;
-  TextEditingController vc;
-  String stateBoolText;
-  RenameDialogContent(
-      {super.key,
-      required this.title,
-      this.cancelBtnTitle = "取消",
-      this.okBtnTitle = "确定",
-      required this.cancelBtnTap,
-      required this.okBtnTap,
-      required this.vc,
-      required this.stateBoolText});
-
-  @override
-  RenameDialogContentState createState() => RenameDialogContentState();
-}
-
-class RenameDialogContentState extends State<RenameDialogContent> {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-        margin: const EdgeInsets.only(top: 20),
-        height: 190,
-        width: 10000,
-        alignment: Alignment.bottomCenter,
-        child: Column(
-          children: [
-            Container(
-                alignment: Alignment.center,
-                child: Text(
-                  widget.title,
-                  style: const TextStyle(
-                      color: Color.fromARGB(255, 0, 0, 0), fontSize: 20),
-                )),
-            //const Spacer(),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(30, 0, 30, 0),
-              child: TextFormField(
-                cursorHeight: 20,
-                textAlign: TextAlign.center,
-                style: const TextStyle(color: Colors.black87),
-                controller: widget.vc,
-                validator: (value) {
-                  if (value!.isEmpty) {
-                    return '不能为空';
-                  }
-                  return null;
-                },
-                decoration: const InputDecoration(
-                    enabledBorder: UnderlineInputBorder(
-                      borderSide:
-                          BorderSide(color: Color.fromARGB(255, 234, 236, 238)),
-                    ),
-                    focusedBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.blue),
-                    )),
-              ),
-            ),
-            Padding(
-                padding: const EdgeInsets.fromLTRB(30, 0, 30, 0),
-                child: Row(
-                  children: [
-                    Checkbox(
-                        value: isCoverFile,
-                        onChanged: (value) {
-                          setState(() {
-                            isCoverFile = value!;
-                          });
-                        }),
-                    Text(
-                      widget.stateBoolText,
-                      style:
-                          const TextStyle(color: Colors.black87, fontSize: 15),
-                    )
-                  ],
-                )),
-            Container(
-              // color: Colors.red,
-              height: btnHeight,
-              margin: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-              child: Column(
-                children: [
-                  Container(
-                    width: double.infinity,
-                    color: const Color.fromARGB(255, 234, 236, 238),
-                    height: borderWidth,
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      TextButton(
-                        onPressed: () {
-                          widget.vc.text = "";
-                          widget.cancelBtnTap();
-                          Navigator.of(context).pop();
-                        },
-                        child: Text(
-                          widget.cancelBtnTitle,
-                          style:
-                              const TextStyle(fontSize: 22, color: Colors.blue),
-                        ),
-                      ),
-                      Container(
-                        width: borderWidth,
-                        color: const Color.fromARGB(255, 234, 236, 238),
-                        height: btnHeight - borderWidth - borderWidth,
-                      ),
-                      TextButton(
-                          onPressed: () {
-                            widget.okBtnTap();
-                            Navigator.of(context).pop();
-                            widget.vc.text = "";
-                          },
-                          child: Text(
-                            widget.okBtnTitle,
-                            style: const TextStyle(
-                                fontSize: 22,
-                                color: Color.fromARGB(255, 169, 173, 177)),
-                          )),
-                    ],
-                  ),
-                ],
-              ),
-            )
-          ],
-        ));
-  }
-}
-
-class NewFolderDialog extends AlertDialog {
-  NewFolderDialog({super.key, required Widget contentWidget})
-      : super(
-          content: contentWidget,
-          contentPadding: EdgeInsets.zero,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(30),
-            //side: BorderSide(color: Colors.blue, width: 3)
-          ),
-        );
-}
-
-//弹出框 修改自https://www.jianshu.com/p/4144837a789b
-
-class NewFolderDialogContent extends StatefulWidget {
-  String title;
-  String cancelBtnTitle;
-  String okBtnTitle;
-  VoidCallback cancelBtnTap;
-  VoidCallback okBtnTap;
-  TextEditingController vc;
-  NewFolderDialogContent({
-    super.key,
-    required this.title,
-    this.cancelBtnTitle = "取消",
-    this.okBtnTitle = "确定",
-    required this.cancelBtnTap,
-    required this.okBtnTap,
-    required this.vc,
-  });
-
-  @override
-  NewFolderDialogContentState createState() => NewFolderDialogContentState();
-}
-
-class NewFolderDialogContentState extends State<NewFolderDialogContent> {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-        margin: const EdgeInsets.only(top: 20),
-        height: 190,
-        width: 10000,
-        alignment: Alignment.bottomCenter,
-        child: Column(
-          children: [
-            Container(
-                alignment: Alignment.center,
-                child: Text(
-                  widget.title,
-                  style: const TextStyle(
-                      color: Color.fromARGB(255, 0, 0, 0), fontSize: 20),
-                )),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(30, 0, 30, 0),
-              child: TextFormField(
-                cursorHeight: 20,
-                textAlign: TextAlign.center,
-                style: const TextStyle(color: Colors.black87),
-                controller: widget.vc,
-                validator: (value) {
-                  if (value!.isEmpty) {
-                    return '不能为空';
-                  }
-                  return null;
-                },
-                decoration: const InputDecoration(
-                    enabledBorder: UnderlineInputBorder(
-                      borderSide:
-                          BorderSide(color: Color.fromARGB(255, 14, 103, 192)),
-                    ),
-                    focusedBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.blue),
-                    )),
-              ),
-            ),
-            const Spacer(),
-            Container(
-              height: btnHeight,
-              margin: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-              child: Column(
-                children: [
-                  Container(
-                    width: double.infinity,
-                    color: const Color.fromARGB(255, 234, 236, 238),
-                    height: borderWidth,
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      TextButton(
-                        onPressed: () {
-                          widget.vc.text = "";
-                          widget.cancelBtnTap();
-                          Navigator.of(context).pop();
-                        },
-                        child: Text(
-                          widget.cancelBtnTitle,
-                          style:
-                              const TextStyle(fontSize: 22, color: Colors.blue),
-                        ),
-                      ),
-                      Container(
-                        width: borderWidth,
-                        color: const Color.fromARGB(255, 234, 236, 238),
-                        height: btnHeight - borderWidth - borderWidth,
-                      ),
-                      TextButton(
-                          onPressed: () {
-                            widget.okBtnTap();
-                            Navigator.of(context).pop();
-                            widget.vc.text = "";
-                          },
-                          child: Text(
-                            widget.okBtnTitle,
-                            style: const TextStyle(
-                                fontSize: 22, color: Colors.blue),
-                          )),
-                    ],
-                  ),
-                ],
-              ),
-            )
-          ],
-        ));
   }
 }
