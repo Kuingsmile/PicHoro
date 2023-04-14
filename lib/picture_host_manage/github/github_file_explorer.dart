@@ -864,7 +864,7 @@ class GithubFileExplorerState
                       return;
                     }
                     String hostPrefix =
-                        'https://gh.api.99988866.xyz/https://raw.githubusercontent.com/${widget.element['showedUsername']}/${widget.element['name']}/${widget.element['default_branch']}/${widget.bucketPrefix}';
+                        'https://ghproxy.com/https://raw.githubusercontent.com/${widget.element['showedUsername']}/${widget.element['name']}/${widget.element['default_branch']}/${widget.bucketPrefix}';
                     List<String> urlList = [];
                     for (int i = 0; i < downloadList.length; i++) {
                       urlList.add(hostPrefix + downloadList[i]['path']);
@@ -900,7 +900,7 @@ class GithubFileExplorerState
                       );
                       if (result[0] == 'success') {
                         urlList.add(
-                            'https://gh.api.99988866.xyz/${result[1]['download_url']}');
+                            'https://ghproxy.com/${result[1]['download_url']}');
                       }
                     }
                     Global.githubDownloadList.addAll(urlList);
@@ -1548,7 +1548,7 @@ class GithubFileExplorerState
                                             widget.element['private'] ==
                                                 false) {
                                           urlList +=
-                                              'https://gh.api.99988866.xyz/https://raw.githubusercontent.com/${widget.element['showedUsername']}/${widget.element['name']}/${widget.element['default_branch']}/${widget.bucketPrefix}${allInfoList[i]['path']},';
+                                              'https://ghproxy.com/https://raw.githubusercontent.com/${widget.element['showedUsername']}/${widget.element['name']}/${widget.element['default_branch']}/${widget.bucketPrefix}${allInfoList[i]['path']},';
                                         } else {
                                           var result = await GithubManageAPI
                                               .getRepoFileContent(
@@ -1559,7 +1559,7 @@ class GithubFileExplorerState
                                           );
                                           if (result[0] == 'success') {
                                             urlList +=
-                                                'https://gh.api.99988866.xyz/${result[1]['download_url']},';
+                                                'https://ghproxy.com/${result[1]['download_url']},';
                                           }
                                         }
                                       } else if (i < index) {
@@ -1583,7 +1583,7 @@ class GithubFileExplorerState
                                     );
                                     if (result[0] == 'success') {
                                       urlList +=
-                                          'https://gh.api.99988866.xyz/${result[1]['download_url']}';
+                                          'https://ghproxy.com/${result[1]['download_url']}';
                                     } else {
                                       showToast('获取图片地址失败');
                                       return;
@@ -1601,7 +1601,7 @@ class GithubFileExplorerState
                                           adminUserName ||
                                       widget.element['private'] == false) {
                                     String urlPath =
-                                        'https://gh.api.99988866.xyz/https://raw.githubusercontent.com/${widget.element['showedUsername']}/${widget.element['name']}/${widget.element['default_branch']}/${widget.bucketPrefix}${allInfoList[index]['path']}';
+                                        'https://ghproxy.com/https://raw.githubusercontent.com/${widget.element['showedUsername']}/${widget.element['name']}/${widget.element['default_branch']}/${widget.bucketPrefix}${allInfoList[index]['path']}';
                                     showToast('开始获取文件');
                                     String filePath = await downloadFile(
                                         urlPath, allInfoList[index]['path']);
@@ -1625,7 +1625,7 @@ class GithubFileExplorerState
                                     );
                                     if (result[0] == 'success') {
                                       urlList +=
-                                          'https://gh.api.99988866.xyz/${result[1]['download_url']}';
+                                          'https://ghproxy.com/${result[1]['download_url']}';
                                     } else {
                                       showToast('获取文件地址失败');
                                       return;

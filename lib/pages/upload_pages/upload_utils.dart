@@ -1271,7 +1271,7 @@ class UploadManager {
                       responseGet.data!['data']['sign'] == null
                   ? returnUrl
                   : configMap['host'] +
-                      '/d' +
+                      '/d/' +
                       filePath +
                       '?sign=' +
                       responseGet.data!['data']['sign'];

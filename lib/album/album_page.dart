@@ -425,7 +425,7 @@ class UploadedImagesState extends State<UploadedImages>
                       if (currentShowedImagesDisplayAddressUrl[i]
                           .contains('raw.githubusercontent.com')) {
                         urlList +=
-                            'https://gh.api.99988866.xyz/${currentShowedImagesDisplayAddressUrl[i]},';
+                            'https://ghproxy.com/${currentShowedImagesDisplayAddressUrl[i]},';
                       } else {
                         urlList += currentShowedImagesUrl[i] + ',';
                       }
@@ -522,7 +522,7 @@ class UploadedImagesState extends State<UploadedImages>
                                         .contains('raw.githubusercontent.com')
                                     ?
                                     // ignore: prefer_interpolation_to_compose_strings
-                                    'https://gh.api.99988866.xyz/' +
+                                    'https://ghproxy.com/' +
                                         currentShowedImagesDisplayAddressUrl[
                                             index]
                                     : currentShowedImagesDisplayAddressUrl[
@@ -851,12 +851,8 @@ class UploadedImagesState extends State<UploadedImages>
                         multiUrls.add(finalFormatedurl);
                       }
                     }
-                    await Clipboard.setData(ClipboardData(
-                        text: multiUrls
-                            .toString()
-                            .substring(1, multiUrls.toString().length - 1)
-                            .replaceAll(', ', '\n')
-                            .replaceAll(',', '\n')));
+                    await Clipboard.setData(
+                        ClipboardData(text: multiUrls.join('\n')));
                     showToast('已复制全部链接');
                     return;
                   }
