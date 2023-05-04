@@ -4,11 +4,8 @@ import 'package:f_logs/f_logs.dart';
 
 import 'package:horopic/router/application.dart';
 import 'package:horopic/router/routers.dart';
-import 'package:horopic/picture_host_manage/common_page/loading_state.dart'
-    as loading_state;
+import 'package:horopic/picture_host_manage/common_page/loading_state.dart' as loading_state;
 import 'package:horopic/picture_host_manage/manage_api/smms_manage_api.dart';
-import 'package:horopic/utils/global.dart';
-import 'package:horopic/utils/sql_utils.dart';
 import 'package:horopic/utils/common_functions.dart';
 
 class SmmsManageHomePage extends StatefulWidget {
@@ -18,8 +15,7 @@ class SmmsManageHomePage extends StatefulWidget {
   SmmsManageHomePageState createState() => SmmsManageHomePageState();
 }
 
-class SmmsManageHomePageState
-    extends loading_state.BaseLoadingPageState<SmmsManageHomePage> {
+class SmmsManageHomePageState extends loading_state.BaseLoadingPageState<SmmsManageHomePage> {
   Map userProfile = {};
 
   @override
@@ -30,27 +26,6 @@ class SmmsManageHomePageState
 
   initProfile() async {
     try {
-      String currentUser = await Global.getUser();
-      String defaultPassword = await Global.getPassword();
-      var queryuser = await MySqlUtils.queryUser(username: currentUser);
-      if (queryuser == 'Empty') {
-        setState(() {
-          state = loading_state.LoadState.ERROR;
-        });
-        return showToast('请先登录');
-      } else if (queryuser['password'] != defaultPassword) {
-        setState(() {
-          state = loading_state.LoadState.ERROR;
-        });
-        return showToast('请先登录');
-      }
-      var querySmms = await MySqlUtils.querySmms(username: currentUser);
-      if (querySmms == 'Empty') {
-        setState(() {
-          state = loading_state.LoadState.ERROR;
-        });
-        return showToast('请先去配置SM.MS');
-      }
       var profileMap = await SmmsManageAPI.getUserProfile();
       if (profileMap[0] == 'success') {
         userProfile = profileMap[1];
@@ -94,9 +69,7 @@ class SmmsManageHomePageState
             width: 100,
             height: 100,
           ),
-          const Text('暂无数据',
-              style: TextStyle(
-                  fontSize: 20, color: Color.fromARGB(136, 121, 118, 118)))
+          const Text('暂无数据', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118)))
         ],
       ),
     );
@@ -108,9 +81,7 @@ class SmmsManageHomePageState
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Text('加载失败',
-              style: TextStyle(
-                  fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))),
+          const Text('加载失败', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))),
           ElevatedButton(
             style: ButtonStyle(
               backgroundColor: MaterialStateProperty.all(Colors.blue),
@@ -157,9 +128,7 @@ class SmmsManageHomePageState
                 CircleAvatar(
                   radius: MediaQuery.of(context).size.width / 10,
                   backgroundColor: Colors.transparent,
-                  backgroundImage:
-                      const Image(image: AssetImage('assets/icons/smms.png'))
-                          .image,
+                  backgroundImage: const Image(image: AssetImage('assets/icons/smms.png')).image,
                 ),
                 const SizedBox(height: 20),
               ],
@@ -170,15 +139,13 @@ class SmmsManageHomePageState
       Column(
         children: [
           ListTile(
-            leading:
-                const Icon(Icons.folder_open_outlined, color: Colors.blue),
+            leading: const Icon(Icons.folder_open_outlined, color: Colors.blue),
             minLeadingWidth: 0,
             title: const Text('文件管理'),
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () {
               Application.router
-                  .navigateTo(context, Routes.smmsFileExplorer,
-                      transition: TransitionType.cupertino)
+                  .navigateTo(context, Routes.smmsFileExplorer, transition: TransitionType.cupertino)
                   .then((value) => setState(() {
                         initProfile();
                       }));
@@ -188,43 +155,37 @@ class SmmsManageHomePageState
             leading: const Icon(Icons.person, color: Colors.blue),
             minLeadingWidth: 0,
             title: const Text('用户名'),
-            trailing: Text(userProfile['username'].toString(),
-                style: const TextStyle(fontSize: 15)),
+            trailing: Text(userProfile['username'].toString(), style: const TextStyle(fontSize: 15)),
           ),
           ListTile(
             leading: const Icon(Icons.email, color: Colors.blue),
             minLeadingWidth: 0,
             title: const Text('邮箱'),
-            trailing: Text(userProfile['email'],
-                style: const TextStyle(fontSize: 15)),
+            trailing: Text(userProfile['email'], style: const TextStyle(fontSize: 15)),
           ),
           ListTile(
             leading: const Icon(Icons.data_usage, color: Colors.blue),
             minLeadingWidth: 0,
             title: const Text('已用空间'),
-            trailing: Text(userProfile['disk_usage'].toString(),
-                style: const TextStyle(fontSize: 15)),
+            trailing: Text(userProfile['disk_usage'].toString(), style: const TextStyle(fontSize: 15)),
           ),
           ListTile(
             leading: const Icon(Icons.storage, color: Colors.blue),
             minLeadingWidth: 0,
             title: const Text('总空间'),
-            trailing: Text(userProfile['disk_limit'],
-                style: const TextStyle(fontSize: 15)),
+            trailing: Text(userProfile['disk_limit'], style: const TextStyle(fontSize: 15)),
           ),
           ListTile(
             leading: const Icon(Icons.diamond, color: Colors.blue),
             minLeadingWidth: 0,
             title: const Text('SM.MS会员'),
-            trailing: Text(userProfile['role'] == 'VIP' ? '是' : '否',
-                style: const TextStyle(fontSize: 15)),
+            trailing: Text(userProfile['role'] == 'VIP' ? '是' : '否', style: const TextStyle(fontSize: 15)),
           ),
           ListTile(
             leading: const Icon(Icons.file_upload_outlined, color: Colors.blue),
             minLeadingWidth: 0,
             title: const Text('最大上传文件大小'),
-            trailing: Text(userProfile['role'] == 'VIP' ? '10 MB' : '5 MB',
-                style: const TextStyle(fontSize: 15)),
+            trailing: Text(userProfile['role'] == 'VIP' ? '10 MB' : '5 MB', style: const TextStyle(fontSize: 15)),
           ),
         ],
       ),

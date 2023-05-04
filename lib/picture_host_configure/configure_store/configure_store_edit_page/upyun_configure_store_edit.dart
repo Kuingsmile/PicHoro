@@ -219,8 +219,7 @@ class UpyunConfigureStoreEditState extends State<UpyunConfigureStoreEdit> {
         _pathController.text = configMap['path'];
       }
 
-      if (configMap['options'] != 'None' ||
-          configMap['options'].toString().trim() != '') {
+      if (configMap['options'] != 'None' || configMap['options'].toString().trim() != '') {
         _optionsController.text = configMap['options'];
       }
       showToast('导入成功');

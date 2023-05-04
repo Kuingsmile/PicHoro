@@ -21,13 +21,10 @@ import 'package:horopic/utils/global.dart';
 class SmmsUpDownloadManagePage extends StatefulWidget {
   String downloadPath;
   String tabIndex;
-  SmmsUpDownloadManagePage(
-      {Key? key, required this.downloadPath, required this.tabIndex})
-      : super(key: key);
+  SmmsUpDownloadManagePage({Key? key, required this.downloadPath, required this.tabIndex}) : super(key: key);
 
   @override
-  SmmsUpDownloadManagePageState createState() =>
-      SmmsUpDownloadManagePageState();
+  SmmsUpDownloadManagePageState createState() => SmmsUpDownloadManagePageState();
 }
 
 class SmmsUpDownloadManagePageState extends State<SmmsUpDownloadManagePage> {
@@ -76,8 +73,7 @@ class SmmsUpDownloadManagePageState extends State<SmmsUpDownloadManagePage> {
           },
           child: UploadListItem(
               onUploadPlayPausedPressed: (path, fileName, configMap) async {
-                var task = uploadManager
-                    .getUpload(jsonDecode(Global.smmsUploadList[i])[1]);
+                var task = uploadManager.getUpload(jsonDecode(Global.smmsUploadList[i])[1]);
                 if (task != null && !task.status.value.isCompleted) {
                   switch (task.status.value) {
                     case UploadStatus.uploading:
@@ -102,8 +98,7 @@ class SmmsUpDownloadManagePageState extends State<SmmsUpDownloadManagePage> {
               path: jsonDecode(Global.smmsUploadList[i])[0],
               fileName: jsonDecode(Global.smmsUploadList[i])[1],
               configMap: jsonDecode(Global.smmsUploadList[i])[2],
-              uploadTask: uploadManager
-                  .getUpload(jsonDecode(Global.smmsUploadList[i])[1]))));
+              uploadTask: uploadManager.getUpload(jsonDecode(Global.smmsUploadList[i])[1]))));
     }
     List<Widget> list2 = [
       const Divider(
@@ -115,28 +110,20 @@ class SmmsUpDownloadManagePageState extends State<SmmsUpDownloadManagePage> {
         children: [
           TextButton(
               onPressed: () async {
-                await uploadManager.addBatchUploads(
-                    uploadPathList, uploadFileNameList, uploadConfigMapList);
+                await uploadManager.addBatchUploads(uploadPathList, uploadFileNameList, uploadConfigMapList);
                 setState(() {});
               },
               child: const Text(
                 "全部开始",
-                style: TextStyle(
-                    color: Colors.blue,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold),
+                style: TextStyle(color: Colors.blue, fontSize: 16, fontWeight: FontWeight.bold),
               )),
           TextButton(
               onPressed: () async {
-                await uploadManager.cancelBatchUploads(
-                    uploadPathList, uploadFileNameList);
+                await uploadManager.cancelBatchUploads(uploadPathList, uploadFileNameList);
               },
               child: const Text(
                 "全部取消",
-                style: TextStyle(
-                    color: Colors.blue,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold),
+                style: TextStyle(color: Colors.blue, fontSize: 16, fontWeight: FontWeight.bold),
               )),
           TextButton(
               onPressed: () async {
@@ -148,16 +135,12 @@ class SmmsUpDownloadManagePageState extends State<SmmsUpDownloadManagePage> {
               },
               child: const Text(
                 "全部清空",
-                style: TextStyle(
-                    color: Colors.blue,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold),
+                style: TextStyle(color: Colors.blue, fontSize: 16, fontWeight: FontWeight.bold),
               )),
         ],
       ),
       ValueListenableBuilder(
-          valueListenable: uploadManager.getBatchUploadProgress(
-              uploadPathList, uploadFileNameList),
+          valueListenable: uploadManager.getBatchUploadProgress(uploadPathList, uploadFileNameList),
           builder: (context, value, child) {
             return Container(
               color: const Color.fromARGB(255, 219, 239, 255),
@@ -194,8 +177,7 @@ class SmmsUpDownloadManagePageState extends State<SmmsUpDownloadManagePage> {
           },
           child: ListItem(
               onDownloadPlayPausedPressed: (url) async {
-                var task =
-                    downloadManager.getDownload(Global.smmsDownloadList[i]);
+                var task = downloadManager.getDownload(Global.smmsDownloadList[i]);
                 if (task != null && !task.status.value.isCompleted) {
                   switch (task.status.value) {
                     case DownloadStatus.downloading:
@@ -209,14 +191,12 @@ class SmmsUpDownloadManagePageState extends State<SmmsUpDownloadManagePage> {
                   }
                   setState(() {});
                 } else {
-                  await downloadManager.addDownload(
-                      url, "$savedDir${Global.smmsSavedNameList[i]}");
+                  await downloadManager.addDownload(url, "$savedDir${Global.smmsSavedNameList[i]}");
                   setState(() {});
                 }
               },
               onDelete: (url) async {
-                var fileName =
-                    "$savedDir${Global.smmsSavedNameList[Global.smmsDownloadList.indexOf(url)]}";
+                var fileName = "$savedDir${Global.smmsSavedNameList[Global.smmsDownloadList.indexOf(url)]}";
                 var file = File(fileName);
                 try {
                   await file.delete();
@@ -236,8 +216,7 @@ class SmmsUpDownloadManagePageState extends State<SmmsUpDownloadManagePage> {
               index: i,
               savedFileNameList: Global.smmsSavedNameList,
               url: Global.smmsDownloadList[i],
-              downloadTask:
-                  downloadManager.getDownload(Global.smmsDownloadList[i]))));
+              downloadTask: downloadManager.getDownload(Global.smmsDownloadList[i]))));
     }
     List<Widget> list2 = [
       const Divider(
@@ -253,20 +232,15 @@ class SmmsUpDownloadManagePageState extends State<SmmsUpDownloadManagePage> {
           padding: const EdgeInsets.all(10),
           onPressed: () async {
             String externalStorageDirectory =
-                await ExternalPath.getExternalStoragePublicDirectory(
-                    ExternalPath.DIRECTORY_DOWNLOADS);
-            externalStorageDirectory =
-                '$externalStorageDirectory/PicHoro/Download/smms';
+                await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOADS);
+            externalStorageDirectory = '$externalStorageDirectory/PicHoro/Download/smms';
             // ignore: use_build_context_synchronously
             Application.router.navigateTo(context,
                 '${Routes.fileExplorer}?currentDirPath=${Uri.encodeComponent(externalStorageDirectory)}&rootPath=${Uri.encodeComponent(externalStorageDirectory)}',
                 transition: TransitionType.cupertino);
           },
-          child: const Text('打开下载文件目录',
-              style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold)),
+          child:
+              const Text('打开下载文件目录', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
         ),
         const SizedBox(
           width: 10,
@@ -285,11 +259,7 @@ class SmmsUpDownloadManagePageState extends State<SmmsUpDownloadManagePage> {
                 Icons.delete,
                 color: Colors.white,
               ),
-              Text('清空下载列表',
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold)),
+              Text('清空下载列表', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
             ],
           ),
         ),
@@ -300,67 +270,47 @@ class SmmsUpDownloadManagePageState extends State<SmmsUpDownloadManagePage> {
           TextButton(
               onPressed: () async {
                 String externalStorageDirectory =
-                    await ExternalPath.getExternalStoragePublicDirectory(
-                        ExternalPath.DIRECTORY_DOWNLOADS);
-                externalStorageDirectory =
-                    '$externalStorageDirectory/PicHoro/Download/smms';
+                    await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOADS);
+                externalStorageDirectory = '$externalStorageDirectory/PicHoro/Download/smms';
                 List savedDirList = [];
                 for (var i = 0; i < Global.smmsSavedNameList.length; i++) {
-                  savedDirList.add(
-                      '$externalStorageDirectory/${Global.smmsSavedNameList[i]}');
+                  savedDirList.add('$externalStorageDirectory/${Global.smmsSavedNameList[i]}');
                 }
-                await downloadManager.addBatchDownloads(
-                    Global.smmsDownloadList, savedDirList);
+                await downloadManager.addBatchDownloads(Global.smmsDownloadList, savedDirList);
                 setState(() {});
               },
               child: const Text(
                 "全部下载",
-                style: TextStyle(
-                    color: Colors.blue,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold),
+                style: TextStyle(color: Colors.blue, fontSize: 16, fontWeight: FontWeight.bold),
               )),
           TextButton(
               onPressed: () async {
-                await downloadManager
-                    .pauseBatchDownloads(Global.smmsDownloadList);
+                await downloadManager.pauseBatchDownloads(Global.smmsDownloadList);
               },
               child: const Text(
                 "全部暂停",
-                style: TextStyle(
-                    color: Colors.blue,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold),
+                style: TextStyle(color: Colors.blue, fontSize: 16, fontWeight: FontWeight.bold),
               )),
           TextButton(
               onPressed: () async {
-                await downloadManager
-                    .resumeBatchDownloads(Global.smmsDownloadList);
+                await downloadManager.resumeBatchDownloads(Global.smmsDownloadList);
               },
               child: const Text(
                 "全部继续",
-                style: TextStyle(
-                    color: Colors.blue,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold),
+                style: TextStyle(color: Colors.blue, fontSize: 16, fontWeight: FontWeight.bold),
               )),
           TextButton(
               onPressed: () async {
-                await downloadManager
-                    .cancelBatchDownloads(Global.smmsDownloadList);
+                await downloadManager.cancelBatchDownloads(Global.smmsDownloadList);
               },
               child: const Text(
                 "全部取消",
-                style: TextStyle(
-                    color: Colors.blue,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold),
+                style: TextStyle(color: Colors.blue, fontSize: 16, fontWeight: FontWeight.bold),
               )),
         ],
       ),
       ValueListenableBuilder(
-          valueListenable:
-              downloadManager.getBatchDownloadProgress(Global.smmsDownloadList),
+          valueListenable: downloadManager.getBatchDownloadProgress(Global.smmsDownloadList),
           builder: (context, value, child) {
             return Container(
               height: 10,
@@ -394,17 +344,11 @@ class SmmsUpDownloadManagePageState extends State<SmmsUpDownloadManagePage> {
                 unselectedLabelColor: Colors.white,
                 tabs: <Widget>[
                   Tab(
-                      child: Text('上传',
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold))),
+                      child:
+                          Text('上传', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold))),
                   Tab(
-                      child: Text('下载',
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold))),
+                      child:
+                          Text('下载', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold))),
                 ],
               ),
             ),
@@ -481,9 +425,8 @@ class ListItemState extends State<ListItem> {
                           builder: (context, value, child) {
                             return Padding(
                               padding: const EdgeInsets.symmetric(vertical: 8),
-                              child: Text(
-                                  "状态: ${downloadStatus[value.toString()]}",
-                                  style: const TextStyle(fontSize: 14)),
+                              child:
+                                  Text("状态: ${downloadStatus[value.toString()]}", style: const TextStyle(fontSize: 14)),
                             );
                           }),
                   ],
@@ -496,8 +439,7 @@ class ListItemState extends State<ListItem> {
                             case DownloadStatus.downloading:
                               return IconButton(
                                   onPressed: () async {
-                                    await widget.onDownloadPlayPausedPressed(
-                                        widget.url);
+                                    await widget.onDownloadPlayPausedPressed(widget.url);
                                   },
                                   icon: const Icon(
                                     Icons.pause,
@@ -506,8 +448,7 @@ class ListItemState extends State<ListItem> {
                             case DownloadStatus.paused:
                               return IconButton(
                                 onPressed: () async {
-                                  await widget
-                                      .onDownloadPlayPausedPressed(widget.url);
+                                  await widget.onDownloadPlayPausedPressed(widget.url);
                                 },
                                 icon: const Icon(Icons.play_arrow),
                                 color: Colors.blue,
@@ -525,8 +466,7 @@ class ListItemState extends State<ListItem> {
                             case DownloadStatus.canceled:
                               return IconButton(
                                   onPressed: () async {
-                                    await widget.onDownloadPlayPausedPressed(
-                                        widget.url);
+                                    await widget.onDownloadPlayPausedPressed(widget.url);
                                   },
                                   icon: const Icon(
                                     Icons.download,
@@ -549,8 +489,7 @@ class ListItemState extends State<ListItem> {
                         ))
               ],
             ),
-            if (widget.downloadTask != null &&
-                !widget.downloadTask!.status.value.isCompleted)
+            if (widget.downloadTask != null && !widget.downloadTask!.status.value.isCompleted)
               ValueListenableBuilder(
                   valueListenable: widget.downloadTask!.progress,
                   builder: (context, value, child) {
@@ -558,10 +497,7 @@ class ListItemState extends State<ListItem> {
                       margin: const EdgeInsets.symmetric(vertical: 4),
                       child: LinearProgressIndicator(
                         value: value,
-                        color: widget.downloadTask!.status.value ==
-                                DownloadStatus.paused
-                            ? Colors.grey
-                            : Colors.amber,
+                        color: widget.downloadTask!.status.value == DownloadStatus.paused ? Colors.grey : Colors.amber,
                       ),
                     );
                   }),
@@ -629,9 +565,8 @@ class UploadListItemState extends State<UploadListItem> {
                           builder: (context, value, child) {
                             return Padding(
                               padding: const EdgeInsets.symmetric(vertical: 8),
-                              child: Text(
-                                  "状态: ${uploadStatus[value.toString()]}",
-                                  style: const TextStyle(fontSize: 14)),
+                              child:
+                                  Text("状态: ${uploadStatus[value.toString()]}", style: const TextStyle(fontSize: 14)),
                             );
                           }),
                   ],
@@ -644,8 +579,7 @@ class UploadListItemState extends State<UploadListItem> {
                             case UploadStatus.completed:
                               return IconButton(
                                   onPressed: () {
-                                    widget.onDelete(
-                                        widget.path, widget.fileName);
+                                    widget.onDelete(widget.path, widget.fileName);
                                   },
                                   icon: const Icon(
                                     Icons.delete,
@@ -656,37 +590,29 @@ class UploadListItemState extends State<UploadListItem> {
                               return IconButton(
                                   onPressed: () async {
                                     await widget.onUploadPlayPausedPressed(
-                                        widget.path,
-                                        widget.fileName,
-                                        widget.configMap);
+                                        widget.path, widget.fileName, widget.configMap);
                                   },
                                   icon: const Icon(
                                     Icons.cloud_upload_outlined,
                                     color: Colors.blue,
                                   ));
                             default:
-                              return widget.uploadTask == null ||
-                                      widget.uploadTask!.status.value ==
-                                          UploadStatus.queued
+                              return widget.uploadTask == null || widget.uploadTask!.status.value == UploadStatus.queued
                                   ? const Icon(
                                       Icons.query_builder_rounded,
                                       color: Colors.blue,
                                     )
                                   : ValueListenableBuilder(
-                                      valueListenable:
-                                          widget.uploadTask!.progress,
+                                      valueListenable: widget.uploadTask!.progress,
                                       builder: (context, value, child) {
                                         return Container(
                                           height: 20,
                                           width: 20,
-                                          margin: const EdgeInsets.fromLTRB(
-                                              0, 0, 10, 0),
+                                          margin: const EdgeInsets.fromLTRB(0, 0, 10, 0),
                                           child: CircularProgressIndicator(
                                             value: value,
                                             strokeWidth: 4,
-                                            color: widget.uploadTask!.status
-                                                        .value ==
-                                                    UploadStatus.paused
+                                            color: widget.uploadTask!.status.value == UploadStatus.paused
                                                 ? Colors.grey
                                                 : Colors.blue,
                                           ),
@@ -696,8 +622,7 @@ class UploadListItemState extends State<UploadListItem> {
                         })
                     : IconButton(
                         onPressed: () async {
-                          await widget.onUploadPlayPausedPressed(
-                              widget.path, widget.fileName, widget.configMap);
+                          await widget.onUploadPlayPausedPressed(widget.path, widget.fileName, widget.configMap);
                         },
                         icon: const Icon(
                           Icons.cloud_upload_outlined,

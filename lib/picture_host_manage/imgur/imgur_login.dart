@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:f_logs/f_logs.dart';
 import 'package:fluro/fluro.dart';
 import 'dart:convert';
-import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/common_functions.dart';
-import 'package:horopic/utils/sql_utils.dart';
 import 'package:horopic/pages/loading.dart';
 import 'package:horopic/picture_host_manage/manage_api/imgur_manage_api.dart';
 import 'package:horopic/router/application.dart';
@@ -20,7 +18,6 @@ class ImgurLogIn extends StatefulWidget {
 class ImgurLogInState extends State<ImgurLogIn> {
   final _imgurUserController = TextEditingController();
   final _clientIDcontroller = TextEditingController();
-  final _clientSecretcontroller = TextEditingController();
   final _accessTokencontroller = TextEditingController();
   final _proxyController = TextEditingController();
   bool loginStatus = false;
@@ -37,63 +34,20 @@ class ImgurLogInState extends State<ImgurLogIn> {
       if (_proxyController.text.isNotEmpty) {
         proxy = _proxyController.text;
       }
-      String currentPicHoroUser = await Global.getUser();
-      String currentPicHoroPasswd = await Global.getPassword();
-      var usernamecheck =
-          await MySqlUtils.queryUser(username: currentPicHoroUser);
-      if (usernamecheck == 'Empty') {
-        return showToast('请先去设置页面注册');
-      } else if (currentPicHoroPasswd != usernamecheck['password']) {
-        return showToast('请先去设置页面登录');
-      }
-      var queryImgurManage =
-          await MySqlUtils.queryImgurManage(username: currentPicHoroUser);
-      if (queryImgurManage == 'Empty') {
-        var checkTokenResult = await ImgurManageAPI.checkToken(
-            _imgurUserController.text, _accessTokencontroller.text, proxy);
-        if (checkTokenResult[0] == 'success') {
-          var saveResult = await MySqlUtils.insertImgurManage(content: [
-            _imgurUserController.text,
-            _clientIDcontroller.text,
-            _clientSecretcontroller.text,
-            _accessTokencontroller.text,
-            proxy,
-            currentPicHoroUser
-          ]);
-          if (saveResult == 'Success') {
-            loginStatus = true;
-            return showToast('保存成功');
-          } else {
-            return showToast('保存失败');
-          }
-        } else {
-          return showToast('登录失败');
-        }
-      } else if (queryImgurManage == 'Error') {
-        return showToast('获取数据库错误');
-      } else {
-        var checkTokenResult = await ImgurManageAPI.checkToken(
-            _imgurUserController.text, _accessTokencontroller.text, proxy);
-        if (checkTokenResult[0] == 'success') {
+
+      var checkTokenResult =
+          await ImgurManageAPI.checkToken(_imgurUserController.text, _accessTokencontroller.text, proxy);
+      if (checkTokenResult[0] == 'success') {
+        var saveResult = await ImgurManageAPI.saveImgurManageConfig(
+            _imgurUserController.text, _clientIDcontroller.text, _accessTokencontroller.text, proxy);
+        if (saveResult) {
           loginStatus = true;
-          var updateResult = await MySqlUtils.updateImgurManage(
-            content: [
-              _imgurUserController.text,
-              _clientIDcontroller.text,
-              _clientSecretcontroller.text,
-              _accessTokencontroller.text,
-              proxy,
-              currentPicHoroUser
-            ],
-          );
-          if (updateResult == 'Success') {
-            return showToast('更新成功');
-          } else {
-            return showToast('更新失败');
-          }
+          return showToast('保存成功');
         } else {
-          return showToast('登录失败');
+          return showToast('保存失败');
         }
+      } else {
+        return showToast('登录失败');
       }
     } catch (e) {
       FLog.error(
@@ -172,24 +126,6 @@ class ImgurLogInState extends State<ImgurLogIn> {
           Padding(
             padding: const EdgeInsets.only(left: 15, right: 15, top: 15),
             child: TextFormField(
-              controller: _clientSecretcontroller,
-              decoration: const InputDecoration(
-                hintText: '请输入Client Secret',
-                hintStyle: TextStyle(color: Colors.grey, fontSize: 14.0),
-              ),
-              textAlign: TextAlign.center,
-              autovalidateMode: AutovalidateMode.onUserInteraction,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Client Secret不能为空';
-                }
-                return null;
-              },
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left: 15, right: 15, top: 15),
-            child: TextFormField(
               controller: _accessTokencontroller,
               decoration: const InputDecoration(
                 hintText: '请输入Access Token',
@@ -237,7 +173,6 @@ class ImgurLogInState extends State<ImgurLogIn> {
                 onPressed: () async {
                   if (_imgurUserController.text.isEmpty ||
                       _clientIDcontroller.text.isEmpty ||
-                      _clientSecretcontroller.text.isEmpty ||
                       _accessTokencontroller.text.isEmpty) {
                     return showToastWithContext(context, '请填写完整信息');
                   }
@@ -260,11 +195,8 @@ class ImgurLogInState extends State<ImgurLogIn> {
                       Map userInfo = {
                         'imguruser': _imgurUserController.text,
                         "clientid": _clientIDcontroller.text,
-                        'clientsecret': _clientSecretcontroller.text,
                         'accesstoken': _accessTokencontroller.text,
-                        'proxy': _proxyController.text.isEmpty
-                            ? "None"
-                            : _proxyController.text,
+                        'proxy': _proxyController.text.isEmpty ? "None" : _proxyController.text,
                       };
                       Application.router.navigateTo(context,
                           '${Routes.imgurFileExplorer}?userProfile=${Uri.encodeComponent(jsonEncode(userInfo))}&albumInfo=${Uri.encodeComponent(jsonEncode({}))}&allImages=${Uri.encodeComponent(jsonEncode([]))}',
@@ -274,8 +206,7 @@ class ImgurLogInState extends State<ImgurLogIn> {
                 },
                 child: const Text(
                   '登录Imgur',
-                  style: TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.bold),
+                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                 )),
           ),
         ],

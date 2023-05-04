@@ -6,7 +6,6 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:f_logs/f_logs.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:fluro/fluro.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -14,7 +13,6 @@ import 'package:horopic/router/application.dart';
 import 'package:horopic/pages/loading.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/global.dart';
-import 'package:horopic/utils/sql_utils.dart';
 import 'package:horopic/utils/event_bus_utils.dart';
 import 'package:horopic/picture_host_manage/manage_api/upyun_manage_api.dart';
 
@@ -88,14 +86,12 @@ class UpyunConfigState extends State<UpyunConfig> {
         actions: [
           IconButton(
             onPressed: () async {
-              await Application.router.navigateTo(
-                  context, '/configureStorePage?psHost=upyun',
-                  transition: TransitionType.cupertino);
+              await Application.router
+                  .navigateTo(context, '/configureStorePage?psHost=upyun', transition: TransitionType.cupertino);
               await _initConfig();
               setState(() {});
             },
-            icon: const Icon(Icons.save_as_outlined,
-                color: Color.fromARGB(255, 255, 255, 255), size: 35),
+            icon: const Icon(Icons.save_as_outlined, color: Color.fromARGB(255, 255, 255, 255), size: 35),
           )
         ],
       ),
@@ -219,9 +215,8 @@ class UpyunConfigState extends State<UpyunConfig> {
             ListTile(
                 title: ElevatedButton(
               onPressed: () async {
-                await Application.router.navigateTo(
-                    context, '/configureStorePage?psHost=upyun',
-                    transition: TransitionType.cupertino);
+                await Application.router
+                    .navigateTo(context, '/configureStorePage?psHost=upyun', transition: TransitionType.cupertino);
                 await _initConfig();
                 setState(() {});
               },
@@ -268,25 +263,6 @@ class UpyunConfigState extends State<UpyunConfig> {
         url = url.substring(0, url.length - 1);
       }
 
-      List sqlconfig = [];
-      sqlconfig.add(bucket);
-      sqlconfig.add(upyunOperator);
-      sqlconfig.add(password);
-      sqlconfig.add(url);
-      sqlconfig.add(options);
-      sqlconfig.add(path);
-      //添加默认用户
-      String defaultUser = await Global.getUser();
-      sqlconfig.add(defaultUser);
-
-      var queryUpyun = await MySqlUtils.queryUpyun(username: defaultUser);
-      var queryuser = await MySqlUtils.queryUser(username: defaultUser);
-
-      if (queryuser == 'Empty') {
-        return showCupertinoAlertDialog(
-            context: context, title: '错误', content: '用户不存在,请先登录');
-      }
-
       //save asset image to app dir
       String assetPath = 'assets/validateImage/PicHoroValidate.jpeg';
       String appDir = await getApplicationDocumentsDirectory().then((value) {
@@ -297,8 +273,7 @@ class UpyunConfigState extends State<UpyunConfig> {
 
       if (!assetFile.existsSync()) {
         ByteData data = await rootBundle.load(assetPath);
-        List<int> bytes =
-            data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+        List<int> bytes = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
         await assetFile.writeAsBytes(bytes);
       }
       String key = 'PicHoroValidate.jpeg';
@@ -321,13 +296,10 @@ class UpyunConfigState extends State<UpyunConfig> {
         'date': date,
         'content-md5': assetFileMd5,
       };
-      String base64Policy =
-          base64.encode(utf8.encode(json.encode(uploadPolicy)));
+      String base64Policy = base64.encode(utf8.encode(json.encode(uploadPolicy)));
       String stringToSign = 'POST&/$bucket&$date&$base64Policy&$assetFileMd5';
       String passwordMd5 = md5.convert(utf8.encode(password)).toString();
-      String signature = base64.encode(Hmac(sha1, utf8.encode(passwordMd5))
-          .convert(utf8.encode(stringToSign))
-          .bytes);
+      String signature = base64.encode(Hmac(sha1, utf8.encode(passwordMd5)).convert(utf8.encode(stringToSign)).bytes);
       String authorization = 'UPYUN $upyunOperator:$signature';
       FormData formData = FormData.fromMap({
         'authorization': authorization,
@@ -354,29 +326,13 @@ class UpyunConfigState extends State<UpyunConfig> {
       );
 
       if (response.statusCode == 200) {
-        var sqlResult = '';
-
-        if (queryUpyun == 'Empty') {
-          sqlResult = await MySqlUtils.insertUpyun(content: sqlconfig);
-        } else {
-          sqlResult = await MySqlUtils.updateUpyun(content: sqlconfig);
-        }
-
-        if (sqlResult == "Success") {
-          final upyunConfig = UpyunConfigModel(
-              bucket, upyunOperator, password, url, options, path);
-          final upyunConfigJson = jsonEncode(upyunConfig);
-          final upyunConfigFile = await localFile;
-          await upyunConfigFile.writeAsString(upyunConfigJson);
-          return showCupertinoAlertDialog(
-              context: context, title: '成功', content: '配置成功');
-        } else {
-          return showCupertinoAlertDialog(
-              context: context, title: '错误', content: '数据库错误');
-        }
+        final upyunConfig = UpyunConfigModel(bucket, upyunOperator, password, url, options, path);
+        final upyunConfigJson = jsonEncode(upyunConfig);
+        final upyunConfigFile = await localFile;
+        await upyunConfigFile.writeAsString(upyunConfigJson);
+        return showCupertinoAlertDialog(context: context, title: '成功', content: '配置成功');
       } else {
-        return showCupertinoAlertDialog(
-            context: context, title: '错误', content: '验证失败');
+        return showCupertinoAlertDialog(context: context, title: '错误', content: '验证失败');
       }
     } catch (e) {
       FLog.error(
@@ -384,8 +340,7 @@ class UpyunConfigState extends State<UpyunConfig> {
           methodName: 'saveConfig',
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
-      return showCupertinoAlertDialog(
-          context: context, title: '错误', content: e.toString());
+      return showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
     }
   }
 
@@ -395,8 +350,7 @@ class UpyunConfigState extends State<UpyunConfig> {
       String configData = await upyunConfigFile.readAsString();
 
       if (configData == "Error") {
-        return showCupertinoAlertDialog(
-            context: context, title: "检查失败!", content: "请先配置上传参数.");
+        return showCupertinoAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");
       }
 
       Map configMap = jsonDecode(configData);
@@ -411,8 +365,7 @@ class UpyunConfigState extends State<UpyunConfig> {
 
       if (!assetFile.existsSync()) {
         ByteData data = await rootBundle.load(assetPath);
-        List<int> bytes =
-            data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+        List<int> bytes = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
         await assetFile.writeAsBytes(bytes);
       }
       String key = 'PicHoroValidate.jpeg';
@@ -434,15 +387,10 @@ class UpyunConfigState extends State<UpyunConfig> {
         'date': date,
         'content-md5': assetFileMd5,
       };
-      String base64Policy =
-          base64.encode(utf8.encode(json.encode(uploadPolicy)));
-      String stringToSign =
-          "POST&/${configMap['bucket']}&$date&$base64Policy&$assetFileMd5";
-      String passwordMd5 =
-          md5.convert(utf8.encode(configMap['password'])).toString();
-      String signature = base64.encode(Hmac(sha1, utf8.encode(passwordMd5))
-          .convert(utf8.encode(stringToSign))
-          .bytes);
+      String base64Policy = base64.encode(utf8.encode(json.encode(uploadPolicy)));
+      String stringToSign = "POST&/${configMap['bucket']}&$date&$base64Policy&$assetFileMd5";
+      String passwordMd5 = md5.convert(utf8.encode(configMap['password'])).toString();
+      String signature = base64.encode(Hmac(sha1, utf8.encode(passwordMd5)).convert(utf8.encode(stringToSign)).bytes);
       String authorization = 'UPYUN ${configMap['operator']}:$signature';
       FormData formData = FormData.fromMap({
         'authorization': authorization,
@@ -475,8 +423,7 @@ class UpyunConfigState extends State<UpyunConfig> {
             content:
                 '检测通过，您的配置信息为:\nBucket:\n${configMap['bucket']}\nOperator:\n${configMap['operator']}\nPassword:\n${configMap['password']}\nUrl:\n${configMap['url']}\nOptions:\n${configMap['options']}\nPath:\n${configMap['path']}');
       } else {
-        return showCupertinoAlertDialog(
-            context: context, title: '错误', content: '检查失败，请检查配置信息');
+        return showCupertinoAlertDialog(context: context, title: '错误', content: '检查失败，请检查配置信息');
       }
     } catch (e) {
       FLog.error(
@@ -484,8 +431,7 @@ class UpyunConfigState extends State<UpyunConfig> {
           methodName: 'checkUpyunConfig',
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
-      return showCupertinoAlertDialog(
-          context: context, title: "检查失败!", content: e.toString());
+      return showCupertinoAlertDialog(context: context, title: "检查失败!", content: e.toString());
     }
   }
 
@@ -517,66 +463,11 @@ class UpyunConfigState extends State<UpyunConfig> {
 
   _setdefault() async {
     try {
-      String defaultUser = await Global.getUser();
-      String defaultPassword = await Global.getPassword();
-
-      var queryuser = await MySqlUtils.queryUser(username: defaultUser);
-      if (queryuser == 'Empty') {
-        return Fluttertoast.showToast(
-            msg: "请先注册用户",
-            toastLength: Toast.LENGTH_SHORT,
-            timeInSecForIosWeb: 2,
-            fontSize: 16.0);
-      } else if (queryuser['password'] != defaultPassword) {
-        return Fluttertoast.showToast(
-            msg: "请先登录",
-            toastLength: Toast.LENGTH_SHORT,
-            timeInSecForIosWeb: 2,
-            fontSize: 16.0);
-      }
-
-      var queryUpyun = await MySqlUtils.queryUpyun(username: defaultUser);
-      if (queryUpyun == 'Empty') {
-        return Fluttertoast.showToast(
-            msg: "请先配置上传参数",
-            toastLength: Toast.LENGTH_SHORT,
-            timeInSecForIosWeb: 2,
-            fontSize: 16.0);
-      }
-      if (queryUpyun == 'Error') {
-        return Fluttertoast.showToast(
-            msg: "Error",
-            toastLength: Toast.LENGTH_SHORT,
-            timeInSecForIosWeb: 2,
-            fontSize: 16.0);
-      }
-      if (queryuser['defaultPShost'] == 'upyun') {
-        await Global.setPShost('upyun');
-        await Global.setShowedPBhost('upyun');
-        eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-        eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
-        return Fluttertoast.showToast(
-            msg: "已经是默认配置",
-            toastLength: Toast.LENGTH_SHORT,
-            timeInSecForIosWeb: 2,
-            fontSize: 16.0);
-      } else {
-        List sqlconfig = [];
-        sqlconfig.add(defaultUser);
-        sqlconfig.add(defaultPassword);
-        sqlconfig.add('upyun');
-
-        var updateResult = await MySqlUtils.updateUser(content: sqlconfig);
-        if (updateResult == 'Success') {
-          await Global.setPShost('upyun');
-          await Global.setShowedPBhost('upyun');
-          eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-          eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
-          showToast('已设置又拍云为默认图床');
-        } else {
-          showToast('写入数据库失败');
-        }
-      }
+      await Global.setPShost('upyun');
+      await Global.setShowedPBhost('upyun');
+      eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
+      eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
+      showToast('已设置又拍云为默认图床');
     } catch (e) {
       FLog.error(
           className: 'UpyunConfigPageState',
@@ -596,8 +487,7 @@ class UpyunConfigModel {
   final String options;
   final String path;
 
-  UpyunConfigModel(this.bucket, this.upyunoperator, this.password, this.url,
-      this.options, this.path);
+  UpyunConfigModel(this.bucket, this.upyunoperator, this.password, this.url, this.options, this.path);
 
   Map<String, dynamic> toJson() => {
         'bucket': bucket,

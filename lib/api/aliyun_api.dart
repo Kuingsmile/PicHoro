@@ -10,10 +10,7 @@ import 'package:horopic/utils/global.dart';
 
 class AliyunImageUploadUtils {
   //上传接口
-  static uploadApi(
-      {required String path,
-      required String name,
-      required Map configMap}) async {
+  static uploadApi({required String path, required String name, required Map configMap}) async {
     String keyId = configMap['keyId'];
     String keySecret = configMap['keySecret'];
     String bucket = configMap['bucket'];
@@ -29,8 +26,7 @@ class AliyunImageUploadUtils {
     }
     //格式化
     if (aliyunpath != 'None') {
-      aliyunpath =
-          '${aliyunpath.replaceAll(RegExp(r'^/*'), '').replaceAll(RegExp(r'/*$'), '')}/';
+      aliyunpath = '${aliyunpath.replaceAll(RegExp(r'^/*'), '').replaceAll(RegExp(r'/*$'), '')}/';
     }
     String host = '$bucket.$area.aliyuncs.com';
     //云存储的路径
@@ -51,9 +47,7 @@ class AliyunImageUploadUtils {
       ]
     };
     String base64Policy = base64.encode(utf8.encode(json.encode(uploadPolicy)));
-    String singature = base64.encode(Hmac(sha1, utf8.encode(keySecret))
-        .convert(utf8.encode(base64Policy))
-        .bytes);
+    String singature = base64.encode(Hmac(sha1, utf8.encode(keySecret)).convert(utf8.encode(base64Policy)).bytes);
     Map<String, dynamic> formMap = {
       'key': urlpath,
       'OSSAccessKeyId': keyId,
@@ -101,8 +95,7 @@ class AliyunImageUploadUtils {
         }
 
         if (options == 'None') {
-          displayUrl =
-              "$displayUrl?x-oss-process=image/resize,m_lfit,h_500,w_500";
+          displayUrl = "$displayUrl?x-oss-process=image/resize,m_lfit,h_500,w_500";
         } else {
           //网站后缀以?开头
           if (!options.startsWith('?')) {
@@ -114,8 +107,7 @@ class AliyunImageUploadUtils {
 
         String formatedURL = '';
         if (Global.isCopyLink == true) {
-          formatedURL =
-              linkGenerateDict[Global.defaultLKformat]!(returnUrl, name);
+          formatedURL = linkGenerateDict[Global.defaultLKformat]!(returnUrl, name);
         } else {
           formatedURL = returnUrl;
         }
@@ -180,11 +172,8 @@ class AliyunImageUploadUtils {
       String contentType = 'application/json';
       String canonicalizedOSSHeaders = '';
       String canonicalizedResource = '/$bucket/$urlpath';
-      String stringToSign =
-          '$verb\n$contentMD5\n$contentType\n$date\n$canonicalizedOSSHeaders$canonicalizedResource';
-      String signature = base64.encode(Hmac(sha1, utf8.encode(keySecret))
-          .convert(utf8.encode(stringToSign))
-          .bytes);
+      String stringToSign = '$verb\n$contentMD5\n$contentType\n$date\n$canonicalizedOSSHeaders$canonicalizedResource';
+      String signature = base64.encode(Hmac(sha1, utf8.encode(keySecret)).convert(utf8.encode(stringToSign)).bytes);
 
       baseOptions.headers = {
         'Host': '$bucket.$area.aliyuncs.com',
@@ -230,8 +219,7 @@ class AliyunImageUploadUtils {
         FLog.error(
             className: "AliyunImageUploadUtils",
             methodName: "deleteApi",
-            text: formatErrorMessage({}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
+            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(

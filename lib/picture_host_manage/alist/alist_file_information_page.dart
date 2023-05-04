@@ -4,15 +4,13 @@ import 'package:horopic/picture_host_manage/manage_api/alist_manage_api.dart';
 
 class AlistFileInformation extends StatefulWidget {
   final Map fileMap;
-  const AlistFileInformation({Key? key, required this.fileMap})
-      : super(key: key);
+  const AlistFileInformation({Key? key, required this.fileMap}) : super(key: key);
 
   @override
   AlistFileInformationState createState() => AlistFileInformationState();
 }
 
 class AlistFileInformationState extends State<AlistFileInformation> {
-
   String rawUrl = '';
 
   @override
@@ -23,9 +21,8 @@ class AlistFileInformationState extends State<AlistFileInformation> {
 
   getcompleteInformation() async {
     Map fileMap = widget.fileMap;
-    var res =
-        await AlistManageAPI.getFileInfo(fileMap['fullPath']);
-    if (res[0]=='success'){
+    var res = await AlistManageAPI.getFileInfo(fileMap['fullPath']);
+    if (res[0] == 'success') {
       setState(() {
         rawUrl = res[1]['raw_url'];
       });
@@ -48,19 +45,16 @@ class AlistFileInformationState extends State<AlistFileInformation> {
           ),
           ListTile(
             title: const Text('文件大小'),
-            subtitle:
-                SelectableText(getFileSize(int.parse(widget.fileMap['size'].toString()))),
+            subtitle: SelectableText(getFileSize(int.parse(widget.fileMap['size'].toString()))),
           ),
           ListTile(
             isThreeLine: true,
             title: const Text('文件创建时间'),
-            subtitle: SelectableText(
-                widget.fileMap['modified'].toString().substring(0, 19)),
+            subtitle: SelectableText(widget.fileMap['modified'].toString().substring(0, 19)),
           ),
           ListTile(
             title: const Text('文件签名'),
-            subtitle:
-                SelectableText(widget.fileMap['sign'].toString()),
+            subtitle: SelectableText(widget.fileMap['sign'].toString()),
           ),
           ListTile(
             title: const Text('缩略图链接'),

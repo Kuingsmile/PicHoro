@@ -1,10 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:f_logs/f_logs.dart';
 
 import 'package:horopic/picture_host_manage/manage_api/qiniu_manage_api.dart';
 import 'package:horopic/utils/common_functions.dart';
-import 'package:horopic/utils/global.dart';
-import 'package:horopic/utils/sql_utils.dart';
 
 class QiniuBucketDomainAreaConfig extends StatefulWidget {
   final Map element;
@@ -14,12 +14,10 @@ class QiniuBucketDomainAreaConfig extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  QiniuBucketDomainAreaConfigState createState() =>
-      QiniuBucketDomainAreaConfigState();
+  QiniuBucketDomainAreaConfigState createState() => QiniuBucketDomainAreaConfigState();
 }
 
-class QiniuBucketDomainAreaConfigState
-    extends State<QiniuBucketDomainAreaConfig> {
+class QiniuBucketDomainAreaConfigState extends State<QiniuBucketDomainAreaConfig> {
   final _formKey = GlobalKey<FormState>();
   TextEditingController domainController = TextEditingController();
   Map bucketConfig = {
@@ -41,17 +39,16 @@ class QiniuBucketDomainAreaConfigState
   _initConfig() async {
     resetBucketConfig();
     try {
-      String user = await Global.getUser();
-      String userBucket = '${user}_${widget.element['name']}';
-      var config = await MySqlUtils.queryQiniuManage(username: userBucket);
-      if (config == 'Empty' || config == 'Error') {
+      var config = await QiniuManageAPI.readQiniuManageConfig();
+      if (config == 'Error') {
         return;
       } else {
-        if (config['domain'] != 'None') {
-          domainController.text = config['domain'];
+        var jsonResult = jsonDecode(config);
+        if (jsonResult['domain'] != 'None') {
+          domainController.text = jsonResult['domain'];
         }
-        if (config['region'] != 'None') {
-          bucketConfig['region'] = config['area'];
+        if (jsonResult['region'] != 'None') {
+          bucketConfig['region'] = jsonResult['area'];
         }
         setState(() {});
       }
@@ -126,49 +123,15 @@ class QiniuBucketDomainAreaConfigState
                 onPressed: () async {
                   if (_formKey.currentState!.validate()) {
                     try {
-                      List content = [];
-                      String user = await Global.getUser();
-                      String userBucket = '${user}_${widget.element['name']}';
-                      var config = await MySqlUtils.queryQiniuManage(
-                          username: userBucket);
-                      if (config == 'Error') {
-                        showToast('连接数据库失败');
+                      var result = await QiniuManageAPI.saveQiniuManageConfig(
+                          widget.element['name'], domainController.text, bucketConfig['region']);
+                      if (!result) {
+                        showToast('保存数据失败');
                         return;
-                      } else if (config == 'Empty') {
-                        content = [
-                          widget.element['name'],
-                          domainController.text,
-                          bucketConfig['region'],
-                          userBucket
-                        ];
-                        var result = await MySqlUtils.insertQiniuManage(
-                            content: content);
-                        if (result == 'Error') {
-                          showToast('连接数据库失败');
-                          return;
-                        } else if (result == 'Success') {
-                          showToast('配置成功');
-                          if (mounted) {
-                            Navigator.pop(context);
-                          }
-                        }
                       } else {
-                        content = [
-                          widget.element['name'],
-                          domainController.text,
-                          bucketConfig['region'],
-                          userBucket
-                        ];
-                        var result = await MySqlUtils.updateQiniuManage(
-                            content: content);
-                        if (result == 'Error') {
-                          showToast('连接数据库失败');
-                          return;
-                        } else if (result == 'Success') {
-                          showToast('配置成功');
-                          if (mounted) {
-                            Navigator.pop(context);
-                          }
+                        showToast('配置成功');
+                        if (mounted) {
+                          Navigator.pop(context);
                         }
                       }
                     } catch (e) {
@@ -188,8 +151,7 @@ class QiniuBucketDomainAreaConfigState
               builder: (BuildContext context, AsyncSnapshot snapshot) {
                 if (snapshot.hasData) {
                   if (snapshot.data[0] == 'success') {
-                    if (snapshot.data[1] == null ||
-                        snapshot.data[1].length == 0) {
+                    if (snapshot.data[1] == null || snapshot.data[1].length == 0) {
                       return const Center(
                           child: ListTile(
                         title: Text('未查询到可用域名'),
@@ -204,9 +166,7 @@ class QiniuBucketDomainAreaConfigState
                                 Center(
                                     child: SelectableText(
                                   e.toString(),
-                                  style: const TextStyle(
-                                      color: Colors.blue,
-                                      decoration: TextDecoration.underline),
+                                  style: const TextStyle(color: Colors.blue, decoration: TextDecoration.underline),
                                 )),
                               ],
                             );

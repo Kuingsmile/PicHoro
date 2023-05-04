@@ -19,8 +19,7 @@ import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 import 'package:horopic/router/application.dart';
 import 'package:horopic/router/routers.dart';
 import 'package:horopic/picture_host_manage/manage_api/webdav_manage_api.dart';
-import 'package:horopic/picture_host_manage/common_page/loading_state.dart'
-    as loading_state;
+import 'package:horopic/picture_host_manage/common_page/loading_state.dart' as loading_state;
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/pages/loading.dart';
@@ -29,23 +28,19 @@ import 'package:horopic/utils/image_compress.dart';
 class WebdavFileExplorer extends StatefulWidget {
   final Map element;
   final String bucketPrefix;
-  const WebdavFileExplorer(
-      {Key? key, required this.element, required this.bucketPrefix})
-      : super(key: key);
+  const WebdavFileExplorer({Key? key, required this.element, required this.bucketPrefix}) : super(key: key);
 
   @override
   WebdavFileExplorerState createState() => WebdavFileExplorerState();
 }
 
-class WebdavFileExplorerState
-    extends loading_state.BaseLoadingPageState<WebdavFileExplorer> {
+class WebdavFileExplorerState extends loading_state.BaseLoadingPageState<WebdavFileExplorer> {
   List fileAllInfoList = [];
   List dirAllInfoList = [];
   List allInfoList = [];
 
   List selectedFilesBool = [];
-  RefreshController refreshController =
-      RefreshController(initialRefresh: false);
+  RefreshController refreshController = RefreshController(initialRefresh: false);
   TextEditingController vc = TextEditingController();
   TextEditingController newFolder = TextEditingController();
   TextEditingController fileLink = TextEditingController();
@@ -152,10 +147,7 @@ class WebdavFileExplorerState
         title: Text(
             widget.bucketPrefix == '/'
                 ? '根目录'
-                : widget.bucketPrefix
-                    .substring(0, widget.bucketPrefix.length - 1)
-                    .split('/')
-                    .last,
+                : widget.bucketPrefix.substring(0, widget.bucketPrefix.length - 1).split('/').last,
             style: const TextStyle(
               color: Colors.white,
               fontSize: 15,
@@ -187,8 +179,7 @@ class WebdavFileExplorerState
                           return b['mTime'].compareTo(a['mTime']);
                         });
                       } else {
-                        List temp = allInfoList.sublist(
-                            dirAllInfoList.length, allInfoList.length);
+                        List temp = allInfoList.sublist(dirAllInfoList.length, allInfoList.length);
                         temp.sort((a, b) {
                           return b['mTime'].compareTo(a['mTime']);
                         });
@@ -205,8 +196,7 @@ class WebdavFileExplorerState
                           return a['mTime'].compareTo(b['mTime']);
                         });
                       } else {
-                        List temp = allInfoList.sublist(
-                            dirAllInfoList.length, allInfoList.length);
+                        List temp = allInfoList.sublist(dirAllInfoList.length, allInfoList.length);
                         temp.sort((a, b) {
                           return a['mTime'].compareTo(b['mTime']);
                         });
@@ -236,8 +226,7 @@ class WebdavFileExplorerState
                           return a['name'].compareTo(b['name']);
                         });
                       } else {
-                        List temp = allInfoList.sublist(
-                            dirAllInfoList.length, allInfoList.length);
+                        List temp = allInfoList.sublist(dirAllInfoList.length, allInfoList.length);
                         temp.sort((a, b) {
                           return a['name'].compareTo(b['name']);
                         });
@@ -254,8 +243,7 @@ class WebdavFileExplorerState
                           return b['name'].compareTo(a['name']);
                         });
                       } else {
-                        List temp = allInfoList.sublist(
-                            dirAllInfoList.length, allInfoList.length);
+                        List temp = allInfoList.sublist(dirAllInfoList.length, allInfoList.length);
                         temp.sort((a, b) {
                           return b['name'].compareTo(a['name']);
                         });
@@ -285,8 +273,7 @@ class WebdavFileExplorerState
                           return a['size'].compareTo(b['size']);
                         });
                       } else {
-                        List temp = allInfoList.sublist(
-                            dirAllInfoList.length, allInfoList.length);
+                        List temp = allInfoList.sublist(dirAllInfoList.length, allInfoList.length);
                         temp.sort((a, b) {
                           return a['size'].compareTo(b['size']);
                         });
@@ -303,8 +290,7 @@ class WebdavFileExplorerState
                           return b['size'].compareTo(a['size']);
                         });
                       } else {
-                        List temp = allInfoList.sublist(
-                            dirAllInfoList.length, allInfoList.length);
+                        List temp = allInfoList.sublist(dirAllInfoList.length, allInfoList.length);
                         temp.sort((a, b) {
                           return b['size'].compareTo(a['size']);
                         });
@@ -342,8 +328,7 @@ class WebdavFileExplorerState
                           }
                         });
                       } else {
-                        List temp = allInfoList.sublist(
-                            dirAllInfoList.length, allInfoList.length);
+                        List temp = allInfoList.sublist(dirAllInfoList.length, allInfoList.length);
                         temp.sort((a, b) {
                           String type = a['name'].split('.').last;
                           String type2 = b['name'].split('.').last;
@@ -376,8 +361,7 @@ class WebdavFileExplorerState
                           }
                         });
                       } else {
-                        List temp = allInfoList.sublist(
-                            dirAllInfoList.length, allInfoList.length);
+                        List temp = allInfoList.sublist(dirAllInfoList.length, allInfoList.length);
                         temp.sort((a, b) {
                           String type = a['name'].split('.').last;
                           String type2 = b['name'].split('.').last;
@@ -412,71 +396,52 @@ class WebdavFileExplorerState
                         children: [
                           ListTile(
                             minLeadingWidth: 0,
-                            leading: const Icon(Icons.file_present_outlined,
-                                color: Colors.blue),
+                            leading: const Icon(Icons.file_present_outlined, color: Colors.blue),
                             title: const Text('上传文件(可多选)'),
                             onTap: () async {
                               Navigator.pop(context);
-                              FilePickerResult? pickresult =
-                                  await FilePicker.platform.pickFiles(
+                              FilePickerResult? pickresult = await FilePicker.platform.pickFiles(
                                 allowMultiple: true,
                               );
                               if (pickresult == null) {
                                 showToast('未选择文件');
                               } else {
-                                List<File> files = pickresult.paths
-                                    .map((path) => File(path!))
-                                    .toList();
-                                Map configMap =
-                                    await WebdavManageAPI.getConfigMap();
+                                List<File> files = pickresult.paths.map((path) => File(path!)).toList();
+                                Map configMap = await WebdavManageAPI.getConfigMap();
                                 configMap['uploadPath'] = widget.bucketPrefix;
                                 for (int i = 0; i < files.length; i++) {
-                                   File compressedFile;
-                                  if (Global.imgExt.contains(my_path
-                                      .extension(files[i].path)
-                                      .toLowerCase()
-                                      .substring(1))) {
+                                  File compressedFile;
+                                  if (Global.imgExt
+                                      .contains(my_path.extension(files[i].path).toLowerCase().substring(1))) {
                                     if (Global.isCompress == true) {
-                                      ImageCompress imageCompress =
-                                          ImageCompress();
-                                      compressedFile = await imageCompress
-                                          .compressAndGetFile(
-                                              files[i].path,
-                                              my_path.basename(files[i].path),
-                                              Global.defaultCompressFormat,
-                                              minHeight: Global.minHeight,
-                                              minWidth: Global.minWidth,
-                                              quality: Global.quality);
+                                      ImageCompress imageCompress = ImageCompress();
+                                      compressedFile = await imageCompress.compressAndGetFile(
+                                          files[i].path, my_path.basename(files[i].path), Global.defaultCompressFormat,
+                                          minHeight: Global.minHeight,
+                                          minWidth: Global.minWidth,
+                                          quality: Global.quality);
                                       files[i] = compressedFile;
                                     } else {
                                       compressedFile = files[i];
                                     }
                                   }
-                                  List uploadList = [
-                                    files[i].path,
-                                    my_path.basename(files[i].path),
-                                    configMap
-                                  ];
+                                  List uploadList = [files[i].path, my_path.basename(files[i].path), configMap];
                                   String uploadListStr = jsonEncode(uploadList);
                                   Global.webdavUploadList.add(uploadListStr);
                                 }
-                                await Global.setWebdavUploadList(
-                                    Global.webdavUploadList);
-                                String downloadPath = await ExternalPath
-                                    .getExternalStoragePublicDirectory(
-                                        ExternalPath.DIRECTORY_DOWNLOADS);
+                                await Global.setWebdavUploadList(Global.webdavUploadList);
+                                String downloadPath = await ExternalPath.getExternalStoragePublicDirectory(
+                                    ExternalPath.DIRECTORY_DOWNLOADS);
                                 String bucketName = widget.bucketPrefix == '/'
                                     ? '根目录'
                                     : widget.bucketPrefix.endsWith('/')
-                                        ? widget.bucketPrefix.substring(
-                                            0, widget.bucketPrefix.length - 1)
+                                        ? widget.bucketPrefix.substring(0, widget.bucketPrefix.length - 1)
                                         : widget.bucketPrefix;
                                 if (mounted) {
                                   Application.router
                                       .navigateTo(context,
                                           '/baseUpDownloadManagePage?bucketName=${Uri.encodeComponent(bucketName)}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=0&currentListIndex=11',
-                                          transition:
-                                              TransitionType.inFromRight)
+                                          transition: TransitionType.inFromRight)
                                       .then((value) {
                                     _getBucketList();
                                   });
@@ -486,76 +451,59 @@ class WebdavFileExplorerState
                           ),
                           ListTile(
                             minLeadingWidth: 0,
-                            leading: const Icon(Icons.image_outlined,
-                                color: Colors.blue),
+                            leading: const Icon(Icons.image_outlined, color: Colors.blue),
                             title: const Text('上传照片(可多选)'),
                             onTap: () async {
                               Navigator.pop(context);
-                              AssetPickerConfig config =
-                                  const AssetPickerConfig(
+                              AssetPickerConfig config = const AssetPickerConfig(
                                 maxAssets: 100,
                                 selectedAssets: [],
                               );
                               final List<AssetEntity>? pickedImage =
-                                  await AssetPicker.pickAssets(context,
-                                      pickerConfig: config);
+                                  await AssetPicker.pickAssets(context, pickerConfig: config);
 
                               if (pickedImage == null) {
                                 showToast('未选择照片');
                               } else {
                                 List<File> files = [];
                                 for (var i = 0; i < pickedImage.length; i++) {
-                                  File? fileImage =
-                                      await pickedImage[i].originFile;
+                                  File? fileImage = await pickedImage[i].originFile;
                                   if (fileImage != null) {
                                     files.add(fileImage);
                                   }
                                 }
-                                Map configMap =
-                                    await WebdavManageAPI.getConfigMap();
+                                Map configMap = await WebdavManageAPI.getConfigMap();
                                 configMap['uploadPath'] = widget.bucketPrefix;
                                 for (int i = 0; i < files.length; i++) {
-                                   File compressedFile;
+                                  File compressedFile;
                                   if (Global.isCompress == true) {
-                                    ImageCompress imageCompress =
-                                        ImageCompress();
-                                    compressedFile =
-                                        await imageCompress.compressAndGetFile(
-                                            files[i].path,
-                                            my_path.basename(files[i].path),
-                                            Global.defaultCompressFormat,
-                                            minHeight: Global.minHeight,
-                                            minWidth: Global.minWidth,
-                                            quality: Global.quality);
+                                    ImageCompress imageCompress = ImageCompress();
+                                    compressedFile = await imageCompress.compressAndGetFile(
+                                        files[i].path, my_path.basename(files[i].path), Global.defaultCompressFormat,
+                                        minHeight: Global.minHeight,
+                                        minWidth: Global.minWidth,
+                                        quality: Global.quality);
                                     files[i] = compressedFile;
                                   } else {
                                     compressedFile = files[i];
                                   }
-                                  List uploadList = [
-                                    files[i].path,
-                                    my_path.basename(files[i].path),
-                                    configMap
-                                  ];
+                                  List uploadList = [files[i].path, my_path.basename(files[i].path), configMap];
                                   String uploadListStr = jsonEncode(uploadList);
                                   Global.webdavUploadList.add(uploadListStr);
                                 }
-                                await Global.setWebdavUploadList(
-                                    Global.webdavUploadList);
-                                String downloadPath = await ExternalPath
-                                    .getExternalStoragePublicDirectory(
-                                        ExternalPath.DIRECTORY_DOWNLOADS);
+                                await Global.setWebdavUploadList(Global.webdavUploadList);
+                                String downloadPath = await ExternalPath.getExternalStoragePublicDirectory(
+                                    ExternalPath.DIRECTORY_DOWNLOADS);
                                 String bucketName = widget.bucketPrefix == '/'
                                     ? '根目录'
                                     : widget.bucketPrefix.endsWith('/')
-                                        ? widget.bucketPrefix.substring(
-                                            0, widget.bucketPrefix.length - 1)
+                                        ? widget.bucketPrefix.substring(0, widget.bucketPrefix.length - 1)
                                         : widget.bucketPrefix;
                                 if (mounted) {
                                   Application.router
                                       .navigateTo(context,
                                           '/baseUpDownloadManagePage?bucketName=${Uri.encodeComponent(bucketName)}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=0&currentListIndex=11',
-                                          transition:
-                                              TransitionType.inFromRight)
+                                          transition: TransitionType.inFromRight)
                                       .then((value) {
                                     _getBucketList();
                                   });
@@ -569,12 +517,8 @@ class WebdavFileExplorerState
                             title: const Text('上传剪贴板内链接(换行分隔多个)'),
                             onTap: () async {
                               Navigator.pop(context);
-                              var url =
-                                  await flutter_services.Clipboard.getData(
-                                      'text/plain');
-                              if (url == null ||
-                                  url.text == null ||
-                                  url.text!.isEmpty) {
+                              var url = await flutter_services.Clipboard.getData('text/plain');
+                              if (url == null || url.text == null || url.text!.isEmpty) {
                                 if (mounted) {
                                   showToastWithContext(context, "剪贴板为空");
                                 }
@@ -591,10 +535,8 @@ class WebdavFileExplorerState
                                         outsideDismiss: false,
                                         loading: true,
                                         loadingText: "上传中...",
-                                        requestCallBack: WebdavManageAPI
-                                            .uploadNetworkFileEntry(
-                                                fileLinkList,
-                                                widget.bucketPrefix),
+                                        requestCallBack:
+                                            WebdavManageAPI.uploadNetworkFileEntry(fileLinkList, widget.bucketPrefix),
                                       );
                                     });
                                 _getBucketList();
@@ -632,22 +574,17 @@ class WebdavFileExplorerState
                                         okBtnTap: () async {
                                           String newName = newFolder.text;
                                           if (newName.isEmpty) {
-                                            showToastWithContext(
-                                                context, "文件夹名不能为空");
+                                            showToastWithContext(context, "文件夹名不能为空");
                                             return;
                                           }
                                           if (newName.startsWith("/")) {
                                             newName = newName.substring(1);
                                           }
                                           if (newName.endsWith("/")) {
-                                            newName = newName.substring(
-                                                0, newName.length - 1);
+                                            newName = newName.substring(0, newName.length - 1);
                                           }
-                                          newName =
-                                              "${widget.bucketPrefix}$newName/";
-                                          var copyResult =
-                                              await WebdavManageAPI.createDir(
-                                                  newName);
+                                          newName = "${widget.bucketPrefix}$newName/";
+                                          var copyResult = await WebdavManageAPI.createDir(newName);
                                           if (copyResult[0] == 'success') {
                                             showToast('创建成功');
                                             _getBucketList();
@@ -674,8 +611,7 @@ class WebdavFileExplorerState
           IconButton(
               onPressed: () async {
                 String downloadPath =
-                    await ExternalPath.getExternalStoragePublicDirectory(
-                        ExternalPath.DIRECTORY_DOWNLOADS);
+                    await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOADS);
                 // ignore: use_build_context_synchronously
                 int index = 1;
                 if (Global.webdavDownloadList.isEmpty) {
@@ -684,8 +620,7 @@ class WebdavFileExplorerState
                 String bucketName = widget.bucketPrefix == '/'
                     ? '根目录'
                     : widget.bucketPrefix.endsWith('/')
-                        ? widget.bucketPrefix
-                            .substring(0, widget.bucketPrefix.length - 1)
+                        ? widget.bucketPrefix.substring(0, widget.bucketPrefix.length - 1)
                         : widget.bucketPrefix;
                 if (mounted) {
                   Application.router
@@ -704,13 +639,10 @@ class WebdavFileExplorerState
               )),
           IconButton(
             icon: selectedFilesBool.contains(true)
-                ? const Icon(Icons.delete,
-                    color: Color.fromARGB(255, 236, 127, 120), size: 30.0)
-                : const Icon(Icons.delete_outline,
-                    color: Colors.white, size: 30.0),
+                ? const Icon(Icons.delete, color: Color.fromARGB(255, 236, 127, 120), size: 30.0)
+                : const Icon(Icons.delete_outline, color: Colors.white, size: 30.0),
             onPressed: () async {
-              if (!selectedFilesBool.contains(true) ||
-                  selectedFilesBool.isEmpty) {
+              if (!selectedFilesBool.contains(true) || selectedFilesBool.isEmpty) {
                 showToastWithContext(context, '没有选择文件');
                 return;
               }
@@ -771,12 +703,10 @@ class WebdavFileExplorerState
               width: 40,
               child: FloatingActionButton(
                 heroTag: 'download',
-                backgroundColor: selectedFilesBool.contains(true)
-                    ? const Color.fromARGB(255, 180, 236, 182)
-                    : Colors.transparent,
+                backgroundColor:
+                    selectedFilesBool.contains(true) ? const Color.fromARGB(255, 180, 236, 182) : Colors.transparent,
                 onPressed: () async {
-                  if (!selectedFilesBool.contains(true) ||
-                      selectedFilesBool.isEmpty) {
+                  if (!selectedFilesBool.contains(true) || selectedFilesBool.isEmpty) {
                     showToastWithContext(context, '没有选择文件');
                     return;
                   }
@@ -799,17 +729,14 @@ class WebdavFileExplorerState
                     urlList.add(host + downloadList[i]['path']);
                   }
                   Global.webdavDownloadList.addAll(urlList);
-                  await Global.setWebdavDownloadList(
-                      Global.webdavDownloadList);
+                  await Global.setWebdavDownloadList(Global.webdavDownloadList);
                   String downloadPath =
-                      await ExternalPath.getExternalStoragePublicDirectory(
-                          ExternalPath.DIRECTORY_DOWNLOADS);
-                   String bucketName = widget.bucketPrefix == '/'
-                                    ? '根目录'
-                                    : widget.bucketPrefix.endsWith('/')
-                                        ? widget.bucketPrefix.substring(
-                                            0, widget.bucketPrefix.length - 1)
-                                        : widget.bucketPrefix;
+                      await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOADS);
+                  String bucketName = widget.bucketPrefix == '/'
+                      ? '根目录'
+                      : widget.bucketPrefix.endsWith('/')
+                          ? widget.bucketPrefix.substring(0, widget.bucketPrefix.length - 1)
+                          : widget.bucketPrefix;
                   // ignore: use_build_context_synchronously
                   Application.router.navigateTo(context,
                       '/baseUpDownloadManagePage?bucketName=${Uri.encodeComponent(bucketName)}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=0&currentListIndex=11',
@@ -827,9 +754,8 @@ class WebdavFileExplorerState
               width: 40,
               child: FloatingActionButton(
                 heroTag: 'copy',
-                backgroundColor: selectedFilesBool.contains(true)
-                    ? const Color.fromARGB(255, 232, 177, 241)
-                    : Colors.transparent,
+                backgroundColor:
+                    selectedFilesBool.contains(true) ? const Color.fromARGB(255, 232, 177, 241) : Colors.transparent,
                 elevation: 5,
                 onPressed: () async {
                   if (!selectedFilesBool.contains(true)) {
@@ -847,20 +773,17 @@ class WebdavFileExplorerState
                         String rawurl = host + allInfoList[i]['path'];
                         String fileName = allInfoList[i]['name'];
 
-                        finalFormatedurl =
-                            linkGenerateDict[Global.defaultLKformat]!(
-                                rawurl, fileName);
+                        finalFormatedurl = linkGenerateDict[Global.defaultLKformat]!(rawurl, fileName);
 
                         multiUrls.add(finalFormatedurl);
                       }
                     }
-                    await flutter_services.Clipboard.setData(
-                        flutter_services.ClipboardData(
-                            text: multiUrls
-                                .toString()
-                                .substring(1, multiUrls.toString().length - 1)
-                                .replaceAll(', ', '\n')
-                                .replaceAll(',', '\n')));
+                    await flutter_services.Clipboard.setData(flutter_services.ClipboardData(
+                        text: multiUrls
+                            .toString()
+                            .substring(1, multiUrls.toString().length - 1)
+                            .replaceAll(', ', '\n')
+                            .replaceAll(',', '\n')));
                     if (mounted) {
                       showToastWithContext(context, '已复制全部链接');
                     }
@@ -911,16 +834,14 @@ class WebdavFileExplorerState
     try {
       for (int i = 0; i < toDelete.length; i++) {
         if ((toDelete[i] - i) < dirAllInfoList.length) {
-          await WebdavManageAPI.deleteFile(
-              allInfoList[toDelete[i] - i]['path']);
+          await WebdavManageAPI.deleteFile(allInfoList[toDelete[i] - i]['path']);
           setState(() {
             allInfoList.removeAt(toDelete[i] - i);
             dirAllInfoList.removeAt(toDelete[i] - i);
             selectedFilesBool.removeAt(toDelete[i] - i);
           });
         } else {
-          await WebdavManageAPI.deleteFile(
-              allInfoList[toDelete[i] - i]['path']);
+          await WebdavManageAPI.deleteFile(allInfoList[toDelete[i] - i]['path']);
           setState(() {
             allInfoList.removeAt(toDelete[i] - i);
             fileAllInfoList.removeAt(toDelete[i] - i - dirAllInfoList.length);
@@ -956,9 +877,7 @@ class WebdavFileExplorerState
             width: 100,
             height: 100,
           ),
-          const Text('没有文件哦，点击右上角添加吧',
-              style: TextStyle(
-                  fontSize: 20, color: Color.fromARGB(136, 121, 118, 118)))
+          const Text('没有文件哦，点击右上角添加吧', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118)))
         ],
       ),
     );
@@ -970,9 +889,7 @@ class WebdavFileExplorerState
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Text('加载失败,请先登录或者检查网络',
-              style: TextStyle(
-                  fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))),
+          const Text('加载失败,请先登录或者检查网络', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))),
           ElevatedButton(
             style: ButtonStyle(
               backgroundColor: MaterialStateProperty.all(Colors.blue),
@@ -1052,33 +969,25 @@ class WebdavFileExplorerState
                                   builder: (BuildContext context) {
                                     return CupertinoAlertDialog(
                                       title: const Text('通知'),
-                                      content: Text(
-                                          '确定要删除${allInfoList[index]['name']}吗？'),
+                                      content: Text('确定要删除${allInfoList[index]['name']}吗？'),
                                       actions: <Widget>[
                                         CupertinoDialogAction(
-                                          child: const Text('取消',
-                                              style: TextStyle(
-                                                  color: Colors.blue)),
+                                          child: const Text('取消', style: TextStyle(color: Colors.blue)),
                                           onPressed: () {
                                             Navigator.pop(context);
                                           },
                                         ),
                                         CupertinoDialogAction(
-                                          child: const Text('确定',
-                                              style: TextStyle(
-                                                  color: Colors.blue)),
+                                          child: const Text('确定', style: TextStyle(color: Colors.blue)),
                                           onPressed: () async {
                                             Navigator.pop(context);
-                                            var deleted = await WebdavManageAPI
-                                                .deleteFile(
-                                                    allInfoList[index]['path']);
+                                            var deleted = await WebdavManageAPI.deleteFile(allInfoList[index]['path']);
                                             if (deleted[0] == 'success') {
                                               showToast('删除成功');
                                               setState(() {
                                                 allInfoList.removeAt(index);
                                                 dirAllInfoList.removeAt(index);
-                                                selectedFilesBool
-                                                    .removeAt(index);
+                                                selectedFilesBool.removeAt(index);
                                               });
                                             } else {
                                               showToast('删除失败');
@@ -1101,9 +1010,7 @@ class WebdavFileExplorerState
                         fit: StackFit.loose,
                         children: [
                           Container(
-                            color: selectedFilesBool[index]
-                                ? const Color(0x311192F3)
-                                : Colors.transparent,
+                            color: selectedFilesBool[index] ? const Color(0x311192F3) : Colors.transparent,
                             child: ListTile(
                               minLeadingWidth: 0,
                               minVerticalPadding: 0,
@@ -1114,13 +1021,9 @@ class WebdavFileExplorerState
                               ),
                               title: Text(
                                   allInfoList[index]['name'].length > 15
-                                      ? allInfoList[index]['name']
-                                              .substring(0, 7) +
+                                      ? allInfoList[index]['name'].substring(0, 7) +
                                           '...' +
-                                          allInfoList[index]['name'].substring(
-                                              allInfoList[index]['name']
-                                                      .length -
-                                                  7)
+                                          allInfoList[index]['name'].substring(allInfoList[index]['name'].length - 7)
                                       : allInfoList[index]['name'],
                                   style: const TextStyle(fontSize: 16)),
                               trailing: IconButton(
@@ -1131,8 +1034,7 @@ class WebdavFileExplorerState
                                       isScrollControlled: true,
                                       context: context,
                                       builder: (context) {
-                                        return buildFolderBottomSheetWidget(
-                                            context, index, iconPath);
+                                        return buildFolderBottomSheetWidget(context, index, iconPath);
                                       });
                                 },
                               ),
@@ -1148,8 +1050,7 @@ class WebdavFileExplorerState
                             // ignore: sort_child_properties_last
                             child: Container(
                               decoration: const BoxDecoration(
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(55)),
+                                  borderRadius: BorderRadius.all(Radius.circular(55)),
                                   color: Color.fromARGB(255, 235, 242, 248)),
                               padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
                               child: MSHCheckbox(
@@ -1207,14 +1108,12 @@ class WebdavFileExplorerState
                                 if (host.endsWith('/')) {
                                   host = host.substring(0, host.length - 1);
                                 }
-                                String shareUrl =
-                                    host + allInfoList[index]['path'];
+                                String shareUrl = host + allInfoList[index]['path'];
                                 Share.share(shareUrl);
                               },
                               autoClose: true,
                               padding: EdgeInsets.zero,
-                              backgroundColor:
-                                  const Color.fromARGB(255, 109, 196, 116),
+                              backgroundColor: const Color.fromARGB(255, 109, 196, 116),
                               foregroundColor: Colors.white,
                               icon: Icons.share,
                               label: '分享',
@@ -1227,32 +1126,24 @@ class WebdavFileExplorerState
                                     builder: (BuildContext context) {
                                       return CupertinoAlertDialog(
                                         title: const Text('通知'),
-                                        content: Text(
-                                            '确定要删除${allInfoList[index]['name']}吗？'),
+                                        content: Text('确定要删除${allInfoList[index]['name']}吗？'),
                                         actions: <Widget>[
                                           CupertinoDialogAction(
-                                            child: const Text('取消',
-                                                style: TextStyle(
-                                                    color: Colors.blue)),
+                                            child: const Text('取消', style: TextStyle(color: Colors.blue)),
                                             onPressed: () {
                                               Navigator.pop(context);
                                             },
                                           ),
                                           CupertinoDialogAction(
-                                            child: const Text('确定',
-                                                style: TextStyle(
-                                                    color: Colors.blue)),
+                                            child: const Text('确定', style: TextStyle(color: Colors.blue)),
                                             onPressed: () async {
                                               Navigator.pop(context);
-                                              var result = await WebdavManageAPI
-                                                  .deleteFile(allInfoList[index]
-                                                      ['path']);
+                                              var result = await WebdavManageAPI.deleteFile(allInfoList[index]['path']);
                                               if (result[0] == 'success') {
                                                 showToast('删除成功');
                                                 setState(() {
                                                   allInfoList.removeAt(index);
-                                                  selectedFilesBool
-                                                      .removeAt(index);
+                                                  selectedFilesBool.removeAt(index);
                                                 });
                                               } else {
                                                 showToast('删除失败');
@@ -1272,9 +1163,7 @@ class WebdavFileExplorerState
                         ),
                         child: Stack(fit: StackFit.loose, children: [
                           Container(
-                            color: selectedFilesBool[index]
-                                ? const Color(0x311192F3)
-                                : Colors.transparent,
+                            color: selectedFilesBool[index] ? const Color(0x311192F3) : Colors.transparent,
                             child: ListTile(
                               minLeadingWidth: 0,
                               minVerticalPadding: 0,
@@ -1285,13 +1174,9 @@ class WebdavFileExplorerState
                               ),
                               title: Text(
                                   allInfoList[index]['name'].length > 20
-                                      ? allInfoList[index]['name']
-                                              .substring(0, 10) +
+                                      ? allInfoList[index]['name'].substring(0, 10) +
                                           '...' +
-                                          allInfoList[index]['name'].substring(
-                                              allInfoList[index]['name']
-                                                      .length -
-                                                  10)
+                                          allInfoList[index]['name'].substring(allInfoList[index]['name'].length - 10)
                                       : allInfoList[index]['name'],
                                   style: const TextStyle(fontSize: 14)),
                               subtitle: Text(
@@ -1304,17 +1189,13 @@ class WebdavFileExplorerState
                                       isScrollControlled: true,
                                       context: context,
                                       builder: (context) {
-                                        return buildBottomSheetWidget(
-                                            context, index, iconPath);
+                                        return buildBottomSheetWidget(context, index, iconPath);
                                       });
                                 },
                               ),
                               onTap: () async {
                                 String urlList = '';
-                                if (!supportedExtensions(allInfoList[index]
-                                        ['name']
-                                    .split('.')
-                                    .last)) {
+                                if (!supportedExtensions(allInfoList[index]['name'].split('.').last)) {
                                   showToast('只支持图片文本和非VLC视频');
                                   return;
                                 }
@@ -1323,34 +1204,20 @@ class WebdavFileExplorerState
                                   host = host.substring(0, host.length - 1);
                                 }
                                 //预览图片
-                                if (Global.imgExt.contains(allInfoList[index]
-                                        ['name']
-                                    .split('.')
-                                    .last
-                                    .toLowerCase())) {
+                                if (Global.imgExt.contains(allInfoList[index]['name'].split('.').last.toLowerCase())) {
                                   showToast('正在加载');
-                                  int newImageIndex =
-                                      index - dirAllInfoList.length;
-                                  for (int i = dirAllInfoList.length;
-                                      i < allInfoList.length;
-                                      i++) {
-                                    if (Global.imgExt.contains(allInfoList[i]
-                                            ['name']
-                                        .split('.')
-                                        .last
-                                        .toLowerCase())) {
-                                      urlList +=
-                                          '${host + allInfoList[i]['path']},';
+                                  int newImageIndex = index - dirAllInfoList.length;
+                                  for (int i = dirAllInfoList.length; i < allInfoList.length; i++) {
+                                    if (Global.imgExt.contains(allInfoList[i]['name'].split('.').last.toLowerCase())) {
+                                      urlList += '${host + allInfoList[i]['path']},';
                                     } else if (i < index) {
                                       newImageIndex--;
                                     }
                                   }
-                                  urlList =
-                                      urlList.substring(0, urlList.length - 1);
+                                  urlList = urlList.substring(0, urlList.length - 1);
                                   Map<String, String> headers = {
-                                    'Authorization': generateBasicAuth(
-                                        widget.element['webdavusername'],
-                                        widget.element['password'])
+                                    'Authorization':
+                                        generateBasicAuth(widget.element['webdavusername'], widget.element['password'])
                                   };
                                   List<Map<String, dynamic>> headersList = [];
                                   for (int i = 0; i < urlList.split(',').length; i++) {
@@ -1359,38 +1226,27 @@ class WebdavFileExplorerState
                                   Application.router.navigateTo(this.context,
                                       '${Routes.webdavImagePreview}?index=$newImageIndex&images=${Uri.encodeComponent(urlList)}&headersList=${Uri.encodeComponent(jsonEncode(headersList))}',
                                       transition: TransitionType.none);
-                                } else if (allInfoList[index]['name']
-                                        .split('.')
-                                        .last
-                                        .toLowerCase() ==
-                                    'pdf') {
+                                } else if (allInfoList[index]['name'].split('.').last.toLowerCase() == 'pdf') {
                                   String shareUrl = '';
                                   shareUrl = host + allInfoList[index]['path'];
                                   Map<String, String> headers = {
-                                    'Authorization': generateBasicAuth(
-                                        widget.element['webdavusername'],
-                                        widget.element['password'])
+                                    'Authorization':
+                                        generateBasicAuth(widget.element['webdavusername'], widget.element['password'])
                                   };
                                   Application.router.navigateTo(this.context,
                                       '${Routes.pdfViewer}?url=${Uri.encodeComponent(shareUrl)}&fileName=${Uri.encodeComponent(allInfoList[index]['name'])}&headers=${Uri.encodeComponent(jsonEncode(headers))}',
                                       transition: TransitionType.none);
-                                } else if (Global.textExt.contains(
-                                    allInfoList[index]['name']
-                                        .split('.')
-                                        .last
-                                        .toLowerCase())) {
+                                } else if (Global.textExt
+                                    .contains(allInfoList[index]['name'].split('.').last.toLowerCase())) {
                                   String shareUrl = '';
                                   shareUrl = host + allInfoList[index]['path'];
                                   Map<String, dynamic>? headers = {
-                                    'Authorization': generateBasicAuth(
-                                        widget.element['webdavusername'],
-                                        widget.element['password'])
+                                    'Authorization':
+                                        generateBasicAuth(widget.element['webdavusername'], widget.element['password'])
                                   };
                                   showToast('开始获取文件');
-                                  String filePath = await downloadTxtFile(
-                                      shareUrl,
-                                      allInfoList[index]['name'],
-                                      headers);
+                                  String filePath =
+                                      await downloadTxtFile(shareUrl, allInfoList[index]['name'], headers);
                                   String fileName = allInfoList[index]['name'];
                                   if (filePath == 'error') {
                                     showToast('获取失败');
@@ -1399,37 +1255,24 @@ class WebdavFileExplorerState
                                   Application.router.navigateTo(this.context,
                                       '${Routes.mdPreview}?filePath=${Uri.encodeComponent(filePath)}&fileName=${Uri.encodeComponent(fileName)}',
                                       transition: TransitionType.none);
-                                } else if (Global.chewieExt.contains(
-                                    allInfoList[index]['name']
-                                        .split('.')
-                                        .last
-                                        .toLowerCase())) {
+                                } else if (Global.chewieExt
+                                    .contains(allInfoList[index]['name'].split('.').last.toLowerCase())) {
                                   //预览chewie视频
                                   String shareUrl = '';
                                   List videoList = [];
-                                  int newImageIndex =
-                                      index - dirAllInfoList.length;
-                                  for (int i = dirAllInfoList.length;
-                                      i < allInfoList.length;
-                                      i++) {
-                                    if (Global.chewieExt.contains(allInfoList[i]
-                                            ['name']
-                                        .split('.')
-                                        .last
-                                        .toLowerCase())) {
+                                  int newImageIndex = index - dirAllInfoList.length;
+                                  for (int i = dirAllInfoList.length; i < allInfoList.length; i++) {
+                                    if (Global.chewieExt
+                                        .contains(allInfoList[i]['name'].split('.').last.toLowerCase())) {
                                       shareUrl = host + allInfoList[i]['path'];
-                                      videoList.add({
-                                        "url": shareUrl,
-                                        "name": allInfoList[i]['name']
-                                      });
+                                      videoList.add({"url": shareUrl, "name": allInfoList[i]['name']});
                                     } else if (i < index) {
                                       newImageIndex--;
                                     }
                                   }
                                   Map<String, String> headers = {
-                                    'Authorization': generateBasicAuth(
-                                        widget.element['webdavusername'],
-                                        widget.element['password'])
+                                    'Authorization':
+                                        generateBasicAuth(widget.element['webdavusername'], widget.element['password'])
                                   };
                                   Application.router.navigateTo(this.context,
                                       '${Routes.netVideoPlayer}?videoList=${Uri.encodeComponent(jsonEncode(videoList))}&index=$newImageIndex&type=${Uri.encodeComponent('normal')}&headers=${Uri.encodeComponent(jsonEncode(headers))}',
@@ -1442,8 +1285,7 @@ class WebdavFileExplorerState
                             // ignore: sort_child_properties_last
                             child: Container(
                               decoration: const BoxDecoration(
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(55)),
+                                  borderRadius: BorderRadius.all(Radius.circular(55)),
                                   color: Color.fromARGB(255, 235, 242, 248)),
                               padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
                               child: MSHCheckbox(
@@ -1480,8 +1322,7 @@ class WebdavFileExplorerState
     }
   }
 
-  Widget buildBottomSheetWidget(
-      BuildContext context, int index, String iconPath) {
+  Widget buildBottomSheetWidget(BuildContext context, int index, String iconPath) {
     return SingleChildScrollView(
       child: Column(
         children: [
@@ -1497,16 +1338,11 @@ class WebdavFileExplorerState
                 allInfoList[index]['name'].length > 20
                     ? allInfoList[index]['name'].substring(0, 10) +
                         '...' +
-                        allInfoList[index]['name']
-                            .substring(allInfoList[index]['name'].length - 10)
+                        allInfoList[index]['name'].substring(allInfoList[index]['name'].length - 10)
                     : allInfoList[index]['name'],
                 style: const TextStyle(fontSize: 14)),
             subtitle: Text(
-                allInfoList[index]['mTime']
-                    .toString()
-                    .replaceAll('T', ' ')
-                    .replaceAll('Z', '')
-                    .substring(0, 19),
+                allInfoList[index]['mTime'].toString().replaceAll('T', ' ').replaceAll('Z', '').substring(0, 19),
                 style: const TextStyle(fontSize: 12)),
           ),
           const Divider(
@@ -1530,8 +1366,8 @@ class WebdavFileExplorerState
                 fileMap['rawUrl'] = '$host${fileMap['path']}';
                 fileMap['mTime'] = fileMap['mTime'].toString();
 
-                Application.router.navigateTo(context,
-                    '${Routes.webdavFileInformation}?fileMap=${Uri.encodeComponent(jsonEncode(fileMap))}',
+                Application.router.navigateTo(
+                    context, '${Routes.webdavFileInformation}?fileMap=${Uri.encodeComponent(jsonEncode(fileMap))}',
                     transition: TransitionType.cupertino);
               }),
           const Divider(
@@ -1548,17 +1384,14 @@ class WebdavFileExplorerState
             onTap: () async {
               String format = await Global.getLKformat();
               String host = widget.element['host'].endsWith('/')
-                  ? widget.element['host']
-                      .substring(0, widget.element['host'].length - 1)
+                  ? widget.element['host'].substring(0, widget.element['host'].length - 1)
                   : widget.element['host'];
 
               String shareUrl = '$host${allInfoList[index]['path']}';
 
               String filename = my_path.basename(allInfoList[index]['name']);
-              String formatedLink =
-                  linkGenerateDict[format]!(shareUrl, filename);
-              await flutter_services.Clipboard.setData(
-                  flutter_services.ClipboardData(text: formatedLink));
+              String formatedLink = linkGenerateDict[format]!(shareUrl, filename);
+              await flutter_services.Clipboard.setData(flutter_services.ClipboardData(text: formatedLink));
               if (mounted) {
                 Navigator.pop(context);
               }
@@ -1587,11 +1420,8 @@ class WebdavFileExplorerState
                           title: "新文件名 '/'分割文件夹",
                           okBtnTap: () async {
                             String newName = vc.text;
-                            newName = allInfoList[index]['path'].substring(
-                                    0,
-                                    allInfoList[index]['path']
-                                            .lastIndexOf('/') +
-                                        1) +
+                            newName = allInfoList[index]['path']
+                                    .substring(0, allInfoList[index]['path'].lastIndexOf('/') + 1) +
                                 newName;
                             var renameResult = await WebdavManageAPI.renameFile(
                               allInfoList[index]['path'],
@@ -1633,19 +1463,16 @@ class WebdavFileExplorerState
                     content: Text('确定要删除${allInfoList[index]['name']}吗？'),
                     actions: <Widget>[
                       CupertinoDialogAction(
-                        child: const Text('取消',
-                            style: TextStyle(color: Colors.blue)),
+                        child: const Text('取消', style: TextStyle(color: Colors.blue)),
                         onPressed: () {
                           Navigator.pop(context);
                         },
                       ),
                       CupertinoDialogAction(
-                        child: const Text('确定',
-                            style: TextStyle(color: Colors.blue)),
+                        child: const Text('确定', style: TextStyle(color: Colors.blue)),
                         onPressed: () async {
                           Navigator.pop(context);
-                          var result = await WebdavManageAPI.deleteFile(
-                              allInfoList[index]['path']);
+                          var result = await WebdavManageAPI.deleteFile(allInfoList[index]['path']);
                           if (result[0] == 'success') {
                             showToast('删除成功');
                             setState(() {
@@ -1668,8 +1495,7 @@ class WebdavFileExplorerState
     );
   }
 
-  Widget buildFolderBottomSheetWidget(
-      BuildContext context, int index, String iconPath) {
+  Widget buildFolderBottomSheetWidget(BuildContext context, int index, String iconPath) {
     return SingleChildScrollView(
       child: Column(
         children: [
@@ -1680,11 +1506,7 @@ class WebdavFileExplorerState
               height: 30,
             ),
             minLeadingWidth: 0,
-            title: Text(
-                allInfoList[index]['path']
-                    .substring(0, allInfoList[index]['path'].length - 1)
-                    .split('/')
-                    .last,
+            title: Text(allInfoList[index]['path'].substring(0, allInfoList[index]['path'].length - 1).split('/').last,
                 style: const TextStyle(fontSize: 15)),
           ),
           const Divider(
@@ -1699,8 +1521,7 @@ class WebdavFileExplorerState
             minLeadingWidth: 0,
             title: const Text('设为图床默认目录'),
             onTap: () async {
-              var result = await WebdavManageAPI.setDefaultBucket(
-                  allInfoList[index]['path']);
+              var result = await WebdavManageAPI.setDefaultBucket(allInfoList[index]['path']);
               if (result[0] == 'success') {
                 showToast('设置成功');
                 if (mounted) {
@@ -1733,19 +1554,16 @@ class WebdavFileExplorerState
                       content: Text('确定要删除${allInfoList[index]['name']}吗？'),
                       actions: <Widget>[
                         CupertinoDialogAction(
-                          child: const Text('取消',
-                              style: TextStyle(color: Colors.blue)),
+                          child: const Text('取消', style: TextStyle(color: Colors.blue)),
                           onPressed: () {
                             Navigator.pop(context);
                           },
                         ),
                         CupertinoDialogAction(
-                          child: const Text('确定',
-                              style: TextStyle(color: Colors.blue)),
+                          child: const Text('确定', style: TextStyle(color: Colors.blue)),
                           onPressed: () async {
                             Navigator.pop(context);
-                            var deleted = await WebdavManageAPI.deleteFile(
-                                allInfoList[index]['path']);
+                            var deleted = await WebdavManageAPI.deleteFile(allInfoList[index]['path']);
                             if (deleted[0] == 'success') {
                               showToast('删除成功');
                               setState(() {
@@ -1821,8 +1639,7 @@ class RenameDialogContentState extends State<RenameDialogContent> {
                 alignment: Alignment.center,
                 child: Text(
                   widget.title,
-                  style: const TextStyle(
-                      color: Color.fromARGB(255, 0, 0, 0), fontSize: 20),
+                  style: const TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 20),
                 )),
             Padding(
               padding: const EdgeInsets.fromLTRB(30, 0, 30, 0),
@@ -1839,8 +1656,7 @@ class RenameDialogContentState extends State<RenameDialogContent> {
                 },
                 decoration: const InputDecoration(
                     enabledBorder: UnderlineInputBorder(
-                      borderSide:
-                          BorderSide(color: Color.fromARGB(255, 234, 236, 238)),
+                      borderSide: BorderSide(color: Color.fromARGB(255, 234, 236, 238)),
                     ),
                     focusedBorder: UnderlineInputBorder(
                       borderSide: BorderSide(color: Colors.blue),
@@ -1868,8 +1684,7 @@ class RenameDialogContentState extends State<RenameDialogContent> {
                         },
                         child: Text(
                           widget.cancelBtnTitle,
-                          style:
-                              const TextStyle(fontSize: 22, color: Colors.blue),
+                          style: const TextStyle(fontSize: 22, color: Colors.blue),
                         ),
                       ),
                       Container(
@@ -1885,9 +1700,7 @@ class RenameDialogContentState extends State<RenameDialogContent> {
                           },
                           child: Text(
                             widget.okBtnTitle,
-                            style: const TextStyle(
-                                fontSize: 22,
-                                color: Color.fromARGB(255, 169, 173, 177)),
+                            style: const TextStyle(fontSize: 22, color: Color.fromARGB(255, 169, 173, 177)),
                           )),
                     ],
                   ),
@@ -1948,8 +1761,7 @@ class NewFolderDialogContentState extends State<NewFolderDialogContent> {
                 alignment: Alignment.center,
                 child: Text(
                   widget.title,
-                  style: const TextStyle(
-                      color: Color.fromARGB(255, 0, 0, 0), fontSize: 20),
+                  style: const TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 20),
                 )),
             //const Spacer(),
             Padding(
@@ -1967,8 +1779,7 @@ class NewFolderDialogContentState extends State<NewFolderDialogContent> {
                 },
                 decoration: const InputDecoration(
                     enabledBorder: UnderlineInputBorder(
-                      borderSide:
-                          BorderSide(color: Color.fromARGB(255, 14, 103, 192)),
+                      borderSide: BorderSide(color: Color.fromARGB(255, 14, 103, 192)),
                     ),
                     focusedBorder: UnderlineInputBorder(
                       borderSide: BorderSide(color: Colors.blue),
@@ -1999,8 +1810,7 @@ class NewFolderDialogContentState extends State<NewFolderDialogContent> {
                         },
                         child: Text(
                           widget.cancelBtnTitle,
-                          style:
-                              const TextStyle(fontSize: 22, color: Colors.blue),
+                          style: const TextStyle(fontSize: 22, color: Colors.blue),
                         ),
                       ),
                       Container(
@@ -2016,8 +1826,7 @@ class NewFolderDialogContentState extends State<NewFolderDialogContent> {
                           },
                           child: Text(
                             widget.okBtnTitle,
-                            style: const TextStyle(
-                                fontSize: 22, color: Colors.blue),
+                            style: const TextStyle(fontSize: 22, color: Colors.blue),
                           )),
                     ],
                   ),

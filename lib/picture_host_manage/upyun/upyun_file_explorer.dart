@@ -19,41 +19,32 @@ import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 import 'package:horopic/router/application.dart';
 import 'package:horopic/router/routers.dart';
 import 'package:horopic/picture_host_manage/manage_api/upyun_manage_api.dart';
-import 'package:horopic/picture_host_manage/common_page/loading_state.dart'
-    as loading_state;
+import 'package:horopic/picture_host_manage/common_page/loading_state.dart' as loading_state;
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/pages/loading.dart';
 import 'package:horopic/utils/image_compress.dart';
 import 'package:horopic/picture_host_manage/aws/aws_file_explorer.dart'
-    show
-        RenameDialog,
-        RenameDialogContent,
-        NewFolderDialog,
-        NewFolderDialogContent;
+    show RenameDialog, RenameDialogContent, NewFolderDialog, NewFolderDialogContent;
 
 bool isCoverFile = false;
 
 class UpyunFileExplorer extends StatefulWidget {
   final Map element;
   final String bucketPrefix;
-  const UpyunFileExplorer(
-      {Key? key, required this.element, required this.bucketPrefix})
-      : super(key: key);
+  const UpyunFileExplorer({Key? key, required this.element, required this.bucketPrefix}) : super(key: key);
 
   @override
   UpyunFileExplorerState createState() => UpyunFileExplorerState();
 }
 
-class UpyunFileExplorerState
-    extends loading_state.BaseLoadingPageState<UpyunFileExplorer> {
+class UpyunFileExplorerState extends loading_state.BaseLoadingPageState<UpyunFileExplorer> {
   List fileAllInfoList = [];
   List dirAllInfoList = [];
   List allInfoList = [];
 
   List selectedFilesBool = [];
-  RefreshController refreshController =
-      RefreshController(initialRefresh: false);
+  RefreshController refreshController = RefreshController(initialRefresh: false);
   TextEditingController vc = TextEditingController();
   TextEditingController newFolder = TextEditingController();
   TextEditingController fileLink = TextEditingController();
@@ -68,8 +59,7 @@ class UpyunFileExplorerState
 
   _getBucketList() async {
     try {
-      var res2 = await UpyunManageAPI.queryBucketFiles(
-          widget.element, widget.bucketPrefix);
+      var res2 = await UpyunManageAPI.queryBucketFiles(widget.element, widget.bucketPrefix);
 
       if (res2[0] != 'success') {
         if (mounted) {
@@ -95,8 +85,7 @@ class UpyunFileExplorerState
           fileAllInfoList.add(element);
         }
         for (var i = 0; i < fileAllInfoList.length; i++) {
-          fileAllInfoList[i]['last_modified'] =
-              fileAllInfoList[i]['last_modified'];
+          fileAllInfoList[i]['last_modified'] = fileAllInfoList[i]['last_modified'];
         }
         fileAllInfoList.sort((a, b) {
           return b['last_modified'].compareTo(a['last_modified']);
@@ -202,15 +191,12 @@ class UpyunFileExplorerState
                     if (sorted == true) {
                       if (dirAllInfoList.isEmpty) {
                         allInfoList.sort((a, b) {
-                          return b['last_modified']
-                              .compareTo(a['last_modified']);
+                          return b['last_modified'].compareTo(a['last_modified']);
                         });
                       } else {
-                        List temp = allInfoList.sublist(
-                            dirAllInfoList.length, allInfoList.length);
+                        List temp = allInfoList.sublist(dirAllInfoList.length, allInfoList.length);
                         temp.sort((a, b) {
-                          return b['last_modified']
-                              .compareTo(a['last_modified']);
+                          return b['last_modified'].compareTo(a['last_modified']);
                         });
                         allInfoList.clear();
                         allInfoList.addAll(dirAllInfoList);
@@ -222,15 +208,12 @@ class UpyunFileExplorerState
                     } else {
                       if (dirAllInfoList.isEmpty) {
                         allInfoList.sort((a, b) {
-                          return a['last_modified']
-                              .compareTo(b['last_modified']);
+                          return a['last_modified'].compareTo(b['last_modified']);
                         });
                       } else {
-                        List temp = allInfoList.sublist(
-                            dirAllInfoList.length, allInfoList.length);
+                        List temp = allInfoList.sublist(dirAllInfoList.length, allInfoList.length);
                         temp.sort((a, b) {
-                          return a['last_modified']
-                              .compareTo(b['last_modified']);
+                          return a['last_modified'].compareTo(b['last_modified']);
                         });
                         allInfoList.clear();
                         allInfoList.addAll(dirAllInfoList);
@@ -258,8 +241,7 @@ class UpyunFileExplorerState
                           return a['name'].compareTo(b['name']);
                         });
                       } else {
-                        List temp = allInfoList.sublist(
-                            dirAllInfoList.length, allInfoList.length);
+                        List temp = allInfoList.sublist(dirAllInfoList.length, allInfoList.length);
                         temp.sort((a, b) {
                           return a['name'].compareTo(b['name']);
                         });
@@ -276,8 +258,7 @@ class UpyunFileExplorerState
                           return b['name'].compareTo(a['name']);
                         });
                       } else {
-                        List temp = allInfoList.sublist(
-                            dirAllInfoList.length, allInfoList.length);
+                        List temp = allInfoList.sublist(dirAllInfoList.length, allInfoList.length);
                         temp.sort((a, b) {
                           return b['name'].compareTo(a['name']);
                         });
@@ -307,8 +288,7 @@ class UpyunFileExplorerState
                           return b['length'].compareTo(a['length']);
                         });
                       } else {
-                        List temp = allInfoList.sublist(
-                            dirAllInfoList.length, allInfoList.length);
+                        List temp = allInfoList.sublist(dirAllInfoList.length, allInfoList.length);
                         temp.sort((a, b) {
                           return b['length'].compareTo(a['length']);
                         });
@@ -325,8 +305,7 @@ class UpyunFileExplorerState
                           return a['length'].compareTo(b['length']);
                         });
                       } else {
-                        List temp = allInfoList.sublist(
-                            dirAllInfoList.length, allInfoList.length);
+                        List temp = allInfoList.sublist(dirAllInfoList.length, allInfoList.length);
                         temp.sort((a, b) {
                           return a['length'].compareTo(b['length']);
                         });
@@ -364,8 +343,7 @@ class UpyunFileExplorerState
                           }
                         });
                       } else {
-                        List temp = allInfoList.sublist(
-                            dirAllInfoList.length, allInfoList.length);
+                        List temp = allInfoList.sublist(dirAllInfoList.length, allInfoList.length);
                         temp.sort((a, b) {
                           String type = a['name'].split('.').last;
                           String type2 = b['name'].split('.').last;
@@ -398,8 +376,7 @@ class UpyunFileExplorerState
                           }
                         });
                       } else {
-                        List temp = allInfoList.sublist(
-                            dirAllInfoList.length, allInfoList.length);
+                        List temp = allInfoList.sublist(dirAllInfoList.length, allInfoList.length);
                         temp.sort((a, b) {
                           String type = a['name'].split('.').last;
                           String type2 = b['name'].split('.').last;
@@ -434,70 +411,51 @@ class UpyunFileExplorerState
                         children: [
                           ListTile(
                             minLeadingWidth: 0,
-                            leading: const Icon(Icons.file_present_outlined,
-                                color: Colors.blue),
+                            leading: const Icon(Icons.file_present_outlined, color: Colors.blue),
                             title: const Text('上传文件(可多选)'),
                             onTap: () async {
                               Navigator.pop(context);
-                              FilePickerResult? pickresult =
-                                  await FilePicker.platform.pickFiles(
+                              FilePickerResult? pickresult = await FilePicker.platform.pickFiles(
                                 allowMultiple: true,
                               );
                               if (pickresult == null) {
                                 showToast('未选择文件');
                               } else {
-                                List<File> files = pickresult.paths
-                                    .map((path) => File(path!))
-                                    .toList();
+                                List<File> files = pickresult.paths.map((path) => File(path!)).toList();
                                 Map configMap = {};
                                 configMap['bucket'] = widget.element['bucket'];
-                                configMap['operator'] =
-                                    widget.element['operator'];
-                                configMap['password'] =
-                                    widget.element['password'];
+                                configMap['operator'] = widget.element['operator'];
+                                configMap['password'] = widget.element['password'];
                                 configMap['url'] = widget.element['url'];
                                 configMap['path'] = widget.bucketPrefix;
                                 for (int i = 0; i < files.length; i++) {
                                   File compressedFile;
-                                  if (Global.imgExt.contains(my_path
-                                      .extension(files[i].path)
-                                      .toLowerCase()
-                                      .substring(1))) {
+                                  if (Global.imgExt
+                                      .contains(my_path.extension(files[i].path).toLowerCase().substring(1))) {
                                     if (Global.isCompress == true) {
-                                      ImageCompress imageCompress =
-                                          ImageCompress();
-                                      compressedFile = await imageCompress
-                                          .compressAndGetFile(
-                                              files[i].path,
-                                              my_path.basename(files[i].path),
-                                              Global.defaultCompressFormat,
-                                              minHeight: Global.minHeight,
-                                              minWidth: Global.minWidth,
-                                              quality: Global.quality);
+                                      ImageCompress imageCompress = ImageCompress();
+                                      compressedFile = await imageCompress.compressAndGetFile(
+                                          files[i].path, my_path.basename(files[i].path), Global.defaultCompressFormat,
+                                          minHeight: Global.minHeight,
+                                          minWidth: Global.minWidth,
+                                          quality: Global.quality);
                                       files[i] = compressedFile;
                                     } else {
                                       compressedFile = files[i];
                                     }
                                   }
-                                  List uploadList = [
-                                    files[i].path,
-                                    my_path.basename(files[i].path),
-                                    configMap
-                                  ];
+                                  List uploadList = [files[i].path, my_path.basename(files[i].path), configMap];
                                   String uploadListStr = jsonEncode(uploadList);
                                   Global.upyunUploadList.add(uploadListStr);
                                 }
-                                await Global.setUpyunUploadList(
-                                    Global.upyunUploadList);
-                                String downloadPath = await ExternalPath
-                                    .getExternalStoragePublicDirectory(
-                                        ExternalPath.DIRECTORY_DOWNLOADS);
+                                await Global.setUpyunUploadList(Global.upyunUploadList);
+                                String downloadPath = await ExternalPath.getExternalStoragePublicDirectory(
+                                    ExternalPath.DIRECTORY_DOWNLOADS);
                                 if (mounted) {
                                   Application.router
                                       .navigateTo(context,
                                           '/baseUpDownloadManagePage?bucketName=${widget.element['bucket']}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=0&currentListIndex=10',
-                                          transition:
-                                              TransitionType.inFromRight)
+                                          transition: TransitionType.inFromRight)
                                       .then((value) {
                                     _getBucketList();
                                   });
@@ -507,74 +465,57 @@ class UpyunFileExplorerState
                           ),
                           ListTile(
                             minLeadingWidth: 0,
-                            leading: const Icon(Icons.image_outlined,
-                                color: Colors.blue),
+                            leading: const Icon(Icons.image_outlined, color: Colors.blue),
                             title: const Text('上传照片(可多选)'),
                             onTap: () async {
                               Navigator.pop(context);
-                              AssetPickerConfig config =
-                                  const AssetPickerConfig(
+                              AssetPickerConfig config = const AssetPickerConfig(
                                 maxAssets: 100,
                                 selectedAssets: [],
                               );
                               final List<AssetEntity>? pickedImage =
-                                  await AssetPicker.pickAssets(context,
-                                      pickerConfig: config);
+                                  await AssetPicker.pickAssets(context, pickerConfig: config);
                               if (pickedImage == null) {
                                 showToast('未选择照片');
                               } else {
                                 List<File> files = [];
                                 for (var i = 0; i < pickedImage.length; i++) {
-                                  File? fileImage =
-                                      await pickedImage[i].originFile;
+                                  File? fileImage = await pickedImage[i].originFile;
                                   if (fileImage != null) {
                                     files.add(fileImage);
                                   }
                                 }
                                 Map configMap = {};
                                 configMap['bucket'] = widget.element['bucket'];
-                                configMap['operator'] =
-                                    widget.element['operator'];
-                                configMap['password'] =
-                                    widget.element['password'];
+                                configMap['operator'] = widget.element['operator'];
+                                configMap['password'] = widget.element['password'];
                                 configMap['url'] = widget.element['url'];
                                 configMap['path'] = widget.bucketPrefix;
                                 for (int i = 0; i < files.length; i++) {
                                   File compressedFile;
                                   if (Global.isCompress == true) {
-                                    ImageCompress imageCompress =
-                                        ImageCompress();
-                                    compressedFile =
-                                        await imageCompress.compressAndGetFile(
-                                            files[i].path,
-                                            my_path.basename(files[i].path),
-                                            Global.defaultCompressFormat,
-                                            minHeight: Global.minHeight,
-                                            minWidth: Global.minWidth,
-                                            quality: Global.quality);
+                                    ImageCompress imageCompress = ImageCompress();
+                                    compressedFile = await imageCompress.compressAndGetFile(
+                                        files[i].path, my_path.basename(files[i].path), Global.defaultCompressFormat,
+                                        minHeight: Global.minHeight,
+                                        minWidth: Global.minWidth,
+                                        quality: Global.quality);
                                     files[i] = compressedFile;
                                   } else {
                                     compressedFile = files[i];
                                   }
-                                  List uploadList = [
-                                    files[i].path,
-                                    my_path.basename(files[i].path),
-                                    configMap
-                                  ];
+                                  List uploadList = [files[i].path, my_path.basename(files[i].path), configMap];
                                   String uploadListStr = jsonEncode(uploadList);
                                   Global.upyunUploadList.add(uploadListStr);
                                 }
-                                await Global.setUpyunUploadList(
-                                    Global.upyunUploadList);
-                                String downloadPath = await ExternalPath
-                                    .getExternalStoragePublicDirectory(
-                                        ExternalPath.DIRECTORY_DOWNLOADS);
+                                await Global.setUpyunUploadList(Global.upyunUploadList);
+                                String downloadPath = await ExternalPath.getExternalStoragePublicDirectory(
+                                    ExternalPath.DIRECTORY_DOWNLOADS);
                                 if (mounted) {
                                   Application.router
                                       .navigateTo(context,
                                           '/baseUpDownloadManagePage?bucketName=${widget.element['bucket']}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=0&currentListIndex=10',
-                                          transition:
-                                              TransitionType.inFromRight)
+                                          transition: TransitionType.inFromRight)
                                       .then((value) {
                                     _getBucketList();
                                   });
@@ -588,12 +529,8 @@ class UpyunFileExplorerState
                             title: const Text('上传剪贴板内链接(换行分隔多个)'),
                             onTap: () async {
                               Navigator.pop(context);
-                              var url =
-                                  await flutter_services.Clipboard.getData(
-                                      'text/plain');
-                              if (url == null ||
-                                  url.text == null ||
-                                  url.text!.isEmpty) {
+                              var url = await flutter_services.Clipboard.getData('text/plain');
+                              if (url == null || url.text == null || url.text!.isEmpty) {
                                 if (mounted) {
                                   showToastWithContext(context, "剪贴板为空");
                                 }
@@ -610,11 +547,8 @@ class UpyunFileExplorerState
                                         outsideDismiss: false,
                                         loading: true,
                                         loadingText: "上传中...",
-                                        requestCallBack: UpyunManageAPI
-                                            .uploadNetworkFileEntry(
-                                                fileLinkList,
-                                                widget.element,
-                                                widget.bucketPrefix),
+                                        requestCallBack: UpyunManageAPI.uploadNetworkFileEntry(
+                                            fileLinkList, widget.element, widget.bucketPrefix),
                                       );
                                     });
                                 _getBucketList();
@@ -652,15 +586,11 @@ class UpyunFileExplorerState
                                         okBtnTap: () async {
                                           String newName = newFolder.text;
                                           if (newName.isEmpty) {
-                                            showToastWithContext(
-                                                context, "文件夹名不能为空");
+                                            showToastWithContext(context, "文件夹名不能为空");
                                             return;
                                           }
-                                          var copyResult =
-                                              await UpyunManageAPI.createFolder(
-                                                  widget.element,
-                                                  widget.bucketPrefix,
-                                                  newName);
+                                          var copyResult = await UpyunManageAPI.createFolder(
+                                              widget.element, widget.bucketPrefix, newName);
                                           if (copyResult[0] == 'success') {
                                             showToast('创建成功');
                                             _getBucketList();
@@ -688,8 +618,7 @@ class UpyunFileExplorerState
           IconButton(
               onPressed: () async {
                 String downloadPath =
-                    await ExternalPath.getExternalStoragePublicDirectory(
-                        ExternalPath.DIRECTORY_DOWNLOADS);
+                    await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOADS);
                 // ignore: use_build_context_synchronously
                 int index = 1;
                 if (Global.upyunDownloadList.isEmpty) {
@@ -712,13 +641,10 @@ class UpyunFileExplorerState
               )),
           IconButton(
             icon: selectedFilesBool.contains(true)
-                ? const Icon(Icons.delete,
-                    color: Color.fromARGB(255, 236, 127, 120), size: 30.0)
-                : const Icon(Icons.delete_outline,
-                    color: Colors.white, size: 30.0),
+                ? const Icon(Icons.delete, color: Color.fromARGB(255, 236, 127, 120), size: 30.0)
+                : const Icon(Icons.delete_outline, color: Colors.white, size: 30.0),
             onPressed: () async {
-              if (!selectedFilesBool.contains(true) ||
-                  selectedFilesBool.isEmpty) {
+              if (!selectedFilesBool.contains(true) || selectedFilesBool.isEmpty) {
                 showToastWithContext(context, '没有选择文件');
                 return;
               }
@@ -779,12 +705,10 @@ class UpyunFileExplorerState
               width: 40,
               child: FloatingActionButton(
                 heroTag: 'download',
-                backgroundColor: selectedFilesBool.contains(true)
-                    ? const Color.fromARGB(255, 180, 236, 182)
-                    : Colors.transparent,
+                backgroundColor:
+                    selectedFilesBool.contains(true) ? const Color.fromARGB(255, 180, 236, 182) : Colors.transparent,
                 onPressed: () async {
-                  if (!selectedFilesBool.contains(true) ||
-                      selectedFilesBool.isEmpty) {
+                  if (!selectedFilesBool.contains(true) || selectedFilesBool.isEmpty) {
                     showToastWithContext(context, '没有选择文件');
                     return;
                   }
@@ -803,14 +727,12 @@ class UpyunFileExplorerState
 
                   List<String> urlList = [];
                   for (int i = 0; i < downloadList.length; i++) {
-                    urlList.add(
-                        hostPrefix + bucketPrefix + downloadList[i]['name']);
+                    urlList.add(hostPrefix + bucketPrefix + downloadList[i]['name']);
                   }
                   Global.upyunDownloadList.addAll(urlList);
                   await Global.setUpyunDownloadList(Global.upyunDownloadList);
                   String downloadPath =
-                      await ExternalPath.getExternalStoragePublicDirectory(
-                          ExternalPath.DIRECTORY_DOWNLOADS);
+                      await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOADS);
                   // ignore: use_build_context_synchronously
                   Application.router.navigateTo(context,
                       '/baseUpDownloadManagePage?bucketName=${widget.element['bucket']}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=1&currentListIndex=10',
@@ -828,9 +750,8 @@ class UpyunFileExplorerState
               width: 40,
               child: FloatingActionButton(
                 heroTag: 'copy',
-                backgroundColor: selectedFilesBool.contains(true)
-                    ? const Color.fromARGB(255, 232, 177, 241)
-                    : Colors.transparent,
+                backgroundColor:
+                    selectedFilesBool.contains(true) ? const Color.fromARGB(255, 232, 177, 241) : Colors.transparent,
                 elevation: 5,
                 onPressed: () async {
                   if (!selectedFilesBool.contains(true)) {
@@ -840,30 +761,25 @@ class UpyunFileExplorerState
                     List multiUrls = [];
                     String hostPrefix = widget.element['url'];
                     if (hostPrefix.endsWith('/')) {
-                      hostPrefix =
-                          hostPrefix.substring(0, hostPrefix.length - 1);
+                      hostPrefix = hostPrefix.substring(0, hostPrefix.length - 1);
                     }
                     for (int i = 0; i < allInfoList.length; i++) {
                       if (selectedFilesBool[i]) {
                         String finalFormatedurl = ' ';
                         String rawurl = '';
                         String fileName = '';
-                        rawurl =
-                            '$hostPrefix${widget.bucketPrefix}${allInfoList[i]['name']}';
+                        rawurl = '$hostPrefix${widget.bucketPrefix}${allInfoList[i]['name']}';
                         fileName = allInfoList[i]['name'];
-                        finalFormatedurl =
-                            linkGenerateDict[Global.defaultLKformat]!(
-                                rawurl, fileName);
+                        finalFormatedurl = linkGenerateDict[Global.defaultLKformat]!(rawurl, fileName);
                         multiUrls.add(finalFormatedurl);
                       }
                     }
-                    await flutter_services.Clipboard.setData(
-                        flutter_services.ClipboardData(
-                            text: multiUrls
-                                .toString()
-                                .substring(1, multiUrls.toString().length - 1)
-                                .replaceAll(', ', '\n')
-                                .replaceAll(',', '\n')));
+                    await flutter_services.Clipboard.setData(flutter_services.ClipboardData(
+                        text: multiUrls
+                            .toString()
+                            .substring(1, multiUrls.toString().length - 1)
+                            .replaceAll(', ', '\n')
+                            .replaceAll(',', '\n')));
                     if (mounted) {
                       showToastWithContext(context, '已复制全部链接');
                     }
@@ -914,16 +830,15 @@ class UpyunFileExplorerState
     try {
       for (int i = 0; i < toDelete.length; i++) {
         if ((toDelete[i] - i) < dirAllInfoList.length) {
-          await UpyunManageAPI.deleteFolder(widget.element,
-              '${widget.bucketPrefix}${allInfoList[toDelete[i] - i]['name']}');
+          await UpyunManageAPI.deleteFolder(
+              widget.element, '${widget.bucketPrefix}${allInfoList[toDelete[i] - i]['name']}');
           setState(() {
             allInfoList.removeAt(toDelete[i] - i);
             dirAllInfoList.removeAt(toDelete[i] - i);
             selectedFilesBool.removeAt(toDelete[i] - i);
           });
         } else {
-          await UpyunManageAPI.deleteFile(widget.element, widget.bucketPrefix,
-              allInfoList[toDelete[i] - i]['name']);
+          await UpyunManageAPI.deleteFile(widget.element, widget.bucketPrefix, allInfoList[toDelete[i] - i]['name']);
           setState(() {
             allInfoList.removeAt(toDelete[i] - i);
             fileAllInfoList.removeAt(toDelete[i] - i - dirAllInfoList.length);
@@ -959,9 +874,7 @@ class UpyunFileExplorerState
             width: 100,
             height: 100,
           ),
-          const Text('没有文件哦，点击右上角添加吧',
-              style: TextStyle(
-                  fontSize: 20, color: Color.fromARGB(136, 121, 118, 118)))
+          const Text('没有文件哦，点击右上角添加吧', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118)))
         ],
       ),
     );
@@ -973,9 +886,7 @@ class UpyunFileExplorerState
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Text('加载失败,请先登录或者检查网络',
-              style: TextStyle(
-                  fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))),
+          const Text('加载失败,请先登录或者检查网络', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))),
           ElevatedButton(
             style: ButtonStyle(
               backgroundColor: MaterialStateProperty.all(Colors.blue),
@@ -1055,24 +966,18 @@ class UpyunFileExplorerState
                                   builder: (BuildContext context) {
                                     return CupertinoAlertDialog(
                                       title: const Text('通知'),
-                                      content: Text(
-                                          '确定要删除${allInfoList[index]['name']}吗？'),
+                                      content: Text('确定要删除${allInfoList[index]['name']}吗？'),
                                       actions: <Widget>[
                                         CupertinoDialogAction(
-                                          child: const Text('取消',
-                                              style: TextStyle(
-                                                  color: Colors.blue)),
+                                          child: const Text('取消', style: TextStyle(color: Colors.blue)),
                                           onPressed: () {
                                             Navigator.pop(context);
                                           },
                                         ),
                                         CupertinoDialogAction(
-                                          child: const Text('确定',
-                                              style: TextStyle(
-                                                  color: Colors.blue)),
+                                          child: const Text('确定', style: TextStyle(color: Colors.blue)),
                                           onPressed: () async {
-                                            String dirName =
-                                                allInfoList[index]['name'];
+                                            String dirName = allInfoList[index]['name'];
                                             Navigator.pop(context);
                                             Global.operateDone = false;
                                             await showDialog(
@@ -1083,31 +988,20 @@ class UpyunFileExplorerState
                                                     outsideDismiss: false,
                                                     loading: true,
                                                     loadingText: "删除中...",
-                                                    requestCallBack: UpyunManageAPI
-                                                        .deleteFolder(
-                                                            widget.element,
-                                                            '${widget.bucketPrefix}${allInfoList[index]['name']}'),
+                                                    requestCallBack: UpyunManageAPI.deleteFolder(widget.element,
+                                                        '${widget.bucketPrefix}${allInfoList[index]['name']}'),
                                                   );
                                                 });
                                             while (!Global.operateDone) {
-                                              await Future.delayed(
-                                                  const Duration(
-                                                      milliseconds: 250));
+                                              await Future.delayed(const Duration(milliseconds: 250));
                                             }
                                             Global.operateDone = false;
-                                            var queryResult =
-                                                await UpyunManageAPI
-                                                    .queryBucketFiles(
-                                                        widget.element,
-                                                        widget.bucketPrefix);
+                                            var queryResult = await UpyunManageAPI.queryBucketFiles(
+                                                widget.element, widget.bucketPrefix);
                                             List dirs = [];
-                                            for (var i = 0;
-                                                i < queryResult[1].length;
-                                                i++) {
-                                              if (queryResult[1][i]['type'] ==
-                                                  'folder') {
-                                                dirs.add(
-                                                    queryResult[1][i]['name']);
+                                            for (var i = 0; i < queryResult[1].length; i++) {
+                                              if (queryResult[1][i]['type'] == 'folder') {
+                                                dirs.add(queryResult[1][i]['name']);
                                               }
                                             }
                                             if (!dirs.contains(dirName)) {
@@ -1115,8 +1009,7 @@ class UpyunFileExplorerState
                                               setState(() {
                                                 allInfoList.removeAt(index);
                                                 dirAllInfoList.removeAt(index);
-                                                selectedFilesBool
-                                                    .removeAt(index);
+                                                selectedFilesBool.removeAt(index);
                                               });
                                             } else {
                                               showToast('删除失败');
@@ -1139,9 +1032,7 @@ class UpyunFileExplorerState
                         fit: StackFit.loose,
                         children: [
                           Container(
-                            color: selectedFilesBool[index]
-                                ? const Color(0x311192F3)
-                                : Colors.transparent,
+                            color: selectedFilesBool[index] ? const Color(0x311192F3) : Colors.transparent,
                             child: ListTile(
                               minLeadingWidth: 0,
                               minVerticalPadding: 0,
@@ -1150,8 +1041,7 @@ class UpyunFileExplorerState
                                 width: 30,
                                 height: 32,
                               ),
-                              title: Text(allInfoList[index]['name'],
-                                  style: const TextStyle(fontSize: 16)),
+                              title: Text(allInfoList[index]['name'], style: const TextStyle(fontSize: 16)),
                               trailing: IconButton(
                                 icon: const Icon(Icons.more_horiz),
                                 onPressed: () {
@@ -1160,8 +1050,7 @@ class UpyunFileExplorerState
                                       isScrollControlled: true,
                                       context: context,
                                       builder: (context) {
-                                        return buildFolderBottomSheetWidget(
-                                            context, index, iconPath);
+                                        return buildFolderBottomSheetWidget(context, index, iconPath);
                                       });
                                 },
                               ),
@@ -1179,8 +1068,7 @@ class UpyunFileExplorerState
                             // ignore: sort_child_properties_last
                             child: Container(
                               decoration: const BoxDecoration(
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(55)),
+                                  borderRadius: BorderRadius.all(Radius.circular(55)),
                                   color: Color.fromARGB(255, 235, 242, 248)),
                               padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
                               child: MSHCheckbox(
@@ -1236,24 +1124,20 @@ class UpyunFileExplorerState
                               onPressed: (BuildContext context) {
                                 String customUrl = widget.element['url'];
                                 if (customUrl != "None") {
-                                  if (!customUrl.startsWith('http') &&
-                                      !customUrl.startsWith('https')) {
+                                  if (!customUrl.startsWith('http') && !customUrl.startsWith('https')) {
                                     customUrl = 'http://$customUrl';
                                   }
                                 }
                                 if (customUrl.endsWith('/')) {
-                                  customUrl = customUrl.substring(
-                                      0, customUrl.length - 1);
+                                  customUrl = customUrl.substring(0, customUrl.length - 1);
                                 }
                                 String shareUrl = '';
-                                shareUrl =
-                                    '$customUrl${widget.bucketPrefix}${allInfoList[index]['name']}';
+                                shareUrl = '$customUrl${widget.bucketPrefix}${allInfoList[index]['name']}';
                                 Share.share(shareUrl);
                               },
                               autoClose: true,
                               padding: EdgeInsets.zero,
-                              backgroundColor:
-                                  const Color.fromARGB(255, 109, 196, 116),
+                              backgroundColor: const Color.fromARGB(255, 109, 196, 116),
                               foregroundColor: Colors.white,
                               icon: Icons.share,
                               label: '分享',
@@ -1266,35 +1150,25 @@ class UpyunFileExplorerState
                                     builder: (BuildContext context) {
                                       return CupertinoAlertDialog(
                                         title: const Text('通知'),
-                                        content: Text(
-                                            '确定要删除${allInfoList[index]['name']}吗？'),
+                                        content: Text('确定要删除${allInfoList[index]['name']}吗？'),
                                         actions: <Widget>[
                                           CupertinoDialogAction(
-                                            child: const Text('取消',
-                                                style: TextStyle(
-                                                    color: Colors.blue)),
+                                            child: const Text('取消', style: TextStyle(color: Colors.blue)),
                                             onPressed: () {
                                               Navigator.pop(context);
                                             },
                                           ),
                                           CupertinoDialogAction(
-                                            child: const Text('确定',
-                                                style: TextStyle(
-                                                    color: Colors.blue)),
+                                            child: const Text('确定', style: TextStyle(color: Colors.blue)),
                                             onPressed: () async {
                                               Navigator.pop(context);
-                                              var result = await UpyunManageAPI
-                                                  .deleteFile(
-                                                      widget.element,
-                                                      widget.bucketPrefix,
-                                                      allInfoList[index]
-                                                          ['name']);
+                                              var result = await UpyunManageAPI.deleteFile(
+                                                  widget.element, widget.bucketPrefix, allInfoList[index]['name']);
                                               if (result[0] == 'success') {
                                                 showToast('删除成功');
                                                 setState(() {
                                                   allInfoList.removeAt(index);
-                                                  selectedFilesBool
-                                                      .removeAt(index);
+                                                  selectedFilesBool.removeAt(index);
                                                 });
                                               } else {
                                                 showToast('删除失败');
@@ -1314,9 +1188,7 @@ class UpyunFileExplorerState
                         ),
                         child: Stack(fit: StackFit.loose, children: [
                           Container(
-                            color: selectedFilesBool[index]
-                                ? const Color(0x311192F3)
-                                : Colors.transparent,
+                            color: selectedFilesBool[index] ? const Color(0x311192F3) : Colors.transparent,
                             child: ListTile(
                               minLeadingWidth: 0,
                               minVerticalPadding: 0,
@@ -1326,28 +1198,14 @@ class UpyunFileExplorerState
                                 height: 30,
                               ),
                               title: Text(
-                                  allInfoList[index]['name']
-                                              .split('/')
-                                              .last
-                                              .length >
-                                          20
-                                      ? allInfoList[index]['name']
-                                              .split('/')
-                                              .last
-                                              .substring(0, 10) +
+                                  allInfoList[index]['name'].split('/').last.length > 20
+                                      ? allInfoList[index]['name'].split('/').last.substring(0, 10) +
                                           '...' +
                                           allInfoList[index]['name']
                                               .split('/')
                                               .last
-                                              .substring(allInfoList[index]
-                                                          ['name']
-                                                      .split('/')
-                                                      .last
-                                                      .length -
-                                                  10)
-                                      : allInfoList[index]['name']
-                                          .split('/')
-                                          .last,
+                                              .substring(allInfoList[index]['name'].split('/').last.length - 10)
+                                      : allInfoList[index]['name'].split('/').last,
                                   style: const TextStyle(fontSize: 14)),
                               subtitle: Text(
                                   '${DateTime.fromMillisecondsSinceEpoch(allInfoList[index]['last_modified'] * 1000).toString().substring(0, 19)}  ${getFileSize(allInfoList[index]['length'])}',
@@ -1359,8 +1217,7 @@ class UpyunFileExplorerState
                                       isScrollControlled: true,
                                       context: context,
                                       builder: (context) {
-                                        return buildBottomSheetWidget(
-                                            context, index, iconPath);
+                                        return buildBottomSheetWidget(context, index, iconPath);
                                       });
                                 },
                               ),
@@ -1368,69 +1225,40 @@ class UpyunFileExplorerState
                                 String urlList = '';
 
                                 //判断是否为图片
-                                if (!supportedExtensions(allInfoList[index]
-                                        ['name']
-                                    .split('.')
-                                    .last)) {
+                                if (!supportedExtensions(allInfoList[index]['name'].split('.').last)) {
                                   showToast('只支持图片文本和视频');
                                   return;
                                 }
                                 //预览图片
-                                if (Global.imgExt.contains(allInfoList[index]
-                                        ['name']
-                                    .split('.')
-                                    .last
-                                    .toLowerCase())) {
-                                  int newImageIndex =
-                                      index - dirAllInfoList.length;
-                                  for (int i = dirAllInfoList.length;
-                                      i < allInfoList.length;
-                                      i++) {
-                                    if (Global.imgExt.contains(allInfoList[i]
-                                            ['name']
-                                        .split('.')
-                                        .last
-                                        .toLowerCase())) {
-                                      urlList += widget.element['url'] +
-                                          widget.bucketPrefix +
-                                          allInfoList[i]['name'] +
-                                          ',';
+                                if (Global.imgExt.contains(allInfoList[index]['name'].split('.').last.toLowerCase())) {
+                                  int newImageIndex = index - dirAllInfoList.length;
+                                  for (int i = dirAllInfoList.length; i < allInfoList.length; i++) {
+                                    if (Global.imgExt.contains(allInfoList[i]['name'].split('.').last.toLowerCase())) {
+                                      urlList +=
+                                          widget.element['url'] + widget.bucketPrefix + allInfoList[i]['name'] + ',';
                                     } else if (i < index) {
                                       newImageIndex--;
                                     }
                                   }
-                                  urlList =
-                                      urlList.substring(0, urlList.length - 1);
+                                  urlList = urlList.substring(0, urlList.length - 1);
 
                                   Application.router.navigateTo(this.context,
                                       '${Routes.albumImagePreview}?index=$newImageIndex&images=${Uri.encodeComponent(urlList)}',
                                       transition: TransitionType.none);
-                                } else if (allInfoList[index]['name']
-                                        .split('.')
-                                        .last
-                                        .toLowerCase() ==
-                                    'pdf') {
+                                } else if (allInfoList[index]['name'].split('.').last.toLowerCase() == 'pdf') {
                                   //预览pdf
-                                  String shareUrl = widget.element['url'] +
-                                      widget.bucketPrefix +
-                                      allInfoList[index]['name'];
+                                  String shareUrl =
+                                      widget.element['url'] + widget.bucketPrefix + allInfoList[index]['name'];
                                   Map<String, dynamic> headers = {};
                                   Application.router.navigateTo(this.context,
                                       '${Routes.pdfViewer}?url=${Uri.encodeComponent(shareUrl)}&fileName=${Uri.encodeComponent(allInfoList[index]['name'])}&headers=${Uri.encodeComponent(jsonEncode(headers))}',
                                       transition: TransitionType.none);
-                                } else if (Global.textExt.contains(
-                                    allInfoList[index]['name']
-                                        .split('.')
-                                        .last
-                                        .toLowerCase())) {
-                                  String shareUrl = widget.element['url'] +
-                                      widget.bucketPrefix +
-                                      allInfoList[index]['name'];
+                                } else if (Global.textExt
+                                    .contains(allInfoList[index]['name'].split('.').last.toLowerCase())) {
+                                  String shareUrl =
+                                      widget.element['url'] + widget.bucketPrefix + allInfoList[index]['name'];
                                   showToast('开始获取文件');
-                                  String filePath = await downloadTxtFile(
-                                      shareUrl,
-                                      allInfoList[index]['name'],
-                                      null);
+                                  String filePath = await downloadTxtFile(shareUrl, allInfoList[index]['name'], null);
                                   String fileName = allInfoList[index]['name'];
                                   if (filePath == 'error') {
                                     showToast('获取失败');
@@ -1439,30 +1267,16 @@ class UpyunFileExplorerState
                                   Application.router.navigateTo(this.context,
                                       '${Routes.mdPreview}?filePath=${Uri.encodeComponent(filePath)}&fileName=${Uri.encodeComponent(fileName)}',
                                       transition: TransitionType.none);
-                                } else if (Global.chewieExt.contains(
-                                    allInfoList[index]['name']
-                                        .split('.')
-                                        .last
-                                        .toLowerCase())) {
+                                } else if (Global.chewieExt
+                                    .contains(allInfoList[index]['name'].split('.').last.toLowerCase())) {
                                   String shareUrl = '';
                                   List videoList = [];
-                                  int newImageIndex =
-                                      index - dirAllInfoList.length;
-                                  for (int i = dirAllInfoList.length;
-                                      i < allInfoList.length;
-                                      i++) {
-                                    if (Global.chewieExt.contains(allInfoList[i]
-                                            ['name']
-                                        .split('.')
-                                        .last
-                                        .toLowerCase())) {
-                                      shareUrl = widget.element['url'] +
-                                          widget.bucketPrefix +
-                                          allInfoList[i]['name'];
-                                      videoList.add({
-                                        "url": shareUrl,
-                                        "name": allInfoList[i]['name']
-                                      });
+                                  int newImageIndex = index - dirAllInfoList.length;
+                                  for (int i = dirAllInfoList.length; i < allInfoList.length; i++) {
+                                    if (Global.chewieExt
+                                        .contains(allInfoList[i]['name'].split('.').last.toLowerCase())) {
+                                      shareUrl = widget.element['url'] + widget.bucketPrefix + allInfoList[i]['name'];
+                                      videoList.add({"url": shareUrl, "name": allInfoList[i]['name']});
                                     } else if (i < index) {
                                       newImageIndex--;
                                     }
@@ -1471,40 +1285,22 @@ class UpyunFileExplorerState
                                   Application.router.navigateTo(this.context,
                                       '${Routes.netVideoPlayer}?videoList=${Uri.encodeComponent(jsonEncode(videoList))}&index=$newImageIndex&type=${Uri.encodeComponent('normal')}&headers=${Uri.encodeComponent(jsonEncode(headers))}',
                                       transition: TransitionType.none);
-                                } else if (Global.vlcExt.contains(
-                                    allInfoList[index]['name']
-                                        .split('.')
-                                        .last
-                                        .toLowerCase())) {
+                                } else if (Global.vlcExt
+                                    .contains(allInfoList[index]['name'].split('.').last.toLowerCase())) {
                                   String shareUrl = '';
                                   String subUrl = '';
                                   List videoList = [];
-                                  int newImageIndex =
-                                      index - dirAllInfoList.length;
+                                  int newImageIndex = index - dirAllInfoList.length;
                                   Map subtitleFileMap = {};
-                                  for (int i = dirAllInfoList.length;
-                                      i < allInfoList.length;
-                                      i++) {
-                                    if (Global.subtitleFileExt.contains(
-                                        allInfoList[i]['name']
-                                            .split('.')
-                                            .last
-                                            .toLowerCase())) {
-                                      subUrl = widget.element['url'] +
-                                          widget.bucketPrefix +
-                                          allInfoList[i]['name'];
-                                      subtitleFileMap[allInfoList[i]['name']
-                                          .split('.')
-                                          .first] = subUrl;
+                                  for (int i = dirAllInfoList.length; i < allInfoList.length; i++) {
+                                    if (Global.subtitleFileExt
+                                        .contains(allInfoList[i]['name'].split('.').last.toLowerCase())) {
+                                      subUrl = widget.element['url'] + widget.bucketPrefix + allInfoList[i]['name'];
+                                      subtitleFileMap[allInfoList[i]['name'].split('.').first] = subUrl;
                                     }
-                                    if (Global.vlcExt.contains(
-                                        allInfoList[index]['name']
-                                            .split('.')
-                                            .last
-                                            .toLowerCase())) {
-                                      shareUrl = widget.element['url'] +
-                                          widget.bucketPrefix +
-                                          allInfoList[i]['name'];
+                                    if (Global.vlcExt
+                                        .contains(allInfoList[index]['name'].split('.').last.toLowerCase())) {
+                                      shareUrl = widget.element['url'] + widget.bucketPrefix + allInfoList[i]['name'];
                                       videoList.add({
                                         "url": shareUrl,
                                         "name": allInfoList[i]['name'],
@@ -1515,14 +1311,9 @@ class UpyunFileExplorerState
                                     }
                                   }
                                   for (int i = 0; i < videoList.length; i++) {
-                                    if (subtitleFileMap.containsKey(videoList[i]
-                                            ['name']
-                                        .split('.')
-                                        .first)) {
+                                    if (subtitleFileMap.containsKey(videoList[i]['name'].split('.').first)) {
                                       videoList[i]['subtitlePath'] =
-                                          subtitleFileMap[videoList[i]['name']
-                                              .split('.')
-                                              .first];
+                                          subtitleFileMap[videoList[i]['name'].split('.').first];
                                     }
                                   }
                                   Map<String, dynamic> headers = {};
@@ -1537,8 +1328,7 @@ class UpyunFileExplorerState
                             // ignore: sort_child_properties_last
                             child: Container(
                               decoration: const BoxDecoration(
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(55)),
+                                  borderRadius: BorderRadius.all(Radius.circular(55)),
                                   color: Color.fromARGB(255, 235, 242, 248)),
                               padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
                               child: MSHCheckbox(
@@ -1575,8 +1365,7 @@ class UpyunFileExplorerState
     }
   }
 
-  Widget buildBottomSheetWidget(
-      BuildContext context, int index, String iconPath) {
+  Widget buildBottomSheetWidget(BuildContext context, int index, String iconPath) {
     return SingleChildScrollView(
       child: Column(
         children: [
@@ -1592,12 +1381,10 @@ class UpyunFileExplorerState
                 allInfoList[index]['name'].length > 20
                     ? allInfoList[index]['name'].substring(0, 10) +
                         '...' +
-                        allInfoList[index]['name']
-                            .substring(allInfoList[index]['name'].length - 10)
+                        allInfoList[index]['name'].substring(allInfoList[index]['name'].length - 10)
                     : allInfoList[index]['name'],
                 style: const TextStyle(fontSize: 14)),
-            subtitle: Text(allInfoList[index]['last_modified'].toString(),
-                style: const TextStyle(fontSize: 12)),
+            subtitle: Text(allInfoList[index]['last_modified'].toString(), style: const TextStyle(fontSize: 12)),
           ),
           const Divider(
             height: 0.1,
@@ -1635,12 +1422,10 @@ class UpyunFileExplorerState
               }
               String rawurl = '';
               String fileName = '';
-              rawurl =
-                  '$hostPrefix${widget.bucketPrefix}${allInfoList[index]['name']}';
+              rawurl = '$hostPrefix${widget.bucketPrefix}${allInfoList[index]['name']}';
               fileName = allInfoList[index]['name'];
               String formatedLink = linkGenerateDict[format]!(rawurl, fileName);
-              await flutter_services.Clipboard.setData(
-                  flutter_services.ClipboardData(text: formatedLink));
+              await flutter_services.Clipboard.setData(flutter_services.ClipboardData(text: formatedLink));
               if (mounted) {
                 Navigator.pop(context);
               }
@@ -1671,10 +1456,7 @@ class UpyunFileExplorerState
                             String newName = vc.text;
                             if (isCoverFile) {
                               var copyResult = await UpyunManageAPI.renameFile(
-                                  widget.element,
-                                  widget.bucketPrefix,
-                                  allInfoList[index]['name'],
-                                  newName);
+                                  widget.element, widget.bucketPrefix, allInfoList[index]['name'], newName);
                               if (copyResult[0] == 'success') {
                                 showToast('重命名成功');
                                 _getBucketList();
@@ -1683,20 +1465,12 @@ class UpyunFileExplorerState
                               }
                             } else {
                               var checkDuplicate =
-                                  await UpyunManageAPI.queryDuplicateName(
-                                      widget.element,
-                                      widget.bucketPrefix,
-                                      vc.text);
-                              if (checkDuplicate[0] == 'duplicate' ||
-                                  checkDuplicate[0] == 'error') {
+                                  await UpyunManageAPI.queryDuplicateName(widget.element, widget.bucketPrefix, vc.text);
+                              if (checkDuplicate[0] == 'duplicate' || checkDuplicate[0] == 'error') {
                                 showToast('文件名重复');
                               } else {
-                                var copyResult =
-                                    await UpyunManageAPI.renameFile(
-                                        widget.element,
-                                        widget.bucketPrefix,
-                                        allInfoList[index]['name'],
-                                        newName);
+                                var copyResult = await UpyunManageAPI.renameFile(
+                                    widget.element, widget.bucketPrefix, allInfoList[index]['name'], newName);
                                 if (copyResult[0] == 'success') {
                                   showToast('重命名成功');
                                   _getBucketList();
@@ -1735,21 +1509,17 @@ class UpyunFileExplorerState
                     content: Text('确定要删除${allInfoList[index]['name']}吗？'),
                     actions: <Widget>[
                       CupertinoDialogAction(
-                        child: const Text('取消',
-                            style: TextStyle(color: Colors.blue)),
+                        child: const Text('取消', style: TextStyle(color: Colors.blue)),
                         onPressed: () {
                           Navigator.pop(context);
                         },
                       ),
                       CupertinoDialogAction(
-                        child: const Text('确定',
-                            style: TextStyle(color: Colors.blue)),
+                        child: const Text('确定', style: TextStyle(color: Colors.blue)),
                         onPressed: () async {
                           Navigator.pop(context);
                           var result = await UpyunManageAPI.deleteFile(
-                              widget.element,
-                              widget.bucketPrefix,
-                              allInfoList[index]['name']);
+                              widget.element, widget.bucketPrefix, allInfoList[index]['name']);
                           if (result[0] == 'success') {
                             showToast('删除成功');
                             setState(() {
@@ -1772,8 +1542,7 @@ class UpyunFileExplorerState
     );
   }
 
-  Widget buildFolderBottomSheetWidget(
-      BuildContext context, int index, String iconPath) {
+  Widget buildFolderBottomSheetWidget(BuildContext context, int index, String iconPath) {
     if (widget.bucketPrefix != '/') {
       return SingleChildScrollView(
         child: Column(
@@ -1785,8 +1554,7 @@ class UpyunFileExplorerState
                 height: 30,
               ),
               minLeadingWidth: 0,
-              title: Text(allInfoList[index]['name'],
-                  style: const TextStyle(fontSize: 15)),
+              title: Text(allInfoList[index]['name'], style: const TextStyle(fontSize: 15)),
             ),
             const Divider(
               height: 0.1,
@@ -1800,10 +1568,8 @@ class UpyunFileExplorerState
               minLeadingWidth: 0,
               title: const Text('设为图床默认目录'),
               onTap: () async {
-                String fullPath =
-                    widget.bucketPrefix + allInfoList[index]['name'];
-                var result = await UpyunManageAPI.setDefaultBucket(
-                    widget.element, fullPath);
+                String fullPath = widget.bucketPrefix + allInfoList[index]['name'];
+                var result = await UpyunManageAPI.setDefaultBucket(widget.element, fullPath);
                 if (result[0] == 'success') {
                   showToast('设置成功');
                   if (mounted) {
@@ -1836,15 +1602,13 @@ class UpyunFileExplorerState
                         content: Text('确定要删除${allInfoList[index]['name']}吗？'),
                         actions: <Widget>[
                           CupertinoDialogAction(
-                            child: const Text('取消',
-                                style: TextStyle(color: Colors.blue)),
+                            child: const Text('取消', style: TextStyle(color: Colors.blue)),
                             onPressed: () {
                               Navigator.pop(context);
                             },
                           ),
                           CupertinoDialogAction(
-                            child: const Text('确定',
-                                style: TextStyle(color: Colors.blue)),
+                            child: const Text('确定', style: TextStyle(color: Colors.blue)),
                             onPressed: () async {
                               String dirName = allInfoList[index]['name'];
                               Navigator.pop(context);
@@ -1858,18 +1622,15 @@ class UpyunFileExplorerState
                                       loading: true,
                                       loadingText: "删除中...",
                                       requestCallBack: UpyunManageAPI.deleteFolder(
-                                          widget.element,
-                                          '${widget.bucketPrefix}${allInfoList[index]['name']}'),
+                                          widget.element, '${widget.bucketPrefix}${allInfoList[index]['name']}'),
                                     );
                                   });
                               while (!Global.operateDone) {
-                                await Future.delayed(
-                                    const Duration(milliseconds: 250));
+                                await Future.delayed(const Duration(milliseconds: 250));
                               }
                               Global.operateDone = false;
                               var queryResult =
-                                  await UpyunManageAPI.queryBucketFiles(
-                                      widget.element, widget.bucketPrefix);
+                                  await UpyunManageAPI.queryBucketFiles(widget.element, widget.bucketPrefix);
                               List dirs = [];
                               for (var i = 0; i < queryResult[1].length; i++) {
                                 if (queryResult[1][i]['type'] == 'folder') {
@@ -1907,8 +1668,7 @@ class UpyunFileExplorerState
                 height: 30,
               ),
               minLeadingWidth: 0,
-              title: Text(allInfoList[index]['name'],
-                  style: const TextStyle(fontSize: 15)),
+              title: Text(allInfoList[index]['name'], style: const TextStyle(fontSize: 15)),
             ),
             const Divider(
               height: 0.1,
@@ -1923,8 +1683,7 @@ class UpyunFileExplorerState
               title: const Text('设置根目录为图床默认目录'),
               onTap: () async {
                 String fullPath = '';
-                var result = await UpyunManageAPI.setDefaultBucket(
-                    widget.element, fullPath);
+                var result = await UpyunManageAPI.setDefaultBucket(widget.element, fullPath);
                 if (result[0] == 'success') {
                   showToast('设置成功');
                   if (mounted) {
@@ -1947,10 +1706,8 @@ class UpyunFileExplorerState
               minLeadingWidth: 0,
               title: const Text('设为图床默认目录'),
               onTap: () async {
-                String fullPath =
-                    widget.bucketPrefix + allInfoList[index]['name'];
-                var result = await UpyunManageAPI.setDefaultBucket(
-                    widget.element, fullPath);
+                String fullPath = widget.bucketPrefix + allInfoList[index]['name'];
+                var result = await UpyunManageAPI.setDefaultBucket(widget.element, fullPath);
                 if (result[0] == 'success') {
                   showToast('设置成功');
                   if (mounted) {
@@ -1983,15 +1740,13 @@ class UpyunFileExplorerState
                         content: Text('确定要删除${allInfoList[index]['name']}吗？'),
                         actions: <Widget>[
                           CupertinoDialogAction(
-                            child: const Text('取消',
-                                style: TextStyle(color: Colors.blue)),
+                            child: const Text('取消', style: TextStyle(color: Colors.blue)),
                             onPressed: () {
                               Navigator.pop(context);
                             },
                           ),
                           CupertinoDialogAction(
-                            child: const Text('确定',
-                                style: TextStyle(color: Colors.blue)),
+                            child: const Text('确定', style: TextStyle(color: Colors.blue)),
                             onPressed: () async {
                               String dirName = allInfoList[index]['name'];
                               Navigator.pop(context);
@@ -2005,18 +1760,15 @@ class UpyunFileExplorerState
                                       loading: true,
                                       loadingText: "删除中...",
                                       requestCallBack: UpyunManageAPI.deleteFolder(
-                                          widget.element,
-                                          '${widget.bucketPrefix}${allInfoList[index]['name']}'),
+                                          widget.element, '${widget.bucketPrefix}${allInfoList[index]['name']}'),
                                     );
                                   });
                               while (!Global.operateDone) {
-                                await Future.delayed(
-                                    const Duration(milliseconds: 250));
+                                await Future.delayed(const Duration(milliseconds: 250));
                               }
                               Global.operateDone = false;
                               var queryResult =
-                                  await UpyunManageAPI.queryBucketFiles(
-                                      widget.element, widget.bucketPrefix);
+                                  await UpyunManageAPI.queryBucketFiles(widget.element, widget.bucketPrefix);
                               List dirs = [];
                               for (var i = 0; i < queryResult[1].length; i++) {
                                 if (queryResult[1][i]['type'] == 'folder') {

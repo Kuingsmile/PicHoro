@@ -362,8 +362,7 @@ class GithubNewRepoConfigState extends State<GithubNewRepoConfig> {
             subtitle: ElevatedButton(
               onPressed: () async {
                 if (descriptionController.text.isNotEmpty) {
-                  githubManageConfigMap['description'] =
-                      descriptionController.text;
+                  githubManageConfigMap['description'] = descriptionController.text;
                 }
                 if (homepageController.text.isNotEmpty) {
                   githubManageConfigMap['homepage'] = homepageController.text;

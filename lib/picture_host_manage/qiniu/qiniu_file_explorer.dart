@@ -19,41 +19,32 @@ import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 import 'package:horopic/router/application.dart';
 import 'package:horopic/router/routers.dart';
 import 'package:horopic/picture_host_manage/manage_api/qiniu_manage_api.dart';
-import 'package:horopic/picture_host_manage/common_page/loading_state.dart'
-    as loading_state;
+import 'package:horopic/picture_host_manage/common_page/loading_state.dart' as loading_state;
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/pages/loading.dart';
 import 'package:horopic/utils/image_compress.dart';
 import 'package:horopic/picture_host_manage/aws/aws_file_explorer.dart'
-    show
-        RenameDialog,
-        RenameDialogContent,
-        NewFolderDialog,
-        NewFolderDialogContent;
+    show RenameDialog, RenameDialogContent, NewFolderDialog, NewFolderDialogContent;
 
 bool isCoverFile = false;
 
 class QiniuFileExplorer extends StatefulWidget {
   final Map element;
   final String bucketPrefix;
-  const QiniuFileExplorer(
-      {Key? key, required this.element, required this.bucketPrefix})
-      : super(key: key);
+  const QiniuFileExplorer({Key? key, required this.element, required this.bucketPrefix}) : super(key: key);
 
   @override
   QiniuFileExplorerState createState() => QiniuFileExplorerState();
 }
 
-class QiniuFileExplorerState
-    extends loading_state.BaseLoadingPageState<QiniuFileExplorer> {
+class QiniuFileExplorerState extends loading_state.BaseLoadingPageState<QiniuFileExplorer> {
   List fileAllInfoList = [];
   List dirAllInfoList = [];
   List allInfoList = [];
 
   List selectedFilesBool = [];
-  RefreshController refreshController =
-      RefreshController(initialRefresh: false);
+  RefreshController refreshController = RefreshController(initialRefresh: false);
   TextEditingController vc = TextEditingController();
   TextEditingController newFolder = TextEditingController();
   TextEditingController fileLink = TextEditingController();
@@ -91,8 +82,7 @@ class QiniuFileExplorerState
       return;
     }
     if (widget.bucketPrefix != '') {
-      res2[1]['items']
-          .removeWhere((element) => element['key'] == widget.bucketPrefix);
+      res2[1]['items'].removeWhere((element) => element['key'] == widget.bucketPrefix);
     }
 
     var files = res2[1]['items'];
@@ -174,10 +164,7 @@ class QiniuFileExplorerState
           },
         ),
         titleSpacing: 0,
-        title: Text(
-            widget.bucketPrefix == ''
-                ? widget.element['name']
-                : widget.bucketPrefix,
+        title: Text(widget.bucketPrefix == '' ? widget.element['name'] : widget.bucketPrefix,
             style: const TextStyle(
               color: Colors.white,
               fontSize: 15,
@@ -209,8 +196,7 @@ class QiniuFileExplorerState
                           return b['putTime'].compareTo(a['putTime']);
                         });
                       } else {
-                        List temp = allInfoList.sublist(
-                            dirAllInfoList.length, allInfoList.length);
+                        List temp = allInfoList.sublist(dirAllInfoList.length, allInfoList.length);
                         temp.sort((a, b) {
                           return b['putTime'].compareTo(a['putTime']);
                         });
@@ -227,8 +213,7 @@ class QiniuFileExplorerState
                           return a['putTime'].compareTo(b['putTime']);
                         });
                       } else {
-                        List temp = allInfoList.sublist(
-                            dirAllInfoList.length, allInfoList.length);
+                        List temp = allInfoList.sublist(dirAllInfoList.length, allInfoList.length);
                         temp.sort((a, b) {
                           return a['putTime'].compareTo(b['putTime']);
                         });
@@ -258,8 +243,7 @@ class QiniuFileExplorerState
                           return a['key'].compareTo(b['key']);
                         });
                       } else {
-                        List temp = allInfoList.sublist(
-                            dirAllInfoList.length, allInfoList.length);
+                        List temp = allInfoList.sublist(dirAllInfoList.length, allInfoList.length);
                         temp.sort((a, b) {
                           return a['key'].compareTo(b['key']);
                         });
@@ -276,8 +260,7 @@ class QiniuFileExplorerState
                           return b['key'].compareTo(a['key']);
                         });
                       } else {
-                        List temp = allInfoList.sublist(
-                            dirAllInfoList.length, allInfoList.length);
+                        List temp = allInfoList.sublist(dirAllInfoList.length, allInfoList.length);
                         temp.sort((a, b) {
                           return b['key'].compareTo(a['key']);
                         });
@@ -308,8 +291,7 @@ class QiniuFileExplorerState
                           return a['fsize'].compareTo(b['fsize']);
                         });
                       } else {
-                        List temp = allInfoList.sublist(
-                            dirAllInfoList.length, allInfoList.length);
+                        List temp = allInfoList.sublist(dirAllInfoList.length, allInfoList.length);
                         temp.sort((a, b) {
                           return a['fsize'].compareTo(b['fsize']);
                         });
@@ -326,8 +308,7 @@ class QiniuFileExplorerState
                           return b['fsize'].compareTo(a['fsize']);
                         });
                       } else {
-                        List temp = allInfoList.sublist(
-                            dirAllInfoList.length, allInfoList.length);
+                        List temp = allInfoList.sublist(dirAllInfoList.length, allInfoList.length);
                         temp.sort((a, b) {
                           return b['fsize'].compareTo(a['fsize']);
                         });
@@ -365,8 +346,7 @@ class QiniuFileExplorerState
                           }
                         });
                       } else {
-                        List temp = allInfoList.sublist(
-                            dirAllInfoList.length, allInfoList.length);
+                        List temp = allInfoList.sublist(dirAllInfoList.length, allInfoList.length);
                         temp.sort((a, b) {
                           String type = a['key'].split('.').last;
                           String type2 = b['key'].split('.').last;
@@ -399,8 +379,7 @@ class QiniuFileExplorerState
                           }
                         });
                       } else {
-                        List temp = allInfoList.sublist(
-                            dirAllInfoList.length, allInfoList.length);
+                        List temp = allInfoList.sublist(dirAllInfoList.length, allInfoList.length);
                         temp.sort((a, b) {
                           String type = a['key'].split('.').last;
                           String type2 = b['key'].split('.').last;
@@ -435,72 +414,52 @@ class QiniuFileExplorerState
                         children: [
                           ListTile(
                             minLeadingWidth: 0,
-                            leading: const Icon(Icons.file_present_outlined,
-                                color: Colors.blue),
+                            leading: const Icon(Icons.file_present_outlined, color: Colors.blue),
                             title: const Text('上传文件(可多选)'),
                             onTap: () async {
                               Navigator.pop(context);
-                              FilePickerResult? pickresult =
-                                  await FilePicker.platform.pickFiles(
+                              FilePickerResult? pickresult = await FilePicker.platform.pickFiles(
                                 allowMultiple: true,
                               );
                               if (pickresult == null) {
                                 showToast('未选择文件');
                               } else {
-                                List<File> files = pickresult.paths
-                                    .map((path) => File(path!))
-                                    .toList();
-                                Map configMapTemp =
-                                    await QiniuManageAPI.getConfigMap();
+                                List<File> files = pickresult.paths.map((path) => File(path!)).toList();
+                                Map configMapTemp = await QiniuManageAPI.getConfigMap();
                                 Map configMap = {};
-                                configMap['accessKey'] =
-                                    configMapTemp['accessKey'];
-                                configMap['secretKey'] =
-                                    configMapTemp['secretKey'];
+                                configMap['accessKey'] = configMapTemp['accessKey'];
+                                configMap['secretKey'] = configMapTemp['secretKey'];
                                 configMap['bucket'] = widget.element['name'];
                                 configMap['area'] = widget.element['area'];
                                 configMap['path'] = widget.bucketPrefix;
                                 for (int i = 0; i < files.length; i++) {
                                   File compressedFile;
-                                  if (Global.imgExt.contains(my_path
-                                      .extension(files[i].path)
-                                      .toLowerCase()
-                                      .substring(1))) {
+                                  if (Global.imgExt
+                                      .contains(my_path.extension(files[i].path).toLowerCase().substring(1))) {
                                     if (Global.isCompress == true) {
-                                      ImageCompress imageCompress =
-                                          ImageCompress();
-                                      compressedFile = await imageCompress
-                                          .compressAndGetFile(
-                                              files[i].path,
-                                              my_path.basename(files[i].path),
-                                              Global.defaultCompressFormat,
-                                              minHeight: Global.minHeight,
-                                              minWidth: Global.minWidth,
-                                              quality: Global.quality);
+                                      ImageCompress imageCompress = ImageCompress();
+                                      compressedFile = await imageCompress.compressAndGetFile(
+                                          files[i].path, my_path.basename(files[i].path), Global.defaultCompressFormat,
+                                          minHeight: Global.minHeight,
+                                          minWidth: Global.minWidth,
+                                          quality: Global.quality);
                                       files[i] = compressedFile;
                                     } else {
                                       compressedFile = files[i];
                                     }
                                   }
-                                  List uploadList = [
-                                    files[i].path,
-                                    my_path.basename(files[i].path),
-                                    configMap
-                                  ];
+                                  List uploadList = [files[i].path, my_path.basename(files[i].path), configMap];
                                   String uploadListStr = jsonEncode(uploadList);
                                   Global.qiniuUploadList.add(uploadListStr);
                                 }
-                                await Global.setQiniuUploadList(
-                                    Global.qiniuUploadList);
-                                String downloadPath = await ExternalPath
-                                    .getExternalStoragePublicDirectory(
-                                        ExternalPath.DIRECTORY_DOWNLOADS);
+                                await Global.setQiniuUploadList(Global.qiniuUploadList);
+                                String downloadPath = await ExternalPath.getExternalStoragePublicDirectory(
+                                    ExternalPath.DIRECTORY_DOWNLOADS);
                                 if (mounted) {
                                   Application.router
                                       .navigateTo(context,
                                           '/baseUpDownloadManagePage?bucketName=${widget.element['name']}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=0&currentListIndex=7',
-                                          transition:
-                                              TransitionType.inFromRight)
+                                          transition: TransitionType.inFromRight)
                                       .then((value) {
                                     _getBucketList();
                                   });
@@ -510,76 +469,58 @@ class QiniuFileExplorerState
                           ),
                           ListTile(
                             minLeadingWidth: 0,
-                            leading: const Icon(Icons.image_outlined,
-                                color: Colors.blue),
+                            leading: const Icon(Icons.image_outlined, color: Colors.blue),
                             title: const Text('上传照片(可多选)'),
                             onTap: () async {
                               Navigator.pop(context);
-                              AssetPickerConfig config =
-                                  const AssetPickerConfig(
+                              AssetPickerConfig config = const AssetPickerConfig(
                                 maxAssets: 100,
                                 selectedAssets: [],
                               );
                               final List<AssetEntity>? pickedImage =
-                                  await AssetPicker.pickAssets(context,
-                                      pickerConfig: config);
+                                  await AssetPicker.pickAssets(context, pickerConfig: config);
                               if (pickedImage == null) {
                                 showToast('未选择照片');
                               } else {
                                 List<File> files = [];
                                 for (var i = 0; i < pickedImage.length; i++) {
-                                  File? fileImage =
-                                      await pickedImage[i].originFile;
+                                  File? fileImage = await pickedImage[i].originFile;
                                   if (fileImage != null) {
                                     files.add(fileImage);
                                   }
                                 }
-                                Map configMapTemp =
-                                    await QiniuManageAPI.getConfigMap();
+                                Map configMapTemp = await QiniuManageAPI.getConfigMap();
                                 Map configMap = {};
-                                configMap['accessKey'] =
-                                    configMapTemp['accessKey'];
-                                configMap['secretKey'] =
-                                    configMapTemp['secretKey'];
+                                configMap['accessKey'] = configMapTemp['accessKey'];
+                                configMap['secretKey'] = configMapTemp['secretKey'];
                                 configMap['bucket'] = widget.element['name'];
                                 configMap['area'] = widget.element['area'];
                                 configMap['path'] = widget.bucketPrefix;
                                 for (int i = 0; i < files.length; i++) {
                                   File compressedFile;
                                   if (Global.isCompress == true) {
-                                    ImageCompress imageCompress =
-                                        ImageCompress();
-                                    compressedFile =
-                                        await imageCompress.compressAndGetFile(
-                                            files[i].path,
-                                            my_path.basename(files[i].path),
-                                            Global.defaultCompressFormat,
-                                            minHeight: Global.minHeight,
-                                            minWidth: Global.minWidth,
-                                            quality: Global.quality);
+                                    ImageCompress imageCompress = ImageCompress();
+                                    compressedFile = await imageCompress.compressAndGetFile(
+                                        files[i].path, my_path.basename(files[i].path), Global.defaultCompressFormat,
+                                        minHeight: Global.minHeight,
+                                        minWidth: Global.minWidth,
+                                        quality: Global.quality);
                                     files[i] = compressedFile;
                                   } else {
                                     compressedFile = files[i];
                                   }
-                                  List uploadList = [
-                                    files[i].path,
-                                    my_path.basename(files[i].path),
-                                    configMap
-                                  ];
+                                  List uploadList = [files[i].path, my_path.basename(files[i].path), configMap];
                                   String uploadListStr = jsonEncode(uploadList);
                                   Global.qiniuUploadList.add(uploadListStr);
                                 }
-                                await Global.setQiniuUploadList(
-                                    Global.qiniuUploadList);
-                                String downloadPath = await ExternalPath
-                                    .getExternalStoragePublicDirectory(
-                                        ExternalPath.DIRECTORY_DOWNLOADS);
+                                await Global.setQiniuUploadList(Global.qiniuUploadList);
+                                String downloadPath = await ExternalPath.getExternalStoragePublicDirectory(
+                                    ExternalPath.DIRECTORY_DOWNLOADS);
                                 if (mounted) {
                                   Application.router
                                       .navigateTo(context,
                                           '/baseUpDownloadManagePage?bucketName=${widget.element['name']}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=0&currentListIndex=7',
-                                          transition:
-                                              TransitionType.inFromRight)
+                                          transition: TransitionType.inFromRight)
                                       .then((value) {
                                     _getBucketList();
                                   });
@@ -593,12 +534,8 @@ class QiniuFileExplorerState
                             title: const Text('上传剪贴板内链接(换行分隔多个)'),
                             onTap: () async {
                               Navigator.pop(context);
-                              var url =
-                                  await flutter_services.Clipboard.getData(
-                                      'text/plain');
-                              if (url == null ||
-                                  url.text == null ||
-                                  url.text!.isEmpty) {
+                              var url = await flutter_services.Clipboard.getData('text/plain');
+                              if (url == null || url.text == null || url.text!.isEmpty) {
                                 if (mounted) {
                                   showToastWithContext(context, "剪贴板为空");
                                 }
@@ -610,8 +547,7 @@ class QiniuFileExplorerState
                                 int successCount = 0;
                                 int failCount = 0;
                                 for (int i = 0; i < fileLinkList.length; i++) {
-                                  var result =
-                                      await QiniuManageAPI.sisyphusFetch(
+                                  var result = await QiniuManageAPI.sisyphusFetch(
                                     widget.element,
                                     widget.bucketPrefix,
                                     fileLinkList[i],
@@ -627,8 +563,7 @@ class QiniuFileExplorerState
                                 } else if (successCount == 0) {
                                   showToast('提交失败');
                                 } else {
-                                  showToast(
-                                      '成功提交$successCount个文件,失败$failCount个文件');
+                                  showToast('成功提交$successCount个文件,失败$failCount个文件');
                                 }
                                 _getBucketList();
                               } catch (e) {
@@ -665,8 +600,7 @@ class QiniuFileExplorerState
                                         okBtnTap: () async {
                                           String newName = newFolder.text;
                                           if (newName.isEmpty) {
-                                            showToastWithContext(
-                                                context, "文件夹名不能为空");
+                                            showToastWithContext(context, "文件夹名不能为空");
                                             return;
                                           }
                                           if (newName.startsWith("/")) {
@@ -675,11 +609,8 @@ class QiniuFileExplorerState
                                           if (!newName.endsWith("/")) {
                                             newName = "$newName/";
                                           }
-                                          var copyResult =
-                                              await QiniuManageAPI.createFolder(
-                                                  widget.element,
-                                                  widget.bucketPrefix,
-                                                  newName);
+                                          var copyResult = await QiniuManageAPI.createFolder(
+                                              widget.element, widget.bucketPrefix, newName);
                                           if (copyResult[0] == 'success') {
                                             showToast('创建成功');
                                             _getBucketList();
@@ -706,8 +637,7 @@ class QiniuFileExplorerState
           IconButton(
               onPressed: () async {
                 String downloadPath =
-                    await ExternalPath.getExternalStoragePublicDirectory(
-                        ExternalPath.DIRECTORY_DOWNLOADS);
+                    await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOADS);
                 // ignore: use_build_context_synchronously
                 int index = 1;
                 if (Global.qiniuDownloadList.isEmpty) {
@@ -730,13 +660,10 @@ class QiniuFileExplorerState
               )),
           IconButton(
             icon: selectedFilesBool.contains(true)
-                ? const Icon(Icons.delete,
-                    color: Color.fromARGB(255, 236, 127, 120), size: 30.0)
-                : const Icon(Icons.delete_outline,
-                    color: Colors.white, size: 30.0),
+                ? const Icon(Icons.delete, color: Color.fromARGB(255, 236, 127, 120), size: 30.0)
+                : const Icon(Icons.delete_outline, color: Colors.white, size: 30.0),
             onPressed: () async {
-              if (!selectedFilesBool.contains(true) ||
-                  selectedFilesBool.isEmpty) {
+              if (!selectedFilesBool.contains(true) || selectedFilesBool.isEmpty) {
                 showToastWithContext(context, '没有选择文件');
                 return;
               }
@@ -797,12 +724,10 @@ class QiniuFileExplorerState
               width: 40,
               child: FloatingActionButton(
                 heroTag: 'download',
-                backgroundColor: selectedFilesBool.contains(true)
-                    ? const Color.fromARGB(255, 180, 236, 182)
-                    : Colors.transparent,
+                backgroundColor:
+                    selectedFilesBool.contains(true) ? const Color.fromARGB(255, 180, 236, 182) : Colors.transparent,
                 onPressed: () async {
-                  if (!selectedFilesBool.contains(true) ||
-                      selectedFilesBool.isEmpty) {
+                  if (!selectedFilesBool.contains(true) || selectedFilesBool.isEmpty) {
                     showToastWithContext(context, '没有选择文件');
                     return;
                   }
@@ -817,8 +742,7 @@ class QiniuFileExplorerState
                     return;
                   }
                   String hostPrefix = widget.element['domain'];
-                  if (!hostPrefix.startsWith('http://') &&
-                      !hostPrefix.startsWith('https://')) {
+                  if (!hostPrefix.startsWith('http://') && !hostPrefix.startsWith('https://')) {
                     hostPrefix = 'http://$hostPrefix';
                   }
                   if (!hostPrefix.endsWith('/')) {
@@ -831,8 +755,7 @@ class QiniuFileExplorerState
                   Global.qiniuDownloadList.addAll(urlList);
                   await Global.setQiniuDownloadList(Global.qiniuDownloadList);
                   String downloadPath =
-                      await ExternalPath.getExternalStoragePublicDirectory(
-                          ExternalPath.DIRECTORY_DOWNLOADS);
+                      await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOADS);
                   // ignore: use_build_context_synchronously
                   Application.router.navigateTo(context,
                       '/baseUpDownloadManagePage?bucketName=${widget.element['name']}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=1&currentListIndex=7',
@@ -850,9 +773,8 @@ class QiniuFileExplorerState
               width: 40,
               child: FloatingActionButton(
                 heroTag: 'copy',
-                backgroundColor: selectedFilesBool.contains(true)
-                    ? const Color.fromARGB(255, 232, 177, 241)
-                    : Colors.transparent,
+                backgroundColor:
+                    selectedFilesBool.contains(true) ? const Color.fromARGB(255, 232, 177, 241) : Colors.transparent,
                 elevation: 5,
                 onPressed: () async {
                   if (!selectedFilesBool.contains(true)) {
@@ -870,8 +792,7 @@ class QiniuFileExplorerState
                           showToast('域名为空');
                           return;
                         }
-                        if (!domain.startsWith('http') &&
-                            !domain.startsWith('https')) {
+                        if (!domain.startsWith('http') && !domain.startsWith('https')) {
                           domain = 'http://$domain';
                         }
                         if (domain.endsWith('/')) {
@@ -882,23 +803,19 @@ class QiniuFileExplorerState
                           fileName = allInfoList[i];
                         } else {
                           rawurl = '$domain/${allInfoList[i]['key']}';
-                          fileName = allInfoList[i]['key'].substring(
-                              allInfoList[i]['key'].lastIndexOf('/') + 1);
+                          fileName = allInfoList[i]['key'].substring(allInfoList[i]['key'].lastIndexOf('/') + 1);
                         }
-                        finalFormatedurl =
-                            linkGenerateDict[Global.defaultLKformat]!(
-                                rawurl, fileName);
+                        finalFormatedurl = linkGenerateDict[Global.defaultLKformat]!(rawurl, fileName);
 
                         multiUrls.add(finalFormatedurl);
                       }
                     }
-                    await flutter_services.Clipboard.setData(
-                        flutter_services.ClipboardData(
-                            text: multiUrls
-                                .toString()
-                                .substring(1, multiUrls.toString().length - 1)
-                                .replaceAll(', ', '\n')
-                                .replaceAll(',', '\n')));
+                    await flutter_services.Clipboard.setData(flutter_services.ClipboardData(
+                        text: multiUrls
+                            .toString()
+                            .substring(1, multiUrls.toString().length - 1)
+                            .replaceAll(', ', '\n')
+                            .replaceAll(',', '\n')));
                     if (mounted) {
                       showToastWithContext(context, '已复制全部链接');
                     }
@@ -949,16 +866,14 @@ class QiniuFileExplorerState
     try {
       for (int i = 0; i < toDelete.length; i++) {
         if ((toDelete[i] - i) < dirAllInfoList.length) {
-          await QiniuManageAPI.deleteFolder(
-              widget.element, allInfoList[toDelete[i] - i]);
+          await QiniuManageAPI.deleteFolder(widget.element, allInfoList[toDelete[i] - i]);
           setState(() {
             allInfoList.removeAt(toDelete[i] - i);
             dirAllInfoList.removeAt(toDelete[i] - i);
             selectedFilesBool.removeAt(toDelete[i] - i);
           });
         } else {
-          await QiniuManageAPI.deleteFile(
-              widget.element, allInfoList[toDelete[i] - i]['key']);
+          await QiniuManageAPI.deleteFile(widget.element, allInfoList[toDelete[i] - i]['key']);
           setState(() {
             allInfoList.removeAt(toDelete[i] - i);
             fileAllInfoList.removeAt(toDelete[i] - i - dirAllInfoList.length);
@@ -994,9 +909,7 @@ class QiniuFileExplorerState
             width: 100,
             height: 100,
           ),
-          const Text('没有文件哦，点击右上角添加吧',
-              style: TextStyle(
-                  fontSize: 20, color: Color.fromARGB(136, 121, 118, 118)))
+          const Text('没有文件哦，点击右上角添加吧', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118)))
         ],
       ),
     );
@@ -1008,9 +921,7 @@ class QiniuFileExplorerState
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Text('加载失败,请先登录或者检查网络',
-              style: TextStyle(
-                  fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))),
+          const Text('加载失败,请先登录或者检查网络', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))),
           ElevatedButton(
             style: ButtonStyle(
               backgroundColor: MaterialStateProperty.all(Colors.blue),
@@ -1091,21 +1002,16 @@ class QiniuFileExplorerState
                                   builder: (BuildContext context) {
                                     return CupertinoAlertDialog(
                                       title: const Text('通知'),
-                                      content:
-                                          Text('确定要删除${allInfoList[index]}吗？'),
+                                      content: Text('确定要删除${allInfoList[index]}吗？'),
                                       actions: <Widget>[
                                         CupertinoDialogAction(
-                                          child: const Text('取消',
-                                              style: TextStyle(
-                                                  color: Colors.blue)),
+                                          child: const Text('取消', style: TextStyle(color: Colors.blue)),
                                           onPressed: () {
                                             Navigator.pop(context);
                                           },
                                         ),
                                         CupertinoDialogAction(
-                                          child: const Text('确定',
-                                              style: TextStyle(
-                                                  color: Colors.blue)),
+                                          child: const Text('确定', style: TextStyle(color: Colors.blue)),
                                           onPressed: () async {
                                             Navigator.pop(context);
                                             Global.operateDone = false;
@@ -1118,48 +1024,35 @@ class QiniuFileExplorerState
                                                     loading: true,
                                                     loadingText: "删除中...",
                                                     requestCallBack:
-                                                        QiniuManageAPI
-                                                            .deleteFolder(
-                                                                widget.element,
-                                                                allInfoList[
-                                                                    index]),
+                                                        QiniuManageAPI.deleteFolder(widget.element, allInfoList[index]),
                                                   );
                                                 });
                                             while (!Global.operateDone) {
-                                              await Future.delayed(
-                                                  const Duration(
-                                                      milliseconds: 250));
+                                              await Future.delayed(const Duration(milliseconds: 250));
                                             }
                                             Global.operateDone = false;
-                                            var queryResult =
-                                                await QiniuManageAPI
-                                                    .queryBucketFiles(
+                                            var queryResult = await QiniuManageAPI.queryBucketFiles(
                                               widget.element,
                                               widget.bucketPrefix == ''
                                                   ? {
-                                                      'bucket': widget
-                                                          .element['name'],
+                                                      'bucket': widget.element['name'],
                                                       'limit': 1000,
                                                       'delimiter': '/',
                                                     }
                                                   : {
-                                                      'prefix':
-                                                          widget.bucketPrefix,
-                                                      'bucket': widget
-                                                          .element['name'],
+                                                      'prefix': widget.bucketPrefix,
+                                                      'bucket': widget.element['name'],
                                                       'limit': 1000,
                                                       'delimiter': '/',
                                                     },
                                             );
-                                            var dir = queryResult[1]
-                                                ['commonPrefixes'];
+                                            var dir = queryResult[1]['commonPrefixes'];
                                             if (dir == null) {
                                               showToast('删除成功');
                                               setState(() {
                                                 allInfoList.removeAt(index);
                                                 dirAllInfoList.removeAt(index);
-                                                selectedFilesBool
-                                                    .removeAt(index);
+                                                selectedFilesBool.removeAt(index);
                                               });
                                             } else if (dir != null) {
                                               if (dir is! List) {
@@ -1167,8 +1060,7 @@ class QiniuFileExplorerState
                                               }
                                               bool deleted = true;
                                               for (var element in dir) {
-                                                if (allInfoList[index] ==
-                                                    element) {
+                                                if (allInfoList[index] == element) {
                                                   deleted = false;
                                                   break;
                                                 }
@@ -1177,10 +1069,8 @@ class QiniuFileExplorerState
                                                 showToast('删除成功');
                                                 setState(() {
                                                   allInfoList.removeAt(index);
-                                                  dirAllInfoList
-                                                      .removeAt(index);
-                                                  selectedFilesBool
-                                                      .removeAt(index);
+                                                  dirAllInfoList.removeAt(index);
+                                                  selectedFilesBool.removeAt(index);
                                                 });
                                               } else {
                                                 showToast('删除失败');
@@ -1204,9 +1094,7 @@ class QiniuFileExplorerState
                         fit: StackFit.loose,
                         children: [
                           Container(
-                            color: selectedFilesBool[index]
-                                ? const Color(0x311192F3)
-                                : Colors.transparent,
+                            color: selectedFilesBool[index] ? const Color(0x311192F3) : Colors.transparent,
                             child: ListTile(
                               minLeadingWidth: 0,
                               minVerticalPadding: 0,
@@ -1216,11 +1104,7 @@ class QiniuFileExplorerState
                                 height: 32,
                               ),
                               title: Text(
-                                  allInfoList[index]
-                                      .substring(
-                                          0, allInfoList[index].length - 1)
-                                      .split('/')
-                                      .last,
+                                  allInfoList[index].substring(0, allInfoList[index].length - 1).split('/').last,
                                   style: const TextStyle(fontSize: 16)),
                               trailing: IconButton(
                                 icon: const Icon(Icons.more_horiz),
@@ -1230,8 +1114,7 @@ class QiniuFileExplorerState
                                       isScrollControlled: true,
                                       context: context,
                                       builder: (context) {
-                                        return buildFolderBottomSheetWidget(
-                                            context, index, iconPath);
+                                        return buildFolderBottomSheetWidget(context, index, iconPath);
                                       });
                                 },
                               ),
@@ -1247,8 +1130,7 @@ class QiniuFileExplorerState
                             // ignore: sort_child_properties_last
                             child: Container(
                               decoration: const BoxDecoration(
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(55)),
+                                  borderRadius: BorderRadius.all(Radius.circular(55)),
                                   color: Color.fromARGB(255, 235, 242, 248)),
                               padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
                               child: MSHCheckbox(
@@ -1310,23 +1192,19 @@ class QiniuFileExplorerState
                                   showToast('域名为空');
                                   return;
                                 }
-                                if (!domain.startsWith('http') &&
-                                    !domain.startsWith('https')) {
+                                if (!domain.startsWith('http') && !domain.startsWith('https')) {
                                   domain = 'http://$domain';
                                 }
                                 if (domain.endsWith('/')) {
-                                  domain =
-                                      domain.substring(0, domain.length - 1);
+                                  domain = domain.substring(0, domain.length - 1);
                                 }
-                                String shareUrl =
-                                    '$domain/${allInfoList[index]['key']}';
+                                String shareUrl = '$domain/${allInfoList[index]['key']}';
 
                                 Share.share(shareUrl);
                               },
                               autoClose: true,
                               padding: EdgeInsets.zero,
-                              backgroundColor:
-                                  const Color.fromARGB(255, 109, 196, 116),
+                              backgroundColor: const Color.fromARGB(255, 109, 196, 116),
                               foregroundColor: Colors.white,
                               icon: Icons.share,
                               label: '分享',
@@ -1339,34 +1217,25 @@ class QiniuFileExplorerState
                                     builder: (BuildContext context) {
                                       return CupertinoAlertDialog(
                                         title: const Text('通知'),
-                                        content: Text(
-                                            '确定要删除${allInfoList[index]['key']}吗？'),
+                                        content: Text('确定要删除${allInfoList[index]['key']}吗？'),
                                         actions: <Widget>[
                                           CupertinoDialogAction(
-                                            child: const Text('取消',
-                                                style: TextStyle(
-                                                    color: Colors.blue)),
+                                            child: const Text('取消', style: TextStyle(color: Colors.blue)),
                                             onPressed: () {
                                               Navigator.pop(context);
                                             },
                                           ),
                                           CupertinoDialogAction(
-                                            child: const Text('确定',
-                                                style: TextStyle(
-                                                    color: Colors.blue)),
+                                            child: const Text('确定', style: TextStyle(color: Colors.blue)),
                                             onPressed: () async {
                                               Navigator.pop(context);
-                                              var result = await QiniuManageAPI
-                                                  .deleteFile(
-                                                      widget.element,
-                                                      allInfoList[index]
-                                                          ['key']);
+                                              var result = await QiniuManageAPI.deleteFile(
+                                                  widget.element, allInfoList[index]['key']);
                                               if (result[0] == 'success') {
                                                 showToast('删除成功');
                                                 setState(() {
                                                   allInfoList.removeAt(index);
-                                                  selectedFilesBool
-                                                      .removeAt(index);
+                                                  selectedFilesBool.removeAt(index);
                                                 });
                                               } else {
                                                 showToast('删除失败');
@@ -1386,9 +1255,7 @@ class QiniuFileExplorerState
                         ),
                         child: Stack(fit: StackFit.loose, children: [
                           Container(
-                            color: selectedFilesBool[index]
-                                ? const Color(0x311192F3)
-                                : Colors.transparent,
+                            color: selectedFilesBool[index] ? const Color(0x311192F3) : Colors.transparent,
                             child: ListTile(
                               minLeadingWidth: 0,
                               minVerticalPadding: 0,
@@ -1398,28 +1265,14 @@ class QiniuFileExplorerState
                                 height: 30,
                               ),
                               title: Text(
-                                  allInfoList[index]['key']
-                                              .split('/')
-                                              .last
-                                              .length >
-                                          20
-                                      ? allInfoList[index]['key']
-                                              .split('/')
-                                              .last
-                                              .substring(0, 10) +
+                                  allInfoList[index]['key'].split('/').last.length > 20
+                                      ? allInfoList[index]['key'].split('/').last.substring(0, 10) +
                                           '...' +
                                           allInfoList[index]['key']
                                               .split('/')
                                               .last
-                                              .substring(allInfoList[index]
-                                                          ['key']
-                                                      .split('/')
-                                                      .last
-                                                      .length -
-                                                  10)
-                                      : allInfoList[index]['key']
-                                          .split('/')
-                                          .last,
+                                              .substring(allInfoList[index]['key'].split('/').last.length - 10)
+                                      : allInfoList[index]['key'].split('/').last,
                                   style: const TextStyle(fontSize: 14)),
                               subtitle: Text(
                                   ' ${DateTime.fromMillisecondsSinceEpoch(int.parse((allInfoList[index]['putTime']).toString().split('.')[0])).toString().split('.')[0]} ${getFileSize(allInfoList[index]['fsize'])}',
@@ -1431,18 +1284,13 @@ class QiniuFileExplorerState
                                       isScrollControlled: true,
                                       context: context,
                                       builder: (context) {
-                                        return buildBottomSheetWidget(
-                                            context, index, iconPath);
+                                        return buildBottomSheetWidget(context, index, iconPath);
                                       });
                                 },
                               ),
                               onTap: () async {
                                 String urlList = '';
-                                if (!supportedExtensions(allInfoList[index]
-                                        ['key']
-                                    .split('.')
-                                    .last
-                                    .toLowerCase())) {
+                                if (!supportedExtensions(allInfoList[index]['key'].split('.').last.toLowerCase())) {
                                   showToast('只支持图片文本和视频');
                                   return;
                                 }
@@ -1451,67 +1299,40 @@ class QiniuFileExplorerState
                                   showToast('域名为空');
                                   return;
                                 }
-                                if (!domain.startsWith('http') &&
-                                    !domain.startsWith('https')) {
+                                if (!domain.startsWith('http') && !domain.startsWith('https')) {
                                   domain = 'http://$domain';
                                 }
                                 if (domain.endsWith('/')) {
-                                  domain =
-                                      domain.substring(0, domain.length - 1);
+                                  domain = domain.substring(0, domain.length - 1);
                                 }
                                 //预览图片
-                                if (Global.imgExt.contains(allInfoList[index]
-                                        ['key']
-                                    .split('.')
-                                    .last
-                                    .toLowerCase())) {
-                                  int newImageIndex =
-                                      index - dirAllInfoList.length;
+                                if (Global.imgExt.contains(allInfoList[index]['key'].split('.').last.toLowerCase())) {
+                                  int newImageIndex = index - dirAllInfoList.length;
 
-                                  for (int i = dirAllInfoList.length;
-                                      i < allInfoList.length;
-                                      i++) {
-                                    if (Global.imgExt.contains(allInfoList[i]
-                                            ['key']
-                                        .split('.')
-                                        .last
-                                        .toLowerCase())) {
-                                      String shareUrl =
-                                          '$domain/${allInfoList[i]['key']}';
+                                  for (int i = dirAllInfoList.length; i < allInfoList.length; i++) {
+                                    if (Global.imgExt.contains(allInfoList[i]['key'].split('.').last.toLowerCase())) {
+                                      String shareUrl = '$domain/${allInfoList[i]['key']}';
                                       urlList += '$shareUrl,';
                                     } else if (i < index) {
                                       newImageIndex--;
                                     }
                                   }
-                                  urlList =
-                                      urlList.substring(0, urlList.length - 1);
+                                  urlList = urlList.substring(0, urlList.length - 1);
                                   Application.router.navigateTo(this.context,
                                       '${Routes.albumImagePreview}?index=$newImageIndex&images=${Uri.encodeComponent(urlList)}',
                                       transition: TransitionType.none);
-                                } else if (allInfoList[index]['key']
-                                        .split('.')
-                                        .last
-                                        .toLowerCase() ==
-                                    'pdf') {
-                                  String shareUrl =
-                                      '$domain/${allInfoList[index]['key']}';
+                                } else if (allInfoList[index]['key'].split('.').last.toLowerCase() == 'pdf') {
+                                  String shareUrl = '$domain/${allInfoList[index]['key']}';
                                   Map<String, dynamic> headers = {};
                                   Application.router.navigateTo(this.context,
                                       '${Routes.pdfViewer}?url=${Uri.encodeComponent(shareUrl)}&fileName=${Uri.encodeComponent(allInfoList[index]['key'])}&headers=${Uri.encodeComponent(jsonEncode(headers))}',
                                       transition: TransitionType.none);
-                                } else if (Global.textExt.contains(
-                                    allInfoList[index]['key']
-                                        .split('.')
-                                        .last
-                                        .toLowerCase())) {
-                                  String shareUrl =
-                                      '$domain/${allInfoList[index]['key']}';
+                                } else if (Global.textExt
+                                    .contains(allInfoList[index]['key'].split('.').last.toLowerCase())) {
+                                  String shareUrl = '$domain/${allInfoList[index]['key']}';
 
                                   showToast('开始获取文件');
-                                  String filePath = await downloadTxtFile(
-                                      shareUrl,
-                                      allInfoList[index]['key'],
-                                      null);
+                                  String filePath = await downloadTxtFile(shareUrl, allInfoList[index]['key'], null);
                                   String fileName = allInfoList[index]['key'];
                                   if (filePath == 'error') {
                                     showToast('获取失败');
@@ -1520,29 +1341,16 @@ class QiniuFileExplorerState
                                   Application.router.navigateTo(this.context,
                                       '${Routes.mdPreview}?filePath=${Uri.encodeComponent(filePath)}&fileName=${Uri.encodeComponent(fileName)}',
                                       transition: TransitionType.none);
-                                } else if (Global.chewieExt.contains(
-                                    allInfoList[index]['key']
-                                        .split('.')
-                                        .last
-                                        .toLowerCase())) {
+                                } else if (Global.chewieExt
+                                    .contains(allInfoList[index]['key'].split('.').last.toLowerCase())) {
                                   String shareUrl = '';
                                   List videoList = [];
-                                  int newImageIndex =
-                                      index - dirAllInfoList.length;
-                                  for (int i = dirAllInfoList.length;
-                                      i < allInfoList.length;
-                                      i++) {
-                                    if (Global.chewieExt.contains(allInfoList[i]
-                                            ['key']
-                                        .split('.')
-                                        .last
-                                        .toLowerCase())) {
-                                      shareUrl =
-                                          '$domain/${allInfoList[i]['key']}';
-                                      videoList.add({
-                                        "url": shareUrl,
-                                        "name": allInfoList[i]['key']
-                                      });
+                                  int newImageIndex = index - dirAllInfoList.length;
+                                  for (int i = dirAllInfoList.length; i < allInfoList.length; i++) {
+                                    if (Global.chewieExt
+                                        .contains(allInfoList[i]['key'].split('.').last.toLowerCase())) {
+                                      shareUrl = '$domain/${allInfoList[i]['key']}';
+                                      videoList.add({"url": shareUrl, "name": allInfoList[i]['key']});
                                     } else if (i < index) {
                                       newImageIndex--;
                                     }
@@ -1551,39 +1359,23 @@ class QiniuFileExplorerState
                                   Application.router.navigateTo(this.context,
                                       '${Routes.netVideoPlayer}?videoList=${Uri.encodeComponent(jsonEncode(videoList))}&index=$newImageIndex&type=${Uri.encodeComponent('normal')}&headers=${Uri.encodeComponent(jsonEncode(headers))}',
                                       transition: TransitionType.none);
-                                } else if (Global.vlcExt.contains(
-                                    allInfoList[index]['key']
-                                        .split('.')
-                                        .last
-                                        .toLowerCase())) {
+                                } else if (Global.vlcExt
+                                    .contains(allInfoList[index]['key'].split('.').last.toLowerCase())) {
                                   //vlc预览视频
                                   String shareUrl = '';
                                   String subUrl = '';
                                   List videoList = [];
-                                  int newImageIndex =
-                                      index - dirAllInfoList.length;
+                                  int newImageIndex = index - dirAllInfoList.length;
                                   Map subtitleFileMap = {};
-                                  for (int i = dirAllInfoList.length;
-                                      i < allInfoList.length;
-                                      i++) {
-                                    if (Global.subtitleFileExt.contains(
-                                        allInfoList[i]['key']
-                                            .split('.')
-                                            .last
-                                            .toLowerCase())) {
-                                      subUrl =
-                                          '$domain/${allInfoList[i]['key']}';
-                                      subtitleFileMap[allInfoList[i]['key']
-                                          .split('.')
-                                          .first] = subUrl;
+                                  for (int i = dirAllInfoList.length; i < allInfoList.length; i++) {
+                                    if (Global.subtitleFileExt
+                                        .contains(allInfoList[i]['key'].split('.').last.toLowerCase())) {
+                                      subUrl = '$domain/${allInfoList[i]['key']}';
+                                      subtitleFileMap[allInfoList[i]['key'].split('.').first] = subUrl;
                                     }
-                                    if (Global.vlcExt.contains(
-                                        allInfoList[index]['key']
-                                            .split('.')
-                                            .last
-                                            .toLowerCase())) {
-                                      shareUrl =
-                                          '$domain/${allInfoList[i]['key']}';
+                                    if (Global.vlcExt
+                                        .contains(allInfoList[index]['key'].split('.').last.toLowerCase())) {
+                                      shareUrl = '$domain/${allInfoList[i]['key']}';
                                       videoList.add({
                                         "url": shareUrl,
                                         "name": allInfoList[i]['key'],
@@ -1594,14 +1386,9 @@ class QiniuFileExplorerState
                                     }
                                   }
                                   for (int i = 0; i < videoList.length; i++) {
-                                    if (subtitleFileMap.containsKey(videoList[i]
-                                            ['name']
-                                        .split('.')
-                                        .first)) {
+                                    if (subtitleFileMap.containsKey(videoList[i]['name'].split('.').first)) {
                                       videoList[i]['subtitlePath'] =
-                                          subtitleFileMap[videoList[i]['name']
-                                              .split('.')
-                                              .first];
+                                          subtitleFileMap[videoList[i]['name'].split('.').first];
                                     }
                                   }
                                   Map<String, dynamic> headers = {};
@@ -1616,8 +1403,7 @@ class QiniuFileExplorerState
                             // ignore: sort_child_properties_last
                             child: Container(
                               decoration: const BoxDecoration(
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(55)),
+                                  borderRadius: BorderRadius.all(Radius.circular(55)),
                                   color: Color.fromARGB(255, 235, 242, 248)),
                               padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
                               child: MSHCheckbox(
@@ -1654,8 +1440,7 @@ class QiniuFileExplorerState
     }
   }
 
-  Widget buildBottomSheetWidget(
-      BuildContext context, int index, String iconPath) {
+  Widget buildBottomSheetWidget(BuildContext context, int index, String iconPath) {
     return SingleChildScrollView(
       child: Column(
         children: [
@@ -1669,14 +1454,12 @@ class QiniuFileExplorerState
             minLeadingWidth: 0,
             title: Text(
                 allInfoList[index]['key'].split('/').last.length > 20
-                    ? allInfoList[index]['key']
+                    ? allInfoList[index]['key'].split('/').last.substring(0, 10) +
+                        '...' +
+                        allInfoList[index]['key']
                             .split('/')
                             .last
-                            .substring(0, 10) +
-                        '...' +
-                        allInfoList[index]['key'].split('/').last.substring(
-                            allInfoList[index]['key'].split('/').last.length -
-                                10)
+                            .substring(allInfoList[index]['key'].split('/').last.length - 10)
                     : allInfoList[index]['key'].split('/').last,
                 style: const TextStyle(fontSize: 14)),
             subtitle: Text(
@@ -1727,10 +1510,8 @@ class QiniuFileExplorerState
               String shareUrl = '$domain/${allInfoList[index]['key']}';
 
               String filename = my_path.basename(allInfoList[index]['key']);
-              String formatedLink =
-                  linkGenerateDict[format]!(shareUrl, filename);
-              await flutter_services.Clipboard.setData(
-                  flutter_services.ClipboardData(text: formatedLink));
+              String formatedLink = linkGenerateDict[format]!(shareUrl, filename);
+              await flutter_services.Clipboard.setData(flutter_services.ClipboardData(text: formatedLink));
               if (mounted) {
                 Navigator.pop(context);
               }
@@ -1761,11 +1542,7 @@ class QiniuFileExplorerState
                             String newName = vc.text;
                             if (isCoverFile) {
                               var copyResult = await QiniuManageAPI.copyFile(
-                                  'move',
-                                  widget.element,
-                                  allInfoList[index]['key'],
-                                  newName,
-                                  true);
+                                  'move', widget.element, allInfoList[index]['key'], newName, true);
                               if (copyResult[0] == 'success') {
                                 showToast('重命名成功');
                                 _getBucketList();
@@ -1774,11 +1551,7 @@ class QiniuFileExplorerState
                               }
                             } else {
                               var copyResult = await QiniuManageAPI.copyFile(
-                                  'move',
-                                  widget.element,
-                                  allInfoList[index]['key'],
-                                  newName,
-                                  false);
+                                  'move', widget.element, allInfoList[index]['key'], newName, false);
                               if (copyResult[0] == 'success') {
                                 showToast('重命名成功');
                                 _getBucketList();
@@ -1818,19 +1591,16 @@ class QiniuFileExplorerState
                     content: Text('确定要删除${allInfoList[index]['key']}吗？'),
                     actions: <Widget>[
                       CupertinoDialogAction(
-                        child: const Text('取消',
-                            style: TextStyle(color: Colors.blue)),
+                        child: const Text('取消', style: TextStyle(color: Colors.blue)),
                         onPressed: () {
                           Navigator.pop(context);
                         },
                       ),
                       CupertinoDialogAction(
-                        child: const Text('确定',
-                            style: TextStyle(color: Colors.blue)),
+                        child: const Text('确定', style: TextStyle(color: Colors.blue)),
                         onPressed: () async {
                           Navigator.pop(context);
-                          var result = await QiniuManageAPI.deleteFile(
-                              widget.element, allInfoList[index]['key']);
+                          var result = await QiniuManageAPI.deleteFile(widget.element, allInfoList[index]['key']);
                           if (result[0] == 'success') {
                             showToast('删除成功');
                             setState(() {
@@ -1853,8 +1623,7 @@ class QiniuFileExplorerState
     );
   }
 
-  Widget buildFolderBottomSheetWidget(
-      BuildContext context, int index, String iconPath) {
+  Widget buildFolderBottomSheetWidget(BuildContext context, int index, String iconPath) {
     return SingleChildScrollView(
       child: Column(
         children: [
@@ -1865,11 +1634,7 @@ class QiniuFileExplorerState
               height: 30,
             ),
             minLeadingWidth: 0,
-            title: Text(
-                allInfoList[index]
-                    .substring(0, allInfoList[index].length - 1)
-                    .split('/')
-                    .last,
+            title: Text(allInfoList[index].substring(0, allInfoList[index].length - 1).split('/').last,
                 style: const TextStyle(fontSize: 15)),
           ),
           const Divider(
@@ -1888,8 +1653,8 @@ class QiniuFileExplorerState
                 'domain': widget.element['domain'],
                 'area': widget.element['area'],
               };
-              var result = await QiniuManageAPI.setDefaultBucketFromListPage(
-                  widget.element, textMap, allInfoList[index]);
+              var result =
+                  await QiniuManageAPI.setDefaultBucketFromListPage(widget.element, textMap, allInfoList[index]);
               if (result[0] == 'success') {
                 showToast('设置成功');
                 if (mounted) {
@@ -1922,15 +1687,13 @@ class QiniuFileExplorerState
                       content: Text('确定要删除${allInfoList[index]}吗？'),
                       actions: <Widget>[
                         CupertinoDialogAction(
-                          child: const Text('取消',
-                              style: TextStyle(color: Colors.blue)),
+                          child: const Text('取消', style: TextStyle(color: Colors.blue)),
                           onPressed: () {
                             Navigator.pop(context);
                           },
                         ),
                         CupertinoDialogAction(
-                          child: const Text('确定',
-                              style: TextStyle(color: Colors.blue)),
+                          child: const Text('确定', style: TextStyle(color: Colors.blue)),
                           onPressed: () async {
                             Navigator.pop(context);
                             Global.operateDone = false;
@@ -1942,18 +1705,14 @@ class QiniuFileExplorerState
                                     outsideDismiss: false,
                                     loading: true,
                                     loadingText: "删除中...",
-                                    requestCallBack:
-                                        QiniuManageAPI.deleteFolder(
-                                            widget.element, allInfoList[index]),
+                                    requestCallBack: QiniuManageAPI.deleteFolder(widget.element, allInfoList[index]),
                                   );
                                 });
                             while (!Global.operateDone) {
-                              await Future.delayed(
-                                  const Duration(milliseconds: 250));
+                              await Future.delayed(const Duration(milliseconds: 250));
                             }
                             Global.operateDone = false;
-                            var queryResult =
-                                await QiniuManageAPI.queryBucketFiles(
+                            var queryResult = await QiniuManageAPI.queryBucketFiles(
                               widget.element,
                               widget.bucketPrefix == ''
                                   ? {

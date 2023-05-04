@@ -8,8 +8,7 @@ import 'package:f_logs/f_logs.dart';
 
 import 'package:horopic/router/application.dart';
 import 'package:horopic/router/routers.dart';
-import 'package:horopic/picture_host_manage/common_page/loading_state.dart'
-    as loading_state;
+import 'package:horopic/picture_host_manage/common_page/loading_state.dart' as loading_state;
 import 'package:horopic/picture_host_manage/manage_api/github_manage_api.dart';
 import 'package:horopic/utils/common_functions.dart';
 
@@ -24,12 +23,10 @@ class GithubReposList extends StatefulWidget {
   GithubReposListState createState() => GithubReposListState();
 }
 
-class GithubReposListState
-    extends loading_state.BaseLoadingPageState<GithubReposList> {
+class GithubReposListState extends loading_state.BaseLoadingPageState<GithubReposList> {
   List repoMap = [];
 
-  RefreshController refreshController =
-      RefreshController(initialRefresh: false);
+  RefreshController refreshController = RefreshController(initialRefresh: false);
 
   @override
   void initState() {
@@ -57,8 +54,7 @@ class GithubReposListState
       if (configMap['githubusername'] == widget.showedUsername) {
         bucketListResponse = await GithubManageAPI.getReposList();
       } else {
-        bucketListResponse =
-            await GithubManageAPI.getOtherReposList(widget.showedUsername);
+        bucketListResponse = await GithubManageAPI.getOtherReposList(widget.showedUsername);
       }
       //判断是否获取成功
       if (bucketListResponse[0] != 'success') {
@@ -120,8 +116,7 @@ class GithubReposListState
     Map<String, int> visibilityCount = {};
     for (var i = 0; i < elements.length; i++) {
       if (visibilityCount.containsKey(elements[i]['visibility'])) {
-        visibilityCount[elements[i]['visibility']] =
-            visibilityCount[elements[i]['visibility']]! + 1;
+        visibilityCount[elements[i]['visibility']] = visibilityCount[elements[i]['visibility']]! + 1;
       } else {
         visibilityCount[elements[i]['visibility']] = 1;
       }
@@ -133,8 +128,7 @@ class GithubReposListState
   AppBar get appBar => AppBar(
         elevation: 0,
         centerTitle: true,
-        title: titleText('${widget.showedUsername}的仓库',fontsize: 16
-           ),
+        title: titleText('${widget.showedUsername}的仓库', fontsize: 16),
         actions: [
           IconButton(
             onPressed: () async {
@@ -142,9 +136,8 @@ class GithubReposListState
                 var configMap = await GithubManageAPI.getConfigMap();
                 if (configMap['githubusername'] == widget.showedUsername) {
                   if (mounted) {
-                    await Application.router.navigateTo(
-                        context, Routes.githubNewRepoConfig,
-                        transition: TransitionType.cupertino);
+                    await Application.router
+                        .navigateTo(context, Routes.githubNewRepoConfig, transition: TransitionType.cupertino);
                     _onRefresh();
                   }
                 } else {
@@ -171,9 +164,7 @@ class GithubReposListState
             width: 100,
             height: 100,
           ),
-          const Text('没有仓库，点击右上角添加哦',
-              style: TextStyle(
-                  fontSize: 20, color: Color.fromARGB(136, 121, 118, 118)))
+          const Text('没有仓库，点击右上角添加哦', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118)))
         ],
       ),
     );
@@ -185,9 +176,7 @@ class GithubReposListState
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Text('加载失败',
-              style: TextStyle(
-                  fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))),
+          const Text('加载失败', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))),
           ElevatedButton(
             style: ButtonStyle(
               backgroundColor: MaterialStateProperty.all(Colors.blue),
@@ -247,10 +236,9 @@ class GithubReposListState
           shrinkWrap: true,
           elements: repoMap,
           groupBy: (element) => element['visibility'],
-          itemComparator: (item1, item2) =>
-              item2['name'].toString().toLowerCase().compareTo(
-                    item1['name'].toString().toLowerCase(),
-                  ),
+          itemComparator: (item1, item2) => item2['name'].toString().toLowerCase().compareTo(
+                item1['name'].toString().toLowerCase(),
+              ),
           groupComparator: (value1, value2) => value2.compareTo(value1),
           separator: const Divider(
             height: 0.1,
@@ -346,8 +334,7 @@ class GithubReposListState
                   showToast('该仓库不属于当前登录用户');
                   return;
                 }
-                var result =
-                    await GithubManageAPI.setDefaultRepo(element, null);
+                var result = await GithubManageAPI.setDefaultRepo(element, null);
                 if (result[0] == 'success') {
                   showToast('设置成功');
                   if (mounted) {
@@ -373,8 +360,8 @@ class GithubReposListState
             minLeadingWidth: 0,
             title: const Text('仓库信息', style: TextStyle(fontSize: 15)),
             onTap: () {
-              Application.router.navigateTo(context,
-                  '${Routes.githubRepoInformation}?repoMap=${Uri.encodeComponent(jsonEncode(element))}',
+              Application.router.navigateTo(
+                  context, '${Routes.githubRepoInformation}?repoMap=${Uri.encodeComponent(jsonEncode(element))}',
                   transition: TransitionType.none);
             },
           ),

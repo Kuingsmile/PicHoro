@@ -91,8 +91,7 @@ BaseOptions setBaseOptions() {
   return baseOptions;
 }
 
-downloadTxtFile(
-    String urlpath, String fileName, Map<String, dynamic>? headers) async {
+downloadTxtFile(String urlpath, String fileName, Map<String, dynamic>? headers) async {
   BaseOptions baseOptions = setBaseOptions();
   Dio dio = Dio(baseOptions);
   String tempDir = (await getTemporaryDirectory()).path;
@@ -261,11 +260,7 @@ showCupertinoAlertDialogWithConfirmFunc({
 
 //弹出toast
 showToast(String msg) {
-  Fluttertoast.showToast(
-      msg: msg,
-      toastLength: Toast.LENGTH_SHORT,
-      timeInSecForIosWeb: 2,
-      fontSize: 16.0);
+  Fluttertoast.showToast(msg: msg, toastLength: Toast.LENGTH_SHORT, timeInSecForIosWeb: 2, fontSize: 16.0);
 }
 
 //带context的toast
@@ -274,18 +269,13 @@ showToastWithContext(BuildContext context, String msg) {
       msg: msg,
       toastLength: Toast.LENGTH_SHORT,
       timeInSecForIosWeb: 2,
-      backgroundColor: Theme.of(context).brightness == Brightness.light
-          ? Colors.black
-          : Colors.white,
-      textColor: Theme.of(context).brightness == Brightness.light
-          ? Colors.white
-          : Colors.black,
+      backgroundColor: Theme.of(context).brightness == Brightness.light ? Colors.black : Colors.white,
+      textColor: Theme.of(context).brightness == Brightness.light ? Colors.white : Colors.black,
       fontSize: 16.0);
 }
 
 //底部选择框
-void bottomPickerSheet(
-    BuildContext context, Function imageFromCamera, Function imageFromGallery) {
+void bottomPickerSheet(BuildContext context, Function imageFromCamera, Function imageFromGallery) {
   showModalBottomSheet(
       context: context,
       builder: (BuildContext bc) {
@@ -315,9 +305,7 @@ void bottomPickerSheet(
 
 //title text
 Widget titleText(String title,
-    {double? fontsize = 20,
-    FontWeight fontWeight = FontWeight.bold,
-    Color? color = Colors.white}) {
+    {double? fontsize = 20, FontWeight fontWeight = FontWeight.bold, Color? color = Colors.white}) {
   return Text(
     title,
     style: TextStyle(
@@ -330,11 +318,9 @@ Widget titleText(String title,
 
 //random String Generator
 String randomStringGenerator(int length) {
-  const chars =
-      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   final Random rnd = Random();
-  return String.fromCharCodes(Iterable.generate(
-      length, (_) => chars.codeUnitAt(rnd.nextInt(chars.length))));
+  return String.fromCharCodes(Iterable.generate(length, (_) => chars.codeUnitAt(rnd.nextInt(chars.length))));
 }
 
 //rename file with timestamp
@@ -376,8 +362,7 @@ renamePictureWithCustomFormat(File file) async {
   String yearTwoDigit = yearFourDigit.substring(2, 4);
   String month = DateTime.now().month.toString();
   String day = DateTime.now().day.toString();
-  String timestampSecond =
-      (DateTime.now().millisecondsSinceEpoch / 1000).floor().toString();
+  String timestampSecond = (DateTime.now().millisecondsSinceEpoch / 1000).floor().toString();
   String uuidWithoutDash = Uuid().v4().replaceAll('-', '');
   String randommd5 = md5.convert(utf8.encode(uuidWithoutDash)).toString();
   String randommd5Short = randommd5.substring(0, 16);
@@ -407,8 +392,7 @@ String generateUrl(String rawUrl, String fileName) {
 
 //generate html formated url by raw url
 String generateHtmlFormatedUrl(String rawUrl, String fileName) {
-  String htmlFormatedUrl =
-      '<img src="$rawUrl" alt="$fileName" title="$fileName" />';
+  String htmlFormatedUrl = '<img src="$rawUrl" alt="$fileName" title="$fileName" />';
   return htmlFormatedUrl;
 }
 
@@ -435,9 +419,7 @@ String generateCustomFormatedUrl(String url, String filename) {
   String fileName = filename;
   String rawUrl = url;
   String customLinkFormat = Global.customLinkFormat;
-  String customFormatedUrl = customLinkFormat
-      .replaceAll(r'$fileName', fileName)
-      .replaceAll(r'$url', rawUrl);
+  String customFormatedUrl = customLinkFormat.replaceAll(r'$fileName', fileName).replaceAll(r'$url', rawUrl);
   return customFormatedUrl;
 }
 
@@ -534,8 +516,7 @@ flogErr(Object e, Map parameters, String className, String methodName) {
       className: className,
       methodName: methodName,
       text: e is DioError
-          ? formatErrorMessage(parameters, e.toString(),
-              isDioError: true, dioErrorMessage: e)
+          ? formatErrorMessage(parameters, e.toString(), isDioError: true, dioErrorMessage: e)
           : formatErrorMessage(parameters, e.toString()),
       dataLogType: DataLogType.ERRORS.toString());
 }
@@ -696,11 +677,9 @@ mainInit() async {
 Widget getImageIcon(String path) {
   try {
     List imageType = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp'];
-    if (imageType
-        .contains(path.substring(path.lastIndexOf('.')).toLowerCase())) {
+    if (imageType.contains(path.substring(path.lastIndexOf('.')).toLowerCase())) {
       return Image.file(File(path), width: 30, height: 30, fit: BoxFit.fill);
-    } else if (Global.iconList
-        .contains(my_path.extension(path).substring(1).toLowerCase())) {
+    } else if (Global.iconList.contains(my_path.extension(path).substring(1).toLowerCase())) {
       return Image.asset(
         'assets/icons/${my_path.extension(path).substring(1)}.png',
         width: 30,
@@ -708,11 +687,9 @@ Widget getImageIcon(String path) {
         fit: BoxFit.fill,
       );
     } else {
-      return Image.asset('assets/icons/unknown.png',
-          width: 30, height: 30, fit: BoxFit.fill);
+      return Image.asset('assets/icons/unknown.png', width: 30, height: 30, fit: BoxFit.fill);
     }
   } catch (e) {
-    return Image.asset('assets/icons/unknown.png',
-        width: 30, height: 30, fit: BoxFit.fill);
+    return Image.asset('assets/icons/unknown.png', width: 30, height: 30, fit: BoxFit.fill);
   }
 }

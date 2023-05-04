@@ -6,7 +6,6 @@ import 'package:flutter/services.dart';
 
 import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:f_logs/f_logs.dart';
 import 'package:fluro/fluro.dart';
 import 'package:path_provider/path_provider.dart';
@@ -15,7 +14,6 @@ import 'package:path/path.dart' as my_path;
 import 'package:horopic/router/application.dart';
 import 'package:horopic/utils/event_bus_utils.dart';
 import 'package:horopic/utils/common_functions.dart';
-import 'package:horopic/utils/sql_utils.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/picture_host_manage/manage_api/aliyun_manage_api.dart';
 import 'package:horopic/pages/loading.dart';
@@ -101,14 +99,12 @@ class AliyunConfigState extends State<AliyunConfig> {
         actions: [
           IconButton(
             onPressed: () async {
-              await Application.router.navigateTo(
-                  context, '/configureStorePage?psHost=aliyun',
-                  transition: TransitionType.cupertino);
+              await Application.router
+                  .navigateTo(context, '/configureStorePage?psHost=aliyun', transition: TransitionType.cupertino);
               await _initConfig();
               setState(() {});
             },
-            icon: const Icon(Icons.save_as_outlined,
-                color: Color.fromARGB(255, 255, 255, 255), size: 35),
+            icon: const Icon(Icons.save_as_outlined, color: Color.fromARGB(255, 255, 255, 255), size: 35),
           )
         ],
       ),
@@ -242,9 +238,8 @@ class AliyunConfigState extends State<AliyunConfig> {
             ListTile(
                 title: ElevatedButton(
               onPressed: () async {
-                await Application.router.navigateTo(
-                    context, '/configureStorePage?psHost=aliyun',
-                    transition: TransitionType.cupertino);
+                await Application.router
+                    .navigateTo(context, '/configureStorePage?psHost=aliyun', transition: TransitionType.cupertino);
                 await _initConfig();
                 setState(() {});
               },
@@ -286,8 +281,7 @@ class AliyunConfigState extends State<AliyunConfig> {
       //格式化自定义域名，不以/结尾，以http(s)://开头
       if (customUrl.isEmpty) {
         customUrl = 'None';
-      } else if (!customUrl.startsWith('http') &&
-          !customUrl.startsWith('https')) {
+      } else if (!customUrl.startsWith('http') && !customUrl.startsWith('https')) {
         customUrl = 'http://$customUrl';
       }
       if (customUrl.endsWith('/')) {
@@ -303,26 +297,6 @@ class AliyunConfigState extends State<AliyunConfig> {
         options = 'None';
       }
 
-      List sqlconfig = [];
-      sqlconfig.add(keyId);
-      sqlconfig.add(keySecret);
-      sqlconfig.add(bucket);
-      sqlconfig.add(area);
-      sqlconfig.add(path);
-      sqlconfig.add(customUrl);
-      sqlconfig.add(options);
-      //添加默认用户
-      String defaultUser = await Global.getUser();
-      sqlconfig.add(defaultUser);
-
-      var queryAliyun = await MySqlUtils.queryAliyun(username: defaultUser);
-      var queryuser = await MySqlUtils.queryUser(username: defaultUser);
-
-      if (queryuser == 'Empty') {
-        return showCupertinoAlertDialog(
-            context: context, title: '错误', content: '用户不存在,请先登录');
-      }
-
       //save asset image to app dir
       String assetPath = 'assets/validateImage/PicHoroValidate.jpeg';
       String appDir = await getApplicationDocumentsDirectory().then((value) {
@@ -333,8 +307,7 @@ class AliyunConfigState extends State<AliyunConfig> {
 
       if (!assetFile.existsSync()) {
         ByteData data = await rootBundle.load(assetPath);
-        List<int> bytes =
-            data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+        List<int> bytes = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
         await assetFile.writeAsBytes(bytes);
       }
       String key = 'PicHoroValidate.jpeg';
@@ -354,19 +327,15 @@ class AliyunConfigState extends State<AliyunConfig> {
           {"key": urlpath}
         ]
       };
-      String base64Policy =
-          base64.encode(utf8.encode(json.encode(uploadPolicy)));
-      String singature = base64.encode(Hmac(sha1, utf8.encode(keySecret))
-          .convert(utf8.encode(base64Policy))
-          .bytes);
+      String base64Policy = base64.encode(utf8.encode(json.encode(uploadPolicy)));
+      String singature = base64.encode(Hmac(sha1, utf8.encode(keySecret)).convert(utf8.encode(base64Policy)).bytes);
       FormData formData = FormData.fromMap({
         'key': urlpath,
         'OSSAccessKeyId': keyId,
         'policy': base64Policy,
         'Signature': singature,
         //阿里默认的content-type是application/octet-stream，这里改成image/xxx
-        'x-oss-content-type':
-            'image/${my_path.extension(assetFilePath).replaceFirst('.', '')}',
+        'x-oss-content-type': 'image/${my_path.extension(assetFilePath).replaceFirst('.', '')}',
         'file': await MultipartFile.fromFile(assetFilePath, filename: key),
       });
 
@@ -386,29 +355,13 @@ class AliyunConfigState extends State<AliyunConfig> {
       );
       //阿里默认返回204
       if (response.statusCode == 204) {
-        var sqlResult = '';
-
-        if (queryAliyun == 'Empty') {
-          sqlResult = await MySqlUtils.insertAliyun(content: sqlconfig);
-        } else {
-          sqlResult = await MySqlUtils.updateAliyun(content: sqlconfig);
-        }
-
-        if (sqlResult == "Success") {
-          final aliyunConfig = AliyunConfigModel(
-              keyId, keySecret, bucket, area, path, customUrl, options);
-          final aliyunConfigJson = jsonEncode(aliyunConfig);
-          final aliyunConfigFile = await localFile;
-          await aliyunConfigFile.writeAsString(aliyunConfigJson);
-          return showCupertinoAlertDialog(
-              context: context, title: '成功', content: '配置成功');
-        } else {
-          return showCupertinoAlertDialog(
-              context: context, title: '错误', content: '数据库错误');
-        }
+        final aliyunConfig = AliyunConfigModel(keyId, keySecret, bucket, area, path, customUrl, options);
+        final aliyunConfigJson = jsonEncode(aliyunConfig);
+        final aliyunConfigFile = await localFile;
+        await aliyunConfigFile.writeAsString(aliyunConfigJson);
+        return showCupertinoAlertDialog(context: context, title: '成功', content: '配置成功');
       } else {
-        return showCupertinoAlertDialog(
-            context: context, title: '错误', content: '验证失败');
+        return showCupertinoAlertDialog(context: context, title: '错误', content: '验证失败');
       }
     } catch (e) {
       FLog.error(
@@ -416,8 +369,7 @@ class AliyunConfigState extends State<AliyunConfig> {
           methodName: 'saveAliyunConfig',
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
-      return showCupertinoAlertDialog(
-          context: context, title: '错误', content: e.toString());
+      return showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
     }
   }
 
@@ -427,8 +379,7 @@ class AliyunConfigState extends State<AliyunConfig> {
       String configData = await aliyunConfigFile.readAsString();
 
       if (configData == "Error") {
-        showCupertinoAlertDialog(
-            context: context, title: "检查失败!", content: "请先配置上传参数.");
+        showCupertinoAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");
         return;
       }
 
@@ -444,8 +395,7 @@ class AliyunConfigState extends State<AliyunConfig> {
 
       if (!assetFile.existsSync()) {
         ByteData data = await rootBundle.load(assetPath);
-        List<int> bytes =
-            data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+        List<int> bytes = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
         await assetFile.writeAsBytes(bytes);
       }
       String key = 'PicHoroValidate.jpeg';
@@ -465,20 +415,16 @@ class AliyunConfigState extends State<AliyunConfig> {
           {"key": urlpath}
         ]
       };
-      String base64Policy =
-          base64.encode(utf8.encode(json.encode(uploadPolicy)));
-      String singature = base64.encode(
-          Hmac(sha1, utf8.encode(configMap['keySecret']))
-              .convert(utf8.encode(base64Policy))
-              .bytes);
+      String base64Policy = base64.encode(utf8.encode(json.encode(uploadPolicy)));
+      String singature =
+          base64.encode(Hmac(sha1, utf8.encode(configMap['keySecret'])).convert(utf8.encode(base64Policy)).bytes);
       FormData formData = FormData.fromMap({
         'key': urlpath,
         'OSSAccessKeyId': configMap['keyId'],
         'policy': base64Policy,
         'Signature': singature,
         //阿里默认的content-type是application/octet-stream，这里改成image/xxx
-        'x-oss-content-type':
-            'image/${my_path.extension(assetFilePath).replaceFirst('.', '')}',
+        'x-oss-content-type': 'image/${my_path.extension(assetFilePath).replaceFirst('.', '')}',
         'file': await MultipartFile.fromFile(assetFilePath, filename: key),
       });
       BaseOptions baseoptions = setBaseOptions();
@@ -503,8 +449,7 @@ class AliyunConfigState extends State<AliyunConfig> {
             content:
                 '检测通过，您的配置信息为:\n\nAccessKeyId:\n${configMap['keyId']}\nAccessKeySecret:\n${configMap['keySecret']}\nBucket:\n${configMap['bucket']}\nArea:\n${configMap['area']}\nPath:\n${configMap['path']}\nCustomUrl:\n${configMap['customUrl']}\nOptions:\n${configMap['options']}');
       } else {
-        return showCupertinoAlertDialog(
-            context: context, title: '错误', content: '检查失败，请检查配置信息');
+        return showCupertinoAlertDialog(context: context, title: '错误', content: '检查失败，请检查配置信息');
       }
     } catch (e) {
       FLog.error(
@@ -512,8 +457,7 @@ class AliyunConfigState extends State<AliyunConfig> {
           methodName: 'checkAliyunConfig',
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
-      return showCupertinoAlertDialog(
-          context: context, title: "检查失败!", content: e.toString());
+      return showCupertinoAlertDialog(context: context, title: "检查失败!", content: e.toString());
     }
   }
 
@@ -545,66 +489,11 @@ class AliyunConfigState extends State<AliyunConfig> {
 
   _setdefault() async {
     try {
-      String defaultUser = await Global.getUser();
-      String defaultPassword = await Global.getPassword();
-
-      var queryuser = await MySqlUtils.queryUser(username: defaultUser);
-      if (queryuser == 'Empty') {
-        return Fluttertoast.showToast(
-            msg: "请先注册用户",
-            toastLength: Toast.LENGTH_SHORT,
-            timeInSecForIosWeb: 2,
-            fontSize: 16.0);
-      } else if (queryuser['password'] != defaultPassword) {
-        return Fluttertoast.showToast(
-            msg: "请先登录",
-            toastLength: Toast.LENGTH_SHORT,
-            timeInSecForIosWeb: 2,
-            fontSize: 16.0);
-      }
-
-      var queryAliyun = await MySqlUtils.queryAliyun(username: defaultUser);
-      if (queryAliyun == 'Empty') {
-        return Fluttertoast.showToast(
-            msg: "请先配置上传参数",
-            toastLength: Toast.LENGTH_SHORT,
-            timeInSecForIosWeb: 2,
-            fontSize: 16.0);
-      }
-      if (queryAliyun == 'Error') {
-        return Fluttertoast.showToast(
-            msg: "Error",
-            toastLength: Toast.LENGTH_SHORT,
-            timeInSecForIosWeb: 2,
-            fontSize: 16.0);
-      }
-      if (queryuser['defaultPShost'] == 'aliyun') {
-        await Global.setPShost('aliyun');
-        await Global.setShowedPBhost('aliyun');
-        eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-        eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
-        return Fluttertoast.showToast(
-            msg: "已经是默认配置",
-            toastLength: Toast.LENGTH_SHORT,
-            timeInSecForIosWeb: 2,
-            fontSize: 16.0);
-      } else {
-        List sqlconfig = [];
-        sqlconfig.add(defaultUser);
-        sqlconfig.add(defaultPassword);
-        sqlconfig.add('aliyun');
-
-        var updateResult = await MySqlUtils.updateUser(content: sqlconfig);
-        if (updateResult == 'Success') {
-          await Global.setPShost('aliyun');
-          await Global.setShowedPBhost('aliyun');
-          showToast('已设置阿里云为默认图床');
-          eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
-          eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-        } else {
-          showToast('写入数据库失败');
-        }
-      }
+      await Global.setPShost('aliyun');
+      await Global.setShowedPBhost('aliyun');
+      showToast('已设置阿里云为默认图床');
+      eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
+      eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
     } catch (e) {
       FLog.error(
           className: 'AliyunConfigPage',
@@ -625,8 +514,7 @@ class AliyunConfigModel {
   final String customUrl;
   final String options;
 
-  AliyunConfigModel(this.keyId, this.keySecret, this.bucket, this.area,
-      this.path, this.customUrl, this.options);
+  AliyunConfigModel(this.keyId, this.keySecret, this.bucket, this.area, this.path, this.customUrl, this.options);
 
   Map<String, dynamic> toJson() => {
         'keyId': keyId,

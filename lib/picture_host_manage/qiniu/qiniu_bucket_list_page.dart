@@ -9,12 +9,10 @@ import 'package:f_logs/f_logs.dart';
 
 import 'package:horopic/router/application.dart';
 import 'package:horopic/router/routers.dart';
-import 'package:horopic/picture_host_manage/common_page/loading_state.dart'
-    as loading_state;
+import 'package:horopic/picture_host_manage/common_page/loading_state.dart' as loading_state;
 import 'package:horopic/picture_host_manage/manage_api/qiniu_manage_api.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/global.dart';
-import 'package:horopic/utils/sql_utils.dart';
 
 class QiniuBucketList extends StatefulWidget {
   const QiniuBucketList({Key? key}) : super(key: key);
@@ -23,12 +21,10 @@ class QiniuBucketList extends StatefulWidget {
   QiniuBucketListState createState() => QiniuBucketListState();
 }
 
-class QiniuBucketListState
-    extends loading_state.BaseLoadingPageState<QiniuBucketList> {
+class QiniuBucketListState extends loading_state.BaseLoadingPageState<QiniuBucketList> {
   List bucketMap = [];
 
-  RefreshController refreshController =
-      RefreshController(initialRefresh: false);
+  RefreshController refreshController = RefreshController(initialRefresh: false);
   TextEditingController domainController = TextEditingController();
   TextEditingController pathController = TextEditingController();
 
@@ -78,27 +74,6 @@ class QiniuBucketListState
         if (configMap['path'] != 'None') {
           pathController.text = configMap['path'];
         }
-      }
-      String currentUser = await Global.getUser();
-      String defaultPassword = await Global.getPassword();
-      var queryuser = await MySqlUtils.queryUser(username: currentUser);
-      if (queryuser == 'Empty') {
-        setState(() {
-          state = loading_state.LoadState.ERROR;
-        });
-        return showToast('请先登录');
-      } else if (queryuser['password'] != defaultPassword) {
-        setState(() {
-          state = loading_state.LoadState.ERROR;
-        });
-        return showToast('请先登录');
-      }
-      var queryQiniu = await MySqlUtils.queryQiniu(username: currentUser);
-      if (queryQiniu == 'Empty') {
-        setState(() {
-          state = loading_state.LoadState.ERROR;
-        });
-        return showToast('请先去配置七牛云');
       }
 
       var bucketListResponse = await QiniuManageAPI.getBucketNameList();
@@ -170,12 +145,14 @@ class QiniuBucketListState
         actions: [
           IconButton(
             onPressed: () async {
-              await Application.router.navigateTo(
-                  context, Routes.qiniuNewBucketConfig,
-                  transition: TransitionType.cupertino);
+              await Application.router
+                  .navigateTo(context, Routes.qiniuNewBucketConfig, transition: TransitionType.cupertino);
               _onRefresh();
             },
-            icon: const Icon(Icons.add,color: Colors.white,),
+            icon: const Icon(
+              Icons.add,
+              color: Colors.white,
+            ),
             iconSize: 35,
           )
         ],
@@ -192,9 +169,7 @@ class QiniuBucketListState
             width: 100,
             height: 100,
           ),
-          const Text('没有存储桶，点击右上角添加哦',
-              style: TextStyle(
-                  fontSize: 20, color: Color.fromARGB(136, 121, 118, 118)))
+          const Text('没有存储桶，点击右上角添加哦', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118)))
         ],
       ),
     );
@@ -206,9 +181,7 @@ class QiniuBucketListState
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Text('加载失败',
-              style: TextStyle(
-                  fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))),
+          const Text('加载失败', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))),
           ElevatedButton(
             style: ButtonStyle(
               backgroundColor: MaterialStateProperty.all(Colors.blue),
@@ -227,12 +200,9 @@ class QiniuBucketListState
   }
 
   Widget setDefaultPSHost(Map element) {
-    return StatefulBuilder(builder:
-        (BuildContext context, void Function(void Function()) setState) {
+    return StatefulBuilder(builder: (BuildContext context, void Function(void Function()) setState) {
       return CupertinoAlertDialog(
-        title: const Text('请确认域名等信息',
-            style: TextStyle(
-                fontSize: 16, fontWeight: FontWeight.bold, color: Colors.blue)),
+        title: const Text('请确认域名等信息', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.blue)),
         content: Column(
           children: [
             const SizedBox(
@@ -240,9 +210,7 @@ class QiniuBucketListState
             ),
             CupertinoTextField(
               textAlign: TextAlign.center,
-              prefix: const Text('域名：',
-                  style: TextStyle(
-                      fontSize: 16, color: Color.fromARGB(255, 121, 118, 118))),
+              prefix: const Text('域名：', style: TextStyle(fontSize: 16, color: Color.fromARGB(255, 121, 118, 118))),
               controller: domainController,
               placeholder: '网站域名',
             ),
@@ -251,9 +219,7 @@ class QiniuBucketListState
             ),
             CupertinoTextField(
               textAlign: TextAlign.center,
-              prefix: const Text('区域：',
-                  style: TextStyle(
-                      fontSize: 16, color: Color.fromARGB(255, 121, 118, 118))),
+              prefix: const Text('区域：', style: TextStyle(fontSize: 16, color: Color.fromARGB(255, 121, 118, 118))),
               controller: areaController,
               placeholder: '存储区域',
             ),
@@ -261,9 +227,7 @@ class QiniuBucketListState
               height: 10,
             ),
             CupertinoTextField(
-              prefix: const Text('路径：',
-                  style: TextStyle(
-                      fontSize: 16, color: Color.fromARGB(255, 121, 118, 118))),
+              prefix: const Text('路径：', style: TextStyle(fontSize: 16, color: Color.fromARGB(255, 121, 118, 118))),
               textAlign: TextAlign.center,
               controller: pathController,
               placeholder: '图床路径，非必填',
@@ -272,9 +236,7 @@ class QiniuBucketListState
               height: 10,
             ),
             CupertinoTextField(
-              prefix: const Text('后缀：',
-                  style: TextStyle(
-                      fontSize: 16, color: Color.fromARGB(255, 121, 118, 118))),
+              prefix: const Text('后缀：', style: TextStyle(fontSize: 16, color: Color.fromARGB(255, 121, 118, 118))),
               textAlign: TextAlign.center,
               controller: optionController,
               placeholder: '网址后缀，非必填',
@@ -291,13 +253,11 @@ class QiniuBucketListState
                 value: isUseRemotePSConfig,
                 onChanged: (value) async {
                   if (value == true) {
-                    String usernameBucket =
-                        '${Global.defaultUser}_${element['name']}';
-                    var queryQiniu = await MySqlUtils.queryQiniuManage(
-                        username: usernameBucket);
-                    if (queryQiniu != 'Empty' && queryQiniu != 'Error') {
-                      domainController.text = queryQiniu['domain'];
-                      areaController.text = queryQiniu['area'];
+                    var queryQiniu = await QiniuManageAPI.readQiniuManageConfig();
+                    if (queryQiniu != 'Error') {
+                      var jsonResult = jsonDecode(queryQiniu);
+                      domainController.text = jsonResult['domain'];
+                      areaController.text = jsonResult['area'];
                       setState(() {
                         isUseRemotePSConfig = value!;
                       });
@@ -350,42 +310,13 @@ class QiniuBucketListState
                 }
                 textMap['domain'] = domain;
                 textMap['area'] = area;
-                String usernameBucket =
-                    '${Global.defaultUser}_${element['name']}';
-                var queryQiniuManage =
-                    await MySqlUtils.queryQiniuManage(username: usernameBucket);
-                if (queryQiniuManage == 'Error') {
-                  showToast('数据库错误');
+                var insertQiniuManage =
+                    await QiniuManageAPI.saveQiniuManageConfig(element['name'], textMap['domain'], textMap['area']);
+                if (!insertQiniuManage) {
+                  showToast('数据保存错误');
                   return;
-                } else if (queryQiniuManage == 'Empty') {
-                  List content = [
-                    element['name'],
-                    textMap['domain'],
-                    textMap['area'],
-                    usernameBucket,
-                  ];
-                  var insertQiniuManage =
-                      await MySqlUtils.insertQiniuManage(content: content);
-                  if (insertQiniuManage == 'Error') {
-                    showToast('数据库错误');
-                    return;
-                  }
-                } else {
-                  List content = [
-                    element['name'],
-                    textMap['domain'],
-                    textMap['area'],
-                    usernameBucket,
-                  ];
-                  var updateQiniuManage =
-                      await MySqlUtils.updateQiniuManage(content: content);
-                  if (updateQiniuManage == 'Error') {
-                    showToast('数据库错误');
-                    return;
-                  }
                 }
-                var result = await QiniuManageAPI.setDefaultBucketFromListPage(
-                    element, textMap,null);
+                var result = await QiniuManageAPI.setDefaultBucketFromListPage(element, textMap, null);
                 if (result[0] == 'success') {
                   showToast('设置成功');
                   if (mounted) {
@@ -450,8 +381,7 @@ class QiniuBucketListState
           shrinkWrap: true,
           elements: bucketMap,
           groupBy: (element) => element['tag'],
-          itemComparator: (item1, item2) =>
-              item1['name'].compareTo(item2['name']),
+          itemComparator: (item1, item2) => item1['name'].compareTo(item2['name']),
           groupComparator: (value1, value2) => value2.compareTo(value1),
           separator: const Divider(
             height: 0.1,
@@ -494,24 +424,18 @@ class QiniuBucketListState
                 onTap: () async {
                   Map<String, dynamic> textMap = {};
                   textMap['name'] = element['name'];
-                  String usernameBucket =
-                      '${Global.defaultUser}_${element['name']}';
-                  var queryQiniuManage = await MySqlUtils.queryQiniuManage(
-                      username: usernameBucket);
+                  var queryQiniuManage = await QiniuManageAPI.readQiniuManageConfig();
                   if (queryQiniuManage == 'Error') {
-                    showToast('数据库错误');
-                    return;
-                  } else if (queryQiniuManage == 'Empty') {
-                    showToast('请先设置域名和区域');
+                    showToast('数据读取错误');
                     return;
                   } else {
-                    if (queryQiniuManage['domain'] == 'None' ||
-                        queryQiniuManage['area'] == 'None') {
+                    var jsonResult = jsonDecode(queryQiniuManage);
+                    if (jsonResult['domain'] == 'None' || jsonResult['area'] == 'None') {
                       showToast('请先设置域名和区域');
                       return;
                     }
-                    textMap['domain'] = queryQiniuManage['domain'];
-                    textMap['area'] = queryQiniuManage['area'];
+                    textMap['domain'] = jsonResult['domain'];
+                    textMap['area'] = jsonResult['area'];
                   }
                   if (mounted) {
                     Application.router.navigateTo(context,
@@ -584,8 +508,8 @@ class QiniuBucketListState
             title: const Text('设置存储桶参数', style: TextStyle(fontSize: 15)),
             onTap: () {
               Navigator.pop(context);
-              Application.router.navigateTo(context,
-                  '${Routes.qiniuBucketDomainAreaConfig}?element=${Uri.encodeComponent(jsonEncode(element))}',
+              Application.router.navigateTo(
+                  context, '${Routes.qiniuBucketDomainAreaConfig}?element=${Uri.encodeComponent(jsonEncode(element))}',
                   transition: TransitionType.cupertino);
             },
           ),
@@ -594,8 +518,7 @@ class QiniuBucketListState
             color: Color.fromARGB(255, 230, 230, 230),
           ),
           ListTile(
-            leading: const Icon(Icons.public,
-                color: Color.fromARGB(255, 97, 141, 236)),
+            leading: const Icon(Icons.public, color: Color.fromARGB(255, 97, 141, 236)),
             minLeadingWidth: 0,
             title: const Text('设为公开', style: TextStyle(fontSize: 15)),
             onTap: () async {

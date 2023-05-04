@@ -209,8 +209,7 @@ class FtpConfigureStoreEditState extends State<FtpConfigureStoreEdit> {
                     _ftpConfigMap['ftpType'] = newValue!;
                   });
                 },
-                items: <String>['FTP', 'SFTP']
-                    .map<DropdownMenuItem<String>>((String value) {
+                items: <String>['FTP', 'SFTP'].map<DropdownMenuItem<String>>((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
                     child: Text(value),

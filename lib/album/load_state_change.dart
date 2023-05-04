@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:extended_image/extended_image.dart';
 
-Widget? defaultLoadStateChanged(ExtendedImageState state,
-    {double iconSize = 16}) {
+Widget? defaultLoadStateChanged(ExtendedImageState state, {double iconSize = 16}) {
   switch (state.extendedImageLoadState) {
     case LoadState.loading:
       return Center(

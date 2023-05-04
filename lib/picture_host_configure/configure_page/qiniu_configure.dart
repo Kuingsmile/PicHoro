@@ -3,7 +3,6 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:f_logs/f_logs.dart';
 import 'package:fluro/fluro.dart';
 import 'package:qiniu_flutter_sdk/qiniu_flutter_sdk.dart';
@@ -12,7 +11,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:horopic/router/application.dart';
 import 'package:horopic/pages/loading.dart';
 import 'package:horopic/utils/common_functions.dart';
-import 'package:horopic/utils/sql_utils.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/event_bus_utils.dart';
 import 'package:horopic/api/qiniu_api.dart';
@@ -92,14 +90,12 @@ class QiniuConfigState extends State<QiniuConfig> {
         actions: [
           IconButton(
             onPressed: () async {
-              await Application.router.navigateTo(
-                  context, '/configureStorePage?psHost=qiniu',
-                  transition: TransitionType.cupertino);
+              await Application.router
+                  .navigateTo(context, '/configureStorePage?psHost=qiniu', transition: TransitionType.cupertino);
               await _initConfig();
               setState(() {});
             },
-            icon: const Icon(Icons.save_as_outlined,
-                color: Color.fromARGB(255, 255, 255, 255), size: 35),
+            icon: const Icon(Icons.save_as_outlined, color: Color.fromARGB(255, 255, 255, 255), size: 35),
           )
         ],
       ),
@@ -238,9 +234,8 @@ class QiniuConfigState extends State<QiniuConfig> {
             ListTile(
                 title: ElevatedButton(
               onPressed: () async {
-                await Application.router.navigateTo(
-                    context, '/configureStorePage?psHost=qiniu',
-                    transition: TransitionType.cupertino);
+                await Application.router
+                    .navigateTo(context, '/configureStorePage?psHost=qiniu', transition: TransitionType.cupertino);
                 await _initConfig();
                 setState(() {});
               },
@@ -285,8 +280,7 @@ class QiniuConfigState extends State<QiniuConfig> {
       }
 
       String path = '';
-      if (_pathController.text.isNotEmpty &&
-          _pathController.text.replaceAll(' ', '').isNotEmpty) {
+      if (_pathController.text.isNotEmpty && _pathController.text.replaceAll(' ', '').isNotEmpty) {
         path = _pathController.text;
         if (path.startsWith('/')) {
           path = path.substring(1);
@@ -296,24 +290,6 @@ class QiniuConfigState extends State<QiniuConfig> {
         }
       } else {
         path = 'None';
-      }
-      List sqlconfig = [];
-      sqlconfig.add(accessKey);
-      sqlconfig.add(secretKey);
-      sqlconfig.add(bucket);
-      sqlconfig.add(url);
-      sqlconfig.add(area);
-      sqlconfig.add(options);
-      sqlconfig.add(path);
-      //添加默认用户
-      String defaultUser = await Global.getUser();
-      sqlconfig.add(defaultUser);
-      var queryQiniu = await MySqlUtils.queryQiniu(username: defaultUser);
-      var queryuser = await MySqlUtils.queryUser(username: defaultUser);
-
-      if (queryuser == 'Empty') {
-        return showCupertinoAlertDialog(
-            context: context, title: '错误', content: '用户不存在,请先登录');
       }
 
       //save asset image to app dir
@@ -326,48 +302,27 @@ class QiniuConfigState extends State<QiniuConfig> {
 
       if (!assetFile.existsSync()) {
         ByteData data = await rootBundle.load(assetPath);
-        List<int> bytes =
-            data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+        List<int> bytes = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
         await assetFile.writeAsBytes(bytes);
       }
       String key = 'PicHoroValidate.jpeg';
 
-      String urlSafeBase64EncodePutPolicy =
-          QiniuImageUploadUtils.geturlSafeBase64EncodePutPolicy(
-              bucket, key, path);
-      String uploadToken = QiniuImageUploadUtils.getUploadToken(
-          accessKey, secretKey, urlSafeBase64EncodePutPolicy);
+      String urlSafeBase64EncodePutPolicy = QiniuImageUploadUtils.geturlSafeBase64EncodePutPolicy(bucket, key, path);
+      String uploadToken = QiniuImageUploadUtils.getUploadToken(accessKey, secretKey, urlSafeBase64EncodePutPolicy);
       Storage storage = Storage(
           config: Config(
         retryLimit: 5,
       ));
-      PutResponse putresult =
-          await storage.putFile(File(assetFilePath), uploadToken);
+      PutResponse putresult = await storage.putFile(File(assetFilePath), uploadToken);
 
       if (putresult.key == key || putresult.key == '$path$key') {
-        var sqlResult = '';
-
-        if (queryQiniu == 'Empty') {
-          sqlResult = await MySqlUtils.insertQiniu(content: sqlconfig);
-        } else {
-          sqlResult = await MySqlUtils.updateQiniu(content: sqlconfig);
-        }
-
-        if (sqlResult == "Success") {
-          final qiniuConfig = QiniuConfigModel(
-              accessKey, secretKey, bucket, url, area, options, path);
-          final qiniuConfigJson = jsonEncode(qiniuConfig);
-          final qiniuConfigFile = await localFile;
-          await qiniuConfigFile.writeAsString(qiniuConfigJson);
-          return showCupertinoAlertDialog(
-              context: context, title: '成功', content: '配置成功');
-        } else {
-          return showCupertinoAlertDialog(
-              context: context, title: '错误', content: '数据库错误');
-        }
+        final qiniuConfig = QiniuConfigModel(accessKey, secretKey, bucket, url, area, options, path);
+        final qiniuConfigJson = jsonEncode(qiniuConfig);
+        final qiniuConfigFile = await localFile;
+        await qiniuConfigFile.writeAsString(qiniuConfigJson);
+        return showCupertinoAlertDialog(context: context, title: '成功', content: '配置成功');
       } else {
-        return showCupertinoAlertDialog(
-            context: context, title: '错误', content: '验证失败');
+        return showCupertinoAlertDialog(context: context, title: '错误', content: '验证失败');
       }
     } catch (e) {
       FLog.error(
@@ -375,8 +330,7 @@ class QiniuConfigState extends State<QiniuConfig> {
           methodName: '_saveQiniuConfig',
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
-      return showCupertinoAlertDialog(
-          context: context, title: '错误', content: e.toString());
+      return showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
     }
   }
 
@@ -386,8 +340,7 @@ class QiniuConfigState extends State<QiniuConfig> {
       String configData = await qiniuConfigFile.readAsString();
 
       if (configData == "Error") {
-        return showCupertinoAlertDialog(
-            context: context, title: "检查失败!", content: "请先配置上传参数.");
+        return showCupertinoAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");
       }
 
       Map configMap = jsonDecode(configData);
@@ -402,8 +355,7 @@ class QiniuConfigState extends State<QiniuConfig> {
 
       if (!assetFile.existsSync()) {
         ByteData data = await rootBundle.load(assetPath);
-        List<int> bytes =
-            data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+        List<int> bytes = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
         await assetFile.writeAsBytes(bytes);
       }
       String key = 'PicHoroValidate.jpeg';
@@ -418,18 +370,14 @@ class QiniuConfigState extends State<QiniuConfig> {
         }
       }
       String urlSafeBase64EncodePutPolicy =
-          QiniuImageUploadUtils.geturlSafeBase64EncodePutPolicy(
-              configMap['bucket'], key, qiniupath);
+          QiniuImageUploadUtils.geturlSafeBase64EncodePutPolicy(configMap['bucket'], key, qiniupath);
       String uploadToken = QiniuImageUploadUtils.getUploadToken(
-          configMap['accessKey'],
-          configMap['secretKey'],
-          urlSafeBase64EncodePutPolicy);
+          configMap['accessKey'], configMap['secretKey'], urlSafeBase64EncodePutPolicy);
       Storage storage = Storage(
           config: Config(
         retryLimit: 5,
       ));
-      PutResponse putresult =
-          await storage.putFile(File(assetFilePath), uploadToken);
+      PutResponse putresult = await storage.putFile(File(assetFilePath), uploadToken);
 
       if (putresult.key == key || putresult.key == '${configMap['path']}$key') {
         return showCupertinoAlertDialog(
@@ -438,8 +386,7 @@ class QiniuConfigState extends State<QiniuConfig> {
             content:
                 '检测通过，您的配置信息为:\naccessKey:\n${configMap['accessKey']}\nsecretKey:\n${configMap['secretKey']}\nbucket:\n${configMap['bucket']}\nurl:\n${configMap['url']}\narea:\n${configMap['area']}\noptions:\n${configMap['options']}\npath:\n${configMap['path']}');
       } else {
-        return showCupertinoAlertDialog(
-            context: context, title: '错误', content: '检查失败，请检查配置信息');
+        return showCupertinoAlertDialog(context: context, title: '错误', content: '检查失败，请检查配置信息');
       }
     } catch (e) {
       FLog.error(
@@ -447,8 +394,7 @@ class QiniuConfigState extends State<QiniuConfig> {
           methodName: 'checkQiniuConfig',
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
-      return showCupertinoAlertDialog(
-          context: context, title: "检查失败!", content: e.toString());
+      return showCupertinoAlertDialog(context: context, title: "检查失败!", content: e.toString());
     }
   }
 
@@ -480,66 +426,11 @@ class QiniuConfigState extends State<QiniuConfig> {
 
   _setdefault() async {
     try {
-      String defaultUser = await Global.getUser();
-      String defaultPassword = await Global.getPassword();
-
-      var queryuser = await MySqlUtils.queryUser(username: defaultUser);
-      if (queryuser == 'Empty') {
-        return Fluttertoast.showToast(
-            msg: "请先注册用户",
-            toastLength: Toast.LENGTH_SHORT,
-            timeInSecForIosWeb: 2,
-            fontSize: 16.0);
-      } else if (queryuser['password'] != defaultPassword) {
-        return Fluttertoast.showToast(
-            msg: "请先登录",
-            toastLength: Toast.LENGTH_SHORT,
-            timeInSecForIosWeb: 2,
-            fontSize: 16.0);
-      }
-
-      var queryQiniu = await MySqlUtils.queryQiniu(username: defaultUser);
-      if (queryQiniu == 'Empty') {
-        return Fluttertoast.showToast(
-            msg: "请先配置上传参数",
-            toastLength: Toast.LENGTH_SHORT,
-            timeInSecForIosWeb: 2,
-            fontSize: 16.0);
-      }
-      if (queryQiniu == 'Error') {
-        return Fluttertoast.showToast(
-            msg: "Error",
-            toastLength: Toast.LENGTH_SHORT,
-            timeInSecForIosWeb: 2,
-            fontSize: 16.0);
-      }
-      if (queryuser['defaultPShost'] == 'qiniu') {
-        await Global.setPShost('qiniu');
-        await Global.setShowedPBhost('qiniu');
-        eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-        eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
-        return Fluttertoast.showToast(
-            msg: "已经是默认配置",
-            toastLength: Toast.LENGTH_SHORT,
-            timeInSecForIosWeb: 2,
-            fontSize: 16.0);
-      } else {
-        List sqlconfig = [];
-        sqlconfig.add(defaultUser);
-        sqlconfig.add(defaultPassword);
-        sqlconfig.add('qiniu');
-
-        var updateResult = await MySqlUtils.updateUser(content: sqlconfig);
-        if (updateResult == 'Success') {
-          await Global.setPShost('qiniu');
-          await Global.setShowedPBhost('qiniu');
-          eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-          eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
-          showToast('已设置七牛云为默认图床');
-        } else {
-          showToast('写入数据库失败');
-        }
-      }
+      await Global.setPShost('qiniu');
+      await Global.setShowedPBhost('qiniu');
+      eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
+      eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
+      showToast('已设置七牛云为默认图床');
     } catch (e) {
       FLog.error(
           className: 'QiniuConfigPage',
@@ -560,8 +451,7 @@ class QiniuConfigModel {
   final String options;
   final String path;
 
-  QiniuConfigModel(this.accessKey, this.secretKey, this.bucket, this.url,
-      this.area, this.options, this.path);
+  QiniuConfigModel(this.accessKey, this.secretKey, this.bucket, this.url, this.area, this.options, this.path);
 
   Map<String, dynamic> toJson() => {
         'accessKey': accessKey,

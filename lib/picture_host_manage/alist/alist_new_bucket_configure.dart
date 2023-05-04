@@ -40,14 +40,11 @@ class AlistNewBucketConfigState extends State<AlistNewBucketConfig> {
     List configList = driverConfigTemplate['common'];
     for (int j = 0; j < configList.length; j++) {
       if (configList[j]['type'] == 'select') {
-        commonConfig[configList[j]['name']] =
-            configList[j]['options'].toString().split(',')[0];
+        commonConfig[configList[j]['name']] = configList[j]['options'].toString().split(',')[0];
       } else if (configList[j]['type'] == 'bool') {
         commonConfig[configList[j]['name']] = false;
       } else if (configList[j]['type'] == 'number') {
-        commonConfig[configList[j]['name']] = configList[j]['default'] == ""
-            ? ""
-            : int.parse(configList[j]['default']);
+        commonConfig[configList[j]['name']] = configList[j]['default'] == "" ? "" : int.parse(configList[j]['default']);
       } else {
         commonConfig[configList[j]['name']] = configList[j]['default'];
       }
@@ -65,15 +62,12 @@ class AlistNewBucketConfigState extends State<AlistNewBucketConfig> {
       List configList = driverConfigTemplate['additional'];
       for (int j = 0; j < configList.length; j++) {
         if (configList[j]['type'] == 'select') {
-          additionalConfig[configList[j]['name']] =
-              configList[j]['options'].toString().split(',')[0];
+          additionalConfig[configList[j]['name']] = configList[j]['options'].toString().split(',')[0];
         } else if (configList[j]['type'] == 'bool') {
           additionalConfig[configList[j]['name']] = false;
         } else if (configList[j]['type'] == 'number') {
           additionalConfig[configList[j]['name']] =
-              configList[j]['default'] == ""
-                  ? ""
-                  : int.parse(configList[j]['default']);
+              configList[j]['default'] == "" ? "" : int.parse(configList[j]['default']);
         } else {
           additionalConfig[configList[j]['name']] = configList[j]['default'];
         }
@@ -96,14 +90,11 @@ class AlistNewBucketConfigState extends State<AlistNewBucketConfig> {
     List configList = driverConfigTemplate['common'];
     for (int j = 0; j < configList.length; j++) {
       if (configList[j]['type'] == 'select') {
-        commonConfig[configList[j]['name']] =
-            configList[j]['options'].toString().split(',')[0];
+        commonConfig[configList[j]['name']] = configList[j]['options'].toString().split(',')[0];
       } else if (configList[j]['type'] == 'bool') {
         commonConfig[configList[j]['name']] = false;
       } else if (configList[j]['type'] == 'number') {
-        commonConfig[configList[j]['name']] = configList[j]['default'] == ""
-            ? ""
-            : int.parse(configList[j]['default']);
+        commonConfig[configList[j]['name']] = configList[j]['default'] == "" ? "" : int.parse(configList[j]['default']);
       } else {
         commonConfig[configList[j]['name']] = configList[j]['default'];
       }
@@ -113,15 +104,12 @@ class AlistNewBucketConfigState extends State<AlistNewBucketConfig> {
       List configList = driverConfigTemplate['additional'];
       for (int j = 0; j < configList.length; j++) {
         if (configList[j]['type'] == 'select') {
-          additionalConfig[configList[j]['name']] =
-              configList[j]['options'].toString().split(',')[0];
+          additionalConfig[configList[j]['name']] = configList[j]['options'].toString().split(',')[0];
         } else if (configList[j]['type'] == 'bool') {
           additionalConfig[configList[j]['name']] = false;
         } else if (configList[j]['type'] == 'number') {
           additionalConfig[configList[j]['name']] =
-              configList[j]['default'] == ""
-                  ? ""
-                  : int.parse(configList[j]['default']);
+              configList[j]['default'] == "" ? "" : int.parse(configList[j]['default']);
         } else {
           additionalConfig[configList[j]['name']] = configList[j]['default'];
         }
@@ -139,16 +127,12 @@ class AlistNewBucketConfigState extends State<AlistNewBucketConfig> {
     configList.addAll(driverConfigTemplate['common']);
     configList.addAll(driverConfigTemplate['additional']);
     configList.sort((a, b) {
-      if (((a['type'] == 'string' ||
-                  a['type'] == 'number' ||
-                  a['type'] == 'text') &&
+      if (((a['type'] == 'string' || a['type'] == 'number' || a['type'] == 'text') &&
               (b['type'] == 'select' || b['type'] == 'bool')) ||
           (a['type'] == 'select' && b['type'] == 'bool')) {
         return -1;
       } else if (((a['type'] == 'select' || a['type'] == 'bool') &&
-              (b['type'] == 'string' ||
-                  b['type'] == 'number' ||
-                  b['type'] == 'text')) ||
+              (b['type'] == 'string' || b['type'] == 'number' || b['type'] == 'text')) ||
           (a['type'] == 'bool' && b['type'] == 'select')) {
         return 1;
       } else {
@@ -159,8 +143,7 @@ class AlistNewBucketConfigState extends State<AlistNewBucketConfig> {
       if (configList[i]['type'] == 'select') {
         Map optionsMap = {};
         List optionsList = configList[i]['options'].toString().split(',');
-        List optionsTranslatedList =
-            configList[i]['options_translate'].toString().split(',');
+        List optionsTranslatedList = configList[i]['options_translate'].toString().split(',');
         for (int j = 0; j < optionsList.length; j++) {
           optionsMap[optionsList[j]] = optionsTranslatedList[j];
         }
@@ -181,9 +164,7 @@ class AlistNewBucketConfigState extends State<AlistNewBucketConfig> {
                 .toList(),
             onChanged: (value) {
               setState(() {
-                if (commonConfig.keys
-                    .toList()
-                    .contains(configList[i]['name'])) {
+                if (commonConfig.keys.toList().contains(configList[i]['name'])) {
                   commonConfig[configList[i]['name']] = value;
                   setState(() {});
                 } else {
@@ -207,9 +188,7 @@ class AlistNewBucketConfigState extends State<AlistNewBucketConfig> {
                 : additionalConfig[configList[i]['name']],
             onChanged: (value) {
               setState(() {
-                if (commonConfig.keys
-                    .toList()
-                    .contains(configList[i]['name'])) {
+                if (commonConfig.keys.toList().contains(configList[i]['name'])) {
                   commonConfig[configList[i]['name']] = value;
                 } else {
                   additionalConfig[configList[i]['name']] = value;
@@ -219,37 +198,30 @@ class AlistNewBucketConfigState extends State<AlistNewBucketConfig> {
           ),
         ));
       }
-      if (configList[i]['type'] == 'string' ||
-          configList[i]['type'] == 'number' ||
-          configList[i]['type'] == 'text') {
+      if (configList[i]['type'] == 'string' || configList[i]['type'] == 'number' || configList[i]['type'] == 'text') {
         list.add(
           ListTile(
             title: Center(
-                 child: Text(configList[i]['required'] == true
-                   ? configList[i]['translate'] + '*'
-                   : '可选:${configList[i]['translate']}')),
+                child: Text(configList[i]['required'] == true
+                    ? configList[i]['translate'] + '*'
+                    : '可选:${configList[i]['translate']}')),
             subtitle: TextFormField(
               textAlign: TextAlign.center,
-              initialValue:
-                  commonConfig.keys.toList().contains(configList[i]['name'])
-                      ? commonConfig[configList[i]['name']].toString()
-                      : additionalConfig[configList[i]['name']].toString(),
+              initialValue: commonConfig.keys.toList().contains(configList[i]['name'])
+                  ? commonConfig[configList[i]['name']].toString()
+                  : additionalConfig[configList[i]['name']].toString(),
               onChanged: (value) {
                 setState(() {
-                  if (commonConfig.keys
-                      .toList()
-                      .contains(configList[i]['name'])) {
+                  if (commonConfig.keys.toList().contains(configList[i]['name'])) {
                     //type为number时，需要转换为int
                     if (configList[i]['type'] == 'number') {
-                      commonConfig[configList[i]['name']] =
-                          int.parse(value.toString());
+                      commonConfig[configList[i]['name']] = int.parse(value.toString());
                     } else {
                       commonConfig[configList[i]['name']] = value;
                     }
                   } else {
                     if (configList[i]['type'] == 'number') {
-                      additionalConfig[configList[i]['name']] =
-                          int.parse(value.toString());
+                      additionalConfig[configList[i]['name']] = int.parse(value.toString());
                     } else {
                       additionalConfig[configList[i]['name']] = value;
                     }
@@ -271,15 +243,13 @@ class AlistNewBucketConfigState extends State<AlistNewBucketConfig> {
         List commonConfigList = driverConfigTemplate['common'];
         List additionalConfigList = driverConfigTemplate['additional'];
         for (int i = 0; i < commonConfigList.length; i++) {
-          if (commonConfigList[i]['required'] == true &&
-              commonConfig[commonConfigList[i]['name']] == '') {
+          if (commonConfigList[i]['required'] == true && commonConfig[commonConfigList[i]['name']] == '') {
             showToast('请填写${commonConfigList[i]['translate']}');
             return;
           }
         }
         for (int i = 0; i < additionalConfigList.length; i++) {
-          if (additionalConfigList[i]['required'] == true &&
-              additionalConfig[additionalConfigList[i]['name']] == '') {
+          if (additionalConfigList[i]['required'] == true && additionalConfig[additionalConfigList[i]['name']] == '') {
             showToast('请填写${additionalConfigList[i]['translate']}');
             return;
           }

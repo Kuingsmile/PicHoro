@@ -10,7 +10,7 @@ import 'package:horopic/utils/common_functions.dart';
 class PdfViewer extends StatefulWidget {
   final String url;
   final String fileName;
-  final Map<String,String>? headers;
+  final Map<String, String>? headers;
 
   const PdfViewer({
     Key? key,
@@ -51,8 +51,7 @@ class PdfViewerState extends State<PdfViewer> {
     super.dispose();
   }
 
-  void _showContextMenu(
-      BuildContext context, PdfTextSelectionChangedDetails details) {
+  void _showContextMenu(BuildContext context, PdfTextSelectionChangedDetails details) {
     final OverlayState? overlayState = Overlay.of(context);
     _overlayEntry = OverlayEntry(
       builder: (context) => Positioned(
@@ -169,18 +168,15 @@ class PdfViewerState extends State<PdfViewer> {
             ),
             actions: <Widget>[
               TextButton(
-                child: const Text('取消',
-                    style: TextStyle(fontWeight: FontWeight.bold)),
+                child: const Text('取消', style: TextStyle(fontWeight: FontWeight.bold)),
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
               ),
               TextButton(
-                child: const Text('确定',
-                    style: TextStyle(fontWeight: FontWeight.bold)),
+                child: const Text('确定', style: TextStyle(fontWeight: FontWeight.bold)),
                 onPressed: () {
-                  _pdfViewerController
-                      .jumpToPage(int.parse(pageJumpController.text));
+                  _pdfViewerController.jumpToPage(int.parse(pageJumpController.text));
                   setState(() {});
                   Navigator.of(context).pop();
                 },
@@ -205,20 +201,17 @@ class PdfViewerState extends State<PdfViewer> {
             ),
             actions: <Widget>[
               TextButton(
-                child: const Text('取消',
-                    style: TextStyle(fontWeight: FontWeight.bold)),
+                child: const Text('取消', style: TextStyle(fontWeight: FontWeight.bold)),
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
               ),
               TextButton(
-                child: const Text('确定',
-                    style: TextStyle(fontWeight: FontWeight.bold)),
+                child: const Text('确定', style: TextStyle(fontWeight: FontWeight.bold)),
                 onPressed: () {
                   showToast('开始搜索');
                   Navigator.of(context).pop();
-                  _searchResult = _pdfViewerController.searchText(
-                      searchTextController.text,
+                  _searchResult = _pdfViewerController.searchText(searchTextController.text,
                       searchOption: TextSearchOption.caseSensitive);
                   if (!_searchResult.hasResult) {
                     showToast('未找到');

@@ -16,8 +16,7 @@ class WebdavConfigureStoreEdit extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  WebdavConfigureStoreEditState createState() =>
-      WebdavConfigureStoreEditState();
+  WebdavConfigureStoreEditState createState() => WebdavConfigureStoreEditState();
 }
 
 class WebdavConfigureStoreEditState extends State<WebdavConfigureStoreEdit> {
@@ -104,13 +103,10 @@ class WebdavConfigureStoreEditState extends State<WebdavConfigureStoreEdit> {
               ),
               textAlign: TextAlign.center,
               validator: (value) {
-                if (value == null ||
-                    value.isEmpty ||
-                    value.toString().trim().isEmpty) {
+                if (value == null || value.isEmpty || value.toString().trim().isEmpty) {
                   return '请输入域名';
                 }
-                if (!value.startsWith('http://') &&
-                    !value.startsWith('https://')) {
+                if (!value.startsWith('http://') && !value.startsWith('https://')) {
                   return '以http://或https://开头';
                 }
                 return null;
@@ -124,9 +120,7 @@ class WebdavConfigureStoreEditState extends State<WebdavConfigureStoreEdit> {
               ),
               textAlign: TextAlign.center,
               validator: (value) {
-                if (value == null ||
-                    value.isEmpty ||
-                    value.toString().trim().isEmpty) {
+                if (value == null || value.isEmpty || value.toString().trim().isEmpty) {
                   return '请输入用户名';
                 }
                 return null;
@@ -141,9 +135,7 @@ class WebdavConfigureStoreEditState extends State<WebdavConfigureStoreEdit> {
               ),
               textAlign: TextAlign.center,
               validator: (value) {
-                if (value == null ||
-                    value.isEmpty ||
-                    value.toString().trim().isEmpty) {
+                if (value == null || value.isEmpty || value.toString().trim().isEmpty) {
                   return '请输入密码';
                 }
                 return null;

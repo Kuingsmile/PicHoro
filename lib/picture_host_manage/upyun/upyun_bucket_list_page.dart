@@ -9,12 +9,9 @@ import 'package:grouped_list/grouped_list.dart';
 
 import 'package:horopic/router/application.dart';
 import 'package:horopic/router/routers.dart';
-import 'package:horopic/picture_host_manage/common_page/loading_state.dart'
-    as loading_state;
+import 'package:horopic/picture_host_manage/common_page/loading_state.dart' as loading_state;
 import 'package:horopic/picture_host_manage/manage_api/upyun_manage_api.dart';
 import 'package:horopic/utils/common_functions.dart';
-import 'package:horopic/utils/global.dart';
-import 'package:horopic/utils/sql_utils.dart';
 
 class UpyunBucketList extends StatefulWidget {
   const UpyunBucketList({Key? key}) : super(key: key);
@@ -23,13 +20,11 @@ class UpyunBucketList extends StatefulWidget {
   UpyunBucketListState createState() => UpyunBucketListState();
 }
 
-class UpyunBucketListState
-    extends loading_state.BaseLoadingPageState<UpyunBucketList> {
+class UpyunBucketListState extends loading_state.BaseLoadingPageState<UpyunBucketList> {
   List bucketMap = [];
   Map upyunManageConfigMap = {};
 
-  RefreshController refreshController =
-      RefreshController(initialRefresh: false);
+  RefreshController refreshController = RefreshController(initialRefresh: false);
   TextEditingController nameController = TextEditingController();
   TextEditingController passwdController = TextEditingController();
   TextEditingController optionController = TextEditingController();
@@ -55,10 +50,11 @@ class UpyunBucketListState
   _onRefresh() async {
     await initBucketList();
     refreshController.refreshCompleted();
-    var queryUpyun = await MySqlUtils.queryUpyun(username: Global.defaultUser);
-    if (queryUpyun != 'Empty' && queryUpyun != 'Error') {
-      nameController.text = queryUpyun['operator'];
-      passwdController.text = queryUpyun['password'];
+    var queryUpyun = await UpyunManageAPI.readUpyunConfig();
+    if (queryUpyun != 'Error') {
+      var jsonResult = jsonDecode(queryUpyun);
+      nameController.text = jsonResult['operator'];
+      passwdController.text = jsonResult['password'];
     }
     var result = await UpyunManageAPI.getUpyunManageConfigMap();
     if (result != 'Error') {
@@ -70,20 +66,6 @@ class UpyunBucketListState
   initBucketList() async {
     bucketMap.clear();
     try {
-      String currentUser = await Global.getUser();
-      String defaultPassword = await Global.getPassword();
-      var queryuser = await MySqlUtils.queryUser(username: currentUser);
-      if (queryuser == 'Empty') {
-        setState(() {
-          state = loading_state.LoadState.ERROR;
-        });
-        return showToast('请先登录');
-      } else if (queryuser['password'] != defaultPassword) {
-        setState(() {
-          state = loading_state.LoadState.ERROR;
-        });
-        return showToast('请先登录');
-      }
       var bucketListResponse = await UpyunManageAPI.getBucketList();
       //判断是否获取成功
       if (bucketListResponse[0] != 'success') {
@@ -169,21 +151,25 @@ class UpyunBucketListState
         actions: [
           IconButton(
             onPressed: () async {
-              await Application.router.navigateTo(
-                  context, Routes.upyunTokenManagePage,
-                  transition: TransitionType.cupertino);
+              await Application.router
+                  .navigateTo(context, Routes.upyunTokenManagePage, transition: TransitionType.cupertino);
             },
-            icon: const Icon(Icons.perm_identity,color: Colors.white,),
+            icon: const Icon(
+              Icons.perm_identity,
+              color: Colors.white,
+            ),
             iconSize: 35,
           ),
           IconButton(
             onPressed: () async {
-              await Application.router.navigateTo(
-                  context, Routes.upyunNewBucketConfig,
-                  transition: TransitionType.cupertino);
+              await Application.router
+                  .navigateTo(context, Routes.upyunNewBucketConfig, transition: TransitionType.cupertino);
               _onRefresh();
             },
-            icon: const Icon(Icons.add,color: Colors.white,),
+            icon: const Icon(
+              Icons.add,
+              color: Colors.white,
+            ),
             iconSize: 35,
           ),
         ],
@@ -200,9 +186,7 @@ class UpyunBucketListState
             width: 100,
             height: 100,
           ),
-          const Text('没有存储桶，点击右上角添加哦',
-              style: TextStyle(
-                  fontSize: 20, color: Color.fromARGB(136, 121, 118, 118)))
+          const Text('没有存储桶，点击右上角添加哦', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118)))
         ],
       ),
     );
@@ -214,9 +198,7 @@ class UpyunBucketListState
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Text('加载失败',
-              style: TextStyle(
-                  fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))),
+          const Text('加载失败', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))),
           ElevatedButton(
             style: ButtonStyle(
               backgroundColor: MaterialStateProperty.all(Colors.blue),
@@ -276,8 +258,7 @@ class UpyunBucketListState
           shrinkWrap: true,
           elements: bucketMap,
           groupBy: (element) => element['status'],
-          itemComparator: (item1, item2) =>
-              item1['CreationDate'].compareTo(item2['CreationDate']),
+          itemComparator: (item1, item2) => item1['CreationDate'].compareTo(item2['CreationDate']),
           groupComparator: (value1, value2) => value2.compareTo(value1),
           separator: const Divider(
             height: 0.1,
@@ -322,13 +303,15 @@ class UpyunBucketListState
                 onTap: () async {
                   Map configElement = {};
                   configElement['bucket'] = element['bucket_name'];
-                  String usernameEmailBucket =
-                      '${Global.defaultUser}_${upyunManageConfigMap['email']}_${element['bucket_name']}';
-                  var queryOperator = await MySqlUtils.queryUpyunOperator(
-                      username: usernameEmailBucket);
-                  if (queryOperator != 'Empty' && queryOperator != 'Error') {
-                    configElement['operator'] = queryOperator['operator'];
-                    configElement['password'] = queryOperator['password'];
+                  var queryOperator = await UpyunManageAPI.readUpyunOperatorConfig();
+                  if (queryOperator != 'Error') {
+                    var jsonResult = jsonDecode(queryOperator);
+                    // 判断bucket是否存在
+                    if (jsonResult['${element['bucket_name']}'] == null) {
+                      return showToast('请先在底部弹出栏中添加操作员');
+                    }
+                    configElement['operator'] = jsonResult['${element['bucket_name']}']['operator'];
+                    configElement['password'] = jsonResult['${element['bucket_name']}']['password'];
                   } else {
                     return showToast('请先在底部弹出栏中添加操作员');
                   }
@@ -367,12 +350,10 @@ class UpyunBucketListState
   }
 
   Widget setDefaultPSHost(Map element) {
-    return StatefulBuilder(builder:
-        (BuildContext context, void Function(void Function()) setState) {
+    return StatefulBuilder(builder: (BuildContext context, void Function(void Function()) setState) {
       return CupertinoAlertDialog(
-        title: const Text('请输入网站后缀和图床路径',
-            style: TextStyle(
-                fontSize: 16, fontWeight: FontWeight.bold, color: Colors.blue)),
+        title:
+            const Text('请输入网站后缀和图床路径', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.blue)),
         content: Column(
           children: [
             const SizedBox(
@@ -380,9 +361,7 @@ class UpyunBucketListState
             ),
             CupertinoTextField(
               textAlign: TextAlign.center,
-              prefix: const Text('后缀：',
-                  style: TextStyle(
-                      fontSize: 16, color: Color.fromARGB(255, 121, 118, 118))),
+              prefix: const Text('后缀：', style: TextStyle(fontSize: 16, color: Color.fromARGB(255, 121, 118, 118))),
               controller: optionController,
               placeholder: '网站后缀，非必填',
             ),
@@ -390,9 +369,7 @@ class UpyunBucketListState
               height: 10,
             ),
             CupertinoTextField(
-              prefix: const Text('路径：',
-                  style: TextStyle(
-                      fontSize: 16, color: Color.fromARGB(255, 121, 118, 118))),
+              prefix: const Text('路径：', style: TextStyle(fontSize: 16, color: Color.fromARGB(255, 121, 118, 118))),
               textAlign: TextAlign.center,
               controller: pathController,
               placeholder: '图床路径，非必填',
@@ -401,9 +378,7 @@ class UpyunBucketListState
               height: 10,
             ),
             CupertinoTextField(
-              prefix: const Text('操作员：',
-                  style: TextStyle(
-                      fontSize: 16, color: Color.fromARGB(255, 121, 118, 118))),
+              prefix: const Text('操作员：', style: TextStyle(fontSize: 16, color: Color.fromARGB(255, 121, 118, 118))),
               textAlign: TextAlign.center,
               controller: defaultOperatorController,
               placeholder: '操作员',
@@ -412,9 +387,7 @@ class UpyunBucketListState
               height: 10,
             ),
             CupertinoTextField(
-              prefix: const Text('密码：',
-                  style: TextStyle(
-                      fontSize: 16, color: Color.fromARGB(255, 121, 118, 118))),
+              prefix: const Text('密码：', style: TextStyle(fontSize: 16, color: Color.fromARGB(255, 121, 118, 118))),
               textAlign: TextAlign.center,
               controller: defaultPasswordController,
               placeholder: '操作员密码',
@@ -428,11 +401,11 @@ class UpyunBucketListState
                 value: isUsePSConfig,
                 onChanged: (value) async {
                   if (value == true) {
-                    var queryUpyun = await MySqlUtils.queryUpyun(
-                        username: Global.defaultUser);
-                    if (queryUpyun != 'Empty' && queryUpyun != 'Error') {
-                      defaultOperatorController.text = queryUpyun['operator'];
-                      defaultPasswordController.text = queryUpyun['password'];
+                    var queryUpyun = await UpyunManageAPI.readUpyunConfig();
+                    if (queryUpyun != 'Error') {
+                      var jsonResult = jsonDecode(queryUpyun);
+                      defaultOperatorController.text = jsonResult['operator'];
+                      defaultPasswordController.text = jsonResult['password'];
                       setState(() {
                         if (isUseRemotePSConfig) {
                           isUseRemotePSConfig = false;
@@ -459,15 +432,11 @@ class UpyunBucketListState
                 value: isUseRemotePSConfig,
                 onChanged: (value) async {
                   if (value == true) {
-                    String usernameEmailBucket =
-                        '${Global.defaultUser}_${upyunManageConfigMap['email']}_${element['bucket_name']}';
-                    var queryOperator = await MySqlUtils.queryUpyunOperator(
-                        username: usernameEmailBucket);
-                    if (queryOperator != 'Empty' && queryOperator != 'Error') {
-                      defaultOperatorController.text =
-                          queryOperator['operator'];
-                      defaultPasswordController.text =
-                          queryOperator['password'];
+                    var queryOperator = await UpyunManageAPI.readUpyunOperatorConfig();
+                    if (queryOperator != 'Error') {
+                      var jsonResult = jsonDecode(queryOperator);
+                      defaultOperatorController.text = jsonResult['${element['bucket_name']}']['operator'];
+                      defaultPasswordController.text = jsonResult['${element['bucket_name']}']['password'];
                       setState(() {
                         if (isUsePSConfig) {
                           isUsePSConfig = false;
@@ -519,44 +488,19 @@ class UpyunBucketListState
                 }
                 textMap['operator'] = operator;
                 textMap['password'] = password;
-                String usernameEmailBucket =
-                    '${Global.defaultUser}_${upyunManageConfigMap['email']}_${element['bucket_name']}';
-                var queryOperator = await MySqlUtils.queryUpyunOperator(
-                    username: usernameEmailBucket);
-                if (queryOperator == 'Error') {
+
+                var updateOperator = await UpyunManageAPI.saveUpyunOperatorConfig(
+                  element['bucket_name'],
+                  upyunManageConfigMap['email'],
+                  textMap['operator'],
+                  textMap['password'],
+                );
+                if (!updateOperator) {
                   showToast('数据库错误');
                   return;
-                } else if (queryOperator == 'Empty') {
-                  List content = [
-                    element['bucket_name'],
-                    upyunManageConfigMap['email'],
-                    textMap['operator'],
-                    textMap['password'],
-                    usernameEmailBucket
-                  ];
-                  var insertOperator =
-                      await MySqlUtils.insertUpyunOperator(content: content);
-                  if (insertOperator == 'Error') {
-                    showToast('数据库错误');
-                    return;
-                  }
-                } else {
-                  List content = [
-                    element['bucket_name'],
-                    upyunManageConfigMap['email'],
-                    textMap['operator'],
-                    textMap['password'],
-                    usernameEmailBucket
-                  ];
-                  var updateOperator =
-                      await MySqlUtils.updateUpyunOperator(content: content);
-                  if (updateOperator == 'Error') {
-                    showToast('数据库错误');
-                    return;
-                  }
                 }
-                var result = await UpyunManageAPI.setDefaultBucketFromListPage(
-                    element, upyunManageConfigMap, textMap);
+
+                var result = await UpyunManageAPI.setDefaultBucketFromListPage(element, upyunManageConfigMap, textMap);
                 if (result[0] == 'success') {
                   showToast('设置成功');
                   if (mounted) {
@@ -621,36 +565,14 @@ class UpyunBucketListState
               for (var operator in queryOperator[1]) {
                 operatorList.add(operator['operator_name']);
               }
-              String usernameEmailBucket =
-                  '${Global.defaultUser}_${upyunManageConfigMap['email']}_${element['bucket_name']}';
-              List content = [];
-              content.add(element['bucket_name']);
-              content.add(upyunManageConfigMap['email']);
-              content.add(nameController.text);
-              content.add(passwdController.text);
-              content.add(usernameEmailBucket);
 
               if (operatorList.contains(nameController.text)) {
-                var queryOperator = await MySqlUtils.queryUpyunOperator(
-                    username: usernameEmailBucket);
-                if (queryOperator == 'Error') {
-                  return showToast('查询操作员数据库失败');
-                } else if (queryOperator == 'Empty') {
-                  var insertOperator =
-                      await MySqlUtils.insertUpyunOperator(content: content);
-                  if (insertOperator == 'Error') {
-                    return showToast('插入操作员数据库失败');
-                  } else {
-                    return showToast('设置操作员成功');
-                  }
+                var updateOperator = await UpyunManageAPI.saveUpyunOperatorConfig(
+                    element['bucket_name'], upyunManageConfigMap['email'], nameController.text, passwdController.text);
+                if (!updateOperator) {
+                  return showToast('更新操作员数据库失败');
                 } else {
-                  var updateOperator =
-                      await MySqlUtils.updateUpyunOperator(content: content);
-                  if (updateOperator == 'Error') {
-                    return showToast('更新操作员数据库失败');
-                  } else {
-                    return showToast('设置操作员成功');
-                  }
+                  return showToast('设置操作员成功');
                 }
               } else {
                 var addOperator = await UpyunManageAPI.addOperator(
@@ -658,26 +580,12 @@ class UpyunBucketListState
                   nameController.text,
                 );
                 if (addOperator[0] == 'success') {
-                  var queryOperator = await MySqlUtils.queryUpyunOperator(
-                      username: usernameEmailBucket);
-                  if (queryOperator == 'Error') {
-                    return showToast('查询操作员数据库失败');
-                  } else if (queryOperator == 'Empty') {
-                    var insertOperator =
-                        await MySqlUtils.insertUpyunOperator(content: content);
-                    if (insertOperator == 'Error') {
-                      return showToast('插入操作员数据库失败');
-                    } else {
-                      return showToast('设置操作员成功');
-                    }
+                  var insertOperator = await UpyunManageAPI.saveUpyunOperatorConfig(element['bucket_name'],
+                      upyunManageConfigMap['email'], nameController.text, passwdController.text);
+                  if (!insertOperator) {
+                    return showToast('插入操作员数据库失败');
                   } else {
-                    var updateOperator =
-                        await MySqlUtils.updateUpyunOperator(content: content);
-                    if (updateOperator == 'Error') {
-                      return showToast('更新操作员数据库失败');
-                    } else {
-                      return showToast('设置操作员成功');
-                    }
+                    return showToast('设置操作员成功');
                   }
                 } else {
                   return showToast('添加操作员失败');
@@ -696,8 +604,7 @@ class UpyunBucketListState
     List<Widget> children = [];
     for (var i = 0; i < operatorMap.length; i++) {
       children.add(StatefulBuilder(
-        builder:
-            (BuildContext context, void Function(void Function()) setState) {
+        builder: (BuildContext context, void Function(void Function()) setState) {
           Map<bool, String> trans = {
             true: '√',
             false: '×',
@@ -708,10 +615,7 @@ class UpyunBucketListState
             title: Text(operatorMap.keys.toList()[i]),
             subtitle: Text(
                 '读${trans[operatorMap[operatorMap.keys.toList()[i]]['read']]}写${trans[operatorMap[operatorMap.keys.toList()[i]]['write']]}删${trans[operatorMap[operatorMap.keys.toList()[i]]['delete']]}',
-                style: const TextStyle(
-                    fontSize: 12,
-                    color: Colors.blue,
-                    fontWeight: FontWeight.bold)),
+                style: const TextStyle(fontSize: 12, color: Colors.blue, fontWeight: FontWeight.bold)),
             value: selectionList[i],
             onChanged: (value) {
               setState(() {
@@ -725,8 +629,7 @@ class UpyunBucketListState
     return children;
   }
 
-  Widget removeOperatorSelectionCupertinoDialog(
-      BuildContext context, Map element, Map operatorMap) {
+  Widget removeOperatorSelectionCupertinoDialog(BuildContext context, Map element, Map operatorMap) {
     selectionList.clear();
     for (var i = 0; i < operatorMap.length; i++) {
       selectionList.add(false);
@@ -743,9 +646,7 @@ class UpyunBucketListState
               height: 150,
               width: 300,
               child: SingleChildScrollView(
-                  child: Column(
-                      children: buildremoveOperatorSelectionCupertinoDialog(
-                          operatorMap))))),
+                  child: Column(children: buildremoveOperatorSelectionCupertinoDialog(operatorMap))))),
       actions: [
         CupertinoDialogAction(
           child: const Text('取消'),
@@ -765,31 +666,16 @@ class UpyunBucketListState
                 }
               }
               for (var i = 0; i < operatorList.length; i++) {
-                var removeOperator = await UpyunManageAPI.deleteOperator(
-                    element['bucket_name'], operatorList[i]);
+                var removeOperator = await UpyunManageAPI.deleteOperator(element['bucket_name'], operatorList[i]);
                 if (removeOperator[0] == 'success') {
-                  String usernameEmailBucket =
-                      '${Global.defaultUser}_${upyunManageConfigMap['email']}_${element['bucket_name']}';
-                  var queryOperator = await MySqlUtils.queryUpyunOperator(
-                      username: usernameEmailBucket);
-                  if (queryOperator == 'Error') {
-                    return showToast('查询操作员数据库失败');
-                  } else if (queryOperator == 'Empty') {
-                    showToast('删除${operatorList[i]}成功');
-                    continue;
-                  } else if (queryOperator['operator'] == operatorList[i]) {
-                    var deleteOperator = await MySqlUtils.deleteUpyunOperator(
-                        id: queryOperator['id']);
-                    if (deleteOperator == 'Error') {
-                      return showToast('删除操作员数据库失败');
-                    } else {
-                      showToast('删除${operatorList[i]}成功');
-                      continue;
+                  var queryOperator = await UpyunManageAPI.readUpyunOperatorConfig();
+                  if (queryOperator != 'Error') {
+                    var jsonResult = jsonDecode(queryOperator);
+                    var currentOperator = jsonResult['${element['bucket_name']}']['operator'];
+                    if (currentOperator == operatorList[i]) {
+                      await UpyunManageAPI.deleteUpyunOperatorConfig(element['bucket_name']);
                     }
                   }
-                  showToast('删除${operatorList[i]}成功');
-                } else {
-                  return showToast('删除${operatorList[i]}失败');
                 }
               }
             } catch (e) {
@@ -820,8 +706,7 @@ class UpyunBucketListState
               element['bucket_name'],
               style: const TextStyle(fontSize: 14),
             ),
-            subtitle: Text(element['CreationDate'],
-                style: const TextStyle(fontSize: 12)),
+            subtitle: Text(element['CreationDate'], style: const TextStyle(fontSize: 12)),
           ),
           const Divider(
             height: 0.1,
@@ -855,8 +740,8 @@ class UpyunBucketListState
             minLeadingWidth: 0,
             title: const Text('存储桶信息', style: TextStyle(fontSize: 15)),
             onTap: () {
-              Application.router.navigateTo(context,
-                  '${Routes.upyunBucketInformation}?bucketMap=${Uri.encodeComponent(jsonEncode(element))}',
+              Application.router.navigateTo(
+                  context, '${Routes.upyunBucketInformation}?bucketMap=${Uri.encodeComponent(jsonEncode(element))}',
                   transition: TransitionType.none);
             },
           ),
@@ -888,8 +773,7 @@ class UpyunBucketListState
             minLeadingWidth: 0,
             title: const Text('解绑操作员', style: TextStyle(fontSize: 15)),
             onTap: () async {
-              List operatorList =
-                  await UpyunManageAPI.getOperator(element['bucket_name']);
+              List operatorList = await UpyunManageAPI.getOperator(element['bucket_name']);
               Map operatorMap = {};
               if (operatorList.isEmpty) {
                 return showToast('获取操作员失败');
@@ -910,8 +794,7 @@ class UpyunBucketListState
               }
               await showCupertinoDialog(
                   builder: (context) {
-                    return removeOperatorSelectionCupertinoDialog(
-                        context, element, operatorMap);
+                    return removeOperatorSelectionCupertinoDialog(context, element, operatorMap);
                   },
                   context: context);
             },
@@ -936,8 +819,7 @@ class UpyunBucketListState
                   try {
                     Navigator.of(context).pop();
                     Navigator.of(context).pop();
-                    var result = await UpyunManageAPI.deleteBucket(
-                        element['bucket_name']);
+                    var result = await UpyunManageAPI.deleteBucket(element['bucket_name']);
                     if (result[0] == 'success') {
                       showToast('删除成功');
                       _onRefresh();

@@ -3,7 +3,6 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:f_logs/f_logs.dart';
 import 'package:ftpconnect/ftpconnect.dart';
 import 'package:dartssh2/dartssh2.dart';
@@ -14,7 +13,6 @@ import 'package:horopic/pages/loading.dart';
 import 'package:horopic/router/routers.dart';
 import 'package:horopic/router/application.dart';
 import 'package:horopic/utils/common_functions.dart';
-import 'package:horopic/utils/sql_utils.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/picture_host_manage/manage_api/ftp_manage_api.dart';
 
@@ -122,21 +120,19 @@ class FTPConfigState extends State<FTPConfig> {
                 'ftpUser': _ftpUserController.text,
                 'ftpPassword': _ftpPasswordController.text,
               };
-              Application.router.navigateTo(context,
-                  '${Routes.sshTerminal}?configMap=${Uri.encodeComponent(jsonEncode(configMap))}',
+              Application.router.navigateTo(
+                  context, '${Routes.sshTerminal}?configMap=${Uri.encodeComponent(jsonEncode(configMap))}',
                   transition: TransitionType.cupertino);
             },
           ),
           IconButton(
             onPressed: () async {
-              await Application.router.navigateTo(
-                  context, '/configureStorePage?psHost=ftp',
-                  transition: TransitionType.cupertino);
+              await Application.router
+                  .navigateTo(context, '/configureStorePage?psHost=ftp', transition: TransitionType.cupertino);
               await _initConfig();
               setState(() {});
             },
-            icon: const Icon(Icons.save_as_outlined,
-                color: Color.fromARGB(255, 255, 255, 255), size: 35),
+            icon: const Icon(Icons.save_as_outlined, color: Color.fromARGB(255, 255, 255, 255), size: 35),
           )
         ],
       ),
@@ -223,8 +219,7 @@ class FTPConfigState extends State<FTPConfig> {
                     _ftpConfigMap['ftpType'] = newValue!;
                   });
                 },
-                items: <String>['FTP', 'SFTP']
-                    .map<DropdownMenuItem<String>>((String value) {
+                items: <String>['FTP', 'SFTP'].map<DropdownMenuItem<String>>((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
                     child: Text(value),
@@ -282,9 +277,8 @@ class FTPConfigState extends State<FTPConfig> {
             ListTile(
                 title: ElevatedButton(
               onPressed: () async {
-                await Application.router.navigateTo(
-                    context, '/configureStorePage?psHost=ftp',
-                    transition: TransitionType.cupertino);
+                await Application.router
+                    .navigateTo(context, '/configureStorePage?psHost=ftp', transition: TransitionType.cupertino);
                 await _initConfig();
                 setState(() {});
               },
@@ -303,8 +297,8 @@ class FTPConfigState extends State<FTPConfig> {
                   showToast('只支持SSH/SFTP类型');
                   return;
                 }
-                Application.router.navigateTo(context,
-                    '${Routes.sshTerminal}?configMap=${Uri.encodeComponent(jsonEncode(configMap))}',
+                Application.router.navigateTo(
+                    context, '${Routes.sshTerminal}?configMap=${Uri.encodeComponent(jsonEncode(configMap))}',
                     transition: TransitionType.cupertino);
               },
               child: Row(
@@ -342,15 +336,13 @@ class FTPConfigState extends State<FTPConfig> {
       ftpUser = _ftpUserController.text;
     }
     String ftpPassword = '';
-    if (_ftpPasswordController.text.isEmpty ||
-        _ftpPasswordController.text == '') {
+    if (_ftpPasswordController.text.isEmpty || _ftpPasswordController.text == '') {
       ftpPassword = 'None';
     } else {
       ftpPassword = _ftpPasswordController.text;
     }
     String ftpUploadPath = '';
-    if (_ftpUploadPathController.text.isEmpty ||
-        _ftpUploadPathController.text == '') {
+    if (_ftpUploadPathController.text.isEmpty || _ftpUploadPathController.text == '') {
       ftpUploadPath = 'None';
     } else {
       ftpUploadPath = _ftpUploadPathController.text;
@@ -359,9 +351,7 @@ class FTPConfigState extends State<FTPConfig> {
       }
     }
     String ftpHomeDir = '';
-    if (_ftpHomeDirController.text.isEmpty ||
-        _ftpHomeDirController.text == '' ||
-        _ftpHomeDirController.text == '/') {
+    if (_ftpHomeDirController.text.isEmpty || _ftpHomeDirController.text == '' || _ftpHomeDirController.text == '/') {
       ftpHomeDir = 'None';
     } else {
       ftpHomeDir = _ftpHomeDirController.text;
@@ -373,65 +363,27 @@ class FTPConfigState extends State<FTPConfig> {
     final String ftpType = _ftpConfigMap['ftpType'];
 
     try {
-      List sqlconfig = [];
-      sqlconfig.add(ftpHost);
-      sqlconfig.add(ftpPort);
-      sqlconfig.add(ftpUser);
-      sqlconfig.add(ftpPassword);
-      sqlconfig.add(ftpType);
-      sqlconfig.add(isAnonymous);
-      sqlconfig.add(ftpUploadPath);
-      sqlconfig.add(ftpHomeDir);
-      //添加默认用户
-      String defaultUser = await Global.getUser();
-      sqlconfig.add(defaultUser);
-
-      var queryFTP = await MySqlUtils.queryFTP(username: defaultUser);
-      var queryuser = await MySqlUtils.queryUser(username: defaultUser);
-
-      if (queryuser == 'Empty') {
-        return showCupertinoAlertDialog(
-            context: context, title: '错误', content: '用户不存在,请先登录');
-      }
-
       try {
         if (ftpType == 'FTP') {
           FTPConnect ftpConnect;
           if (isAnonymous == 'true') {
-            ftpConnect = FTPConnect(ftpHost,
-                port: int.parse(ftpPort), securityType: SecurityType.FTP);
+            ftpConnect = FTPConnect(ftpHost, port: int.parse(ftpPort), securityType: SecurityType.FTP);
           } else {
             ftpConnect = FTPConnect(ftpHost,
-                port: int.parse(ftpPort),
-                user: ftpUser,
-                pass: ftpPassword,
-                securityType: SecurityType.FTP);
+                port: int.parse(ftpPort), user: ftpUser, pass: ftpPassword, securityType: SecurityType.FTP);
           }
           bool connectResult = await ftpConnect.connect();
           await ftpConnect.disconnect();
-          var sqlResult;
           if (connectResult == true) {
-            if (queryFTP == 'Empty') {
-              sqlResult = await MySqlUtils.insertFTP(content: sqlconfig);
-            } else {
-              sqlResult = await MySqlUtils.updateFTP(content: sqlconfig);
-            }
-            if (sqlResult == "Success") {
-              final ftpConfig = FTPConfigModel(ftpHost, ftpPort, ftpUser,
-                  ftpPassword, ftpType, isAnonymous, ftpUploadPath, ftpHomeDir);
-              final ftpConfigJson = jsonEncode(ftpConfig);
-              final ftpConfigFile = await localFile;
-              await ftpConfigFile.writeAsString(ftpConfigJson);
-              return showCupertinoAlertDialog(
-                  context: context, title: '成功', content: '配置成功');
-            } else {
-              return showCupertinoAlertDialog(
-                  context: context, title: '错误', content: '数据库错误');
-            }
+            final ftpConfig =
+                FTPConfigModel(ftpHost, ftpPort, ftpUser, ftpPassword, ftpType, isAnonymous, ftpUploadPath, ftpHomeDir);
+            final ftpConfigJson = jsonEncode(ftpConfig);
+            final ftpConfigFile = await localFile;
+            await ftpConfigFile.writeAsString(ftpConfigJson);
+            return showCupertinoAlertDialog(context: context, title: '成功', content: '配置成功');
           }
         } else {
-          final socket =
-              await SSHSocket.connect(ftpHost, int.parse(ftpPort.toString()));
+          final socket = await SSHSocket.connect(ftpHost, int.parse(ftpPort.toString()));
           final client = SSHClient(
             socket,
             username: ftpUser,
@@ -440,25 +392,13 @@ class FTPConfigState extends State<FTPConfig> {
             },
           );
           client.close();
-          var sqlResult;
 
-          if (queryFTP == 'Empty') {
-            sqlResult = await MySqlUtils.insertFTP(content: sqlconfig);
-          } else {
-            sqlResult = await MySqlUtils.updateFTP(content: sqlconfig);
-          }
-          if (sqlResult == "Success") {
-            final ftpConfig = FTPConfigModel(ftpHost, ftpPort, ftpUser,
-                ftpPassword, ftpType, isAnonymous, ftpUploadPath, ftpHomeDir);
-            final ftpConfigJson = jsonEncode(ftpConfig);
-            final ftpConfigFile = await localFile;
-            await ftpConfigFile.writeAsString(ftpConfigJson);
-            return showCupertinoAlertDialog(
-                context: context, title: '成功', content: '配置成功');
-          } else {
-            return showCupertinoAlertDialog(
-                context: context, title: '错误', content: '数据库错误');
-          }
+          final ftpConfig =
+              FTPConfigModel(ftpHost, ftpPort, ftpUser, ftpPassword, ftpType, isAnonymous, ftpUploadPath, ftpHomeDir);
+          final ftpConfigJson = jsonEncode(ftpConfig);
+          final ftpConfigFile = await localFile;
+          await ftpConfigFile.writeAsString(ftpConfigJson);
+          return showCupertinoAlertDialog(context: context, title: '成功', content: '配置成功');
         }
       } catch (e) {
         FLog.error(
@@ -466,8 +406,7 @@ class FTPConfigState extends State<FTPConfig> {
             methodName: '_saveFTPConfig_1',
             text: formatErrorMessage({}, e.toString()),
             dataLogType: DataLogType.ERRORS.toString());
-        return showCupertinoAlertDialog(
-            context: context, title: '错误', content: e.toString());
+        return showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
       }
     } catch (e) {
       FLog.error(
@@ -475,8 +414,7 @@ class FTPConfigState extends State<FTPConfig> {
           methodName: '_saveFTPConfig_2',
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
-      return showCupertinoAlertDialog(
-          context: context, title: '错误', content: e.toString());
+      return showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
     }
   }
 
@@ -486,8 +424,7 @@ class FTPConfigState extends State<FTPConfig> {
       String configData = await ftpConfigFile.readAsString();
 
       if (configData == "Error") {
-        return showCupertinoAlertDialog(
-            context: context, title: "检查失败!", content: "请先配置上传参数.");
+        return showCupertinoAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");
       }
 
       Map configMap = jsonDecode(configData);
@@ -501,14 +438,10 @@ class FTPConfigState extends State<FTPConfig> {
       if (ftpType == 'FTP') {
         FTPConnect ftpConnect;
         if (isAnonymous == 'true') {
-          ftpConnect = FTPConnect(ftpHost,
-              port: int.parse(ftpPort), securityType: SecurityType.FTP);
+          ftpConnect = FTPConnect(ftpHost, port: int.parse(ftpPort), securityType: SecurityType.FTP);
         } else {
           ftpConnect = FTPConnect(ftpHost,
-              port: int.parse(ftpPort),
-              user: ftpUser,
-              pass: ftpPassword,
-              securityType: SecurityType.FTP);
+              port: int.parse(ftpPort), user: ftpUser, pass: ftpPassword, securityType: SecurityType.FTP);
         }
         bool connectResult = await ftpConnect.connect();
         await ftpConnect.disconnect();
@@ -520,12 +453,10 @@ class FTPConfigState extends State<FTPConfig> {
                 '检测通过，您的配置信息为:\n用户名:\n${configMap["ftpHost"]}\n端口:\n${configMap["ftpPort"]}\n用户名:\n${configMap["ftpUser"]}\n密码:\n${configMap["ftpPassword"]}\n上传路径:\n${configMap["uploadPath"]}\n管理功能起始路径:\n${configMap["ftpHomeDir"]}',
           );
         } else {
-          return showCupertinoAlertDialog(
-              context: context, title: '错误', content: '检查失败，请检查配置信息');
+          return showCupertinoAlertDialog(context: context, title: '错误', content: '检查失败，请检查配置信息');
         }
       } else {
-        final socket =
-            await SSHSocket.connect(ftpHost, int.parse(ftpPort.toString()));
+        final socket = await SSHSocket.connect(ftpHost, int.parse(ftpPort.toString()));
         final client = SSHClient(
           socket,
           username: ftpUser,
@@ -547,8 +478,7 @@ class FTPConfigState extends State<FTPConfig> {
           methodName: 'checkFTPConfig',
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
-      return showCupertinoAlertDialog(
-          context: context, title: "检查失败!", content: e.toString());
+      return showCupertinoAlertDialog(context: context, title: "检查失败!", content: e.toString());
     }
   }
 
@@ -580,66 +510,11 @@ class FTPConfigState extends State<FTPConfig> {
 
   _setdefault() async {
     try {
-      String defaultUser = await Global.getUser();
-      String defaultPassword = await Global.getPassword();
-
-      var queryuser = await MySqlUtils.queryUser(username: defaultUser);
-      if (queryuser == 'Empty') {
-        return Fluttertoast.showToast(
-            msg: "请先注册用户",
-            toastLength: Toast.LENGTH_SHORT,
-            timeInSecForIosWeb: 2,
-            fontSize: 16.0);
-      } else if (queryuser['password'] != defaultPassword) {
-        return Fluttertoast.showToast(
-            msg: "请先登录",
-            toastLength: Toast.LENGTH_SHORT,
-            timeInSecForIosWeb: 2,
-            fontSize: 16.0);
-      }
-
-      var queryFTP = await MySqlUtils.queryFTP(username: defaultUser);
-      if (queryFTP == 'Empty') {
-        return Fluttertoast.showToast(
-            msg: "请先配置上传参数",
-            toastLength: Toast.LENGTH_SHORT,
-            timeInSecForIosWeb: 2,
-            fontSize: 16.0);
-      }
-      if (queryFTP == 'Error') {
-        return Fluttertoast.showToast(
-            msg: "Error",
-            toastLength: Toast.LENGTH_SHORT,
-            timeInSecForIosWeb: 2,
-            fontSize: 16.0);
-      }
-      if (queryuser['defaultPShost'] == 'ftp') {
-        await Global.setPShost('ftp');
-        await Global.setShowedPBhost('PBhostExtend1');
-        eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-        eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
-        return Fluttertoast.showToast(
-            msg: "已经是默认配置",
-            toastLength: Toast.LENGTH_SHORT,
-            timeInSecForIosWeb: 2,
-            fontSize: 16.0);
-      } else {
-        List sqlconfig = [];
-        sqlconfig.add(defaultUser);
-        sqlconfig.add(defaultPassword);
-        sqlconfig.add('ftp');
-
-        var updateResult = await MySqlUtils.updateUser(content: sqlconfig);
-        if (updateResult == 'Success') {
-          await Global.setPShost('ftp');
-          await Global.setShowedPBhost('PBhostExtend1');
-          eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-          eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
-          showToast('已设置FTP为默认图床');
-        } else {
-          showToast('写入数据库失败');
-        }
-      }
+      await Global.setPShost('ftp');
+      await Global.setShowedPBhost('PBhostExtend1');
+      eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
+      eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
+      showToast('已设置FTP为默认图床');
     } catch (e) {
       FLog.error(
           className: 'FTPConfigPage',
@@ -661,8 +536,8 @@ class FTPConfigModel {
   final String uploadPath;
   final String ftpHomeDir;
 
-  FTPConfigModel(this.ftpHost, this.ftpPort, this.ftpUser, this.ftpPassword,
-      this.ftpType, this.isAnonymous, this.uploadPath, this.ftpHomeDir);
+  FTPConfigModel(this.ftpHost, this.ftpPort, this.ftpUser, this.ftpPassword, this.ftpType, this.isAnonymous,
+      this.uploadPath, this.ftpHomeDir);
 
   Map<String, dynamic> toJson() => {
         'ftpHost': ftpHost,

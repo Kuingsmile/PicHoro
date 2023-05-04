@@ -207,7 +207,7 @@ class AliyunConfigureStoreEditState extends State<AliyunConfigureStoreEdit> {
                 _importConfig();
                 setState(() {});
               },
-              child: titleText('导入当前图床配置', fontsize: null),
+              child: titleText('导入当前图床配置',fontsize: null),
             )),
             ListTile(
                 title: ElevatedButton(
@@ -217,7 +217,7 @@ class AliyunConfigureStoreEditState extends State<AliyunConfigureStoreEdit> {
                   Navigator.pop(context, true);
                 }
               },
-              child: titleText('保存配置', fontsize: null),
+              child: titleText('保存配置',fontsize: null),
             )),
           ],
         ),

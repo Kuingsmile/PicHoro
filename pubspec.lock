@@ -492,13 +492,6 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "2.0.1"
-  logging:
-    dependency: transitive
-    description:
-      name: logging
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "1.1.0"
   markdown:
     dependency: transitive
     description:
@@ -548,13 +541,6 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "1.1.1"
-  mysql1:
-    dependency: "direct main"
-    description:
-      name: mysql1
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "0.20.0"
   nested:
     dependency: transitive
     description:
@@ -751,13 +737,6 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "3.6.2"
-  pool:
-    dependency: transitive
-    description:
-      name: pool
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "1.5.1"
   process:
     dependency: transitive
     description:

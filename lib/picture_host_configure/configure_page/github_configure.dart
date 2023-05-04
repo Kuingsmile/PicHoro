@@ -4,14 +4,12 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:f_logs/f_logs.dart';
 import 'package:fluro/fluro.dart';
 
 import 'package:horopic/router/application.dart';
 import 'package:horopic/pages/loading.dart';
 import 'package:horopic/utils/common_functions.dart';
-import 'package:horopic/utils/sql_utils.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/picture_host_manage/manage_api/github_manage_api.dart';
 import 'package:horopic/utils/event_bus_utils.dart';
@@ -87,14 +85,12 @@ class GithubConfigState extends State<GithubConfig> {
         actions: [
           IconButton(
             onPressed: () async {
-              await Application.router.navigateTo(
-                  context, '/configureStorePage?psHost=github',
-                  transition: TransitionType.cupertino);
+              await Application.router
+                  .navigateTo(context, '/configureStorePage?psHost=github', transition: TransitionType.cupertino);
               await _initConfig();
               setState(() {});
             },
-            icon: const Icon(Icons.save_as_outlined,
-                color: Color.fromARGB(255, 255, 255, 255), size: 35),
+            icon: const Icon(Icons.save_as_outlined, color: Color.fromARGB(255, 255, 255, 255), size: 35),
           )
         ],
       ),
@@ -211,9 +207,8 @@ class GithubConfigState extends State<GithubConfig> {
             ListTile(
                 title: ElevatedButton(
               onPressed: () async {
-                await Application.router.navigateTo(
-                    context, '/configureStorePage?psHost=github',
-                    transition: TransitionType.cupertino);
+                await Application.router
+                    .navigateTo(context, '/configureStorePage?psHost=github', transition: TransitionType.cupertino);
                 await _initConfig();
                 setState(() {});
               },
@@ -238,8 +233,7 @@ class GithubConfigState extends State<GithubConfig> {
     final String githubusername = _githubusernameController.text;
     final String repo = _repoController.text;
     String storePath = '';
-    if (_storePathController.text.isEmpty ||
-        _storePathController.text.trim().isEmpty) {
+    if (_storePathController.text.isEmpty || _storePathController.text.trim().isEmpty) {
       storePath = 'None';
     } else {
       storePath = _storePathController.text;
@@ -249,20 +243,17 @@ class GithubConfigState extends State<GithubConfig> {
     }
 
     String branch = '';
-    if (_branchController.text.isEmpty ||
-        _branchController.text.trim().isEmpty) {
+    if (_branchController.text.isEmpty || _branchController.text.trim().isEmpty) {
       branch = 'main';
     } else {
       branch = _branchController.text;
     }
     String customDomain = '';
-    if (_customDomainController.text.isEmpty ||
-        _customDomainController.text.trim().isEmpty) {
+    if (_customDomainController.text.isEmpty || _customDomainController.text.trim().isEmpty) {
       customDomain = 'None';
     } else {
       customDomain = _customDomainController.text;
-      if (!customDomain.startsWith('http') &&
-          !customDomain.startsWith('https')) {
+      if (!customDomain.startsWith('http') && !customDomain.startsWith('https')) {
         customDomain = 'http://$customDomain';
       }
       if (customDomain.endsWith('/')) {
@@ -277,24 +268,6 @@ class GithubConfigState extends State<GithubConfig> {
     }
 
     try {
-      List sqlconfig = [];
-      sqlconfig.add(githubusername);
-      sqlconfig.add(repo);
-      sqlconfig.add(token);
-      sqlconfig.add(storePath);
-      sqlconfig.add(branch);
-      sqlconfig.add(customDomain);
-      //添加默认用户
-      String defaultUser = await Global.getUser();
-      sqlconfig.add(defaultUser);
-
-      var queryGithub = await MySqlUtils.queryGithub(username: defaultUser);
-      var queryuser = await MySqlUtils.queryUser(username: defaultUser);
-
-      if (queryuser == 'Empty') {
-        return showCupertinoAlertDialog(
-            context: context, title: '错误', content: '用户不存在,请先登录');
-      }
       BaseOptions options = setBaseOptions();
       options.headers = {
         "Accept": 'application/vnd.github+json',
@@ -303,33 +276,19 @@ class GithubConfigState extends State<GithubConfig> {
       //需要加一个空的formdata，不然会报错
       Map<String, dynamic> queryData = {};
       Dio dio = Dio(options);
-      String sqlResult = '';
+
       try {
-        var validateResponse =
-            await dio.get(githubUserApi, queryParameters: queryData);
-        if (validateResponse.statusCode == 200 &&
-            validateResponse.data.toString().contains("email")) {
+        var validateResponse = await dio.get(githubUserApi, queryParameters: queryData);
+        if (validateResponse.statusCode == 200 && validateResponse.data.toString().contains("email")) {
           //验证成功
-          if (queryGithub == 'Empty') {
-            sqlResult = await MySqlUtils.insertGithub(content: sqlconfig);
-          } else {
-            sqlResult = await MySqlUtils.updateGithub(content: sqlconfig);
-          }
-          if (sqlResult == "Success") {
-            final githubConfig = GithubConfigModel(
-                githubusername, repo, token, storePath, branch, customDomain);
-            final githubConfigJson = jsonEncode(githubConfig);
-            final githubConfigFile = await localFile;
-            await githubConfigFile.writeAsString(githubConfigJson);
-            return showCupertinoAlertDialog(
-                context: context, title: '成功', content: '配置成功');
-          } else {
-            return showCupertinoAlertDialog(
-                context: context, title: '错误', content: '数据库错误');
-          }
+
+          final githubConfig = GithubConfigModel(githubusername, repo, token, storePath, branch, customDomain);
+          final githubConfigJson = jsonEncode(githubConfig);
+          final githubConfigFile = await localFile;
+          await githubConfigFile.writeAsString(githubConfigJson);
+          return showCupertinoAlertDialog(context: context, title: '成功', content: '配置成功');
         } else {
-          return showCupertinoAlertDialog(
-              context: context, title: '错误', content: 'token错误');
+          return showCupertinoAlertDialog(context: context, title: '错误', content: 'token错误');
         }
       } catch (e) {
         FLog.error(
@@ -337,8 +296,7 @@ class GithubConfigState extends State<GithubConfig> {
             methodName: '_saveGithubConfig_1',
             text: formatErrorMessage({}, e.toString()),
             dataLogType: DataLogType.ERRORS.toString());
-        return showCupertinoAlertDialog(
-            context: context, title: '错误', content: e.toString());
+        return showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
       }
     } catch (e) {
       FLog.error(
@@ -346,8 +304,7 @@ class GithubConfigState extends State<GithubConfig> {
           methodName: '_saveGithubConfig_2',
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
-      return showCupertinoAlertDialog(
-          context: context, title: '错误', content: e.toString());
+      return showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
     }
   }
 
@@ -357,8 +314,7 @@ class GithubConfigState extends State<GithubConfig> {
       String configData = await githubConfigFile.readAsString();
 
       if (configData == "Error") {
-        return showCupertinoAlertDialog(
-            context: context, title: "检查失败!", content: "请先配置上传参数.");
+        return showCupertinoAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");
       }
 
       Map configMap = jsonDecode(configData);
@@ -372,8 +328,7 @@ class GithubConfigState extends State<GithubConfig> {
       Dio dio = Dio(options);
       var response = await dio.get(validateURL, queryParameters: queryData);
 
-      if (response.statusCode == 200 &&
-          response.data.toString().contains("email")) {
+      if (response.statusCode == 200 && response.data.toString().contains("email")) {
         return showCupertinoAlertDialog(
           context: context,
           title: '通知',
@@ -381,8 +336,7 @@ class GithubConfigState extends State<GithubConfig> {
               '检测通过，您的配置信息为:\n用户名:\n${configMap["githubusername"]}\n仓库名:\n${configMap["repo"]}\n存储路径:\n${configMap["storePath"]}\n分支:\n${configMap["branch"]}\n自定义域名:\n${configMap["customDomain"]}',
         );
       } else {
-        return showCupertinoAlertDialog(
-            context: context, title: '错误', content: '检查失败，请检查配置信息');
+        return showCupertinoAlertDialog(context: context, title: '错误', content: '检查失败，请检查配置信息');
       }
     } catch (e) {
       FLog.error(
@@ -390,8 +344,7 @@ class GithubConfigState extends State<GithubConfig> {
           methodName: 'checkGithubConfig',
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
-      return showCupertinoAlertDialog(
-          context: context, title: "检查失败!", content: e.toString());
+      return showCupertinoAlertDialog(context: context, title: "检查失败!", content: e.toString());
     }
   }
 
@@ -423,66 +376,11 @@ class GithubConfigState extends State<GithubConfig> {
 
   _setdefault() async {
     try {
-      String defaultUser = await Global.getUser();
-      String defaultPassword = await Global.getPassword();
-
-      var queryuser = await MySqlUtils.queryUser(username: defaultUser);
-      if (queryuser == 'Empty') {
-        return Fluttertoast.showToast(
-            msg: "请先注册用户",
-            toastLength: Toast.LENGTH_SHORT,
-            timeInSecForIosWeb: 2,
-            fontSize: 16.0);
-      } else if (queryuser['password'] != defaultPassword) {
-        return Fluttertoast.showToast(
-            msg: "请先登录",
-            toastLength: Toast.LENGTH_SHORT,
-            timeInSecForIosWeb: 2,
-            fontSize: 16.0);
-      }
-
-      var queryGithub = await MySqlUtils.queryGithub(username: defaultUser);
-      if (queryGithub == 'Empty') {
-        return Fluttertoast.showToast(
-            msg: "请先配置上传参数",
-            toastLength: Toast.LENGTH_SHORT,
-            timeInSecForIosWeb: 2,
-            fontSize: 16.0);
-      }
-      if (queryGithub == 'Error') {
-        return Fluttertoast.showToast(
-            msg: "Error",
-            toastLength: Toast.LENGTH_SHORT,
-            timeInSecForIosWeb: 2,
-            fontSize: 16.0);
-      }
-      if (queryuser['defaultPShost'] == 'github') {
-        await Global.setPShost('github');
-        await Global.setShowedPBhost('github');
-        eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-        eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
-        return Fluttertoast.showToast(
-            msg: "已经是默认配置",
-            toastLength: Toast.LENGTH_SHORT,
-            timeInSecForIosWeb: 2,
-            fontSize: 16.0);
-      } else {
-        List sqlconfig = [];
-        sqlconfig.add(defaultUser);
-        sqlconfig.add(defaultPassword);
-        sqlconfig.add('github');
-
-        var updateResult = await MySqlUtils.updateUser(content: sqlconfig);
-        if (updateResult == 'Success') {
-          await Global.setPShost('github');
-          await Global.setShowedPBhost('github');
-          eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-          eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
-          showToast('已设置Github为默认图床');
-        } else {
-          showToast('写入数据库失败');
-        }
-      }
+      await Global.setPShost('github');
+      await Global.setShowedPBhost('github');
+      eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
+      eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
+      showToast('已设置Github为默认图床');
     } catch (e) {
       FLog.error(
           className: 'GithubConfigPage',
@@ -502,8 +400,7 @@ class GithubConfigModel {
   final String branch;
   final String customDomain;
 
-  GithubConfigModel(this.githubusername, this.repo, this.token, this.storePath,
-      this.branch, this.customDomain);
+  GithubConfigModel(this.githubusername, this.repo, this.token, this.storePath, this.branch, this.customDomain);
 
   Map<String, dynamic> toJson() => {
         'githubusername': githubusername,

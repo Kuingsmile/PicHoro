@@ -209,7 +209,7 @@ class AwsConfigureStoreEditState extends State<AwsConfigureStoreEdit> {
                 _importConfig();
                 setState(() {});
               },
-              child: titleText('导入当前图床配置', fontsize: null),
+              child: titleText('导入当前图床配置',fontsize: null),
             )),
             ListTile(
                 title: ElevatedButton(
@@ -219,7 +219,7 @@ class AwsConfigureStoreEditState extends State<AwsConfigureStoreEdit> {
                   Navigator.pop(context, true);
                 }
               },
-              child: titleText('保存配置', fontsize: null),
+              child: titleText('保存配置',fontsize: null),
             )),
           ],
         ),

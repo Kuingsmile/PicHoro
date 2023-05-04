@@ -3,8 +3,7 @@ import 'package:horopic/utils/common_functions.dart';
 
 class AliyunFileInformation extends StatefulWidget {
   final Map fileMap;
-  const AliyunFileInformation({Key? key, required this.fileMap})
-      : super(key: key);
+  const AliyunFileInformation({Key? key, required this.fileMap}) : super(key: key);
 
   @override
   AliyunFileInformationState createState() => AliyunFileInformationState();

@@ -3,8 +3,7 @@ import 'package:horopic/utils/common_functions.dart';
 
 class ImgurFileInformation extends StatefulWidget {
   final Map fileMap;
-  const ImgurFileInformation({Key? key, required this.fileMap})
-      : super(key: key);
+  const ImgurFileInformation({Key? key, required this.fileMap}) : super(key: key);
 
   @override
   ImgurFileInformationState createState() => ImgurFileInformationState();
@@ -32,13 +31,10 @@ class ImgurFileInformationState extends State<ImgurFileInformation> {
           ),
           ListTile(
               title: const Text('原始文件名'),
-              subtitle: SelectableText(widget.fileMap['name'] == null
-                  ? '无'
-                  : widget.fileMap['name'].toString())),
+              subtitle: SelectableText(widget.fileMap['name'] == null ? '无' : widget.fileMap['name'].toString())),
           ListTile(
             title: const Text('文件大小'),
-            subtitle: SelectableText(getFileSize(
-                int.parse(widget.fileMap['size'].toString().split('.')[0]))),
+            subtitle: SelectableText(getFileSize(int.parse(widget.fileMap['size'].toString().split('.')[0]))),
           ),
           ListTile(
             title: const Text('mime类型'),
@@ -55,25 +51,21 @@ class ImgurFileInformationState extends State<ImgurFileInformation> {
           ListTile(
               isThreeLine: true,
               title: const Text('文件创建时间'),
-              subtitle: SelectableText(DateTime.fromMillisecondsSinceEpoch(
-                      widget.fileMap['datetime'] * 1000)
-                  .toString()
-                  .substring(0, 19))),
+              subtitle: SelectableText(
+                  DateTime.fromMillisecondsSinceEpoch(widget.fileMap['datetime'] * 1000).toString().substring(0, 19))),
           ListTile(
             title: const Text('文件url'),
             subtitle: SelectableText(widget.fileMap['link']),
           ),
           ListTile(
             title: const Text('文件描述'),
-            subtitle: SelectableText(widget.fileMap['description'] == null
-                ? '无'
-                : widget.fileMap['description'].toString()),
+            subtitle:
+                SelectableText(widget.fileMap['description'] == null ? '无' : widget.fileMap['description'].toString()),
           ),
           ListTile(
             title: const Text('文件deletehash'),
-            subtitle: SelectableText(widget.fileMap['deletehash'] == null
-                ? '无'
-                : widget.fileMap['deletehash'].toString()),
+            subtitle:
+                SelectableText(widget.fileMap['deletehash'] == null ? '无' : widget.fileMap['deletehash'].toString()),
           ),
         ],
       ),

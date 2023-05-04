@@ -1,7 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
-import 'package:horopic/utils/sql_utils.dart';
 import 'package:horopic/utils/common_functions.dart';
-import 'package:horopic/utils/global.dart';
+import 'package:horopic/picture_host_manage/manage_api/imgur_manage_api.dart';
 
 class ImgurTokenManage extends StatefulWidget {
   const ImgurTokenManage({Key? key}) : super(key: key);
@@ -13,7 +14,6 @@ class ImgurTokenManage extends StatefulWidget {
 class ImgurTokenManageState extends State<ImgurTokenManage> {
   String clientID = '';
   String imgurUser = '';
-  String clientSecret = '';
   String accessToken = '';
   String proxy = '';
   @override
@@ -23,20 +23,18 @@ class ImgurTokenManageState extends State<ImgurTokenManage> {
   }
 
   _getTokens() async {
-    var result =
-        await MySqlUtils.queryImgurManage(username: Global.defaultUser);
-    if (result == 'Empty' || result == 'Error') {
+    var result = await ImgurManageAPI.readImgurManageConfig();
+    if (result == 'Error') {
       clientID = 'Error';
       imgurUser = 'Error';
-      clientSecret = 'Error';
       accessToken = 'Error';
       proxy = 'Error';
     } else {
-      imgurUser = result['imguruser'];
-      clientID = result['clientid'];
-      clientSecret = result['clientsecret'];
-      accessToken = result['accesstoken'];
-      proxy = result['proxy'];
+      var jsonResult = jsonDecode(result);
+      imgurUser = jsonResult['imguruser'];
+      clientID = jsonResult['clientid'];
+      accessToken = jsonResult['accesstoken'];
+      proxy = jsonResult['proxy'];
     }
     setState(() {});
   }
@@ -54,8 +52,8 @@ class ImgurTokenManageState extends State<ImgurTokenManage> {
           children: [
             const ListTile(
               dense: true,
-              title:
-                  Center(child: Text('imgur用户名', style: TextStyle(fontSize: 20))),
+              title: Center(
+                  child: Text('imgur用户名', style: TextStyle(fontSize: 20))),
             ),
             ListTile(
               title: Center(
@@ -77,17 +75,6 @@ class ImgurTokenManageState extends State<ImgurTokenManage> {
             const ListTile(
               dense: true,
               title: Center(
-                  child: Text('Client Secret', style: TextStyle(fontSize: 20))),
-            ),
-            ListTile(
-              title: Center(
-                child: SelectableText(clientSecret,
-                    style: const TextStyle(color: Colors.blue)),
-              ),
-            ),
-            const ListTile(
-              dense: true,
-              title: Center(
                   child: Text('Access Token', style: TextStyle(fontSize: 20))),
             ),
             ListTile(
@@ -98,8 +85,7 @@ class ImgurTokenManageState extends State<ImgurTokenManage> {
             ),
             const ListTile(
               dense: true,
-              title: Center(
-                  child: Text('代理', style: TextStyle(fontSize: 20))),
+              title: Center(child: Text('代理', style: TextStyle(fontSize: 20))),
             ),
             ListTile(
               title: Center(
@@ -116,27 +102,20 @@ class ImgurTokenManageState extends State<ImgurTokenManage> {
                   context: context,
                   onConfirm: () async {
                     Navigator.pop(context);
-                      var queryResult = await MySqlUtils.queryImgurManage(
-                          username: Global.defaultUser);
-                      if (queryResult != 'Empty' && queryResult != 'Error') {
-                        String imgurUser = queryResult['imguruser'];
-                        String clientID = queryResult['clientid'];
-                        String clientSecret = queryResult['clientsecret'];
-                        String accessToken = 'None';
-                        String proxy = 'None';
-                        await MySqlUtils.updateImgurManage(content: [
-                          imgurUser,
-                          clientID,
-                          clientSecret,
-                          accessToken,
-                          proxy,
-                          Global.defaultUser
-                        ]);
-                        showToast('注销成功');
-                        if (mounted) {
-                          Navigator.pop(context);
-                          Navigator.pop(context);
-                        
+                    var queryResult =
+                        await ImgurManageAPI.readImgurManageConfig();
+                    if (queryResult != 'Error') {
+                      var jsonResult = jsonDecode(queryResult);
+                      String imgurUser = jsonResult['imguruser'];
+                      String clientID = jsonResult['clientid'];
+                      String accessToken = 'None';
+                      String proxy = 'None';
+                      await ImgurManageAPI.saveImgurManageConfig(
+                          imgurUser, clientID, accessToken, proxy);
+                      showToast('注销成功');
+                      if (mounted) {
+                        Navigator.pop(context);
+                        Navigator.pop(context);
                       }
                     } else {
                       showToast('注销失败');

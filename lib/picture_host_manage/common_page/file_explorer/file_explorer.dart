@@ -16,8 +16,7 @@ import 'package:horopic/router/routers.dart';
 import 'package:horopic/utils/common_functions.dart';
 
 class FileExplorer extends StatefulWidget {
-  const FileExplorer(
-      {super.key, required this.currentDirPath, required this.rootPath});
+  const FileExplorer({super.key, required this.currentDirPath, required this.rootPath});
 
   final String currentDirPath;
   final String rootPath;
@@ -32,8 +31,7 @@ class FileExplorerState extends State<FileExplorer> {
   List selectedFilesBool = [];
   bool sorted = true;
 
-  RefreshController refreshController =
-      RefreshController(initialRefresh: false);
+  RefreshController refreshController = RefreshController(initialRefresh: false);
 
   @override
   void initState() {
@@ -88,18 +86,12 @@ class FileExplorerState extends State<FileExplorer> {
                       onTap: () {
                         if (sorted == true) {
                           setState(() {
-                            currentFiles.sort((a, b) => b
-                                .statSync()
-                                .modified
-                                .compareTo(a.statSync().modified));
+                            currentFiles.sort((a, b) => b.statSync().modified.compareTo(a.statSync().modified));
                             sorted = false;
                           });
                         } else {
                           setState(() {
-                            currentFiles.sort((a, b) => a
-                                .statSync()
-                                .modified
-                                .compareTo(b.statSync().modified));
+                            currentFiles.sort((a, b) => a.statSync().modified.compareTo(b.statSync().modified));
                             sorted = true;
                           });
                         }
@@ -116,16 +108,12 @@ class FileExplorerState extends State<FileExplorer> {
                       onTap: () {
                         if (sorted == true) {
                           setState(() {
-                            currentFiles.sort((a, b) => b.path
-                                .toLowerCase()
-                                .compareTo(a.path.toLowerCase()));
+                            currentFiles.sort((a, b) => b.path.toLowerCase().compareTo(a.path.toLowerCase()));
                             sorted = false;
                           });
                         } else {
                           setState(() {
-                            currentFiles.sort((a, b) => a.path
-                                .toLowerCase()
-                                .compareTo(b.path.toLowerCase()));
+                            currentFiles.sort((a, b) => a.path.toLowerCase().compareTo(b.path.toLowerCase()));
                             sorted = true;
                           });
                         }
@@ -142,14 +130,12 @@ class FileExplorerState extends State<FileExplorer> {
                       onTap: () {
                         if (sorted == true) {
                           setState(() {
-                            currentFiles.sort((a, b) =>
-                                b.statSync().size.compareTo(a.statSync().size));
+                            currentFiles.sort((a, b) => b.statSync().size.compareTo(a.statSync().size));
                             sorted = false;
                           });
                         } else {
                           setState(() {
-                            currentFiles.sort((a, b) =>
-                                a.statSync().size.compareTo(b.statSync().size));
+                            currentFiles.sort((a, b) => a.statSync().size.compareTo(b.statSync().size));
                             sorted = true;
                           });
                         }
@@ -175,9 +161,7 @@ class FileExplorerState extends State<FileExplorer> {
                               } else if (bType.isEmpty) {
                                 return -1;
                               } else {
-                                return aType
-                                    .toLowerCase()
-                                    .compareTo(bType.toLowerCase());
+                                return aType.toLowerCase().compareTo(bType.toLowerCase());
                               }
                             });
                           });
@@ -192,9 +176,7 @@ class FileExplorerState extends State<FileExplorer> {
                               } else if (bType.isEmpty) {
                                 return 1;
                               } else {
-                                return bType
-                                    .toLowerCase()
-                                    .compareTo(aType.toLowerCase());
+                                return bType.toLowerCase().compareTo(aType.toLowerCase());
                               }
                             });
                           });
@@ -204,13 +186,10 @@ class FileExplorerState extends State<FileExplorer> {
               }),
           IconButton(
             icon: selectedFilesBool.contains(true)
-                ? const Icon(Icons.delete,
-                    color: Color.fromARGB(255, 236, 127, 120), size: 30.0)
-                : const Icon(Icons.delete_outline,
-                    color: Colors.white, size: 30.0),
+                ? const Icon(Icons.delete, color: Color.fromARGB(255, 236, 127, 120), size: 30.0)
+                : const Icon(Icons.delete_outline, color: Colors.white, size: 30.0),
             onPressed: () async {
-              if (!selectedFilesBool.contains(true) ||
-                  selectedFilesBool.isEmpty) {
+              if (!selectedFilesBool.contains(true) || selectedFilesBool.isEmpty) {
                 showToastWithContext(context, '没有选择文件');
                 return;
               }
@@ -254,10 +233,7 @@ class FileExplorerState extends State<FileExplorer> {
                     width: 100,
                     height: 100,
                   ),
-                  const Text('没有文件哦',
-                      style: TextStyle(
-                          fontSize: 20,
-                          color: Color.fromARGB(136, 121, 118, 118)))
+                  const Text('没有文件哦', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118)))
                 ],
               ),
             )
@@ -303,10 +279,8 @@ class FileExplorerState extends State<FileExplorer> {
                                       FLog.error(
                                           className: 'FileListPage',
                                           methodName: 'deleteFile_folder',
-                                          text: formatErrorMessage(
-                                              {}, e.toString()),
-                                          dataLogType:
-                                              DataLogType.ERRORS.toString());
+                                          text: formatErrorMessage({}, e.toString()),
+                                          dataLogType: DataLogType.ERRORS.toString());
                                       showToast('删除失败');
                                     }
                                   },
@@ -321,9 +295,7 @@ class FileExplorerState extends State<FileExplorer> {
                               fit: StackFit.loose,
                               children: [
                                 Container(
-                                  color: selectedFilesBool[index]
-                                      ? const Color(0x311192F3)
-                                      : Colors.transparent,
+                                  color: selectedFilesBool[index] ? const Color(0x311192F3) : Colors.transparent,
                                   child: ListTile(
                                     minLeadingWidth: 0,
                                     minVerticalPadding: 0,
@@ -333,12 +305,7 @@ class FileExplorerState extends State<FileExplorer> {
                                       height: 32,
                                     ),
                                     title: Text(
-                                        currentFiles[index].path.substring(
-                                            currentFiles[index]
-                                                    .parent
-                                                    .path
-                                                    .length +
-                                                1),
+                                        currentFiles[index].path.substring(currentFiles[index].parent.path.length + 1),
                                         style: const TextStyle(fontSize: 15)),
                                     trailing: const Icon(
                                       Icons.chevron_right,
@@ -347,8 +314,7 @@ class FileExplorerState extends State<FileExplorer> {
                                     onTap: () {
                                       Application.router.navigateTo(context,
                                           '${Routes.fileExplorer}?currentDirPath=${Uri.encodeComponent(currentFiles[index].path)}&rootPath=${Uri.encodeComponent(widget.rootPath)}',
-                                          transition:
-                                              TransitionType.inFromRight);
+                                          transition: TransitionType.inFromRight);
                                     },
                                   ),
                                 ),
@@ -356,12 +322,9 @@ class FileExplorerState extends State<FileExplorer> {
                                   // ignore: sort_child_properties_last
                                   child: Container(
                                     decoration: const BoxDecoration(
-                                        borderRadius: BorderRadius.all(
-                                            Radius.circular(55)),
-                                        color:
-                                            Color.fromARGB(255, 235, 242, 248)),
-                                    padding:
-                                        const EdgeInsets.fromLTRB(0, 0, 0, 0),
+                                        borderRadius: BorderRadius.all(Radius.circular(55)),
+                                        color: Color.fromARGB(255, 235, 242, 248)),
+                                    padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
                                     child: MSHCheckbox(
                                       uncheckedColor: Colors.blue,
                                       size: 17,
@@ -404,16 +367,13 @@ class FileExplorerState extends State<FileExplorer> {
                                   SlidableAction(
                                     onPressed: (BuildContext context) async {
                                       try {
-                                        deleteFile(
-                                            context, currentFiles[index]);
+                                        deleteFile(context, currentFiles[index]);
                                       } catch (e) {
                                         FLog.error(
                                             className: 'FileListPage',
                                             methodName: 'deleteFile_file',
-                                            text: formatErrorMessage(
-                                                {}, e.toString()),
-                                            dataLogType:
-                                                DataLogType.ERRORS.toString());
+                                            text: formatErrorMessage({}, e.toString()),
+                                            dataLogType: DataLogType.ERRORS.toString());
                                         showToast('删除失败');
                                       }
                                     },
@@ -426,21 +386,13 @@ class FileExplorerState extends State<FileExplorer> {
                               ),
                               child: Stack(fit: StackFit.loose, children: [
                                 Container(
-                                  color: selectedFilesBool[index]
-                                      ? const Color(0x311192F3)
-                                      : Colors.transparent,
+                                  color: selectedFilesBool[index] ? const Color(0x311192F3) : Colors.transparent,
                                   child: ListTile(
                                     minLeadingWidth: 0,
                                     minVerticalPadding: 0,
-                                    leading:
-                                        imageIcon(currentFiles[index].path),
+                                    leading: imageIcon(currentFiles[index].path),
                                     title: Text(
-                                      currentFiles[index].path.substring(
-                                          currentFiles[index]
-                                                  .parent
-                                                  .path
-                                                  .length +
-                                              1),
+                                      currentFiles[index].path.substring(currentFiles[index].parent.path.length + 1),
                                       style: const TextStyle(fontSize: 15),
                                     ),
                                     subtitle: Text(
@@ -453,8 +405,7 @@ class FileExplorerState extends State<FileExplorer> {
                                             isScrollControlled: true,
                                             context: context,
                                             builder: (context) {
-                                              return buildBottomSheetWidget(
-                                                  context, currentFiles[index]);
+                                              return buildBottomSheetWidget(context, currentFiles[index]);
                                             });
                                       },
                                     ),
@@ -470,31 +421,25 @@ class FileExplorerState extends State<FileExplorer> {
                                         '.ico',
                                         '.gif',
                                       ];
-                                      if (imageTypeList.contains(my_path
-                                          .extension(currentFiles[index].path)
-                                          .toLowerCase())) {
+                                      if (imageTypeList
+                                          .contains(my_path.extension(currentFiles[index].path).toLowerCase())) {
                                         List<String> imgList = [];
                                         for (var element in currentFiles) {
-                                          if (imageTypeList.contains(
-                                              my_path.extension(element.path
-                                                  .toLowerCase()))) {
+                                          if (imageTypeList.contains(my_path.extension(element.path.toLowerCase()))) {
                                             imgList.add(element.path);
                                           }
                                         }
-                                        int newindex = imgList
-                                            .indexOf(currentFiles[index].path);
+                                        int newindex = imgList.indexOf(currentFiles[index].path);
                                         String imgListStr = '';
                                         for (var element in imgList) {
                                           imgListStr += '$element,';
                                         }
-                                        imgListStr = imgListStr.substring(
-                                            0, imgListStr.length - 1);
+                                        imgListStr = imgListStr.substring(0, imgListStr.length - 1);
                                         Application.router.navigateTo(context,
                                             '${Routes.localImagePreview}?index=$newindex&images=${Uri.encodeComponent(imgListStr)}',
                                             transition: TransitionType.none);
                                       } else {
-                                        OpenFilex.open(
-                                            currentFiles[index].path);
+                                        OpenFilex.open(currentFiles[index].path);
                                       }
                                     },
                                   ),
@@ -503,12 +448,9 @@ class FileExplorerState extends State<FileExplorer> {
                                   // ignore: sort_child_properties_last
                                   child: Container(
                                     decoration: const BoxDecoration(
-                                        borderRadius: BorderRadius.all(
-                                            Radius.circular(55)),
-                                        color:
-                                            Color.fromARGB(255, 235, 242, 248)),
-                                    padding:
-                                        const EdgeInsets.fromLTRB(0, 0, 0, 0),
+                                        borderRadius: BorderRadius.all(Radius.circular(55)),
+                                        color: Color.fromARGB(255, 235, 242, 248)),
+                                    padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
                                     child: MSHCheckbox(
                                       uncheckedColor: Colors.blue,
                                       size: 17,
@@ -647,8 +589,7 @@ class FileExplorerState extends State<FileExplorer> {
           fit: BoxFit.fill,
           filterQuality: FilterQuality.medium);
     } else {
-      return Image.asset(selectIcon(my_path.extension(path)),
-          width: 40.0, height: 40.0);
+      return Image.asset(selectIcon(my_path.extension(path)), width: 40.0, height: 40.0);
     }
   }
 
@@ -661,10 +602,8 @@ class FileExplorerState extends State<FileExplorer> {
             leading: imageIcon(file.path),
             visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
             minLeadingWidth: 0,
-            title: Text(file.path.split('/').last,
-                style: const TextStyle(fontSize: 15)),
-            subtitle: Text(fileDateFormat(file),
-                style: const TextStyle(fontSize: 12)),
+            title: Text(file.path.split('/').last, style: const TextStyle(fontSize: 15)),
+            subtitle: Text(fileDateFormat(file), style: const TextStyle(fontSize: 12)),
           ),
           const Divider(
             height: 0.1,
@@ -754,8 +693,7 @@ class FileExplorerState extends State<FileExplorer> {
                   if (file.statSync().type == FileSystemEntityType.directory) {
                     Directory directory = Directory(file.path);
                     directory.deleteSync(recursive: true);
-                  } else if (file.statSync().type ==
-                      FileSystemEntityType.file) {
+                  } else if (file.statSync().type == FileSystemEntityType.file) {
                     file.deleteSync();
                   }
                   getCurrentPathFiles(file.parent.path);
@@ -794,11 +732,9 @@ class FileExplorerState extends State<FileExplorer> {
                 child: TextField(
                   controller: controller,
                   decoration: InputDecoration(
-                    focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(2.0)),
+                    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(2.0)),
                     hintText: '请输入新名称 不含扩展名',
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(2.0)),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(2.0)),
                     contentPadding: const EdgeInsets.all(10.0),
                   ),
                 ),
@@ -819,11 +755,9 @@ class FileExplorerState extends State<FileExplorer> {
                       return;
                     }
                     if (newName.endsWith(my_path.extension(file.path))) {
-                      newName = newName.substring(0,
-                          newName.length - my_path.extension(file.path).length);
+                      newName = newName.substring(0, newName.length - my_path.extension(file.path).length);
                     }
-                    String newPath =
-                        '${file.parent.path}/$newName${my_path.extension(file.path)}';
+                    String newPath = '${file.parent.path}/$newName${my_path.extension(file.path)}';
                     file.renameSync(newPath);
                     getCurrentPathFiles(file.parent.path);
                     Navigator.pop(context);

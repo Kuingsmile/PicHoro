@@ -69,8 +69,7 @@ class SmmsManageAPI {
         FLog.error(
             className: "SmmsManageAPI",
             methodName: "getUserProfile",
-            text: formatErrorMessage({}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
+            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
@@ -98,8 +97,7 @@ class SmmsManageAPI {
     };
 
     try {
-      var response =
-          await dio.get('${smmsAPIUrl}upload_history', queryParameters: params);
+      var response = await dio.get('${smmsAPIUrl}upload_history', queryParameters: params);
       if (response.statusCode == 200 && response.data['success'] == true) {
         Map result = response.data;
         return ['success', result];
@@ -111,8 +109,7 @@ class SmmsManageAPI {
         FLog.error(
             className: "SmmsManageAPI",
             methodName: "getFileList",
-            text: formatErrorMessage({'page': page}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
+            text: formatErrorMessage({'page': page}, e.toString(), isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
@@ -151,16 +148,14 @@ class SmmsManageAPI {
         FLog.error(
             className: "SmmsManageAPI",
             methodName: "uploadFile",
-            text: formatErrorMessage(
-                {'filename': filename, 'path': path}, e.toString(),
+            text: formatErrorMessage({'filename': filename, 'path': path}, e.toString(),
                 isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
             className: "SmmsManageAPI",
             methodName: "uploadFile",
-            text: formatErrorMessage(
-                {'filename': filename, 'path': path}, e.toString()),
+            text: formatErrorMessage({'filename': filename, 'path': path}, e.toString()),
             dataLogType: DataLogType.ERRORS.toString());
       }
       return ['error'];
@@ -183,10 +178,7 @@ class SmmsManageAPI {
       );
       if (uploadResult[0] == "Error") {
         return Fluttertoast.showToast(
-            msg: '配置错误',
-            toastLength: Toast.LENGTH_SHORT,
-            timeInSecForIosWeb: 2,
-            fontSize: 16.0);
+            msg: '配置错误', toastLength: Toast.LENGTH_SHORT, timeInSecForIosWeb: 2, fontSize: 16.0);
       } else if (uploadResult[0] == "success") {
         successCount++;
       } else {
@@ -196,31 +188,20 @@ class SmmsManageAPI {
 
     if (successCount == 0) {
       return Fluttertoast.showToast(
-          msg: '上传失败',
-          toastLength: Toast.LENGTH_SHORT,
-          timeInSecForIosWeb: 2,
-          fontSize: 16.0);
+          msg: '上传失败', toastLength: Toast.LENGTH_SHORT, timeInSecForIosWeb: 2, fontSize: 16.0);
     } else if (failCount == 0) {
       return Fluttertoast.showToast(
-          msg: '上传成功',
-          toastLength: Toast.LENGTH_SHORT,
-          timeInSecForIosWeb: 2,
-          fontSize: 16.0);
+          msg: '上传成功', toastLength: Toast.LENGTH_SHORT, timeInSecForIosWeb: 2, fontSize: 16.0);
     } else {
       return Fluttertoast.showToast(
-          msg: '成功$successCount,失败$failCount',
-          toastLength: Toast.LENGTH_SHORT,
-          timeInSecForIosWeb: 2,
-          fontSize: 16.0);
+          msg: '成功$successCount,失败$failCount', toastLength: Toast.LENGTH_SHORT, timeInSecForIosWeb: 2, fontSize: 16.0);
     }
   }
 
   static uploadNetworkFile(String fileLink) async {
     try {
-      String filename =
-          fileLink.substring(fileLink.lastIndexOf("/") + 1, fileLink.length);
-      filename = filename.substring(
-          0, !filename.contains("?") ? filename.length : filename.indexOf("?"));
+      String filename = fileLink.substring(fileLink.lastIndexOf("/") + 1, fileLink.length);
+      filename = filename.substring(0, !filename.contains("?") ? filename.length : filename.indexOf("?"));
       String savePath = await getTemporaryDirectory().then((value) {
         return value.path;
       });
@@ -245,8 +226,7 @@ class SmmsManageAPI {
         FLog.error(
             className: "SmmsManageAPI",
             methodName: "uploadNetworkFile",
-            text: formatErrorMessage({'fileLink': fileLink}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
+            text: formatErrorMessage({'fileLink': fileLink}, e.toString(), isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
@@ -278,22 +258,13 @@ class SmmsManageAPI {
 
     if (successCount == 0) {
       return Fluttertoast.showToast(
-          msg: '上传失败',
-          toastLength: Toast.LENGTH_SHORT,
-          timeInSecForIosWeb: 2,
-          fontSize: 16.0);
+          msg: '上传失败', toastLength: Toast.LENGTH_SHORT, timeInSecForIosWeb: 2, fontSize: 16.0);
     } else if (failCount == 0) {
       return Fluttertoast.showToast(
-          msg: '上传成功',
-          toastLength: Toast.LENGTH_SHORT,
-          timeInSecForIosWeb: 2,
-          fontSize: 16.0);
+          msg: '上传成功', toastLength: Toast.LENGTH_SHORT, timeInSecForIosWeb: 2, fontSize: 16.0);
     } else {
       return Fluttertoast.showToast(
-          msg: '成功$successCount,失败$failCount',
-          toastLength: Toast.LENGTH_SHORT,
-          timeInSecForIosWeb: 2,
-          fontSize: 16.0);
+          msg: '成功$successCount,失败$failCount', toastLength: Toast.LENGTH_SHORT, timeInSecForIosWeb: 2, fontSize: 16.0);
     }
   }
 
@@ -323,8 +294,7 @@ class SmmsManageAPI {
         FLog.error(
             className: "SmmsManageAPI",
             methodName: "deleteFile",
-            text: formatErrorMessage({'hash': hash}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
+            text: formatErrorMessage({'hash': hash}, e.toString(), isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(

@@ -44,8 +44,7 @@ class EmptyDatabaseState extends State<EmptyDatabase> {
             context: context,
             onConfirm: () async {
               Navigator.pop(context);
-              await AlbumSQL.deleteTable(
-                  Global.imageDB!, _tableNameList[index]);
+              await AlbumSQL.deleteTable(Global.imageDB!, _tableNameList[index]);
               showToast('已清空${_psHostNameList[index]}数据库');
               eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
             },
@@ -67,8 +66,7 @@ class EmptyDatabaseState extends State<EmptyDatabase> {
             context: context,
             onConfirm: () async {
               Navigator.pop(context);
-              await AlbumSQL.deleteTable(
-                  Global.imageDBExtend!, 'PBhostExtend1');
+              await AlbumSQL.deleteTable(Global.imageDBExtend!, 'PBhostExtend1');
               showToast('已清空FTP数据库');
               eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
             },
@@ -83,8 +81,7 @@ class EmptyDatabaseState extends State<EmptyDatabase> {
             context: context,
             onConfirm: () async {
               Navigator.pop(context);
-              await AlbumSQL.deleteTable(
-                  Global.imageDBExtend!, 'PBhostExtend2');
+              await AlbumSQL.deleteTable(Global.imageDBExtend!, 'PBhostExtend2');
               showToast('已清空S3兼容平台数据库');
               eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
             },
@@ -99,8 +96,7 @@ class EmptyDatabaseState extends State<EmptyDatabase> {
             context: context,
             onConfirm: () async {
               Navigator.pop(context);
-              await AlbumSQL.deleteTable(
-                  Global.imageDBExtend!, 'PBhostExtend3');
+              await AlbumSQL.deleteTable(Global.imageDBExtend!, 'PBhostExtend3');
               showToast('已清空Alist数据库');
               eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
             },
@@ -115,8 +111,7 @@ class EmptyDatabaseState extends State<EmptyDatabase> {
             context: context,
             onConfirm: () async {
               Navigator.pop(context);
-              await AlbumSQL.deleteTable(
-                  Global.imageDBExtend!, 'PBhostExtend4');
+              await AlbumSQL.deleteTable(Global.imageDBExtend!, 'PBhostExtend4');
               showToast('已清空WebDAV数据库');
               eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
             },

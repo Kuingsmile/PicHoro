@@ -6,8 +6,7 @@ import 'package:path_provider/path_provider.dart';
 
 import 'package:horopic/pages/loading.dart';
 import 'package:horopic/utils/common_functions.dart';
-import 'package:horopic/picture_host_manage/common_page/loading_state.dart'
-    as loading_state;
+import 'package:horopic/picture_host_manage/common_page/loading_state.dart' as loading_state;
 
 class LogPage extends StatefulWidget {
   const LogPage({super.key});
@@ -250,15 +249,11 @@ class LogPageState extends loading_state.BaseLoadingPageState<LogPage> {
       var path = directory!.path;
       String filePath = '$path/log';
       await Directory(filePath).create(recursive: true);
-      String currentTimestamp =
-          DateTime.now().millisecondsSinceEpoch.toString();
+      String currentTimestamp = DateTime.now().millisecondsSinceEpoch.toString();
       File file = File('$filePath/PicHoro_Log_$currentTimestamp.txt');
       await file.writeAsString(buffer.toString());
       await Clipboard.setData(ClipboardData(text: buffer.toString()));
-      return showCupertinoAlertDialog(
-          context: context,
-          title: '导出成功',
-          content: '导出成功，日志已复制到剪切板\n文件路径：\n${file.path}');
+      return showCupertinoAlertDialog(context: context, title: '导出成功', content: '导出成功，日志已复制到剪切板\n文件路径：\n${file.path}');
     } catch (e) {
       FLog.error(
           className: 'LogPageState',
@@ -338,9 +333,7 @@ class LogPageState extends loading_state.BaseLoadingPageState<LogPage> {
             height: 100,
           ),
           const SizedBox(height: 20),
-          const Text('没有已记录的日志',
-              style: TextStyle(
-                  fontSize: 20, color: Color.fromARGB(136, 121, 118, 118)))
+          const Text('没有已记录的日志', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118)))
         ],
       ),
     );
@@ -352,9 +345,7 @@ class LogPageState extends loading_state.BaseLoadingPageState<LogPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Text('加载失败,请重试',
-              style: TextStyle(
-                  fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))),
+          const Text('加载失败,请重试', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))),
           ElevatedButton(
             style: ButtonStyle(
               backgroundColor: MaterialStateProperty.all(Colors.blue),

@@ -11,8 +11,7 @@ class LocalImagePreview extends StatefulWidget {
   final int index;
   final List images;
 
-  const LocalImagePreview({Key? key, required this.index, required this.images})
-      : super(key: key);
+  const LocalImagePreview({Key? key, required this.index, required this.images}) : super(key: key);
 
   @override
   LocalImagePreviewState createState() => LocalImagePreviewState();
@@ -53,8 +52,7 @@ class LocalImagePreviewState extends State<LocalImagePreview> {
                 fit: BoxFit.contain,
                 mode: ExtendedImageMode.gesture,
                 clearMemoryCacheIfFailed: true,
-                loadStateChanged: (state) =>
-                    defaultLoadStateChanged(state, iconSize: 60),
+                loadStateChanged: (state) => defaultLoadStateChanged(state, iconSize: 60),
                 initGestureConfigHandler: (state) {
                   return GestureConfig(
                       minScale: 0.9,
@@ -77,10 +75,7 @@ class LocalImagePreviewState extends State<LocalImagePreview> {
                       width: 100,
                       height: 100,
                     ),
-                    const Text('文件不存在',
-                        style: TextStyle(
-                            fontSize: 20,
-                            color: Color.fromARGB(136, 121, 118, 118)))
+                    const Text('文件不存在', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118)))
                   ],
                 ),
               );

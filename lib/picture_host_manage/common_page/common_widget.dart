@@ -66,9 +66,8 @@ class UploadListItemState extends State<UploadListItem> {
                           builder: (context, value, child) {
                             return Padding(
                               padding: const EdgeInsets.symmetric(vertical: 8),
-                              child: Text(
-                                  "状态: ${uploadStatus[value.toString()]}",
-                                  style: const TextStyle(fontSize: 14)),
+                              child:
+                                  Text("状态: ${uploadStatus[value.toString()]}", style: const TextStyle(fontSize: 14)),
                             );
                           }),
                   ],
@@ -81,8 +80,7 @@ class UploadListItemState extends State<UploadListItem> {
                             case UploadStatus.completed:
                               return IconButton(
                                   onPressed: () {
-                                    widget.onDelete(
-                                        widget.path, widget.fileName);
+                                    widget.onDelete(widget.path, widget.fileName);
                                   },
                                   icon: const Icon(
                                     Icons.delete,
@@ -93,37 +91,29 @@ class UploadListItemState extends State<UploadListItem> {
                               return IconButton(
                                   onPressed: () async {
                                     await widget.onUploadPlayPausedPressed(
-                                        widget.path,
-                                        widget.fileName,
-                                        widget.configMap);
+                                        widget.path, widget.fileName, widget.configMap);
                                   },
                                   icon: const Icon(
                                     Icons.cloud_upload_outlined,
                                     color: Colors.blue,
                                   ));
                             default:
-                              return widget.uploadTask == null ||
-                                      widget.uploadTask!.status.value ==
-                                          UploadStatus.queued
+                              return widget.uploadTask == null || widget.uploadTask!.status.value == UploadStatus.queued
                                   ? const Icon(
                                       Icons.query_builder_rounded,
                                       color: Colors.blue,
                                     )
                                   : ValueListenableBuilder(
-                                      valueListenable:
-                                          widget.uploadTask!.progress,
+                                      valueListenable: widget.uploadTask!.progress,
                                       builder: (context, value, child) {
                                         return Container(
                                           height: 20,
                                           width: 20,
-                                          margin: const EdgeInsets.fromLTRB(
-                                              0, 0, 10, 0),
+                                          margin: const EdgeInsets.fromLTRB(0, 0, 10, 0),
                                           child: CircularProgressIndicator(
                                             value: value,
                                             strokeWidth: 4,
-                                            color: widget.uploadTask!.status
-                                                        .value ==
-                                                    UploadStatus.paused
+                                            color: widget.uploadTask!.status.value == UploadStatus.paused
                                                 ? Colors.grey
                                                 : Colors.blue,
                                           ),
@@ -133,8 +123,7 @@ class UploadListItemState extends State<UploadListItem> {
                         })
                     : IconButton(
                         onPressed: () async {
-                          await widget.onUploadPlayPausedPressed(
-                              widget.path, widget.fileName, widget.configMap);
+                          await widget.onUploadPlayPausedPressed(widget.path, widget.fileName, widget.configMap);
                         },
                         icon: const Icon(
                           Icons.cloud_upload_outlined,
@@ -195,7 +184,7 @@ class ListItemState extends State<ListItem> {
                     Text(widget.url.contains('/')
                         ? '文件名：${widget.url.split('/').last.split('?').first}'
                         : widget.url.contains('object') &&
-                                widget.url.contains('bucket') && 
+                                widget.url.contains('bucket') &&
                                 widget.url.contains('region')
                             ? '文件名:${jsonDecode(widget.url)['object'].split('/').last}'
                             : '文件名:${widget.url}'),
@@ -205,9 +194,8 @@ class ListItemState extends State<ListItem> {
                           builder: (context, value, child) {
                             return Padding(
                               padding: const EdgeInsets.symmetric(vertical: 8),
-                              child: Text(
-                                  "状态: ${downloadStatus[value.toString()]}",
-                                  style: const TextStyle(fontSize: 14)),
+                              child:
+                                  Text("状态: ${downloadStatus[value.toString()]}", style: const TextStyle(fontSize: 14)),
                             );
                           }),
                   ],
@@ -220,8 +208,7 @@ class ListItemState extends State<ListItem> {
                             case DownloadStatus.downloading:
                               return IconButton(
                                   onPressed: () async {
-                                    await widget.onDownloadPlayPausedPressed(
-                                        widget.url);
+                                    await widget.onDownloadPlayPausedPressed(widget.url);
                                   },
                                   icon: const Icon(
                                     Icons.pause,
@@ -230,8 +217,7 @@ class ListItemState extends State<ListItem> {
                             case DownloadStatus.paused:
                               return IconButton(
                                 onPressed: () async {
-                                  await widget
-                                      .onDownloadPlayPausedPressed(widget.url);
+                                  await widget.onDownloadPlayPausedPressed(widget.url);
                                 },
                                 icon: const Icon(Icons.play_arrow),
                                 color: Colors.blue,
@@ -249,8 +235,7 @@ class ListItemState extends State<ListItem> {
                             case DownloadStatus.canceled:
                               return IconButton(
                                   onPressed: () async {
-                                    await widget.onDownloadPlayPausedPressed(
-                                        widget.url);
+                                    await widget.onDownloadPlayPausedPressed(widget.url);
                                   },
                                   icon: const Icon(
                                     Icons.download,
@@ -273,8 +258,7 @@ class ListItemState extends State<ListItem> {
                         ))
               ],
             ),
-            if (widget.downloadTask != null &&
-                !widget.downloadTask!.status.value.isCompleted)
+            if (widget.downloadTask != null && !widget.downloadTask!.status.value.isCompleted)
               ValueListenableBuilder(
                   valueListenable: widget.downloadTask!.progress,
                   builder: (context, value, child) {
@@ -282,10 +266,7 @@ class ListItemState extends State<ListItem> {
                       margin: const EdgeInsets.symmetric(vertical: 4),
                       child: LinearProgressIndicator(
                         value: value,
-                        color: widget.downloadTask!.status.value ==
-                                DownloadStatus.paused
-                            ? Colors.grey
-                            : Colors.amber,
+                        color: widget.downloadTask!.status.value == DownloadStatus.paused ? Colors.grey : Colors.amber,
                       ),
                     );
                   }),

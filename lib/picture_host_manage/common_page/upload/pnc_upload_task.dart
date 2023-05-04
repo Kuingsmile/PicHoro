@@ -14,8 +14,7 @@ class UploadTask {
     this.request,
   );
 
-  Future<UploadStatus> whenUploadComplete(
-      {Duration timeout = const Duration(hours: 2)}) async {
+  Future<UploadStatus> whenUploadComplete({Duration timeout = const Duration(hours: 2)}) async {
     var completer = Completer<UploadStatus>();
 
     if (status.value.isCompleted) {

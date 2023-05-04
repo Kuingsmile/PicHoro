@@ -3,11 +3,10 @@ import 'package:horopic/utils/common_functions.dart';
 
 class AwsFileInformation extends StatefulWidget {
   final Map fileMap;
-  const AwsFileInformation({Key? key, required this.fileMap})
-      : super(key: key);
+  const AwsFileInformation({Key? key, required this.fileMap}) : super(key: key);
 
   @override
- AwsFileInformationState createState() => AwsFileInformationState();
+  AwsFileInformationState createState() => AwsFileInformationState();
 }
 
 class AwsFileInformationState extends State<AwsFileInformation> {
@@ -43,7 +42,6 @@ class AwsFileInformationState extends State<AwsFileInformation> {
             title: const Text('文件etag'),
             subtitle: SelectableText(widget.fileMap['ETag'].replaceAll('"', '')),
           ),
-          
         ],
       ),
     );

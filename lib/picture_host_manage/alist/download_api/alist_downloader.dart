@@ -37,15 +37,12 @@ class DownloadManager {
     return _dm;
   }
 
-  void Function(int, int) createCallback(url, int partialFileLength) =>
-      (int received, int total) {
-        getDownload(url)?.progress.value =
-            (received + partialFileLength) / (total + partialFileLength);
+  void Function(int, int) createCallback(url, int partialFileLength) => (int received, int total) {
+        getDownload(url)?.progress.value = (received + partialFileLength) / (total + partialFileLength);
         if (total == -1) {}
       };
 
-  Future<void> download(String url, String savePath, cancelToken, Map configMap,
-      {forceDownload = false}) async {
+  Future<void> download(String url, String savePath, cancelToken, Map configMap, {forceDownload = false}) async {
     try {
       var task = getDownload(url);
 
@@ -67,8 +64,7 @@ class DownloadManager {
         var partialFileLength = await partialFile.length();
         Response response;
         Map addition = jsonDecode(configMap['addition']);
-        if (configMap['driver'] == 'BaiduNetdisk' &&
-            addition['download_api'] == 'official') {
+        if (configMap['driver'] == 'BaiduNetdisk' && addition['download_api'] == 'official') {
           response = await dio.download(url, partialFilePath + tempExtension,
               onReceiveProgress: createCallback(url, partialFileLength),
               options: Options(
@@ -104,8 +100,7 @@ class DownloadManager {
       } else {
         Response response;
         Map addition = jsonDecode(configMap['addition']);
-        if (configMap['driver'] == 'BaiduNetdisk' &&
-            addition['download_api'] == 'official') {
+        if (configMap['driver'] == 'BaiduNetdisk' && addition['download_api'] == 'official') {
           response = await dio.download(
             url,
             partialFilePath,
@@ -157,8 +152,7 @@ class DownloadManager {
             dataLogType: DataLogType.ERRORS.toString());
       }
       var task = getDownload(url)!;
-      if (task.status.value != DownloadStatus.canceled &&
-          task.status.value != DownloadStatus.paused) {
+      if (task.status.value != DownloadStatus.canceled && task.status.value != DownloadStatus.paused) {
         setStatus(task, DownloadStatus.failed);
         runningTasks--;
 
@@ -192,8 +186,8 @@ class DownloadManager {
     }
   }
 
-  Future<DownloadTask?> addDownload(String url, String savedDir,
-      String fileName, Map<String, dynamic> configMap) async {
+  Future<DownloadTask?> addDownload(
+      String url, String savedDir, String fileName, Map<String, dynamic> configMap) async {
     if (url.isNotEmpty) {
       if (savedDir.isEmpty) {
         savedDir = ".";
@@ -206,8 +200,7 @@ class DownloadManager {
         downloadFilename = savedDir;
       }
 
-      return await _addDownloadRequest(
-          DownloadRequest(url, downloadFilename, fileName, configMap));
+      return await _addDownloadRequest(DownloadRequest(url, downloadFilename, fileName, configMap));
     }
     return null;
   }
@@ -225,8 +218,8 @@ class DownloadManager {
       }
     }
 
-    _queue.add(DownloadRequest(downloadRequest.url, downloadRequest.path,
-        downloadRequest.fileName, downloadRequest.configMap));
+    _queue.add(DownloadRequest(
+        downloadRequest.url, downloadRequest.path, downloadRequest.fileName, downloadRequest.configMap));
     var task = DownloadTask(_queue.last);
 
     _cache[downloadRequest.url] = task;
@@ -275,8 +268,7 @@ class DownloadManager {
     return _cache[url];
   }
 
-  Future<DownloadStatus> whenDownloadComplete(String url,
-      {Duration timeout = const Duration(hours: 2)}) async {
+  Future<DownloadStatus> whenDownloadComplete(String url, {Duration timeout = const Duration(hours: 2)}) async {
     DownloadTask? task = getDownload(url);
 
     if (task != null) {
@@ -291,8 +283,8 @@ class DownloadManager {
   }
 
   // Batch Download Mechanism
-  Future<void> addBatchDownloads(List<String> urls, String savedDir,
-      List<String> fileNames, List<Map<String, dynamic>> configMaps) async {
+  Future<void> addBatchDownloads(
+      List<String> urls, String savedDir, List<String> fileNames, List<Map<String, dynamic>> configMaps) async {
     for (int i = 0; i < urls.length; i++) {
       await addDownload(urls[i], savedDir, fileNames[i], configMaps[i]);
     }
@@ -426,8 +418,7 @@ class DownloadManager {
 
       var currentRequest = _queue.removeFirst();
 
-      download(currentRequest.url, currentRequest.path,
-          currentRequest.cancelToken, currentRequest.configMap);
+      download(currentRequest.url, currentRequest.path, currentRequest.cancelToken, currentRequest.configMap);
 
       await Future.delayed(const Duration(milliseconds: 500), null);
     }

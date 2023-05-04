@@ -7,7 +7,6 @@ import 'package:f_logs/f_logs.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'package:horopic/utils/global.dart';
-import 'package:horopic/utils/sql_utils.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/api/qiniu_api.dart';
 import 'package:horopic/picture_host_configure/configure_page/qiniu_configure.dart';
@@ -59,6 +58,41 @@ class QiniuManageAPI {
     }
   }
 
+  static Future<File> get _manageLocalFile async {
+    final path = await _localPath;
+    return File('$path/qiniu_manage.txt');
+  }
+
+  static Future<String> readQiniuManageConfig() async {
+    try {
+      final file = await _manageLocalFile;
+      String contents = await file.readAsString();
+      return contents;
+    } catch (e) {
+      FLog.error(
+          className: 'QiniuManageAPI',
+          methodName: 'readQiniuManageConfig',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
+      return "Error";
+    }
+  }
+
+  static Future<bool> saveQiniuManageConfig(String bucket, String domain, String area) async {
+    try {
+      final file = await _manageLocalFile;
+      await file.writeAsString(jsonEncode({'bucket': bucket, 'domain': domain, 'area': area}));
+      return true;
+    } catch (e) {
+      FLog.error(
+          className: 'QiniuManageAPI',
+          methodName: 'saveQiniuManageConfig',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
+      return false;
+    }
+  }
+
   static Future<Map> getConfigMap() async {
     String configStr = await readQiniuConfig();
     Map configMap = json.decode(configStr);
@@ -92,8 +126,7 @@ class QiniuManageAPI {
   }
 
   //url安全的base64编码的上传策略
-  static String geturlSafeBase64EncodePutPolicy(
-      String bucket, String key, String path) {
+  static String geturlSafeBase64EncodePutPolicy(String bucket, String key, String path) {
     Map<String, dynamic> putPolicy;
     if (path == 'None') {
       putPolicy = {
@@ -113,8 +146,7 @@ class QiniuManageAPI {
   }
 
   //获取上传凭证
-  static String getUploadToken(
-      String accessKey, String secretKey, String urlSafeBase64EncodePutPolicy) {
+  static String getUploadToken(String accessKey, String secretKey, String urlSafeBase64EncodePutPolicy) {
     var hmacSha1 = Hmac(sha1, utf8.encode(secretKey));
     var sign = hmacSha1.convert(utf8.encode(urlSafeBase64EncodePutPolicy));
     String encodedSign = urlSafeBase64Encode(sign.bytes);
@@ -141,16 +173,8 @@ signingStr=signingStr+\n(换行符)+\n(换行符)
 signingStr=signingStr+<body>
 */
   //get authorization
-  static Future<String> qiniuAuthorization(
-      String method,
-      String path,
-      String? query,
-      String host,
-      String? contentType,
-      Map? xQiniuHeaders,
-      String body,
-      String accessKey,
-      String secretKey) async {
+  static Future<String> qiniuAuthorization(String method, String path, String? query, String host, String? contentType,
+      Map? xQiniuHeaders, String body, String accessKey, String secretKey) async {
     try {
       var signStr = '${method.toUpperCase()} $path';
 
@@ -206,8 +230,7 @@ signingStr=signingStr+<body>
     String secretKey = configMap['secretKey'];
     String host = 'uc.qbox.me';
 
-    String authorization = await qiniuAuthorization(
-        method, urlpath, null, host, null, null, '', accessKey, secretKey);
+    String authorization = await qiniuAuthorization(method, urlpath, null, host, null, null, '', accessKey, secretKey);
     authorization = 'Qiniu $authorization';
     BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = {
@@ -227,8 +250,7 @@ signingStr=signingStr+<body>
         FLog.error(
             className: "QiniuManageAPI",
             methodName: "getBucketList",
-            text: formatErrorMessage({}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
+            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
@@ -253,8 +275,8 @@ signingStr=signingStr+<body>
     String secretKey = configMap['secretKey'];
     String host = 'uc.qbox.me';
 
-    String authorization = await qiniuAuthorization(method, urlpath, null, host,
-        'application/json', null, '', accessKey, secretKey);
+    String authorization =
+        await qiniuAuthorization(method, urlpath, null, host, 'application/json', null, '', accessKey, secretKey);
 
     BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = {
@@ -279,16 +301,57 @@ signingStr=signingStr+<body>
         FLog.error(
             className: "QiniuManageAPI",
             methodName: "createBucket",
-            text: formatErrorMessage(
-                {'newBucketConfigMap': newBucketConfigMap}, e.toString(),
+            text: formatErrorMessage({'newBucketConfigMap': newBucketConfigMap}, e.toString(),
                 isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
             className: "QiniuManageAPI",
             methodName: "createBucket",
-            text: formatErrorMessage(
-                {'newBucketConfigMap': newBucketConfigMap}, e.toString()),
+            text: formatErrorMessage({'newBucketConfigMap': newBucketConfigMap}, e.toString()),
+            dataLogType: DataLogType.ERRORS.toString());
+      }
+      return [e.toString()];
+    }
+  }
+
+  static getBucketACL(Map element) async {
+    Map configMap = await getConfigMap();
+    String bucket = element['name'];
+    String method = 'POST';
+    String urlpath = '/v2/bucketInfo?bucket=$bucket&fs=true';
+    String accessKey = configMap['accessKey'];
+    String secretKey = configMap['secretKey'];
+    String host = 'uc.qiniuapi.com';
+    String authorization =
+        await qiniuAuthorization(method, urlpath, null, host, 'application/json', null, '', accessKey, secretKey);
+    BaseOptions baseoptions = setBaseOptions();
+    baseoptions.headers = {
+      'Authorization': 'Qiniu $authorization',
+      'Host': host,
+      'Content-Type': 'application/json',
+    };
+    Dio dio = Dio(baseoptions);
+    try {
+      var response = await dio.post('https://$host$urlpath');
+
+      if (response.statusCode == 200) {
+        return ['success', response.data['private']];
+      } else {
+        return ['failed'];
+      }
+    } catch (e) {
+      if (e is DioError) {
+        FLog.error(
+            className: "QiniuManageAPI",
+            methodName: "getBucketACL",
+            text: formatErrorMessage({'element': element}, e.toString(), isDioError: true, dioErrorMessage: e),
+            dataLogType: DataLogType.ERRORS.toString());
+      } else {
+        FLog.error(
+            className: "QiniuManageAPI",
+            methodName: "getBucketACL",
+            text: formatErrorMessage({'element': element}, e.toString()),
             dataLogType: DataLogType.ERRORS.toString());
       }
       return [e.toString()];
@@ -306,8 +369,8 @@ signingStr=signingStr+<body>
     String secretKey = configMap['secretKey'];
     String host = 'uc.qbox.me';
 
-    String authorization = await qiniuAuthorization(method, urlpath, null, host,
-        'application/json', null, '', accessKey, secretKey);
+    String authorization =
+        await qiniuAuthorization(method, urlpath, null, host, 'application/json', null, '', accessKey, secretKey);
 
     BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = {
@@ -329,8 +392,7 @@ signingStr=signingStr+<body>
         FLog.error(
             className: "QiniuManageAPI",
             methodName: "deleteBucket",
-            text: formatErrorMessage({'element': element}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
+            text: formatErrorMessage({'element': element}, e.toString(), isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
@@ -354,8 +416,8 @@ signingStr=signingStr+<body>
     String secretKey = configMap['secretKey'];
     String host = 'uc.qbox.me';
 
-    String authorization = await qiniuAuthorization(method, urlpath, null, host,
-        'application/x-www-form-urlencoded', null, '', accessKey, secretKey);
+    String authorization = await qiniuAuthorization(
+        method, urlpath, null, host, 'application/x-www-form-urlencoded', null, '', accessKey, secretKey);
 
     BaseOptions baseoptions = setBaseOptions();
     Dio dio = Dio(baseoptions);
@@ -384,8 +446,7 @@ signingStr=signingStr+<body>
         FLog.error(
             className: "QiniuManageAPI",
             methodName: "queryDomains",
-            text: formatErrorMessage({'element': element}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
+            text: formatErrorMessage({'element': element}, e.toString(), isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
@@ -409,8 +470,8 @@ signingStr=signingStr+<body>
     String secretKey = configMap['secretKey'];
     String host = 'uc.qbox.me';
 
-    String authorization = await qiniuAuthorization(method, urlpath, null, host,
-        'application/x-www-form-urlencoded', null, '', accessKey, secretKey);
+    String authorization = await qiniuAuthorization(
+        method, urlpath, null, host, 'application/x-www-form-urlencoded', null, '', accessKey, secretKey);
 
     BaseOptions baseoptions = setBaseOptions();
     Dio dio = Dio(baseoptions);
@@ -440,8 +501,7 @@ signingStr=signingStr+<body>
         FLog.error(
             className: "QiniuManageAPI",
             methodName: "setACL",
-            text: formatErrorMessage({'element': element}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
+            text: formatErrorMessage({'element': element}, e.toString(), isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
@@ -455,21 +515,19 @@ signingStr=signingStr+<body>
   }
 
   //存储桶设为默认图床
-  static setDefaultBucketFromListPage(
-      Map element, Map textMap, String? folder) async {
+  static setDefaultBucketFromListPage(Map element, Map textMap, String? folder) async {
     try {
       Map configMap = await getConfigMap();
       String accessKey = configMap['accessKey'];
       String secretKey = configMap['secretKey'];
       String bucket = element['name'];
-      String usernameBucket = '${Global.defaultUser}_${element['name']}';
-      var queryQiniuManage =
-          await MySqlUtils.queryQiniuManage(username: usernameBucket);
-      if (queryQiniuManage == 'Error' || queryQiniuManage == 'Empty') {
+      var queryQiniuManage = await QiniuManageAPI.readQiniuManageConfig();
+      if (queryQiniuManage == 'Error') {
         return ['failed'];
       }
-      String domain = queryQiniuManage['domain'];
-      String area = queryQiniuManage['area'];
+      var jsonResult = jsonDecode(queryQiniuManage);
+      String domain = jsonResult['domain'];
+      String area = jsonResult['area'];
       String httpPrefix = 'http://';
       String url = '';
 
@@ -497,40 +555,11 @@ signingStr=signingStr+<body>
         }
       }
 
-      List sqlconfig = [];
-      sqlconfig.add(accessKey);
-      sqlconfig.add(secretKey);
-      sqlconfig.add(bucket);
-      sqlconfig.add(url);
-      sqlconfig.add(area);
-      sqlconfig.add(options);
-      sqlconfig.add(path);
-      String defaultUser = await Global.getUser();
-      sqlconfig.add(defaultUser);
-      var queryQiniu = await MySqlUtils.queryQiniu(username: defaultUser);
-      var queryuser = await MySqlUtils.queryUser(username: defaultUser);
-
-      if (queryuser == 'Empty') {
-        return ['failed'];
-      }
-      var sqlResult = '';
-
-      if (queryQiniu == 'Empty') {
-        sqlResult = await MySqlUtils.insertQiniu(content: sqlconfig);
-      } else {
-        sqlResult = await MySqlUtils.updateQiniu(content: sqlconfig);
-      }
-
-      if (sqlResult == "Success") {
-        final qiniuConfig = QiniuConfigModel(
-            accessKey, secretKey, bucket, url, area, options, path);
-        final qiniuConfigJson = jsonEncode(qiniuConfig);
-        final qiniuConfigFile = await localFile;
-        await qiniuConfigFile.writeAsString(qiniuConfigJson);
-        return ['success'];
-      } else {
-        return ['failed'];
-      }
+      final qiniuConfig = QiniuConfigModel(accessKey, secretKey, bucket, url, area, options, path);
+      final qiniuConfigJson = jsonEncode(qiniuConfig);
+      final qiniuConfigFile = await localFile;
+      await qiniuConfigFile.writeAsString(qiniuConfigJson);
+      return ['success'];
     } catch (e) {
       FLog.error(
           className: "QiniuManageAPI",
@@ -556,26 +585,16 @@ signingStr=signingStr+<body>
     if (query['delimiter'] == null && query['prefix'] == null) {
       queryStr = 'bucket=$bucket&limit=1000';
     } else if (query['delimiter'] == null && query['prefix'] != null) {
-      queryStr =
-          'bucket=$bucket&limit=1000&prefix=${Uri.encodeComponent(query['prefix'])}';
+      queryStr = 'bucket=$bucket&limit=1000&prefix=${Uri.encodeComponent(query['prefix'])}';
     } else if (query['delimiter'] != null && query['prefix'] == null) {
-      queryStr =
-          'bucket=$bucket&limit=1000&delimiter=${Uri.encodeComponent(query['delimiter'])}';
+      queryStr = 'bucket=$bucket&limit=1000&delimiter=${Uri.encodeComponent(query['delimiter'])}';
     } else {
       queryStr =
           'bucket=$bucket&limit=1000&prefix=${Uri.encodeComponent(query['prefix'])}&delimiter=${Uri.encodeComponent(query['delimiter'])}';
     }
 
     String authorization = await qiniuAuthorization(
-        method,
-        urlpath,
-        queryStr,
-        host,
-        'application/x-www-form-urlencoded',
-        null,
-        '',
-        accessKey,
-        secretKey);
+        method, urlpath, queryStr, host, 'application/x-www-form-urlencoded', null, '', accessKey, secretKey);
 
     BaseOptions baseoptions = setBaseOptions();
     Dio dio = Dio(baseoptions);
@@ -603,15 +622,7 @@ signingStr=signingStr+<body>
             marker = tempMap['marker'];
             newQuery = '$queryStr&marker=${Uri.encodeComponent(marker)}';
             String authorization = await qiniuAuthorization(
-                method,
-                urlpath,
-                newQuery,
-                host,
-                'application/x-www-form-urlencoded',
-                null,
-                '',
-                accessKey,
-                secretKey);
+                method, urlpath, newQuery, host, 'application/x-www-form-urlencoded', null, '', accessKey, secretKey);
             var response = await dio.get(
               'https://$host$urlpath?$newQuery',
               options: Options(
@@ -646,12 +657,9 @@ signingStr=signingStr+<body>
                   responseMap['commonPrefixes'] = tempMap['commonPrefixes'];
                 } else {
                   if (responseMap['commonPrefixes'] is! List) {
-                    responseMap['commonPrefixes'] = [
-                      responseMap['commonPrefixes']
-                    ];
+                    responseMap['commonPrefixes'] = [responseMap['commonPrefixes']];
                   }
-                  responseMap['commonPrefixes']
-                      .addAll(tempMap['commonPrefixes']);
+                  responseMap['commonPrefixes'].addAll(tempMap['commonPrefixes']);
                 }
               }
             } else {
@@ -668,16 +676,14 @@ signingStr=signingStr+<body>
         FLog.error(
             className: "QiniuManageAPI",
             methodName: "queryBucketFiles",
-            text: formatErrorMessage(
-                {'element': element, 'query': query}, e.toString(),
+            text: formatErrorMessage({'element': element, 'query': query}, e.toString(),
                 isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
             className: "QiniuManageAPI",
             methodName: "queryBucketFiles",
-            text: formatErrorMessage(
-                {'element': element, 'query': query}, e.toString()),
+            text: formatErrorMessage({'element': element, 'query': query}, e.toString()),
             dataLogType: DataLogType.ERRORS.toString());
       }
       return [e.toString()];
@@ -692,10 +698,8 @@ signingStr=signingStr+<body>
       'delimiter': '/',
     });
     if (queryResult[0] == 'success') {
-      if ((queryResult[1]['items'] == null ||
-              queryResult[1]['items'].length == 0) &&
-          (queryResult[1]['commonPrefixes'] == null ||
-              queryResult[1]['commonPrefixes'].length == 0)) {
+      if ((queryResult[1]['items'] == null || queryResult[1]['items'].length == 0) &&
+          (queryResult[1]['commonPrefixes'] == null || queryResult[1]['commonPrefixes'].length == 0)) {
         return ['empty'];
       } else {
         return ['notempty'];
@@ -714,10 +718,8 @@ signingStr=signingStr+<body>
     String accessKey = configMap['accessKey'];
     String secretKey = configMap['secretKey'];
     String urlSafeBase64EncodePutPolicy =
-        QiniuImageUploadUtils.geturlSafeBase64EncodePutPolicy(
-            bucket, prefix, newfolder);
-    String uploadToken = QiniuImageUploadUtils.getUploadToken(
-        accessKey, secretKey, urlSafeBase64EncodePutPolicy);
+        QiniuImageUploadUtils.geturlSafeBase64EncodePutPolicy(bucket, prefix, newfolder);
+    String uploadToken = QiniuImageUploadUtils.getUploadToken(accessKey, secretKey, urlSafeBase64EncodePutPolicy);
 
     String urlpath = '$prefix$newfolder';
     FormData formData = FormData.fromMap({
@@ -753,19 +755,14 @@ signingStr=signingStr+<body>
         FLog.error(
             className: "QiniuManageAPI",
             methodName: "createFolder",
-            text: formatErrorMessage({
-              'element': element,
-              'prefix': prefix,
-              'newfolder': newfolder
-            }, e.toString(), isDioError: true, dioErrorMessage: e),
+            text: formatErrorMessage({'element': element, 'prefix': prefix, 'newfolder': newfolder}, e.toString(),
+                isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
             className: "QiniuManageAPI",
             methodName: "createFolder",
-            text: formatErrorMessage(
-                {'element': element, 'prefix': prefix, 'newfolder': newfolder},
-                e.toString()),
+            text: formatErrorMessage({'element': element, 'prefix': prefix, 'newfolder': newfolder}, e.toString()),
             dataLogType: DataLogType.ERRORS.toString());
       }
       return [e.toString()];
@@ -784,8 +781,8 @@ signingStr=signingStr+<body>
     String accessKey = configMap['accessKey'];
     String secretKey = configMap['secretKey'];
     String host = 'rs.qiniuapi.com';
-    String authorization = await qiniuAuthorization(method, urlpath, null, host,
-        'application/x-www-form-urlencoded', null, '', accessKey, secretKey);
+    String authorization = await qiniuAuthorization(
+        method, urlpath, null, host, 'application/x-www-form-urlencoded', null, '', accessKey, secretKey);
 
     BaseOptions baseoptions = setBaseOptions();
     Dio dio = Dio(baseoptions);
@@ -814,16 +811,14 @@ signingStr=signingStr+<body>
         FLog.error(
             className: "QiniuManageAPI",
             methodName: "deleteFile",
-            text: formatErrorMessage(
-                {'element': element, 'key': key}, e.toString(),
+            text: formatErrorMessage({'element': element, 'key': key}, e.toString(),
                 isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
             className: "QiniuManageAPI",
             methodName: "deleteFile",
-            text: formatErrorMessage(
-                {'element': element, 'key': key}, e.toString()),
+            text: formatErrorMessage({'element': element, 'key': key}, e.toString()),
             dataLogType: DataLogType.ERRORS.toString());
       }
       return [e.toString()];
@@ -878,8 +873,7 @@ signingStr=signingStr+<body>
   }
 
   //复制/移动/重命名文件
-  static copyFile(String operateType, Map element, String key, String newKey,
-      bool isCover) async {
+  static copyFile(String operateType, Map element, String key, String newKey, bool isCover) async {
     Map configMap = await getConfigMap();
     String bucket = element['name'];
 
@@ -888,13 +882,12 @@ signingStr=signingStr+<body>
     String entryURIDest = '$bucket:$newKey';
     String encodeEntryURI = urlSafeBase64Encode(utf8.encode(entryURISrc));
     String encodeEntryURIDest = urlSafeBase64Encode(utf8.encode(entryURIDest));
-    String urlpath =
-        '/$operateType/$encodeEntryURI/$encodeEntryURIDest/force/$isCover';
+    String urlpath = '/$operateType/$encodeEntryURI/$encodeEntryURIDest/force/$isCover';
     String accessKey = configMap['accessKey'];
     String secretKey = configMap['secretKey'];
     String host = 'rs.qiniuapi.com';
-    String authorization = await qiniuAuthorization(method, urlpath, null, host,
-        'application/x-www-form-urlencoded', null, '', accessKey, secretKey);
+    String authorization = await qiniuAuthorization(
+        method, urlpath, null, host, 'application/x-www-form-urlencoded', null, '', accessKey, secretKey);
 
     BaseOptions baseoptions = setBaseOptions();
     Dio dio = Dio(baseoptions);
@@ -925,19 +918,14 @@ signingStr=signingStr+<body>
         FLog.error(
             className: "QiniuManageAPI",
             methodName: "copyFile",
-            text: formatErrorMessage({
-              'element': element,
-              'key': key,
-              'newKey': newKey
-            }, e.toString(), isDioError: true, dioErrorMessage: e),
+            text: formatErrorMessage({'element': element, 'key': key, 'newKey': newKey}, e.toString(),
+                isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
             className: "QiniuManageAPI",
             methodName: "copyFile",
-            text: formatErrorMessage(
-                {'element': element, 'key': key, 'newKey': newKey},
-                e.toString()),
+            text: formatErrorMessage({'element': element, 'key': key, 'newKey': newKey}, e.toString()),
             dataLogType: DataLogType.ERRORS.toString());
       }
       if (e.toString().contains('614')) {
@@ -969,8 +957,8 @@ signingStr=signingStr+<body>
       'key': bucketPrefix + fileNames,
     };
     String bodyString = json.encode(body);
-    String authorization = await qiniuAuthorization(method, urlpath, null, host,
-        contentType, null, bodyString, accessKey, secretKey);
+    String authorization =
+        await qiniuAuthorization(method, urlpath, null, host, contentType, null, bodyString, accessKey, secretKey);
 
     BaseOptions baseoptions = setBaseOptions();
     Dio dio = Dio(baseoptions);
@@ -998,21 +986,14 @@ signingStr=signingStr+<body>
         FLog.error(
             className: "QiniuManageAPI",
             methodName: "sisyphusFetch",
-            text: formatErrorMessage({
-              'element': element,
-              'bucketPrefix': bucketPrefix,
-              'link': link
-            }, e.toString(), isDioError: true, dioErrorMessage: e),
+            text: formatErrorMessage({'element': element, 'bucketPrefix': bucketPrefix, 'link': link}, e.toString(),
+                isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
             className: "QiniuManageAPI",
             methodName: "sisyphusFetch",
-            text: formatErrorMessage({
-              'element': element,
-              'bucketPrefix': bucketPrefix,
-              'link': link
-            }, e.toString()),
+            text: formatErrorMessage({'element': element, 'bucketPrefix': bucketPrefix, 'link': link}, e.toString()),
             dataLogType: DataLogType.ERRORS.toString());
       }
       return [e.toString()];

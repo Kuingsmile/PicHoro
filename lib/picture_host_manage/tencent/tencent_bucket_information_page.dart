@@ -4,8 +4,7 @@ import 'package:horopic/utils/common_functions.dart';
 
 class BucketInformation extends StatefulWidget {
   final Map bucketMap;
-  const BucketInformation({Key? key, required this.bucketMap})
-      : super(key: key);
+  const BucketInformation({Key? key, required this.bucketMap}) : super(key: key);
 
   @override
   BucketInformationState createState() => BucketInformationState();
@@ -38,14 +37,13 @@ class BucketInformationState extends State<BucketInformation> {
           ),
           ListTile(
             title: const Text('创建时间'),
-            subtitle: SelectableText(
-                widget.bucketMap['CreationDate'].substring(0, 19)),
+            subtitle: SelectableText(widget.bucketMap['CreationDate'].substring(0, 19)),
           ),
           ListTile(
             isThreeLine: true,
             title: const Text('访问域名'),
-            subtitle: SelectableText(
-                'https://${widget.bucketMap['name']}.cos.${widget.bucketMap['location']}.myqcloud.com'),
+            subtitle:
+                SelectableText('https://${widget.bucketMap['name']}.cos.${widget.bucketMap['location']}.myqcloud.com'),
           ),
         ],
       ),

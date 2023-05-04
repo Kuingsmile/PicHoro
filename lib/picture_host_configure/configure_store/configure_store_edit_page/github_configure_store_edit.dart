@@ -16,8 +16,7 @@ class GithubConfigureStoreEdit extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  GithubConfigureStoreEditState createState() =>
-      GithubConfigureStoreEditState();
+  GithubConfigureStoreEditState createState() => GithubConfigureStoreEditState();
 }
 
 class GithubConfigureStoreEditState extends State<GithubConfigureStoreEdit> {
@@ -257,8 +256,7 @@ class GithubConfigureStoreEditState extends State<GithubConfigureStoreEdit> {
       if (customDomain.isEmpty || customDomain.trim().isEmpty) {
         customDomain = ConfigureTemplate.placeholder;
       } else {
-        if (!customDomain.startsWith('http') &&
-            !customDomain.startsWith('https')) {
+        if (!customDomain.startsWith('http') && !customDomain.startsWith('https')) {
           customDomain = 'http://$customDomain';
         }
         if (customDomain.endsWith('/')) {

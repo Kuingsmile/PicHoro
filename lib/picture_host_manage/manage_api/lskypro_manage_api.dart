@@ -73,8 +73,7 @@ class LskyproManageAPI {
         FLog.error(
             className: "LskyproManageAPI",
             methodName: "getUserInfo",
-            text: formatErrorMessage({}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
+            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
@@ -110,8 +109,7 @@ class LskyproManageAPI {
         }
         albums.addAll(response.data!['data']['data']);
         for (page = 2; page <= lastPage; page++) {
-          response =
-              await dio.get(userInfoUrl, queryParameters: {"page": page});
+          response = await dio.get(userInfoUrl, queryParameters: {"page": page});
           if (response.statusCode == 200 && response.data!['status'] == true) {
             albums.addAll(response.data!['data']['data']);
           } else {
@@ -127,8 +125,7 @@ class LskyproManageAPI {
         FLog.error(
             className: "LskyproManageAPI",
             methodName: "getAlbums",
-            text: formatErrorMessage({}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
+            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
@@ -157,8 +154,7 @@ class LskyproManageAPI {
       int page = 1;
       int lastPage = 1;
       List images = [];
-      var response = await dio.get(userInfoUrl,
-          queryParameters: albumId == null ? {} : {"album_id": albumId});
+      var response = await dio.get(userInfoUrl, queryParameters: albumId == null ? {} : {"album_id": albumId});
       if (response.statusCode == 200 && response.data!['status'] == true) {
         lastPage = response.data!['data']['last_page'];
         if (response.data!['data']['data'].isEmpty) {
@@ -167,9 +163,7 @@ class LskyproManageAPI {
         images.addAll(response.data!['data']['data']);
         for (page = 2; page <= lastPage; page++) {
           response = await dio.get(userInfoUrl,
-              queryParameters: albumId == null
-                  ? {"page": page}
-                  : {"album_id": albumId, "page": page});
+              queryParameters: albumId == null ? {"page": page} : {"album_id": albumId, "page": page});
           if (response.statusCode == 200 && response.data!['status'] == true) {
             images.addAll(response.data!['data']['data']);
           } else {
@@ -185,8 +179,7 @@ class LskyproManageAPI {
         FLog.error(
             className: "LskyproManageAPI",
             methodName: "getPhoto",
-            text: formatErrorMessage({}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
+            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
@@ -227,8 +220,7 @@ class LskyproManageAPI {
         FLog.error(
             className: "LskyproManageAPI",
             methodName: "deleteFile",
-            text: formatErrorMessage({}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
+            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
@@ -268,8 +260,7 @@ class LskyproManageAPI {
         FLog.error(
             className: "LskyproManageAPI",
             methodName: "deleteAlbum",
-            text: formatErrorMessage({}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
+            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
@@ -317,8 +308,7 @@ class LskyproManageAPI {
         FLog.error(
             className: "LskyproManageAPI",
             methodName: "uploadFile",
-            text: formatErrorMessage({}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
+            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
@@ -331,13 +321,10 @@ class LskyproManageAPI {
     }
   }
 
-  
   static uploadNetworkFile(String fileLink) async {
     try {
-      String filename =
-          fileLink.substring(fileLink.lastIndexOf("/") + 1, fileLink.length);
-      filename = filename.substring(
-          0, !filename.contains("?") ? filename.length : filename.indexOf("?"));
+      String filename = fileLink.substring(fileLink.lastIndexOf("/") + 1, fileLink.length);
+      filename = filename.substring(0, !filename.contains("?") ? filename.length : filename.indexOf("?"));
       String savePath = await getTemporaryDirectory().then((value) {
         return value.path;
       });
@@ -362,8 +349,7 @@ class LskyproManageAPI {
         FLog.error(
             className: "LskyproManageAPI",
             methodName: "uploadNetworkFile",
-            text: formatErrorMessage({'fileLink': fileLink}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
+            text: formatErrorMessage({'fileLink': fileLink}, e.toString(), isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
@@ -395,22 +381,13 @@ class LskyproManageAPI {
 
     if (successCount == 0) {
       return Fluttertoast.showToast(
-          msg: '上传失败',
-          toastLength: Toast.LENGTH_SHORT,
-          timeInSecForIosWeb: 2,
-          fontSize: 16.0);
+          msg: '上传失败', toastLength: Toast.LENGTH_SHORT, timeInSecForIosWeb: 2, fontSize: 16.0);
     } else if (failCount == 0) {
       return Fluttertoast.showToast(
-          msg: '上传成功',
-          toastLength: Toast.LENGTH_SHORT,
-          timeInSecForIosWeb: 2,
-          fontSize: 16.0);
+          msg: '上传成功', toastLength: Toast.LENGTH_SHORT, timeInSecForIosWeb: 2, fontSize: 16.0);
     } else {
       return Fluttertoast.showToast(
-          msg: '成功$successCount,失败$failCount',
-          toastLength: Toast.LENGTH_SHORT,
-          timeInSecForIosWeb: 2,
-          fontSize: 16.0);
+          msg: '成功$successCount,失败$failCount', toastLength: Toast.LENGTH_SHORT, timeInSecForIosWeb: 2, fontSize: 16.0);
     }
   }
 }

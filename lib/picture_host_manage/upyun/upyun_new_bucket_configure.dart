@@ -1,9 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 
 import 'package:horopic/picture_host_manage/manage_api/upyun_manage_api.dart';
 import 'package:horopic/utils/common_functions.dart';
-import 'package:horopic/utils/global.dart';
-import 'package:horopic/utils/sql_utils.dart';
 
 class UpyunNewBucketConfig extends StatefulWidget {
   const UpyunNewBucketConfig({
@@ -104,11 +104,11 @@ class UpyunNewBucketConfigState extends State<UpyunNewBucketConfig> {
               value: isUsePSConfig,
               onChanged: (value) async {
                 if (value == true) {
-                  var queryUpyun =
-                      await MySqlUtils.queryUpyun(username: Global.defaultUser);
-                  if (queryUpyun != 'Empty' && queryUpyun != 'Error') {
-                    defaultOperatorController.text = queryUpyun['operator'];
-                    defaultPasswordController.text = queryUpyun['password'];
+                  var queryUpyun = await UpyunManageAPI.readUpyunConfig();
+                  if (queryUpyun != 'Error') {
+                    var jsonResult = jsonDecode(queryUpyun);
+                    defaultOperatorController.text = jsonResult['operator'];
+                    defaultPasswordController.text = jsonResult['password'];
                     setState(() {
                       isUsePSConfig = value!;
                     });
@@ -131,8 +131,7 @@ class UpyunNewBucketConfigState extends State<UpyunNewBucketConfig> {
                     defaultPasswordController.text.isEmpty) {
                   showToast('请填写完整信息');
                 } else {
-                  var result =
-                      await UpyunManageAPI.putBucket(bucketNameController.text);
+                  var result = await UpyunManageAPI.putBucket(bucketNameController.text);
 
                   if (result[0] == 'success') {
                     var result2 = await UpyunManageAPI.addOperator(
@@ -141,43 +140,15 @@ class UpyunNewBucketConfigState extends State<UpyunNewBucketConfig> {
                     );
                     if (result2[0] == 'success') {
                       showToast('创建成功');
-                      String usernameEmailBucket =
-                          '${Global.defaultUser}_${upyunManageConfigMap['email']}_${bucketNameController.text}';
-                      var queryOperator = await MySqlUtils.queryUpyunOperator(
-                          username: usernameEmailBucket);
-                      if (queryOperator == 'Error') {
-                        showToast('数据库错误');
+                      var insertOperator = await UpyunManageAPI.saveUpyunOperatorConfig(
+                        bucketNameController.text,
+                        upyunManageConfigMap['email'],
+                        defaultOperatorController.text,
+                        defaultPasswordController.text,
+                      );
+                      if (!insertOperator) {
+                        showToast('数据保存错误');
                         return;
-                      } else if (queryOperator == 'Empty') {
-                        List content = [
-                          bucketNameController.text,
-                          upyunManageConfigMap['email'],
-                          defaultOperatorController.text,
-                          defaultPasswordController.text,
-                          usernameEmailBucket
-                        ];
-                        var insertOperator =
-                            await MySqlUtils.insertUpyunOperator(
-                                content: content);
-                        if (insertOperator == 'Error') {
-                          showToast('数据库错误');
-                          return;
-                        }
-                      } else {
-                        List content = [
-                          bucketNameController.text,
-                          upyunManageConfigMap['email'],
-                          defaultOperatorController.text,
-                          defaultPasswordController.text,
-                          usernameEmailBucket
-                        ];
-                        var updateOperator =
-                            await MySqlUtils.updateUpyunOperator(
-                                content: content);
-                        if (updateOperator == 'Error') {
-                          showToast('数据库错误');
-                          return;
-                        }
                       }
                       if (mounted) {
                         Navigator.pop(context);

@@ -21,8 +21,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:horopic/router/application.dart';
 import 'package:horopic/router/routers.dart';
 import 'package:horopic/picture_host_manage/manage_api/ftp_manage_api.dart';
-import 'package:horopic/picture_host_manage/common_page/loading_state.dart'
-    as loading_state;
+import 'package:horopic/picture_host_manage/common_page/loading_state.dart' as loading_state;
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/pages/loading.dart';
@@ -33,23 +32,19 @@ bool isCoverFile = false;
 class SFTPFileExplorer extends StatefulWidget {
   final Map element;
   final String bucketPrefix;
-  const SFTPFileExplorer(
-      {Key? key, required this.element, required this.bucketPrefix})
-      : super(key: key);
+  const SFTPFileExplorer({Key? key, required this.element, required this.bucketPrefix}) : super(key: key);
 
   @override
   SFTPFileExplorerState createState() => SFTPFileExplorerState();
 }
 
-class SFTPFileExplorerState
-    extends loading_state.BaseLoadingPageState<SFTPFileExplorer> {
+class SFTPFileExplorerState extends loading_state.BaseLoadingPageState<SFTPFileExplorer> {
   List fileAllInfoList = [];
   List dirAllInfoList = [];
   List allInfoList = [];
 
   List selectedFilesBool = [];
-  RefreshController refreshController =
-      RefreshController(initialRefresh: false);
+  RefreshController refreshController = RefreshController(initialRefresh: false);
   TextEditingController vc = TextEditingController();
   TextEditingController newFolder = TextEditingController();
   TextEditingController fileLink = TextEditingController();
@@ -187,10 +182,7 @@ class SFTPFileExplorerState
         title: Text(
             widget.bucketPrefix == '/'
                 ? '根目录'
-                : widget.bucketPrefix
-                    .substring(0, widget.bucketPrefix.length - 1)
-                    .split('/')
-                    .last,
+                : widget.bucketPrefix.substring(0, widget.bucketPrefix.length - 1).split('/').last,
             style: const TextStyle(
               color: Colors.white,
               fontSize: 15,
@@ -202,8 +194,8 @@ class SFTPFileExplorerState
             onPressed: () async {
               Map configMap = await FTPManageAPI.getConfigMap();
               if (mounted) {
-                Application.router.navigateTo(context,
-                    '${Routes.sshTerminal}?configMap=${Uri.encodeComponent(jsonEncode(configMap))}',
+                Application.router.navigateTo(
+                    context, '${Routes.sshTerminal}?configMap=${Uri.encodeComponent(jsonEncode(configMap))}',
                     transition: TransitionType.cupertino);
               }
             },
@@ -233,8 +225,7 @@ class SFTPFileExplorerState
                           return b['mtime'].compareTo(a['mtime']);
                         });
                       } else {
-                        List temp = allInfoList.sublist(
-                            dirAllInfoList.length, allInfoList.length);
+                        List temp = allInfoList.sublist(dirAllInfoList.length, allInfoList.length);
                         temp.sort((a, b) {
                           return b['mtime'].compareTo(a['mtime']);
                         });
@@ -251,8 +242,7 @@ class SFTPFileExplorerState
                           return a['mtime'].compareTo(b['mtime']);
                         });
                       } else {
-                        List temp = allInfoList.sublist(
-                            dirAllInfoList.length, allInfoList.length);
+                        List temp = allInfoList.sublist(dirAllInfoList.length, allInfoList.length);
                         temp.sort((a, b) {
                           return a['mtime'].compareTo(b['mtime']);
                         });
@@ -282,8 +272,7 @@ class SFTPFileExplorerState
                           return a['name'].compareTo(b['name']);
                         });
                       } else {
-                        List temp = allInfoList.sublist(
-                            dirAllInfoList.length, allInfoList.length);
+                        List temp = allInfoList.sublist(dirAllInfoList.length, allInfoList.length);
                         temp.sort((a, b) {
                           return a['name'].compareTo(b['name']);
                         });
@@ -300,8 +289,7 @@ class SFTPFileExplorerState
                           return b['name'].compareTo(a['name']);
                         });
                       } else {
-                        List temp = allInfoList.sublist(
-                            dirAllInfoList.length, allInfoList.length);
+                        List temp = allInfoList.sublist(dirAllInfoList.length, allInfoList.length);
                         temp.sort((a, b) {
                           return b['name'].compareTo(a['name']);
                         });
@@ -331,8 +319,7 @@ class SFTPFileExplorerState
                           return a['size'].compareTo(b['size']);
                         });
                       } else {
-                        List temp = allInfoList.sublist(
-                            dirAllInfoList.length, allInfoList.length);
+                        List temp = allInfoList.sublist(dirAllInfoList.length, allInfoList.length);
                         temp.sort((a, b) {
                           return a['size'].compareTo(b['size']);
                         });
@@ -349,8 +336,7 @@ class SFTPFileExplorerState
                           return b['size'].compareTo(a['size']);
                         });
                       } else {
-                        List temp = allInfoList.sublist(
-                            dirAllInfoList.length, allInfoList.length);
+                        List temp = allInfoList.sublist(dirAllInfoList.length, allInfoList.length);
                         temp.sort((a, b) {
                           return b['size'].compareTo(a['size']);
                         });
@@ -388,8 +374,7 @@ class SFTPFileExplorerState
                           }
                         });
                       } else {
-                        List temp = allInfoList.sublist(
-                            dirAllInfoList.length, allInfoList.length);
+                        List temp = allInfoList.sublist(dirAllInfoList.length, allInfoList.length);
                         temp.sort((a, b) {
                           String type = a['name'].split('.').last;
                           String type2 = b['name'].split('.').last;
@@ -422,8 +407,7 @@ class SFTPFileExplorerState
                           }
                         });
                       } else {
-                        List temp = allInfoList.sublist(
-                            dirAllInfoList.length, allInfoList.length);
+                        List temp = allInfoList.sublist(dirAllInfoList.length, allInfoList.length);
                         temp.sort((a, b) {
                           String type = a['name'].split('.').last;
                           String type2 = b['name'].split('.').last;
@@ -458,65 +442,47 @@ class SFTPFileExplorerState
                         children: [
                           ListTile(
                             minLeadingWidth: 0,
-                            leading: const Icon(Icons.file_present_outlined,
-                                color: Colors.blue),
+                            leading: const Icon(Icons.file_present_outlined, color: Colors.blue),
                             title: const Text('上传文件(可多选)'),
                             onTap: () async {
                               Navigator.pop(context);
-                              FilePickerResult? pickresult =
-                                  await FilePicker.platform.pickFiles(
+                              FilePickerResult? pickresult = await FilePicker.platform.pickFiles(
                                 allowMultiple: true,
                               );
                               if (pickresult == null) {
                                 showToast('未选择文件');
                               } else {
-                                List<File> files = pickresult.paths
-                                    .map((path) => File(path!))
-                                    .toList();
-                                Map configMap =
-                                    await FTPManageAPI.getConfigMap();
+                                List<File> files = pickresult.paths.map((path) => File(path!)).toList();
+                                Map configMap = await FTPManageAPI.getConfigMap();
                                 configMap['uploadPath'] = widget.bucketPrefix;
                                 for (int i = 0; i < files.length; i++) {
                                   File compressedFile;
-                                  if (Global.imgExt.contains(my_path
-                                      .extension(files[i].path)
-                                      .toLowerCase()
-                                      .substring(1))) {
+                                  if (Global.imgExt
+                                      .contains(my_path.extension(files[i].path).toLowerCase().substring(1))) {
                                     if (Global.isCompress == true) {
-                                      ImageCompress imageCompress =
-                                          ImageCompress();
-                                      compressedFile = await imageCompress
-                                          .compressAndGetFile(
-                                              files[i].path,
-                                              my_path.basename(files[i].path),
-                                              Global.defaultCompressFormat,
-                                              minHeight: Global.minHeight,
-                                              minWidth: Global.minWidth,
-                                              quality: Global.quality);
+                                      ImageCompress imageCompress = ImageCompress();
+                                      compressedFile = await imageCompress.compressAndGetFile(
+                                          files[i].path, my_path.basename(files[i].path), Global.defaultCompressFormat,
+                                          minHeight: Global.minHeight,
+                                          minWidth: Global.minWidth,
+                                          quality: Global.quality);
                                       files[i] = compressedFile;
                                     } else {
                                       compressedFile = files[i];
                                     }
                                   }
-                                  List uploadList = [
-                                    files[i].path,
-                                    my_path.basename(files[i].path),
-                                    configMap
-                                  ];
+                                  List uploadList = [files[i].path, my_path.basename(files[i].path), configMap];
                                   String uploadListStr = jsonEncode(uploadList);
                                   Global.ftpUploadList.add(uploadListStr);
                                 }
-                                await Global.setFtpUploadList(
-                                    Global.ftpUploadList);
-                                String downloadPath = await ExternalPath
-                                    .getExternalStoragePublicDirectory(
-                                        ExternalPath.DIRECTORY_DOWNLOADS);
+                                await Global.setFtpUploadList(Global.ftpUploadList);
+                                String downloadPath = await ExternalPath.getExternalStoragePublicDirectory(
+                                    ExternalPath.DIRECTORY_DOWNLOADS);
                                 if (mounted) {
                                   Application.router
                                       .navigateTo(context,
                                           '/baseUpDownloadManagePage?ftpHost=${widget.element['ftpHost']}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=0&currentListIndex=3',
-                                          transition:
-                                              TransitionType.inFromRight)
+                                          transition: TransitionType.inFromRight)
                                       .then((value) {
                                     _getBucketList();
                                   });
@@ -526,69 +492,53 @@ class SFTPFileExplorerState
                           ),
                           ListTile(
                             minLeadingWidth: 0,
-                            leading: const Icon(Icons.image_outlined,
-                                color: Colors.blue),
+                            leading: const Icon(Icons.image_outlined, color: Colors.blue),
                             title: const Text('上传照片(可多选)'),
                             onTap: () async {
                               Navigator.pop(context);
-                              AssetPickerConfig config =
-                                  const AssetPickerConfig(
+                              AssetPickerConfig config = const AssetPickerConfig(
                                 maxAssets: 100,
                                 selectedAssets: [],
                               );
                               final List<AssetEntity>? pickedImage =
-                                  await AssetPicker.pickAssets(context,
-                                      pickerConfig: config);
+                                  await AssetPicker.pickAssets(context, pickerConfig: config);
                               if (pickedImage == null) {
                                 showToast('未选择照片');
                               } else {
                                 List<File> files = [];
                                 for (var i = 0; i < pickedImage.length; i++) {
-                                  File? fileImage =
-                                      await pickedImage[i].originFile;
+                                  File? fileImage = await pickedImage[i].originFile;
                                   if (fileImage != null) {
                                     files.add(fileImage);
                                   }
                                 }
-                                Map configMap =
-                                    await FTPManageAPI.getConfigMap();
+                                Map configMap = await FTPManageAPI.getConfigMap();
                                 configMap['uploadPath'] = widget.bucketPrefix;
                                 for (int i = 0; i < files.length; i++) {
-                                   File compressedFile;
+                                  File compressedFile;
                                   if (Global.isCompress == true) {
-                                    ImageCompress imageCompress =
-                                        ImageCompress();
-                                    compressedFile =
-                                        await imageCompress.compressAndGetFile(
-                                            files[i].path,
-                                            my_path.basename(files[i].path),
-                                            Global.defaultCompressFormat,
-                                            minHeight: Global.minHeight,
-                                            minWidth: Global.minWidth,
-                                            quality: Global.quality);
+                                    ImageCompress imageCompress = ImageCompress();
+                                    compressedFile = await imageCompress.compressAndGetFile(
+                                        files[i].path, my_path.basename(files[i].path), Global.defaultCompressFormat,
+                                        minHeight: Global.minHeight,
+                                        minWidth: Global.minWidth,
+                                        quality: Global.quality);
                                     files[i] = compressedFile;
                                   } else {
                                     compressedFile = files[i];
                                   }
-                                  List uploadList = [
-                                    files[i].path,
-                                    my_path.basename(files[i].path),
-                                    configMap
-                                  ];
+                                  List uploadList = [files[i].path, my_path.basename(files[i].path), configMap];
                                   String uploadListStr = jsonEncode(uploadList);
                                   Global.ftpUploadList.add(uploadListStr);
                                 }
-                                await Global.setFtpUploadList(
-                                    Global.ftpUploadList);
-                                String downloadPath = await ExternalPath
-                                    .getExternalStoragePublicDirectory(
-                                        ExternalPath.DIRECTORY_DOWNLOADS);
+                                await Global.setFtpUploadList(Global.ftpUploadList);
+                                String downloadPath = await ExternalPath.getExternalStoragePublicDirectory(
+                                    ExternalPath.DIRECTORY_DOWNLOADS);
                                 if (mounted) {
                                   Application.router
                                       .navigateTo(context,
                                           '/baseUpDownloadManagePage?ftpHost=${widget.element['ftpHost']}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=0&currentListIndex=3',
-                                          transition:
-                                              TransitionType.inFromRight)
+                                          transition: TransitionType.inFromRight)
                                       .then((value) {
                                     _getBucketList();
                                   });
@@ -602,12 +552,8 @@ class SFTPFileExplorerState
                             title: const Text('上传剪贴板内链接(换行分隔多个)'),
                             onTap: () async {
                               Navigator.pop(context);
-                              var url =
-                                  await flutter_services.Clipboard.getData(
-                                      'text/plain');
-                              if (url == null ||
-                                  url.text == null ||
-                                  url.text!.isEmpty) {
+                              var url = await flutter_services.Clipboard.getData('text/plain');
+                              if (url == null || url.text == null || url.text!.isEmpty) {
                                 if (mounted) {
                                   showToastWithContext(context, "剪贴板为空");
                                 }
@@ -624,10 +570,8 @@ class SFTPFileExplorerState
                                         outsideDismiss: false,
                                         loading: true,
                                         loadingText: "上传中...",
-                                        requestCallBack: FTPManageAPI
-                                            .uploadNetworkFileEntrySFTP(
-                                                fileLinkList,
-                                                widget.bucketPrefix),
+                                        requestCallBack:
+                                            FTPManageAPI.uploadNetworkFileEntrySFTP(fileLinkList, widget.bucketPrefix),
                                       );
                                     });
                                 _getBucketList();
@@ -665,21 +609,17 @@ class SFTPFileExplorerState
                                         okBtnTap: () async {
                                           String newName = newFolder.text;
                                           if (newName.isEmpty) {
-                                            showToastWithContext(
-                                                context, "文件夹名不能为空");
+                                            showToastWithContext(context, "文件夹名不能为空");
                                             return;
                                           }
                                           if (newName.startsWith('/')) {
                                             newName = newName.substring(1);
                                           }
                                           if (newName.endsWith('/')) {
-                                            newName = newName.substring(
-                                                0, newName.length - 1);
+                                            newName = newName.substring(0, newName.length - 1);
                                           }
-                                          var createResult = await FTPManageAPI
-                                              .createFolderSFTP(
-                                                  widget.bucketPrefix +
-                                                      newName);
+                                          var createResult =
+                                              await FTPManageAPI.createFolderSFTP(widget.bucketPrefix + newName);
                                           if (createResult[0] == 'success') {
                                             showToast('创建成功');
                                             _getBucketList();
@@ -706,8 +646,7 @@ class SFTPFileExplorerState
           IconButton(
               onPressed: () async {
                 String downloadPath =
-                    await ExternalPath.getExternalStoragePublicDirectory(
-                        ExternalPath.DIRECTORY_DOWNLOADS);
+                    await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOADS);
                 // ignore: use_build_context_synchronously
                 int index = 1;
                 if (Global.ftpDownloadList.isEmpty) {
@@ -730,13 +669,10 @@ class SFTPFileExplorerState
               )),
           IconButton(
             icon: selectedFilesBool.contains(true)
-                ? const Icon(Icons.delete,
-                    color: Color.fromARGB(255, 236, 127, 120), size: 30.0)
-                : const Icon(Icons.delete_outline,
-                    color: Colors.white, size: 30.0),
+                ? const Icon(Icons.delete, color: Color.fromARGB(255, 236, 127, 120), size: 30.0)
+                : const Icon(Icons.delete_outline, color: Colors.white, size: 30.0),
             onPressed: () async {
-              if (!selectedFilesBool.contains(true) ||
-                  selectedFilesBool.isEmpty) {
+              if (!selectedFilesBool.contains(true) || selectedFilesBool.isEmpty) {
                 showToastWithContext(context, '没有选择文件');
                 return;
               }
@@ -797,12 +733,10 @@ class SFTPFileExplorerState
               width: 40,
               child: FloatingActionButton(
                 heroTag: 'download',
-                backgroundColor: selectedFilesBool.contains(true)
-                    ? const Color.fromARGB(255, 180, 236, 182)
-                    : Colors.transparent,
+                backgroundColor:
+                    selectedFilesBool.contains(true) ? const Color.fromARGB(255, 180, 236, 182) : Colors.transparent,
                 onPressed: () async {
-                  if (!selectedFilesBool.contains(true) ||
-                      selectedFilesBool.isEmpty) {
+                  if (!selectedFilesBool.contains(true) || selectedFilesBool.isEmpty) {
                     showToastWithContext(context, '没有选择文件');
                     return;
                   }
@@ -824,8 +758,7 @@ class SFTPFileExplorerState
                   Global.ftpDownloadList.addAll(urlList);
                   await Global.setFtpDownloadList(Global.ftpDownloadList);
                   String downloadPath =
-                      await ExternalPath.getExternalStoragePublicDirectory(
-                          ExternalPath.DIRECTORY_DOWNLOADS);
+                      await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOADS);
 // ignore: use_build_context_synchronously
                   Application.router.navigateTo(context,
                       '/baseUpDownloadManagePage?ftpHost=${widget.element['ftpHost']}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=1&currentListIndex=3',
@@ -843,9 +776,8 @@ class SFTPFileExplorerState
               width: 40,
               child: FloatingActionButton(
                 heroTag: 'copy',
-                backgroundColor: selectedFilesBool.contains(true)
-                    ? const Color.fromARGB(255, 232, 177, 241)
-                    : Colors.transparent,
+                backgroundColor:
+                    selectedFilesBool.contains(true) ? const Color.fromARGB(255, 232, 177, 241) : Colors.transparent,
                 elevation: 5,
                 onPressed: () async {
                   if (!selectedFilesBool.contains(true)) {
@@ -861,19 +793,16 @@ class SFTPFileExplorerState
                         rawurl =
                             'ftp://${widget.element['ftpUser']}@${widget.element['ftpPassword']}@${widget.element['ftpHost']}:${widget.element['ftpPort']}${widget.bucketPrefix}${allInfoList[i]['name']}';
                         fileName = allInfoList[i]['name'];
-                        finalFormatedurl =
-                            linkGenerateDict[Global.defaultLKformat]!(
-                                rawurl, fileName);
+                        finalFormatedurl = linkGenerateDict[Global.defaultLKformat]!(rawurl, fileName);
                         multiUrls.add(finalFormatedurl);
                       }
                     }
-                    await flutter_services.Clipboard.setData(
-                        flutter_services.ClipboardData(
-                            text: multiUrls
-                                .toString()
-                                .substring(1, multiUrls.toString().length - 1)
-                                .replaceAll(', ', '\n')
-                                .replaceAll(',', '\n')));
+                    await flutter_services.Clipboard.setData(flutter_services.ClipboardData(
+                        text: multiUrls
+                            .toString()
+                            .substring(1, multiUrls.toString().length - 1)
+                            .replaceAll(', ', '\n')
+                            .replaceAll(',', '\n')));
                     if (mounted) {
                       showToastWithContext(context, '已复制全部链接');
                     }
@@ -924,16 +853,14 @@ class SFTPFileExplorerState
     try {
       for (int i = 0; i < toDelete.length; i++) {
         if ((toDelete[i] - i) < dirAllInfoList.length) {
-          await FTPManageAPI.deleteFolderSFTP(
-              widget.bucketPrefix + allInfoList[toDelete[i] - i]['name']);
+          await FTPManageAPI.deleteFolderSFTP(widget.bucketPrefix + allInfoList[toDelete[i] - i]['name']);
           setState(() {
             allInfoList.removeAt(toDelete[i] - i);
             dirAllInfoList.removeAt(toDelete[i] - i);
             selectedFilesBool.removeAt(toDelete[i] - i);
           });
         } else {
-          await FTPManageAPI.deleteFileSFTP(
-              widget.bucketPrefix + allInfoList[toDelete[i] - i]['name']);
+          await FTPManageAPI.deleteFileSFTP(widget.bucketPrefix + allInfoList[toDelete[i] - i]['name']);
           setState(() {
             allInfoList.removeAt(toDelete[i] - i);
             fileAllInfoList.removeAt(toDelete[i] - i - dirAllInfoList.length);
@@ -969,9 +896,7 @@ class SFTPFileExplorerState
             width: 100,
             height: 100,
           ),
-          const Text('没有文件哦，点击右上角添加吧',
-              style: TextStyle(
-                  fontSize: 20, color: Color.fromARGB(136, 121, 118, 118)))
+          const Text('没有文件哦，点击右上角添加吧', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118)))
         ],
       ),
     );
@@ -983,9 +908,7 @@ class SFTPFileExplorerState
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Text('加载失败,请先登录或者检查网络',
-              style: TextStyle(
-                  fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))),
+          const Text('加载失败,请先登录或者检查网络', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))),
           ElevatedButton(
             style: ButtonStyle(
               backgroundColor: MaterialStateProperty.all(Colors.blue),
@@ -1065,42 +988,31 @@ class SFTPFileExplorerState
                                   builder: (BuildContext context) {
                                     return CupertinoAlertDialog(
                                       title: const Text('通知'),
-                                      content: Text(
-                                          '确定要删除${allInfoList[index]['name']}吗？\n删除后不可恢复!!'),
+                                      content: Text('确定要删除${allInfoList[index]['name']}吗？\n删除后不可恢复!!'),
                                       actions: <Widget>[
                                         CupertinoDialogAction(
-                                          child: const Text('取消',
-                                              style: TextStyle(
-                                                  color: Colors.blue)),
+                                          child: const Text('取消', style: TextStyle(color: Colors.blue)),
                                           onPressed: () {
                                             Navigator.pop(context);
                                           },
                                         ),
                                         CupertinoDialogAction(
-                                          child: const Text('确定',
-                                              style: TextStyle(
-                                                  color: Colors.blue)),
+                                          child: const Text('确定', style: TextStyle(color: Colors.blue)),
                                           onPressed: () async {
                                             Navigator.pop(context);
-                                            String folderName =
-                                                widget.bucketPrefix +
-                                                    allInfoList[index]['name'];
-                                            if (folderName.contains('*') ||
-                                                folderName.contains('?')) {
+                                            String folderName = widget.bucketPrefix + allInfoList[index]['name'];
+                                            if (folderName.contains('*') || folderName.contains('?')) {
                                               showToast('文件夹名不能包含特殊字符');
                                               return;
                                             }
-                                            var result = await FTPManageAPI
-                                                .deleteFolderSFTP(widget
-                                                        .bucketPrefix +
-                                                    allInfoList[index]['name']);
+                                            var result = await FTPManageAPI.deleteFolderSFTP(
+                                                widget.bucketPrefix + allInfoList[index]['name']);
                                             if (result[0] == 'success') {
                                               showToast('删除成功');
                                               setState(() {
                                                 allInfoList.removeAt(index);
                                                 dirAllInfoList.removeAt(index);
-                                                selectedFilesBool
-                                                    .removeAt(index);
+                                                selectedFilesBool.removeAt(index);
                                               });
                                             } else {
                                               showToast('删除失败');
@@ -1123,9 +1035,7 @@ class SFTPFileExplorerState
                         fit: StackFit.loose,
                         children: [
                           Container(
-                            color: selectedFilesBool[index]
-                                ? const Color(0x311192F3)
-                                : Colors.transparent,
+                            color: selectedFilesBool[index] ? const Color(0x311192F3) : Colors.transparent,
                             child: ListTile(
                               minLeadingWidth: 0,
                               minVerticalPadding: 0,
@@ -1134,8 +1044,7 @@ class SFTPFileExplorerState
                                 width: 30,
                                 height: 32,
                               ),
-                              title: Text(allInfoList[index]['name'],
-                                  style: const TextStyle(fontSize: 16)),
+                              title: Text(allInfoList[index]['name'], style: const TextStyle(fontSize: 16)),
                               trailing: IconButton(
                                 icon: const Icon(Icons.more_horiz),
                                 onPressed: () {
@@ -1144,14 +1053,12 @@ class SFTPFileExplorerState
                                       isScrollControlled: true,
                                       context: context,
                                       builder: (context) {
-                                        return buildFolderBottomSheetWidget(
-                                            context, index, iconPath);
+                                        return buildFolderBottomSheetWidget(context, index, iconPath);
                                       });
                                 },
                               ),
                               onTap: () {
-                                String prefix =
-                                    '${widget.bucketPrefix}${allInfoList[index]['name']}/';
+                                String prefix = '${widget.bucketPrefix}${allInfoList[index]['name']}/';
                                 Application.router.navigateTo(context,
                                     '${Routes.sftpFileExplorer}?element=${Uri.encodeComponent(jsonEncode(widget.element))}&bucketPrefix=${Uri.encodeComponent(prefix)}',
                                     transition: TransitionType.cupertino);
@@ -1162,8 +1069,7 @@ class SFTPFileExplorerState
                             // ignore: sort_child_properties_last
                             child: Container(
                               decoration: const BoxDecoration(
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(55)),
+                                  borderRadius: BorderRadius.all(Radius.circular(55)),
                                   color: Color.fromARGB(255, 235, 242, 248)),
                               padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
                               child: MSHCheckbox(
@@ -1223,8 +1129,7 @@ class SFTPFileExplorerState
                               },
                               autoClose: true,
                               padding: EdgeInsets.zero,
-                              backgroundColor:
-                                  const Color.fromARGB(255, 109, 196, 116),
+                              backgroundColor: const Color.fromARGB(255, 109, 196, 116),
                               foregroundColor: Colors.white,
                               icon: Icons.share,
                               label: '分享',
@@ -1237,39 +1142,29 @@ class SFTPFileExplorerState
                                     builder: (BuildContext context) {
                                       return CupertinoAlertDialog(
                                         title: const Text('通知'),
-                                        content: Text(
-                                            '确定要删除${allInfoList[index]['name']}吗？'),
+                                        content: Text('确定要删除${allInfoList[index]['name']}吗？'),
                                         actions: <Widget>[
                                           CupertinoDialogAction(
-                                            child: const Text('取消',
-                                                style: TextStyle(
-                                                    color: Colors.blue)),
+                                            child: const Text('取消', style: TextStyle(color: Colors.blue)),
                                             onPressed: () {
                                               Navigator.pop(context);
                                             },
                                           ),
                                           CupertinoDialogAction(
-                                            child: const Text('确定',
-                                                style: TextStyle(
-                                                    color: Colors.blue)),
+                                            child: const Text('确定', style: TextStyle(color: Colors.blue)),
                                             onPressed: () async {
                                               Navigator.pop(context);
-                                              String filepath = widget
-                                                      .bucketPrefix +
-                                                  allInfoList[index]['name'];
-                                              if (filepath.contains('*') ||
-                                                  filepath.contains('?')) {
+                                              String filepath = widget.bucketPrefix + allInfoList[index]['name'];
+                                              if (filepath.contains('*') || filepath.contains('?')) {
                                                 showToast('文件名中不能包含特殊字符');
                                                 return;
                                               }
-                                              var result = await FTPManageAPI
-                                                  .deleteFileSFTP(filepath);
+                                              var result = await FTPManageAPI.deleteFileSFTP(filepath);
                                               if (result[0] == 'success') {
                                                 showToast('删除成功');
                                                 setState(() {
                                                   allInfoList.removeAt(index);
-                                                  selectedFilesBool
-                                                      .removeAt(index);
+                                                  selectedFilesBool.removeAt(index);
                                                 });
                                               } else {
                                                 showToast('删除失败');
@@ -1289,9 +1184,7 @@ class SFTPFileExplorerState
                         ),
                         child: Stack(fit: StackFit.loose, children: [
                           Container(
-                            color: selectedFilesBool[index]
-                                ? const Color(0x311192F3)
-                                : Colors.transparent,
+                            color: selectedFilesBool[index] ? const Color(0x311192F3) : Colors.transparent,
                             child: ListTile(
                               minLeadingWidth: 0,
                               minVerticalPadding: 0,
@@ -1302,13 +1195,9 @@ class SFTPFileExplorerState
                               ),
                               title: Text(
                                   allInfoList[index]['name'].length > 20
-                                      ? allInfoList[index]['name']
-                                              .substring(0, 10) +
+                                      ? allInfoList[index]['name'].substring(0, 10) +
                                           '...' +
-                                          allInfoList[index]['name'].substring(
-                                              allInfoList[index]['name']
-                                                      .length -
-                                                  10)
+                                          allInfoList[index]['name'].substring(allInfoList[index]['name'].length - 10)
                                       : allInfoList[index]['name'],
                                   style: const TextStyle(fontSize: 14)),
                               subtitle: Text(
@@ -1321,53 +1210,33 @@ class SFTPFileExplorerState
                                       isScrollControlled: true,
                                       context: context,
                                       builder: (context) {
-                                        return buildBottomSheetWidget(
-                                            context, index, iconPath);
+                                        return buildBottomSheetWidget(context, index, iconPath);
                                       });
                                 },
                               ),
                               onTap: () async {
                                 //判断是否为图片
-                                if (!Global.imgExt.contains(allInfoList[index]
-                                            ['name']
-                                        .split('.')
-                                        .last
-                                        .toLowerCase()) &&
-                                    !Global.textExt.contains(allInfoList[index]
-                                            ['name']
-                                        .split('.')
-                                        .last
-                                        .toLowerCase())) {
+                                if (!Global.imgExt.contains(allInfoList[index]['name'].split('.').last.toLowerCase()) &&
+                                    !Global.textExt
+                                        .contains(allInfoList[index]['name'].split('.').last.toLowerCase())) {
                                   showToast('不支持的文件类型');
                                   return;
                                 }
-                                if (Global.imgExt.contains(allInfoList[index]
-                                        ['name']
-                                    .split('.')
-                                    .last
-                                    .toLowerCase())) {
+                                if (Global.imgExt.contains(allInfoList[index]['name'].split('.').last.toLowerCase())) {
                                   //预览图片
-                                  Map configMapTemp =
-                                      await FTPManageAPI.getConfigMap();
-                                  configMapTemp['name'] =
-                                      allInfoList[index]['name'];
-                                  String imagePath = widget.bucketPrefix +
-                                      allInfoList[index]['name'];
+                                  Map configMapTemp = await FTPManageAPI.getConfigMap();
+                                  configMapTemp['name'] = allInfoList[index]['name'];
+                                  String imagePath = widget.bucketPrefix + allInfoList[index]['name'];
                                   Application.router.navigateTo(this.context,
                                       '${Routes.sftpLocalImagePreview}?configMap=${Uri.encodeComponent(jsonEncode(configMapTemp))}&image=${Uri.encodeComponent(imagePath)}',
                                       transition: TransitionType.none);
-                                } else if (Global.textExt.contains(
-                                    allInfoList[index]['name']
-                                        .split('.')
-                                        .last
-                                        .toLowerCase())) {
+                                } else if (Global.textExt
+                                    .contains(allInfoList[index]['name'].split('.').last.toLowerCase())) {
                                   showToast('开始加载，请稍候');
-                                  Map configMapTemp =
-                                      await FTPManageAPI.getConfigMap();
+                                  Map configMapTemp = await FTPManageAPI.getConfigMap();
                                   String fileName = allInfoList[index]['name'];
                                   String path = widget.bucketPrefix + fileName;
-                                  String filePath = await downloadFile(
-                                      configMapTemp, path, fileName);
+                                  String filePath = await downloadFile(configMapTemp, path, fileName);
                                   if (filePath == 'error') {
                                     showToast('获取文件失败');
                                     return;
@@ -1383,8 +1252,7 @@ class SFTPFileExplorerState
                             // ignore: sort_child_properties_last
                             child: Container(
                               decoration: const BoxDecoration(
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(55)),
+                                  borderRadius: BorderRadius.all(Radius.circular(55)),
                                   color: Color.fromARGB(255, 235, 242, 248)),
                               padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
                               child: MSHCheckbox(
@@ -1421,8 +1289,7 @@ class SFTPFileExplorerState
     }
   }
 
-  Widget buildBottomSheetWidget(
-      BuildContext context, int index, String iconPath) {
+  Widget buildBottomSheetWidget(BuildContext context, int index, String iconPath) {
     return SingleChildScrollView(
       child: Column(
         children: [
@@ -1438,8 +1305,7 @@ class SFTPFileExplorerState
                 allInfoList[index]['name'].length > 20
                     ? allInfoList[index]['name'].substring(0, 10) +
                         '...' +
-                        allInfoList[index]['name']
-                            .substring(allInfoList[index]['name'].length - 10)
+                        allInfoList[index]['name'].substring(allInfoList[index]['name'].length - 10)
                     : allInfoList[index]['name'],
                 style: const TextStyle(fontSize: 14)),
             subtitle: Text(
@@ -1460,8 +1326,8 @@ class SFTPFileExplorerState
               onTap: () async {
                 Navigator.pop(context);
                 Map<dynamic, dynamic> fileMap = allInfoList[index];
-                Application.router.navigateTo(context,
-                    '${Routes.sftpFileInformation}?fileMap=${Uri.encodeComponent(jsonEncode(fileMap))}',
+                Application.router.navigateTo(
+                    context, '${Routes.sftpFileInformation}?fileMap=${Uri.encodeComponent(jsonEncode(fileMap))}',
                     transition: TransitionType.cupertino);
               }),
           const Divider(
@@ -1480,10 +1346,8 @@ class SFTPFileExplorerState
               String shareUrl =
                   'ftp://${widget.element['ftpUser']}@${widget.element['ftpPassword']}@${widget.element['ftpHost']}:${widget.element['ftpPort']}${widget.bucketPrefix}${allInfoList[index]['name']}';
               String filename = allInfoList[index]['name'];
-              String formatedLink =
-                  linkGenerateDict[format]!(shareUrl, filename);
-              await flutter_services.Clipboard.setData(
-                  flutter_services.ClipboardData(text: formatedLink));
+              String formatedLink = linkGenerateDict[format]!(shareUrl, filename);
+              await flutter_services.Clipboard.setData(flutter_services.ClipboardData(text: formatedLink));
               if (mounted) {
                 Navigator.pop(context);
               }
@@ -1520,14 +1384,10 @@ class SFTPFileExplorerState
                               newName = newName.substring(1);
                             }
                             if (newName.endsWith('/')) {
-                              newName =
-                                  newName.substring(0, newName.length - 1);
+                              newName = newName.substring(0, newName.length - 1);
                             }
-                            var renameResult =
-                                await FTPManageAPI.renameFileSFTP(
-                                    widget.bucketPrefix +
-                                        allInfoList[index]['name'],
-                                    widget.bucketPrefix + newName);
+                            var renameResult = await FTPManageAPI.renameFileSFTP(
+                                widget.bucketPrefix + allInfoList[index]['name'], widget.bucketPrefix + newName);
                             if (renameResult[0] == 'success') {
                               showToast('重命名成功');
                               _getBucketList();
@@ -1563,26 +1423,21 @@ class SFTPFileExplorerState
                     content: Text('确定要删除${allInfoList[index]['name']}吗？'),
                     actions: <Widget>[
                       CupertinoDialogAction(
-                        child: const Text('取消',
-                            style: TextStyle(color: Colors.blue)),
+                        child: const Text('取消', style: TextStyle(color: Colors.blue)),
                         onPressed: () {
                           Navigator.pop(context);
                         },
                       ),
                       CupertinoDialogAction(
-                        child: const Text('确定',
-                            style: TextStyle(color: Colors.blue)),
+                        child: const Text('确定', style: TextStyle(color: Colors.blue)),
                         onPressed: () async {
                           Navigator.pop(context);
-                          String filepath =
-                              widget.bucketPrefix + allInfoList[index]['name'];
-                          if (filepath.contains('*') ||
-                              filepath.contains('?')) {
+                          String filepath = widget.bucketPrefix + allInfoList[index]['name'];
+                          if (filepath.contains('*') || filepath.contains('?')) {
                             showToast('文件名中不能包含特殊字符');
                             return;
                           }
-                          var result =
-                              await FTPManageAPI.deleteFileSFTP(filepath);
+                          var result = await FTPManageAPI.deleteFileSFTP(filepath);
                           if (result[0] == 'success') {
                             showToast('删除成功');
                             setState(() {
@@ -1605,8 +1460,7 @@ class SFTPFileExplorerState
     );
   }
 
-  Widget buildFolderBottomSheetWidget(
-      BuildContext context, int index, String iconPath) {
+  Widget buildFolderBottomSheetWidget(BuildContext context, int index, String iconPath) {
     return SingleChildScrollView(
       child: Column(
         children: [
@@ -1617,8 +1471,7 @@ class SFTPFileExplorerState
               height: 30,
             ),
             minLeadingWidth: 0,
-            title: Text(allInfoList[index]['name'],
-                style: const TextStyle(fontSize: 15)),
+            title: Text(allInfoList[index]['name'], style: const TextStyle(fontSize: 15)),
           ),
           const Divider(
             height: 0.1,
@@ -1632,8 +1485,8 @@ class SFTPFileExplorerState
             minLeadingWidth: 0,
             title: const Text('设为图床默认目录'),
             onTap: () async {
-              var result = await FTPManageAPI.setDefaultBucketSFTP(
-                  '${widget.bucketPrefix + allInfoList[index]['name']}/');
+              var result =
+                  await FTPManageAPI.setDefaultBucketSFTP('${widget.bucketPrefix + allInfoList[index]['name']}/');
               if (result[0] == 'success') {
                 showToast('设置成功');
                 if (mounted) {
@@ -1663,31 +1516,25 @@ class SFTPFileExplorerState
                   builder: (BuildContext context) {
                     return CupertinoAlertDialog(
                       title: const Text('通知'),
-                      content: Text(
-                          '确定要删除${allInfoList[index]['name']}吗？\n删除后不可恢复!!'),
+                      content: Text('确定要删除${allInfoList[index]['name']}吗？\n删除后不可恢复!!'),
                       actions: <Widget>[
                         CupertinoDialogAction(
-                          child: const Text('取消',
-                              style: TextStyle(color: Colors.blue)),
+                          child: const Text('取消', style: TextStyle(color: Colors.blue)),
                           onPressed: () {
                             Navigator.pop(context);
                           },
                         ),
                         CupertinoDialogAction(
-                          child: const Text('确定',
-                              style: TextStyle(color: Colors.blue)),
+                          child: const Text('确定', style: TextStyle(color: Colors.blue)),
                           onPressed: () async {
                             Navigator.pop(context);
-                            String folderName = widget.bucketPrefix +
-                                allInfoList[index]['name'];
-                            if (folderName.contains('*') ||
-                                folderName.contains('?')) {
+                            String folderName = widget.bucketPrefix + allInfoList[index]['name'];
+                            if (folderName.contains('*') || folderName.contains('?')) {
                               showToast('文件夹名不能包含特殊字符');
                               return;
                             }
-                            var result = await FTPManageAPI.deleteFolderSFTP(
-                                widget.bucketPrefix +
-                                    allInfoList[index]['name']);
+                            var result =
+                                await FTPManageAPI.deleteFolderSFTP(widget.bucketPrefix + allInfoList[index]['name']);
                             if (result[0] == 'success') {
                               showToast('删除成功');
                               setState(() {
@@ -1762,8 +1609,7 @@ class RenameDialogContentState extends State<RenameDialogContent> {
                 alignment: Alignment.center,
                 child: Text(
                   widget.title,
-                  style: const TextStyle(
-                      color: Color.fromARGB(255, 0, 0, 0), fontSize: 20),
+                  style: const TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 20),
                 )),
             Padding(
               padding: const EdgeInsets.fromLTRB(30, 0, 30, 0),
@@ -1780,8 +1626,7 @@ class RenameDialogContentState extends State<RenameDialogContent> {
                 },
                 decoration: const InputDecoration(
                     enabledBorder: UnderlineInputBorder(
-                      borderSide:
-                          BorderSide(color: Color.fromARGB(255, 234, 236, 238)),
+                      borderSide: BorderSide(color: Color.fromARGB(255, 234, 236, 238)),
                     ),
                     focusedBorder: UnderlineInputBorder(
                       borderSide: BorderSide(color: Colors.blue),
@@ -1810,8 +1655,7 @@ class RenameDialogContentState extends State<RenameDialogContent> {
                         },
                         child: Text(
                           widget.cancelBtnTitle,
-                          style:
-                              const TextStyle(fontSize: 22, color: Colors.blue),
+                          style: const TextStyle(fontSize: 22, color: Colors.blue),
                         ),
                       ),
                       Container(
@@ -1827,9 +1671,7 @@ class RenameDialogContentState extends State<RenameDialogContent> {
                           },
                           child: Text(
                             widget.okBtnTitle,
-                            style: const TextStyle(
-                                fontSize: 22,
-                                color: Color.fromARGB(255, 169, 173, 177)),
+                            style: const TextStyle(fontSize: 22, color: Color.fromARGB(255, 169, 173, 177)),
                           )),
                     ],
                   ),
@@ -1890,8 +1732,7 @@ class NewFolderDialogContentState extends State<NewFolderDialogContent> {
                 alignment: Alignment.center,
                 child: Text(
                   widget.title,
-                  style: const TextStyle(
-                      color: Color.fromARGB(255, 0, 0, 0), fontSize: 20),
+                  style: const TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 20),
                 )),
             Padding(
               padding: const EdgeInsets.fromLTRB(30, 0, 30, 0),
@@ -1908,8 +1749,7 @@ class NewFolderDialogContentState extends State<NewFolderDialogContent> {
                 },
                 decoration: const InputDecoration(
                     enabledBorder: UnderlineInputBorder(
-                      borderSide:
-                          BorderSide(color: Color.fromARGB(255, 14, 103, 192)),
+                      borderSide: BorderSide(color: Color.fromARGB(255, 14, 103, 192)),
                     ),
                     focusedBorder: UnderlineInputBorder(
                       borderSide: BorderSide(color: Colors.blue),
@@ -1940,8 +1780,7 @@ class NewFolderDialogContentState extends State<NewFolderDialogContent> {
                         },
                         child: Text(
                           widget.cancelBtnTitle,
-                          style:
-                              const TextStyle(fontSize: 22, color: Colors.blue),
+                          style: const TextStyle(fontSize: 22, color: Colors.blue),
                         ),
                       ),
                       Container(
@@ -1957,8 +1796,7 @@ class NewFolderDialogContentState extends State<NewFolderDialogContent> {
                           },
                           child: Text(
                             widget.okBtnTitle,
-                            style: const TextStyle(
-                                fontSize: 22, color: Colors.blue),
+                            style: const TextStyle(fontSize: 22, color: Colors.blue),
                           )),
                     ],
                   ),

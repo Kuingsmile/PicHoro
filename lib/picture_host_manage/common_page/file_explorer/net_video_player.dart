@@ -65,18 +65,15 @@ class _NetVideoPlayerState extends State<NetVideoPlayer> {
   final Color _iconColor = Colors.white;
 
   final ValueNotifier<bool> showControlNotifier = ValueNotifier(true);
-  final ValueNotifier<Orientation> orientationNotifier =
-      ValueNotifier(Orientation.portrait);
+  final ValueNotifier<Orientation> orientationNotifier = ValueNotifier(Orientation.portrait);
 
   @override
   void initState() {
     super.initState();
     _currActiveIdx = widget.index;
     if (widget.type == 'normal') {
-      _videoPlayerController = VideoPlayerController.network(
-          widget.videoList[_currActiveIdx]['url'],
-          httpHeaders: widget.headers
-          );
+      _videoPlayerController =
+          VideoPlayerController.network(widget.videoList[_currActiveIdx]['url'], httpHeaders: widget.headers);
       _chewieController = ChewieController(
         videoPlayerController: _videoPlayerController,
         aspectRatio: 16 / 9,
@@ -126,8 +123,7 @@ class _NetVideoPlayerState extends State<NetVideoPlayer> {
       _controller.addOnInitListener(() async {
         await _controller.startRendererScanning();
         if (_videoData.subtitlePath != '') {
-          await _controller.addSubtitleFromNetwork(
-              Uri.parse(_videoData.subtitlePath).toString());
+          await _controller.addSubtitleFromNetwork(Uri.parse(_videoData.subtitlePath).toString());
         }
       });
       _controller.addOnRendererEventListener((type, id, name) {});
@@ -188,8 +184,7 @@ class _NetVideoPlayerState extends State<NetVideoPlayer> {
       return WillPopScope(
         onWillPop: () async {
           AutoOrientation.portraitUpMode();
-          SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
-              overlays: SystemUiOverlay.values);
+          SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: SystemUiOverlay.values);
           return true;
         },
         child: Center(
@@ -259,8 +254,7 @@ class _NetVideoPlayerState extends State<NetVideoPlayer> {
                           if (showControlNotifier.value) {
                             return GestureDetector(
                                 onTap: (() {
-                                  showControlNotifier.value =
-                                      !showControlNotifier.value;
+                                  showControlNotifier.value = !showControlNotifier.value;
                                 }),
                                 onDoubleTap: _pause,
                                 child: Container(
@@ -273,10 +267,8 @@ class _NetVideoPlayerState extends State<NetVideoPlayer> {
                                       IconButton(
                                         color: Colors.white,
                                         icon: _controller.value.isPlaying
-                                            ? const Icon(
-                                                Icons.pause_circle_outline)
-                                            : const Icon(
-                                                Icons.play_circle_outline),
+                                            ? const Icon(Icons.pause_circle_outline)
+                                            : const Icon(Icons.play_circle_outline),
                                         onPressed: _togglePlaying,
                                       ),
                                       IconButton(
@@ -291,8 +283,7 @@ class _NetVideoPlayerState extends State<NetVideoPlayer> {
                                             } else {
                                               volumeValue = 50;
                                             }
-                                            _controller
-                                                .setVolume(volumeValue.toInt());
+                                            _controller.setVolume(volumeValue.toInt());
                                           });
                                         },
                                       ),
@@ -300,14 +291,12 @@ class _NetVideoPlayerState extends State<NetVideoPlayer> {
                                           child: SizedBox(
                                         height: 50,
                                         child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                           mainAxisSize: MainAxisSize.max,
                                           children: [
                                             Text(
                                               position,
-                                              style: const TextStyle(
-                                                  color: Colors.white),
+                                              style: const TextStyle(color: Colors.white),
                                             ),
                                             Expanded(
                                               child: Slider(
@@ -315,23 +304,15 @@ class _NetVideoPlayerState extends State<NetVideoPlayer> {
                                                 inactiveColor: Colors.white70,
                                                 value: sliderValue,
                                                 min: 0.0,
-                                                max: (!validPosition &&
-                                                        _controller.value
-                                                                .duration ==
-                                                            null)
+                                                max: (!validPosition && _controller.value.duration == null)
                                                     ? 1.0
-                                                    : _controller.value.duration
-                                                        .inSeconds
-                                                        .toDouble(),
-                                                onChanged: validPosition
-                                                    ? _onSliderPositionChanged
-                                                    : null,
+                                                    : _controller.value.duration.inSeconds.toDouble(),
+                                                onChanged: validPosition ? _onSliderPositionChanged : null,
                                               ),
                                             ),
                                             Text(
                                               duration,
-                                              style: const TextStyle(
-                                                  color: Colors.white),
+                                              style: const TextStyle(color: Colors.white),
                                             ),
                                           ],
                                         ),
@@ -340,20 +321,13 @@ class _NetVideoPlayerState extends State<NetVideoPlayer> {
                                         icon: const Icon(Icons.fullscreen),
                                         color: Colors.white,
                                         onPressed: () {
-                                          Orientation orientation =
-                                              MediaQuery.of(context)
-                                                  .orientation;
-                                          if (orientation ==
-                                              Orientation.landscape) {
-                                            orientationNotifier.value =
-                                                Orientation.portrait;
+                                          Orientation orientation = MediaQuery.of(context).orientation;
+                                          if (orientation == Orientation.landscape) {
+                                            orientationNotifier.value = Orientation.portrait;
                                             AutoOrientation.portraitAutoMode();
                                           } else {
-                                            orientationNotifier.value =
-                                                Orientation.landscape;
-                                            SystemChrome.setEnabledSystemUIMode(
-                                                SystemUiMode.manual,
-                                                overlays: []);
+                                            orientationNotifier.value = Orientation.landscape;
+                                            SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
 
                                             AutoOrientation.landscapeAutoMode();
                                           }
@@ -365,8 +339,7 @@ class _NetVideoPlayerState extends State<NetVideoPlayer> {
                           } else {
                             return GestureDetector(
                                 onTap: (() {
-                                  showControlNotifier.value =
-                                      !showControlNotifier.value;
+                                  showControlNotifier.value = !showControlNotifier.value;
                                 }),
                                 onDoubleTap: _pause,
                                 child: Container(
@@ -419,9 +392,7 @@ class _NetVideoPlayerState extends State<NetVideoPlayer> {
   }
 
   void _togglePlaying() async {
-    _controller.value.isPlaying
-        ? await _controller.pause()
-        : await _controller.play();
+    _controller.value.isPlaying ? await _controller.pause() : await _controller.play();
   }
 
   void _onSliderPositionChanged(double progress) {
@@ -443,26 +414,21 @@ class _NetVideoPlayerState extends State<NetVideoPlayer> {
   }
 
   createTabContentList() {
-    List<Widget> playListButtons =
-        widget.videoList.asMap().keys.map((int activeIndex) {
+    List<Widget> playListButtons = widget.videoList.asMap().keys.map((int activeIndex) {
       return Padding(
         padding: const EdgeInsets.only(left: 5, right: 5),
         child: ElevatedButton(
           style: ButtonStyle(
-              shape: MaterialStateProperty.all(RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(5))),
+              shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(5))),
               elevation: MaterialStateProperty.all(0),
-              backgroundColor: MaterialStateProperty.all(
-                  activeIndex == _currActiveIdx ? Colors.red : Colors.blue)),
+              backgroundColor: MaterialStateProperty.all(activeIndex == _currActiveIdx ? Colors.red : Colors.blue)),
           onPressed: () async {
             setState(() {
               _currActiveIdx = activeIndex;
             });
             String nextVideoUrl = widget.videoList[activeIndex]['url'];
             if (widget.type == 'normal') {
-              
-              _videoPlayerController =
-                  VideoPlayerController.network(nextVideoUrl,httpHeaders: widget.headers);
+              _videoPlayerController = VideoPlayerController.network(nextVideoUrl, httpHeaders: widget.headers);
               _chewieController = ChewieController(
                 videoPlayerController: _videoPlayerController,
                 aspectRatio: 16 / 9,

@@ -9,7 +9,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:dartssh2/dartssh2.dart';
 
 import 'package:horopic/utils/global.dart';
-import 'package:horopic/utils/sql_utils.dart';
 import 'package:horopic/picture_host_configure/configure_page/ftp_configure.dart';
 import 'package:horopic/utils/common_functions.dart';
 
@@ -77,8 +76,7 @@ class FTPManageAPI {
           List itemAttr = item.longname.split(RegExp(r'\s+'));
           if (itemAttr[8] != '.' && itemAttr[8] != '..') {
             Map temp = {
-              'type':
-                  itemAttr[0].toString().startsWith('d') ? 'folder' : 'file',
+              'type': itemAttr[0].toString().startsWith('d') ? 'folder' : 'file',
               'permissions': itemAttr[0],
               'numberOflinks': itemAttr[1],
               'owner': itemAttr[2],
@@ -274,41 +272,12 @@ class FTPManageAPI {
       String uploadPath = folder;
       String ftpHomeDir = configMap['ftpHomeDir'];
 
-      List sqlconfig = [];
-      sqlconfig.add(ftpHost);
-      sqlconfig.add(ftpPort);
-      sqlconfig.add(ftpUser);
-      sqlconfig.add(ftpPassword);
-      sqlconfig.add(ftpType);
-      sqlconfig.add(isAnonymous);
-      sqlconfig.add(uploadPath);
-      sqlconfig.add(ftpHomeDir);
-      String defaultUser = await Global.getUser();
-      sqlconfig.add(defaultUser);
-      var queryFTP = await MySqlUtils.queryFTP(username: defaultUser);
-      var queryuser = await MySqlUtils.queryUser(username: defaultUser);
-
-      if (queryuser == 'Empty') {
-        return ['failed'];
-      }
-      var sqlResult = '';
-
-      if (queryFTP == 'Empty') {
-        sqlResult = await MySqlUtils.insertFTP(content: sqlconfig);
-      } else {
-        sqlResult = await MySqlUtils.updateFTP(content: sqlconfig);
-      }
-
-      if (sqlResult == "Success") {
-        final ftpConfig = FTPConfigModel(ftpHost, ftpPort, ftpUser, ftpPassword,
-            ftpType, isAnonymous, uploadPath, ftpHomeDir);
-        final ftpConfigJson = jsonEncode(ftpConfig);
-        final ftpConfigFile = await localFile;
-        await ftpConfigFile.writeAsString(ftpConfigJson);
-        return ['success'];
-      } else {
-        return ['failed'];
-      }
+      final ftpConfig =
+          FTPConfigModel(ftpHost, ftpPort, ftpUser, ftpPassword, ftpType, isAnonymous, uploadPath, ftpHomeDir);
+      final ftpConfigJson = jsonEncode(ftpConfig);
+      final ftpConfigFile = await localFile;
+      await ftpConfigFile.writeAsString(ftpConfigJson);
+      return ['success'];
     } catch (e) {
       FLog.error(
           className: "FTPManageAPI",
@@ -319,8 +288,7 @@ class FTPManageAPI {
     }
   }
 
-  static uploadFileSFTP(
-      String uploadPath, String filePath, String fileName) async {
+  static uploadFileSFTP(String uploadPath, String filePath, String fileName) async {
     Map configMap = await getConfigMap();
     String ftpHost = configMap['ftpHost'];
     String ftpPort = configMap['ftpPort'];
@@ -337,17 +305,16 @@ class FTPManageAPI {
       );
       final sftp = await client.sftp();
       if (uploadPath == 'None') {
-          uploadPath = '/';
-        }
-        if (!uploadPath.startsWith('/')) {
-          uploadPath = '/$uploadPath';
-        }
-        if (!uploadPath.endsWith('/')) {
-          uploadPath = '$uploadPath/';
-        }
+        uploadPath = '/';
+      }
+      if (!uploadPath.startsWith('/')) {
+        uploadPath = '/$uploadPath';
+      }
+      if (!uploadPath.endsWith('/')) {
+        uploadPath = '$uploadPath/';
+      }
       String urlPath = uploadPath + fileName;
-      var file = await sftp.open(urlPath,
-          mode: SftpFileOpenMode.create | SftpFileOpenMode.write);
+      var file = await sftp.open(urlPath, mode: SftpFileOpenMode.create | SftpFileOpenMode.write);
       int fileSize = File(filePath).lengthSync();
       bool operateDone = false;
       file.write(File(filePath).openRead().cast(), onProgress: (int sent) {
@@ -373,10 +340,8 @@ class FTPManageAPI {
   //从网络链接下载文件后上传
   static uploadNetworkFileSFTP(String fileLink, String uploadPath) async {
     try {
-      String filename =
-          fileLink.substring(fileLink.lastIndexOf("/") + 1, fileLink.length);
-      filename = filename.substring(
-          0, !filename.contains("?") ? filename.length : filename.indexOf("?"));
+      String filename = fileLink.substring(fileLink.lastIndexOf("/") + 1, fileLink.length);
+      filename = filename.substring(0, !filename.contains("?") ? filename.length : filename.indexOf("?"));
       String savePath = await getTemporaryDirectory().then((value) {
         return value.path;
       });
@@ -437,22 +402,13 @@ class FTPManageAPI {
 
     if (successCount == 0) {
       return Fluttertoast.showToast(
-          msg: '上传失败',
-          toastLength: Toast.LENGTH_SHORT,
-          timeInSecForIosWeb: 2,
-          fontSize: 16.0);
+          msg: '上传失败', toastLength: Toast.LENGTH_SHORT, timeInSecForIosWeb: 2, fontSize: 16.0);
     } else if (failCount == 0) {
       return Fluttertoast.showToast(
-          msg: '上传成功',
-          toastLength: Toast.LENGTH_SHORT,
-          timeInSecForIosWeb: 2,
-          fontSize: 16.0);
+          msg: '上传成功', toastLength: Toast.LENGTH_SHORT, timeInSecForIosWeb: 2, fontSize: 16.0);
     } else {
       return Fluttertoast.showToast(
-          msg: '成功$successCount,失败$failCount',
-          toastLength: Toast.LENGTH_SHORT,
-          timeInSecForIosWeb: 2,
-          fontSize: 16.0);
+          msg: '成功$successCount,失败$failCount', toastLength: Toast.LENGTH_SHORT, timeInSecForIosWeb: 2, fontSize: 16.0);
     }
   }
 }

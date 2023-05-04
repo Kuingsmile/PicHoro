@@ -7,10 +7,7 @@ import 'package:horopic/utils/global.dart';
 
 class GithubImageUploadUtils {
   //上传接口
-  static uploadApi(
-      {required String path,
-      required String name,
-      required Map configMap}) async {
+  static uploadApi({required String path, required String name, required Map configMap}) async {
     String formatedURL = '';
     String base64Image = base64Encode(File(path).readAsBytesSync());
 
@@ -27,14 +24,11 @@ class GithubImageUploadUtils {
       "Accept": "application/vnd.github+json",
     };
     String trimedPath = configMap['storePath'].toString().trim();
-    trimedPath = trimedPath
-        .replaceAll(RegExp(r'^/+'), '')
-        .replaceAll(RegExp(r'/+$'), '');
+    trimedPath = trimedPath.replaceAll(RegExp(r'^/+'), '').replaceAll(RegExp(r'/+$'), '');
     Dio dio = Dio(options);
     String uploadUrl = '';
     if (trimedPath == 'None') {
-      uploadUrl =
-          "https://api.github.com/repos/${configMap["githubusername"]}/${configMap["repo"]}/contents/$name";
+      uploadUrl = "https://api.github.com/repos/${configMap["githubusername"]}/${configMap["repo"]}/contents/$name";
     } else {
       uploadUrl =
           "https://api.github.com/repos/${configMap["githubusername"]}/${configMap["repo"]}/contents/$trimedPath/$name";
@@ -49,9 +43,8 @@ class GithubImageUploadUtils {
         String downloadUrl = '';
         if (configMap['customDomain'] != 'None') {
           if (configMap['customDomain'].toString().endsWith('/')) {
-            String trimedCustomDomain = configMap['customDomain']
-                .toString()
-                .substring(0, configMap['customDomain'].toString().length - 1);
+            String trimedCustomDomain =
+                configMap['customDomain'].toString().substring(0, configMap['customDomain'].toString().length - 1);
             if (trimedPath == 'None') {
               downloadUrl = '$trimedCustomDomain$name';
             } else {
@@ -67,14 +60,12 @@ class GithubImageUploadUtils {
         } else {
           downloadUrl = response.data!['content']['download_url'];
         }
-        if (!downloadUrl.startsWith('http') &&
-            !downloadUrl.startsWith('https')) {
+        if (!downloadUrl.startsWith('http') && !downloadUrl.startsWith('https')) {
           downloadUrl = 'http://$downloadUrl';
         }
         //复制的链接地址应该是downloadUrl
         if (Global.isCopyLink == true) {
-          formatedURL =
-              linkGenerateDict[Global.defaultLKformat]!(downloadUrl, name);
+          formatedURL = linkGenerateDict[Global.defaultLKformat]!(downloadUrl, name);
         } else {
           formatedURL = downloadUrl;
         }
@@ -122,9 +113,7 @@ class GithubImageUploadUtils {
     Dio dio = Dio(options);
     String trimedPath = configMapFromPictureKey['storePath'].toString().trim();
 
-    trimedPath = trimedPath
-        .replaceAll(RegExp(r'^/+'), '')
-        .replaceAll(RegExp(r'/+$'), '');
+    trimedPath = trimedPath.replaceAll(RegExp(r'^/+'), '').replaceAll(RegExp(r'/+$'), '');
 
     String deleteUrl = '';
     if (trimedPath == 'None') {
@@ -148,8 +137,7 @@ class GithubImageUploadUtils {
         FLog.error(
             className: "GithubImageUploadUtils",
             methodName: "deleteApi",
-            text: formatErrorMessage({}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
+            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(

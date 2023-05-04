@@ -29,24 +29,19 @@ Future<File> get _localFile async {
   String defaultUser = await Global.getUser();
   switch (defaultConfig) {
     case 'lskypro':
-      return File(
-          '${directory.path}/${defaultUser}_${getpdconfig('lsky.pro')}.txt');
+      return File('${directory.path}/${defaultUser}_${getpdconfig('lsky.pro')}.txt');
     case 'smms':
-      return File(
-          '${directory.path}/${defaultUser}_${getpdconfig('sm.ms')}.txt');
+      return File('${directory.path}/${defaultUser}_${getpdconfig('sm.ms')}.txt');
     case 'PBhostExtend1':
       return File('${directory.path}/${defaultUser}_${getpdconfig('ftp')}.txt');
     case 'PBhostExtend2':
       return File('${directory.path}/${defaultUser}_${getpdconfig('aws')}.txt');
     case 'PBhostExtend3':
-      return File(
-          '${directory.path}/${defaultUser}_${getpdconfig('alist')}.txt');
+      return File('${directory.path}/${defaultUser}_${getpdconfig('alist')}.txt');
     case 'PBhostExtend4':
-      return File(
-          '${directory.path}/${defaultUser}_${getpdconfig('webdav')}.txt');
+      return File('${directory.path}/${defaultUser}_${getpdconfig('webdav')}.txt');
     default:
-      return File(
-          '${directory.path}/${defaultUser}_${getpdconfig(defaultConfig)}.txt');
+      return File('${directory.path}/${defaultUser}_${getpdconfig(defaultConfig)}.txt');
   }
 }
 
@@ -76,8 +71,7 @@ deleterentry(Map deleteConfig) async {
 
   String defaultConfig = await Global.getShowedPBhost();
   try {
-    var result = await deleteFunc[defaultConfig]!(
-        deleteMap: deleteConfig, configMap: configMap);
+    var result = await deleteFunc[defaultConfig]!(deleteMap: deleteConfig, configMap: configMap);
     return result;
   } catch (e) {
     flogErr(

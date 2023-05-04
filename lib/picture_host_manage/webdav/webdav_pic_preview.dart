@@ -32,7 +32,7 @@ class WebdavImagePreviewState extends State<WebdavImagePreview> {
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
-        title:  titleText('图片预览'),
+        title: titleText('图片预览'),
       ),
       body: PageView.builder(
         controller: _pageController,
@@ -49,8 +49,7 @@ class WebdavImagePreviewState extends State<WebdavImagePreview> {
             mode: ExtendedImageMode.gesture,
             cache: true,
             headers: Map<String, String>.from(widget.headersList[index]),
-            loadStateChanged: (state) =>
-                defaultLoadStateChanged(state, iconSize: 60),
+            loadStateChanged: (state) => defaultLoadStateChanged(state, iconSize: 60),
             initGestureConfigHandler: (state) {
               return GestureConfig(
                   minScale: 0.9,

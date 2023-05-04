@@ -38,8 +38,7 @@ class UploadManager {
     };
   }
 
-  Future<void> upload(
-      String path, String fileName, Map configMap, canceltoken) async {
+  Future<void> upload(String path, String fileName, Map configMap, canceltoken) async {
     try {
       var task = getUpload(fileName);
 
@@ -91,8 +90,7 @@ class UploadManager {
         onSendProgress: createCallback(path, fileName),
         cancelToken: canceltoken,
       );
-      if (response.statusCode == HttpStatus.ok &&
-          response.data!['success'] == true) {
+      if (response.statusCode == HttpStatus.ok && response.data!['success'] == true) {
         setStatus(task, UploadStatus.completed);
       }
     } catch (e) {
@@ -105,8 +103,7 @@ class UploadManager {
           'imgurUploadManager',
           'upload');
       var task = getUpload(fileName)!;
-      if (task.status.value != UploadStatus.canceled &&
-          task.status.value != UploadStatus.completed) {
+      if (task.status.value != UploadStatus.canceled && task.status.value != UploadStatus.completed) {
         setStatus(task, UploadStatus.failed);
         runningTasks--;
         if (_queue.isNotEmpty) {
@@ -133,8 +130,7 @@ class UploadManager {
         runningTasks--;
         continue;
       }
-      upload(currentRequest.path, currentRequest.name, currentRequest.configMap,
-          currentRequest.cancelToken);
+      upload(currentRequest.path, currentRequest.name, currentRequest.configMap, currentRequest.cancelToken);
       await Future.delayed(const Duration(milliseconds: 500), null);
     }
   }
@@ -149,8 +145,7 @@ class UploadManager {
     }
   }
 
-  Future<UploadTask?> addUpload(
-      String path, String fileName, Map<String, dynamic> configMap) async {
+  Future<UploadTask?> addUpload(String path, String fileName, Map<String, dynamic> configMap) async {
     if (path.isNotEmpty && fileName.isNotEmpty) {
       return await _addUploadRequest(UploadRequest(path, fileName, configMap));
     }
@@ -160,16 +155,14 @@ class UploadManager {
   Future<UploadTask> _addUploadRequest(UploadRequest uploadRequest) async {
     if (_cache[uploadRequest.name] != null) {
       if ((_cache[uploadRequest.name]!.status.value == UploadStatus.completed ||
-              _cache[uploadRequest.name]!.status.value ==
-                  UploadStatus.uploading) &&
+              _cache[uploadRequest.name]!.status.value == UploadStatus.uploading) &&
           _cache[uploadRequest.name]!.request == uploadRequest) {
         return _cache[uploadRequest.name]!;
       } else {
         _queue.remove(_cache[uploadRequest.name]);
       }
     }
-    _queue.add(UploadRequest(
-        uploadRequest.path, uploadRequest.name, uploadRequest.configMap));
+    _queue.add(UploadRequest(uploadRequest.path, uploadRequest.name, uploadRequest.configMap));
     var task = UploadTask(_queue.last);
     _cache[uploadRequest.name] = task;
     _startExecution();
@@ -224,8 +217,7 @@ class UploadManager {
     return _cache.values as List<UploadTask>;
   }
 
-  Future<void> addBatchUploads(List<String> paths, List<String> names,
-      List<Map<String, dynamic>> configMaps) async {
+  Future<void> addBatchUploads(List<String> paths, List<String> names, List<Map<String, dynamic>> configMaps) async {
     for (var i = 0; i < paths.length; i++) {
       await addUpload(paths[i], names[i], configMaps[i]);
     }
@@ -241,22 +233,19 @@ class UploadManager {
     }
   }
 
-  Future<void> cancelBatchUploads(
-      List<String> paths, List<String> names) async {
+  Future<void> cancelBatchUploads(List<String> paths, List<String> names) async {
     for (var i = 0; i < paths.length; i++) {
       await cancelUpload(paths[i], names[i]);
     }
   }
 
-  Future<void> resumeBatchUploads(
-      List<String> paths, List<String> names) async {
+  Future<void> resumeBatchUploads(List<String> paths, List<String> names) async {
     for (var i = 0; i < paths.length; i++) {
       await resumeUpload(paths[i], names[i]);
     }
   }
 
-  ValueNotifier<double> getBatchUploadProgress(
-      List<String> paths, List<String> names) {
+  ValueNotifier<double> getBatchUploadProgress(List<String> paths, List<String> names) {
     ValueNotifier<double> progress = ValueNotifier(0);
     var total = paths.length;
 
@@ -303,8 +292,7 @@ class UploadManager {
     return progress;
   }
 
-  Future<List<UploadTask?>?> whenBatchUploadsComplete(
-      List<String> paths, List<String> names,
+  Future<List<UploadTask?>?> whenBatchUploadsComplete(List<String> paths, List<String> names,
       {Duration timeout = const Duration(hours: 2)}) async {
     var completer = Completer<List<UploadTask?>?>();
     var completed = 0;

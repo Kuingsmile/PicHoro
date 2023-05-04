@@ -15,8 +15,7 @@ class ConfigureStoreFile {
 
   Map initConigureStoreMap(String psHost) {
     Map<String, Map<String, String>> configureStoreMap = {};
-    Map<String, String> template =
-        ConfigureTemplate.psHostNameToTemplate[psHost]!;
+    Map<String, String> template = ConfigureTemplate.psHostNameToTemplate[psHost]!;
     for (int i = 0; i < alphabet.length; i++) {
       configureStoreMap[alphabet[i]] = template;
     }
@@ -61,8 +60,7 @@ class ConfigureStoreFile {
     String configureFilePath = await localConfigureFilePath(psHost);
     String configureStoreMapJson = File(configureFilePath).readAsStringSync();
     Map configureStoreMap = json.decode(configureStoreMapJson);
-    Map<String, String> template =
-        ConfigureTemplate.psHostNameToTemplate[psHost]!;
+    Map<String, String> template = ConfigureTemplate.psHostNameToTemplate[psHost]!;
     configureStoreMap[key] = template;
     configureStoreMapJson = json.encode(configureStoreMap);
     File(configureFilePath).writeAsStringSync(configureStoreMapJson);
@@ -74,8 +72,7 @@ class ConfigureStoreFile {
     File(configureFilePath).writeAsStringSync(configureStoreMapJson);
   }
 
-  Future<void> updateConfigureFileKey(
-      String psHost, String key, Map value) async {
+  Future<void> updateConfigureFileKey(String psHost, String key, Map value) async {
     String configureFilePath = await localConfigureFilePath(psHost);
     String configureStoreMapJson = File(configureFilePath).readAsStringSync();
     Map configureStoreMap = json.decode(configureStoreMapJson);
@@ -89,8 +86,7 @@ class ConfigureStoreFile {
     List keyList = configureStoreMap[alphabet[0]]!.keys.toList();
     for (var i = 0; i < alphabet.length; i++) {
       for (var j = 0; j < keyList.length; j++) {
-        if (configureStoreMap[alphabet[i]]![keyList[j]] !=
-            ConfigureTemplate.placeholder) {
+        if (configureStoreMap[alphabet[i]]![keyList[j]] != ConfigureTemplate.placeholder) {
           return false;
         }
       }
@@ -115,10 +111,8 @@ class ConfigureStoreFile {
     for (var i = 0; i < alphabet.length; i++) {
       Map configureStoreMapOne = {};
       for (var j = 0; j < keyList.length; j++) {
-        if (configureStoreMap[alphabet[i]]![keyList[j]] !=
-            ConfigureTemplate.placeholder) {
-          configureStoreMapOne[keyList[j]] =
-              configureStoreMap[alphabet[i]]![keyList[j]];
+        if (configureStoreMap[alphabet[i]]![keyList[j]] != ConfigureTemplate.placeholder) {
+          configureStoreMapOne[keyList[j]] = configureStoreMap[alphabet[i]]![keyList[j]];
         }
       }
       if (!checkIfOneUndetermined(configureStoreMapOne)) {
@@ -145,8 +139,7 @@ class ConfigureStoreFile {
     return configureStoreMapExportJson;
   }
 
-  Future<void> importConfigureFromJson(
-      String psHost, String configureStoreMapImportJson) async {
+  Future<void> importConfigureFromJson(String psHost, String configureStoreMapImportJson) async {
     Map configureStoreMap = await readConfigureFile(psHost);
     Map configureStoreMapImport = json.decode(configureStoreMapImportJson);
     List keyList = configureStoreMap[alphabet[0]]!.keys.toList();
@@ -154,11 +147,9 @@ class ConfigureStoreFile {
       if (configureStoreMapImport[alphabet[i]] != null) {
         for (var j = 0; j < keyList.length; j++) {
           if (configureStoreMapImport[alphabet[i]]![keyList[j]] != null) {
-            configureStoreMap[alphabet[i]]![keyList[j]] =
-                configureStoreMapImport[alphabet[i]]![keyList[j]];
+            configureStoreMap[alphabet[i]]![keyList[j]] = configureStoreMapImport[alphabet[i]]![keyList[j]];
           } else {
-            configureStoreMap[alphabet[i]]![keyList[j]] =
-                ConfigureTemplate.placeholder;
+            configureStoreMap[alphabet[i]]![keyList[j]] = ConfigureTemplate.placeholder;
           }
         }
       }

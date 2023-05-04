@@ -1,10 +1,11 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:f_logs/f_logs.dart';
 import 'package:fluro/fluro.dart';
 
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/common_functions.dart';
-import 'package:horopic/utils/sql_utils.dart';
 import 'package:horopic/pages/loading.dart';
 import 'package:horopic/picture_host_manage/manage_api/upyun_manage_api.dart';
 import 'package:horopic/router/application.dart';
@@ -30,32 +31,15 @@ class UpyunLogInState extends State<UpyunLogIn> {
 
   _saveuserpasswd() async {
     try {
-      String currentPicHoroUser = await Global.getUser();
-      String currentPicHoroPasswd = await Global.getPassword();
-      var usernamecheck =
-          await MySqlUtils.queryUser(username: currentPicHoroUser);
-
-      if (usernamecheck == 'Empty') {
-        return showToast('请先去设置页面注册');
-      } else if (currentPicHoroPasswd != usernamecheck['password']) {
-        return showToast('请先去设置页面登录');
-      }
-      var queryUpyunManage =
-          await MySqlUtils.queryUpyunManage(username: currentPicHoroUser);
-      if (queryUpyunManage == 'Empty') {
-        var getTokenResult = await UpyunManageAPI.getToken(
-            _userNametext.text, _passwordcontroller.text);
+      var queryUpyunManage = await UpyunManageAPI.readUpyunManageConfig();
+      if (queryUpyunManage == 'Error') {
+        var getTokenResult = await UpyunManageAPI.getToken(_userNametext.text, _passwordcontroller.text);
         if (getTokenResult[0] == 'success') {
           String token = getTokenResult[1]['access_token'];
           String tokenName = getTokenResult[1]['name'];
-          var saveResult = await MySqlUtils.insertUpyunManage(content: [
-            _userNametext.text,
-            _passwordcontroller.text,
-            token,
-            tokenName,
-            currentPicHoroUser
-          ]);
-          if (saveResult == 'Success') {
+          var saveResult = await UpyunManageAPI.saveUpyunManageConfig(
+              _userNametext.text, _passwordcontroller.text, token, tokenName);
+          if (saveResult) {
             loginStatus = true;
             return showToast('保存成功');
           } else {
@@ -64,28 +48,25 @@ class UpyunLogInState extends State<UpyunLogIn> {
         } else {
           return showToast('登录失败');
         }
-      } else if (queryUpyunManage == 'Error') {
-        return showToast('获取数据库错误');
       } else {
-        String token = queryUpyunManage['token'];
+        var jsonResult = jsonDecode(queryUpyunManage);
+        String token = jsonResult['token'];
         var checkTokenResult = await UpyunManageAPI.checkToken(token);
         if (checkTokenResult[0] == 'success') {
           loginStatus = true;
           return showToast('保存成功');
         } else {
-          var getTokenResult = await UpyunManageAPI.getToken(
-              _userNametext.text, _passwordcontroller.text);
+          var getTokenResult = await UpyunManageAPI.getToken(_userNametext.text, _passwordcontroller.text);
           if (getTokenResult[0] == 'success') {
             String token = getTokenResult[1]['access_token'];
             String tokenName = getTokenResult[1]['name'];
-            var saveResult = await MySqlUtils.updateUpyunManage(content: [
+            var saveResult = await UpyunManageAPI.saveUpyunManageConfig(
               _userNametext.text,
               _passwordcontroller.text,
               token,
               tokenName,
-              currentPicHoroUser
-            ]);
-            if (saveResult == 'Success') {
+            );
+            if (saveResult) {
               loginStatus = true;
               return showToast('保存成功');
             } else {
@@ -212,16 +193,14 @@ class UpyunLogInState extends State<UpyunLogIn> {
                       Navigator.pop(context);
                     } else {
                       Navigator.pop(context);
-                      Application.router.navigateTo(
-                          context, Routes.upyunBucketList,
-                          transition: TransitionType.inFromRight);
+                      Application.router
+                          .navigateTo(context, Routes.upyunBucketList, transition: TransitionType.inFromRight);
                     }
                   }
                 },
                 child: const Text(
                   '登录又拍云',
-                  style: TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.bold),
+                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                 )),
           ),
         ],

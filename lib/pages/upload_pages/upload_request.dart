@@ -13,10 +13,7 @@ class UploadRequest {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is UploadRequest &&
-          runtimeType == other.runtimeType &&
-          path == other.path &&
-          name == other.name;
+      other is UploadRequest && runtimeType == other.runtimeType && path == other.path && name == other.name;
 
   @override
   int get hashCode => path.hashCode ^ name.hashCode;

@@ -9,9 +9,7 @@ class WebViewPage extends StatefulWidget {
   final String title;
   final bool enableJs;
 
-  const WebViewPage(
-      {Key? key, required this.url, required this.title, this.enableJs = false})
-      : super(key: key);
+  const WebViewPage({Key? key, required this.url, required this.title, this.enableJs = false}) : super(key: key);
 
   @override
   WebViewPageState createState() => WebViewPageState();
@@ -30,15 +28,11 @@ class WebViewPageState extends State<WebViewPage> {
       appBar: AppBar(
         centerTitle: true,
         elevation: 0,
-        title: widget.title == 'None'
-            ? titleText('网页浏览')
-            : titleText(widget.title),
+        title: widget.title == 'None' ? titleText('网页浏览') : titleText(widget.title),
       ),
       body: WebView(
         initialUrl: widget.url,
-        javascriptMode: widget.enableJs
-            ? JavascriptMode.unrestricted
-            : JavascriptMode.disabled,
+        javascriptMode: widget.enableJs ? JavascriptMode.unrestricted : JavascriptMode.disabled,
       ),
     );
   }

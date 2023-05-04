@@ -7,7 +7,6 @@ import 'package:f_logs/f_logs.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'package:horopic/utils/global.dart';
-import 'package:horopic/utils/sql_utils.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/picture_host_configure/configure_page/alist_configure.dart';
 
@@ -20,10 +19,14 @@ class AlistManageAPI {
     '189CloudPC': '天翼云盘客户端',
     'AList V2': 'Alist V2',
     'AList V3': 'Alist V3',
+    'Alias': 'Alias',
     'Aliyundrive': '阿里云盘',
+    'AliyundriveOpen': '阿里云盘开放平台',
     'AliyundriveShare': '阿里云盘分享',
     'BaiduNetdisk': '百度网盘',
     'BaiduPhoto': '一刻相册',
+    'BaiduShare': '百度网盘分享',
+    'Cloudreve': 'Cloudreve',
     'FTP': 'FTP',
     'GoogleDrive': '谷歌云盘',
     'GooglePhoto': '谷歌相册',
@@ -32,15 +35,21 @@ class AlistManageAPI {
     'MediaTrack': '分秒帧',
     'Mega_nz': 'MEGA.nz',
     'Onedrive': 'OneDrive',
+    'OnedriveAPP': 'OneDrive APP',
     'PikPak': 'PikPak',
+    'PikPakShare': 'PikPak分享',
     'Quark': '夸克',
     'S3': 'S3',
     'SFTP': 'SFTP',
     'SMB': 'SMB',
+    'Seafile': 'Seafile',
     'Teambition': 'Teambition网盘',
+    'Terabox': 'Terabox',
     'Thunder': '迅雷',
     'ThunderExpert': '迅雷专家版',
+    'Trainbit': 'Trainbit',
     'USS': '又拍云存储',
+    'UrlTree': 'UrlTree',
     'Virtual': '虚拟存储',
     'WebDav': 'WebDav',
     'YandexDisk': 'YandexDisk',
@@ -132,46 +141,20 @@ class AlistManageAPI {
     Map configMap = await getConfigMap();
     String uploadPath = configMap['uploadPath'];
     String token = configMap['token'];
-    var res = await AlistManageAPI.getToken(
-        configMap['host'], configMap['alistusername'], configMap['password']);
+    var res = await AlistManageAPI.getToken(configMap['host'], configMap['alistusername'], configMap['password']);
     if (res[0] == 'success') {
       token = res[1];
-      String sqlResult = '';
-      try {
-        List sqlconfig = [];
-        sqlconfig.add(configMap['host']);
-        sqlconfig.add(configMap['alistusername']);
-        sqlconfig.add(configMap['password']);
-        sqlconfig.add(token);
-        sqlconfig.add(uploadPath);
-        String defaultUser = await Global.getUser();
-        sqlconfig.add(defaultUser);
-        var queryalist = await MySqlUtils.queryAlist(username: defaultUser);
-        var queryuser = await MySqlUtils.queryUser(username: defaultUser);
-        if (queryuser == 'Empty') {
-          return ['failed'];
-        } else if (queryalist == 'Empty') {
-          sqlResult = await MySqlUtils.insertAlist(content: sqlconfig);
-        } else {
-          sqlResult = await MySqlUtils.updateAlist(content: sqlconfig);
-        }
-      } catch (e) {
-        return ['failed'];
-      }
-      if (sqlResult == "Success") {
-        final alistConfig = AlistConfigModel(
-          configMap['host'],
-          configMap['alistusername'],
-          configMap['password'],
-          token,
-          uploadPath,
-        );
-        final alistConfigJson = jsonEncode(alistConfig);
-        final alistConfigFile = await AlistConfigState().localFile;
-        alistConfigFile.writeAsString(alistConfigJson);
-      } else {
-        return ['failed'];
-      }
+      final alistConfig = AlistConfigModel(
+        configMap['host'],
+        configMap['alistusername'],
+        configMap['password'],
+        token,
+        uploadPath,
+      );
+      final alistConfigJson = jsonEncode(alistConfig);
+      final alistConfigFile = await AlistConfigState().localFile;
+      alistConfigFile.writeAsString(alistConfigJson);
+
       return ['success', token];
     } else {
       return ['failed'];
@@ -204,8 +187,7 @@ class AlistManageAPI {
         FLog.error(
             className: "AlistManageAPI",
             methodName: "getBucketList",
-            text: formatErrorMessage({}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
+            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
@@ -258,8 +240,7 @@ class AlistManageAPI {
         FLog.error(
             className: "AlistManageAPI",
             methodName: "changeBucketState",
-            text: formatErrorMessage({}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
+            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
@@ -303,8 +284,7 @@ class AlistManageAPI {
         FLog.error(
             className: "AlistManageAPI",
             methodName: "deleteBucket",
-            text: formatErrorMessage({}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
+            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
@@ -346,8 +326,7 @@ class AlistManageAPI {
         FLog.error(
             className: "AlistManageAPI",
             methodName: "createBucket",
-            text: formatErrorMessage({}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
+            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
@@ -389,8 +368,7 @@ class AlistManageAPI {
         FLog.error(
             className: "AlistManageAPI",
             methodName: "updateBucket",
-            text: formatErrorMessage({}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
+            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
@@ -415,43 +393,18 @@ class AlistManageAPI {
       if (uploadPath == '/' || uploadPath == '') {
         uploadPath = 'None';
       }
-      List sqlconfig = [];
-      sqlconfig.add(host);
-      sqlconfig.add(alistusername);
-      sqlconfig.add(password);
-      sqlconfig.add(token);
-      sqlconfig.add(uploadPath);
-      String defaultUser = await Global.getUser();
-      sqlconfig.add(defaultUser);
-      var queryAlist = await MySqlUtils.queryAlist(username: defaultUser);
-      var queryuser = await MySqlUtils.queryUser(username: defaultUser);
 
-      if (queryuser == 'Empty') {
-        return ['failed'];
-      }
-      var sqlResult = '';
-
-      if (queryAlist == 'Empty') {
-        sqlResult = await MySqlUtils.insertAlist(content: sqlconfig);
-      } else {
-        sqlResult = await MySqlUtils.updateAlist(content: sqlconfig);
-      }
-
-      if (sqlResult == "Success") {
-        final alistConfig = AlistConfigModel(
-          host,
-          alistusername,
-          password,
-          token,
-          uploadPath,
-        );
-        final alistConfigJson = jsonEncode(alistConfig);
-        final alistConfigFile = await _localFile;
-        await alistConfigFile.writeAsString(alistConfigJson);
-        return ['success'];
-      } else {
-        return ['failed'];
-      }
+      final alistConfig = AlistConfigModel(
+        host,
+        alistusername,
+        password,
+        token,
+        uploadPath,
+      );
+      final alistConfigJson = jsonEncode(alistConfig);
+      final alistConfigFile = await _localFile;
+      await alistConfigFile.writeAsString(alistConfigJson);
+      return ['success'];
     } catch (e) {
       FLog.error(
           className: "AlistManageAPI",
@@ -504,8 +457,7 @@ class AlistManageAPI {
         FLog.error(
             className: "AlistManageAPI",
             methodName: "getTotalPage",
-            text: formatErrorMessage({}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
+            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
@@ -557,8 +509,7 @@ class AlistManageAPI {
         FLog.error(
             className: "AlistManageAPI",
             methodName: "listFolderByPage",
-            text: formatErrorMessage({}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
+            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
@@ -610,8 +561,7 @@ class AlistManageAPI {
               url,
               data: dataMap,
             );
-            if (response.statusCode == 200 &&
-                response.data['message'] == 'success') {
+            if (response.statusCode == 200 && response.data['message'] == 'success') {
               if (response.data['data']['total'] == 0) {
                 return ['success', fileList];
               }
@@ -631,8 +581,7 @@ class AlistManageAPI {
         FLog.error(
             className: "AlistManageAPI",
             methodName: "listFolder",
-            text: formatErrorMessage({}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
+            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
@@ -675,8 +624,7 @@ class AlistManageAPI {
         FLog.error(
             className: "AlistManageAPI",
             methodName: "getFileInfo",
-            text: formatErrorMessage({}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
+            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
@@ -719,8 +667,7 @@ class AlistManageAPI {
         FLog.error(
             className: "AlistManageAPI",
             methodName: "mkDir",
-            text: formatErrorMessage({}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
+            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
@@ -764,8 +711,7 @@ class AlistManageAPI {
         FLog.error(
             className: "AlistManageAPI",
             methodName: "rename",
-            text: formatErrorMessage({}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
+            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
@@ -809,8 +755,7 @@ class AlistManageAPI {
         FLog.error(
             className: "AlistManageAPI",
             methodName: "remove",
-            text: formatErrorMessage({}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
+            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
@@ -868,8 +813,7 @@ class AlistManageAPI {
         FLog.error(
             className: "AlistManageAPI",
             methodName: "uploadFile",
-            text: formatErrorMessage({}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
+            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
@@ -885,10 +829,8 @@ class AlistManageAPI {
   //从网络链接下载文件后上传
   static uploadNetworkFile(String fileLink, String uploadPath) async {
     try {
-      String filename =
-          fileLink.substring(fileLink.lastIndexOf("/") + 1, fileLink.length);
-      filename = filename.substring(
-          0, !filename.contains("?") ? filename.length : filename.indexOf("?"));
+      String filename = fileLink.substring(fileLink.lastIndexOf("/") + 1, fileLink.length);
+      filename = filename.substring(0, !filename.contains("?") ? filename.length : filename.indexOf("?"));
       String savePath = await getTemporaryDirectory().then((value) {
         return value.path;
       });
@@ -914,16 +856,14 @@ class AlistManageAPI {
         FLog.error(
             className: "AlistManageAPI",
             methodName: "uploadNetworkFile",
-            text: formatErrorMessage(
-                {'fileLink': fileLink, 'uploadPath': uploadPath}, e.toString(),
+            text: formatErrorMessage({'fileLink': fileLink, 'uploadPath': uploadPath}, e.toString(),
                 isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
             className: "AlistManageAPI",
             methodName: "uploadNetworkFile",
-            text: formatErrorMessage(
-                {'fileLink': fileLink, 'uploadPath': uploadPath}, e.toString()),
+            text: formatErrorMessage({'fileLink': fileLink, 'uploadPath': uploadPath}, e.toString()),
             dataLogType: DataLogType.ERRORS.toString());
       }
       return ['failed'];
@@ -948,22 +888,13 @@ class AlistManageAPI {
 
     if (successCount == 0) {
       return Fluttertoast.showToast(
-          msg: '上传失败',
-          toastLength: Toast.LENGTH_SHORT,
-          timeInSecForIosWeb: 2,
-          fontSize: 16.0);
+          msg: '上传失败', toastLength: Toast.LENGTH_SHORT, timeInSecForIosWeb: 2, fontSize: 16.0);
     } else if (failCount == 0) {
       return Fluttertoast.showToast(
-          msg: '上传成功',
-          toastLength: Toast.LENGTH_SHORT,
-          timeInSecForIosWeb: 2,
-          fontSize: 16.0);
+          msg: '上传成功', toastLength: Toast.LENGTH_SHORT, timeInSecForIosWeb: 2, fontSize: 16.0);
     } else {
       return Fluttertoast.showToast(
-          msg: '成功$successCount,失败$failCount',
-          toastLength: Toast.LENGTH_SHORT,
-          timeInSecForIosWeb: 2,
-          fontSize: 16.0);
+          msg: '成功$successCount,失败$failCount', toastLength: Toast.LENGTH_SHORT, timeInSecForIosWeb: 2, fontSize: 16.0);
     }
   }
 }

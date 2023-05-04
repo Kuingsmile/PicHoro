@@ -9,34 +9,25 @@ import 'package:horopic/utils/global.dart';
 
 class TencentImageUploadUtils {
   //表单上传的signature
-  static String getUploadAuthorization(
-      String secretKey, String keyTime, String uploadPolicyStr) {
-    String signKey = Hmac(sha1, utf8.encode(secretKey))
-        .convert(utf8.encode(keyTime))
-        .toString();
+  static String getUploadAuthorization(String secretKey, String keyTime, String uploadPolicyStr) {
+    String signKey = Hmac(sha1, utf8.encode(secretKey)).convert(utf8.encode(keyTime)).toString();
     String stringtosign = sha1.convert(utf8.encode(uploadPolicyStr)).toString();
-    String signature = Hmac(sha1, utf8.encode(signKey))
-        .convert(utf8.encode(stringtosign))
-        .toString();
+    String signature = Hmac(sha1, utf8.encode(signKey)).convert(utf8.encode(stringtosign)).toString();
     return signature;
   }
 
   //authorization
-  static String getDeleteAuthorization(String method, String urlpath,
-      Map header, String secretId, String secretKey) {
+  static String getDeleteAuthorization(String method, String urlpath, Map header, String secretId, String secretKey) {
     int startTimestamp = DateTime.now().millisecondsSinceEpoch ~/ 1000;
     int endTimestamp = startTimestamp + 86400;
     String keyTime = '$startTimestamp;$endTimestamp';
-    String signKey = Hmac(sha1, utf8.encode(secretKey))
-        .convert(utf8.encode(keyTime))
-        .toString();
+    String signKey = Hmac(sha1, utf8.encode(secretKey)).convert(utf8.encode(keyTime)).toString();
     String lowerMethod = method.toLowerCase();
     String headerList = '';
     String httpHeaders = '';
     header.forEach((key, value) {
       headerList += '${Uri.encodeComponent(key).toLowerCase()};';
-      httpHeaders +=
-          '${Uri.encodeComponent(key).toLowerCase()}=${Uri.encodeComponent(value)}&';
+      httpHeaders += '${Uri.encodeComponent(key).toLowerCase()}=${Uri.encodeComponent(value)}&';
     });
     if (headerList.isNotEmpty) {
       headerList = headerList.substring(0, headerList.length - 1);
@@ -45,21 +36,15 @@ class TencentImageUploadUtils {
       httpHeaders = httpHeaders.substring(0, httpHeaders.length - 1);
     }
     String httpString = '$lowerMethod\n$urlpath\n\n$httpHeaders\n';
-    String stringtosign =
-        'sha1\n$keyTime\n${sha1.convert(utf8.encode(httpString)).toString()}\n';
-    String signature = Hmac(sha1, utf8.encode(signKey))
-        .convert(utf8.encode(stringtosign))
-        .toString();
+    String stringtosign = 'sha1\n$keyTime\n${sha1.convert(utf8.encode(httpString)).toString()}\n';
+    String signature = Hmac(sha1, utf8.encode(signKey)).convert(utf8.encode(stringtosign)).toString();
     String authorization =
         'q-sign-algorithm=sha1&q-ak=$secretId&q-sign-time=$keyTime&q-key-time=$keyTime&q-header-list=$headerList&q-url-param-list=&q-signature=$signature';
     return authorization;
   }
 
   //上传接口
-  static uploadApi(
-      {required String path,
-      required String name,
-      required Map configMap}) async {
+  static uploadApi({required String path, required String name, required Map configMap}) async {
     String secretId = configMap['secretId'];
     String secretKey = configMap['secretKey'];
     String bucket = configMap['bucket'];
@@ -75,8 +60,7 @@ class TencentImageUploadUtils {
     }
 
     if (tencentpath != 'None') {
-      tencentpath =
-          '${tencentpath.replaceAll(RegExp(r'^/*'), '').replaceAll(RegExp(r'/*$'), '')}/';
+      tencentpath = '${tencentpath.replaceAll(RegExp(r'^/*'), '').replaceAll(RegExp(r'/*$'), '')}/';
     }
     String host = '$bucket.cos.$area.myqcloud.com';
     //云存储的路径
@@ -101,8 +85,7 @@ class TencentImageUploadUtils {
       ]
     };
     String uploadPolicyStr = jsonEncode(uploadPolicy);
-    String singature = TencentImageUploadUtils.getUploadAuthorization(
-        secretKey, keyTime, uploadPolicyStr);
+    String singature = TencentImageUploadUtils.getUploadAuthorization(secretKey, keyTime, uploadPolicyStr);
     FormData formData = FormData.fromMap({
       'key': urlpath,
       'policy': base64Encode(utf8.encode(uploadPolicyStr)),
@@ -163,8 +146,7 @@ class TencentImageUploadUtils {
 
         String formatedURL = '';
         if (Global.isCopyLink == true) {
-          formatedURL =
-              linkGenerateDict[Global.defaultLKformat]!(returnUrl, name);
+          formatedURL = linkGenerateDict[Global.defaultLKformat]!(returnUrl, name);
         } else {
           formatedURL = returnUrl;
         }

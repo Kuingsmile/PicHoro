@@ -15,7 +15,6 @@ import 'package:qiniu_flutter_sdk/qiniu_flutter_sdk.dart';
 import 'package:path/path.dart' as mypath;
 
 import 'package:horopic/utils/global.dart';
-import 'package:horopic/utils/sql_utils.dart';
 import 'package:horopic/utils/common_functions.dart';
 
 import 'package:horopic/picture_host_configure/configure_page/configure_export.dart';
@@ -226,27 +225,14 @@ class AllPShostState extends State<AllPShost> {
         !(result.contains('aliyun')) &&
         !(result.contains('upyun'))) {
       return Fluttertoast.showToast(
-          msg: "不包含支持的图床配置信息",
-          toastLength: Toast.LENGTH_SHORT,
-          timeInSecForIosWeb: 2,
-          fontSize: 16.0);
+          msg: "不包含支持的图床配置信息", toastLength: Toast.LENGTH_SHORT, timeInSecForIosWeb: 2, fontSize: 16.0);
     }
     Map<String, dynamic> jsonResult = jsonDecode(result);
 
     if (jsonResult['smms'] != null) {
       final smmsToken = jsonResult['smms']['token'];
       try {
-        List sqlconfig = [];
-        sqlconfig.add(smmsToken);
-        String defaultUser = await Global.getUser();
-        sqlconfig.add(defaultUser);
-        var querysmms = await MySqlUtils.querySmms(username: defaultUser);
-        var queryuser = await MySqlUtils.queryUser(username: defaultUser);
-        if (queryuser == 'Empty') {
-          showToast("请先登录");
-        }
         String validateURL = "https://smms.app/api/v2/profile";
-        // String validateURL = "https://sm.ms/api/v2/profile";被墙了
         BaseOptions options = setBaseOptions();
         options.headers = {
           "Content-Type": 'multipart/form-data',
@@ -255,25 +241,14 @@ class AllPShostState extends State<AllPShost> {
         //需要加一个空的formdata，不然会报错
         FormData formData = FormData.fromMap({});
         Dio dio = Dio(options);
-        String sqlResult = '';
         try {
           var validateResponse = await dio.post(validateURL, data: formData);
-          if (validateResponse.statusCode == 200 &&
-              validateResponse.data['success'] == true) {
-            if (querysmms == 'Empty') {
-              sqlResult = await MySqlUtils.insertSmms(content: sqlconfig);
-            } else {
-              sqlResult = await MySqlUtils.updateSmms(content: sqlconfig);
-            }
-            if (sqlResult == "Success") {
-              final smmsConfig = SmmsConfigModel(smmsToken);
-              final smmsConfigJson = jsonEncode(smmsConfig);
-              final smmsConfigFile = await smmsFile;
-              await smmsConfigFile.writeAsString(smmsConfigJson);
-              showToast("sm.ms配置成功");
-            } else {
-              showToast("sm.ms数据库错误");
-            }
+          if (validateResponse.statusCode == 200 && validateResponse.data['success'] == true) {
+            final smmsConfig = SmmsConfigModel(smmsToken);
+            final smmsConfigJson = jsonEncode(smmsConfig);
+            final smmsConfigFile = await smmsFile;
+            await smmsConfigFile.writeAsString(smmsConfigJson);
+            showToast("sm.ms配置成功");
           } else {
             showToast("sm.ms验证失败");
           }
@@ -300,8 +275,7 @@ class AllPShostState extends State<AllPShost> {
         String token = jsonResult['github']['token'];
         String githubUserApi = 'https://api.github.com/user';
         String usernameRepo = jsonResult['github']['repo'];
-        String githubusername =
-            usernameRepo.substring(0, usernameRepo.indexOf('/'));
+        String githubusername = usernameRepo.substring(0, usernameRepo.indexOf('/'));
         String repo = usernameRepo.substring(usernameRepo.indexOf('/') + 1);
         String storePath = jsonResult['github']['path'];
         if (storePath == '' || storePath.isEmpty) {
@@ -318,38 +292,15 @@ class AllPShostState extends State<AllPShost> {
           customDomain = 'None';
         }
         if (customDomain != 'None') {
-          if (!customDomain.startsWith('http') &&
-              !customDomain.startsWith('https')) {
+          if (!customDomain.startsWith('http') && !customDomain.startsWith('https')) {
             customDomain = 'http://$customDomain';
           }
           if (customDomain.endsWith('/')) {
             customDomain = customDomain.substring(0, customDomain.length - 1);
           }
         }
-
-        if (token.startsWith('Bearer ')) {
-        } else {
-          token = 'Bearer $token';
-        }
-
+        token = token.startsWith('Bearer ') ? token : 'Bearer $token';
         try {
-          List sqlconfig = [];
-          sqlconfig.add(githubusername);
-          sqlconfig.add(repo);
-          sqlconfig.add(token);
-          sqlconfig.add(storePath);
-          sqlconfig.add(branch);
-          sqlconfig.add(customDomain);
-          //添加默认用户
-          String defaultUser = await Global.getUser();
-          sqlconfig.add(defaultUser);
-
-          var queryGithub = await MySqlUtils.queryGithub(username: defaultUser);
-          var queryuser = await MySqlUtils.queryUser(username: defaultUser);
-
-          if (queryuser == 'Empty') {
-            showToast("请先登录");
-          }
           BaseOptions options = setBaseOptions();
           options.headers = {
             "Accept": 'application/vnd.github+json',
@@ -358,28 +309,14 @@ class AllPShostState extends State<AllPShost> {
           //需要加一个空的formdata，不然会报错
           Map<String, dynamic> queryData = {};
           Dio dio = Dio(options);
-          String sqlResult = '';
           try {
-            var validateResponse =
-                await dio.get(githubUserApi, queryParameters: queryData);
-            if (validateResponse.statusCode == 200 &&
-                validateResponse.data.toString().contains("email")) {
-              //验证成功
-              if (queryGithub == 'Empty') {
-                sqlResult = await MySqlUtils.insertGithub(content: sqlconfig);
-              } else {
-                sqlResult = await MySqlUtils.updateGithub(content: sqlconfig);
-              }
-              if (sqlResult == "Success") {
-                final githubConfig = GithubConfigModel(githubusername, repo,
-                    token, storePath, branch, customDomain);
-                final githubConfigJson = jsonEncode(githubConfig);
-                final githubConfigFile = await githubFile;
-                await githubConfigFile.writeAsString(githubConfigJson);
-                showToast("Github配置成功");
-              } else {
-                showToast("Github数据库错误");
-              }
+            var validateResponse = await dio.get(githubUserApi, queryParameters: queryData);
+            if (validateResponse.statusCode == 200 && validateResponse.data.toString().contains("email")) {
+              final githubConfig = GithubConfigModel(githubusername, repo, token, storePath, branch, customDomain);
+              final githubConfigJson = jsonEncode(githubConfig);
+              final githubConfigFile = await githubFile;
+              await githubConfigFile.writeAsString(githubConfigJson);
+              showToast("Github配置成功");
             } else {
               showToast("Github验证失败");
             }
@@ -415,8 +352,7 @@ class AllPShostState extends State<AllPShost> {
         if (lankongVersion == 'V2') {
           String lankongVtwoHost = jsonResult['lankong']['server'];
           if (lankongVtwoHost.endsWith('/')) {
-            lankongVtwoHost =
-                lankongVtwoHost.substring(0, lankongVtwoHost.length - 1);
+            lankongVtwoHost = lankongVtwoHost.substring(0, lankongVtwoHost.length - 1);
           }
           String lankongToken = jsonResult['lankong']['token'];
           if (lankongToken.startsWith('Bearer ')) {
@@ -439,54 +375,17 @@ class AllPShostState extends State<AllPShost> {
           };
           String profileUrl = "$lankongVtwoHost/api/v1/profile";
           Dio dio = Dio(options);
-
-          String sqlResult = '';
           try {
             var response = await dio.get(
               profileUrl,
             );
             if (response.statusCode == 200 && response.data['status'] == true) {
-              try {
-                List sqlconfig = [];
-                sqlconfig.add(lankongVtwoHost);
-                sqlconfig.add(lanKongstrategyId.toString());
-                sqlconfig.add(lanKongalbumId.toString());
-                sqlconfig.add(lankongToken);
-                String defaultUser = await Global.getUser();
-                sqlconfig.add(defaultUser);
-
-                var querylankong =
-                    await MySqlUtils.queryLankong(username: defaultUser);
-                var queryuser =
-                    await MySqlUtils.queryUser(username: defaultUser);
-
-                if (queryuser == 'Empty') {
-                  showToast("请先登录");
-                } else if (querylankong == 'Empty') {
-                  sqlResult =
-                      await MySqlUtils.insertLankong(content: sqlconfig);
-                } else {
-                  sqlResult =
-                      await MySqlUtils.updateLankong(content: sqlconfig);
-                }
-              } catch (e) {
-                FLog.error(
-                    className: 'AllPShostState',
-                    methodName: 'processingQRCodeResult_lankong_1',
-                    text: formatErrorMessage({}, e.toString()),
-                    dataLogType: DataLogType.ERRORS.toString());
-                showToast("兰空数据库错误");
-              }
-              if (sqlResult == "Success") {
-                HostConfigModel hostConfig = HostConfigModel(lankongVtwoHost,
-                    lankongToken, lanKongstrategyId, lanKongalbumId);
-                final hostConfigJson = jsonEncode(hostConfig);
-                final hostConfigFile = await lskyFile;
-                hostConfigFile.writeAsString(hostConfigJson);
-                showToast("兰空配置成功");
-              } else {
-                showToast("兰空数据库错误");
-              }
+              HostConfigModel hostConfig =
+                  HostConfigModel(lankongVtwoHost, lankongToken, lanKongstrategyId, lanKongalbumId);
+              final hostConfigJson = jsonEncode(hostConfig);
+              final hostConfigFile = await lskyFile;
+              hostConfigFile.writeAsString(hostConfigJson);
+              showToast("兰空配置成功");
             } else {
               showToast("兰空验证失败");
             }
@@ -518,18 +417,6 @@ class AllPShostState extends State<AllPShost> {
         imgurProxy = 'None';
       }
       try {
-        List sqlconfig = [];
-        sqlconfig.add(imgurclientId);
-        sqlconfig.add(imgurProxy);
-        String defaultUser = await Global.getUser();
-        sqlconfig.add(defaultUser);
-
-        var queryimgur = await MySqlUtils.queryImgur(username: defaultUser);
-        var queryuser = await MySqlUtils.queryUser(username: defaultUser);
-
-        if (queryuser == 'Empty') {
-          showToast("请先登录");
-        }
         String baiduPicUrl =
             "https://dss0.bdstatic.com/5aV1bjqh_Q23odCf/static/superman/img/logo/logo_white-d0c9fe2af5.png";
         String validateURL = "https://api.imgur.com/3/image";
@@ -546,8 +433,7 @@ class AllPShostState extends State<AllPShost> {
         String proxyClean = '';
 
         if (imgurProxy != 'None') {
-          if (imgurProxy.startsWith('http://') ||
-              imgurProxy.startsWith('https://')) {
+          if (imgurProxy.startsWith('http://') || imgurProxy.startsWith('https://')) {
             proxyClean = imgurProxy.split('://')[1];
           } else {
             proxyClean = imgurProxy;
@@ -555,25 +441,14 @@ class AllPShostState extends State<AllPShost> {
           dio.useProxy(proxyClean);
         }
 
-        String sqlResult = '';
         try {
           var validateResponse = await dio.post(validateURL, data: formData);
-          if (validateResponse.statusCode == 200 &&
-              validateResponse.data['success'] == true) {
-            if (queryimgur == 'Empty') {
-              sqlResult = await MySqlUtils.insertImgur(content: sqlconfig);
-            } else {
-              sqlResult = await MySqlUtils.updateImgur(content: sqlconfig);
-            }
-            if (sqlResult == "Success") {
-              final imgurConfig = ImgurConfigModel(imgurclientId, imgurProxy);
-              final imgurConfigJson = jsonEncode(imgurConfig);
-              final imgurConfigFile = await smmsFile;
-              await imgurConfigFile.writeAsString(imgurConfigJson);
-              showToast("Imgur配置成功");
-            } else {
-              showToast("Imgur数据库错误");
-            }
+          if (validateResponse.statusCode == 200 && validateResponse.data['success'] == true) {
+            final imgurConfig = ImgurConfigModel(imgurclientId, imgurProxy);
+            final imgurConfigJson = jsonEncode(imgurConfig);
+            final imgurConfigFile = await smmsFile;
+            await imgurConfigFile.writeAsString(imgurConfigJson);
+            showToast("Imgur配置成功");
           } else {
             showToast("Imgur验证失败");
           }
@@ -605,14 +480,6 @@ class AllPShostState extends State<AllPShost> {
       String qiniuPath = jsonResult['qiniu']['path'];
 
       try {
-        String defaultUser = await Global.getUser();
-        var queryqiniu = await MySqlUtils.queryQiniu(username: defaultUser);
-        var queryuser = await MySqlUtils.queryUser(username: defaultUser);
-
-        if (queryuser == 'Empty') {
-          showToast("请先登录");
-        }
-
         if (!qiniuUrl.startsWith('http') && !qiniuUrl.startsWith('https')) {
           qiniuUrl = 'http://$qiniuUrl';
         }
@@ -638,16 +505,6 @@ class AllPShostState extends State<AllPShost> {
             qiniuOptions = '?$qiniuOptions';
           }
         }
-        List sqlconfig = [];
-        sqlconfig.add(qiniuAccessKey);
-        sqlconfig.add(qiniuSecretKey);
-        sqlconfig.add(qiniuBucket);
-        sqlconfig.add(qiniuUrl);
-        sqlconfig.add(qiniuArea);
-        sqlconfig.add(qiniuOptions);
-        sqlconfig.add(qiniuPath);
-
-        sqlconfig.add(defaultUser);
         String assetPath = 'assets/validateImage/PicHoroValidate.jpeg';
         String appDir = await getApplicationDocumentsDirectory().then((value) {
           return value.path;
@@ -657,47 +514,28 @@ class AllPShostState extends State<AllPShost> {
 
         if (!assetFile.existsSync()) {
           ByteData data = await rootBundle.load(assetPath);
-          List<int> bytes =
-              data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+          List<int> bytes = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
           await assetFile.writeAsBytes(bytes);
         }
         String key = 'PicHoroValidate.jpeg';
         String urlSafeBase64EncodePutPolicy =
-            QiniuImageUploadUtils.geturlSafeBase64EncodePutPolicy(
-                qiniuBucket, key, qiniuPath);
-        String uploadToken = QiniuImageUploadUtils.getUploadToken(
-            qiniuAccessKey, qiniuSecretKey, urlSafeBase64EncodePutPolicy);
+            QiniuImageUploadUtils.geturlSafeBase64EncodePutPolicy(qiniuBucket, key, qiniuPath);
+        String uploadToken =
+            QiniuImageUploadUtils.getUploadToken(qiniuAccessKey, qiniuSecretKey, urlSafeBase64EncodePutPolicy);
         Storage storage = Storage(
             config: Config(
           retryLimit: 5,
         ));
 
-        String sqlResult = '';
         try {
-          PutResponse putresult =
-              await storage.putFile(File(assetFilePath), uploadToken);
+          PutResponse putresult = await storage.putFile(File(assetFilePath), uploadToken);
           if (putresult.key == key || putresult.key == '$qiniuPath$key') {
-            if (queryqiniu == 'Empty') {
-              sqlResult = await MySqlUtils.insertQiniu(content: sqlconfig);
-            } else {
-              sqlResult = await MySqlUtils.updateQiniu(content: sqlconfig);
-            }
-            if (sqlResult == "Success") {
-              final qiniuConfig = QiniuConfigModel(
-                  qiniuAccessKey,
-                  qiniuSecretKey,
-                  qiniuBucket,
-                  qiniuUrl,
-                  qiniuArea,
-                  qiniuOptions,
-                  qiniuPath);
-              final qiniuConfigJson = jsonEncode(qiniuConfig);
-              final qiniuConfigFile = await qiniuFile;
-              await qiniuConfigFile.writeAsString(qiniuConfigJson);
-              showToast("七牛配置成功");
-            } else {
-              showToast("七牛数据库错误");
-            }
+            final qiniuConfig = QiniuConfigModel(
+                qiniuAccessKey, qiniuSecretKey, qiniuBucket, qiniuUrl, qiniuArea, qiniuOptions, qiniuPath);
+            final qiniuConfigJson = jsonEncode(qiniuConfig);
+            final qiniuConfigFile = await qiniuFile;
+            await qiniuConfigFile.writeAsString(qiniuConfigJson);
+            showToast("七牛配置成功");
           } else {
             showToast("七牛验证失败");
           }
@@ -732,22 +570,12 @@ class AllPShostState extends State<AllPShost> {
         String tencentOptions = jsonResult['tcyun']['options'];
 
         try {
-          String defaultUser = await Global.getUser();
-          var querytencent =
-              await MySqlUtils.queryTencent(username: defaultUser);
-          var queryuser = await MySqlUtils.queryUser(username: defaultUser);
-
-          if (queryuser == 'Empty') {
-            showToast("请先登录");
-          }
           if (tencentCustomUrl.isNotEmpty) {
-            if (!tencentCustomUrl.startsWith('http') &&
-                !tencentCustomUrl.startsWith('https')) {
+            if (!tencentCustomUrl.startsWith('http') && !tencentCustomUrl.startsWith('https')) {
               tencentCustomUrl = 'http://$tencentCustomUrl';
             }
             if (tencentCustomUrl.endsWith('/')) {
-              tencentCustomUrl =
-                  tencentCustomUrl.substring(0, tencentCustomUrl.length - 1);
+              tencentCustomUrl = tencentCustomUrl.substring(0, tencentCustomUrl.length - 1);
             }
           } else {
             tencentCustomUrl = 'None';
@@ -771,20 +599,8 @@ class AllPShostState extends State<AllPShost> {
               tencentOptions = '?$tencentOptions';
             }
           }
-          List sqlconfig = [];
-          sqlconfig.add(tencentSecretId);
-          sqlconfig.add(tencentSecretKey);
-          sqlconfig.add(tencentBucket);
-          sqlconfig.add(tencentAppId);
-          sqlconfig.add(tencentArea);
-          sqlconfig.add(tencentPath);
-          sqlconfig.add(tencentCustomUrl);
-          sqlconfig.add(tencentOptions);
-
-          sqlconfig.add(defaultUser);
           String assetPath = 'assets/validateImage/PicHoroValidate.jpeg';
-          String appDir =
-              await getApplicationDocumentsDirectory().then((value) {
+          String appDir = await getApplicationDocumentsDirectory().then((value) {
             return value.path;
           });
           String assetFilePath = '$appDir/PicHoroValidate.jpeg';
@@ -792,8 +608,7 @@ class AllPShostState extends State<AllPShost> {
 
           if (!assetFile.existsSync()) {
             ByteData data = await rootBundle.load(assetPath);
-            List<int> bytes =
-                data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+            List<int> bytes = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
             await assetFile.writeAsBytes(bytes);
           }
           String key = 'PicHoroValidate.jpeg';
@@ -819,8 +634,7 @@ class AllPShostState extends State<AllPShost> {
             ]
           };
           String uploadPolicyStr = jsonEncode(uploadPolicy);
-          String singature = TencentImageUploadUtils.getUploadAuthorization(
-              tencentSecretKey, keyTime, uploadPolicyStr);
+          String singature = TencentImageUploadUtils.getUploadAuthorization(tencentSecretKey, keyTime, uploadPolicyStr);
           //policy中的字段，除了bucket，其它的都要在formdata中添加
           FormData formData = FormData.fromMap({
             'key': urlpath,
@@ -844,7 +658,6 @@ class AllPShostState extends State<AllPShost> {
             'Content-Length': contentLength,
           };
           Dio dio = Dio(baseoptions);
-          String tencentSqlResult = '';
 
           var response = await dio.post(
             'http://$host',
@@ -852,31 +665,20 @@ class AllPShostState extends State<AllPShost> {
           );
 
           if (response.statusCode == 204) {
-            if (querytencent == 'Empty') {
-              tencentSqlResult =
-                  await MySqlUtils.insertTencent(content: sqlconfig);
-            } else {
-              tencentSqlResult =
-                  await MySqlUtils.updateTencent(content: sqlconfig);
-            }
-            if (tencentSqlResult == "Success") {
-              final tencentConfig = TencentConfigModel(
-                tencentSecretId,
-                tencentSecretKey,
-                tencentBucket,
-                tencentAppId,
-                tencentArea,
-                tencentPath,
-                tencentCustomUrl,
-                tencentOptions,
-              );
-              final tencentConfigJson = jsonEncode(tencentConfig);
-              final tencentConfigFile = await tencentFile;
-              await tencentConfigFile.writeAsString(tencentConfigJson);
-              showToast("腾讯云配置成功");
-            } else {
-              showToast("腾讯云数据库错误");
-            }
+            final tencentConfig = TencentConfigModel(
+              tencentSecretId,
+              tencentSecretKey,
+              tencentBucket,
+              tencentAppId,
+              tencentArea,
+              tencentPath,
+              tencentCustomUrl,
+              tencentOptions,
+            );
+            final tencentConfigJson = jsonEncode(tencentConfig);
+            final tencentConfigFile = await tencentFile;
+            await tencentConfigFile.writeAsString(tencentConfigJson);
+            showToast("腾讯云配置成功");
           } else {
             showToast("腾讯云验证失败");
           }
@@ -903,21 +705,12 @@ class AllPShostState extends State<AllPShost> {
       String aliyunOptions = jsonResult['aliyun']['options'];
 
       try {
-        String defaultUser = await Global.getUser();
-        var queryaliyun = await MySqlUtils.queryAliyun(username: defaultUser);
-        var queryuser = await MySqlUtils.queryUser(username: defaultUser);
-
-        if (queryuser == 'Empty') {
-          showToast("请先登录");
-        }
         if (aliyunCustomUrl.isNotEmpty) {
-          if (!aliyunCustomUrl.startsWith('http') &&
-              !aliyunCustomUrl.startsWith('https')) {
+          if (!aliyunCustomUrl.startsWith('http') && !aliyunCustomUrl.startsWith('https')) {
             aliyunCustomUrl = 'http://$aliyunCustomUrl';
           }
           if (aliyunCustomUrl.endsWith('/')) {
-            aliyunCustomUrl =
-                aliyunCustomUrl.substring(0, aliyunCustomUrl.length - 1);
+            aliyunCustomUrl = aliyunCustomUrl.substring(0, aliyunCustomUrl.length - 1);
           }
         } else {
           aliyunCustomUrl = 'None';
@@ -941,15 +734,6 @@ class AllPShostState extends State<AllPShost> {
             aliyunOptions = '?$aliyunOptions';
           }
         }
-        List sqlconfig = [];
-        sqlconfig.add(aliyunKeyId);
-        sqlconfig.add(aliyunKeySecret);
-        sqlconfig.add(aliyunBucket);
-        sqlconfig.add(aliyunArea);
-        sqlconfig.add(aliyunPath);
-        sqlconfig.add(aliyunCustomUrl);
-        sqlconfig.add(aliyunOptions);
-        sqlconfig.add(defaultUser);
         String assetPath = 'assets/validateImage/PicHoroValidate.jpeg';
         String appDir = await getApplicationDocumentsDirectory().then((value) {
           return value.path;
@@ -959,8 +743,7 @@ class AllPShostState extends State<AllPShost> {
 
         if (!assetFile.existsSync()) {
           ByteData data = await rootBundle.load(assetPath);
-          List<int> bytes =
-              data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+          List<int> bytes = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
           await assetFile.writeAsBytes(bytes);
         }
         String key = 'PicHoroValidate.jpeg';
@@ -979,20 +762,16 @@ class AllPShostState extends State<AllPShost> {
             {"key": urlpath}
           ]
         };
-        String base64Policy =
-            base64.encode(utf8.encode(json.encode(uploadPolicy)));
-        String singature = base64.encode(
-            Hmac(sha1, utf8.encode(aliyunKeySecret))
-                .convert(utf8.encode(base64Policy))
-                .bytes);
+        String base64Policy = base64.encode(utf8.encode(json.encode(uploadPolicy)));
+        String singature =
+            base64.encode(Hmac(sha1, utf8.encode(aliyunKeySecret)).convert(utf8.encode(base64Policy)).bytes);
         FormData formData = FormData.fromMap({
           'key': urlpath,
           'OSSAccessKeyId': aliyunKeyId,
           'policy': base64Policy,
           'Signature': singature,
           //阿里默认的content-type是application/octet-stream，这里改成image/xxx
-          'x-oss-content-type':
-              'image/${mypath.extension(assetFilePath).replaceFirst('.', '')}',
+          'x-oss-content-type': 'image/${mypath.extension(assetFilePath).replaceFirst('.', '')}',
           'file': await MultipartFile.fromFile(assetFilePath, filename: key),
         });
 
@@ -1006,36 +785,25 @@ class AllPShostState extends State<AllPShost> {
           'Content-Length': contentLength,
         };
         Dio dio = Dio(baseoptions);
-        String aliyunSqlResult = '';
-
         var response = await dio.post(
           'https://$host',
           data: formData,
         );
 
         if (response.statusCode == 204) {
-          if (queryaliyun == 'Empty') {
-            aliyunSqlResult = await MySqlUtils.insertAliyun(content: sqlconfig);
-          } else {
-            aliyunSqlResult = await MySqlUtils.updateAliyun(content: sqlconfig);
-          }
-          if (aliyunSqlResult == "Success") {
-            final aliyunConfig = AliyunConfigModel(
-              aliyunKeyId,
-              aliyunKeySecret,
-              aliyunBucket,
-              aliyunArea,
-              aliyunPath,
-              aliyunCustomUrl,
-              aliyunOptions,
-            );
-            final aliyunConfigJson = jsonEncode(aliyunConfig);
-            final aliyunConfigFile = await aliyunFile;
-            await aliyunConfigFile.writeAsString(aliyunConfigJson);
-            showToast("阿里云配置成功");
-          } else {
-            showToast("阿里云数据库错误");
-          }
+          final aliyunConfig = AliyunConfigModel(
+            aliyunKeyId,
+            aliyunKeySecret,
+            aliyunBucket,
+            aliyunArea,
+            aliyunPath,
+            aliyunCustomUrl,
+            aliyunOptions,
+          );
+          final aliyunConfigJson = jsonEncode(aliyunConfig);
+          final aliyunConfigFile = await aliyunFile;
+          await aliyunConfigFile.writeAsString(aliyunConfigJson);
+          showToast("阿里云配置成功");
         } else {
           showToast("阿里云验证失败");
         }
@@ -1057,13 +825,6 @@ class AllPShostState extends State<AllPShost> {
       String upyunOptions = jsonResult['upyun']['options'];
       String upyunPath = jsonResult['upyun']['path'];
       try {
-        String defaultUser = await Global.getUser();
-        var queryupyun = await MySqlUtils.queryUpyun(username: defaultUser);
-        var queryuser = await MySqlUtils.queryUser(username: defaultUser);
-
-        if (queryuser == 'Empty') {
-          showToast("请先登录");
-        }
         if (!upyunUrl.startsWith('http') && !upyunUrl.startsWith('https')) {
           upyunUrl = 'http://$upyunUrl';
         }
@@ -1083,15 +844,6 @@ class AllPShostState extends State<AllPShost> {
             upyunPath = '$upyunPath/';
           }
         }
-
-        List sqlconfig = [];
-        sqlconfig.add(upyunBucket);
-        sqlconfig.add(upyunOperator);
-        sqlconfig.add(upyunPassword);
-        sqlconfig.add(upyunUrl);
-        sqlconfig.add(upyunOptions);
-        sqlconfig.add(upyunPath);
-        sqlconfig.add(defaultUser);
         //save asset image to app dir
         String assetPath = 'assets/validateImage/PicHoroValidate.jpeg';
         String appDir = await getApplicationDocumentsDirectory().then((value) {
@@ -1102,8 +854,7 @@ class AllPShostState extends State<AllPShost> {
 
         if (!assetFile.existsSync()) {
           ByteData data = await rootBundle.load(assetPath);
-          List<int> bytes =
-              data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+          List<int> bytes = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
           await assetFile.writeAsBytes(bytes);
         }
         String key = 'PicHoroValidate.jpeg';
@@ -1125,14 +876,10 @@ class AllPShostState extends State<AllPShost> {
           'date': date,
           'content-md5': assetFileMd5,
         };
-        String base64Policy =
-            base64.encode(utf8.encode(json.encode(uploadPolicy)));
-        String stringToSign =
-            'POST&/$upyunBucket&$date&$base64Policy&$assetFileMd5';
+        String base64Policy = base64.encode(utf8.encode(json.encode(uploadPolicy)));
+        String stringToSign = 'POST&/$upyunBucket&$date&$base64Policy&$assetFileMd5';
         String passwordMd5 = md5.convert(utf8.encode(upyunPassword)).toString();
-        String signature = base64.encode(Hmac(sha1, utf8.encode(passwordMd5))
-            .convert(utf8.encode(stringToSign))
-            .bytes);
+        String signature = base64.encode(Hmac(sha1, utf8.encode(passwordMd5)).convert(utf8.encode(stringToSign)).bytes);
         String authorization = 'UPYUN $upyunOperator:$signature';
         FormData formData = FormData.fromMap({
           'authorization': authorization,
@@ -1153,7 +900,6 @@ class AllPShostState extends State<AllPShost> {
           'Content-MD5': assetFileMd5,
         };
         Dio dio = Dio(baseoptions);
-        String upyunSqlResult = '';
 
         var response = await dio.post(
           '$host/$upyunBucket',
@@ -1161,27 +907,18 @@ class AllPShostState extends State<AllPShost> {
         );
 
         if (response.statusCode == 200) {
-          if (queryupyun == 'Empty') {
-            upyunSqlResult = await MySqlUtils.insertUpyun(content: sqlconfig);
-          } else {
-            upyunSqlResult = await MySqlUtils.updateUpyun(content: sqlconfig);
-          }
-          if (upyunSqlResult == "Success") {
-            final upyunConfig = UpyunConfigModel(
-              upyunBucket,
-              upyunOperator,
-              upyunPassword,
-              upyunUrl,
-              upyunOptions,
-              upyunPath,
-            );
-            final upyunConfigJson = jsonEncode(upyunConfig);
-            final upyunConfigFile = await upyunFile;
-            await upyunConfigFile.writeAsString(upyunConfigJson);
-            showToast("又拍云配置成功");
-          } else {
-            showToast("又拍云数据库错误");
-          }
+          final upyunConfig = UpyunConfigModel(
+            upyunBucket,
+            upyunOperator,
+            upyunPassword,
+            upyunUrl,
+            upyunOptions,
+            upyunPath,
+          );
+          final upyunConfigJson = jsonEncode(upyunConfig);
+          final upyunConfigFile = await upyunFile;
+          await upyunConfigFile.writeAsString(upyunConfigJson);
+          showToast("又拍云配置成功");
         } else {
           showToast("又拍云验证失败");
         }
@@ -1197,8 +934,7 @@ class AllPShostState extends State<AllPShost> {
     return true;
   }
 
-  SimpleDialogOption _buildSimpleDialogOption(
-      BuildContext context, String text, String value) {
+  SimpleDialogOption _buildSimpleDialogOption(BuildContext context, String text, String value) {
     return SimpleDialogOption(
       child: Text(text, textAlign: TextAlign.center),
       onPressed: () {
@@ -1278,104 +1014,91 @@ class AllPShostState extends State<AllPShost> {
         ListTile(
           title: const Text('默认图床选择'),
           onTap: () {
-            Application.router.navigateTo(context, Routes.defaultPShostSelect,
-                transition: TransitionType.cupertino);
+            Application.router.navigateTo(context, Routes.defaultPShostSelect, transition: TransitionType.cupertino);
           },
           trailing: const Icon(Icons.arrow_forward_ios),
         ),
         ListTile(
           title: const Text('Alist V3'),
           onTap: () {
-            Application.router.navigateTo(context, Routes.alistPShostSelect,
-                transition: TransitionType.cupertino);
+            Application.router.navigateTo(context, Routes.alistPShostSelect, transition: TransitionType.cupertino);
           },
           trailing: const Icon(Icons.arrow_forward_ios),
         ),
         ListTile(
           title: const Text('阿里云OSS'),
           onTap: () {
-            Application.router.navigateTo(context, Routes.aliyunPShostSelect,
-                transition: TransitionType.cupertino);
+            Application.router.navigateTo(context, Routes.aliyunPShostSelect, transition: TransitionType.cupertino);
           },
           trailing: const Icon(Icons.arrow_forward_ios),
         ),
         ListTile(
           title: const Text('FTP-SSH/SFTP'),
           onTap: () {
-            Application.router.navigateTo(context, Routes.ftpPShostSelect,
-                transition: TransitionType.cupertino);
+            Application.router.navigateTo(context, Routes.ftpPShostSelect, transition: TransitionType.cupertino);
           },
           trailing: const Icon(Icons.arrow_forward_ios),
         ),
         ListTile(
           title: const Text('Github图床'),
           onTap: () {
-            Application.router.navigateTo(context, Routes.githubPShostSelect,
-                transition: TransitionType.cupertino);
+            Application.router.navigateTo(context, Routes.githubPShostSelect, transition: TransitionType.cupertino);
           },
           trailing: const Icon(Icons.arrow_forward_ios),
         ),
         ListTile(
           title: const Text('Imgur图床'),
           onTap: () {
-            Application.router.navigateTo(context, Routes.imgurPShostSelect,
-                transition: TransitionType.cupertino);
+            Application.router.navigateTo(context, Routes.imgurPShostSelect, transition: TransitionType.cupertino);
           },
           trailing: const Icon(Icons.arrow_forward_ios),
         ),
         ListTile(
           title: const Text('兰空图床V2'),
           onTap: () {
-            Application.router.navigateTo(context, Routes.lskyproPShostSelect,
-                transition: TransitionType.cupertino);
+            Application.router.navigateTo(context, Routes.lskyproPShostSelect, transition: TransitionType.cupertino);
           },
           trailing: const Icon(Icons.arrow_forward_ios),
         ),
         ListTile(
           title: const Text('七牛云存储'),
           onTap: () {
-            Application.router.navigateTo(context, Routes.qiniuPShostSelect,
-                transition: TransitionType.cupertino);
+            Application.router.navigateTo(context, Routes.qiniuPShostSelect, transition: TransitionType.cupertino);
           },
           trailing: const Icon(Icons.arrow_forward_ios),
         ),
         ListTile(
           title: const Text('S3兼容平台'),
           onTap: () {
-            Application.router.navigateTo(context, Routes.awsPShostSelect,
-                transition: TransitionType.cupertino);
+            Application.router.navigateTo(context, Routes.awsPShostSelect, transition: TransitionType.cupertino);
           },
           trailing: const Icon(Icons.arrow_forward_ios),
         ),
         ListTile(
           title: const Text('SM.MS图床'),
           onTap: () {
-            Application.router.navigateTo(context, Routes.smmsPShostSelect,
-                transition: TransitionType.cupertino);
+            Application.router.navigateTo(context, Routes.smmsPShostSelect, transition: TransitionType.cupertino);
           },
           trailing: const Icon(Icons.arrow_forward_ios),
         ),
         ListTile(
           title: const Text('腾讯云COS V5'),
           onTap: () {
-            Application.router.navigateTo(context, Routes.tencentPShostSelect,
-                transition: TransitionType.cupertino);
+            Application.router.navigateTo(context, Routes.tencentPShostSelect, transition: TransitionType.cupertino);
           },
           trailing: const Icon(Icons.arrow_forward_ios),
         ),
         ListTile(
           title: const Text('又拍云存储'),
           onTap: () {
-            Application.router.navigateTo(context, Routes.upyunPShostSelect,
-                transition: TransitionType.cupertino);
+            Application.router.navigateTo(context, Routes.upyunPShostSelect, transition: TransitionType.cupertino);
           },
           trailing: const Icon(Icons.arrow_forward_ios),
         ),
         ListTile(
           title: const Text('WebDAV'),
           onTap: () {
-            Application.router.navigateTo(context, Routes.webdavPShostSelect,
-                transition: TransitionType.cupertino);
+            Application.router.navigateTo(context, Routes.webdavPShostSelect, transition: TransitionType.cupertino);
           },
           trailing: const Icon(Icons.arrow_forward_ios),
         ),

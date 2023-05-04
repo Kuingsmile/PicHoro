@@ -6,9 +6,8 @@ import 'package:horopic/utils/common_functions.dart';
 
 class AlistBucketInformation extends StatefulWidget {
   final Map bucketMap;
-  
-  const AlistBucketInformation({Key? key, required this.bucketMap})
-      : super(key: key);
+
+  const AlistBucketInformation({Key? key, required this.bucketMap}) : super(key: key);
 
   @override
   AlistBucketInformationState createState() => AlistBucketInformationState();
@@ -57,16 +56,11 @@ class AlistBucketInformationState extends State<AlistBucketInformation> {
       ),
       ListTile(
         title: const Text('备注'),
-        subtitle: SelectableText(widget.bucketMap['remark'] == ""
-            ? '无'
-            : widget.bucketMap['remark']),
+        subtitle: SelectableText(widget.bucketMap['remark'] == "" ? '无' : widget.bucketMap['remark']),
       ),
       ListTile(
         title: const Text('修改时间'),
-        subtitle: SelectableText(widget.bucketMap['modified']
-            .toString()
-            .substring(0, 19)
-            .replaceAll('T', ' ')),
+        subtitle: SelectableText(widget.bucketMap['modified'].toString().substring(0, 19).replaceAll('T', ' ')),
       ),
       ListTile(
         title: const Text('是否启用'),
@@ -82,8 +76,7 @@ class AlistBucketInformationState extends State<AlistBucketInformation> {
       ),
       ListTile(
         title: const Text('web代理'),
-        subtitle: SelectableText(
-            widget.bucketMap['web_proxy'] == true ? "启用" : "未启用"),
+        subtitle: SelectableText(widget.bucketMap['web_proxy'] == true ? "启用" : "未启用"),
       ),
       ListTile(
         title: const Text('webDav策略'),

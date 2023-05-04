@@ -119,8 +119,7 @@ class NewBucketConfigState extends State<NewBucketConfig> {
           ListTile(
             subtitle: ElevatedButton(
               onPressed: () async {
-                var result =
-                    await TencentManageAPI.createBucket(newBucketConfig);
+                var result = await TencentManageAPI.createBucket(newBucketConfig);
                 if (result[0] == 'success') {
                   resetBucketConfig();
                   if (mounted) {

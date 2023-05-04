@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 
 import 'package:dio/dio.dart';
 import 'package:dio_proxy_adapter/dio_proxy_adapter.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:f_logs/f_logs.dart';
 import 'package:fluro/fluro.dart';
 import 'package:path_provider/path_provider.dart';
@@ -12,7 +11,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:horopic/router/application.dart';
 import 'package:horopic/pages/loading.dart';
 import 'package:horopic/utils/common_functions.dart';
-import 'package:horopic/utils/sql_utils.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/picture_host_manage/manage_api/imgur_manage_api.dart';
 import 'package:horopic/utils/event_bus_utils.dart';
@@ -71,14 +69,12 @@ class ImgurConfigState extends State<ImgurConfig> {
         actions: [
           IconButton(
             onPressed: () async {
-              await Application.router.navigateTo(
-                  context, '/configureStorePage?psHost=imgur',
-                  transition: TransitionType.cupertino);
+              await Application.router
+                  .navigateTo(context, '/configureStorePage?psHost=imgur', transition: TransitionType.cupertino);
               await _initConfig();
               setState(() {});
             },
-            icon: const Icon(Icons.save_as_outlined,
-                color: Color.fromARGB(255, 255, 255, 255), size: 35),
+            icon: const Icon(Icons.save_as_outlined, color: Color.fromARGB(255, 255, 255, 255), size: 35),
           )
         ],
       ),
@@ -147,9 +143,8 @@ class ImgurConfigState extends State<ImgurConfig> {
             ListTile(
                 title: ElevatedButton(
               onPressed: () async {
-                await Application.router.navigateTo(
-                    context, '/configureStorePage?psHost=imgur',
-                    transition: TransitionType.cupertino);
+                await Application.router
+                    .navigateTo(context, '/configureStorePage?psHost=imgur', transition: TransitionType.cupertino);
                 await _initConfig();
                 setState(() {});
               },
@@ -183,19 +178,6 @@ class ImgurConfigState extends State<ImgurConfig> {
     }
 
     try {
-      List sqlconfig = [];
-      sqlconfig.add(clientId);
-      sqlconfig.add(proxy);
-      String defaultUser = await Global.getUser();
-      sqlconfig.add(defaultUser);
-
-      var queryImgur = await MySqlUtils.queryImgur(username: defaultUser);
-      var queryuser = await MySqlUtils.queryUser(username: defaultUser);
-
-      if (queryuser == 'Empty') {
-        return showCupertinoAlertDialog(
-            context: context, title: '错误', content: '用户不存在,请先登录');
-      }
       String baiduPicUrl =
           "https://dss0.bdstatic.com/5aV1bjqh_Q23odCf/static/superman/img/logo/logo_white-d0c9fe2af5.png";
       String validateURL = "https://api.imgur.com/3/image";
@@ -209,7 +191,7 @@ class ImgurConfigState extends State<ImgurConfig> {
         "image": baiduPicUrl,
       });
       Dio dio = Dio(options);
-      String sqlResult = '';
+
       String proxyClean = '';
       if (proxy != 'None') {
         if (proxy.startsWith('http://') || proxy.startsWith('https://')) {
@@ -221,27 +203,14 @@ class ImgurConfigState extends State<ImgurConfig> {
       }
       try {
         var validateResponse = await dio.post(validateURL, data: formData);
-        if (validateResponse.statusCode == 200 &&
-            validateResponse.data['success'] == true) {
-          if (queryImgur == 'Empty') {
-            sqlResult = await MySqlUtils.insertImgur(content: sqlconfig);
-          } else {
-            sqlResult = await MySqlUtils.updateImgur(content: sqlconfig);
-          }
-          if (sqlResult == "Success") {
-            final imgurConfig = ImgurConfigModel(clientId, proxy);
-            final imgurConfigJson = jsonEncode(imgurConfig);
-            final imgurConfigFile = await localFile;
-            await imgurConfigFile.writeAsString(imgurConfigJson);
-            return showCupertinoAlertDialog(
-                context: context, title: '成功', content: '配置成功');
-          } else {
-            return showCupertinoAlertDialog(
-                context: context, title: '错误', content: '数据库错误');
-          }
+        if (validateResponse.statusCode == 200 && validateResponse.data['success'] == true) {
+          final imgurConfig = ImgurConfigModel(clientId, proxy);
+          final imgurConfigJson = jsonEncode(imgurConfig);
+          final imgurConfigFile = await localFile;
+          await imgurConfigFile.writeAsString(imgurConfigJson);
+          return showCupertinoAlertDialog(context: context, title: '成功', content: '配置成功');
         } else {
-          return showCupertinoAlertDialog(
-              context: context, title: '错误', content: 'clientId错误');
+          return showCupertinoAlertDialog(context: context, title: '错误', content: 'clientId错误');
         }
       } catch (e) {
         FLog.error(
@@ -249,8 +218,7 @@ class ImgurConfigState extends State<ImgurConfig> {
             methodName: '_saveImgurConfig_1',
             text: formatErrorMessage({}, e.toString()),
             dataLogType: DataLogType.ERRORS.toString());
-        return showCupertinoAlertDialog(
-            context: context, title: '错误', content: e.toString());
+        return showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
       }
     } catch (e) {
       FLog.error(
@@ -258,8 +226,7 @@ class ImgurConfigState extends State<ImgurConfig> {
           methodName: '_saveImgurConfig_2',
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
-      return showCupertinoAlertDialog(
-          context: context, title: '错误', content: e.toString());
+      return showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
     }
   }
 
@@ -268,8 +235,7 @@ class ImgurConfigState extends State<ImgurConfig> {
       final imgurConfigFile = await localFile;
       String configData = await imgurConfigFile.readAsString();
       if (configData == "Error") {
-        return showCupertinoAlertDialog(
-            context: context, title: "检查失败!", content: "请先配置上传参数.");
+        return showCupertinoAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");
       }
       Map configMap = jsonDecode(configData);
 
@@ -287,8 +253,7 @@ class ImgurConfigState extends State<ImgurConfig> {
       String proxyClean = '';
 
       if (configMap["proxy"] != 'None') {
-        if (configMap["proxy"].startsWith('http://') ||
-            configMap["proxy"].startsWith('https://')) {
+        if (configMap["proxy"].startsWith('http://') || configMap["proxy"].startsWith('https://')) {
           proxyClean = configMap["proxy"].split('://')[1];
         } else {
           proxyClean = configMap["proxy"];
@@ -300,11 +265,9 @@ class ImgurConfigState extends State<ImgurConfig> {
         return showCupertinoAlertDialog(
             context: context,
             title: '通知',
-            content:
-                '检测通过，您的配置信息为:\nclientId:\n${configMap["clientId"]}\n代理:\n${configMap["proxy"]}');
+            content: '检测通过，您的配置信息为:\nclientId:\n${configMap["clientId"]}\n代理:\n${configMap["proxy"]}');
       } else {
-        return showCupertinoAlertDialog(
-            context: context, title: '错误', content: '配置有误，请检查网络或重新配置');
+        return showCupertinoAlertDialog(context: context, title: '错误', content: '配置有误，请检查网络或重新配置');
       }
     } catch (e) {
       FLog.error(
@@ -312,8 +275,7 @@ class ImgurConfigState extends State<ImgurConfig> {
           methodName: 'checkImgurConfig',
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
-      return showCupertinoAlertDialog(
-          context: context, title: "检查失败!", content: e.toString());
+      return showCupertinoAlertDialog(context: context, title: "检查失败!", content: e.toString());
     }
   }
 
@@ -345,64 +307,11 @@ class ImgurConfigState extends State<ImgurConfig> {
 
   _setdefault() async {
     try {
-      String defaultUser = await Global.getUser();
-      String defaultPassword = await Global.getPassword();
-
-      var queryuser = await MySqlUtils.queryUser(username: defaultUser);
-      if (queryuser == 'Empty') {
-        return Fluttertoast.showToast(
-            msg: "请先注册用户",
-            toastLength: Toast.LENGTH_SHORT,
-            timeInSecForIosWeb: 2,
-            fontSize: 16.0);
-      } else if (queryuser['password'] != defaultPassword) {
-        return Fluttertoast.showToast(
-            msg: "请先登录",
-            toastLength: Toast.LENGTH_SHORT,
-            timeInSecForIosWeb: 2,
-            fontSize: 16.0);
-      }
-      var queryImgur = await MySqlUtils.queryImgur(username: defaultUser);
-      if (queryImgur == 'Empty') {
-        return Fluttertoast.showToast(
-            msg: "请先配置上传参数",
-            toastLength: Toast.LENGTH_SHORT,
-            timeInSecForIosWeb: 2,
-            fontSize: 16.0);
-      }
-      if (queryImgur == 'Error') {
-        return Fluttertoast.showToast(
-            msg: "Error",
-            toastLength: Toast.LENGTH_SHORT,
-            timeInSecForIosWeb: 2,
-            fontSize: 16.0);
-      }
-      if (queryuser['defaultPShost'] == 'imgur') {
-        await Global.setPShost('imgur');
-        await Global.setShowedPBhost('imgur');
-        eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-        eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
-        return Fluttertoast.showToast(
-            msg: "已经是默认配置",
-            toastLength: Toast.LENGTH_SHORT,
-            timeInSecForIosWeb: 2,
-            fontSize: 16.0);
-      } else {
-        List sqlconfig = [];
-        sqlconfig.add(defaultUser);
-        sqlconfig.add(defaultPassword);
-        sqlconfig.add('imgur');
-        var updateResult = await MySqlUtils.updateUser(content: sqlconfig);
-        if (updateResult == 'Success') {
-          await Global.setPShost('imgur');
-          await Global.setShowedPBhost('imgur');
-          eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-          eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
-          showToast('已设置Imgur为默认图床');
-        } else {
-          showToast('写入数据库失败');
-        }
-      }
+      await Global.setPShost('imgur');
+      await Global.setShowedPBhost('imgur');
+      eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
+      eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
+      showToast('已设置Imgur为默认图床');
     } catch (e) {
       FLog.error(
           className: 'ImgurConfigPage',

@@ -16,8 +16,7 @@ class LskyproConfigureStoreEdit extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  LskyproConfigureStoreEditState createState() =>
-      LskyproConfigureStoreEditState();
+  LskyproConfigureStoreEditState createState() => LskyproConfigureStoreEditState();
 }
 
 class LskyproConfigureStoreEditState extends State<LskyproConfigureStoreEdit> {

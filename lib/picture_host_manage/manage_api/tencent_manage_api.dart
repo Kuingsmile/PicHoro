@@ -10,7 +10,6 @@ import 'package:xml2json/xml2json.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'package:horopic/utils/global.dart';
-import 'package:horopic/utils/sql_utils.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/picture_host_configure/configure_page/tencent_configure.dart';
 import 'package:horopic/api/tencent_api.dart';
@@ -75,15 +74,13 @@ class TencentManageAPI {
   }
 
   //authorization
-  static String tecentAuthorization(String method, String urlpath, Map header,
-      String secretId, String secretKey, Map? urlParam) {
+  static String tecentAuthorization(
+      String method, String urlpath, Map header, String secretId, String secretKey, Map? urlParam) {
     int startTimestamp = DateTime.now().millisecondsSinceEpoch ~/ 1000;
     int endTimestamp = startTimestamp + 86400;
     String keyTime = '$startTimestamp;$endTimestamp';
 
-    String signKey = Hmac(sha1, utf8.encode(secretKey))
-        .convert(utf8.encode(keyTime))
-        .toString();
+    String signKey = Hmac(sha1, utf8.encode(secretKey)).convert(utf8.encode(keyTime)).toString();
     String lowerMethod = method.toLowerCase();
 
     String urlParamList = '';
@@ -92,8 +89,7 @@ class TencentManageAPI {
     if (urlParam != null && urlParam.isNotEmpty) {
       Map uriEncodeUrlParam = {};
       urlParam.forEach((key, value) {
-        uriEncodeUrlParam[Uri.encodeComponent(key).toLowerCase()] =
-            Uri.encodeComponent(value.toString());
+        uriEncodeUrlParam[Uri.encodeComponent(key).toLowerCase()] = Uri.encodeComponent(value.toString());
       });
 
       List urlParamKeyList = uriEncodeUrlParam.keys.toList();
@@ -101,8 +97,7 @@ class TencentManageAPI {
 
       for (var i = 0; i < urlParamKeyList.length; i++) {
         urlParamList = '${urlParamList + urlParamKeyList[i]};';
-        httpParameters =
-            '${httpParameters + urlParamKeyList[i]}=${uriEncodeUrlParam[urlParamKeyList[i]]}&';
+        httpParameters = '${httpParameters + urlParamKeyList[i]}=${uriEncodeUrlParam[urlParamKeyList[i]]}&';
       }
       if (httpParameters.isNotEmpty) {
         httpParameters = httpParameters.substring(0, httpParameters.length - 1);
@@ -116,15 +111,13 @@ class TencentManageAPI {
     String httpHeaders = '';
     Map uriEncodeHeader = {};
     header.forEach((key, value) {
-      uriEncodeHeader[Uri.encodeComponent(key).toLowerCase()] =
-          Uri.encodeComponent(value);
+      uriEncodeHeader[Uri.encodeComponent(key).toLowerCase()] = Uri.encodeComponent(value);
     });
     List headerKeyList = uriEncodeHeader.keys.toList();
     headerKeyList.sort();
     for (var i = 0; i < headerKeyList.length; i++) {
       headerList = '${headerList + headerKeyList[i]};';
-      httpHeaders =
-          '${httpHeaders + headerKeyList[i]}=${uriEncodeHeader[headerKeyList[i]]}&';
+      httpHeaders = '${httpHeaders + headerKeyList[i]}=${uriEncodeHeader[headerKeyList[i]]}&';
     }
     if (httpHeaders.isNotEmpty) {
       httpHeaders = httpHeaders.substring(0, httpHeaders.length - 1);
@@ -133,14 +126,10 @@ class TencentManageAPI {
       headerList = headerList.substring(0, headerList.length - 1);
     }
 
-    String httpString =
-        '$lowerMethod\n$urlpath\n$httpParameters\n$httpHeaders\n';
-    String stringtosign =
-        'sha1\n$keyTime\n${sha1.convert(utf8.encode(httpString)).toString()}\n';
+    String httpString = '$lowerMethod\n$urlpath\n$httpParameters\n$httpHeaders\n';
+    String stringtosign = 'sha1\n$keyTime\n${sha1.convert(utf8.encode(httpString)).toString()}\n';
 
-    String signature = Hmac(sha1, utf8.encode(signKey))
-        .convert(utf8.encode(stringtosign))
-        .toString();
+    String signature = Hmac(sha1, utf8.encode(signKey)).convert(utf8.encode(stringtosign)).toString();
     String authorization =
         'q-sign-algorithm=sha1&q-ak=$secretId&q-sign-time=$keyTime&q-key-time=$keyTime&q-header-list=$headerList&q-url-param-list=$urlParamList&q-signature=$signature';
     return authorization;
@@ -160,8 +149,7 @@ class TencentManageAPI {
       'Host': 'service.cos.myqcloud.com',
     };
 
-    String authorization =
-        tecentAuthorization(method, urlpath, header, secretId, secretKey, {});
+    String authorization = tecentAuthorization(method, urlpath, header, secretId, secretKey, {});
 
     BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = {
@@ -185,8 +173,7 @@ class TencentManageAPI {
         FLog.error(
             className: "TencentManageAPI",
             methodName: "getBucketList",
-            text: formatErrorMessage({}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
+            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
@@ -215,8 +202,7 @@ class TencentManageAPI {
         'multiAZ error',
       ];
     }
-    var body =
-        '<CreateBucketConfiguration><BucketAZConfig>MAZ</BucketAZConfig></CreateBucketConfiguration>';
+    var body = '<CreateBucketConfiguration><BucketAZConfig>MAZ</BucketAZConfig></CreateBucketConfiguration>';
     var bodyMd5 = md5.convert(utf8.encode(body));
     String base64BodyMd5 = base64.encode(bodyMd5.bytes);
     if (!bucket.endsWith('-appId')) {
@@ -239,8 +225,7 @@ class TencentManageAPI {
       header['content-md5'] = base64BodyMd5;
     }
 
-    String authorization =
-        tecentAuthorization(method, urlpath, header, secretId, secretKey, {});
+    String authorization = tecentAuthorization(method, urlpath, header, secretId, secretKey, {});
 
     BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = header;
@@ -264,16 +249,14 @@ class TencentManageAPI {
         FLog.error(
             className: "TencentManageAPI",
             methodName: "createBucket",
-            text: formatErrorMessage(
-                {'newBucketConfigMap': newBucketConfigMap}, e.toString(),
+            text: formatErrorMessage({'newBucketConfigMap': newBucketConfigMap}, e.toString(),
                 isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
             className: "TencentManageAPI",
             methodName: "createBucket",
-            text: formatErrorMessage(
-                {'newBucketConfigMap': newBucketConfigMap}, e.toString()),
+            text: formatErrorMessage({'newBucketConfigMap': newBucketConfigMap}, e.toString()),
             dataLogType: DataLogType.ERRORS.toString());
       }
       return [e.toString()];
@@ -294,8 +277,7 @@ class TencentManageAPI {
     Map<String, dynamic> header = {
       'Host': host,
     };
-    String authorization =
-        tecentAuthorization(method, urlpath, header, secretId, secretKey, {});
+    String authorization = tecentAuthorization(method, urlpath, header, secretId, secretKey, {});
 
     BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = header;
@@ -314,8 +296,7 @@ class TencentManageAPI {
         FLog.error(
             className: "TencentManageAPI",
             methodName: "deleteBucket",
-            text: formatErrorMessage({'element': element}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
+            text: formatErrorMessage({'element': element}, e.toString(), isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
@@ -342,8 +323,7 @@ class TencentManageAPI {
     Map<String, dynamic> header = {
       'Host': host,
     };
-    String authorization = tecentAuthorization(
-        method, urlpath, header, secretId, secretKey, {'acl': ''});
+    String authorization = tecentAuthorization(method, urlpath, header, secretId, secretKey, {'acl': ''});
 
     BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = header;
@@ -367,8 +347,7 @@ class TencentManageAPI {
         FLog.error(
             className: "TencentManageAPI",
             methodName: "queryACLPolicy",
-            text: formatErrorMessage({'element': element}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
+            text: formatErrorMessage({'element': element}, e.toString(), isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
@@ -396,8 +375,7 @@ class TencentManageAPI {
       'Host': host,
       'x-cos-acl': newACL,
     };
-    String authorization = tecentAuthorization(
-        method, urlpath, header, secretId, secretKey, {'acl': ''});
+    String authorization = tecentAuthorization(method, urlpath, header, secretId, secretKey, {'acl': ''});
 
     BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = header;
@@ -416,16 +394,14 @@ class TencentManageAPI {
         FLog.error(
             className: "TencentManageAPI",
             methodName: "changeACLPolicy",
-            text: formatErrorMessage(
-                {'element': element, 'newACL': newACL}, e.toString(),
+            text: formatErrorMessage({'element': element, 'newACL': newACL}, e.toString(),
                 isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
             className: "TencentManageAPI",
             methodName: "changeACLPolicy",
-            text: formatErrorMessage(
-                {'element': element, 'newACL': newACL}, e.toString()),
+            text: formatErrorMessage({'element': element, 'newACL': newACL}, e.toString()),
             dataLogType: DataLogType.ERRORS.toString());
       }
       return [e.toString()];
@@ -450,47 +426,17 @@ class TencentManageAPI {
       } else {
         path = folder;
       }
-      List sqlconfig = [];
-      sqlconfig.add(secretId);
-      sqlconfig.add(secretKey);
-      sqlconfig.add(bucket);
-      sqlconfig.add(appId);
-      sqlconfig.add(area);
-      sqlconfig.add(path);
-      sqlconfig.add(customUrl);
-      sqlconfig.add(options);
-      String defaultUser = await Global.getUser();
-      sqlconfig.add(defaultUser);
-      var queryTencent = await MySqlUtils.queryTencent(username: defaultUser);
-      var queryuser = await MySqlUtils.queryUser(username: defaultUser);
 
-      if (queryuser == 'Empty') {
-        return ['failed'];
-      }
-      var sqlResult = '';
-
-      if (queryTencent == 'Empty') {
-        sqlResult = await MySqlUtils.insertTencent(content: sqlconfig);
-      } else {
-        sqlResult = await MySqlUtils.updateTencent(content: sqlconfig);
-      }
-
-      if (sqlResult == "Success") {
-        final tencentConfig = TencentConfigModel(
-            secretId, secretKey, bucket, appId, area, path, customUrl, options);
-        final tencentConfigJson = jsonEncode(tencentConfig);
-        final tencentConfigFile = await _localFile;
-        await tencentConfigFile.writeAsString(tencentConfigJson);
-        return ['success'];
-      } else {
-        return ['failed'];
-      }
+      final tencentConfig = TencentConfigModel(secretId, secretKey, bucket, appId, area, path, customUrl, options);
+      final tencentConfigJson = jsonEncode(tencentConfig);
+      final tencentConfigFile = await _localFile;
+      await tencentConfigFile.writeAsString(tencentConfigJson);
+      return ['success'];
     } catch (e) {
       FLog.error(
           className: "TencentManageAPI",
           methodName: "setDefaultBucket",
-          text: formatErrorMessage(
-              {'element': element, 'folder': folder}, e.toString()),
+          text: formatErrorMessage({'element': element, 'folder': folder}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
       return ['failed'];
     }
@@ -512,8 +458,7 @@ class TencentManageAPI {
     };
     query['max-keys'] = 1000;
 
-    String authorization = tecentAuthorization(
-        method, urlpath, header, secretId, secretKey, query);
+    String authorization = tecentAuthorization(method, urlpath, header, secretId, secretKey, query);
 
     BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = header;
@@ -544,37 +489,27 @@ class TencentManageAPI {
             if (response.statusCode == 200) {
               if (tempMap['ListBucketResult']['Contents'] != null) {
                 if (tempMap['ListBucketResult']['Contents'] is! List) {
-                  tempMap['ListBucketResult']
-                      ['Contents'] = [tempMap['ListBucketResult']['Contents']];
+                  tempMap['ListBucketResult']['Contents'] = [tempMap['ListBucketResult']['Contents']];
                 }
                 if (responseMap['ListBucketResult']['Contents'] == null) {
-                  responseMap['ListBucketResult']['Contents'] =
-                      tempMap['ListBucketResult']['Contents'];
+                  responseMap['ListBucketResult']['Contents'] = tempMap['ListBucketResult']['Contents'];
                 } else {
                   if (responseMap['ListBucketResult']['Contents'] is! List) {
-                    responseMap['ListBucketResult']['Contents'] = [
-                      responseMap['ListBucketResult']['Contents']
-                    ];
+                    responseMap['ListBucketResult']['Contents'] = [responseMap['ListBucketResult']['Contents']];
                   }
-                  responseMap['ListBucketResult']['Contents']
-                      .addAll(tempMap['ListBucketResult']['Contents']);
+                  responseMap['ListBucketResult']['Contents'].addAll(tempMap['ListBucketResult']['Contents']);
                 }
               }
               if (tempMap['ListBucketResult']['CommonPrefixes'] != null) {
                 if (tempMap['ListBucketResult']['CommonPrefixes'] is! List) {
-                  tempMap['ListBucketResult']['CommonPrefixes'] = [
-                    tempMap['ListBucketResult']['CommonPrefixes']
-                  ];
+                  tempMap['ListBucketResult']['CommonPrefixes'] = [tempMap['ListBucketResult']['CommonPrefixes']];
                 }
                 if (responseMap['ListBucketResult']['CommonPrefixes'] == null) {
-                  responseMap['ListBucketResult']['CommonPrefixes'] =
-                      tempMap['ListBucketResult']['CommonPrefixes'];
+                  responseMap['ListBucketResult']['CommonPrefixes'] = tempMap['ListBucketResult']['CommonPrefixes'];
                 } else {
-                  if (responseMap['ListBucketResult']['CommonPrefixes']
-                      is! List) {
-                    responseMap['ListBucketResult']['CommonPrefixes'] = [
-                      responseMap['ListBucketResult']['CommonPrefixes']
-                    ];
+                  if (responseMap['ListBucketResult']['CommonPrefixes'] is! List) {
+                    responseMap['ListBucketResult']
+                        ['CommonPrefixes'] = [responseMap['ListBucketResult']['CommonPrefixes']];
                   }
                   responseMap['ListBucketResult']['CommonPrefixes']
                       .addAll(tempMap['ListBucketResult']['CommonPrefixes']);
@@ -594,16 +529,14 @@ class TencentManageAPI {
         FLog.error(
             className: "TencentManageAPI",
             methodName: "queryBucketFiles",
-            text: formatErrorMessage(
-                {'element': element, 'query': query}, e.toString(),
+            text: formatErrorMessage({'element': element, 'query': query}, e.toString(),
                 isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
             className: "TencentManageAPI",
             methodName: "queryBucketFiles",
-            text: formatErrorMessage(
-                {'element': element, 'query': query}, e.toString()),
+            text: formatErrorMessage({'element': element, 'query': query}, e.toString()),
             dataLogType: DataLogType.ERRORS.toString());
       }
       return [e.toString()];
@@ -639,8 +572,7 @@ class TencentManageAPI {
     Map<String, dynamic> header = {
       'Host': host,
     };
-    String authorization =
-        tecentAuthorization(method, urlpath, header, secretId, secretKey, {});
+    String authorization = tecentAuthorization(method, urlpath, header, secretId, secretKey, {});
 
     BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = header;
@@ -659,16 +591,14 @@ class TencentManageAPI {
         FLog.error(
             className: "TencentManageAPI",
             methodName: "deleteFile",
-            text: formatErrorMessage(
-                {'element': element, 'key': key}, e.toString(),
+            text: formatErrorMessage({'element': element, 'key': key}, e.toString(),
                 isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
             className: "TencentManageAPI",
             methodName: "deleteFile",
-            text: formatErrorMessage(
-                {'element': element, 'key': key}, e.toString()),
+            text: formatErrorMessage({'element': element, 'key': key}, e.toString()),
             dataLogType: DataLogType.ERRORS.toString());
       }
       return [e.toString()];
@@ -699,19 +629,16 @@ class TencentManageAPI {
         }
       }
       if (queryResult[1]['ListBucketResult']['CommonPrefixes'] != null) {
-        var commonPrefixes =
-            queryResult[1]['ListBucketResult']['CommonPrefixes'];
+        var commonPrefixes = queryResult[1]['ListBucketResult']['CommonPrefixes'];
         if (commonPrefixes is List) {
           for (var i = 0; i < commonPrefixes.length; i++) {
-            var deleteResult =
-                await deleteFolder(element, commonPrefixes[i]['Prefix']);
+            var deleteResult = await deleteFolder(element, commonPrefixes[i]['Prefix']);
             if (deleteResult[0] != 'success') {
               return ['failed'];
             }
           }
         } else {
-          var deleteResult =
-              await deleteFolder(element, commonPrefixes['Prefix']);
+          var deleteResult = await deleteFolder(element, commonPrefixes['Prefix']);
           if (deleteResult[0] != 'success') {
             return ['failed'];
           }
@@ -741,15 +668,13 @@ class TencentManageAPI {
       newName = key.substring(0, key.lastIndexOf('/') + 1) + newKey;
     }
     String urlpath = '/$newName';
-    String xCosCopySource =
-        '/$bucket.cos.$region.myqcloud.com/${Uri.encodeComponent(key)}';
+    String xCosCopySource = '/$bucket.cos.$region.myqcloud.com/${Uri.encodeComponent(key)}';
 
     Map<String, dynamic> header = {
       'Host': host,
       'x-cos-copy-source': xCosCopySource,
     };
-    String authorization =
-        tecentAuthorization(method, urlpath, header, secretId, secretKey, {});
+    String authorization = tecentAuthorization(method, urlpath, header, secretId, secretKey, {});
 
     BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = header;
@@ -768,19 +693,14 @@ class TencentManageAPI {
         FLog.error(
             className: "TencentManageAPI",
             methodName: "copyFile",
-            text: formatErrorMessage({
-              'element': element,
-              'key': key,
-              'newKey': newKey
-            }, e.toString(), isDioError: true, dioErrorMessage: e),
+            text: formatErrorMessage({'element': element, 'key': key, 'newKey': newKey}, e.toString(),
+                isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
             className: "TencentManageAPI",
             methodName: "copyFile",
-            text: formatErrorMessage(
-                {'element': element, 'key': key, 'newKey': newKey},
-                e.toString()),
+            text: formatErrorMessage({'element': element, 'key': key, 'newKey': newKey}, e.toString()),
             dataLogType: DataLogType.ERRORS.toString());
       }
       return [e.toString()];
@@ -810,8 +730,7 @@ class TencentManageAPI {
         }
       }
       if (queryResult[1]['ListBucketResult']['CommonPrefixes'] != null) {
-        var commonPrefixes =
-            queryResult[1]['ListBucketResult']['CommonPrefixes'];
+        var commonPrefixes = queryResult[1]['ListBucketResult']['CommonPrefixes'];
         if (commonPrefixes is List) {
           for (var i = 0; i < commonPrefixes.length; i++) {
             if (commonPrefixes[i]['Prefix'] == key) {
@@ -847,8 +766,7 @@ class TencentManageAPI {
     Map<String, dynamic> header = {
       'Host': host,
     };
-    String authorization =
-        tecentAuthorization(method, urlpath, header, secretId, secretKey, {});
+    String authorization = tecentAuthorization(method, urlpath, header, secretId, secretKey, {});
 
     BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = header;
@@ -866,16 +784,14 @@ class TencentManageAPI {
         FLog.error(
             className: "TencentManageAPI",
             methodName: "downloadFile",
-            text: formatErrorMessage(
-                {'element': element, 'key': key, 'path': path}, e.toString(),
+            text: formatErrorMessage({'element': element, 'key': key, 'path': path}, e.toString(),
                 isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
             className: "TencentManageAPI",
             methodName: "downloadFile",
-            text: formatErrorMessage(
-                {'element': element, 'key': key, 'path': path}, e.toString()),
+            text: formatErrorMessage({'element': element, 'key': key, 'path': path}, e.toString()),
             dataLogType: DataLogType.ERRORS.toString());
       }
       return [e.toString()];
@@ -902,8 +818,7 @@ class TencentManageAPI {
     Map<String, dynamic> header = {
       'Host': host,
     };
-    String authorization =
-        tecentAuthorization(method, urlpath, header, secretId, secretKey, {});
+    String authorization = tecentAuthorization(method, urlpath, header, secretId, secretKey, {});
 
     BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = header;
@@ -921,19 +836,14 @@ class TencentManageAPI {
         FLog.error(
             className: "TencentManageAPI",
             methodName: "createFolder",
-            text: formatErrorMessage({
-              'element': element,
-              'prefix': prefix,
-              'newfolder': newfolder
-            }, e.toString(), isDioError: true, dioErrorMessage: e),
+            text: formatErrorMessage({'element': element, 'prefix': prefix, 'newfolder': newfolder}, e.toString(),
+                isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
             className: "TencentManageAPI",
             methodName: "createFolder",
-            text: formatErrorMessage(
-                {'element': element, 'prefix': prefix, 'newfolder': newfolder},
-                e.toString()),
+            text: formatErrorMessage({'element': element, 'prefix': prefix, 'newfolder': newfolder}, e.toString()),
             dataLogType: DataLogType.ERRORS.toString());
       }
       return [e.toString()];
@@ -972,8 +882,7 @@ class TencentManageAPI {
       ]
     };
     String uploadPolicyStr = jsonEncode(uploadPolicy);
-    String singature = TencentImageUploadUtils.getUploadAuthorization(
-        secretKey, keyTime, uploadPolicyStr);
+    String singature = TencentImageUploadUtils.getUploadAuthorization(secretKey, keyTime, uploadPolicyStr);
     FormData formData = FormData.fromMap({
       'key': urlpath,
       'policy': base64Encode(utf8.encode(uploadPolicyStr)),
@@ -1012,23 +921,16 @@ class TencentManageAPI {
         FLog.error(
             className: "TencentManageAPI",
             methodName: "uploadFile",
-            text: formatErrorMessage({
-              'element': element,
-              'filename': filename,
-              'filepath': filepath,
-              'prefix': prefix
-            }, e.toString(), isDioError: true, dioErrorMessage: e),
+            text: formatErrorMessage(
+                {'element': element, 'filename': filename, 'filepath': filepath, 'prefix': prefix}, e.toString(),
+                isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
             className: "TencentManageAPI",
             methodName: "uploadFile",
-            text: formatErrorMessage({
-              'element': element,
-              'filename': filename,
-              'filepath': filepath,
-              'prefix': prefix
-            }, e.toString()),
+            text: formatErrorMessage(
+                {'element': element, 'filename': filename, 'filepath': filepath, 'prefix': prefix}, e.toString()),
             dataLogType: DataLogType.ERRORS.toString());
       }
       return ['error'];
@@ -1052,10 +954,7 @@ class TencentManageAPI {
       );
       if (uploadResult[0] == "Error") {
         return Fluttertoast.showToast(
-            msg: '配置错误',
-            toastLength: Toast.LENGTH_SHORT,
-            timeInSecForIosWeb: 2,
-            fontSize: 16.0);
+            msg: '配置错误', toastLength: Toast.LENGTH_SHORT, timeInSecForIosWeb: 2, fontSize: 16.0);
       } else if (uploadResult[0] == "success") {
         successCount++;
       } else {
@@ -1065,32 +964,21 @@ class TencentManageAPI {
 
     if (successCount == 0) {
       return Fluttertoast.showToast(
-          msg: '上传失败',
-          toastLength: Toast.LENGTH_SHORT,
-          timeInSecForIosWeb: 2,
-          fontSize: 16.0);
+          msg: '上传失败', toastLength: Toast.LENGTH_SHORT, timeInSecForIosWeb: 2, fontSize: 16.0);
     } else if (failCount == 0) {
       return Fluttertoast.showToast(
-          msg: '上传成功',
-          toastLength: Toast.LENGTH_SHORT,
-          timeInSecForIosWeb: 2,
-          fontSize: 16.0);
+          msg: '上传成功', toastLength: Toast.LENGTH_SHORT, timeInSecForIosWeb: 2, fontSize: 16.0);
     } else {
       return Fluttertoast.showToast(
-          msg: '成功$successCount,失败$failCount',
-          toastLength: Toast.LENGTH_SHORT,
-          timeInSecForIosWeb: 2,
-          fontSize: 16.0);
+          msg: '成功$successCount,失败$failCount', toastLength: Toast.LENGTH_SHORT, timeInSecForIosWeb: 2, fontSize: 16.0);
     }
   }
 
   //从网络链接下载文件后上传
   static uploadNetworkFile(String fileLink, Map element, String prefix) async {
     try {
-      String filename =
-          fileLink.substring(fileLink.lastIndexOf("/") + 1, fileLink.length);
-      filename = filename.substring(
-          0, !filename.contains("?") ? filename.length : filename.indexOf("?"));
+      String filename = fileLink.substring(fileLink.lastIndexOf("/") + 1, fileLink.length);
+      filename = filename.substring(0, !filename.contains("?") ? filename.length : filename.indexOf("?"));
       String savePath = await getTemporaryDirectory().then((value) {
         return value.path;
       });
@@ -1117,27 +1005,21 @@ class TencentManageAPI {
         FLog.error(
             className: "TencentManageAPI",
             methodName: "uploadNetworkFile",
-            text: formatErrorMessage({
-              'fileLink': fileLink,
-              'element': element,
-              'prefix': prefix
-            }, e.toString(), isDioError: true, dioErrorMessage: e),
+            text: formatErrorMessage({'fileLink': fileLink, 'element': element, 'prefix': prefix}, e.toString(),
+                isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
             className: "TencentManageAPI",
             methodName: "uploadNetworkFile",
-            text: formatErrorMessage(
-                {'fileLink': fileLink, 'element': element, 'prefix': prefix},
-                e.toString()),
+            text: formatErrorMessage({'fileLink': fileLink, 'element': element, 'prefix': prefix}, e.toString()),
             dataLogType: DataLogType.ERRORS.toString());
       }
       return ['failed'];
     }
   }
 
-  static uploadNetworkFileEntry(
-      List fileList, Map element, String prefix) async {
+  static uploadNetworkFileEntry(List fileList, Map element, String prefix) async {
     int successCount = 0;
     int failCount = 0;
 
@@ -1155,22 +1037,13 @@ class TencentManageAPI {
 
     if (successCount == 0) {
       return Fluttertoast.showToast(
-          msg: '上传失败',
-          toastLength: Toast.LENGTH_SHORT,
-          timeInSecForIosWeb: 2,
-          fontSize: 16.0);
+          msg: '上传失败', toastLength: Toast.LENGTH_SHORT, timeInSecForIosWeb: 2, fontSize: 16.0);
     } else if (failCount == 0) {
       return Fluttertoast.showToast(
-          msg: '上传成功',
-          toastLength: Toast.LENGTH_SHORT,
-          timeInSecForIosWeb: 2,
-          fontSize: 16.0);
+          msg: '上传成功', toastLength: Toast.LENGTH_SHORT, timeInSecForIosWeb: 2, fontSize: 16.0);
     } else {
       return Fluttertoast.showToast(
-          msg: '成功$successCount,失败$failCount',
-          toastLength: Toast.LENGTH_SHORT,
-          timeInSecForIosWeb: 2,
-          fontSize: 16.0);
+          msg: '成功$successCount,失败$failCount', toastLength: Toast.LENGTH_SHORT, timeInSecForIosWeb: 2, fontSize: 16.0);
     }
   }
 }

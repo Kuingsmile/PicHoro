@@ -24,8 +24,7 @@ import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/router/application.dart';
 import 'package:horopic/router/routers.dart';
-import 'package:horopic/picture_host_manage/common_page/loading_state.dart'
-    as loading_state;
+import 'package:horopic/picture_host_manage/common_page/loading_state.dart' as loading_state;
 
 import 'package:horopic/utils/image_compress.dart';
 
@@ -38,14 +37,12 @@ class SmmsFileExplorer extends StatefulWidget {
   SmmsFileExplorerState createState() => SmmsFileExplorerState();
 }
 
-class SmmsFileExplorerState
-    extends loading_state.BaseLoadingPageState<SmmsFileExplorer> {
+class SmmsFileExplorerState extends loading_state.BaseLoadingPageState<SmmsFileExplorer> {
   List allInfoList = [];
   List selectedFilesBool = [];
   bool sorted = true;
 
-  RefreshController refreshController =
-      RefreshController(initialRefresh: false);
+  RefreshController refreshController = RefreshController(initialRefresh: false);
 
   @override
   void initState() {
@@ -148,19 +145,15 @@ class SmmsFileExplorerState
                     onTap: () {
                       if (sorted == true) {
                         allInfoList.sort((a, b) {
-                          int timestampA = DateTime.parse(a['created_at'])
-                              .millisecondsSinceEpoch;
-                          int timestampB = DateTime.parse(b['created_at'])
-                              .millisecondsSinceEpoch;
+                          int timestampA = DateTime.parse(a['created_at']).millisecondsSinceEpoch;
+                          int timestampB = DateTime.parse(b['created_at']).millisecondsSinceEpoch;
                           return timestampB.compareTo(timestampA);
                         });
                         sorted = false;
                       } else {
                         allInfoList.sort((a, b) {
-                          int timestampA = DateTime.parse(a['created_at'])
-                              .millisecondsSinceEpoch;
-                          int timestampB = DateTime.parse(b['created_at'])
-                              .millisecondsSinceEpoch;
+                          int timestampA = DateTime.parse(a['created_at']).millisecondsSinceEpoch;
+                          int timestampB = DateTime.parse(b['created_at']).millisecondsSinceEpoch;
                           return timestampA.compareTo(timestampB);
                         });
                         sorted = true;
@@ -256,8 +249,7 @@ class SmmsFileExplorerState
                       children: [
                         ListTile(
                           minLeadingWidth: 0,
-                          leading: const Icon(Icons.image_outlined,
-                              color: Colors.blue),
+                          leading: const Icon(Icons.image_outlined, color: Colors.blue),
                           title: const Text('上传照片(可多选)'),
                           onTap: () async {
                             Navigator.pop(context);
@@ -266,50 +258,36 @@ class SmmsFileExplorerState
                               selectedAssets: [],
                             );
                             final List<AssetEntity>? pickedImage =
-                                await AssetPicker.pickAssets(context,
-                                    pickerConfig: config);
+                                await AssetPicker.pickAssets(context, pickerConfig: config);
                             if (pickedImage == null) {
                               showToast('未选择图片');
                             } else {
                               List<File> files = [];
                               for (var i = 0; i < pickedImage.length; i++) {
-                                File? fileImage =
-                                    await pickedImage[i].originFile;
+                                File? fileImage = await pickedImage[i].originFile;
                                 if (fileImage != null) {
                                   files.add(fileImage);
                                 }
                               }
-                              Map configMap =
-                                  await SmmsManageAPI.getConfigMap();
+                              Map configMap = await SmmsManageAPI.getConfigMap();
                               for (int i = 0; i < files.length; i++) {
                                 File compressedFile;
                                 if (Global.isCompress == true) {
                                   ImageCompress imageCompress = ImageCompress();
-                                  compressedFile =
-                                      await imageCompress.compressAndGetFile(
-                                          files[i].path,
-                                          my_path.basename(files[i].path),
-                                          Global.defaultCompressFormat,
-                                          minHeight: Global.minHeight,
-                                          minWidth: Global.minWidth,
-                                          quality: Global.quality);
+                                  compressedFile = await imageCompress.compressAndGetFile(
+                                      files[i].path, my_path.basename(files[i].path), Global.defaultCompressFormat,
+                                      minHeight: Global.minHeight, minWidth: Global.minWidth, quality: Global.quality);
                                   files[i] = compressedFile;
                                 } else {
                                   compressedFile = files[i];
                                 }
-                                List uploadList = [
-                                  files[i].path,
-                                  my_path.basename(files[i].path),
-                                  configMap
-                                ];
+                                List uploadList = [files[i].path, my_path.basename(files[i].path), configMap];
                                 String uploadListStr = jsonEncode(uploadList);
                                 Global.smmsUploadList.add(uploadListStr);
                               }
-                              await Global.setSmmsUploadList(
-                                  Global.smmsUploadList);
-                              String downloadPath = await ExternalPath
-                                  .getExternalStoragePublicDirectory(
-                                      ExternalPath.DIRECTORY_DOWNLOADS);
+                              await Global.setSmmsUploadList(Global.smmsUploadList);
+                              String downloadPath = await ExternalPath.getExternalStoragePublicDirectory(
+                                  ExternalPath.DIRECTORY_DOWNLOADS);
                               if (mounted) {
                                 Application.router
                                     .navigateTo(context,
@@ -328,11 +306,8 @@ class SmmsFileExplorerState
                           title: const Text('上传剪贴板内链接(换行分隔多个)'),
                           onTap: () async {
                             Navigator.pop(context);
-                            var url = await flutter_services.Clipboard.getData(
-                                'text/plain');
-                            if (url == null ||
-                                url.text == null ||
-                                url.text!.isEmpty) {
+                            var url = await flutter_services.Clipboard.getData('text/plain');
+                            if (url == null || url.text == null || url.text!.isEmpty) {
                               if (mounted) {
                                 showToastWithContext(context, '剪贴板为空');
                               }
@@ -349,8 +324,7 @@ class SmmsFileExplorerState
                                       outsideDismiss: false,
                                       loading: true,
                                       loadingText: "上传中...",
-                                      requestCallBack:
-                                          SmmsManageAPI.uploadNetworkFileEntry(
+                                      requestCallBack: SmmsManageAPI.uploadNetworkFileEntry(
                                         fileLinkList,
                                       ),
                                     );
@@ -385,8 +359,7 @@ class SmmsFileExplorerState
           IconButton(
               onPressed: () async {
                 String downloadPath =
-                    await ExternalPath.getExternalStoragePublicDirectory(
-                        ExternalPath.DIRECTORY_DOWNLOADS);
+                    await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOADS);
                 int index = 1;
                 if (Global.smmsDownloadList.isEmpty) {
                   index = 0;
@@ -404,13 +377,10 @@ class SmmsFileExplorerState
               )),
           IconButton(
             icon: selectedFilesBool.contains(true)
-                ? const Icon(Icons.delete,
-                    color: Color.fromARGB(255, 236, 127, 120), size: 30.0)
-                : const Icon(Icons.delete_outline,
-                    color: Colors.white, size: 30.0),
+                ? const Icon(Icons.delete, color: Color.fromARGB(255, 236, 127, 120), size: 30.0)
+                : const Icon(Icons.delete_outline, color: Colors.white, size: 30.0),
             onPressed: () async {
-              if (!selectedFilesBool.contains(true) ||
-                  selectedFilesBool.isEmpty) {
+              if (!selectedFilesBool.contains(true) || selectedFilesBool.isEmpty) {
                 showToastWithContext(context, '没有选择文件');
                 return;
               }
@@ -495,12 +465,10 @@ class SmmsFileExplorerState
               width: 40,
               child: FloatingActionButton(
                 heroTag: 'download',
-                backgroundColor: selectedFilesBool.contains(true)
-                    ? const Color.fromARGB(255, 180, 236, 182)
-                    : Colors.transparent,
+                backgroundColor:
+                    selectedFilesBool.contains(true) ? const Color.fromARGB(255, 180, 236, 182) : Colors.transparent,
                 onPressed: () async {
-                  if (!selectedFilesBool.contains(true) ||
-                      selectedFilesBool.isEmpty) {
+                  if (!selectedFilesBool.contains(true) || selectedFilesBool.isEmpty) {
                     showToastWithContext(context, '没有选择文件');
                     return;
                   }
@@ -522,8 +490,7 @@ class SmmsFileExplorerState
                     Global.smmsSavedNameList.add(downloadList[i]['filename']);
                   }
                   String downloadPath =
-                      await ExternalPath.getExternalStoragePublicDirectory(
-                          ExternalPath.DIRECTORY_DOWNLOADS);
+                      await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOADS);
                   if (mounted) {
                     Application.router.navigateTo(context,
                         '/smmsUpDownloadManagePage?downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=1',
@@ -542,9 +509,8 @@ class SmmsFileExplorerState
               width: 40,
               child: FloatingActionButton(
                 heroTag: 'copy',
-                backgroundColor: selectedFilesBool.contains(true)
-                    ? const Color.fromARGB(255, 232, 177, 241)
-                    : Colors.transparent,
+                backgroundColor:
+                    selectedFilesBool.contains(true) ? const Color.fromARGB(255, 232, 177, 241) : Colors.transparent,
                 elevation: 5,
                 onPressed: () async {
                   if (!selectedFilesBool.contains(true)) {
@@ -559,19 +525,16 @@ class SmmsFileExplorerState
                         String fileName = '';
                         rawurl = allInfoList[i]['url'];
                         fileName = allInfoList[i]['filename'];
-                        finalFormatedurl =
-                            linkGenerateDict[Global.defaultLKformat]!(
-                                rawurl, fileName);
+                        finalFormatedurl = linkGenerateDict[Global.defaultLKformat]!(rawurl, fileName);
                         multiUrls.add(finalFormatedurl);
                       }
                     }
-                    await flutter_services.Clipboard.setData(
-                        flutter_services.ClipboardData(
-                            text: multiUrls
-                                .toString()
-                                .substring(1, multiUrls.toString().length - 1)
-                                .replaceAll(', ', '\n')
-                                .replaceAll(',', '\n')));
+                    await flutter_services.Clipboard.setData(flutter_services.ClipboardData(
+                        text: multiUrls
+                            .toString()
+                            .substring(1, multiUrls.toString().length - 1)
+                            .replaceAll(', ', '\n')
+                            .replaceAll(',', '\n')));
                     if (mounted) {
                       showToastWithContext(context, '已复制全部链接');
                     }
@@ -654,9 +617,7 @@ class SmmsFileExplorerState
               const Center(
                   child: Text('没有文件哦，点击右上角添加吧\n刚上传的文件\n可能需要一段时间才能显示',
                       textAlign: TextAlign.center,
-                      style: TextStyle(
-                          fontSize: 20,
-                          color: Color.fromARGB(136, 121, 118, 118))))
+                      style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))))
             ],
           ),
         ));
@@ -668,9 +629,7 @@ class SmmsFileExplorerState
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Text('加载失败,请先登录或者检查网络',
-              style: TextStyle(
-                  fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))),
+          const Text('加载失败,请先登录或者检查网络', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))),
           ElevatedButton(
             style: ButtonStyle(
               backgroundColor: MaterialStateProperty.all(Colors.blue),
@@ -748,8 +707,7 @@ class SmmsFileExplorerState
                             },
                             autoClose: true,
                             padding: EdgeInsets.zero,
-                            backgroundColor:
-                                const Color.fromARGB(255, 109, 196, 116),
+                            backgroundColor: const Color.fromARGB(255, 109, 196, 116),
                             foregroundColor: Colors.white,
                             icon: Icons.share,
                             label: '分享',
@@ -762,32 +720,24 @@ class SmmsFileExplorerState
                                   builder: (BuildContext context) {
                                     return CupertinoAlertDialog(
                                       title: const Text('通知'),
-                                      content: Text(
-                                          '确定要删除${allInfoList[index]['filename']}吗？'),
+                                      content: Text('确定要删除${allInfoList[index]['filename']}吗？'),
                                       actions: <Widget>[
                                         CupertinoDialogAction(
-                                          child: const Text('取消',
-                                              style: TextStyle(
-                                                  color: Colors.blue)),
+                                          child: const Text('取消', style: TextStyle(color: Colors.blue)),
                                           onPressed: () {
                                             Navigator.pop(context);
                                           },
                                         ),
                                         CupertinoDialogAction(
-                                          child: const Text('确定',
-                                              style: TextStyle(
-                                                  color: Colors.blue)),
+                                          child: const Text('确定', style: TextStyle(color: Colors.blue)),
                                           onPressed: () async {
                                             Navigator.pop(context);
-                                            var result =
-                                                await SmmsManageAPI.deleteFile(
-                                                    allInfoList[index]['hash']);
+                                            var result = await SmmsManageAPI.deleteFile(allInfoList[index]['hash']);
                                             if (result[0] == 'success') {
                                               showToast('删除成功');
                                               setState(() {
                                                 allInfoList.removeAt(index);
-                                                selectedFilesBool
-                                                    .removeAt(index);
+                                                selectedFilesBool.removeAt(index);
                                               });
                                             } else {
                                               showToast('删除失败');
@@ -807,9 +757,7 @@ class SmmsFileExplorerState
                       ),
                       child: Stack(fit: StackFit.loose, children: [
                         Container(
-                          color: selectedFilesBool[index]
-                              ? const Color(0x311192F3)
-                              : Colors.transparent,
+                          color: selectedFilesBool[index] ? const Color(0x311192F3) : Colors.transparent,
                           child: ListTile(
                             minLeadingWidth: 0,
                             minVerticalPadding: 0,
@@ -820,20 +768,14 @@ class SmmsFileExplorerState
                             ),
                             title: Text(
                                 allInfoList[index]['filename'].length > 20
-                                    ? allInfoList[index]['filename']
-                                            .substring(0, 10) +
+                                    ? allInfoList[index]['filename'].substring(0, 10) +
                                         '...' +
                                         allInfoList[index]['filename']
-                                            .substring(allInfoList[index]
-                                                        ['filename']
-                                                    .length -
-                                                10)
+                                            .substring(allInfoList[index]['filename'].length - 10)
                                     : allInfoList[index]['filename'],
                                 style: const TextStyle(fontSize: 14)),
                             subtitle: Text(
-                              allInfoList[index]['created_at'] +
-                                  '   ' +
-                                  getFileSize(allInfoList[index]['size']),
+                              allInfoList[index]['created_at'] + '   ' + getFileSize(allInfoList[index]['size']),
                               style: const TextStyle(fontSize: 12),
                             ),
                             trailing: IconButton(
@@ -855,8 +797,7 @@ class SmmsFileExplorerState
                               for (var i = 0; i < allInfoList.length; i++) {
                                 urlList += allInfoList[i]['url'] + ',';
                               }
-                              urlList =
-                                  urlList.substring(0, urlList.length - 1);
+                              urlList = urlList.substring(0, urlList.length - 1);
 
                               Application.router.navigateTo(this.context,
                                   '${Routes.albumImagePreview}?index=$index&images=${Uri.encodeComponent(urlList)}',
@@ -868,8 +809,7 @@ class SmmsFileExplorerState
                           // ignore: sort_child_properties_last
                           child: Container(
                             decoration: const BoxDecoration(
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(55)),
+                                borderRadius: BorderRadius.all(Radius.circular(55)),
                                 color: Color.fromARGB(255, 235, 242, 248)),
                             padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
                             child: MSHCheckbox(
@@ -916,8 +856,7 @@ class SmmsFileExplorerState
         cache: true,
         border: Border.all(color: Colors.transparent, width: 2),
         borderRadius: const BorderRadius.all(Radius.circular(8)),
-        loadStateChanged: (state) =>
-            defaultLoadStateChanged(state, iconSize: 30),
+        loadStateChanged: (state) => defaultLoadStateChanged(state, iconSize: 30),
       );
     } catch (e) {
       FLog.error(
@@ -958,14 +897,11 @@ class SmmsFileExplorerState
                 allInfoList[index]['filename'].length > 20
                     ? allInfoList[index]['filename'].substring(0, 10) +
                         '...' +
-                        allInfoList[index]['filename'].substring(
-                            allInfoList[index]['filename'].length - 10)
+                        allInfoList[index]['filename'].substring(allInfoList[index]['filename'].length - 10)
                     : allInfoList[index]['filename'],
                 style: const TextStyle(fontSize: 14)),
             subtitle: Text(
-              allInfoList[index]['created_at'] +
-                  '   ' +
-                  getFileSize(allInfoList[index]['size']),
+              allInfoList[index]['created_at'] + '   ' + getFileSize(allInfoList[index]['size']),
               style: const TextStyle(fontSize: 12),
             ),
           ),
@@ -1000,12 +936,9 @@ class SmmsFileExplorerState
             onTap: () async {
               String format = await Global.getLKformat();
               String shareUrl = allInfoList[index]['url'];
-              String filename =
-                  my_path.basename(allInfoList[index]['filename']);
-              String formatedLink =
-                  linkGenerateDict[format]!(shareUrl, filename);
-              await flutter_services.Clipboard.setData(
-                  flutter_services.ClipboardData(text: formatedLink));
+              String filename = my_path.basename(allInfoList[index]['filename']);
+              String formatedLink = linkGenerateDict[format]!(shareUrl, filename);
+              await flutter_services.Clipboard.setData(flutter_services.ClipboardData(text: formatedLink));
               if (mounted) {
                 Navigator.pop(context);
               }
@@ -1034,19 +967,16 @@ class SmmsFileExplorerState
                     content: Text('确定要删除${allInfoList[index]['filename']}吗？'),
                     actions: <Widget>[
                       CupertinoDialogAction(
-                        child: const Text('取消',
-                            style: TextStyle(color: Colors.blue)),
+                        child: const Text('取消', style: TextStyle(color: Colors.blue)),
                         onPressed: () {
                           Navigator.pop(context);
                         },
                       ),
                       CupertinoDialogAction(
-                        child: const Text('确定',
-                            style: TextStyle(color: Colors.blue)),
+                        child: const Text('确定', style: TextStyle(color: Colors.blue)),
                         onPressed: () async {
                           Navigator.pop(context);
-                          var result = await SmmsManageAPI.deleteFile(
-                              allInfoList[index]['hash']);
+                          var result = await SmmsManageAPI.deleteFile(allInfoList[index]['hash']);
                           if (result[0] == 'success') {
                             showToast('删除成功');
                             setState(() {

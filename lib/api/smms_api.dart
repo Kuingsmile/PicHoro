@@ -5,10 +5,7 @@ import 'package:horopic/utils/global.dart';
 
 class SmmsImageUploadUtils {
   //上传接口
-  static uploadApi(
-      {required String path,
-      required String name,
-      required Map configMap}) async {
+  static uploadApi({required String path, required String name, required Map configMap}) async {
     String formatedURL = '';
     FormData formdata = FormData.fromMap({
       "smfile": await MultipartFile.fromFile(path, filename: name),
@@ -22,7 +19,6 @@ class SmmsImageUploadUtils {
     };
     Dio dio = Dio(options);
     String uploadUrl = "https://smms.app/api/v2/upload";
-    //String uploadUrl = "https://sm.ms/api/v2/upload"; //主要接口,国内访问不了
 
     try {
       var response = await dio.post(uploadUrl, data: formdata);
@@ -30,8 +26,7 @@ class SmmsImageUploadUtils {
         String returnUrl = response.data!['data']['url'];
         String pictureKey = response.data!['data']['hash'];
         if (Global.isCopyLink == true) {
-          formatedURL =
-              linkGenerateDict[Global.defaultLKformat]!(returnUrl, name);
+          formatedURL = linkGenerateDict[Global.defaultLKformat]!(returnUrl, name);
         } else {
           formatedURL = returnUrl;
         }
@@ -74,8 +69,7 @@ class SmmsImageUploadUtils {
       "Authorization": configMap["token"],
     };
     Dio dio = Dio(options);
-    String deleteUrl =
-        "https://smms.app/api/v2/delete/${deleteMap["pictureKey"]}";
+    String deleteUrl = "https://smms.app/api/v2/delete/${deleteMap["pictureKey"]}";
     //String uploadUrl = "https://sm.ms/api/v2/delete/:hash"; //主要接口,国内访问不了
 
     try {
@@ -90,8 +84,7 @@ class SmmsImageUploadUtils {
         FLog.error(
             className: "SmmsImageUploadUtils",
             methodName: "deleteApi",
-            text: formatErrorMessage({}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
+            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(

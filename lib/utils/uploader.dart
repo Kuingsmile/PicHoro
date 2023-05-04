@@ -27,8 +27,7 @@ Future<File> get _localFile async {
   String defaultConfig = await Global.getPShost();
   String defaultUser = await Global.getUser();
 
-  return File(
-      '${directory.path}/${defaultUser}_${getpdconfig(defaultConfig)}.txt');
+  return File('${directory.path}/${defaultUser}_${getpdconfig(defaultConfig)}.txt');
 }
 
 //读取图床配置文件
@@ -56,8 +55,7 @@ uploaderentry({required String path, required String name}) async {
   Map configMap = jsonDecode(configData);
   String defaultConfig = await Global.getPShost();
   try {
-    var result = await uploadFunc[defaultConfig]!(
-        path: path, name: name, configMap: configMap);
+    var result = await uploadFunc[defaultConfig]!(path: path, name: name, configMap: configMap);
     return result;
   } catch (e) {
     flogErr(

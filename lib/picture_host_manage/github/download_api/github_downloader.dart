@@ -35,16 +35,13 @@ class DownloadManager {
     return _dm;
   }
 
-  void Function(int, int) createCallback(url, int partialFileLength) =>
-      (int received, int total) {
-        getDownload(url)?.progress.value =
-            (received + partialFileLength) / (total + partialFileLength);
+  void Function(int, int) createCallback(url, int partialFileLength) => (int received, int total) {
+        getDownload(url)?.progress.value = (received + partialFileLength) / (total + partialFileLength);
 
         if (total == -1) {}
       };
 
-  Future<void> download(String url, String savePath, cancelToken,
-      {forceDownload = false}) async {
+  Future<void> download(String url, String savePath, cancelToken, {forceDownload = false}) async {
     try {
       var task = getDownload(url);
 
@@ -114,8 +111,7 @@ class DownloadManager {
           'githubDownloadManager',
           'download');
       var task = getDownload(url)!;
-      if (task.status.value != DownloadStatus.canceled &&
-          task.status.value != DownloadStatus.paused) {
+      if (task.status.value != DownloadStatus.canceled && task.status.value != DownloadStatus.paused) {
         setStatus(task, DownloadStatus.failed);
         runningTasks--;
 
@@ -231,8 +227,7 @@ class DownloadManager {
     return _cache[url];
   }
 
-  Future<DownloadStatus> whenDownloadComplete(String url,
-      {Duration timeout = const Duration(hours: 2)}) async {
+  Future<DownloadStatus> whenDownloadComplete(String url, {Duration timeout = const Duration(hours: 2)}) async {
     DownloadTask? task = getDownload(url);
 
     if (task != null) {
@@ -381,8 +376,7 @@ class DownloadManager {
 
       var currentRequest = _queue.removeFirst();
 
-      download(
-          currentRequest.url, currentRequest.path, currentRequest.cancelToken);
+      download(currentRequest.url, currentRequest.path, currentRequest.cancelToken);
 
       await Future.delayed(const Duration(milliseconds: 500), null);
     }

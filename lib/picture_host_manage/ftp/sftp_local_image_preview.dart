@@ -11,9 +11,7 @@ class SFTPLocalImagePreview extends StatefulWidget {
   final Map configMap;
   final String image;
 
-  const SFTPLocalImagePreview(
-      {Key? key, required this.configMap, required this.image})
-      : super(key: key);
+  const SFTPLocalImagePreview({Key? key, required this.configMap, required this.image}) : super(key: key);
 
   @override
   SFTPLocalImagePreviewState createState() => SFTPLocalImagePreviewState();
@@ -43,8 +41,7 @@ class SFTPLocalImagePreviewState extends State<SFTPLocalImagePreview> {
       if (file.existsSync()) {
         file.deleteSync();
       }
-      var remoteFile =
-          await sftp.open(widget.image, mode: SftpFileOpenMode.read);
+      var remoteFile = await sftp.open(widget.image, mode: SftpFileOpenMode.read);
       file.writeAsBytesSync(await remoteFile.readBytes());
       return file.path;
     } catch (e) {
@@ -74,9 +71,7 @@ class SFTPLocalImagePreviewState extends State<SFTPLocalImagePreview> {
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             filePath = snapshot.data.toString();
-            return Center(
-                child: Image.file(File(filePath),
-                    fit: BoxFit.contain, width: double.infinity));
+            return Center(child: Image.file(File(filePath), fit: BoxFit.contain, width: double.infinity));
           } else {
             return const Center(
               child: CircularProgressIndicator(),

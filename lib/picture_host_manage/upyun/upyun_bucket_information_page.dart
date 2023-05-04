@@ -4,8 +4,7 @@ import 'package:horopic/utils/common_functions.dart';
 
 class UpyunBucketInformation extends StatefulWidget {
   final Map bucketMap;
-  const UpyunBucketInformation({Key? key, required this.bucketMap})
-      : super(key: key);
+  const UpyunBucketInformation({Key? key, required this.bucketMap}) : super(key: key);
 
   @override
   UpyunBucketInformationState createState() => UpyunBucketInformationState();
@@ -29,8 +28,7 @@ class UpyunBucketInformationState extends State<UpyunBucketInformation> {
         children: [
           ListTile(
             title: const Text('存储桶名称'),
-            trailing:
-                SelectableText(widget.bucketMap['bucket_name'].toString()),
+            trailing: SelectableText(widget.bucketMap['bucket_name'].toString()),
           ),
           ListTile(
             title: const Text('存储桶ID'),
@@ -42,8 +40,7 @@ class UpyunBucketInformationState extends State<UpyunBucketInformation> {
           ),
           ListTile(
             title: const Text('HTTPS'),
-            trailing: SelectableText(
-                widget.bucketMap['https'] == false ? '关闭' : '开启'),
+            trailing: SelectableText(widget.bucketMap['https'] == false ? '关闭' : '开启'),
           ),
           ListTile(
             title: const Text('缩略图版本分隔符'),
@@ -51,8 +48,8 @@ class UpyunBucketInformationState extends State<UpyunBucketInformation> {
           ),
           ListTile(
             title: const Text('标签'),
-            trailing: SelectableText(
-                '${widget.bucketMap['tag']}(${UpyunManageAPI.tagConvert[widget.bucketMap['tag']]})'),
+            trailing:
+                SelectableText('${widget.bucketMap['tag']}(${UpyunManageAPI.tagConvert[widget.bucketMap['tag']]})'),
           ),
           ListTile(
             title: const Text('状态'),
@@ -60,17 +57,16 @@ class UpyunBucketInformationState extends State<UpyunBucketInformation> {
           ),
           ListTile(
             title: const Text('访问域名'),
-            subtitle: SelectableText(widget.bucketMap['domains'] == null
-                ? '无'
-                : widget.bucketMap['domains'].toString()),
+            subtitle:
+                SelectableText(widget.bucketMap['domains'] == null ? '无' : widget.bucketMap['domains'].toString()),
           ),
           ListTile(
             title: const Text('操作员'),
-            subtitle: SelectableText(
-                widget.bucketMap['operator'].toString() == '[]'
-                    ? '无'
-                    : widget.bucketMap['operator'].toString().substring(
-                        1, widget.bucketMap['operator'].toString().length - 1)),
+            subtitle: SelectableText(widget.bucketMap['operator'].toString() == '[]'
+                ? '无'
+                : widget.bucketMap['operator']
+                    .toString()
+                    .substring(1, widget.bucketMap['operator'].toString().length - 1)),
           ),
         ],
       ),

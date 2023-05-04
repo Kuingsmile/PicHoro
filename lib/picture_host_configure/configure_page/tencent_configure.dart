@@ -4,7 +4,6 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:f_logs/f_logs.dart';
 import 'package:fluro/fluro.dart';
 import 'package:path_provider/path_provider.dart';
@@ -13,7 +12,6 @@ import 'package:horopic/router/application.dart';
 import 'package:horopic/api/tencent_api.dart';
 import 'package:horopic/pages/loading.dart';
 import 'package:horopic/utils/common_functions.dart';
-import 'package:horopic/utils/sql_utils.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/event_bus_utils.dart';
 import 'package:horopic/picture_host_manage/manage_api/tencent_manage_api.dart';
@@ -99,14 +97,12 @@ class TencentConfigState extends State<TencentConfig> {
         actions: [
           IconButton(
             onPressed: () async {
-              await Application.router.navigateTo(
-                  context, '/configureStorePage?psHost=tencent',
-                  transition: TransitionType.cupertino);
+              await Application.router
+                  .navigateTo(context, '/configureStorePage?psHost=tencent', transition: TransitionType.cupertino);
               await _initConfig();
               setState(() {});
             },
-            icon: const Icon(Icons.save_as_outlined,
-                color: Color.fromARGB(255, 255, 255, 255), size: 35),
+            icon: const Icon(Icons.save_as_outlined, color: Color.fromARGB(255, 255, 255, 255), size: 35),
           )
         ],
       ),
@@ -255,9 +251,8 @@ class TencentConfigState extends State<TencentConfig> {
             ListTile(
                 title: ElevatedButton(
               onPressed: () async {
-                await Application.router.navigateTo(
-                    context, '/configureStorePage?psHost=tencent',
-                    transition: TransitionType.cupertino);
+                await Application.router
+                    .navigateTo(context, '/configureStorePage?psHost=tencent', transition: TransitionType.cupertino);
                 await _initConfig();
                 setState(() {});
               },
@@ -300,8 +295,7 @@ class TencentConfigState extends State<TencentConfig> {
       //格式化自定义域名，不以/结尾，以http(s)://开头
       if (customUrl.isEmpty) {
         customUrl = 'None';
-      } else if (!customUrl.startsWith('http') &&
-          !customUrl.startsWith('https')) {
+      } else if (!customUrl.startsWith('http') && !customUrl.startsWith('https')) {
         customUrl = 'http://$customUrl';
       }
 
@@ -317,26 +311,6 @@ class TencentConfigState extends State<TencentConfig> {
       } else {
         options = 'None';
       }
-      List sqlconfig = [];
-      sqlconfig.add(secretId);
-      sqlconfig.add(secretKey);
-      sqlconfig.add(bucket);
-      sqlconfig.add(appId);
-      sqlconfig.add(area);
-      sqlconfig.add(path);
-      sqlconfig.add(customUrl);
-      sqlconfig.add(options);
-      //添加默认用户
-      String defaultUser = await Global.getUser();
-      sqlconfig.add(defaultUser);
-
-      var queryTencent = await MySqlUtils.queryTencent(username: defaultUser);
-      var queryuser = await MySqlUtils.queryUser(username: defaultUser);
-
-      if (queryuser == 'Empty') {
-        return showCupertinoAlertDialog(
-            context: context, title: '错误', content: '用户不存在,请先登录');
-      }
 
       //save asset image to app dir
       String assetPath = 'assets/validateImage/PicHoroValidate.jpeg';
@@ -348,8 +322,7 @@ class TencentConfigState extends State<TencentConfig> {
 
       if (!assetFile.existsSync()) {
         ByteData data = await rootBundle.load(assetPath);
-        List<int> bytes =
-            data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+        List<int> bytes = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
         await assetFile.writeAsBytes(bytes);
       }
       String key = 'PicHoroValidate.jpeg';
@@ -375,8 +348,7 @@ class TencentConfigState extends State<TencentConfig> {
         ]
       };
       String uploadPolicyStr = jsonEncode(uploadPolicy);
-      String singature = TencentImageUploadUtils.getUploadAuthorization(
-          secretKey, keyTime, uploadPolicyStr);
+      String singature = TencentImageUploadUtils.getUploadAuthorization(secretKey, keyTime, uploadPolicyStr);
       //policy中的字段，除了bucket，其它的都要在formdata中添加
       FormData formData = FormData.fromMap({
         'key': urlpath,
@@ -406,29 +378,13 @@ class TencentConfigState extends State<TencentConfig> {
       );
       //腾讯默认返回204
       if (response.statusCode == 204) {
-        var sqlResult = '';
-
-        if (queryTencent == 'Empty') {
-          sqlResult = await MySqlUtils.insertTencent(content: sqlconfig);
-        } else {
-          sqlResult = await MySqlUtils.updateTencent(content: sqlconfig);
-        }
-
-        if (sqlResult == "Success") {
-          final tencentConfig = TencentConfigModel(secretId, secretKey, bucket,
-              appId, area, path, customUrl, options);
-          final tencentConfigJson = jsonEncode(tencentConfig);
-          final tencentConfigFile = await localFile;
-          await tencentConfigFile.writeAsString(tencentConfigJson);
-          return showCupertinoAlertDialog(
-              context: context, title: '成功', content: '配置成功');
-        } else {
-          return showCupertinoAlertDialog(
-              context: context, title: '错误', content: '数据库错误');
-        }
+        final tencentConfig = TencentConfigModel(secretId, secretKey, bucket, appId, area, path, customUrl, options);
+        final tencentConfigJson = jsonEncode(tencentConfig);
+        final tencentConfigFile = await localFile;
+        await tencentConfigFile.writeAsString(tencentConfigJson);
+        return showCupertinoAlertDialog(context: context, title: '成功', content: '配置成功');
       } else {
-        return showCupertinoAlertDialog(
-            context: context, title: '错误', content: '验证失败');
+        return showCupertinoAlertDialog(context: context, title: '错误', content: '数据库错误');
       }
     } catch (e) {
       FLog.error(
@@ -436,8 +392,7 @@ class TencentConfigState extends State<TencentConfig> {
           methodName: 'saveConfig',
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
-      return showCupertinoAlertDialog(
-          context: context, title: '错误', content: e.toString());
+      return showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
     }
   }
 
@@ -447,8 +402,7 @@ class TencentConfigState extends State<TencentConfig> {
       String configData = await tencentConfigFile.readAsString();
 
       if (configData == "Error") {
-        return showCupertinoAlertDialog(
-            context: context, title: "检查失败!", content: "请先配置上传参数.");
+        return showCupertinoAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");
       }
 
       Map configMap = jsonDecode(configData);
@@ -463,13 +417,11 @@ class TencentConfigState extends State<TencentConfig> {
 
       if (!assetFile.existsSync()) {
         ByteData data = await rootBundle.load(assetPath);
-        List<int> bytes =
-            data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+        List<int> bytes = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
         await assetFile.writeAsBytes(bytes);
       }
       String key = 'PicHoroValidate.jpeg';
-      String host =
-          '${configMap['bucket']}.cos.${configMap['area']}.myqcloud.com';
+      String host = '${configMap['bucket']}.cos.${configMap['area']}.myqcloud.com';
       String urlpath = '';
       if (configMap['path'] != 'None') {
         urlpath = '${configMap['path']}$key';
@@ -492,8 +444,8 @@ class TencentConfigState extends State<TencentConfig> {
         ]
       };
       String uploadPolicyStr = jsonEncode(uploadPolicy);
-      String singature = TencentImageUploadUtils.getUploadAuthorization(
-          configMap['secretKey'], keyTime, uploadPolicyStr);
+      String singature =
+          TencentImageUploadUtils.getUploadAuthorization(configMap['secretKey'], keyTime, uploadPolicyStr);
       //policy中的字段，除了bucket，其它的都要在formdata中添加
       FormData formData = FormData.fromMap({
         'key': urlpath,
@@ -529,8 +481,7 @@ class TencentConfigState extends State<TencentConfig> {
             content:
                 '检测通过，您的配置信息为:\nsecretId:\n${configMap['secretId']}\nsecretKey:\n${configMap['secretKey']}\nbucket:\n${configMap['bucket']}\nappId:\n${configMap['appId']}\narea:\n${configMap['area']}\npath:\n${configMap['path']}\ncustomUrl:\n${configMap['customUrl']}\noptions:\n${configMap['options']}');
       } else {
-        return showCupertinoAlertDialog(
-            context: context, title: '错误', content: '检查失败，请检查配置信息');
+        return showCupertinoAlertDialog(context: context, title: '错误', content: '检查失败，请检查配置信息');
       }
     } catch (e) {
       FLog.error(
@@ -538,8 +489,7 @@ class TencentConfigState extends State<TencentConfig> {
           methodName: 'checkTencentConfig',
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
-      return showCupertinoAlertDialog(
-          context: context, title: "检查失败!", content: e.toString());
+      return showCupertinoAlertDialog(context: context, title: "检查失败!", content: e.toString());
     }
   }
 
@@ -571,65 +521,11 @@ class TencentConfigState extends State<TencentConfig> {
 
   _setdefault() async {
     try {
-      String defaultUser = await Global.getUser();
-      String defaultPassword = await Global.getPassword();
-
-      var queryuser = await MySqlUtils.queryUser(username: defaultUser);
-      if (queryuser == 'Empty') {
-        return Fluttertoast.showToast(
-            msg: "请先注册用户",
-            toastLength: Toast.LENGTH_SHORT,
-            timeInSecForIosWeb: 2,
-            fontSize: 16.0);
-      } else if (queryuser['password'] != defaultPassword) {
-        return Fluttertoast.showToast(
-            msg: "请先登录",
-            toastLength: Toast.LENGTH_SHORT,
-            timeInSecForIosWeb: 2,
-            fontSize: 16.0);
-      }
-
-      var queryTencent = await MySqlUtils.queryTencent(username: defaultUser);
-      if (queryTencent == 'Empty') {
-        return Fluttertoast.showToast(
-            msg: "请先配置上传参数",
-            toastLength: Toast.LENGTH_SHORT,
-            timeInSecForIosWeb: 2,
-            fontSize: 16.0);
-      }
-      if (queryTencent == 'Error') {
-        return Fluttertoast.showToast(
-            msg: "Error",
-            toastLength: Toast.LENGTH_SHORT,
-            timeInSecForIosWeb: 2,
-            fontSize: 16.0);
-      }
-      if (queryuser['defaultPShost'] == 'tencent') {
-        await Global.setPShost('tencent');
-        await Global.setShowedPBhost('tencent');
-        eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-        eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
-        return Fluttertoast.showToast(
-            msg: "已经是默认配置",
-            toastLength: Toast.LENGTH_SHORT,
-            timeInSecForIosWeb: 2,
-            fontSize: 16.0);
-      } else {
-        List sqlconfig = [];
-        sqlconfig.add(defaultUser);
-        sqlconfig.add(defaultPassword);
-        sqlconfig.add('tencent');
-        var updateResult = await MySqlUtils.updateUser(content: sqlconfig);
-        if (updateResult == 'Success') {
-          await Global.setPShost('tencent');
-          await Global.setShowedPBhost('tencent');
-          eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-          eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
-          showToast('已设置腾讯云为默认图床');
-        } else {
-          showToast('写入数据库失败');
-        }
-      }
+      await Global.setPShost('tencent');
+      await Global.setShowedPBhost('tencent');
+      eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
+      eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
+      showToast('已设置腾讯云为默认图床');
     } catch (e) {
       FLog.error(
           className: 'TencentConfigPage',
@@ -651,8 +547,8 @@ class TencentConfigModel {
   final String customUrl;
   final String options;
 
-  TencentConfigModel(this.secretId, this.secretKey, this.bucket, this.appId,
-      this.area, this.path, this.customUrl, this.options);
+  TencentConfigModel(
+      this.secretId, this.secretKey, this.bucket, this.appId, this.area, this.path, this.customUrl, this.options);
 
   Map<String, dynamic> toJson() => {
         'secretId': secretId,

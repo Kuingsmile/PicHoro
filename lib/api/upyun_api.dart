@@ -9,10 +9,7 @@ import 'package:horopic/utils/global.dart';
 
 class UpyunImageUploadUtils {
   //上传接口
-  static uploadApi(
-      {required String path,
-      required String name,
-      required Map configMap}) async {
+  static uploadApi({required String path, required String name, required Map configMap}) async {
     String bucket = configMap['bucket'];
     String upyunOperator = configMap['operator'];
     String password = configMap['password'];
@@ -61,9 +58,7 @@ class UpyunImageUploadUtils {
     String base64Policy = base64.encode(utf8.encode(json.encode(uploadPolicy)));
     String stringToSign = 'POST&/$bucket&$date&$base64Policy&$uploadFileMd5';
     String passwordMd5 = md5.convert(utf8.encode(password)).toString();
-    String signature = base64.encode(Hmac(sha1, utf8.encode(passwordMd5))
-        .convert(utf8.encode(stringToSign))
-        .bytes);
+    String signature = base64.encode(Hmac(sha1, utf8.encode(passwordMd5)).convert(utf8.encode(stringToSign)).bytes);
     String authorization = 'UPYUN $upyunOperator:$signature';
     FormData formData = FormData.fromMap({
       'authorization': authorization,
@@ -110,8 +105,7 @@ class UpyunImageUploadUtils {
 
         String formatedURL = '';
         if (Global.isCopyLink == true) {
-          formatedURL =
-              linkGenerateDict[Global.defaultLKformat]!(returnUrl, name);
+          formatedURL = linkGenerateDict[Global.defaultLKformat]!(returnUrl, name);
         } else {
           formatedURL = returnUrl;
         }
@@ -176,9 +170,7 @@ class UpyunImageUploadUtils {
     String codedUri = Uri.encodeFull(uri);
     String stringToSign = '$method&$codedUri&$date';
     String passwordMd5 = md5.convert(utf8.encode(password)).toString();
-    String signature = base64.encode(Hmac(sha1, utf8.encode(passwordMd5))
-        .convert(utf8.encode(stringToSign))
-        .bytes);
+    String signature = base64.encode(Hmac(sha1, utf8.encode(passwordMd5)).convert(utf8.encode(stringToSign)).bytes);
     String authorization = 'UPYUN $upyunOperator:$signature';
     baseOptions.headers = {
       'Host': 'v0.api.upyun.com',

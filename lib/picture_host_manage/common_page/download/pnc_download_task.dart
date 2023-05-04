@@ -14,8 +14,7 @@ class DownloadTask {
     this.request,
   );
 
-  Future<DownloadStatus> whenDownloadComplete(
-      {Duration timeout = const Duration(hours: 2)}) async {
+  Future<DownloadStatus> whenDownloadComplete({Duration timeout = const Duration(hours: 2)}) async {
     var completer = Completer<DownloadStatus>();
 
     if (status.value.isCompleted) {

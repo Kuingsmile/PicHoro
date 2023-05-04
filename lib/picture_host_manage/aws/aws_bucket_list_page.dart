@@ -8,14 +8,11 @@ import 'package:f_logs/f_logs.dart';
 
 import 'package:horopic/router/application.dart';
 import 'package:horopic/router/routers.dart';
-import 'package:horopic/picture_host_manage/common_page/loading_state.dart'
-    as loading_state;
+import 'package:horopic/picture_host_manage/common_page/loading_state.dart' as loading_state;
 import 'package:horopic/picture_host_manage/manage_api/aws_manage_api.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/global.dart';
-import 'package:horopic/utils/sql_utils.dart';
-import 'package:horopic/picture_host_manage/alist/alist_file_explorer.dart'
-    show RenameDialog, RenameDialogContent;
+import 'package:horopic/picture_host_manage/alist/alist_file_explorer.dart' show RenameDialog, RenameDialogContent;
 
 class AwsBucketList extends StatefulWidget {
   const AwsBucketList({Key? key}) : super(key: key);
@@ -24,12 +21,10 @@ class AwsBucketList extends StatefulWidget {
   AwsBucketListState createState() => AwsBucketListState();
 }
 
-class AwsBucketListState
-    extends loading_state.BaseLoadingPageState<AwsBucketList> {
+class AwsBucketListState extends loading_state.BaseLoadingPageState<AwsBucketList> {
   List bucketMap = [];
 
-  RefreshController refreshController =
-      RefreshController(initialRefresh: false);
+  RefreshController refreshController = RefreshController(initialRefresh: false);
   TextEditingController vc = TextEditingController();
 
   @override
@@ -53,27 +48,6 @@ class AwsBucketListState
   initBucketList() async {
     bucketMap.clear();
     try {
-      String currentUser = await Global.getUser();
-      String defaultPassword = await Global.getPassword();
-      var queryuser = await MySqlUtils.queryUser(username: currentUser);
-      if (queryuser == 'Empty') {
-        setState(() {
-          state = loading_state.LoadState.ERROR;
-        });
-        return showToast('请先登录');
-      } else if (queryuser['password'] != defaultPassword) {
-        setState(() {
-          state = loading_state.LoadState.ERROR;
-        });
-        return showToast('请先登录');
-      }
-      var queryAws = await MySqlUtils.queryAws(username: currentUser);
-      if (queryAws == 'Empty') {
-        setState(() {
-          state = loading_state.LoadState.ERROR;
-        });
-        return showToast('请先去配置S3兼容平台');
-      }
       var bucketListResponse = await AwsManageAPI.getBucketList();
       //判断是否获取成功
       if (bucketListResponse[0] != 'success') {
@@ -97,11 +71,7 @@ class AwsBucketListState
       var allBucketList = bucketListResponse[1];
 
       for (var element in allBucketList) {
-        String formatedTime = element.creationDate
-            .toString()
-            .toString()
-            .replaceAll('Z', '')
-            .substring(0, 19);
+        String formatedTime = element.creationDate.toString().toString().replaceAll('Z', '').substring(0, 19);
 
         bucketMap.add({
           'name': element.name,
@@ -111,13 +81,11 @@ class AwsBucketListState
       }
       for (var i = 0; i < bucketMap.length; i++) {
         if (Global.bucketCustomUrl.containsKey('s3-${bucketMap[i]['name']}')) {
-          bucketMap[i]['customUrl'] =
-              Global.bucketCustomUrl['s3-${bucketMap[i]['name']}'];
+          bucketMap[i]['customUrl'] = Global.bucketCustomUrl['s3-${bucketMap[i]['name']}'];
         } else {
           bucketMap[i]['customUrl'] = '';
         }
-        var regionResponse =
-            await AwsManageAPI.getBucketRegion(bucketMap[i]['name']);
+        var regionResponse = await AwsManageAPI.getBucketRegion(bucketMap[i]['name']);
         if (regionResponse[0] != 'success') {
           bucketMap[i]['region'] = 'None';
         } else {
@@ -155,8 +123,7 @@ class AwsBucketListState
     Map<String, int> locationCount = {};
     for (var i = 0; i < elements.length; i++) {
       if (locationCount.containsKey(elements[i]['region'])) {
-        locationCount[elements[i]['region']] =
-            locationCount[elements[i]['region']]! + 1;
+        locationCount[elements[i]['region']] = locationCount[elements[i]['region']]! + 1;
       } else {
         locationCount[elements[i]['region']] = 1;
       }
@@ -172,9 +139,8 @@ class AwsBucketListState
         actions: [
           IconButton(
             onPressed: () async {
-              await Application.router.navigateTo(
-                  context, Routes.awsNewBucketConfig,
-                  transition: TransitionType.cupertino);
+              await Application.router
+                  .navigateTo(context, Routes.awsNewBucketConfig, transition: TransitionType.cupertino);
               _onRefresh();
             },
             icon: const Icon(
@@ -197,9 +163,7 @@ class AwsBucketListState
             width: 100,
             height: 100,
           ),
-          const Text('没有存储桶，点击右上角添加哦',
-              style: TextStyle(
-                  fontSize: 20, color: Color.fromARGB(136, 121, 118, 118)))
+          const Text('没有存储桶，点击右上角添加哦', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118)))
         ],
       ),
     );
@@ -211,9 +175,7 @@ class AwsBucketListState
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Text('加载失败',
-              style: TextStyle(
-                  fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))),
+          const Text('加载失败', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))),
           ElevatedButton(
             style: ButtonStyle(
               backgroundColor: MaterialStateProperty.all(Colors.blue),
@@ -273,8 +235,7 @@ class AwsBucketListState
           shrinkWrap: true,
           elements: bucketMap,
           groupBy: (element) => element['region'],
-          itemComparator: (item1, item2) =>
-              item1['CreationDate'].compareTo(item2['CreationDate']),
+          itemComparator: (item1, item2) => item1['CreationDate'].compareTo(item2['CreationDate']),
           groupComparator: (value1, value2) => value2.compareTo(value1),
           separator: const Divider(
             height: 0.1,
@@ -353,8 +314,7 @@ class AwsBucketListState
               element['name'],
               style: const TextStyle(fontSize: 14),
             ),
-            subtitle: Text(element['CreationDate'],
-                style: const TextStyle(fontSize: 12)),
+            subtitle: Text(element['CreationDate'], style: const TextStyle(fontSize: 12)),
           ),
           const Divider(
             height: 0.1,
@@ -375,30 +335,20 @@ class AwsBucketListState
                   builder: (context) {
                     return RenameDialog(
                       contentWidget: RenameDialogContent(
-                        title: Global
-                                    .bucketCustomUrl['s3-${element['name']}'] ==
-                                ''
+                        title: Global.bucketCustomUrl['s3-${element['name']}'] == ''
                             ? '设置自定义链接'
-                            : Global.bucketCustomUrl['s3-${element['name']}'] ==
-                                    null
+                            : Global.bucketCustomUrl['s3-${element['name']}'] == null
                                 ? '设置自定义链接'
-                                : Global
-                                            .bucketCustomUrl[
-                                                's3-${element['name']}']!
-                                            .length >
-                                        20
+                                : Global.bucketCustomUrl['s3-${element['name']}']!.length > 20
                                     ? '${Global.bucketCustomUrl['s3-${element['name']}']!.substring(0, 20)}...'
-                                    : Global.bucketCustomUrl[
-                                        's3-${element['name']}']!,
+                                    : Global.bucketCustomUrl['s3-${element['name']}']!,
                         okBtnTap: () async {
                           if (!vc.text.startsWith(RegExp(r'http|https'))) {
                             showToast('链接必须以http或https开头');
                             return;
                           }
-                          bucketMap[bucketMap.indexOf(element)]['customUrl'] =
-                              vc.text;
-                          Global.bucketCustomUrl['s3-${element['name']}'] =
-                              vc.text;
+                          bucketMap[bucketMap.indexOf(element)]['customUrl'] = vc.text;
+                          Global.bucketCustomUrl['s3-${element['name']}'] = vc.text;
                           Global.setBucketCustomUrl(Global.bucketCustomUrl);
                           showToast('设置成功');
                         },

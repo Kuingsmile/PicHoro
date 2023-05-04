@@ -34,8 +34,7 @@ class Global {
   static int quality = 80;
   static String defaultCompressFormat = 'webp';
   static int defaultOutTime = 30000;
-  static String multipartString =
-      "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW";
+  static String multipartString = "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW";
   static Map<String, String> bucketCustomUrl = {};
   static List psHostHomePageOrder = [
     0,
@@ -489,8 +488,7 @@ class Global {
 
   static getCustomeRename() async {
     await SpUtil.getInstance();
-    bool iscustomRename =
-        SpUtil.getBool('key_iscustomRename', defValue: false)!;
+    bool iscustomRename = SpUtil.getBool('key_iscustomRename', defValue: false)!;
     return iscustomRename;
   }
 
@@ -532,8 +530,7 @@ class Global {
 
   static getShowedPBhost() async {
     await SpUtil.getInstance();
-    String showedPBhost =
-        SpUtil.getString('key_showedPBhost', defValue: 'lskypro')!;
+    String showedPBhost = SpUtil.getString('key_showedPBhost', defValue: 'lskypro')!;
     return showedPBhost;
   }
 
@@ -551,9 +548,8 @@ class Global {
 
   static getBucketCustomUrl() async {
     await SpUtil.getInstance();
-    Map<String, String> bucketCustomUrl = SpUtil.getObj(
-        'key_bucketCustomUrl', (v) => Map<String, String>.from(v),
-        defValue: {})!;
+    Map<String, String> bucketCustomUrl =
+        SpUtil.getObj('key_bucketCustomUrl', (v) => Map<String, String>.from(v), defValue: {})!;
     return bucketCustomUrl;
   }
 
@@ -571,8 +567,7 @@ class Global {
 
   static getCustomLinkFormat() async {
     await SpUtil.getInstance();
-    String customLinkFormat = SpUtil.getString('key_customLinkFormat',
-        defValue: r'[$fileName]($url)')!;
+    String customLinkFormat = SpUtil.getString('key_customLinkFormat', defValue: r'[$fileName]($url)')!;
     return customLinkFormat;
   }
 
@@ -584,8 +579,7 @@ class Global {
 
   static getCustomeRenameFormat() async {
     await SpUtil.getInstance();
-    String customRenameFormat =
-        SpUtil.getString('key_customRenameFormat', defValue: r'{filename}')!;
+    String customRenameFormat = SpUtil.getString('key_customRenameFormat', defValue: r'{filename}')!;
     return customRenameFormat;
   }
 
@@ -663,8 +657,7 @@ class Global {
 
   static getdefaultCompressFormat() async {
     await SpUtil.getInstance();
-    String defaultCompressFormat =
-        SpUtil.getString('key_defaultCompressFormat', defValue: 'webp')!;
+    String defaultCompressFormat = SpUtil.getString('key_defaultCompressFormat', defValue: 'webp')!;
     return defaultCompressFormat;
   }
 
@@ -682,8 +675,7 @@ class Global {
 
   static getpsHostHomePageOrder() async {
     await SpUtil.getInstance();
-    List psHostHomePageOrder =
-        SpUtil.getStringList('key_psHostHomePageOrder', defValue: [
+    List psHostHomePageOrder = SpUtil.getStringList('key_psHostHomePageOrder', defValue: [
       '0',
       '1',
       '2',
@@ -718,8 +710,7 @@ class Global {
 
   static getTencentUploadList() async {
     await SpUtil.getInstance();
-    List tencentUploadList =
-        SpUtil.getStringList('key_tencentUploadList', defValue: [])!;
+    List tencentUploadList = SpUtil.getStringList('key_tencentUploadList', defValue: [])!;
     return tencentUploadList;
   }
 
@@ -731,8 +722,7 @@ class Global {
 
   static getTencentDownloadList() async {
     await SpUtil.getInstance();
-    List tencentDownloadList =
-        SpUtil.getStringList('key_tencentDownloadList', defValue: [])!;
+    List tencentDownloadList = SpUtil.getStringList('key_tencentDownloadList', defValue: [])!;
     return tencentDownloadList;
   }
 
@@ -744,8 +734,7 @@ class Global {
 
   static getAliyunUploadList() async {
     await SpUtil.getInstance();
-    List aliyunUploadList =
-        SpUtil.getStringList('key_aliyunUploadList', defValue: [])!;
+    List aliyunUploadList = SpUtil.getStringList('key_aliyunUploadList', defValue: [])!;
     return aliyunUploadList;
   }
 
@@ -757,8 +746,7 @@ class Global {
 
   static getAliyunDownloadList() async {
     await SpUtil.getInstance();
-    List aliyunDownloadList =
-        SpUtil.getStringList('key_aliyunDownloadList', defValue: [])!;
+    List aliyunDownloadList = SpUtil.getStringList('key_aliyunDownloadList', defValue: [])!;
     return aliyunDownloadList;
   }
 
@@ -770,8 +758,7 @@ class Global {
 
   static getUpyunUploadList() async {
     await SpUtil.getInstance();
-    List upyunUploadList =
-        SpUtil.getStringList('key_upyunUploadList', defValue: [])!;
+    List upyunUploadList = SpUtil.getStringList('key_upyunUploadList', defValue: [])!;
     return upyunUploadList;
   }
 
@@ -783,8 +770,7 @@ class Global {
 
   static getUpyunDownloadList() async {
     await SpUtil.getInstance();
-    List upyunDownloadList =
-        SpUtil.getStringList('key_upyunDownloadList', defValue: [])!;
+    List upyunDownloadList = SpUtil.getStringList('key_upyunDownloadList', defValue: [])!;
     return upyunDownloadList;
   }
 
@@ -796,8 +782,7 @@ class Global {
 
   static getQiniuUploadList() async {
     await SpUtil.getInstance();
-    List qiniuUploadList =
-        SpUtil.getStringList('key_qiniuUploadList', defValue: [])!;
+    List qiniuUploadList = SpUtil.getStringList('key_qiniuUploadList', defValue: [])!;
     return qiniuUploadList;
   }
 
@@ -809,8 +794,7 @@ class Global {
 
   static getQiniuDownloadList() async {
     await SpUtil.getInstance();
-    List qiniuDownloadList =
-        SpUtil.getStringList('key_qiniuDownloadList', defValue: [])!;
+    List qiniuDownloadList = SpUtil.getStringList('key_qiniuDownloadList', defValue: [])!;
     return qiniuDownloadList;
   }
 
@@ -822,8 +806,7 @@ class Global {
 
   static getImgurUploadList() async {
     await SpUtil.getInstance();
-    List imgurUploadList =
-        SpUtil.getStringList('key_imgurUploadList', defValue: [])!;
+    List imgurUploadList = SpUtil.getStringList('key_imgurUploadList', defValue: [])!;
     return imgurUploadList;
   }
 
@@ -835,8 +818,7 @@ class Global {
 
   static getImgurDownloadList() async {
     await SpUtil.getInstance();
-    List imgurDownloadList =
-        SpUtil.getStringList('key_imgurDownloadList', defValue: [])!;
+    List imgurDownloadList = SpUtil.getStringList('key_imgurDownloadList', defValue: [])!;
     return imgurDownloadList;
   }
 
@@ -848,8 +830,7 @@ class Global {
 
   static getSmmsUploadList() async {
     await SpUtil.getInstance();
-    List smmsUploadList =
-        SpUtil.getStringList('key_smmsUploadList', defValue: [])!;
+    List smmsUploadList = SpUtil.getStringList('key_smmsUploadList', defValue: [])!;
     return smmsUploadList;
   }
 
@@ -861,8 +842,7 @@ class Global {
 
   static getSmmsDownloadList() async {
     await SpUtil.getInstance();
-    List smmsDownloadList =
-        SpUtil.getStringList('key_smmsDownloadList', defValue: [])!;
+    List smmsDownloadList = SpUtil.getStringList('key_smmsDownloadList', defValue: [])!;
     return smmsDownloadList;
   }
 
@@ -874,8 +854,7 @@ class Global {
 
   static getSmmsSavedNameList() async {
     await SpUtil.getInstance();
-    List smmsSavedNameList =
-        SpUtil.getStringList('key_smmsSavedNameList', defValue: [])!;
+    List smmsSavedNameList = SpUtil.getStringList('key_smmsSavedNameList', defValue: [])!;
     return smmsSavedNameList;
   }
 
@@ -887,8 +866,7 @@ class Global {
 
   static getGithubUploadList() async {
     await SpUtil.getInstance();
-    List githubUploadList =
-        SpUtil.getStringList('key_githubUploadList', defValue: [])!;
+    List githubUploadList = SpUtil.getStringList('key_githubUploadList', defValue: [])!;
     return githubUploadList;
   }
 
@@ -900,8 +878,7 @@ class Global {
 
   static getGithubDownloadList() async {
     await SpUtil.getInstance();
-    List githubDownloadList =
-        SpUtil.getStringList('key_githubDownloadList', defValue: [])!;
+    List githubDownloadList = SpUtil.getStringList('key_githubDownloadList', defValue: [])!;
     return githubDownloadList;
   }
 
@@ -913,8 +890,7 @@ class Global {
 
   static getLskyproUploadList() async {
     await SpUtil.getInstance();
-    List lskyproUploadList =
-        SpUtil.getStringList('key_lskyproUploadList', defValue: [])!;
+    List lskyproUploadList = SpUtil.getStringList('key_lskyproUploadList', defValue: [])!;
     return lskyproUploadList;
   }
 
@@ -926,8 +902,7 @@ class Global {
 
   static getLskyproDownloadList() async {
     await SpUtil.getInstance();
-    List lskyproDownloadList =
-        SpUtil.getStringList('key_lskyproDownloadList', defValue: [])!;
+    List lskyproDownloadList = SpUtil.getStringList('key_lskyproDownloadList', defValue: [])!;
     return lskyproDownloadList;
   }
 
@@ -939,8 +914,7 @@ class Global {
 
   static getFtpUploadList() async {
     await SpUtil.getInstance();
-    List ftpUploadList =
-        SpUtil.getStringList('key_ftpUploadList', defValue: [])!;
+    List ftpUploadList = SpUtil.getStringList('key_ftpUploadList', defValue: [])!;
     return ftpUploadList;
   }
 
@@ -952,8 +926,7 @@ class Global {
 
   static getFtpDownloadList() async {
     await SpUtil.getInstance();
-    List ftpDownloadList =
-        SpUtil.getStringList('key_ftpDownloadList', defValue: [])!;
+    List ftpDownloadList = SpUtil.getStringList('key_ftpDownloadList', defValue: [])!;
     return ftpDownloadList;
   }
 
@@ -965,8 +938,7 @@ class Global {
 
   static getAwsUploadList() async {
     await SpUtil.getInstance();
-    List awsUploadList =
-        SpUtil.getStringList('key_awsUploadList', defValue: [])!;
+    List awsUploadList = SpUtil.getStringList('key_awsUploadList', defValue: [])!;
     return awsUploadList;
   }
 
@@ -978,8 +950,7 @@ class Global {
 
   static getAwsDownloadList() async {
     await SpUtil.getInstance();
-    List awsDownloadList =
-        SpUtil.getStringList('key_awsDownloadList', defValue: [])!;
+    List awsDownloadList = SpUtil.getStringList('key_awsDownloadList', defValue: [])!;
     return awsDownloadList;
   }
 
@@ -991,8 +962,7 @@ class Global {
 
   static getAlistUploadList() async {
     await SpUtil.getInstance();
-    List alistUploadList =
-        SpUtil.getStringList('key_alistUploadList', defValue: [])!;
+    List alistUploadList = SpUtil.getStringList('key_alistUploadList', defValue: [])!;
     return alistUploadList;
   }
 
@@ -1004,8 +974,7 @@ class Global {
 
   static getAlistDownloadList() async {
     await SpUtil.getInstance();
-    List alistDownloadList =
-        SpUtil.getStringList('key_alistDownloadList', defValue: [])!;
+    List alistDownloadList = SpUtil.getStringList('key_alistDownloadList', defValue: [])!;
     return alistDownloadList;
   }
 
@@ -1017,8 +986,7 @@ class Global {
 
   static getWebdavUploadList() async {
     await SpUtil.getInstance();
-    List webdavUploadList =
-        SpUtil.getStringList('key_webdavUploadList', defValue: [])!;
+    List webdavUploadList = SpUtil.getStringList('key_webdavUploadList', defValue: [])!;
     return webdavUploadList;
   }
 
@@ -1030,8 +998,7 @@ class Global {
 
   static getWebdavDownloadList() async {
     await SpUtil.getInstance();
-    List webdavDownloadList =
-        SpUtil.getStringList('key_webdavDownloadList', defValue: [])!;
+    List webdavDownloadList = SpUtil.getStringList('key_webdavDownloadList', defValue: [])!;
     return webdavDownloadList;
   }
 
@@ -1043,8 +1010,7 @@ class Global {
 
   static getTodayAlistUpdate() async {
     await SpUtil.getInstance();
-    String todayAlistUpdate =
-        SpUtil.getString('key_todayAlistUpdate', defValue: '19700101')!;
+    String todayAlistUpdate = SpUtil.getString('key_todayAlistUpdate', defValue: '19700101')!;
     return todayAlistUpdate;
   }
 }

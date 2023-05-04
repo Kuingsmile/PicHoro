@@ -18,8 +18,7 @@ class LinkFormatSelectState extends State<LinkFormatSelect> {
   ListTile _buildListTile(String title, String value) {
     return ListTile(
       title: Text(title),
-      trailing:
-          Global.defaultLKformat == value ? const Icon(Icons.check) : null,
+      trailing: Global.defaultLKformat == value ? const Icon(Icons.check) : null,
       onTap: () async {
         await Global.setLKformat(value);
         setState(() {});
@@ -45,9 +44,7 @@ class LinkFormatSelectState extends State<LinkFormatSelect> {
           _buildListTile('Markdown格式', 'markdown'),
           _buildListTile('Markdown格式(带链接)', 'markdown_with_link'),
           ListTile(
-            trailing: Global.defaultLKformat == 'custom'
-                ? const Icon(Icons.check)
-                : null,
+            trailing: Global.defaultLKformat == 'custom' ? const Icon(Icons.check) : null,
             title: const Text('自定义格式,下方输入框内设置'),
             onTap: () async {
               await Global.setLKformat('custom');

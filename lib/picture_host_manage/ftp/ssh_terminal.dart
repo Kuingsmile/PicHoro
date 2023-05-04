@@ -36,8 +36,7 @@ class SSHTermimalState extends State<SSHTermimal> {
     terminal.write('连接中...\r\n');
 
     final client = SSHClient(
-      await SSHSocket.connect(widget.configMap['ftpHost'],
-          int.parse(widget.configMap['ftpPort'].toString())),
+      await SSHSocket.connect(widget.configMap['ftpHost'], int.parse(widget.configMap['ftpPort'].toString())),
       username: widget.configMap['ftpUser'],
       onPasswordRequest: () => widget.configMap['ftpPassword'],
     );
@@ -66,26 +65,18 @@ class SSHTermimalState extends State<SSHTermimal> {
       session.write(utf8.encode(data) as Uint8List);
     };
 
-    session.stdout
-        .cast<List<int>>()
-        .transform(const Utf8Decoder())
-        .listen(terminal.write);
+    session.stdout.cast<List<int>>().transform(const Utf8Decoder()).listen(terminal.write);
 
-    session.stderr
-        .cast<List<int>>()
-        .transform(const Utf8Decoder())
-        .listen(terminal.write);
+    session.stderr.cast<List<int>>().transform(const Utf8Decoder()).listen(terminal.write);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Center(child: Text(widget.configMap['ftpHost'],
-            style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.white))),
+        title: Center(
+            child: Text(widget.configMap['ftpHost'],
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white))),
         elevation: 0,
       ),
       body: Column(

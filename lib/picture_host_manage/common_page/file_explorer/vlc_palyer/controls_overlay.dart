@@ -15,7 +15,6 @@ class ControlsOverlay extends StatelessWidget {
 
   static const Color _iconColor = Colors.white;
 
-
   @override
   Widget build(BuildContext context) {
     return AnimatedSwitcher(

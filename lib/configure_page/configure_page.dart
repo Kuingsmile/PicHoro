@@ -5,11 +5,10 @@ import 'package:r_upgrade/r_upgrade.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:fluro/fluro.dart';
 
-import 'package:horopic/utils/sql_utils.dart';
 import 'package:horopic/router/application.dart';
 import 'package:horopic/router/routers.dart';
 import 'package:horopic/utils/common_functions.dart';
-import 'package:horopic/utils/global.dart';
+import 'package:dio/dio.dart';
 
 class ConfigurePage extends StatefulWidget {
   const ConfigurePage({Key? key}) : super(key: key);
@@ -18,8 +17,7 @@ class ConfigurePage extends StatefulWidget {
   ConfigurePageState createState() => ConfigurePageState();
 }
 
-class ConfigurePageState extends State<ConfigurePage>
-    with AutomaticKeepAliveClientMixin<ConfigurePage> {
+class ConfigurePageState extends State<ConfigurePage> with AutomaticKeepAliveClientMixin<ConfigurePage> {
   String version = ' ';
   String latestVersion = ' ';
 
@@ -32,14 +30,20 @@ class ConfigurePageState extends State<ConfigurePage>
     _getVersion();
   }
 
+  getRemoteVersion() async {
+    const url = 'https://pichoro.msq.pub/version.json';
+    try {
+      Response response = await Dio().get(url);
+      return response.data['version'];
+    } catch (e) {
+      return ' ';
+    }
+  }
+
   void _getVersion() async {
     final PackageInfo info = await PackageInfo.fromPlatform();
     String remoteVersion = ' ';
-    try {
-      remoteVersion = await MySqlUtils.getCurrentVersion();
-    } catch (e) {
-      remoteVersion = ' ';
-    }
+    remoteVersion = await getRemoteVersion();
     setState(() {
       version = info.version;
       latestVersion = remoteVersion;
@@ -50,15 +54,12 @@ class ConfigurePageState extends State<ConfigurePage>
     PackageInfo packageInfo = await PackageInfo.fromPlatform();
     String version = packageInfo.version;
 
-    String remoteVersion = await MySqlUtils.getCurrentVersion();
+    String remoteVersion = await getRemoteVersion();
     if (version != remoteVersion) {
       _showUpdateDialog(version, remoteVersion);
     } else {
       return Fluttertoast.showToast(
-          msg: "已是最新版本",
-          toastLength: Toast.LENGTH_SHORT,
-          timeInSecForIosWeb: 2,
-          fontSize: 16.0);
+          msg: "已是最新版本", toastLength: Toast.LENGTH_SHORT, timeInSecForIosWeb: 2, fontSize: 16.0);
     }
   }
 
@@ -108,9 +109,7 @@ class ConfigurePageState extends State<ConfigurePage>
                     CircleAvatar(
                       radius: MediaQuery.of(context).size.width / 10,
                       backgroundColor: Colors.grey,
-                      backgroundImage:
-                          const Image(image: AssetImage('assets/app_icon.png'))
-                              .image,
+                      backgroundImage: const Image(image: AssetImage('assets/app_icon.png')).image,
                     ),
                     const SizedBox(height: 20),
                     Center(
@@ -128,70 +127,32 @@ class ConfigurePageState extends State<ConfigurePage>
             ),
           ),
           ListTile(
-              title: const Text(
-                '用户登录',
-              ),
-              trailing: const Icon(Icons.arrow_forward_ios),
-              onTap: () async {
-                String currentUser = await Global.getUser();
-                String password = await Global.getPassword();
-                if (currentUser.isEmpty || currentUser == ' ') {
-                  if (mounted) {
-                    Application.router.navigateTo(context, Routes.appPassword,
-                        transition: TransitionType.inFromRight);
-                  }
-                  return;
-                }
-                var usernamecheck =
-                    await MySqlUtils.queryUser(username: currentUser);
-                if (usernamecheck == 'Empty') {
-                  if (mounted) {
-                    Application.router.navigateTo(context, Routes.appPassword,
-                        transition: TransitionType.inFromRight);
-                  }
-                } else if (usernamecheck == 'Error') {
-                  showToast('网络错误');
-                } else {
-                  if (usernamecheck['password'] == password) {
-                    if (mounted) {
-                      Application.router.navigateTo(
-                          context, Routes.userInformationPage,
-                          transition: TransitionType.inFromRight);
-                    }
-                  }
-                }
-              }),
-          ListTile(
             title: const Text('图床参数设置'),
             onTap: () {
-              Application.router.navigateTo(this.context, Routes.allPShost,
-                  transition: TransitionType.cupertino);
+              Application.router.navigateTo(this.context, Routes.allPShost, transition: TransitionType.cupertino);
             },
             trailing: const Icon(Icons.arrow_forward_ios),
           ),
           ListTile(
             title: const Text('常规设置'),
             onTap: () {
-              Application.router.navigateTo(this.context, Routes.commonConfig,
-                  transition: TransitionType.cupertino);
+              Application.router.navigateTo(this.context, Routes.commonConfig, transition: TransitionType.cupertino);
             },
             trailing: const Icon(Icons.arrow_forward_ios),
           ),
           ListTile(
             title: const Text('微信交流群'),
             onTap: () async {
-              Application.router.navigateTo(
-                  this.context, Routes.authorInformation,
-                  transition: TransitionType.cupertino);
+              Application.router
+                  .navigateTo(this.context, Routes.authorInformation, transition: TransitionType.cupertino);
             },
             trailing: const Icon(Icons.arrow_forward_ios),
           ),
           ListTile(
             title: const Text('软件日志'),
             onTap: () {
-              Application.router.navigateTo(
-                  this.context, Routes.configurePageLogger,
-                  transition: TransitionType.cupertino);
+              Application.router
+                  .navigateTo(this.context, Routes.configurePageLogger, transition: TransitionType.cupertino);
             },
             trailing: const Icon(Icons.arrow_forward_ios),
           ),
@@ -213,8 +174,7 @@ class ConfigurePageState extends State<ConfigurePage>
           ListTile(
             title: const Text('更新日志'),
             onTap: () {
-              Application.router.navigateTo(this.context, Routes.updateLog,
-                  transition: TransitionType.cupertino);
+              Application.router.navigateTo(this.context, Routes.updateLog, transition: TransitionType.cupertino);
             },
             trailing: const Icon(Icons.arrow_forward_ios),
           ),

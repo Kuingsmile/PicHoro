@@ -2,7 +2,6 @@ import 'dart:io';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:f_logs/f_logs.dart';
 import 'package:fluro/fluro.dart';
 import 'package:path_provider/path_provider.dart';
@@ -10,7 +9,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:horopic/router/application.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/pages/loading.dart';
-import 'package:horopic/utils/sql_utils.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/event_bus_utils.dart';
 import 'package:horopic/picture_host_manage/manage_api/webdav_manage_api.dart';
@@ -42,8 +40,7 @@ class WebdavConfigState extends State<WebdavConfig> {
       _hostController.text = configMap['host'];
       _usernameController.text = configMap['webdavusername'];
       _passwdController.text = configMap['password'];
-      if (configMap['uploadPath'] != 'None' &&
-          configMap['uploadPath'] != null) {
+      if (configMap['uploadPath'] != 'None' && configMap['uploadPath'] != null) {
         _uploadPathController.text = configMap['uploadPath'];
       } else {
         _uploadPathController.clear();
@@ -77,14 +74,12 @@ class WebdavConfigState extends State<WebdavConfig> {
         actions: [
           IconButton(
             onPressed: () async {
-              await Application.router.navigateTo(
-                  context, '/configureStorePage?psHost=webdav',
-                  transition: TransitionType.cupertino);
+              await Application.router
+                  .navigateTo(context, '/configureStorePage?psHost=webdav', transition: TransitionType.cupertino);
               await _initConfig();
               setState(() {});
             },
-            icon: const Icon(Icons.save_as_outlined,
-                color: Color.fromARGB(255, 255, 255, 255), size: 35),
+            icon: const Icon(Icons.save_as_outlined, color: Color.fromARGB(255, 255, 255, 255), size: 35),
           )
         ],
       ),
@@ -100,13 +95,10 @@ class WebdavConfigState extends State<WebdavConfig> {
               ),
               textAlign: TextAlign.center,
               validator: (value) {
-                if (value == null ||
-                    value.isEmpty ||
-                    value.toString().trim().isEmpty) {
+                if (value == null || value.isEmpty || value.toString().trim().isEmpty) {
                   return '请输入域名';
                 }
-                if (!value.startsWith('http://') &&
-                    !value.startsWith('https://')) {
+                if (!value.startsWith('http://') && !value.startsWith('https://')) {
                   return '以http://或https://开头';
                 }
                 return null;
@@ -120,9 +112,7 @@ class WebdavConfigState extends State<WebdavConfig> {
               ),
               textAlign: TextAlign.center,
               validator: (value) {
-                if (value == null ||
-                    value.isEmpty ||
-                    value.toString().trim().isEmpty) {
+                if (value == null || value.isEmpty || value.toString().trim().isEmpty) {
                   return '请输入用户名';
                 }
                 return null;
@@ -137,9 +127,7 @@ class WebdavConfigState extends State<WebdavConfig> {
               ),
               textAlign: TextAlign.center,
               validator: (value) {
-                if (value == null ||
-                    value.isEmpty ||
-                    value.toString().trim().isEmpty) {
+                if (value == null || value.isEmpty || value.toString().trim().isEmpty) {
                   return '请输入密码';
                 }
                 return null;
@@ -193,9 +181,8 @@ class WebdavConfigState extends State<WebdavConfig> {
             ListTile(
                 title: ElevatedButton(
               onPressed: () async {
-                await Application.router.navigateTo(
-                    context, '/configureStorePage?psHost=webdav',
-                    transition: TransitionType.cupertino);
+                await Application.router
+                    .navigateTo(context, '/configureStorePage?psHost=webdav', transition: TransitionType.cupertino);
                 await _initConfig();
                 setState(() {});
               },
@@ -238,7 +225,6 @@ class WebdavConfigState extends State<WebdavConfig> {
       }
     }
 
-    String sqlResult = '';
     try {
       var client = webdav.newClient(
         host,
@@ -251,62 +237,24 @@ class WebdavConfigState extends State<WebdavConfig> {
       client.setReceiveTimeout(30000);
       await client.ping();
 
-      try {
-        List sqlconfig = [];
-        sqlconfig.add(host);
-        sqlconfig.add(username);
-        sqlconfig.add(password);
-        sqlconfig.add(uploadPath);
-
-        String defaultUser = await Global.getUser();
-        sqlconfig.add(defaultUser);
-        var querywebdav = await MySqlUtils.queryWebdav(username: defaultUser);
-        var queryuser = await MySqlUtils.queryUser(username: defaultUser);
-        if (queryuser == 'Empty') {
-          return showCupertinoAlertDialog(
-              context: context, title: '错误', content: '用户不存在,请先登录');
-        } else if (querywebdav == 'Empty') {
-          sqlResult = await MySqlUtils.insertWebdav(content: sqlconfig);
-        } else {
-          sqlResult = await MySqlUtils.updateWebdav(content: sqlconfig);
-        }
-      } catch (e) {
-        FLog.error(
-            className: 'WebdavConfigPage',
-            methodName: '_saveWebdavConfig',
-            text: formatErrorMessage({}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-        return showCupertinoAlertDialog(
-            context: context, title: '错误', content: e.toString());
-      }
-      if (sqlResult == "Success") {
-        final webdavConfig =
-            WebdavConfigModel(host, username, password, uploadPath);
-        final webdavConfigJson = jsonEncode(webdavConfig);
-        final webdavConfigFile = await localFile;
-        webdavConfigFile.writeAsString(webdavConfigJson);
-        setState(() {});
-        return showCupertinoAlertDialog(
-          context: context,
-          barrierDismissible: false,
-          title: '配置成功',
-          content: '配置成功！',
-        );
-      } else {
-        return showCupertinoAlertDialog(
-            context: context,
-            barrierDismissible: false,
-            title: '配置失败',
-            content: '数据库错误');
-      }
+      final webdavConfig = WebdavConfigModel(host, username, password, uploadPath);
+      final webdavConfigJson = jsonEncode(webdavConfig);
+      final webdavConfigFile = await localFile;
+      webdavConfigFile.writeAsString(webdavConfigJson);
+      setState(() {});
+      return showCupertinoAlertDialog(
+        context: context,
+        barrierDismissible: false,
+        title: '配置成功',
+        content: '配置成功！',
+      );
     } catch (e) {
       FLog.error(
           className: 'WebdavConfigPage',
           methodName: '_saveWebdavConfig',
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
-      return showCupertinoAlertDialog(
-          context: context, title: '连接webdav服务失败', content: e.toString());
+      return showCupertinoAlertDialog(context: context, title: '连接webdav服务失败', content: e.toString());
     }
   }
 
@@ -315,8 +263,7 @@ class WebdavConfigState extends State<WebdavConfig> {
       final webdavConfigFile = await localFile;
       String configData = await webdavConfigFile.readAsString();
       if (configData == "Error") {
-        return showCupertinoAlertDialog(
-            context: context, title: "检查失败!", content: "请先配置上传参数.");
+        return showCupertinoAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");
       }
       Map configMap = jsonDecode(configData);
       var client = webdav.newClient(
@@ -340,8 +287,7 @@ class WebdavConfigState extends State<WebdavConfig> {
           methodName: 'checkWebdavConfig',
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
-      return showCupertinoAlertDialog(
-          context: context, title: "检查失败!", content: e.toString());
+      return showCupertinoAlertDialog(context: context, title: "检查失败!", content: e.toString());
     }
   }
 
@@ -372,72 +318,11 @@ class WebdavConfigState extends State<WebdavConfig> {
   }
 
   _setdefault() async {
-    try {
-      String defaultUser = await Global.getUser();
-      String defaultPassword = await Global.getPassword();
-      var queryuser = await MySqlUtils.queryUser(username: defaultUser);
-      if (queryuser == 'Empty') {
-        return Fluttertoast.showToast(
-            msg: "请先注册用户",
-            toastLength: Toast.LENGTH_SHORT,
-            timeInSecForIosWeb: 2,
-            fontSize: 16.0);
-      } else if (queryuser['password'] != defaultPassword) {
-        return Fluttertoast.showToast(
-            msg: "请先登录",
-            toastLength: Toast.LENGTH_SHORT,
-            timeInSecForIosWeb: 2,
-            fontSize: 16.0);
-      }
-      var querywebdav = await MySqlUtils.queryWebdav(username: defaultUser);
-      if (querywebdav == 'Empty') {
-        return Fluttertoast.showToast(
-            msg: "请先配置上传参数",
-            toastLength: Toast.LENGTH_SHORT,
-            timeInSecForIosWeb: 2,
-            fontSize: 16.0);
-      }
-      if (querywebdav == 'Error') {
-        return Fluttertoast.showToast(
-            msg: "Error",
-            toastLength: Toast.LENGTH_SHORT,
-            timeInSecForIosWeb: 2,
-            fontSize: 16.0);
-      }
-      if (queryuser['defaultPShost'] == 'webdav') {
-        await Global.setPShost('webdav');
-        await Global.setShowedPBhost('webdav');
-        eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-        eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
-        return Fluttertoast.showToast(
-            msg: "已经是默认配置",
-            toastLength: Toast.LENGTH_SHORT,
-            timeInSecForIosWeb: 2,
-            fontSize: 16.0);
-      } else {
-        List sqlconfig = [];
-        sqlconfig.add(defaultUser);
-        sqlconfig.add(defaultPassword);
-        sqlconfig.add('webdav');
-        var updateResult = await MySqlUtils.updateUser(content: sqlconfig);
-        if (updateResult == 'Success') {
-          await Global.setPShost('webdav');
-          await Global.setShowedPBhost('PBhostExtend4');
-          eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-          eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
-          showToast('已设置Webdav为默认图床');
-        } else {
-          showToast('写入数据库失败');
-        }
-      }
-    } catch (e) {
-      FLog.error(
-          className: 'webdavPage',
-          methodName: '_setdefault',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
-      showToastWithContext(context, '错误');
-    }
+    await Global.setPShost('webdav');
+    await Global.setShowedPBhost('PBhostExtend4');
+    eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
+    eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
+    showToast('已设置Webdav为默认图床');
   }
 }
 
@@ -447,8 +332,7 @@ class WebdavConfigModel {
   final String password;
   final String uploadPath;
 
-  WebdavConfigModel(
-      this.host, this.webdavusername, this.password, this.uploadPath);
+  WebdavConfigModel(this.host, this.webdavusername, this.password, this.uploadPath);
 
   Map<String, dynamic> toJson() => {
         'host': host,

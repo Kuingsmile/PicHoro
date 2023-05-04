@@ -76,7 +76,7 @@ class AwsNewBucketConfigState extends State<AwsNewBucketConfig> {
               onPressed: () async {
                 Map config = {
                   'bucketName': newBucketConfig['bucketName'],
-                  'region': newBucketConfig['region'].isEmpty||newBucketConfig['region'].trim().isEmpty
+                  'region': newBucketConfig['region'].isEmpty || newBucketConfig['region'].trim().isEmpty
                       ? 'None'
                       : newBucketConfig['region'],
                 };

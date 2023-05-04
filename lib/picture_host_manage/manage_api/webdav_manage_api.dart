@@ -7,7 +7,6 @@ import 'package:f_logs/f_logs.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'package:horopic/utils/global.dart';
-import 'package:horopic/utils/sql_utils.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/picture_host_configure/configure_page/webdav_configure.dart';
 import 'package:webdav_client/webdav_client.dart' as webdav;
@@ -94,8 +93,7 @@ class WebdavManageAPI {
         FLog.error(
             className: "WebdavManageAPI",
             methodName: "getFileList",
-            text: formatErrorMessage({}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
+            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
@@ -118,8 +116,7 @@ class WebdavManageAPI {
         FLog.error(
             className: "WebdavManageAPI",
             methodName: "createDir",
-            text: formatErrorMessage({}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
+            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
@@ -142,8 +139,7 @@ class WebdavManageAPI {
         FLog.error(
             className: "WebdavManageAPI",
             methodName: "deleteFile",
-            text: formatErrorMessage({}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
+            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
@@ -169,8 +165,7 @@ class WebdavManageAPI {
         FLog.error(
             className: "WebdavManageAPI",
             methodName: "renameFile",
-            text: formatErrorMessage({}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
+            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
@@ -191,37 +186,11 @@ class WebdavManageAPI {
       String password = configMap['password'];
       String uploadPath = folder;
 
-      List sqlconfig = [];
-      sqlconfig.add(host);
-      sqlconfig.add(webdavusername);
-      sqlconfig.add(password);
-      sqlconfig.add(uploadPath);
-      String defaultUser = await Global.getUser();
-      sqlconfig.add(defaultUser);
-      var queryWebdav = await MySqlUtils.queryWebdav(username: defaultUser);
-      var queryuser = await MySqlUtils.queryUser(username: defaultUser);
-
-      if (queryuser == 'Empty') {
-        return ['failed'];
-      }
-      var sqlResult = '';
-
-      if (queryWebdav == 'Empty') {
-        sqlResult = await MySqlUtils.insertWebdav(content: sqlconfig);
-      } else {
-        sqlResult = await MySqlUtils.updateWebdav(content: sqlconfig);
-      }
-
-      if (sqlResult == "Success") {
-        final webdavConfig =
-            WebdavConfigModel(host, webdavusername, password, uploadPath);
-        final webdavConfigJson = jsonEncode(webdavConfig);
-        final webdavConfigFile = await _localFile;
-        await webdavConfigFile.writeAsString(webdavConfigJson);
-        return ['success'];
-      } else {
-        return ['failed'];
-      }
+      final webdavConfig = WebdavConfigModel(host, webdavusername, password, uploadPath);
+      final webdavConfigJson = jsonEncode(webdavConfig);
+      final webdavConfigFile = await _localFile;
+      await webdavConfigFile.writeAsString(webdavConfigJson);
+      return ['success'];
     } catch (e) {
       FLog.error(
           className: "WebdavManageAPI",
@@ -232,37 +201,29 @@ class WebdavManageAPI {
     }
   }
 
-    //上传文件
+  //上传文件
   static uploadFile(
     String filename,
     String filepath,
     String prefix,
   ) async {
-    try{
-    webdav.Client client = await getWebdavClient();
-    await client.writeFromFile(filepath, prefix + filename);
-    return ['success'];
-
+    try {
+      webdav.Client client = await getWebdavClient();
+      await client.writeFromFile(filepath, prefix + filename);
+      return ['success'];
     } catch (e) {
       if (e is DioError) {
         FLog.error(
             className: "WebdavManageAPI",
             methodName: "uploadFile",
-            text: formatErrorMessage({
-              'filename': filename,
-              'filepath': filepath,
-              'prefix': prefix
-            }, e.toString(), isDioError: true, dioErrorMessage: e),
+            text: formatErrorMessage({'filename': filename, 'filepath': filepath, 'prefix': prefix}, e.toString(),
+                isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
             className: "WebdavManageAPI",
             methodName: "uploadFile",
-            text: formatErrorMessage({
-              'filename': filename,
-              'filepath': filepath,
-              'prefix': prefix
-            }, e.toString()),
+            text: formatErrorMessage({'filename': filename, 'filepath': filepath, 'prefix': prefix}, e.toString()),
             dataLogType: DataLogType.ERRORS.toString());
       }
       return ['error'];
@@ -270,12 +231,10 @@ class WebdavManageAPI {
   }
 
   //从网络链接下载文件后上传
-  static uploadNetworkFile(String fileLink,  String prefix) async {
+  static uploadNetworkFile(String fileLink, String prefix) async {
     try {
-      String filename =
-          fileLink.substring(fileLink.lastIndexOf("/") + 1, fileLink.length);
-      filename = filename.substring(
-          0, !filename.contains("?") ? filename.length : filename.indexOf("?"));
+      String filename = fileLink.substring(fileLink.lastIndexOf("/") + 1, fileLink.length);
+      filename = filename.substring(0, !filename.contains("?") ? filename.length : filename.indexOf("?"));
       String savePath = await getTemporaryDirectory().then((value) {
         return value.path;
       });
@@ -301,26 +260,21 @@ class WebdavManageAPI {
         FLog.error(
             className: "WebdavManageAPI",
             methodName: "uploadNetworkFile",
-            text: formatErrorMessage({
-              'fileLink': fileLink,
-              'prefix': prefix
-            }, e.toString(), isDioError: true, dioErrorMessage: e),
+            text: formatErrorMessage({'fileLink': fileLink, 'prefix': prefix}, e.toString(),
+                isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
             className: "WebdavManageAPI",
             methodName: "uploadNetworkFile",
-            text: formatErrorMessage(
-                {'fileLink': fileLink, 'prefix': prefix},
-                e.toString()),
+            text: formatErrorMessage({'fileLink': fileLink, 'prefix': prefix}, e.toString()),
             dataLogType: DataLogType.ERRORS.toString());
       }
       return ['failed'];
     }
   }
 
-  static uploadNetworkFileEntry(
-      List fileList,  String prefix) async {
+  static uploadNetworkFileEntry(List fileList, String prefix) async {
     int successCount = 0;
     int failCount = 0;
 
@@ -328,7 +282,7 @@ class WebdavManageAPI {
       if (fileLink.isEmpty) {
         continue;
       }
-      var uploadResult = await uploadNetworkFile(fileLink,  prefix);
+      var uploadResult = await uploadNetworkFile(fileLink, prefix);
       if (uploadResult[0] == "success") {
         successCount++;
       } else {
@@ -338,22 +292,13 @@ class WebdavManageAPI {
 
     if (successCount == 0) {
       return Fluttertoast.showToast(
-          msg: '上传失败',
-          toastLength: Toast.LENGTH_SHORT,
-          timeInSecForIosWeb: 2,
-          fontSize: 16.0);
+          msg: '上传失败', toastLength: Toast.LENGTH_SHORT, timeInSecForIosWeb: 2, fontSize: 16.0);
     } else if (failCount == 0) {
       return Fluttertoast.showToast(
-          msg: '上传成功',
-          toastLength: Toast.LENGTH_SHORT,
-          timeInSecForIosWeb: 2,
-          fontSize: 16.0);
+          msg: '上传成功', toastLength: Toast.LENGTH_SHORT, timeInSecForIosWeb: 2, fontSize: 16.0);
     } else {
       return Fluttertoast.showToast(
-          msg: '成功$successCount,失败$failCount',
-          toastLength: Toast.LENGTH_SHORT,
-          timeInSecForIosWeb: 2,
-          fontSize: 16.0);
+          msg: '成功$successCount,失败$failCount', toastLength: Toast.LENGTH_SHORT, timeInSecForIosWeb: 2, fontSize: 16.0);
     }
   }
 }

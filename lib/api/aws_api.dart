@@ -10,10 +10,7 @@ import 'package:horopic/utils/global.dart';
 
 class AwsImageUploadUtils {
   //上传接口
-  static uploadApi(
-      {required String path,
-      required String name,
-      required Map configMap}) async {
+  static uploadApi({required String path, required String name, required Map configMap}) async {
     String accessKeyId = configMap['accessKeyId'];
     String secretAccessKey = configMap['secretAccessKey'];
     String bucket = configMap['bucket'];
@@ -29,8 +26,7 @@ class AwsImageUploadUtils {
     }
 
     if (uploadPath != 'None') {
-      uploadPath =
-          '${uploadPath.replaceAll(RegExp(r'^/*'), '').replaceAll(RegExp(r'/*$'), '')}/';
+      uploadPath = '${uploadPath.replaceAll(RegExp(r'^/*'), '').replaceAll(RegExp(r'/*$'), '')}/';
     }
     //云存储的路径
     String urlpath = '';
@@ -58,8 +54,7 @@ class AwsImageUploadUtils {
 
     try {
       Stream<Uint8List> stream = File(path).openRead().cast();
-      String? contentType =
-          getContentType(my_path.extension(path).substring(1));
+      String? contentType = getContentType(my_path.extension(path).substring(1));
       await minio.putObject(
         bucket,
         urlpath,
@@ -89,8 +84,7 @@ class AwsImageUploadUtils {
 
       String formatedURL = '';
       if (Global.isCopyLink == true) {
-        formatedURL =
-            linkGenerateDict[Global.defaultLKformat]!(returnUrl, name);
+        formatedURL = linkGenerateDict[Global.defaultLKformat]!(returnUrl, name);
       } else {
         formatedURL = returnUrl;
       }

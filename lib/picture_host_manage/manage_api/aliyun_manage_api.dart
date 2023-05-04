@@ -10,7 +10,6 @@ import 'package:path/path.dart' as my_path;
 import 'package:xml2json/xml2json.dart';
 
 import 'package:horopic/utils/global.dart';
-import 'package:horopic/utils/sql_utils.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/picture_host_configure/configure_page/aliyun_configure.dart';
 
@@ -118,11 +117,7 @@ class AliyunManageAPI {
 
   //get authorization
   static Future<String> aliyunAuthorization(
-      String method,
-      String canonicalizedResource,
-      Map headers,
-      String contentMd5,
-      String contentType) async {
+      String method, String canonicalizedResource, Map headers, String contentMd5, String contentType) async {
     try {
       Map configMap = await getConfigMap();
       String accessKeyId = configMap['keyId'];
@@ -132,9 +127,8 @@ class AliyunManageAPI {
       String canonicalizedOSSHeaders = getCanonicalizedOSSHeaders(headers);
       String stringToSign =
           "$uperCaseMethod\n$contentMd5\n$contentType\n$gmtDate\n$canonicalizedOSSHeaders$canonicalizedResource";
-      String signature = base64.encode(Hmac(sha1, utf8.encode(accessKeySecret))
-          .convert(utf8.encode(stringToSign))
-          .bytes);
+      String signature =
+          base64.encode(Hmac(sha1, utf8.encode(accessKeySecret)).convert(utf8.encode(stringToSign)).bytes);
       String authorization = "OSS $accessKeyId:$signature";
       return authorization;
     } catch (e) {
@@ -160,8 +154,7 @@ class AliyunManageAPI {
     String contentMd5 = '';
     String contentType = '';
     String host = 'oss-cn-hangzhou.aliyuncs.com';
-    String authorization = await aliyunAuthorization(
-        method, canonicalizedResource, {}, contentMd5, contentType);
+    String authorization = await aliyunAuthorization(method, canonicalizedResource, {}, contentMd5, contentType);
     BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = {
       'Authorization': authorization,
@@ -173,8 +166,7 @@ class AliyunManageAPI {
 
     Dio dio = Dio(baseoptions);
     try {
-      var response =
-          await dio.get('https://$host', queryParameters: queryParameters);
+      var response = await dio.get('https://$host', queryParameters: queryParameters);
       if (response.statusCode == 200) {
         String responseBody = response.data;
         final myTransformer = Xml2Json();
@@ -189,8 +181,7 @@ class AliyunManageAPI {
         FLog.error(
             className: "AliyunManageAPI",
             methodName: "getBucketList",
-            text: formatErrorMessage({}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
+            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
@@ -223,8 +214,7 @@ class AliyunManageAPI {
         'multiAZ error',
       ];
     }
-    var body =
-        '<CreateBucketConfiguration><DataRedundancyType>ZRS</DataRedundancyType></CreateBucketConfiguration>';
+    var body = '<CreateBucketConfiguration><DataRedundancyType>ZRS</DataRedundancyType></CreateBucketConfiguration>';
     BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = {
       'Date': HttpDate.format(DateTime.now()),
@@ -235,21 +225,20 @@ class AliyunManageAPI {
       baseoptions.headers['content-length'] = body.length.toString();
       String contentMd5 = await getContentMd5(body);
       baseoptions.headers['content-md5'] = await getContentMd5(body);
-      String authorization = await aliyunAuthorization(method, '/$bucketName/',
-          baseoptions.headers, contentMd5, 'application/xml');
+      String authorization =
+          await aliyunAuthorization(method, '/$bucketName/', baseoptions.headers, contentMd5, 'application/xml');
       baseoptions.headers['Authorization'] = authorization;
     } else {
       baseoptions.headers['content-type'] = 'application/json';
-      String authorization = await aliyunAuthorization(
-          method, '/$bucketName/', baseoptions.headers, '', 'application/json');
+      String authorization =
+          await aliyunAuthorization(method, '/$bucketName/', baseoptions.headers, '', 'application/json');
       baseoptions.headers['Authorization'] = authorization;
     }
     Dio dio = Dio(baseoptions);
     try {
       Response response;
       if (multiAZ == true) {
-        response = await dio.put('https://$bucketName.$region.aliyuncs.com',
-            data: body);
+        response = await dio.put('https://$bucketName.$region.aliyuncs.com', data: body);
       } else {
         response = await dio.put('https://$bucketName.$region.aliyuncs.com');
       }
@@ -292,14 +281,12 @@ class AliyunManageAPI {
     baseoptions.headers = {
       'Date': HttpDate.format(DateTime.now()),
     };
-    String authorization =
-        await aliyunAuthorization(method, urlpath, baseoptions.headers, '', '');
+    String authorization = await aliyunAuthorization(method, urlpath, baseoptions.headers, '', '');
     baseoptions.headers['Authorization'] = authorization;
 
     try {
       Dio dio = Dio(baseoptions);
-      var response =
-          await dio.get('https://$host?acl', queryParameters: {'acl': ''});
+      var response = await dio.get('https://$host?acl', queryParameters: {'acl': ''});
       var responseBody = response.data;
       final myTransformer = Xml2Json();
       myTransformer.parse(responseBody);
@@ -345,8 +332,7 @@ class AliyunManageAPI {
       'Date': HttpDate.format(DateTime.now()),
       'content-type': 'application/json',
     };
-    String authorization = await aliyunAuthorization(
-        method, urlpath, baseoptions.headers, '', 'application/json');
+    String authorization = await aliyunAuthorization(method, urlpath, baseoptions.headers, '', 'application/json');
 
     baseoptions.headers['Authorization'] = authorization;
     Dio dio = Dio(baseoptions);
@@ -395,8 +381,7 @@ class AliyunManageAPI {
       'x-oss-acl': newACL,
       'content-type': 'application/json',
     };
-    String authorization = await aliyunAuthorization(
-        method, urlpath, header, '', 'application/json');
+    String authorization = await aliyunAuthorization(method, urlpath, header, '', 'application/json');
 
     baseoptions.headers = header;
     baseoptions.headers['Authorization'] = authorization;
@@ -450,40 +435,12 @@ class AliyunManageAPI {
       } else {
         path = folder;
       }
-      List sqlconfig = [];
-      sqlconfig.add(accessKeyId);
-      sqlconfig.add(accessKeySecret);
-      sqlconfig.add(bucket);
-      sqlconfig.add(area);
-      sqlconfig.add(path);
-      sqlconfig.add(customUrl);
-      sqlconfig.add(options);
-      String defaultUser = await Global.getUser();
-      sqlconfig.add(defaultUser);
-      var queryAliyun = await MySqlUtils.queryAliyun(username: defaultUser);
-      var queryuser = await MySqlUtils.queryUser(username: defaultUser);
 
-      if (queryuser == 'Empty') {
-        return ['failed'];
-      }
-      var sqlResult = '';
-
-      if (queryAliyun == 'Empty') {
-        sqlResult = await MySqlUtils.insertAliyun(content: sqlconfig);
-      } else {
-        sqlResult = await MySqlUtils.updateAliyun(content: sqlconfig);
-      }
-
-      if (sqlResult == "Success") {
-        final aliyunConfig = AliyunConfigModel(accessKeyId, accessKeySecret,
-            bucket, area, path, customUrl, options);
-        final aliyunConfigJson = jsonEncode(aliyunConfig);
-        final aliyunConfigFile = await _localFile;
-        await aliyunConfigFile.writeAsString(aliyunConfigJson);
-        return ['success'];
-      } else {
-        return ['failed'];
-      }
+      final aliyunConfig = AliyunConfigModel(accessKeyId, accessKeySecret, bucket, area, path, customUrl, options);
+      final aliyunConfigJson = jsonEncode(aliyunConfig);
+      final aliyunConfigFile = await _localFile;
+      await aliyunConfigFile.writeAsString(aliyunConfigJson);
+      return ['success'];
     } catch (e) {
       FLog.error(
           className: "AliyunManageAPI",
@@ -512,8 +469,7 @@ class AliyunManageAPI {
     };
     query['max-keys'] = 1000;
     query['list-type'] = 2;
-    String authorization =
-        await aliyunAuthorization(method, urlpath, baseoptions.headers, '', '');
+    String authorization = await aliyunAuthorization(method, urlpath, baseoptions.headers, '', '');
     baseoptions.headers['Authorization'] = authorization;
 
     Dio dio = Dio(baseoptions);
@@ -538,8 +494,7 @@ class AliyunManageAPI {
             baseoptions.headers = {
               'Date': HttpDate.format(DateTime.now()),
             };
-            String authorization = await aliyunAuthorization(
-                method, urlpath, baseoptions.headers, '', '');
+            String authorization = await aliyunAuthorization(method, urlpath, baseoptions.headers, '', '');
             baseoptions.headers['Authorization'] = authorization;
 
             dio = Dio(baseoptions);
@@ -551,37 +506,27 @@ class AliyunManageAPI {
             if (response.statusCode == 200) {
               if (tempMap['ListBucketResult']['Contents'] != null) {
                 if (tempMap['ListBucketResult']['Contents'] is! List) {
-                  tempMap['ListBucketResult']
-                      ['Contents'] = [tempMap['ListBucketResult']['Contents']];
+                  tempMap['ListBucketResult']['Contents'] = [tempMap['ListBucketResult']['Contents']];
                 }
                 if (responseMap['ListBucketResult']['Contents'] == null) {
-                  responseMap['ListBucketResult']['Contents'] =
-                      tempMap['ListBucketResult']['Contents'];
+                  responseMap['ListBucketResult']['Contents'] = tempMap['ListBucketResult']['Contents'];
                 } else {
                   if (responseMap['ListBucketResult']['Contents'] is! List) {
-                    responseMap['ListBucketResult']['Contents'] = [
-                      responseMap['ListBucketResult']['Contents']
-                    ];
+                    responseMap['ListBucketResult']['Contents'] = [responseMap['ListBucketResult']['Contents']];
                   }
-                  responseMap['ListBucketResult']['Contents']
-                      .addAll(tempMap['ListBucketResult']['Contents']);
+                  responseMap['ListBucketResult']['Contents'].addAll(tempMap['ListBucketResult']['Contents']);
                 }
               }
               if (tempMap['ListBucketResult']['CommonPrefixes'] != null) {
                 if (tempMap['ListBucketResult']['CommonPrefixes'] is! List) {
-                  tempMap['ListBucketResult']['CommonPrefixes'] = [
-                    tempMap['ListBucketResult']['CommonPrefixes']
-                  ];
+                  tempMap['ListBucketResult']['CommonPrefixes'] = [tempMap['ListBucketResult']['CommonPrefixes']];
                 }
                 if (responseMap['ListBucketResult']['CommonPrefixes'] == null) {
-                  responseMap['ListBucketResult']['CommonPrefixes'] =
-                      tempMap['ListBucketResult']['CommonPrefixes'];
+                  responseMap['ListBucketResult']['CommonPrefixes'] = tempMap['ListBucketResult']['CommonPrefixes'];
                 } else {
-                  if (responseMap['ListBucketResult']['CommonPrefixes']
-                      is! List) {
-                    responseMap['ListBucketResult']['CommonPrefixes'] = [
-                      responseMap['ListBucketResult']['CommonPrefixes']
-                    ];
+                  if (responseMap['ListBucketResult']['CommonPrefixes'] is! List) {
+                    responseMap['ListBucketResult']
+                        ['CommonPrefixes'] = [responseMap['ListBucketResult']['CommonPrefixes']];
                   }
                   responseMap['ListBucketResult']['CommonPrefixes']
                       .addAll(tempMap['ListBucketResult']['CommonPrefixes']);
@@ -658,14 +603,12 @@ class AliyunManageAPI {
       'Host': host,
       'content-type': 'application/json',
     };
-    String authorization = await aliyunAuthorization(
-        method, urlpath, baseoptions.headers, '', 'application/json');
+    String authorization = await aliyunAuthorization(method, urlpath, baseoptions.headers, '', 'application/json');
     baseoptions.headers['Authorization'] = authorization;
 
     Dio dio = Dio(baseoptions);
     try {
-      var response =
-          await dio.put('https://$host/${Uri.encodeComponent(newName)}');
+      var response = await dio.put('https://$host/${Uri.encodeComponent(newName)}');
       if (response.statusCode == 200) {
         return ['success'];
       } else {
@@ -713,8 +656,7 @@ class AliyunManageAPI {
       'content-type': contentType,
     };
 
-    String authorization = await aliyunAuthorization(
-        method, urlpath, baseoptions.headers, contentMD5, contentType);
+    String authorization = await aliyunAuthorization(method, urlpath, baseoptions.headers, contentMD5, contentType);
 
     baseoptions.headers['Authorization'] = authorization;
     Dio dio = Dio(baseoptions);
@@ -774,19 +716,16 @@ class AliyunManageAPI {
         }
       }
       if (queryResult[1]['ListBucketResult']['CommonPrefixes'] != null) {
-        var commonPrefixes =
-            queryResult[1]['ListBucketResult']['CommonPrefixes'];
+        var commonPrefixes = queryResult[1]['ListBucketResult']['CommonPrefixes'];
         if (commonPrefixes is List) {
           for (var i = 0; i < commonPrefixes.length; i++) {
-            var deleteResult =
-                await deleteFolder(element, commonPrefixes[i]['Prefix']);
+            var deleteResult = await deleteFolder(element, commonPrefixes[i]['Prefix']);
             if (deleteResult[0] != 'success') {
               return ['failed'];
             }
           }
         } else {
-          var deleteResult =
-              await deleteFolder(element, commonPrefixes['Prefix']);
+          var deleteResult = await deleteFolder(element, commonPrefixes['Prefix']);
           if (deleteResult[0] != 'success') {
             return ['failed'];
           }
@@ -821,8 +760,7 @@ class AliyunManageAPI {
         }
       }
       if (queryResult[1]['ListBucketResult']['CommonPrefixes'] != null) {
-        var commonPrefixes =
-            queryResult[1]['ListBucketResult']['CommonPrefixes'];
+        var commonPrefixes = queryResult[1]['ListBucketResult']['CommonPrefixes'];
         if (commonPrefixes is List) {
           for (var i = 0; i < commonPrefixes.length; i++) {
             if (commonPrefixes[i]['Prefix'] == key) {
@@ -863,8 +801,7 @@ class AliyunManageAPI {
       'content-length': '0',
       'Host': host,
     };
-    String authorization = await aliyunAuthorization(
-        method, urlpath, baseoptions.headers, contentMD5, contentType);
+    String authorization = await aliyunAuthorization(method, urlpath, baseoptions.headers, contentMD5, contentType);
 
     baseoptions.headers['Authorization'] = authorization;
     Dio dio = Dio(baseoptions);
@@ -931,9 +868,7 @@ class AliyunManageAPI {
       ]
     };
     String base64Policy = base64.encode(utf8.encode(json.encode(uploadPolicy)));
-    String singature = base64.encode(Hmac(sha1, utf8.encode(keySecret))
-        .convert(utf8.encode(base64Policy))
-        .bytes);
+    String singature = base64.encode(Hmac(sha1, utf8.encode(keySecret)).convert(utf8.encode(base64Policy)).bytes);
 
     Map<String, dynamic> formMap = {
       'key': urlpath,
@@ -943,8 +878,7 @@ class AliyunManageAPI {
       'file': await MultipartFile.fromFile(filepath, filename: filename),
     };
     if (getContentType(my_path.extension(filepath)) != null) {
-      formMap['x-oss-content-type'] =
-          getContentType(my_path.extension(filepath));
+      formMap['x-oss-content-type'] = getContentType(my_path.extension(filepath));
     }
     FormData formData = FormData.fromMap(formMap);
 
@@ -1014,10 +948,7 @@ class AliyunManageAPI {
       );
       if (uploadResult[0] == "Error") {
         return Fluttertoast.showToast(
-            msg: '配置错误',
-            toastLength: Toast.LENGTH_SHORT,
-            timeInSecForIosWeb: 2,
-            fontSize: 16.0);
+            msg: '配置错误', toastLength: Toast.LENGTH_SHORT, timeInSecForIosWeb: 2, fontSize: 16.0);
       } else if (uploadResult[0] == "success") {
         successCount++;
       } else {
@@ -1027,32 +958,21 @@ class AliyunManageAPI {
 
     if (successCount == 0) {
       return Fluttertoast.showToast(
-          msg: '上传失败',
-          toastLength: Toast.LENGTH_SHORT,
-          timeInSecForIosWeb: 2,
-          fontSize: 16.0);
+          msg: '上传失败', toastLength: Toast.LENGTH_SHORT, timeInSecForIosWeb: 2, fontSize: 16.0);
     } else if (failCount == 0) {
       return Fluttertoast.showToast(
-          msg: '上传成功',
-          toastLength: Toast.LENGTH_SHORT,
-          timeInSecForIosWeb: 2,
-          fontSize: 16.0);
+          msg: '上传成功', toastLength: Toast.LENGTH_SHORT, timeInSecForIosWeb: 2, fontSize: 16.0);
     } else {
       return Fluttertoast.showToast(
-          msg: '成功$successCount,失败$failCount',
-          toastLength: Toast.LENGTH_SHORT,
-          timeInSecForIosWeb: 2,
-          fontSize: 16.0);
+          msg: '成功$successCount,失败$failCount', toastLength: Toast.LENGTH_SHORT, timeInSecForIosWeb: 2, fontSize: 16.0);
     }
   }
 
   //从网络链接下载文件后上传
   static uploadNetworkFile(String fileLink, Map element, String prefix) async {
     try {
-      String filename =
-          fileLink.substring(fileLink.lastIndexOf("/") + 1, fileLink.length);
-      filename = filename.substring(
-          0, !filename.contains("?") ? filename.length : filename.indexOf("?"));
+      String filename = fileLink.substring(fileLink.lastIndexOf("/") + 1, fileLink.length);
+      filename = filename.substring(0, !filename.contains("?") ? filename.length : filename.indexOf("?"));
       String savePath = await getTemporaryDirectory().then((value) {
         return value.path;
       });
@@ -1079,27 +999,21 @@ class AliyunManageAPI {
         FLog.error(
             className: "AliyunManageAPI",
             methodName: "uploadNetworkFile",
-            text: formatErrorMessage({
-              'fileLink': fileLink,
-              'element': element,
-              'prefix': prefix
-            }, e.toString(), isDioError: true, dioErrorMessage: e),
+            text: formatErrorMessage({'fileLink': fileLink, 'element': element, 'prefix': prefix}, e.toString(),
+                isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
             className: "AliyunManageAPI",
             methodName: "uploadNetworkFile",
-            text: formatErrorMessage(
-                {'fileLink': fileLink, 'element': element, 'prefix': prefix},
-                e.toString()),
+            text: formatErrorMessage({'fileLink': fileLink, 'element': element, 'prefix': prefix}, e.toString()),
             dataLogType: DataLogType.ERRORS.toString());
       }
       return ['failed'];
     }
   }
 
-  static uploadNetworkFileEntry(
-      List fileList, Map element, String prefix) async {
+  static uploadNetworkFileEntry(List fileList, Map element, String prefix) async {
     int successCount = 0;
     int failCount = 0;
 
@@ -1117,22 +1031,13 @@ class AliyunManageAPI {
 
     if (successCount == 0) {
       return Fluttertoast.showToast(
-          msg: '上传失败',
-          toastLength: Toast.LENGTH_SHORT,
-          timeInSecForIosWeb: 2,
-          fontSize: 16.0);
+          msg: '上传失败', toastLength: Toast.LENGTH_SHORT, timeInSecForIosWeb: 2, fontSize: 16.0);
     } else if (failCount == 0) {
       return Fluttertoast.showToast(
-          msg: '上传成功',
-          toastLength: Toast.LENGTH_SHORT,
-          timeInSecForIosWeb: 2,
-          fontSize: 16.0);
+          msg: '上传成功', toastLength: Toast.LENGTH_SHORT, timeInSecForIosWeb: 2, fontSize: 16.0);
     } else {
       return Fluttertoast.showToast(
-          msg: '成功$successCount,失败$failCount',
-          toastLength: Toast.LENGTH_SHORT,
-          timeInSecForIosWeb: 2,
-          fontSize: 16.0);
+          msg: '成功$successCount,失败$failCount', toastLength: Toast.LENGTH_SHORT, timeInSecForIosWeb: 2, fontSize: 16.0);
     }
   }
 }

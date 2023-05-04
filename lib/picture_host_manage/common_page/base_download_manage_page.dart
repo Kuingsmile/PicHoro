@@ -13,55 +13,31 @@ import 'package:horopic/router/application.dart';
 import 'package:horopic/router/routers.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/global.dart';
-import 'package:horopic/picture_host_manage/alist/upload_api/alist_upload_utils.dart'
-    as alist_upload_utils;
-import 'package:horopic/picture_host_manage/aliyun/upload_api/aliyun_upload_utils.dart'
-    as aliyun_upload_utils;
-import 'package:horopic/picture_host_manage/aws/upload_api/aws_upload_utils.dart'
-    as aws_upload_utils;
-import 'package:horopic/picture_host_manage/ftp/upload_api/sftp_upload_utils.dart'
-    as ftp_upload_utils;
-import 'package:horopic/picture_host_manage/github/upload_api/github_upload_utils.dart'
-    as github_upload_utils;
-import 'package:horopic/picture_host_manage/imgur/upload_api/imgur_upload_utils.dart'
-    as imgur_upload_utils;
-import 'package:horopic/picture_host_manage/lskypro/upload_api/lskypro_upload_utils.dart'
-    as lskypro_upload_utils;
-import 'package:horopic/picture_host_manage/qiniu/upload_api/qiniu_upload_utils.dart'
-    as qiniu_upload_utils;
-import 'package:horopic/picture_host_manage/smms/upload_api/smms_upload_utils.dart'
-    as smms_upload_utils;
-import 'package:horopic/picture_host_manage/tencent/upload_api/tencent_upload_utils.dart'
-    as tencent_upload_utils;
-import 'package:horopic/picture_host_manage/upyun/upload_api/upyun_upload_utils.dart'
-    as upyun_upload_utils;
-import 'package:horopic/picture_host_manage/webdav/upload_api/webdav_upload_utils.dart'
-    as webdav_upload_utils;
+import 'package:horopic/picture_host_manage/alist/upload_api/alist_upload_utils.dart' as alist_upload_utils;
+import 'package:horopic/picture_host_manage/aliyun/upload_api/aliyun_upload_utils.dart' as aliyun_upload_utils;
+import 'package:horopic/picture_host_manage/aws/upload_api/aws_upload_utils.dart' as aws_upload_utils;
+import 'package:horopic/picture_host_manage/ftp/upload_api/sftp_upload_utils.dart' as ftp_upload_utils;
+import 'package:horopic/picture_host_manage/github/upload_api/github_upload_utils.dart' as github_upload_utils;
+import 'package:horopic/picture_host_manage/imgur/upload_api/imgur_upload_utils.dart' as imgur_upload_utils;
+import 'package:horopic/picture_host_manage/lskypro/upload_api/lskypro_upload_utils.dart' as lskypro_upload_utils;
+import 'package:horopic/picture_host_manage/qiniu/upload_api/qiniu_upload_utils.dart' as qiniu_upload_utils;
+import 'package:horopic/picture_host_manage/smms/upload_api/smms_upload_utils.dart' as smms_upload_utils;
+import 'package:horopic/picture_host_manage/tencent/upload_api/tencent_upload_utils.dart' as tencent_upload_utils;
+import 'package:horopic/picture_host_manage/upyun/upload_api/upyun_upload_utils.dart' as upyun_upload_utils;
+import 'package:horopic/picture_host_manage/webdav/upload_api/webdav_upload_utils.dart' as webdav_upload_utils;
 
-import 'package:horopic/picture_host_manage/alist/download_api/alist_downloader.dart'
-    as alist_downloader;
-import 'package:horopic/picture_host_manage/aliyun/download_api/aliyun_downloader.dart'
-    as aliyun_downloader;
-import 'package:horopic/picture_host_manage/aws/download_api/aws_downloader.dart'
-    as aws_downloader;
-import 'package:horopic/picture_host_manage/ftp/download_api/sftp_downloader.dart'
-    as ftp_downloader;
-import 'package:horopic/picture_host_manage/github/download_api/github_downloader.dart'
-    as github_downloader;
-import 'package:horopic/picture_host_manage/imgur/download_api/imgur_downloader.dart'
-    as imgur_downloader;
-import 'package:horopic/picture_host_manage/lskypro/download_api/lskypro_downloader.dart'
-    as lskypro_downloader;
-import 'package:horopic/picture_host_manage/qiniu/download_api/qiniu_downloader.dart'
-    as qiniu_downloader;
-import 'package:horopic/picture_host_manage/smms/download_api/smms_downloader.dart'
-    as smms_downloader;
-import 'package:horopic/picture_host_manage/tencent/download_api/tencent_downloader.dart'
-    as tencent_downloader;
-import 'package:horopic/picture_host_manage/upyun/download_api/upyun_downloader.dart'
-    as upyun_downloader;
-import 'package:horopic/picture_host_manage/webdav/download_api/webdav_downloader.dart'
-    as webdav_downloader;
+import 'package:horopic/picture_host_manage/alist/download_api/alist_downloader.dart' as alist_downloader;
+import 'package:horopic/picture_host_manage/aliyun/download_api/aliyun_downloader.dart' as aliyun_downloader;
+import 'package:horopic/picture_host_manage/aws/download_api/aws_downloader.dart' as aws_downloader;
+import 'package:horopic/picture_host_manage/ftp/download_api/sftp_downloader.dart' as ftp_downloader;
+import 'package:horopic/picture_host_manage/github/download_api/github_downloader.dart' as github_downloader;
+import 'package:horopic/picture_host_manage/imgur/download_api/imgur_downloader.dart' as imgur_downloader;
+import 'package:horopic/picture_host_manage/lskypro/download_api/lskypro_downloader.dart' as lskypro_downloader;
+import 'package:horopic/picture_host_manage/qiniu/download_api/qiniu_downloader.dart' as qiniu_downloader;
+import 'package:horopic/picture_host_manage/smms/download_api/smms_downloader.dart' as smms_downloader;
+import 'package:horopic/picture_host_manage/tencent/download_api/tencent_downloader.dart' as tencent_downloader;
+import 'package:horopic/picture_host_manage/upyun/download_api/upyun_downloader.dart' as upyun_downloader;
+import 'package:horopic/picture_host_manage/webdav/download_api/webdav_downloader.dart' as webdav_downloader;
 
 //修改自flutter_download_manager包 https://github.com/nabil6391/flutter_download_manager 作者@nabil6391
 
@@ -87,8 +63,7 @@ class BaseUpDownloadManagePage extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  BaseUpDownloadManagePageState createState() =>
-      BaseUpDownloadManagePageState();
+  BaseUpDownloadManagePageState createState() => BaseUpDownloadManagePageState();
 }
 
 class BaseUpDownloadManagePageState extends State<BaseUpDownloadManagePage> {
@@ -228,24 +203,19 @@ class BaseUpDownloadManagePageState extends State<BaseUpDownloadManagePage> {
     currentDownloadManager = downloadManagers[widget.currentListIndex];
     switch (currentPShost) {
       case 'lsky.pro':
-        savedDir =
-            '${widget.downloadPath}/PicHoro/Download/lskypro/${widget.albumName}/';
+        savedDir = '${widget.downloadPath}/PicHoro/Download/lskypro/${widget.albumName}/';
         break;
       case 'imgur':
-        savedDir =
-            '${widget.downloadPath}/PicHoro/Download/imgur/${widget.albumName}/';
+        savedDir = '${widget.downloadPath}/PicHoro/Download/imgur/${widget.albumName}/';
         break;
       case 'github':
-        savedDir =
-            '${widget.downloadPath}/PicHoro/Download/github/${widget.userName}/${widget.repoName}/';
+        savedDir = '${widget.downloadPath}/PicHoro/Download/github/${widget.userName}/${widget.repoName}/';
         break;
       case 'ftp':
-        savedDir =
-            '${widget.downloadPath}/PicHoro/Download/ftp/${widget.ftpHost}/';
+        savedDir = '${widget.downloadPath}/PicHoro/Download/ftp/${widget.ftpHost}/';
         break;
       default:
-        savedDir =
-            '${widget.downloadPath}/PicHoro/Download/$currentPShost/${widget.bucketName}/';
+        savedDir = '${widget.downloadPath}/PicHoro/Download/$currentPShost/${widget.bucketName}/';
         break;
     }
     if (currentUploadList.isNotEmpty) {
@@ -280,8 +250,7 @@ class BaseUpDownloadManagePageState extends State<BaseUpDownloadManagePage> {
           },
           child: UploadListItem(
               onUploadPlayPausedPressed: (path, fileName, configMap) async {
-                var task = uploadManager
-                    .getUpload(jsonDecode(currentUploadList[i])[1]);
+                var task = uploadManager.getUpload(jsonDecode(currentUploadList[i])[1]);
                 if (task != null && !task.status.isCompleted) {
                   switch (task.status.value) {
                     case UploadStatus.uploading:
@@ -306,8 +275,7 @@ class BaseUpDownloadManagePageState extends State<BaseUpDownloadManagePage> {
               path: jsonDecode(currentUploadList[i])[0],
               fileName: jsonDecode(currentUploadList[i])[1],
               configMap: jsonDecode(currentUploadList[i])[2],
-              uploadTask: uploadManager
-                  .getUpload(jsonDecode(currentUploadList[i])[1]))));
+              uploadTask: uploadManager.getUpload(jsonDecode(currentUploadList[i])[1]))));
     }
     List<Widget> list2 = [
       const Divider(
@@ -319,28 +287,20 @@ class BaseUpDownloadManagePageState extends State<BaseUpDownloadManagePage> {
         children: [
           TextButton(
               onPressed: () async {
-                await uploadManager.addBatchUploads(
-                    uploadPathList, uploadFileNameList, uploadConfigMapList);
+                await uploadManager.addBatchUploads(uploadPathList, uploadFileNameList, uploadConfigMapList);
                 setState(() {});
               },
               child: const Text(
                 "全部开始",
-                style: TextStyle(
-                    color: Colors.blue,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold),
+                style: TextStyle(color: Colors.blue, fontSize: 16, fontWeight: FontWeight.bold),
               )),
           TextButton(
               onPressed: () async {
-                await uploadManager.cancelBatchUploads(
-                    uploadPathList, uploadFileNameList);
+                await uploadManager.cancelBatchUploads(uploadPathList, uploadFileNameList);
               },
               child: const Text(
                 "全部取消",
-                style: TextStyle(
-                    color: Colors.blue,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold),
+                style: TextStyle(color: Colors.blue, fontSize: 16, fontWeight: FontWeight.bold),
               )),
           TextButton(
               onPressed: () async {
@@ -354,16 +314,12 @@ class BaseUpDownloadManagePageState extends State<BaseUpDownloadManagePage> {
               },
               child: const Text(
                 "全部清空",
-                style: TextStyle(
-                    color: Colors.blue,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold),
+                style: TextStyle(color: Colors.blue, fontSize: 16, fontWeight: FontWeight.bold),
               )),
         ],
       ),
       ValueListenableBuilder(
-          valueListenable: uploadManager.getBatchUploadProgress(
-              uploadPathList, uploadFileNameList),
+          valueListenable: uploadManager.getBatchUploadProgress(uploadPathList, uploadFileNameList),
           builder: (context, value, child) {
             return Container(
               color: const Color.fromARGB(255, 219, 239, 255),
@@ -415,19 +371,16 @@ class BaseUpDownloadManagePageState extends State<BaseUpDownloadManagePage> {
                   List case1 = ['github', 'lsky.pro', 'ftp', 'imgur'];
                   if (case1.contains(currentPShost)) {
                     String fileName = url.substring(url.lastIndexOf('/') + 1);
-                    await downloadManager.addDownload(
-                        url, "$savedDir$fileName");
+                    await downloadManager.addDownload(url, "$savedDir$fileName");
                   } else {
-                    await downloadManager.addDownload(url,
-                        "$savedDir${downloadManager.getFileNameFromUrl(url)}");
+                    await downloadManager.addDownload(url, "$savedDir${downloadManager.getFileNameFromUrl(url)}");
                   }
 
                   setState(() {});
                 }
               },
               onDelete: (url) async {
-                var fileName =
-                    "$savedDir${downloadManager.getFileNameFromUrl(url)}";
+                var fileName = "$savedDir${downloadManager.getFileNameFromUrl(url)}";
                 if (currentPShost == 'github' && fileName.contains('?')) {
                   fileName = fileName.substring(0, fileName.indexOf('?'));
                 }
@@ -448,8 +401,7 @@ class BaseUpDownloadManagePageState extends State<BaseUpDownloadManagePage> {
                 setState(() {});
               },
               url: currentDownloadList[i],
-              downloadTask:
-                  downloadManager.getDownload(currentDownloadList[i]))));
+              downloadTask: downloadManager.getDownload(currentDownloadList[i]))));
     }
     List<Widget> list2 = [
       const Divider(
@@ -465,16 +417,13 @@ class BaseUpDownloadManagePageState extends State<BaseUpDownloadManagePage> {
           padding: const EdgeInsets.all(10),
           onPressed: () async {
             String externalStorageDirectory =
-                await ExternalPath.getExternalStoragePublicDirectory(
-                    ExternalPath.DIRECTORY_DOWNLOADS);
+                await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOADS);
             switch (currentPShost) {
               case 'lsky.pro':
-                externalStorageDirectory =
-                    '$externalStorageDirectory/PicHoro/Download/lskypro';
+                externalStorageDirectory = '$externalStorageDirectory/PicHoro/Download/lskypro';
                 break;
               default:
-                externalStorageDirectory =
-                    '$externalStorageDirectory/PicHoro/Download/$currentPShost';
+                externalStorageDirectory = '$externalStorageDirectory/PicHoro/Download/$currentPShost';
                 break;
             }
             // ignore: use_build_context_synchronously
@@ -482,11 +431,8 @@ class BaseUpDownloadManagePageState extends State<BaseUpDownloadManagePage> {
                 '${Routes.fileExplorer}?currentDirPath=${Uri.encodeComponent(externalStorageDirectory)}&rootPath=${Uri.encodeComponent(externalStorageDirectory)}',
                 transition: TransitionType.cupertino);
           },
-          child: const Text('打开下载文件目录',
-              style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold)),
+          child:
+              const Text('打开下载文件目录', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
         ),
         const SizedBox(
           width: 10,
@@ -506,11 +452,7 @@ class BaseUpDownloadManagePageState extends State<BaseUpDownloadManagePage> {
                 Icons.delete,
                 color: Colors.white,
               ),
-              Text('清空下载列表',
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold)),
+              Text('清空下载列表', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
             ],
           ),
         ),
@@ -520,16 +462,12 @@ class BaseUpDownloadManagePageState extends State<BaseUpDownloadManagePage> {
         children: [
           TextButton(
               onPressed: () async {
-                await downloadManager.addBatchDownloads(
-                    currentDownloadList, savedDir);
+                await downloadManager.addBatchDownloads(currentDownloadList, savedDir);
                 setState(() {});
               },
               child: const Text(
                 "全部下载",
-                style: TextStyle(
-                    color: Colors.blue,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold),
+                style: TextStyle(color: Colors.blue, fontSize: 16, fontWeight: FontWeight.bold),
               )),
           TextButton(
               onPressed: () async {
@@ -537,10 +475,7 @@ class BaseUpDownloadManagePageState extends State<BaseUpDownloadManagePage> {
               },
               child: const Text(
                 "全部暂停",
-                style: TextStyle(
-                    color: Colors.blue,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold),
+                style: TextStyle(color: Colors.blue, fontSize: 16, fontWeight: FontWeight.bold),
               )),
           TextButton(
               onPressed: () async {
@@ -548,10 +483,7 @@ class BaseUpDownloadManagePageState extends State<BaseUpDownloadManagePage> {
               },
               child: const Text(
                 "全部继续",
-                style: TextStyle(
-                    color: Colors.blue,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold),
+                style: TextStyle(color: Colors.blue, fontSize: 16, fontWeight: FontWeight.bold),
               )),
           TextButton(
               onPressed: () async {
@@ -559,16 +491,12 @@ class BaseUpDownloadManagePageState extends State<BaseUpDownloadManagePage> {
               },
               child: const Text(
                 "全部取消",
-                style: TextStyle(
-                    color: Colors.blue,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold),
+                style: TextStyle(color: Colors.blue, fontSize: 16, fontWeight: FontWeight.bold),
               )),
         ],
       ),
       ValueListenableBuilder(
-          valueListenable:
-              downloadManager.getBatchDownloadProgress(currentDownloadList),
+          valueListenable: downloadManager.getBatchDownloadProgress(currentDownloadList),
           builder: (context, value, child) {
             return Container(
               height: 10,
@@ -602,17 +530,11 @@ class BaseUpDownloadManagePageState extends State<BaseUpDownloadManagePage> {
                 unselectedLabelColor: Colors.white,
                 tabs: <Widget>[
                   Tab(
-                      child: Text('上传',
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold))),
+                      child:
+                          Text('上传', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold))),
                   Tab(
-                      child: Text('下载',
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold))),
+                      child:
+                          Text('下载', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold))),
                 ],
               ),
             ),

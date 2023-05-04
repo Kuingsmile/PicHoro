@@ -1,7 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
-import 'package:horopic/utils/sql_utils.dart';
 import 'package:horopic/utils/common_functions.dart';
-import 'package:horopic/utils/global.dart';
 import 'package:horopic/picture_host_manage/manage_api/upyun_manage_api.dart';
 
 class UpyunTokenManage extends StatefulWidget {
@@ -21,13 +21,13 @@ class UpyunTokenManageState extends State<UpyunTokenManage> {
   }
 
   _getTokens() async {
-    var result =
-        await MySqlUtils.queryUpyunManage(username: Global.defaultUser);
-    if (result == 'Empty' || result == 'Error') {
+    var result = await UpyunManageAPI.readUpyunManageConfig();
+    if (result == 'Error') {
       token = 'Error';
     } else {
-      token = result['token'];
-      tokenName = result['tokenname'];
+      var jsonResult = jsonDecode(result);
+      token = jsonResult['token'];
+      tokenName = jsonResult['tokenname'];
     }
     setState(() {});
   }
@@ -45,24 +45,20 @@ class UpyunTokenManageState extends State<UpyunTokenManage> {
           children: [
             const ListTile(
               dense: true,
-              title:
-                  Center(child: Text('Token', style: TextStyle(fontSize: 20))),
+              title: Center(child: Text('Token', style: TextStyle(fontSize: 20))),
             ),
             ListTile(
               subtitle: Center(
-                child: SelectableText(token,
-                    style: const TextStyle(color: Colors.blue)),
+                child: SelectableText(token, style: const TextStyle(color: Colors.blue)),
               ),
             ),
             const ListTile(
               dense: true,
-              title: Center(
-                  child: Text('Token备注名', style: TextStyle(fontSize: 20))),
+              title: Center(child: Text('Token备注名', style: TextStyle(fontSize: 20))),
             ),
             ListTile(
               title: Center(
-                child: SelectableText(tokenName,
-                    style: const TextStyle(color: Colors.blue)),
+                child: SelectableText(tokenName, style: const TextStyle(color: Colors.blue)),
               ),
             ),
             const SizedBox(height: 20),
@@ -74,23 +70,16 @@ class UpyunTokenManageState extends State<UpyunTokenManage> {
                   context: context,
                   onConfirm: () async {
                     Navigator.pop(context);
-                    var result =
-                        await UpyunManageAPI.deleteToken(token, tokenName);
+                    var result = await UpyunManageAPI.deleteToken(token, tokenName);
                     if (result[0] == 'success') {
-                      var queryResult = await MySqlUtils.queryUpyunManage(
-                          username: Global.defaultUser);
-                      if (queryResult != 'Empty' && queryResult != 'Error') {
-                        String email = queryResult['email'];
-                        String password = queryResult['password'];
+                      var queryResult = await UpyunManageAPI.readUpyunManageConfig();
+                      if (queryResult != 'Error') {
+                        var jsonResult = jsonDecode(queryResult);
+                        String email = jsonResult['email'];
+                        String password = jsonResult['password'];
                         String token = 'None';
                         String tokenName = 'None';
-                        await MySqlUtils.updateUpyunManage(content: [
-                          email,
-                          password,
-                          token,
-                          tokenName,
-                          Global.defaultUser
-                        ]);
+                        await UpyunManageAPI.saveUpyunManageConfig(email, password, token, tokenName);
                         showToast('Token已删除');
                         if (mounted) {
                           Navigator.pop(context);

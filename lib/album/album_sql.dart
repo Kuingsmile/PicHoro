@@ -21,7 +21,6 @@ List<String> allPBhost = [
   'PBhost3', //自定义图床3
 ];
 
-
 //扩展数据库的图床表名
 List<String> allPBhostExtend = [
   'PBhostExtend1', //ftp
@@ -86,10 +85,10 @@ Map<String, String> pBhostToTableName = {
   'qiniu': 'qiniu',
   'aliyun': 'aliyun',
   'tencent': 'tencent',
-  'ftp' :'PBhostExtend1',
-  'aws' :'PBhostExtend2',
-  'alist' :'PBhostExtend3',
-  'webdav' :'PBhostExtend4',
+  'ftp': 'PBhostExtend1',
+  'aws': 'PBhostExtend2',
+  'alist': 'PBhostExtend3',
+  'webdav': 'PBhostExtend4',
 };
 
 List<String> tableKeysList = [
@@ -127,7 +126,6 @@ List<String> tableKeysList = [
 ];
 
 class AlbumSQL {
-
   static getDatabase() async {
     String currentUserName = await Global.getUser();
     Database db = await initDB(currentUserName);
@@ -135,14 +133,12 @@ class AlbumSQL {
   }
 
   static initDB(String username) async {
-    var externalDirectoryPath =
-        await ExternalPath.getExternalStoragePublicDirectory(
-            ExternalPath.DIRECTORY_DOWNLOADS);
+    var externalDirectoryPath = await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOADS);
     var persistPath = '$externalDirectoryPath/PicHoro/Database';
     if (!await Directory(persistPath).exists()) {
       await Directory(persistPath).create(recursive: true);
     }
-    if (username == ''||username == ' ') {
+    if (username == '' || username == ' ') {
       username = 'null';
     }
     var dbPath = join(persistPath, '${username}_album.db');
@@ -178,16 +174,13 @@ class AlbumSQL {
     return db;
   }
 
-  
   static initExtendDB(String username) async {
-    var externalDirectoryPath =
-        await ExternalPath.getExternalStoragePublicDirectory(
-            ExternalPath.DIRECTORY_DOWNLOADS);
+    var externalDirectoryPath = await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOADS);
     var persistPath = '$externalDirectoryPath/PicHoro/Database';
     if (!await Directory(persistPath).exists()) {
       await Directory(persistPath).create(recursive: true);
     }
-    if (username == ''||username == ' ') {
+    if (username == '' || username == ' ') {
       username = 'null';
     }
     var dbPath = join(persistPath, '${username}_album_extend.db');
@@ -239,8 +232,7 @@ class AlbumSQL {
   }
 
   static isTableExist(Database db, String tableName) async {
-    var res = await db.rawQuery(
-        "SELECT name FROM sqlite_master WHERE type='table' AND name='$tableName'");
+    var res = await db.rawQuery("SELECT name FROM sqlite_master WHERE type='table' AND name='$tableName'");
     return res.isNotEmpty;
   }
 
@@ -249,10 +241,8 @@ class AlbumSQL {
         "CREATE TABLE $tableName (id INTEGER PRIMARY KEY AUTOINCREMENT,path TEXT,name TEXT,url TEXT,PBhost TEXT,pictureKey TEXT,hostSpecificArgA TEXT,hostSpecificArgB TEXT,hostSpecificArgC TEXT,hostSpecificArgD TEXT,hostSpecificArgE TEXT)");
   }
 
-  static insertData(
-      Database db, String tableName, Map<String, dynamic> data) async {
-    int id = await db.insert(tableName, data,
-        conflictAlgorithm: ConflictAlgorithm.replace);
+  static insertData(Database db, String tableName, Map<String, dynamic> data) async {
+    int id = await db.insert(tableName, data, conflictAlgorithm: ConflictAlgorithm.replace);
     return id;
   }
 
@@ -262,8 +252,7 @@ class AlbumSQL {
   }
 
   static queryData(Database db, String tableName, int id) async {
-    List<Map<String, dynamic>> maps =
-        await db.query(tableName, where: 'id = ?', whereArgs: [id]);
+    List<Map<String, dynamic>> maps = await db.query(tableName, where: 'id = ?', whereArgs: [id]);
     return maps;
   }
 
@@ -281,12 +270,8 @@ class AlbumSQL {
     int? limit,
     int? offset,
   }) async {
-    List<Map<String, dynamic>> maps = await db.query(tableName,
-        where: where,
-        whereArgs: whereargs,
-        orderBy: orderBy,
-        limit: limit,
-        offset: offset);
+    List<Map<String, dynamic>> maps =
+        await db.query(tableName, where: where, whereArgs: whereargs, orderBy: orderBy, limit: limit, offset: offset);
     return maps;
   }
 

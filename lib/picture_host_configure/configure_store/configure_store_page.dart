@@ -10,8 +10,6 @@ import 'package:horopic/picture_host_configure/configure_store/configure_templat
 
 import 'package:horopic/router/application.dart';
 import 'package:horopic/utils/common_functions.dart';
-import 'package:horopic/utils/sql_utils.dart';
-import 'package:horopic/utils/global.dart';
 
 class ConfigureStorePage extends StatefulWidget {
   final String psHost;
@@ -69,11 +67,8 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
     List<Widget> psInfoListTile = [];
     psInfoListTile.add(
       ListTile(
-        leading:
-            const Icon(Icons.info, color: Color.fromARGB(255, 88, 171, 240)),
-        title: Text(remarkName == ConfigureTemplate.placeholder
-            ? '配置$storeName'
-            : '配置$storeName->$remarkName'),
+        leading: const Icon(Icons.info, color: Color.fromARGB(255, 88, 171, 240)),
+        title: Text(remarkName == ConfigureTemplate.placeholder ? '配置$storeName' : '配置$storeName->$remarkName'),
         trailing: IconButton(
           icon: const Icon(Icons.more_horiz_outlined, color: Colors.amber),
           onPressed: () {
@@ -81,8 +76,7 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
                 isScrollControlled: true,
                 context: context,
                 builder: (context) {
-                  return buildBottomSheetWidget(
-                      context, storeName, pictureHostInfo);
+                  return buildBottomSheetWidget(context, storeName, pictureHostInfo);
                 });
           },
         ),
@@ -92,14 +86,9 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
       psInfoListTile.add(
         ListTile(
           title: Center(
-              child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
-                Text('尚未配置',
-                    style: TextStyle(
-                        color: Color.fromARGB(255, 88, 171, 240),
-                        fontSize: 16)),
-              ])),
+              child: Row(mainAxisAlignment: MainAxisAlignment.center, children: const [
+            Text('尚未配置', style: TextStyle(color: Color.fromARGB(255, 88, 171, 240), fontSize: 16)),
+          ])),
         ),
       );
     } else {
@@ -116,10 +105,7 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
                         color: Colors.black,
                       )),
                 ),
-                SelectableText(
-                    values[i] == ConfigureTemplate.placeholder
-                        ? '未配置'
-                        : values[i],
+                SelectableText(values[i] == ConfigureTemplate.placeholder ? '未配置' : values[i],
                     textAlign: TextAlign.center,
                     style: const TextStyle(
                       color: Colors.black54,
@@ -147,8 +133,7 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
     List<Widget> allPsInfoListTile = [];
     String alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     for (var element in alphabet.split('')) {
-      allPsInfoListTile
-          .addAll(buildPsInfoListTile(element, configMap[element]!));
+      allPsInfoListTile.addAll(buildPsInfoListTile(element, configMap[element]!));
     }
     return allPsInfoListTile;
   }
@@ -212,8 +197,7 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
               backgroundColor: const Color.fromARGB(255, 198, 135, 235),
               heroTag: 'exportConfig',
               onPressed: () async {
-                var result = await ConfigureStoreFile()
-                    .exportConfigureToJson(widget.psHost);
+                var result = await ConfigureStoreFile().exportConfigureToJson(widget.psHost);
                 await Clipboard.setData(ClipboardData(text: result));
                 showToast('已导出到剪贴板');
               },
@@ -239,8 +223,7 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
                   return;
                 }
                 try {
-                  await ConfigureStoreFile().importConfigureFromJson(
-                      widget.psHost, clipboardData.text!);
+                  await ConfigureStoreFile().importConfigureFromJson(widget.psHost, clipboardData.text!);
                   setState(() {
                     showToast('导入成功');
                   });
@@ -269,8 +252,7 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
     return true;
   }
 
-  Widget buildBottomSheetWidget(
-      BuildContext context, String storeName, Map psInfo) {
+  Widget buildBottomSheetWidget(BuildContext context, String storeName, Map psInfo) {
     String remarkName = psInfo['remarkName']!;
 
     return SingleChildScrollView(
@@ -280,10 +262,7 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
             dense: true,
             leading: const Icon(Icons.settings),
             minLeadingWidth: 0,
-            title: Text(
-                remarkName == ConfigureTemplate.placeholder
-                    ? '配置$storeName'
-                    : '配置$storeName-$remarkName',
+            title: Text(remarkName == ConfigureTemplate.placeholder ? '配置$storeName' : '配置$storeName-$remarkName',
                 style: const TextStyle(fontSize: 15)),
           ),
           const Divider(
@@ -317,8 +296,7 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
             title: const Text('导出配置'),
             onTap: () async {
               Navigator.pop(context);
-              var result = await ConfigureStoreFile()
-                  .exportConfigureKeyToJson(widget.psHost, storeName);
+              var result = await ConfigureStoreFile().exportConfigureKeyToJson(widget.psHost, storeName);
               await Clipboard.setData(ClipboardData(text: result));
               showToast('已复制到剪贴板');
             },
@@ -364,44 +342,12 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
                     if (options == ConfigureTemplate.placeholder) {
                       options = 'None';
                     }
-                    List sqlconfig = [];
-                    sqlconfig.add(keyId);
-                    sqlconfig.add(keySecret);
-                    sqlconfig.add(bucket);
-                    sqlconfig.add(area);
-                    sqlconfig.add(path);
-                    sqlconfig.add(customUrl);
-                    sqlconfig.add(options);
-                    String defaultUser = await Global.getUser();
-                    sqlconfig.add(defaultUser);
-                    var queryAliyun =
-                        await MySqlUtils.queryAliyun(username: defaultUser);
-                    var queryuser =
-                        await MySqlUtils.queryUser(username: defaultUser);
 
-                    if (queryuser == 'Empty') {
-                      return showToast('请先登录');
-                    }
-                    var sqlResult = '';
-
-                    if (queryAliyun == 'Empty') {
-                      sqlResult =
-                          await MySqlUtils.insertAliyun(content: sqlconfig);
-                    } else {
-                      sqlResult =
-                          await MySqlUtils.updateAliyun(content: sqlconfig);
-                    }
-                    if (sqlResult == "Success") {
-                      final aliyunConfig = AliyunConfigModel(keyId, keySecret,
-                          bucket, area, path, customUrl, options);
-                      final aliyunConfigJson = jsonEncode(aliyunConfig);
-                      final aliyunConfigFile =
-                          await AliyunConfigState().localFile;
-                      await aliyunConfigFile.writeAsString(aliyunConfigJson);
-                      return showToast('设置成功');
-                    } else {
-                      return showToast('设置失败');
-                    }
+                    final aliyunConfig = AliyunConfigModel(keyId, keySecret, bucket, area, path, customUrl, options);
+                    final aliyunConfigJson = jsonEncode(aliyunConfig);
+                    final aliyunConfigFile = await AliyunConfigState().localFile;
+                    await aliyunConfigFile.writeAsString(aliyunConfigJson);
+                    return showToast('设置成功');
                   } catch (e) {
                     FLog.error(
                         className: 'AliyunConfigureStorePage',
@@ -438,50 +384,20 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
                     if (region == ConfigureTemplate.placeholder) {
                       region = 'None';
                     }
-                    List sqlconfig = [];
-                    sqlconfig.add(accessKeyId);
-                    sqlconfig.add(secretAccessKey);
-                    sqlconfig.add(bucket);
-                    sqlconfig.add(endpoint);
-                    sqlconfig.add(region);
-                    sqlconfig.add(uploadPath);
-                    sqlconfig.add(customUrl);
-                    String defaultUser = await Global.getUser();
-                    sqlconfig.add(defaultUser);
-                    var queryAws =
-                        await MySqlUtils.queryAws(username: defaultUser);
-                    var queryuser =
-                        await MySqlUtils.queryUser(username: defaultUser);
 
-                    if (queryuser == 'Empty') {
-                      return showToast('请先登录');
-                    }
-                    var sqlResult = '';
-
-                    if (queryAws == 'Empty') {
-                      sqlResult =
-                          await MySqlUtils.insertAws(content: sqlconfig);
-                    } else {
-                      sqlResult =
-                          await MySqlUtils.updateAws(content: sqlconfig);
-                    }
-                    if (sqlResult == "Success") {
-                      final awsConfig = AwsConfigModel(
-                        accessKeyId,
-                        secretAccessKey,
-                        bucket,
-                        endpoint,
-                        region,
-                        uploadPath,
-                        customUrl,
-                      );
-                      final awsConfigJson = jsonEncode(awsConfig);
-                      final awsConfigFile = await AwsConfigState().localFile;
-                      await awsConfigFile.writeAsString(awsConfigJson);
-                      return showToast('设置成功');
-                    } else {
-                      return showToast('设置失败');
-                    }
+                    final awsConfig = AwsConfigModel(
+                      accessKeyId,
+                      secretAccessKey,
+                      bucket,
+                      endpoint,
+                      region,
+                      uploadPath,
+                      customUrl,
+                    );
+                    final awsConfigJson = jsonEncode(awsConfig);
+                    final awsConfigFile = await AwsConfigState().localFile;
+                    await awsConfigFile.writeAsString(awsConfigJson);
+                    return showToast('设置成功');
                   } catch (e) {
                     FLog.error(
                         className: 'AwsConfigureStorePage',
@@ -522,52 +438,21 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
                     if (ftpHomeDir == ConfigureTemplate.placeholder) {
                       ftpHomeDir = 'None';
                     }
-                    List sqlconfig = [];
-                    sqlconfig.add(ftpHost);
-                    sqlconfig.add(ftpPort);
-                    sqlconfig.add(ftpUser);
-                    sqlconfig.add(ftpPassword);
-                    sqlconfig.add(ftpType);
-                    sqlconfig.add(isAnonymous);
-                    sqlconfig.add(uploadPath);
-                    sqlconfig.add(ftpHomeDir);
-                    String defaultUser = await Global.getUser();
-                    sqlconfig.add(defaultUser);
-                    var queryFtp =
-                        await MySqlUtils.queryFTP(username: defaultUser);
-                    var queryuser =
-                        await MySqlUtils.queryUser(username: defaultUser);
 
-                    if (queryuser == 'Empty') {
-                      return showToast('请先登录');
-                    }
-                    var sqlResult = '';
-
-                    if (queryFtp == 'Empty') {
-                      sqlResult =
-                          await MySqlUtils.insertFTP(content: sqlconfig);
-                    } else {
-                      sqlResult =
-                          await MySqlUtils.updateFTP(content: sqlconfig);
-                    }
-                    if (sqlResult == "Success") {
-                      final ftpConfig = FTPConfigModel(
-                        ftpHost,
-                        ftpPort,
-                        ftpUser,
-                        ftpPassword,
-                        ftpType,
-                        isAnonymous,
-                        uploadPath,
-                        ftpHomeDir,
-                      );
-                      final ftpConfigJson = jsonEncode(ftpConfig);
-                      final ftpConfigFile = await FTPConfigState().localFile;
-                      await ftpConfigFile.writeAsString(ftpConfigJson);
-                      return showToast('设置成功');
-                    } else {
-                      return showToast('设置失败');
-                    }
+                    final ftpConfig = FTPConfigModel(
+                      ftpHost,
+                      ftpPort,
+                      ftpUser,
+                      ftpPassword,
+                      ftpType,
+                      isAnonymous,
+                      uploadPath,
+                      ftpHomeDir,
+                    );
+                    final ftpConfigJson = jsonEncode(ftpConfig);
+                    final ftpConfigFile = await FTPConfigState().localFile;
+                    await ftpConfigFile.writeAsString(ftpConfigJson);
+                    return showToast('设置成功');
                   } catch (e) {
                     FLog.error(
                         className: 'FtpConfigureStorePage',
@@ -584,8 +469,7 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
                     String storePath = psInfo['storePath']!;
                     String branch = psInfo['branch']!;
                     String customDomain = psInfo['customDomain']!;
-                    bool valid = validateUndetermined(
-                        [githubusername, repo, token, branch]);
+                    bool valid = validateUndetermined([githubusername, repo, token, branch]);
                     if (!valid) {
                       showToast('请先去设置参数');
                       return;
@@ -596,49 +480,19 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
                     if (customDomain == ConfigureTemplate.placeholder) {
                       customDomain = 'None';
                     }
-                    List sqlconfig = [];
-                    sqlconfig.add(githubusername);
-                    sqlconfig.add(repo);
-                    sqlconfig.add(token);
-                    sqlconfig.add(storePath);
-                    sqlconfig.add(branch);
-                    sqlconfig.add(customDomain);
-                    String defaultUser = await Global.getUser();
-                    sqlconfig.add(defaultUser);
-                    var queryGithub =
-                        await MySqlUtils.queryGithub(username: defaultUser);
-                    var queryuser =
-                        await MySqlUtils.queryUser(username: defaultUser);
 
-                    if (queryuser == 'Empty') {
-                      return showToast('请先登录');
-                    }
-                    var sqlResult = '';
-
-                    if (queryGithub == 'Empty') {
-                      sqlResult =
-                          await MySqlUtils.insertGithub(content: sqlconfig);
-                    } else {
-                      sqlResult =
-                          await MySqlUtils.updateGithub(content: sqlconfig);
-                    }
-                    if (sqlResult == "Success") {
-                      final githubConfig = GithubConfigModel(
-                        githubusername,
-                        repo,
-                        token,
-                        storePath,
-                        branch,
-                        customDomain,
-                      );
-                      final githubConfigJson = jsonEncode(githubConfig);
-                      final githubConfigFile =
-                          await GithubConfigState().localFile;
-                      await githubConfigFile.writeAsString(githubConfigJson);
-                      return showToast('设置成功');
-                    } else {
-                      return showToast('设置失败');
-                    }
+                    final githubConfig = GithubConfigModel(
+                      githubusername,
+                      repo,
+                      token,
+                      storePath,
+                      branch,
+                      customDomain,
+                    );
+                    final githubConfigJson = jsonEncode(githubConfig);
+                    final githubConfigFile = await GithubConfigState().localFile;
+                    await githubConfigFile.writeAsString(githubConfigJson);
+                    return showToast('设置成功');
                   } catch (e) {
                     FLog.error(
                         className: 'GithubConfigureStorePage',
@@ -661,41 +515,14 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
                     if (proxy == ConfigureTemplate.placeholder) {
                       proxy = 'None';
                     }
-                    List sqlconfig = [];
-                    sqlconfig.add(clientId);
-                    sqlconfig.add(proxy);
-                    String defaultUser = await Global.getUser();
-                    sqlconfig.add(defaultUser);
-                    var queryImgur =
-                        await MySqlUtils.queryImgur(username: defaultUser);
-                    var queryuser =
-                        await MySqlUtils.queryUser(username: defaultUser);
-
-                    if (queryuser == 'Empty') {
-                      return showToast('请先登录');
-                    }
-                    var sqlResult = '';
-
-                    if (queryImgur == 'Empty') {
-                      sqlResult =
-                          await MySqlUtils.insertImgur(content: sqlconfig);
-                    } else {
-                      sqlResult =
-                          await MySqlUtils.updateImgur(content: sqlconfig);
-                    }
-                    if (sqlResult == "Success") {
-                      final imgurConfig = ImgurConfigModel(
-                        clientId,
-                        proxy,
-                      );
-                      final imgurConfigJson = jsonEncode(imgurConfig);
-                      final imgurConfigFile =
-                          await ImgurConfigState().localFile;
-                      await imgurConfigFile.writeAsString(imgurConfigJson);
-                      return showToast('设置成功');
-                    } else {
-                      return showToast('设置失败');
-                    }
+                    final imgurConfig = ImgurConfigModel(
+                      clientId,
+                      proxy,
+                    );
+                    final imgurConfigJson = jsonEncode(imgurConfig);
+                    final imgurConfigFile = await ImgurConfigState().localFile;
+                    await imgurConfigFile.writeAsString(imgurConfigJson);
+                    return showToast('设置成功');
                   } catch (e) {
                     FLog.error(
                         className: 'ImgurConfigureStorePage',
@@ -722,45 +549,17 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
                     if (albumId == ConfigureTemplate.placeholder) {
                       albumId = 'None';
                     }
-                    List sqlconfig = [];
-                    sqlconfig.add(host);
-                    sqlconfig.add(strategyId);
-                    sqlconfig.add(albumId);
-                    sqlconfig.add(token);
-                    String defaultUser = await Global.getUser();
-                    sqlconfig.add(defaultUser);
-                    var queryLskypro =
-                        await MySqlUtils.queryLankong(username: defaultUser);
-                    var queryuser =
-                        await MySqlUtils.queryUser(username: defaultUser);
 
-                    if (queryuser == 'Empty') {
-                      return showToast('请先登录');
-                    }
-                    var sqlResult = '';
-
-                    if (queryLskypro == 'Empty') {
-                      sqlResult =
-                          await MySqlUtils.insertLankong(content: sqlconfig);
-                    } else {
-                      sqlResult =
-                          await MySqlUtils.updateLankong(content: sqlconfig);
-                    }
-                    if (sqlResult == "Success") {
-                      final lskyproConfig = HostConfigModel(
-                        host,
-                        token,
-                        strategyId,
-                        albumId,
-                      );
-                      final lskyproConfigJson = jsonEncode(lskyproConfig);
-                      final lskyproConfigFile =
-                          await HostConfigState().localFile;
-                      await lskyproConfigFile.writeAsString(lskyproConfigJson);
-                      return showToast('设置成功');
-                    } else {
-                      return showToast('设置失败');
-                    }
+                    final lskyproConfig = HostConfigModel(
+                      host,
+                      token,
+                      strategyId,
+                      albumId,
+                    );
+                    final lskyproConfigJson = jsonEncode(lskyproConfig);
+                    final lskyproConfigFile = await HostConfigState().localFile;
+                    await lskyproConfigFile.writeAsString(lskyproConfigJson);
+                    return showToast('设置成功');
                   } catch (e) {
                     FLog.error(
                         className: 'LskyproConfigureStorePage',
@@ -795,51 +594,20 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
                     if (path == ConfigureTemplate.placeholder) {
                       path = 'None';
                     }
-                    List sqlconfig = [];
-                    sqlconfig.add(accessKey);
-                    sqlconfig.add(secretKey);
-                    sqlconfig.add(bucket);
-                    sqlconfig.add(url);
-                    sqlconfig.add(area);
-                    sqlconfig.add(options);
-                    sqlconfig.add(path);
-                    String defaultUser = await Global.getUser();
-                    sqlconfig.add(defaultUser);
-                    var queryQiniu =
-                        await MySqlUtils.queryQiniu(username: defaultUser);
-                    var queryuser =
-                        await MySqlUtils.queryUser(username: defaultUser);
 
-                    if (queryuser == 'Empty') {
-                      return showToast('请先登录');
-                    }
-                    var sqlResult = '';
-
-                    if (queryQiniu == 'Empty') {
-                      sqlResult =
-                          await MySqlUtils.insertQiniu(content: sqlconfig);
-                    } else {
-                      sqlResult =
-                          await MySqlUtils.updateQiniu(content: sqlconfig);
-                    }
-                    if (sqlResult == "Success") {
-                      final qiniuConfig = QiniuConfigModel(
-                        accessKey,
-                        secretKey,
-                        bucket,
-                        url,
-                        area,
-                        options,
-                        path,
-                      );
-                      final qiniuConfigJson = jsonEncode(qiniuConfig);
-                      final qiniuConfigFile =
-                          await QiniuConfigState().localFile;
-                      await qiniuConfigFile.writeAsString(qiniuConfigJson);
-                      return showToast('设置成功');
-                    } else {
-                      return showToast('设置失败');
-                    }
+                    final qiniuConfig = QiniuConfigModel(
+                      accessKey,
+                      secretKey,
+                      bucket,
+                      url,
+                      area,
+                      options,
+                      path,
+                    );
+                    final qiniuConfigJson = jsonEncode(qiniuConfig);
+                    final qiniuConfigFile = await QiniuConfigState().localFile;
+                    await qiniuConfigFile.writeAsString(qiniuConfigJson);
+                    return showToast('设置成功');
                   } catch (e) {
                     FLog.error(
                         className: 'QiniuConfigureStorePage',
@@ -859,39 +627,13 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
                       return;
                     }
 
-                    List sqlconfig = [];
-                    sqlconfig.add(token);
-
-                    String defaultUser = await Global.getUser();
-                    sqlconfig.add(defaultUser);
-                    var querySmms =
-                        await MySqlUtils.querySmms(username: defaultUser);
-                    var queryuser =
-                        await MySqlUtils.queryUser(username: defaultUser);
-
-                    if (queryuser == 'Empty') {
-                      return showToast('请先登录');
-                    }
-                    var sqlResult = '';
-
-                    if (querySmms == 'Empty') {
-                      sqlResult =
-                          await MySqlUtils.insertSmms(content: sqlconfig);
-                    } else {
-                      sqlResult =
-                          await MySqlUtils.updateSmms(content: sqlconfig);
-                    }
-                    if (sqlResult == "Success") {
-                      final smmsConfig = SmmsConfigModel(
-                        token,
-                      );
-                      final smmsConfigJson = jsonEncode(smmsConfig);
-                      final smmsConfigFile = await SmmsConfigState().localFile;
-                      await smmsConfigFile.writeAsString(smmsConfigJson);
-                      return showToast('设置成功');
-                    } else {
-                      return showToast('设置失败');
-                    }
+                    final smmsConfig = SmmsConfigModel(
+                      token,
+                    );
+                    final smmsConfigJson = jsonEncode(smmsConfig);
+                    final smmsConfigFile = await SmmsConfigState().localFile;
+                    await smmsConfigFile.writeAsString(smmsConfigJson);
+                    return showToast('设置成功');
                   } catch (e) {
                     FLog.error(
                         className: 'SmmsConfigureStorePage',
@@ -930,52 +672,13 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
                     if (options == ConfigureTemplate.placeholder) {
                       options = 'None';
                     }
-                    List sqlconfig = [];
-                    sqlconfig.add(secretId);
-                    sqlconfig.add(secretKey);
-                    sqlconfig.add(bucket);
-                    sqlconfig.add(appId);
-                    sqlconfig.add(area);
-                    sqlconfig.add(path);
-                    sqlconfig.add(customUrl);
-                    sqlconfig.add(options);
-                    String defaultUser = await Global.getUser();
-                    sqlconfig.add(defaultUser);
-                    var queryTencent =
-                        await MySqlUtils.queryTencent(username: defaultUser);
-                    var queryuser =
-                        await MySqlUtils.queryUser(username: defaultUser);
 
-                    if (queryuser == 'Empty') {
-                      return showToast('请先登录');
-                    }
-                    var sqlResult = '';
-
-                    if (queryTencent == 'Empty') {
-                      sqlResult =
-                          await MySqlUtils.insertTencent(content: sqlconfig);
-                    } else {
-                      sqlResult =
-                          await MySqlUtils.updateTencent(content: sqlconfig);
-                    }
-                    if (sqlResult == "Success") {
-                      final tencentConfig = TencentConfigModel(
-                          secretId,
-                          secretKey,
-                          bucket,
-                          appId,
-                          area,
-                          path,
-                          customUrl,
-                          options);
-                      final tencentConfigJson = jsonEncode(tencentConfig);
-                      final tencentConfigFile =
-                          await TencentConfigState().localFile;
-                      await tencentConfigFile.writeAsString(tencentConfigJson);
-                      return showToast('设置成功');
-                    } else {
-                      return showToast('设置失败');
-                    }
+                    final tencentConfig =
+                        TencentConfigModel(secretId, secretKey, bucket, appId, area, path, customUrl, options);
+                    final tencentConfigJson = jsonEncode(tencentConfig);
+                    final tencentConfigFile = await TencentConfigState().localFile;
+                    await tencentConfigFile.writeAsString(tencentConfigJson);
+                    return showToast('设置成功');
                   } catch (e) {
                     FLog.error(
                         className: 'TencentConfigureStorePage',
@@ -1007,43 +710,11 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
                       path = 'None';
                     }
 
-                    List sqlconfig = [];
-                    sqlconfig.add(bucket);
-                    sqlconfig.add(operator);
-                    sqlconfig.add(password);
-                    sqlconfig.add(url);
-                    sqlconfig.add(options);
-                    sqlconfig.add(path);
-                    String defaultUser = await Global.getUser();
-                    sqlconfig.add(defaultUser);
-                    var queryUpyun =
-                        await MySqlUtils.queryUpyun(username: defaultUser);
-                    var queryuser =
-                        await MySqlUtils.queryUser(username: defaultUser);
-
-                    if (queryuser == 'Empty') {
-                      return showToast('请先登录');
-                    }
-                    var sqlResult = '';
-
-                    if (queryUpyun == 'Empty') {
-                      sqlResult =
-                          await MySqlUtils.insertUpyun(content: sqlconfig);
-                    } else {
-                      sqlResult =
-                          await MySqlUtils.updateUpyun(content: sqlconfig);
-                    }
-                    if (sqlResult == "Success") {
-                      final upyunConfig = UpyunConfigModel(
-                          bucket, operator, password, url, options, path);
-                      final upyunConfigJson = jsonEncode(upyunConfig);
-                      final upyunConfigFile =
-                          await UpyunConfigState().localFile;
-                      await upyunConfigFile.writeAsString(upyunConfigJson);
-                      return showToast('设置成功');
-                    } else {
-                      return showToast('设置失败');
-                    }
+                    final upyunConfig = UpyunConfigModel(bucket, operator, password, url, options, path);
+                    final upyunConfigJson = jsonEncode(upyunConfig);
+                    final upyunConfigFile = await UpyunConfigState().localFile;
+                    await upyunConfigFile.writeAsString(upyunConfigJson);
+                    return showToast('设置成功');
                   } catch (e) {
                     FLog.error(
                         className: 'UpyunConfigureStorePage',
@@ -1075,46 +746,18 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
                     if (password == ConfigureTemplate.placeholder) {
                       password = 'None';
                     }
-                    List sqlconfig = [];
-                    sqlconfig.add(host);
-                    sqlconfig.add(alistusername);
-                    sqlconfig.add(password);
-                    sqlconfig.add(token);
-                    sqlconfig.add(uploadPath);
-                    String defaultUser = await Global.getUser();
-                    sqlconfig.add(defaultUser);
-                    var queryAlist =
-                        await MySqlUtils.queryAlist(username: defaultUser);
-                    var queryuser =
-                        await MySqlUtils.queryUser(username: defaultUser);
-                    if (queryuser == 'Empty') {
-                      return showToast('请先登录');
-                    }
-                    var sqlResult = '';
 
-                    if (queryAlist == 'Empty') {
-                      sqlResult =
-                          await MySqlUtils.insertAlist(content: sqlconfig);
-                    } else {
-                      sqlResult =
-                          await MySqlUtils.updateAlist(content: sqlconfig);
-                    }
-                    if (sqlResult == "Success") {
-                      final alistConfig = AlistConfigModel(
-                        host,
-                        alistusername,
-                        password,
-                        token,
-                        uploadPath,
-                      );
-                      final alistConfigJson = jsonEncode(alistConfig);
-                      final alistConfigFile =
-                          await AlistConfigState().localFile;
-                      await alistConfigFile.writeAsString(alistConfigJson);
-                      return showToast('设置成功');
-                    } else {
-                      return showToast('设置失败');
-                    }
+                    final alistConfig = AlistConfigModel(
+                      host,
+                      alistusername,
+                      password,
+                      token,
+                      uploadPath,
+                    );
+                    final alistConfigJson = jsonEncode(alistConfig);
+                    final alistConfigFile = await AlistConfigState().localFile;
+                    await alistConfigFile.writeAsString(alistConfigJson);
+                    return showToast('设置成功');
                   } catch (e) {
                     FLog.error(
                         className: 'AlistConfigureStorePage',
@@ -1141,44 +784,17 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
                     if (uploadPath == ConfigureTemplate.placeholder) {
                       uploadPath = 'None';
                     }
-                    List sqlconfig = [];
-                    sqlconfig.add(host);
-                    sqlconfig.add(webdavusername);
-                    sqlconfig.add(password);
-                    sqlconfig.add(uploadPath);
-                    String defaultUser = await Global.getUser();
-                    sqlconfig.add(defaultUser);
-                    var queryWebdav =
-                        await MySqlUtils.queryWebdav(username: defaultUser);
-                    var queryuser =
-                        await MySqlUtils.queryUser(username: defaultUser);
-                    if (queryuser == 'Empty') {
-                      return showToast('请先登录');
-                    }
-                    var sqlResult = '';
 
-                    if (queryWebdav == 'Empty') {
-                      sqlResult =
-                          await MySqlUtils.insertWebdav(content: sqlconfig);
-                    } else {
-                      sqlResult =
-                          await MySqlUtils.updateWebdav(content: sqlconfig);
-                    }
-                    if (sqlResult == "Success") {
-                      final webdavConfig = WebdavConfigModel(
-                        host,
-                        webdavusername,
-                        password,
-                        uploadPath,
-                      );
-                      final webdavConfigJson = jsonEncode(webdavConfig);
-                      final webdavConfigFile =
-                          await WebdavConfigState().localFile;
-                      await webdavConfigFile.writeAsString(webdavConfigJson);
-                      return showToast('设置成功');
-                    } else {
-                      return showToast('设置失败');
-                    }
+                    final webdavConfig = WebdavConfigModel(
+                      host,
+                      webdavusername,
+                      password,
+                      uploadPath,
+                    );
+                    final webdavConfigJson = jsonEncode(webdavConfig);
+                    final webdavConfigFile = await WebdavConfigState().localFile;
+                    await webdavConfigFile.writeAsString(webdavConfigJson);
+                    return showToast('设置成功');
                   } catch (e) {
                     FLog.error(
                         className: 'WebdavConfigureStorePage',

@@ -24,7 +24,6 @@ import 'package:horopic/pages/upload_pages/upload_task.dart';
 import 'package:horopic/utils/event_bus_utils.dart';
 import 'package:horopic/utils/uploader.dart';
 import 'package:horopic/utils/global.dart';
-import 'package:horopic/utils/sql_utils.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/album/album_sql.dart';
 import 'package:horopic/api/tencent_api.dart';
@@ -116,8 +115,7 @@ class UploadManager {
           ]
         };
         String uploadPolicyStr = jsonEncode(uploadPolicy);
-        String singature = TencentImageUploadUtils.getUploadAuthorization(
-            secretKey, keyTime, uploadPolicyStr);
+        String singature = TencentImageUploadUtils.getUploadAuthorization(secretKey, keyTime, uploadPolicyStr);
         FormData formData = FormData.fromMap({
           'key': urlpath,
           'policy': base64Encode(utf8.encode(uploadPolicyStr)),
@@ -127,8 +125,7 @@ class UploadManager {
           'q-key-time': keyTime,
           'q-sign-time': keyTime,
           'q-signature': singature,
-          'file': await MultipartFile.fromFile(path,
-              filename: my_path.basename(path)),
+          'file': await MultipartFile.fromFile(path, filename: my_path.basename(path)),
         });
         BaseOptions baseoptions = setBaseOptions();
         File uploadFile = File(path);
@@ -179,8 +176,7 @@ class UploadManager {
 
           String formatedURL = '';
           if (Global.isCopyLink == true) {
-            formatedURL =
-                linkGenerateDict[Global.defaultLKformat]!(returnUrl, fileName);
+            formatedURL = linkGenerateDict[Global.defaultLKformat]!(returnUrl, fileName);
           } else {
             formatedURL = returnUrl;
           }
@@ -200,8 +196,7 @@ class UploadManager {
             'hostSpecificArgD': 'test',
             'hostSpecificArgE': 'test',
           };
-          await AlbumSQL.insertData(
-              Global.imageDB!, pBhostToTableName[Global.defaultPShost]!, maps);
+          await AlbumSQL.insertData(Global.imageDB!, pBhostToTableName[Global.defaultPShost]!, maps);
           setStatus(task, UploadStatus.completed);
         }
       } else if (defaultPH == 'aliyun') {
@@ -245,20 +240,15 @@ class UploadManager {
             {"key": urlpath}
           ]
         };
-        String base64Policy =
-            base64.encode(utf8.encode(json.encode(uploadPolicy)));
-        String singature = base64.encode(Hmac(sha1, utf8.encode(keySecret))
-            .convert(utf8.encode(base64Policy))
-            .bytes);
+        String base64Policy = base64.encode(utf8.encode(json.encode(uploadPolicy)));
+        String singature = base64.encode(Hmac(sha1, utf8.encode(keySecret)).convert(utf8.encode(base64Policy)).bytes);
         FormData formData = FormData.fromMap({
           'key': urlpath,
           'OSSAccessKeyId': keyId,
           'policy': base64Policy,
           'Signature': singature,
-          'x-oss-content-type':
-              'image/${my_path.extension(path).replaceFirst('.', '')}',
-          'file': await MultipartFile.fromFile(path,
-              filename: my_path.basename(path)),
+          'x-oss-content-type': 'image/${my_path.extension(path).replaceFirst('.', '')}',
+          'file': await MultipartFile.fromFile(path, filename: my_path.basename(path)),
         });
         BaseOptions baseoptions = setBaseOptions();
         File uploadFile = File(path);
@@ -298,8 +288,7 @@ class UploadManager {
           }
 
           if (options == 'None') {
-            displayUrl =
-                "$displayUrl?x-oss-process=image/resize,m_lfit,h_500,w_500";
+            displayUrl = "$displayUrl?x-oss-process=image/resize,m_lfit,h_500,w_500";
           } else {
             //网站后缀以?开头
             if (!options.startsWith('?')) {
@@ -311,8 +300,7 @@ class UploadManager {
 
           String formatedURL = '';
           if (Global.isCopyLink == true) {
-            formatedURL =
-                linkGenerateDict[Global.defaultLKformat]!(returnUrl, fileName);
+            formatedURL = linkGenerateDict[Global.defaultLKformat]!(returnUrl, fileName);
           } else {
             formatedURL = returnUrl;
           }
@@ -330,8 +318,7 @@ class UploadManager {
             'hostSpecificArgD': 'test',
             'hostSpecificArgE': 'test',
           };
-          await AlbumSQL.insertData(
-              Global.imageDB!, pBhostToTableName[Global.defaultPShost]!, maps);
+          await AlbumSQL.insertData(Global.imageDB!, pBhostToTableName[Global.defaultPShost]!, maps);
           setStatus(task, UploadStatus.completed);
         }
       } else if (defaultPH == 'qiniu') {
@@ -365,17 +352,14 @@ class UploadManager {
         String key = fileName;
 
         String urlSafeBase64EncodePutPolicy =
-            QiniuImageUploadUtils.geturlSafeBase64EncodePutPolicy(
-                bucket, key, qiniupath);
-        String uploadToken = QiniuImageUploadUtils.getUploadToken(
-            accessKey, secretKey, urlSafeBase64EncodePutPolicy);
+            QiniuImageUploadUtils.geturlSafeBase64EncodePutPolicy(bucket, key, qiniupath);
+        String uploadToken = QiniuImageUploadUtils.getUploadToken(accessKey, secretKey, urlSafeBase64EncodePutPolicy);
         String host = QiniuImageUploadUtils.areaHostMap[area]!;
         FormData formData = FormData.fromMap({
           "key": urlpath,
           "fileName": fileName,
           "token": uploadToken,
-          "file": await MultipartFile.fromFile(path,
-              filename: my_path.basename(path)),
+          "file": await MultipartFile.fromFile(path, filename: my_path.basename(path)),
         });
         BaseOptions baseoptions = setBaseOptions();
         //不需要加Content-Type，host，Content-Length
@@ -398,8 +382,7 @@ class UploadManager {
 
           if (options == 'None') {
             returnUrl = '$url/${response.data['key']}';
-            displayUrl =
-                '$url/${response.data['key']}?imageView2/2/w/500/h/500';
+            displayUrl = '$url/${response.data['key']}?imageView2/2/w/500/h/500';
           } else {
             if (!options.startsWith('?')) {
               options = '?$options';
@@ -409,8 +392,7 @@ class UploadManager {
           }
           String formatedURL = '';
           if (Global.isCopyLink == true) {
-            formatedURL =
-                linkGenerateDict[Global.defaultLKformat]!(returnUrl, fileName);
+            formatedURL = linkGenerateDict[Global.defaultLKformat]!(returnUrl, fileName);
           } else {
             formatedURL = returnUrl;
           }
@@ -429,8 +411,7 @@ class UploadManager {
             'hostSpecificArgD': 'test',
             'hostSpecificArgE': 'test',
           };
-          await AlbumSQL.insertData(
-              Global.imageDB!, pBhostToTableName[Global.defaultPShost]!, maps);
+          await AlbumSQL.insertData(Global.imageDB!, pBhostToTableName[Global.defaultPShost]!, maps);
           setStatus(task, UploadStatus.completed);
         }
       } else if (defaultPH == 'upyun') {
@@ -478,20 +459,15 @@ class UploadManager {
           'date': date,
           'content-md5': uploadFileMd5,
         };
-        String base64Policy =
-            base64.encode(utf8.encode(json.encode(uploadPolicy)));
-        String stringToSign =
-            'POST&/$bucket&$date&$base64Policy&$uploadFileMd5';
+        String base64Policy = base64.encode(utf8.encode(json.encode(uploadPolicy)));
+        String stringToSign = 'POST&/$bucket&$date&$base64Policy&$uploadFileMd5';
         String passwordMd5 = md5.convert(utf8.encode(password)).toString();
-        String signature = base64.encode(Hmac(sha1, utf8.encode(passwordMd5))
-            .convert(utf8.encode(stringToSign))
-            .bytes);
+        String signature = base64.encode(Hmac(sha1, utf8.encode(passwordMd5)).convert(utf8.encode(stringToSign)).bytes);
         String authorization = 'UPYUN $upyunOperator:$signature';
         FormData formData = FormData.fromMap({
           'authorization': authorization,
           'policy': base64Policy,
-          'file': await MultipartFile.fromFile(path,
-              filename: my_path.basename(path)),
+          'file': await MultipartFile.fromFile(path, filename: my_path.basename(path)),
         });
         BaseOptions baseoptions = setBaseOptions();
         String contentLength = await uploadFile.length().then((value) {
@@ -535,8 +511,7 @@ class UploadManager {
 
           String formatedURL = '';
           if (Global.isCopyLink == true) {
-            formatedURL =
-                linkGenerateDict[Global.defaultLKformat]!(returnUrl, fileName);
+            formatedURL = linkGenerateDict[Global.defaultLKformat]!(returnUrl, fileName);
           } else {
             formatedURL = returnUrl;
           }
@@ -555,27 +530,23 @@ class UploadManager {
             'hostSpecificArgD': 'test',
             'hostSpecificArgE': 'test',
           };
-          await AlbumSQL.insertData(
-              Global.imageDB!, pBhostToTableName[Global.defaultPShost]!, maps);
+          await AlbumSQL.insertData(Global.imageDB!, pBhostToTableName[Global.defaultPShost]!, maps);
           setStatus(task, UploadStatus.completed);
         }
       } else if (defaultPH == 'lsky.pro') {
         FormData formdata = FormData.fromMap({
-          "file": await MultipartFile.fromFile(path,
-              filename: my_path.basename(path)),
+          "file": await MultipartFile.fromFile(path, filename: my_path.basename(path)),
         });
         if (configMap["strategy_id"] == "None") {
           formdata = FormData.fromMap({});
         } else if (configMap["album_id"] == "None") {
           formdata = FormData.fromMap({
-            "file": await MultipartFile.fromFile(path,
-                filename: my_path.basename(path)),
+            "file": await MultipartFile.fromFile(path, filename: my_path.basename(path)),
             "strategy_id": configMap["strategy_id"],
           });
         } else {
           formdata = FormData.fromMap({
-            "file": await MultipartFile.fromFile(path,
-                filename: my_path.basename(path)),
+            "file": await MultipartFile.fromFile(path, filename: my_path.basename(path)),
             "strategy_id": configMap["strategy_id"],
             "album_id": configMap["album_id"],
           });
@@ -594,8 +565,7 @@ class UploadManager {
           onSendProgress: createCallback(path, fileName),
           cancelToken: canceltoken,
         );
-        if (response.statusCode == HttpStatus.ok &&
-            response.data!['status'] == true) {
+        if (response.statusCode == HttpStatus.ok && response.data!['status'] == true) {
           eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
           Map<String, dynamic> maps = {};
           String returnUrl = '';
@@ -604,8 +574,7 @@ class UploadManager {
           displayUrl = response.data!['data']['links']['thumbnail_url'];
           String formatedURL = '';
           if (Global.isCopyLink == true) {
-            formatedURL =
-                linkGenerateDict[Global.defaultLKformat]!(returnUrl, fileName);
+            formatedURL = linkGenerateDict[Global.defaultLKformat]!(returnUrl, fileName);
           } else {
             formatedURL = returnUrl;
           }
@@ -625,14 +594,12 @@ class UploadManager {
             'hostSpecificArgD': 'test',
             'hostSpecificArgE': 'test',
           };
-          await AlbumSQL.insertData(
-              Global.imageDB!, pBhostToTableName[Global.defaultPShost]!, maps);
+          await AlbumSQL.insertData(Global.imageDB!, pBhostToTableName[Global.defaultPShost]!, maps);
           setStatus(task, UploadStatus.completed);
         }
       } else if (defaultPH == 'sm.ms') {
         FormData formdata = FormData.fromMap({
-          "smfile": await MultipartFile.fromFile(path,
-              filename: my_path.basename(path)),
+          "smfile": await MultipartFile.fromFile(path, filename: my_path.basename(path)),
           "format": "json",
         });
         BaseOptions options = setBaseOptions();
@@ -648,16 +615,14 @@ class UploadManager {
           onSendProgress: createCallback(path, fileName),
           cancelToken: canceltoken,
         );
-        if (response.statusCode == HttpStatus.ok &&
-            response.data!['success'] == true) {
+        if (response.statusCode == HttpStatus.ok && response.data!['success'] == true) {
           eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
           Map<String, dynamic> maps = {};
           String returnUrl = response.data!['data']['url'];
           String pictureKey = response.data!['data']['hash'];
           String formatedURL = '';
           if (Global.isCopyLink == true) {
-            formatedURL =
-                linkGenerateDict[Global.defaultLKformat]!(returnUrl, fileName);
+            formatedURL = linkGenerateDict[Global.defaultLKformat]!(returnUrl, fileName);
           } else {
             formatedURL = returnUrl;
           }
@@ -674,8 +639,7 @@ class UploadManager {
             'hostSpecificArgD': 'test',
             'hostSpecificArgE': 'test',
           };
-          await AlbumSQL.insertData(
-              Global.imageDB!, pBhostToTableName[Global.defaultPShost]!, maps);
+          await AlbumSQL.insertData(Global.imageDB!, pBhostToTableName[Global.defaultPShost]!, maps);
           setStatus(task, UploadStatus.completed);
         }
       } else if (defaultPH == 'github') {
@@ -714,8 +678,7 @@ class UploadManager {
           data: jsonEncode(queryBody),
           onSendProgress: createCallback(path, fileName),
         );
-        if (response.statusCode == HttpStatus.ok ||
-            response.statusCode == HttpStatus.created) {
+        if (response.statusCode == HttpStatus.ok || response.statusCode == HttpStatus.created) {
           eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
           Map<String, dynamic> maps = {};
           String returnUrl = response.data!['content']['html_url'];
@@ -726,10 +689,8 @@ class UploadManager {
           String formatedURL = '';
           if (configMap['customDomain'] != 'None') {
             if (configMap['customDomain'].toString().endsWith('/')) {
-              String trimedCustomDomain = configMap['customDomain']
-                  .toString()
-                  .substring(
-                      0, configMap['customDomain'].toString().length - 1);
+              String trimedCustomDomain =
+                  configMap['customDomain'].toString().substring(0, configMap['customDomain'].toString().length - 1);
               if (trimedPath == 'None') {
                 downloadUrl = '$trimedCustomDomain$fileName';
               } else {
@@ -739,20 +700,17 @@ class UploadManager {
               if (trimedPath == 'None') {
                 downloadUrl = '${configMap['customDomain']}/$fileName';
               } else {
-                downloadUrl =
-                    '${configMap['customDomain']}/$trimedPath/$fileName';
+                downloadUrl = '${configMap['customDomain']}/$trimedPath/$fileName';
               }
             }
           } else {
             downloadUrl = response.data!['content']['download_url'];
           }
-          if (!downloadUrl.startsWith('http') &&
-              !downloadUrl.startsWith('https')) {
+          if (!downloadUrl.startsWith('http') && !downloadUrl.startsWith('https')) {
             downloadUrl = 'http://$downloadUrl';
           }
           if (Global.isCopyLink == true) {
-            formatedURL = linkGenerateDict[Global.defaultLKformat]!(
-                downloadUrl, fileName);
+            formatedURL = linkGenerateDict[Global.defaultLKformat]!(downloadUrl, fileName);
           } else {
             formatedURL = downloadUrl;
           }
@@ -769,8 +727,7 @@ class UploadManager {
             'hostSpecificArgD': 'test',
             'hostSpecificArgE': 'test',
           };
-          await AlbumSQL.insertData(
-              Global.imageDB!, pBhostToTableName[Global.defaultPShost]!, maps);
+          await AlbumSQL.insertData(Global.imageDB!, pBhostToTableName[Global.defaultPShost]!, maps);
           setStatus(task, UploadStatus.completed);
         }
       } else if (defaultPH == 'imgur') {
@@ -801,8 +758,7 @@ class UploadManager {
           onSendProgress: createCallback(path, fileName),
           cancelToken: canceltoken,
         );
-        if (response.statusCode == HttpStatus.ok ||
-            response.data!['success'] == true) {
+        if (response.statusCode == HttpStatus.ok || response.data!['success'] == true) {
           eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
           Map<String, dynamic> maps = {};
           String returnUrl = response.data!['data']['link'];
@@ -814,8 +770,7 @@ class UploadManager {
 
           String formatedURL = '';
           if (Global.isCopyLink == true) {
-            formatedURL =
-                linkGenerateDict[Global.defaultLKformat]!(returnUrl, fileName);
+            formatedURL = linkGenerateDict[Global.defaultLKformat]!(returnUrl, fileName);
           } else {
             formatedURL = returnUrl;
           }
@@ -836,8 +791,7 @@ class UploadManager {
             'hostSpecificArgD': 'test',
             'hostSpecificArgE': 'test',
           };
-          await AlbumSQL.insertData(
-              Global.imageDB!, pBhostToTableName[Global.defaultPShost]!, maps);
+          await AlbumSQL.insertData(Global.imageDB!, pBhostToTableName[Global.defaultPShost]!, maps);
           setStatus(task, UploadStatus.completed);
         }
       } else if (defaultPH == 'ftp') {
@@ -850,8 +804,7 @@ class UploadManager {
         String uploadPath = configMap["uploadPath"];
 
         if (ftpType == 'SFTP') {
-          final socket =
-              await SSHSocket.connect(ftpHost, int.parse(ftpPort.toString()));
+          final socket = await SSHSocket.connect(ftpHost, int.parse(ftpPort.toString()));
           final client = SSHClient(
             socket,
             username: ftpUser,
@@ -870,8 +823,7 @@ class UploadManager {
             uploadPath = '$uploadPath/';
           }
           String urlPath = uploadPath + fileName;
-          var file = await sftp.open(urlPath,
-              mode: SftpFileOpenMode.create | SftpFileOpenMode.write);
+          var file = await sftp.open(urlPath, mode: SftpFileOpenMode.create | SftpFileOpenMode.write);
           int fileSize = File(path).lengthSync();
           bool operateDone = false;
           file.write(File(path).openRead().cast(), onProgress: (int sent) {
@@ -884,8 +836,7 @@ class UploadManager {
             await Future.delayed(const Duration(milliseconds: 100));
           }
           client.close();
-          String returnUrl =
-              'ftp://$ftpUser:$ftpPassword@$ftpHost:$ftpPort$urlPath';
+          String returnUrl = 'ftp://$ftpUser:$ftpPassword@$ftpHost:$ftpPort$urlPath';
           returnUrl = returnUrl;
           String pictureKey = jsonEncode(configMap);
           String displayUrl = returnUrl;
@@ -894,8 +845,7 @@ class UploadManager {
           Map<String, dynamic> maps = {};
           String formatedURL = '';
           if (Global.isCopyLink == true) {
-            formatedURL =
-                linkGenerateDict[Global.defaultLKformat]!(returnUrl, fileName);
+            formatedURL = linkGenerateDict[Global.defaultLKformat]!(returnUrl, fileName);
           } else {
             formatedURL = returnUrl;
           }
@@ -939,20 +889,15 @@ class UploadManager {
           for (int i = 0; i < letter.length; i++) {
             maps['hostSpecificArg${letter[i]}'] = 'test';
           }
-          await AlbumSQL.insertData(Global.imageDBExtend!,
-              pBhostToTableName[Global.defaultPShost]!, maps);
+          await AlbumSQL.insertData(Global.imageDBExtend!, pBhostToTableName[Global.defaultPShost]!, maps);
           setStatus(task, UploadStatus.completed);
         } else if (ftpType == 'FTP') {
           FTPConnect ftpConnect;
           if (isAnonymous == 'true') {
-            ftpConnect = FTPConnect(ftpHost,
-                port: int.parse(ftpPort), securityType: SecurityType.FTP);
+            ftpConnect = FTPConnect(ftpHost, port: int.parse(ftpPort), securityType: SecurityType.FTP);
           } else {
             ftpConnect = FTPConnect(ftpHost,
-                port: int.parse(ftpPort),
-                user: ftpUser,
-                pass: ftpPassword,
-                securityType: SecurityType.FTP);
+                port: int.parse(ftpPort), user: ftpUser, pass: ftpPassword, securityType: SecurityType.FTP);
           }
           var connectResult = await ftpConnect.connect();
           if (connectResult == true) {
@@ -980,8 +925,7 @@ class UploadManager {
               } else if (ftpPassword == 'None') {
                 returnUrl = 'ftp://$ftpUser@$ftpHost:$ftpPort$urlPath';
               } else {
-                returnUrl =
-                    'ftp://$ftpUser:$ftpPassword@$ftpHost:$ftpPort$urlPath';
+                returnUrl = 'ftp://$ftpUser:$ftpPassword@$ftpHost:$ftpPort$urlPath';
               }
               returnUrl = returnUrl;
               String pictureKey = jsonEncode(configMap);
@@ -990,8 +934,7 @@ class UploadManager {
               Map<String, dynamic> maps = {};
               String formatedURL = '';
               if (Global.isCopyLink == true) {
-                formatedURL = linkGenerateDict[Global.defaultLKformat]!(
-                    returnUrl, fileName);
+                formatedURL = linkGenerateDict[Global.defaultLKformat]!(returnUrl, fileName);
               } else {
                 formatedURL = returnUrl;
               }
@@ -1036,8 +979,7 @@ class UploadManager {
               for (int i = 0; i < letter.length; i++) {
                 maps['hostSpecificArg${letter[i]}'] = 'test';
               }
-              await AlbumSQL.insertData(Global.imageDBExtend!,
-                  pBhostToTableName[Global.defaultPShost]!, maps);
+              await AlbumSQL.insertData(Global.imageDBExtend!, pBhostToTableName[Global.defaultPShost]!, maps);
               setStatus(task, UploadStatus.completed);
             }
           }
@@ -1119,8 +1061,7 @@ class UploadManager {
 
         String formatedURL = '';
         if (Global.isCopyLink == true) {
-          formatedURL =
-              linkGenerateDict[Global.defaultLKformat]!(returnUrl, fileName);
+          formatedURL = linkGenerateDict[Global.defaultLKformat]!(returnUrl, fileName);
         } else {
           formatedURL = returnUrl;
         }
@@ -1140,8 +1081,7 @@ class UploadManager {
         for (int i = 0; i < letter.length; i++) {
           maps['hostSpecificArg${letter[i]}'] = 'test';
         }
-        await AlbumSQL.insertData(Global.imageDBExtend!,
-            pBhostToTableName[Global.defaultPShost]!, maps);
+        await AlbumSQL.insertData(Global.imageDBExtend!, pBhostToTableName[Global.defaultPShost]!, maps);
         setStatus(task, UploadStatus.completed);
       } else if (defaultPH == 'alist') {
         String uploadPath = configMap['uploadPath'];
@@ -1149,48 +1089,20 @@ class UploadManager {
         String today = getToday('yyyyMMdd');
         String alistToday = await Global.getTodayAlistUpdate();
         if (alistToday != today && token != '') {
-          var res = await AlistManageAPI.getToken(configMap['host'],
-              configMap['alistusername'], configMap['password']);
+          var res = await AlistManageAPI.getToken(configMap['host'], configMap['alistusername'], configMap['password']);
           if (res[0] == 'success') {
             token = res[1];
-            String sqlResult = '';
-            try {
-              List sqlconfig = [];
-              sqlconfig.add(configMap['host']);
-              sqlconfig.add(configMap['alistusername']);
-              sqlconfig.add(configMap['password']);
-              sqlconfig.add(token);
-              sqlconfig.add(uploadPath);
-              String defaultUser = await Global.getUser();
-              sqlconfig.add(defaultUser);
-              var queryalist =
-                  await MySqlUtils.queryAlist(username: defaultUser);
-              var queryuser = await MySqlUtils.queryUser(username: defaultUser);
-              if (queryuser == 'Empty') {
-                throw 'Empty';
-              } else if (queryalist == 'Empty') {
-                sqlResult = await MySqlUtils.insertAlist(content: sqlconfig);
-              } else {
-                sqlResult = await MySqlUtils.updateAlist(content: sqlconfig);
-              }
-            } catch (e) {
-              rethrow;
-            }
-            if (sqlResult == "Success") {
-              final alistConfig = AlistConfigModel(
-                configMap['host'],
-                configMap['alistusername'],
-                configMap['password'],
-                token,
-                uploadPath,
-              );
-              final alistConfigJson = jsonEncode(alistConfig);
-              final alistConfigFile = await AlistConfigState().localFile;
-              alistConfigFile.writeAsString(alistConfigJson);
-              await Global.setTodayAlistUpdate(today);
-            } else {
-              throw 'sqlError';
-            }
+            final alistConfig = AlistConfigModel(
+              configMap['host'],
+              configMap['alistusername'],
+              configMap['password'],
+              token,
+              uploadPath,
+            );
+            final alistConfigJson = jsonEncode(alistConfig);
+            final alistConfigFile = await AlistConfigState().localFile;
+            alistConfigFile.writeAsString(alistConfigJson);
+            await Global.setTodayAlistUpdate(today);
           } else {
             throw 'tokenError';
           }
@@ -1230,8 +1142,7 @@ class UploadManager {
           data: formdata,
           onSendProgress: createCallback(path, fileName),
         );
-        if (response.statusCode == HttpStatus.ok &&
-            response.data!['message'] == 'success') {
+        if (response.statusCode == HttpStatus.ok && response.data!['message'] == 'success') {
           String infoGetUrl = configMap["host"] + "/api/fs/get";
           String refreshUrl = configMap["host"] + "/api/fs/list";
           BaseOptions getOptions = setBaseOptions();
@@ -1244,42 +1155,26 @@ class UploadManager {
           Map getformData = {
             "path": filePath,
           };
-          Map refreshListFormData = {
-            "password": "",
-            "page": 1,
-            "per_page": 1,
-            "path": uploadPath,
-            "refresh": true
-          };
-          var refreshResponse =
-              await dioRefresh.post(refreshUrl, data: refreshListFormData);
-          if (refreshResponse.statusCode == 200 &&
-              refreshResponse.data!['message'] == 'success') {
+          Map refreshListFormData = {"password": "", "page": 1, "per_page": 1, "path": uploadPath, "refresh": true};
+          var refreshResponse = await dioRefresh.post(refreshUrl, data: refreshListFormData);
+          if (refreshResponse.statusCode == 200 && refreshResponse.data!['message'] == 'success') {
             var responseGet = await dioGet.post(infoGetUrl, data: getformData);
-            if (responseGet.statusCode == 200 &&
-                responseGet.data['message'] == 'success') {
+            if (responseGet.statusCode == 200 && responseGet.data['message'] == 'success') {
               eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
               Map<String, dynamic> maps = {};
 
               String returnUrl = responseGet.data!['data']['raw_url'];
               //返回缩略图地址用来在相册显示
-              String displayUrl = responseGet.data!['data']['thumb'] == "" ||
-                      responseGet.data!['data']['thumb'] == null
+              String displayUrl = responseGet.data!['data']['thumb'] == "" || responseGet.data!['data']['thumb'] == null
                   ? returnUrl
                   : responseGet.data!['data']['thumb'];
-              String hostPicUrl = responseGet.data!['data']['sign'] == "" ||
-                      responseGet.data!['data']['sign'] == null
+              String hostPicUrl = responseGet.data!['data']['sign'] == "" || responseGet.data!['data']['sign'] == null
                   ? returnUrl
-                  : configMap['host'] +
-                      '/d/' +
-                      filePath +
-                      '?sign=' +
-                      responseGet.data!['data']['sign'];
+                  : configMap['host'] + '/d/' + filePath + '?sign=' + responseGet.data!['data']['sign'];
 
               String formatedURL = '';
               if (Global.isCopyLink == true) {
-                formatedURL = linkGenerateDict[Global.defaultLKformat]!(
-                    hostPicUrl, fileName);
+                formatedURL = linkGenerateDict[Global.defaultLKformat]!(hostPicUrl, fileName);
               } else {
                 formatedURL = hostPicUrl;
               }
@@ -1303,8 +1198,7 @@ class UploadManager {
               for (int i = 0; i < letter.length; i++) {
                 maps['hostSpecificArg${letter[i]}'] = 'test';
               }
-              await AlbumSQL.insertData(Global.imageDBExtend!,
-                  pBhostToTableName[Global.defaultPShost]!, maps);
+              await AlbumSQL.insertData(Global.imageDBExtend!, pBhostToTableName[Global.defaultPShost]!, maps);
               setStatus(task, UploadStatus.completed);
             }
           }
@@ -1328,16 +1222,13 @@ class UploadManager {
         await client.writeFromFile(path, filePath);
 
         String returnUrl = configMap['host'] + filePath;
-        String displayUrl = returnUrl +
-            generateBasicAuth(
-                configMap['webdavusername'], configMap['password']);
+        String displayUrl = returnUrl + generateBasicAuth(configMap['webdavusername'], configMap['password']);
 
         eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
         Map<String, dynamic> maps = {};
 
         if (Global.isCopyLink == true) {
-          formatedURL =
-              linkGenerateDict[Global.defaultLKformat]!(returnUrl, fileName);
+          formatedURL = linkGenerateDict[Global.defaultLKformat]!(returnUrl, fileName);
         } else {
           formatedURL = returnUrl;
         }
@@ -1358,8 +1249,7 @@ class UploadManager {
         for (int i = 0; i < letter.length; i++) {
           maps['hostSpecificArg${letter[i]}'] = 'test';
         }
-        await AlbumSQL.insertData(Global.imageDBExtend!,
-            pBhostToTableName[Global.defaultPShost]!, maps);
+        await AlbumSQL.insertData(Global.imageDBExtend!, pBhostToTableName[Global.defaultPShost]!, maps);
         setStatus(task, UploadStatus.completed);
       }
     } catch (e) {
@@ -1372,8 +1262,7 @@ class UploadManager {
           }, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
       var task = getUpload(fileName)!;
-      if (task.status.value != UploadStatus.canceled &&
-          task.status.value != UploadStatus.completed) {
+      if (task.status.value != UploadStatus.canceled && task.status.value != UploadStatus.completed) {
         setStatus(task, UploadStatus.failed);
         runningTasks--;
         if (_queue.isNotEmpty) {
@@ -1400,8 +1289,7 @@ class UploadManager {
         runningTasks--;
         continue;
       }
-      upload(
-          currentRequest.path, currentRequest.name, currentRequest.cancelToken);
+      upload(currentRequest.path, currentRequest.name, currentRequest.cancelToken);
       await Future.delayed(const Duration(milliseconds: 500), null);
     }
   }
@@ -1426,8 +1314,7 @@ class UploadManager {
   Future<UploadTask> _addUploadRequest(UploadRequest uploadRequest) async {
     if (_cache[uploadRequest.name] != null) {
       if ((_cache[uploadRequest.name]!.status.value == UploadStatus.completed ||
-              _cache[uploadRequest.name]!.status.value ==
-                  UploadStatus.uploading) &&
+              _cache[uploadRequest.name]!.status.value == UploadStatus.uploading) &&
           _cache[uploadRequest.name]!.request == uploadRequest) {
         return _cache[uploadRequest.name]!;
       } else {
@@ -1505,22 +1392,19 @@ class UploadManager {
     }
   }
 
-  Future<void> cancelBatchUploads(
-      List<String> paths, List<String> names) async {
+  Future<void> cancelBatchUploads(List<String> paths, List<String> names) async {
     for (var i = 0; i < paths.length; i++) {
       await cancelUpload(paths[i], names[i]);
     }
   }
 
-  Future<void> resumeBatchUploads(
-      List<String> paths, List<String> names) async {
+  Future<void> resumeBatchUploads(List<String> paths, List<String> names) async {
     for (var i = 0; i < paths.length; i++) {
       await resumeUpload(paths[i], names[i]);
     }
   }
 
-  ValueNotifier<double> getBatchUploadProgress(
-      List<String> paths, List<String> names) {
+  ValueNotifier<double> getBatchUploadProgress(List<String> paths, List<String> names) {
     ValueNotifier<double> progress = ValueNotifier(0);
     var total = paths.length;
 
@@ -1567,8 +1451,7 @@ class UploadManager {
     return progress;
   }
 
-  Future<List<UploadTask?>?> whenBatchUploadsComplete(
-      List<String> paths, List<String> names,
+  Future<List<UploadTask?>?> whenBatchUploadsComplete(List<String> paths, List<String> names,
       {Duration timeout = const Duration(hours: 2)}) async {
     var completer = Completer<List<UploadTask?>?>();
     var completed = 0;

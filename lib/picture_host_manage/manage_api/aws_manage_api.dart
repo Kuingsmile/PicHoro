@@ -11,7 +11,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:minio_new/minio.dart';
 
 import 'package:horopic/utils/global.dart';
-import 'package:horopic/utils/sql_utils.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/picture_host_configure/configure_page/aws_configure.dart';
 
@@ -267,53 +266,25 @@ class AwsManageAPI {
       } else {
         uploadPath = folder;
       }
-      List sqlconfig = [];
-      sqlconfig.add(accessKeyId);
-      sqlconfig.add(secretAccessKey);
-      sqlconfig.add(bucket);
-      sqlconfig.add(endpoint);
-      sqlconfig.add(region);
-      sqlconfig.add(uploadPath);
-      sqlconfig.add(customUrl);
-      String defaultUser = await Global.getUser();
-      sqlconfig.add(defaultUser);
-      var queryAws = await MySqlUtils.queryAws(username: defaultUser);
-      var queryuser = await MySqlUtils.queryUser(username: defaultUser);
 
-      if (queryuser == 'Empty') {
-        return ['failed'];
-      }
-      var sqlResult = '';
-
-      if (queryAws == 'Empty') {
-        sqlResult = await MySqlUtils.insertAws(content: sqlconfig);
-      } else {
-        sqlResult = await MySqlUtils.updateAws(content: sqlconfig);
-      }
-
-      if (sqlResult == "Success") {
-        final awsConfig = AwsConfigModel(
-          accessKeyId,
-          secretAccessKey,
-          bucket,
-          endpoint,
-          region,
-          uploadPath,
-          customUrl,
-        );
-        final awsConfigJson = jsonEncode(awsConfig);
-        final awsConfigFile = await _localFile;
-        await awsConfigFile.writeAsString(awsConfigJson);
-        return ['success'];
-      } else {
-        return ['failed'];
-      }
+      final awsConfig = AwsConfigModel(
+        accessKeyId,
+        secretAccessKey,
+        bucket,
+        endpoint,
+        region,
+        uploadPath,
+        customUrl,
+      );
+      final awsConfigJson = jsonEncode(awsConfig);
+      final awsConfigFile = await _localFile;
+      await awsConfigFile.writeAsString(awsConfigJson);
+      return ['success'];
     } catch (e) {
       FLog.error(
           className: "AwsManageAPI",
           methodName: "setDefaultBucket",
-          text: formatErrorMessage(
-              {'element': element, 'folder': folder}, e.toString()),
+          text: formatErrorMessage({'element': element, 'folder': folder}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
       return ['failed'];
     }
@@ -579,8 +550,7 @@ class AwsManageAPI {
       );
     }
     try {
-      var response = await minio.putObject(
-          bucket, '$prefix$newfolder/placeholder.txt', Stream.fromIterable([]));
+      var response = await minio.putObject(bucket, '$prefix$newfolder/placeholder.txt', Stream.fromIterable([]));
       return ['success', response];
     } catch (e) {
       FLog.error(
@@ -647,12 +617,8 @@ class AwsManageAPI {
       FLog.error(
           className: "AwsManageAPI",
           methodName: "uploadFile",
-          text: formatErrorMessage({
-            'element': element,
-            'filename': filename,
-            'filepath': filepath,
-            'prefix': prefix
-          }, e.toString()),
+          text: formatErrorMessage(
+              {'element': element, 'filename': filename, 'filepath': filepath, 'prefix': prefix}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
 
       return ['error'];
@@ -676,10 +642,7 @@ class AwsManageAPI {
       );
       if (uploadResult[0] == "Error") {
         return Fluttertoast.showToast(
-            msg: '配置错误',
-            toastLength: Toast.LENGTH_SHORT,
-            timeInSecForIosWeb: 2,
-            fontSize: 16.0);
+            msg: '配置错误', toastLength: Toast.LENGTH_SHORT, timeInSecForIosWeb: 2, fontSize: 16.0);
       } else if (uploadResult[0] == "success") {
         successCount++;
       } else {
@@ -689,32 +652,21 @@ class AwsManageAPI {
 
     if (successCount == 0) {
       return Fluttertoast.showToast(
-          msg: '上传失败',
-          toastLength: Toast.LENGTH_SHORT,
-          timeInSecForIosWeb: 2,
-          fontSize: 16.0);
+          msg: '上传失败', toastLength: Toast.LENGTH_SHORT, timeInSecForIosWeb: 2, fontSize: 16.0);
     } else if (failCount == 0) {
       return Fluttertoast.showToast(
-          msg: '上传成功',
-          toastLength: Toast.LENGTH_SHORT,
-          timeInSecForIosWeb: 2,
-          fontSize: 16.0);
+          msg: '上传成功', toastLength: Toast.LENGTH_SHORT, timeInSecForIosWeb: 2, fontSize: 16.0);
     } else {
       return Fluttertoast.showToast(
-          msg: '成功$successCount,失败$failCount',
-          toastLength: Toast.LENGTH_SHORT,
-          timeInSecForIosWeb: 2,
-          fontSize: 16.0);
+          msg: '成功$successCount,失败$failCount', toastLength: Toast.LENGTH_SHORT, timeInSecForIosWeb: 2, fontSize: 16.0);
     }
   }
 
   //从网络链接下载文件后上传
   static uploadNetworkFile(String fileLink, Map element, String prefix) async {
     try {
-      String filename =
-          fileLink.substring(fileLink.lastIndexOf("/") + 1, fileLink.length);
-      filename = filename.substring(
-          0, !filename.contains("?") ? filename.length : filename.indexOf("?"));
+      String filename = fileLink.substring(fileLink.lastIndexOf("/") + 1, fileLink.length);
+      filename = filename.substring(0, !filename.contains("?") ? filename.length : filename.indexOf("?"));
       String savePath = await getTemporaryDirectory().then((value) {
         return value.path;
       });
@@ -741,27 +693,21 @@ class AwsManageAPI {
         FLog.error(
             className: "AwsManageAPI",
             methodName: "uploadNetworkFile",
-            text: formatErrorMessage({
-              'fileLink': fileLink,
-              'element': element,
-              'prefix': prefix
-            }, e.toString(), isDioError: true, dioErrorMessage: e),
+            text: formatErrorMessage({'fileLink': fileLink, 'element': element, 'prefix': prefix}, e.toString(),
+                isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
             className: "AwsManageAPI",
             methodName: "uploadNetworkFile",
-            text: formatErrorMessage(
-                {'fileLink': fileLink, 'element': element, 'prefix': prefix},
-                e.toString()),
+            text: formatErrorMessage({'fileLink': fileLink, 'element': element, 'prefix': prefix}, e.toString()),
             dataLogType: DataLogType.ERRORS.toString());
       }
       return ['failed'];
     }
   }
 
-  static uploadNetworkFileEntry(
-      List fileList, Map element, String prefix) async {
+  static uploadNetworkFileEntry(List fileList, Map element, String prefix) async {
     int successCount = 0;
     int failCount = 0;
 
@@ -779,22 +725,13 @@ class AwsManageAPI {
 
     if (successCount == 0) {
       return Fluttertoast.showToast(
-          msg: '上传失败',
-          toastLength: Toast.LENGTH_SHORT,
-          timeInSecForIosWeb: 2,
-          fontSize: 16.0);
+          msg: '上传失败', toastLength: Toast.LENGTH_SHORT, timeInSecForIosWeb: 2, fontSize: 16.0);
     } else if (failCount == 0) {
       return Fluttertoast.showToast(
-          msg: '上传成功',
-          toastLength: Toast.LENGTH_SHORT,
-          timeInSecForIosWeb: 2,
-          fontSize: 16.0);
+          msg: '上传成功', toastLength: Toast.LENGTH_SHORT, timeInSecForIosWeb: 2, fontSize: 16.0);
     } else {
       return Fluttertoast.showToast(
-          msg: '成功$successCount,失败$failCount',
-          toastLength: Toast.LENGTH_SHORT,
-          timeInSecForIosWeb: 2,
-          fontSize: 16.0);
+          msg: '成功$successCount,失败$failCount', toastLength: Toast.LENGTH_SHORT, timeInSecForIosWeb: 2, fontSize: 16.0);
     }
   }
 }

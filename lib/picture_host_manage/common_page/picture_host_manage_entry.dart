@@ -5,7 +5,7 @@ import 'package:flutter_draggable_gridview/flutter_draggable_gridview.dart';
 import 'package:horopic/picture_host_manage/manage_api/webdav_manage_api.dart';
 
 import 'package:horopic/utils/global.dart';
-import 'package:horopic/utils/sql_utils.dart';
+
 import 'package:horopic/router/application.dart';
 import 'package:horopic/router/routers.dart';
 import 'package:horopic/utils/common_functions.dart';
@@ -14,7 +14,6 @@ import 'package:horopic/picture_host_manage/manage_api/imgur_manage_api.dart';
 import 'package:horopic/picture_host_manage/manage_api/ftp_manage_api.dart';
 import 'package:horopic/picture_host_manage/manage_api/alist_manage_api.dart';
 
-
 class PsHostHomePage extends StatefulWidget {
   const PsHostHomePage({super.key});
 
@@ -22,8 +21,7 @@ class PsHostHomePage extends StatefulWidget {
   PsHostHomePageState createState() => PsHostHomePageState();
 }
 
-class PsHostHomePageState extends State<PsHostHomePage>
-    with AutomaticKeepAliveClientMixin<PsHostHomePage> {
+class PsHostHomePageState extends State<PsHostHomePage> with AutomaticKeepAliveClientMixin<PsHostHomePage> {
   List psHostHomePageOrder = [];
 
   @override
@@ -212,20 +210,8 @@ class PsHostHomePageState extends State<PsHostHomePage>
               Center(
                   child: InkWell(
                 onTap: () async {
-                  String currentPicHoroUser = await Global.getUser();
-                  String currentPicHoroPasswd = await Global.getPassword();
-                  var usernamecheck =
-                      await MySqlUtils.queryUser(username: currentPicHoroUser);
-
-                  if (usernamecheck == 'Empty') {
-                    return showToast('请先去设置页面注册');
-                  } else if (currentPicHoroPasswd !=
-                      usernamecheck['password']) {
-                    return showToast('请先去设置页面登录');
-                  }
-                  var queryUpyunManage = await MySqlUtils.queryUpyunManage(
-                      username: currentPicHoroUser);
-                  if (queryUpyunManage == 'Empty') {
+                  var queryUpyunManage = await UpyunManageAPI.readUpyunManageConfig();
+                  if (queryUpyunManage == 'Error') {
                     if (mounted) {
                       Application.router.navigateTo(
                         context,
@@ -233,13 +219,11 @@ class PsHostHomePageState extends State<PsHostHomePage>
                         transition: TransitionType.inFromRight,
                       );
                     }
-                  } else if (queryUpyunManage == 'Error') {
-                    return showToast('获取数据库错误');
                   } else {
                     showToast('开始校验');
-                    String token = queryUpyunManage['token'];
-                    var checkTokenResult =
-                        await UpyunManageAPI.checkToken(token);
+                    var jsonResult = jsonDecode(queryUpyunManage);
+                    String token = jsonResult['token'];
+                    var checkTokenResult = await UpyunManageAPI.checkToken(token);
                     if (checkTokenResult[0] == 'success') {
                       if (mounted) {
                         Application.router.navigateTo(
@@ -366,19 +350,8 @@ class PsHostHomePageState extends State<PsHostHomePage>
               Center(
                 child: InkWell(
                   onTap: () async {
-                    String currentPicHoroUser = await Global.getUser();
-                    String currentPicHoroPasswd = await Global.getPassword();
-                    var usernamecheck = await MySqlUtils.queryUser(
-                        username: currentPicHoroUser);
-                    if (usernamecheck == 'Empty') {
-                      return showToast('请先去设置页面注册');
-                    } else if (currentPicHoroPasswd !=
-                        usernamecheck['password']) {
-                      return showToast('请先去设置页面登录');
-                    }
-                    var queryImgurManage = await MySqlUtils.queryImgurManage(
-                        username: currentPicHoroUser);
-                    if (queryImgurManage == 'Empty') {
+                    var queryImgurManage = await ImgurManageAPI.readImgurManageConfig();
+                    if (queryImgurManage == 'Error') {
                       if (mounted) {
                         Application.router.navigateTo(
                           context,
@@ -386,13 +359,12 @@ class PsHostHomePageState extends State<PsHostHomePage>
                           transition: TransitionType.inFromRight,
                         );
                       }
-                    } else if (queryImgurManage == 'Error') {
-                      return showToast('获取数据库错误');
                     } else {
                       showToast('开始校验');
-                      String imguruser = queryImgurManage['imguruser'];
-                      String token = queryImgurManage['accesstoken'];
-                      String proxy = queryImgurManage['proxy'];
+                      var jsonResult = jsonDecode(queryImgurManage);
+                      String imguruser = jsonResult['imguruser'];
+                      String token = jsonResult['accesstoken'];
+                      String proxy = jsonResult['proxy'];
                       if (token == 'None') {
                         if (mounted) {
                           Application.router.navigateTo(
@@ -403,8 +375,7 @@ class PsHostHomePageState extends State<PsHostHomePage>
                         }
                         return;
                       }
-                      var checkTokenResult = await ImgurManageAPI.checkToken(
-                          imguruser, token, proxy);
+                      var checkTokenResult = await ImgurManageAPI.checkToken(imguruser, token, proxy);
                       if (checkTokenResult[0] == 'success') {
                         if (mounted) {
                           Application.router.navigateTo(
@@ -456,22 +427,6 @@ class PsHostHomePageState extends State<PsHostHomePage>
               Center(
                 child: InkWell(
                   onTap: () async {
-                    String currentPicHoroUser = await Global.getUser();
-                    String currentPicHoroPasswd = await Global.getPassword();
-                    var usernamecheck = await MySqlUtils.queryUser(
-                        username: currentPicHoroUser);
-                    if (usernamecheck == 'Empty') {
-                      return showToast('请先去设置页面注册');
-                    } else if (currentPicHoroPasswd !=
-                        usernamecheck['password']) {
-                      return showToast('请先去设置页面登录');
-                    }
-                    String currentUser = await Global.getUser();
-                    var queryFTP =
-                        await MySqlUtils.queryFTP(username: currentUser);
-                    if (queryFTP == 'Empty') {
-                      return showToast('请先去配置FTP');
-                    }
                     Map configMap = await FTPManageAPI.getConfigMap();
                     if (mounted && configMap['ftpType'] == 'SFTP') {
                       String startDir = configMap['ftpHomeDir'];
@@ -564,22 +519,8 @@ class PsHostHomePageState extends State<PsHostHomePage>
                   onTap: () async {
                     showToast('开始校验');
                     try {
-                      String currentUser = await Global.getUser();
-                      String defaultPassword = await Global.getPassword();
-                      var queryuser =
-                          await MySqlUtils.queryUser(username: currentUser);
-                      if (queryuser == 'Empty') {
-                        return showToast('请先登录');
-                      } else if (queryuser['password'] != defaultPassword) {
-                        return showToast('请先登录');
-                      }
-                      var queryAlist =
-                          await MySqlUtils.queryAlist(username: currentUser);
-                      if (queryAlist == 'Empty') {
-                        return showToast('请先去配置Alist');
-                      }
-                      if (queryAlist['token'] == '') {
-                        Map configMap = await AlistManageAPI.getConfigMap();
+                      Map configMap = await AlistManageAPI.getConfigMap();
+                      if (configMap['token'] == '') {
                         String prefix = configMap['uploadPath'];
                         if (prefix == 'None') {
                           prefix = '/';
@@ -588,9 +529,7 @@ class PsHostHomePageState extends State<PsHostHomePage>
                           prefix += '/';
                         }
                         Map element = {
-                          'mount_path': prefix == '/'
-                              ? '/'
-                              : prefix.substring(0, prefix.length - 1),
+                          'mount_path': prefix == '/' ? '/' : prefix.substring(0, prefix.length - 1),
                           'driver': 'BaiduNetdisk',
                           'addition': jsonEncode({'download_api': 'offical'})
                         };
@@ -610,8 +549,7 @@ class PsHostHomePageState extends State<PsHostHomePage>
                       } else {
                         await Global.setTodayAlistUpdate(today);
                       }
-                      var bucketListResponse =
-                          await AlistManageAPI.getBucketList();
+                      var bucketListResponse = await AlistManageAPI.getBucketList();
                       if (bucketListResponse[0] != 'success') {
                         Map configMap = await AlistManageAPI.getConfigMap();
                         String prefix = configMap['uploadPath'];
@@ -622,9 +560,7 @@ class PsHostHomePageState extends State<PsHostHomePage>
                           prefix += '/';
                         }
                         Map element = {
-                          'mount_path': prefix == '/'
-                              ? '/'
-                              : prefix.substring(0, prefix.length - 1),
+                          'mount_path': prefix == '/' ? '/' : prefix.substring(0, prefix.length - 1),
                           'driver': 'BaiduNetdisk',
                           'addition': jsonEncode({'download_api': 'offical'})
                         };
@@ -736,8 +672,7 @@ class PsHostHomePageState extends State<PsHostHomePage>
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.restart_alt_rounded,
-                color: Colors.white, size: 30),
+            icon: const Icon(Icons.restart_alt_rounded, color: Colors.white, size: 30),
             onPressed: () async {
               List<String> order = [];
               for (int i = 0; i < 22; i++) {
@@ -760,8 +695,7 @@ class PsHostHomePageState extends State<PsHostHomePage>
           childAspectRatio: 1.6,
         ),
         children: newItems,
-        dragCompletion: (List<DraggableGridItem> list, int beforeIndex,
-            int afterIndex) async {
+        dragCompletion: (List<DraggableGridItem> list, int beforeIndex, int afterIndex) async {
           List<String> newOrder = [];
           for (int i = 0; i < list.length; i++) {
             newOrder.add(listOfDraggableGridItem.indexOf(list[i]).toString());

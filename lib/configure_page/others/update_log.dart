@@ -46,8 +46,7 @@ class UpdateLogState extends State<UpdateLog> {
                   fit: BoxFit.contain,
                   mode: ExtendedImageMode.gesture,
                   cache: true,
-                  loadStateChanged: (state) =>
-                      defaultLoadStateChanged(state, iconSize: 60),
+                  loadStateChanged: (state) => defaultLoadStateChanged(state, iconSize: 60),
                   initGestureConfigHandler: (state) {
                     return GestureConfig(
                         minScale: 0.9,

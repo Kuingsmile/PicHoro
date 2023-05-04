@@ -16,8 +16,7 @@ class TencentConfigureStoreEdit extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  TencentConfigureStoreEditState createState() =>
-      TencentConfigureStoreEditState();
+  TencentConfigureStoreEditState createState() => TencentConfigureStoreEditState();
 }
 
 class TencentConfigureStoreEditState extends State<TencentConfigureStoreEdit> {
@@ -298,8 +297,7 @@ class TencentConfigureStoreEditState extends State<TencentConfigureStoreEdit> {
 
       if (customUrl.isEmpty || customUrl.trim().isEmpty) {
         customUrl = ConfigureTemplate.placeholder;
-      } else if (!customUrl.startsWith('http') &&
-          !customUrl.startsWith('https')) {
+      } else if (!customUrl.startsWith('http') && !customUrl.startsWith('https')) {
         customUrl = 'http://$customUrl';
       }
 

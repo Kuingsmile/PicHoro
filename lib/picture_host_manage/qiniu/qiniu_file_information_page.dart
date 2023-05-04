@@ -3,8 +3,7 @@ import 'package:horopic/utils/common_functions.dart';
 
 class QiniuFileInformation extends StatefulWidget {
   final Map fileMap;
-  const QiniuFileInformation({Key? key, required this.fileMap})
-      : super(key: key);
+  const QiniuFileInformation({Key? key, required this.fileMap}) : super(key: key);
 
   @override
   QiniuFileInformationState createState() => QiniuFileInformationState();
@@ -41,11 +40,10 @@ class QiniuFileInformationState extends State<QiniuFileInformation> {
           ListTile(
             isThreeLine: true,
             title: const Text('文件创建时间'),
-            subtitle: SelectableText(DateTime.fromMillisecondsSinceEpoch(
-                    int.parse(
-                        (widget.fileMap['putTime']).toString().split('.')[0]))
-                .toString()
-                .split('.')[0]),
+            subtitle: SelectableText(
+                DateTime.fromMillisecondsSinceEpoch(int.parse((widget.fileMap['putTime']).toString().split('.')[0]))
+                    .toString()
+                    .split('.')[0]),
           ),
           ListTile(
             title: const Text('文件hash'),

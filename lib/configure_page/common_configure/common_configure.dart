@@ -36,8 +36,7 @@ class CommonConfigState extends State<CommonConfig> {
             title: const Text('文件重命名方式选项'),
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () {
-              Application.router.navigateTo(context, Routes.renameFile,
-                  transition: TransitionType.cupertino);
+              Application.router.navigateTo(context, Routes.renameFile, transition: TransitionType.cupertino);
             },
           ),
           ListTile(
@@ -54,8 +53,7 @@ class CommonConfigState extends State<CommonConfig> {
             title: const Text('默认复制链接格式'),
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () {
-              Application.router.navigateTo(context, Routes.linkFormatSelect,
-                  transition: TransitionType.cupertino);
+              Application.router.navigateTo(context, Routes.linkFormatSelect, transition: TransitionType.cupertino);
             },
           ),
           ListTile(
@@ -73,9 +71,8 @@ class CommonConfigState extends State<CommonConfig> {
             title: const Text('图片压缩细节设置'),
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () {
-              Application.router.navigateTo(
-                  context, Routes.compressConfigurePage,
-                  transition: TransitionType.cupertino);
+              Application.router
+                  .navigateTo(context, Routes.compressConfigurePage, transition: TransitionType.cupertino);
             },
           ),
           ListTile(
@@ -104,8 +101,7 @@ class CommonConfigState extends State<CommonConfig> {
             title: const Text('主题设置'),
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () {
-              Application.router.navigateTo(context, Routes.changeTheme,
-                  transition: TransitionType.cupertino);
+              Application.router.navigateTo(context, Routes.changeTheme, transition: TransitionType.cupertino);
             },
           ),
           ListTile(
@@ -133,8 +129,7 @@ class CommonConfigState extends State<CommonConfig> {
             subtitle: const Text('只会清空上传记录，不会清空任何图片'),
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () {
-              Application.router.navigateTo(context, Routes.emptyDatabase,
-                  transition: TransitionType.cupertino);
+              Application.router.navigateTo(context, Routes.emptyDatabase, transition: TransitionType.cupertino);
             },
           ),
         ],

@@ -33,8 +33,7 @@ class UploadedImages extends StatefulWidget {
   UploadedImagesState createState() => UploadedImagesState();
 }
 
-class UploadedImagesState extends State<UploadedImages>
-    with AutomaticKeepAliveClientMixin<UploadedImages> {
+class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveClientMixin<UploadedImages> {
   List showedImages = []; //全部图片
   List showedImageUrl = []; //showedImages的url
   List showedImagePaths = []; //showedImages的路径
@@ -48,8 +47,7 @@ class UploadedImagesState extends State<UploadedImages>
   List currentShowedImagesDisplayAddressUrl = []; //当前显示的图片用来显示到相册里的url
 
   int _currentPage = 0;
-  RefreshController refreshController =
-      RefreshController(initialRefresh: false);
+  RefreshController refreshController = RefreshController(initialRefresh: false);
   List selectedImages = [];
   List<bool> selectedImagesBool = List.filled(12, false);
   Map<String, String> nameToPara = {
@@ -135,17 +133,11 @@ class UploadedImagesState extends State<UploadedImages>
                           children: [
                             SimpleDialogOption(
                               child: Text(
-                                Global.defaultLKformat == 'rawurl'
-                                    ? 'URL格式 \u2713'
-                                    : 'URL格式',
+                                Global.defaultLKformat == 'rawurl' ? 'URL格式 \u2713' : 'URL格式',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                  color: Global.defaultLKformat == 'rawurl'
-                                      ? Colors.blue
-                                      : Colors.black,
-                                  fontWeight: Global.defaultLKformat == 'rawurl'
-                                      ? FontWeight.bold
-                                      : FontWeight.normal,
+                                  color: Global.defaultLKformat == 'rawurl' ? Colors.blue : Colors.black,
+                                  fontWeight: Global.defaultLKformat == 'rawurl' ? FontWeight.bold : FontWeight.normal,
                                 ),
                               ),
                               onPressed: () async {
@@ -158,17 +150,11 @@ class UploadedImagesState extends State<UploadedImages>
                             ),
                             SimpleDialogOption(
                               child: Text(
-                                Global.defaultLKformat == 'html'
-                                    ? 'HTML格式 \u2713'
-                                    : 'HTML格式',
+                                Global.defaultLKformat == 'html' ? 'HTML格式 \u2713' : 'HTML格式',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                  color: Global.defaultLKformat == 'html'
-                                      ? Colors.blue
-                                      : Colors.black,
-                                  fontWeight: Global.defaultLKformat == 'html'
-                                      ? FontWeight.bold
-                                      : FontWeight.normal,
+                                  color: Global.defaultLKformat == 'html' ? Colors.blue : Colors.black,
+                                  fontWeight: Global.defaultLKformat == 'html' ? FontWeight.bold : FontWeight.normal,
                                 ),
                               ),
                               onPressed: () async {
@@ -181,17 +167,11 @@ class UploadedImagesState extends State<UploadedImages>
                             ),
                             SimpleDialogOption(
                               child: Text(
-                                Global.defaultLKformat == 'BBcode'
-                                    ? 'BBcode格式 \u2713'
-                                    : 'BBcode格式',
+                                Global.defaultLKformat == 'BBcode' ? 'BBcode格式 \u2713' : 'BBcode格式',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                  color: Global.defaultLKformat == 'BBcode'
-                                      ? Colors.blue
-                                      : Colors.black,
-                                  fontWeight: Global.defaultLKformat == 'BBcode'
-                                      ? FontWeight.bold
-                                      : FontWeight.normal,
+                                  color: Global.defaultLKformat == 'BBcode' ? Colors.blue : Colors.black,
+                                  fontWeight: Global.defaultLKformat == 'BBcode' ? FontWeight.bold : FontWeight.normal,
                                 ),
                               ),
                               onPressed: () async {
@@ -204,25 +184,18 @@ class UploadedImagesState extends State<UploadedImages>
                             ),
                             SimpleDialogOption(
                               child: Text(
-                                Global.defaultLKformat == 'markdown'
-                                    ? 'markdown格式 \u2713'
-                                    : 'markdown格式',
+                                Global.defaultLKformat == 'markdown' ? 'markdown格式 \u2713' : 'markdown格式',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                  color: Global.defaultLKformat == 'markdown'
-                                      ? Colors.blue
-                                      : Colors.black,
+                                  color: Global.defaultLKformat == 'markdown' ? Colors.blue : Colors.black,
                                   fontWeight:
-                                      Global.defaultLKformat == 'markdown'
-                                          ? FontWeight.bold
-                                          : FontWeight.normal,
+                                      Global.defaultLKformat == 'markdown' ? FontWeight.bold : FontWeight.normal,
                                 ),
                               ),
                               onPressed: () async {
                                 await Global.setLKformat('markdown');
                                 if (mounted) {
-                                  showToastWithContext(
-                                      context, '已设置为markdown格式');
+                                  showToastWithContext(context, '已设置为markdown格式');
                                   Navigator.pop(context);
                                 }
                               },
@@ -234,12 +207,8 @@ class UploadedImagesState extends State<UploadedImages>
                                     : 'markdown格式(带链接)',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                  color: Global.defaultLKformat ==
-                                          'markdown_with_link'
-                                      ? Colors.blue
-                                      : Colors.black,
-                                  fontWeight: Global.defaultLKformat ==
-                                          'markdown_with_link'
+                                  color: Global.defaultLKformat == 'markdown_with_link' ? Colors.blue : Colors.black,
+                                  fontWeight: Global.defaultLKformat == 'markdown_with_link'
                                       ? FontWeight.bold
                                       : FontWeight.normal,
                                 ),
@@ -247,25 +216,18 @@ class UploadedImagesState extends State<UploadedImages>
                               onPressed: () async {
                                 await Global.setLKformat('markdown_with_link');
                                 if (mounted) {
-                                  showToastWithContext(
-                                      context, '已设置为md_link格式');
+                                  showToastWithContext(context, '已设置为md_link格式');
                                   Navigator.pop(context);
                                 }
                               },
                             ),
                             SimpleDialogOption(
                               child: Text(
-                                Global.defaultLKformat == 'custom'
-                                    ? '自定义格式 \u2713'
-                                    : '自定义格式',
+                                Global.defaultLKformat == 'custom' ? '自定义格式 \u2713' : '自定义格式',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                  color: Global.defaultLKformat == 'custom'
-                                      ? Colors.blue
-                                      : Colors.black,
-                                  fontWeight: Global.defaultLKformat == 'custom'
-                                      ? FontWeight.bold
-                                      : FontWeight.normal,
+                                  color: Global.defaultLKformat == 'custom' ? Colors.blue : Colors.black,
+                                  fontWeight: Global.defaultLKformat == 'custom' ? FontWeight.bold : FontWeight.normal,
                                 ),
                               ),
                               onPressed: () async {
@@ -306,8 +268,7 @@ class UploadedImagesState extends State<UploadedImages>
                           ),
                           const Text('同步删除云端'),
                           Switch(
-                            materialTapTargetSize:
-                                MaterialTapTargetSize.shrinkWrap,
+                            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                             value: Global.isDeleteCloud,
                             onChanged: (value) async {
                               await Global.setDeleteCloud(value);
@@ -333,13 +294,10 @@ class UploadedImagesState extends State<UploadedImages>
                 }),
             IconButton(
               icon: selectedImagesBool.contains(true)
-                  ? const Icon(Icons.delete,
-                      color: Color.fromARGB(255, 236, 127, 120), size: 40.0)
-                  : const Icon(Icons.delete_outline,
-                      color: Colors.white, size: 40.0),
+                  ? const Icon(Icons.delete, color: Color.fromARGB(255, 236, 127, 120), size: 40.0)
+                  : const Icon(Icons.delete_outline, color: Colors.white, size: 40.0),
               onPressed: () async {
-                if (!selectedImagesBool.contains(true) ||
-                    currentShowedImagesUrl.isEmpty) {
+                if (!selectedImagesBool.contains(true) || currentShowedImagesUrl.isEmpty) {
                   showToastWithContext(context, '没有选择图片');
                   return;
                 }
@@ -366,14 +324,10 @@ class UploadedImagesState extends State<UploadedImages>
                           methodName: 'build_delete_button',
                           text: formatErrorMessage({}, e.toString()),
                           dataLogType: DataLogType.ERRORS.toString());
-                      Application.router.navigateTo(
-                          context, Routes.albumUploadedImages,
-                          transition: TransitionType.none);
+                      Application.router
+                          .navigateTo(context, Routes.albumUploadedImages, transition: TransitionType.none);
                       showCupertinoAlertDialog(
-                          barrierDismissible: true,
-                          context: context,
-                          title: '错误',
-                          content: e.toString());
+                          barrierDismissible: true, context: context, title: '错误', content: e.toString());
                     }
                   },
                 );
@@ -404,84 +358,72 @@ class UploadedImagesState extends State<UploadedImages>
           onLoading: _onLoading,
           child: GridView.builder(
             padding: const EdgeInsets.all(2),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3, childAspectRatio: 1),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3, childAspectRatio: 1),
             itemCount: currentShowedImagesUrl.length,
             itemBuilder: (context, index) {
               return GestureDetector(
                 onTap: () {
-                  if (Global.defaultShowedPBhost == 'lskypro' ||
-                      Global.defaultShowedPBhost == 'smms') {
+                  if (Global.defaultShowedPBhost == 'lskypro' || Global.defaultShowedPBhost == 'smms') {
                     String urlList = currentShowedImagesUrl.join(',');
-                    Application.router.navigateTo(context,
-                        '${Routes.albumImagePreview}?index=$index&images=${Uri.encodeComponent(urlList)}',
+                    Application.router.navigateTo(
+                        context, '${Routes.albumImagePreview}?index=$index&images=${Uri.encodeComponent(urlList)}',
                         transition: TransitionType.none);
-                  } else if (Global.defaultShowedPBhost == 'imgur' ||
-                      Global.defaultShowedPBhost == 'github') {
+                  } else if (Global.defaultShowedPBhost == 'imgur' || Global.defaultShowedPBhost == 'github') {
                     String urlList = '';
-                    for (int i = 0;
-                        i < currentShowedImagesDisplayAddressUrl.length;
-                        i++) {
-                      if (currentShowedImagesDisplayAddressUrl[i]
-                          .contains('raw.githubusercontent.com')) {
-                        urlList +=
-                            'https://ghproxy.com/${currentShowedImagesDisplayAddressUrl[i]},';
+                    for (int i = 0; i < currentShowedImagesDisplayAddressUrl.length; i++) {
+                      if (currentShowedImagesDisplayAddressUrl[i].contains('raw.githubusercontent.com')) {
+                        urlList += 'https://ghproxy.com/${currentShowedImagesDisplayAddressUrl[i]},';
                       } else {
                         urlList += currentShowedImagesUrl[i] + ',';
                       }
                     }
-                    Application.router.navigateTo(context,
-                        '${Routes.albumImagePreview}?index=$index&images=${Uri.encodeComponent(urlList)}',
+                    Application.router.navigateTo(
+                        context, '${Routes.albumImagePreview}?index=$index&images=${Uri.encodeComponent(urlList)}',
                         transition: TransitionType.none);
                   } else if (Global.defaultShowedPBhost == 'qiniu') {
                     String urlList = currentShowedImagesUrl.join(',');
-                    Application.router.navigateTo(context,
-                        '${Routes.albumImagePreview}?index=$index&images=${Uri.encodeComponent(urlList)}',
+                    Application.router.navigateTo(
+                        context, '${Routes.albumImagePreview}?index=$index&images=${Uri.encodeComponent(urlList)}',
                         transition: TransitionType.none);
                   } else if (Global.defaultShowedPBhost == 'tencent') {
                     String urlList = currentShowedImagesUrl.join(',');
-                    Application.router.navigateTo(context,
-                        '${Routes.albumImagePreview}?index=$index&images=${Uri.encodeComponent(urlList)}',
+                    Application.router.navigateTo(
+                        context, '${Routes.albumImagePreview}?index=$index&images=${Uri.encodeComponent(urlList)}',
                         transition: TransitionType.none);
                   } else if (Global.defaultShowedPBhost == 'aliyun') {
                     String urlList = currentShowedImagesUrl.join(',');
-                    Application.router.navigateTo(context,
-                        '${Routes.albumImagePreview}?index=$index&images=${Uri.encodeComponent(urlList)}',
+                    Application.router.navigateTo(
+                        context, '${Routes.albumImagePreview}?index=$index&images=${Uri.encodeComponent(urlList)}',
                         transition: TransitionType.none);
                   } else if (Global.defaultShowedPBhost == 'upyun') {
                     String urlList = currentShowedImagesUrl.join(',');
-                    Application.router.navigateTo(context,
-                        '${Routes.albumImagePreview}?index=$index&images=${Uri.encodeComponent(urlList)}',
+                    Application.router.navigateTo(
+                        context, '${Routes.albumImagePreview}?index=$index&images=${Uri.encodeComponent(urlList)}',
                         transition: TransitionType.none);
                   } else if (Global.defaultShowedPBhost == 'PBhostExtend1') {
-                    String urlList =
-                        currentShowedImagesDisplayAddressUrl.join(',');
-                    Application.router.navigateTo(context,
-                        '${Routes.localImagePreview}?index=$index&images=${Uri.encodeComponent(urlList)}',
+                    String urlList = currentShowedImagesDisplayAddressUrl.join(',');
+                    Application.router.navigateTo(
+                        context, '${Routes.localImagePreview}?index=$index&images=${Uri.encodeComponent(urlList)}',
                         transition: TransitionType.none);
                   } else if (Global.defaultShowedPBhost == 'PBhostExtend2') {
                     String urlList = currentShowedImagesUrl.join(',');
-                    Application.router.navigateTo(context,
-                        '${Routes.albumImagePreview}?index=$index&images=${Uri.encodeComponent(urlList)}',
+                    Application.router.navigateTo(
+                        context, '${Routes.albumImagePreview}?index=$index&images=${Uri.encodeComponent(urlList)}',
                         transition: TransitionType.none);
                   } else if (Global.defaultShowedPBhost == 'PBhostExtend3') {
                     String urlList = currentShowedImagesUrl.join(',');
-                    Application.router.navigateTo(context,
-                        '${Routes.albumImagePreview}?index=$index&images=${Uri.encodeComponent(urlList)}',
+                    Application.router.navigateTo(
+                        context, '${Routes.albumImagePreview}?index=$index&images=${Uri.encodeComponent(urlList)}',
                         transition: TransitionType.none);
                   } else if (Global.defaultShowedPBhost == 'PBhostExtend4') {
                     List trueUrlList = [];
                     List headersList = [];
                     RegExp reg = RegExp(r'Basic (.*)');
 
-                    for (int i = 0;
-                        i < currentShowedImagesDisplayAddressUrl.length;
-                        i++) {
-                      String trueUrl = currentShowedImagesDisplayAddressUrl[i]
-                          .replaceAll(reg, '');
+                    for (int i = 0; i < currentShowedImagesDisplayAddressUrl.length; i++) {
+                      String trueUrl = currentShowedImagesDisplayAddressUrl[i].replaceAll(reg, '');
                       headersList.add({
-                        'Authorization': reg.firstMatch(
-                            currentShowedImagesDisplayAddressUrl[i])![0],
+                        'Authorization': reg.firstMatch(currentShowedImagesDisplayAddressUrl[i])![0],
                       });
                       trueUrlList.add(trueUrl);
                     }
@@ -491,8 +433,7 @@ class UploadedImagesState extends State<UploadedImages>
                         transition: TransitionType.none);
                   }
                 },
-                onDoubleTap: () =>
-                    copyFormatedLink(index, Global.defaultLKformat),
+                onDoubleTap: () => copyFormatedLink(index, Global.defaultLKformat),
                 onLongPressStart: (LongPressStartDetails details) {
                   double dx = details.globalPosition.dx;
                   double dy = details.globalPosition.dy - 20;
@@ -505,8 +446,7 @@ class UploadedImagesState extends State<UploadedImages>
                       height: 150,
                       child: Card(
                         clipBehavior: Clip.antiAlias,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadiusDirectional.circular(8)),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadiusDirectional.circular(8)),
                         child: Global.defaultShowedPBhost == 'github' ||
                                 Global.defaultShowedPBhost == 'imgur' ||
                                 Global.defaultShowedPBhost == 'upyun' ||
@@ -518,85 +458,55 @@ class UploadedImagesState extends State<UploadedImages>
                                 Global.defaultShowedPBhost == 'PBhostExtend2' ||
                                 Global.defaultShowedPBhost == 'PBhostExtend3'
                             ? ExtendedImage.network(
-                                currentShowedImagesDisplayAddressUrl[index]
-                                        .contains('raw.githubusercontent.com')
+                                currentShowedImagesDisplayAddressUrl[index].contains('raw.githubusercontent.com')
                                     ?
                                     // ignore: prefer_interpolation_to_compose_strings
-                                    'https://ghproxy.com/' +
-                                        currentShowedImagesDisplayAddressUrl[
-                                            index]
-                                    : currentShowedImagesDisplayAddressUrl[
-                                        index],
+                                    'https://ghproxy.com/' + currentShowedImagesDisplayAddressUrl[index]
+                                    : currentShowedImagesDisplayAddressUrl[index],
                                 clearMemoryCacheIfFailed: true,
                                 retries: 5,
                                 height: 150,
                                 fit: BoxFit.fill,
                                 cache: true,
                                 border: Border.all(
-                                    color: selectedImagesBool[index]
-                                        ? Colors.red
-                                        : Colors.transparent,
-                                    width: 2),
-                                borderRadius:
-                                    const BorderRadius.all(Radius.circular(8)),
-                                loadStateChanged: (state) =>
-                                    defaultLoadStateChanged(state,
-                                        iconSize: 30),
+                                    color: selectedImagesBool[index] ? Colors.red : Colors.transparent, width: 2),
+                                borderRadius: const BorderRadius.all(Radius.circular(8)),
+                                loadStateChanged: (state) => defaultLoadStateChanged(state, iconSize: 30),
                               )
                             : Global.defaultShowedPBhost == 'PBhostExtend1'
-                                ? io.File(currentShowedImagesDisplayAddressUrl[
-                                            index])
-                                        .existsSync()
+                                ? io.File(currentShowedImagesDisplayAddressUrl[index]).existsSync()
                                     ? ExtendedImage.file(
-                                        io.File(
-                                            currentShowedImagesDisplayAddressUrl[
-                                                index]),
+                                        io.File(currentShowedImagesDisplayAddressUrl[index]),
                                         fit: BoxFit.fill,
                                         clearMemoryCacheIfFailed: true,
                                         height: 150,
                                         border: Border.all(
-                                            color: selectedImagesBool[index]
-                                                ? Colors.red
-                                                : Colors.transparent,
+                                            color: selectedImagesBool[index] ? Colors.red : Colors.transparent,
                                             width: 2),
-                                        borderRadius: const BorderRadius.all(
-                                            Radius.circular(8)),
-                                        loadStateChanged: (state) =>
-                                            defaultLoadStateChanged(state,
-                                                iconSize: 30),
+                                        borderRadius: const BorderRadius.all(Radius.circular(8)),
+                                        loadStateChanged: (state) => defaultLoadStateChanged(state, iconSize: 30),
                                       )
-                                    : const Icon(Icons.error,
-                                        size: 30, color: Colors.red)
+                                    : const Icon(Icons.error, size: 30, color: Colors.red)
                                 : Global.defaultShowedPBhost == 'PBhostExtend4'
                                     ? ExtendedImage.network(
-                                        currentShowedImagesDisplayAddressUrl[
-                                                index]
-                                            .replaceAll(
-                                                RegExp(r'Basic (.*)'), ''),
+                                        currentShowedImagesDisplayAddressUrl[index]
+                                            .replaceAll(RegExp(r'Basic (.*)'), ''),
                                         clearMemoryCacheIfFailed: true,
                                         retries: 5,
                                         height: 150,
                                         fit: BoxFit.fill,
                                         headers: {
                                           'Authorization': RegExp(r'Basic (.*)')
-                                              .firstMatch(
-                                                  currentShowedImagesDisplayAddressUrl[
-                                                      index])![0]!
+                                              .firstMatch(currentShowedImagesDisplayAddressUrl[index])![0]!
                                         },
                                         cache: false,
                                         border: Border.all(
-                                            color: selectedImagesBool[index]
-                                                ? Colors.red
-                                                : Colors.transparent,
+                                            color: selectedImagesBool[index] ? Colors.red : Colors.transparent,
                                             width: 2),
-                                        borderRadius: const BorderRadius.all(
-                                            Radius.circular(8)),
-                                        loadStateChanged: (state) =>
-                                            defaultLoadStateChanged(state,
-                                                iconSize: 30),
+                                        borderRadius: const BorderRadius.all(Radius.circular(8)),
+                                        loadStateChanged: (state) => defaultLoadStateChanged(state, iconSize: 30),
                                       )
-                                    : const Icon(Icons.error,
-                                        size: 30, color: Colors.red),
+                                    : const Icon(Icons.error, size: 30, color: Colors.red),
                       ),
                     ),
                     Positioned(
@@ -654,8 +564,7 @@ class UploadedImagesState extends State<UploadedImages>
                         ),
                         children: [
                           SimpleDialogOption(
-                            child: const Text('Alist V3',
-                                textAlign: TextAlign.center),
+                            child: const Text('Alist V3', textAlign: TextAlign.center),
                             onPressed: () {
                               Global.setShowedPBhost('PBhostExtend3');
                               Navigator.pop(context);
@@ -664,8 +573,7 @@ class UploadedImagesState extends State<UploadedImages>
                             },
                           ),
                           SimpleDialogOption(
-                            child:
-                                const Text('阿里云', textAlign: TextAlign.center),
+                            child: const Text('阿里云', textAlign: TextAlign.center),
                             onPressed: () {
                               Global.setShowedPBhost('aliyun');
                               Navigator.pop(context);
@@ -674,8 +582,7 @@ class UploadedImagesState extends State<UploadedImages>
                             },
                           ),
                           SimpleDialogOption(
-                            child: const Text('FTP-SSH/SFTP',
-                                textAlign: TextAlign.center),
+                            child: const Text('FTP-SSH/SFTP', textAlign: TextAlign.center),
                             onPressed: () {
                               Global.setShowedPBhost('PBhostExtend1');
                               Navigator.pop(context);
@@ -684,8 +591,7 @@ class UploadedImagesState extends State<UploadedImages>
                             },
                           ),
                           SimpleDialogOption(
-                            child: const Text('Github',
-                                textAlign: TextAlign.center),
+                            child: const Text('Github', textAlign: TextAlign.center),
                             onPressed: () {
                               Global.setShowedPBhost('github');
                               Navigator.pop(context);
@@ -694,8 +600,7 @@ class UploadedImagesState extends State<UploadedImages>
                             },
                           ),
                           SimpleDialogOption(
-                            child: const Text('Imgur',
-                                textAlign: TextAlign.center),
+                            child: const Text('Imgur', textAlign: TextAlign.center),
                             onPressed: () {
                               Global.setShowedPBhost('imgur');
                               Navigator.pop(context);
@@ -704,8 +609,7 @@ class UploadedImagesState extends State<UploadedImages>
                             },
                           ),
                           SimpleDialogOption(
-                            child:
-                                const Text('兰空图床', textAlign: TextAlign.center),
+                            child: const Text('兰空图床', textAlign: TextAlign.center),
                             onPressed: () {
                               Global.setShowedPBhost('lskypro');
                               Navigator.pop(context);
@@ -714,8 +618,7 @@ class UploadedImagesState extends State<UploadedImages>
                             },
                           ),
                           SimpleDialogOption(
-                            child:
-                                const Text('七牛云', textAlign: TextAlign.center),
+                            child: const Text('七牛云', textAlign: TextAlign.center),
                             onPressed: () {
                               Global.setShowedPBhost('qiniu');
                               Navigator.pop(context);
@@ -724,8 +627,7 @@ class UploadedImagesState extends State<UploadedImages>
                             },
                           ),
                           SimpleDialogOption(
-                            child: const Text('S3兼容平台',
-                                textAlign: TextAlign.center),
+                            child: const Text('S3兼容平台', textAlign: TextAlign.center),
                             onPressed: () {
                               Global.setShowedPBhost('PBhostExtend2');
                               Navigator.pop(context);
@@ -734,8 +636,7 @@ class UploadedImagesState extends State<UploadedImages>
                             },
                           ),
                           SimpleDialogOption(
-                            child: const Text('SM.MS',
-                                textAlign: TextAlign.center),
+                            child: const Text('SM.MS', textAlign: TextAlign.center),
                             onPressed: () {
                               Global.setShowedPBhost('smms');
                               Navigator.pop(context);
@@ -744,8 +645,7 @@ class UploadedImagesState extends State<UploadedImages>
                             },
                           ),
                           SimpleDialogOption(
-                            child:
-                                const Text('腾讯云', textAlign: TextAlign.center),
+                            child: const Text('腾讯云', textAlign: TextAlign.center),
                             onPressed: () {
                               Global.setShowedPBhost('tencent');
                               Navigator.pop(context);
@@ -754,8 +654,7 @@ class UploadedImagesState extends State<UploadedImages>
                             },
                           ),
                           SimpleDialogOption(
-                            child:
-                                const Text('又拍云', textAlign: TextAlign.center),
+                            child: const Text('又拍云', textAlign: TextAlign.center),
                             onPressed: () {
                               Global.setShowedPBhost('upyun');
                               Navigator.pop(context);
@@ -764,8 +663,7 @@ class UploadedImagesState extends State<UploadedImages>
                             },
                           ),
                           SimpleDialogOption(
-                            child: const Text('WebDAV',
-                                textAlign: TextAlign.center),
+                            child: const Text('WebDAV', textAlign: TextAlign.center),
                             onPressed: () {
                               Global.setShowedPBhost('PBhostExtend4');
                               Navigator.pop(context);
@@ -816,9 +714,8 @@ class UploadedImagesState extends State<UploadedImages>
               width: 40,
               child: FloatingActionButton(
                 heroTag: 'copy',
-                backgroundColor: selectedImagesBool.contains(true)
-                    ? const Color.fromARGB(255, 232, 177, 241)
-                    : Colors.transparent,
+                backgroundColor:
+                    selectedImagesBool.contains(true) ? const Color.fromARGB(255, 232, 177, 241) : Colors.transparent,
                 elevation: 5,
                 onPressed: () async {
                   if (!selectedImagesBool.contains(true)) {
@@ -826,14 +723,8 @@ class UploadedImagesState extends State<UploadedImages>
                         msg: "请先选择图片",
                         toastLength: Toast.LENGTH_SHORT,
                         timeInSecForIosWeb: 2,
-                        backgroundColor:
-                            Theme.of(context).brightness == Brightness.light
-                                ? Colors.black
-                                : Colors.white,
-                        textColor:
-                            Theme.of(context).brightness == Brightness.light
-                                ? Colors.white
-                                : Colors.black,
+                        backgroundColor: Theme.of(context).brightness == Brightness.light ? Colors.black : Colors.white,
+                        textColor: Theme.of(context).brightness == Brightness.light ? Colors.white : Colors.black,
                         fontSize: 16.0);
                     return;
                   } else {
@@ -842,17 +733,13 @@ class UploadedImagesState extends State<UploadedImages>
                     for (int i = 0; i < currentShowedImagesUrl.length; i++) {
                       if (selectedImagesBool[i]) {
                         String finalFormatedurl = ' ';
-                        finalFormatedurl =
-                            linkGenerateDict[Global.defaultLKformat]!(
-                                currentShowedImagesUrl[i],
-                                showedImageName[
-                                    i + _perPageItemSize * _currentPage]);
+                        finalFormatedurl = linkGenerateDict[Global.defaultLKformat]!(
+                            currentShowedImagesUrl[i], showedImageName[i + _perPageItemSize * _currentPage]);
 
                         multiUrls.add(finalFormatedurl);
                       }
                     }
-                    await Clipboard.setData(
-                        ClipboardData(text: multiUrls.join('\n')));
+                    await Clipboard.setData(ClipboardData(text: multiUrls.join('\n')));
                     showToast('已复制全部链接');
                     return;
                   }
@@ -876,15 +763,11 @@ class UploadedImagesState extends State<UploadedImages>
                     return;
                   } else if (selectedImagesBool.contains(true)) {
                     setState(() {
-                      selectedImagesBool = List.filled(
-                          selectedImagesBool.length, false,
-                          growable: false);
+                      selectedImagesBool = List.filled(selectedImagesBool.length, false, growable: false);
                     });
                   } else {
                     setState(() {
-                      selectedImagesBool = List.filled(
-                          selectedImagesBool.length, true,
-                          growable: false);
+                      selectedImagesBool = List.filled(selectedImagesBool.length, true, growable: false);
                     });
                   }
                 },
@@ -908,114 +791,111 @@ class UploadedImagesState extends State<UploadedImages>
   }
 
   handleOnLongPress(BuildContext context, double dx, double dy, int index) {
-    showMenu(
-        context: context,
-        position: RelativeRect.fromLTRB(dx, dy, dx + 50, dy - 50),
-        items: [
-          const PopupMenuItem(
-            height: 20,
-            value: 1,
-            child: Center(
-              child: Text('Url', textAlign: TextAlign.center),
-            ),
-          ),
-          const PopupMenuItem(
-            height: 1,
-            value: 10,
-            child: Divider(
-              height: 1,
-              color: Colors.grey,
-              thickness: 1,
-            ),
-          ),
-          const PopupMenuItem(
-            height: 20,
-            value: 2,
-            child: Center(
-              child: Text('Html', textAlign: TextAlign.center),
-            ),
-          ),
-          const PopupMenuItem(
-            height: 1,
-            value: 10,
-            child: Divider(
-              height: 1,
-              color: Colors.grey,
-              thickness: 1,
-            ),
-          ),
-          const PopupMenuItem(
-            height: 20,
-            value: 3,
-            child: Center(
-              child: Text('Markdown', textAlign: TextAlign.center),
-            ),
-          ),
-          const PopupMenuItem(
-            height: 1,
-            value: 10,
-            child: Divider(
-              height: 1,
-              color: Colors.grey,
-              thickness: 1,
-            ),
-          ),
-          const PopupMenuItem(
-            height: 20,
-            value: 4,
-            child: Center(
-              child: Text('BBcode', textAlign: TextAlign.center),
-            ),
-          ),
-          const PopupMenuItem(
-            height: 1,
-            value: 10,
-            child: Divider(
-              height: 1,
-              color: Colors.grey,
-              thickness: 1,
-            ),
-          ),
-          const PopupMenuItem(
-            height: 20,
-            value: 5,
-            child: Center(
-              child: Text('MD&Link', textAlign: TextAlign.center),
-            ),
-          ),
-          const PopupMenuItem(
-            height: 1,
-            value: 10,
-            child: Divider(
-              height: 1,
-              color: Colors.grey,
-              thickness: 1,
-            ),
-          ),
-          const PopupMenuItem(
-            height: 20,
-            value: 6,
-            child: Center(
-              child: Text('自定义格式', textAlign: TextAlign.center),
-            ),
-          ),
-          const PopupMenuItem(
-            height: 1,
-            value: 10,
-            child: Divider(
-              height: 1,
-              color: Colors.grey,
-              thickness: 1,
-            ),
-          ),
-          const PopupMenuItem(
-            height: 20,
-            value: 7,
-            child: Center(
-              child: Text('删除', textAlign: TextAlign.center),
-            ),
-          ),
-        ]).then((value) async {
+    showMenu(context: context, position: RelativeRect.fromLTRB(dx, dy, dx + 50, dy - 50), items: [
+      const PopupMenuItem(
+        height: 20,
+        value: 1,
+        child: Center(
+          child: Text('Url', textAlign: TextAlign.center),
+        ),
+      ),
+      const PopupMenuItem(
+        height: 1,
+        value: 10,
+        child: Divider(
+          height: 1,
+          color: Colors.grey,
+          thickness: 1,
+        ),
+      ),
+      const PopupMenuItem(
+        height: 20,
+        value: 2,
+        child: Center(
+          child: Text('Html', textAlign: TextAlign.center),
+        ),
+      ),
+      const PopupMenuItem(
+        height: 1,
+        value: 10,
+        child: Divider(
+          height: 1,
+          color: Colors.grey,
+          thickness: 1,
+        ),
+      ),
+      const PopupMenuItem(
+        height: 20,
+        value: 3,
+        child: Center(
+          child: Text('Markdown', textAlign: TextAlign.center),
+        ),
+      ),
+      const PopupMenuItem(
+        height: 1,
+        value: 10,
+        child: Divider(
+          height: 1,
+          color: Colors.grey,
+          thickness: 1,
+        ),
+      ),
+      const PopupMenuItem(
+        height: 20,
+        value: 4,
+        child: Center(
+          child: Text('BBcode', textAlign: TextAlign.center),
+        ),
+      ),
+      const PopupMenuItem(
+        height: 1,
+        value: 10,
+        child: Divider(
+          height: 1,
+          color: Colors.grey,
+          thickness: 1,
+        ),
+      ),
+      const PopupMenuItem(
+        height: 20,
+        value: 5,
+        child: Center(
+          child: Text('MD&Link', textAlign: TextAlign.center),
+        ),
+      ),
+      const PopupMenuItem(
+        height: 1,
+        value: 10,
+        child: Divider(
+          height: 1,
+          color: Colors.grey,
+          thickness: 1,
+        ),
+      ),
+      const PopupMenuItem(
+        height: 20,
+        value: 6,
+        child: Center(
+          child: Text('自定义格式', textAlign: TextAlign.center),
+        ),
+      ),
+      const PopupMenuItem(
+        height: 1,
+        value: 10,
+        child: Divider(
+          height: 1,
+          color: Colors.grey,
+          thickness: 1,
+        ),
+      ),
+      const PopupMenuItem(
+        height: 20,
+        value: 7,
+        child: Center(
+          child: Text('删除', textAlign: TextAlign.center),
+        ),
+      ),
+    ]).then((value) async {
       switch (value) {
         case 1:
           copyFormatedLink(index, 'rawurl');
@@ -1057,10 +937,8 @@ class UploadedImagesState extends State<UploadedImages>
     for (int i = 0; i < imagesIndex.length; i++) {
       try {
         Map deleteConfig = {
-          'pictureKey': showedImagePictureKey[
-              imagesIndex[i] + (_currentPage * _perPageItemSize) - i],
-          "name": showedImageName[
-              imagesIndex[i] + (_currentPage * _perPageItemSize) - i],
+          'pictureKey': showedImagePictureKey[imagesIndex[i] + (_currentPage * _perPageItemSize) - i],
+          "name": showedImageName[imagesIndex[i] + (_currentPage * _perPageItemSize) - i],
         };
 
         if (deleteCloud) {
@@ -1071,15 +949,10 @@ class UploadedImagesState extends State<UploadedImages>
           }
         }
         if (Global.defaultShowedPBhost == 'PBhostExtend1') {
-          await AlbumSQL.deleteData(
-              Global.imageDBExtend!,
-              Global.defaultShowedPBhost,
-              showedImageId[
-                  imagesIndex[i] + (_currentPage * _perPageItemSize) - i]);
+          await AlbumSQL.deleteData(Global.imageDBExtend!, Global.defaultShowedPBhost,
+              showedImageId[imagesIndex[i] + (_currentPage * _perPageItemSize) - i]);
           try {
-            await io.File(showedImageDisplayAddressUrl[
-                    imagesIndex[i] + _currentPage * _perPageItemSize - i])
-                .delete();
+            await io.File(showedImageDisplayAddressUrl[imagesIndex[i] + _currentPage * _perPageItemSize - i]).delete();
           } catch (e) {
             FLog.error(
                 className: 'ImagePage',
@@ -1090,24 +963,16 @@ class UploadedImagesState extends State<UploadedImages>
         } else if (Global.defaultShowedPBhost == 'PBhostExtend2' ||
             Global.defaultShowedPBhost == 'PBhostExtend3' ||
             Global.defaultShowedPBhost == 'PBhostExtend4') {
-          await AlbumSQL.deleteData(
-              Global.imageDBExtend!,
-              Global.defaultShowedPBhost,
-              showedImageId[
-                  imagesIndex[i] + (_currentPage * _perPageItemSize) - i]);
+          await AlbumSQL.deleteData(Global.imageDBExtend!, Global.defaultShowedPBhost,
+              showedImageId[imagesIndex[i] + (_currentPage * _perPageItemSize) - i]);
         } else {
-          await AlbumSQL.deleteData(
-              Global.imageDB!,
-              Global.defaultShowedPBhost,
-              showedImageId[
-                  imagesIndex[i] + (_currentPage * _perPageItemSize) - i]);
+          await AlbumSQL.deleteData(Global.imageDB!, Global.defaultShowedPBhost,
+              showedImageId[imagesIndex[i] + (_currentPage * _perPageItemSize) - i]);
         }
 
         if (deleteLocal) {
           try {
-            await io.File(showedImagePaths[
-                    imagesIndex[i] + (_currentPage * _perPageItemSize) - i])
-                .delete();
+            await io.File(showedImagePaths[imagesIndex[i] + (_currentPage * _perPageItemSize) - i]).delete();
           } catch (e) {
             FLog.error(
                 className: 'ImagePage',
@@ -1116,31 +981,23 @@ class UploadedImagesState extends State<UploadedImages>
                 dataLogType: DataLogType.ERRORS.toString());
           }
         }
-        showedImageId
-            .removeAt(imagesIndex[i] + (_currentPage * _perPageItemSize) - i);
-        showedImageUrl
-            .removeAt(imagesIndex[i] + (_currentPage * _perPageItemSize) - i);
-        showedImageDisplayAddressUrl
-            .removeAt(imagesIndex[i] + (_currentPage * _perPageItemSize) - i);
-        showedImagePaths
-            .removeAt(imagesIndex[i] + (_currentPage * _perPageItemSize) - i);
-        showedImageName
-            .removeAt(imagesIndex[i] + (_currentPage * _perPageItemSize) - i);
-        showedImagePictureKey
-            .removeAt(imagesIndex[i] + (_currentPage * _perPageItemSize) - i);
+        showedImageId.removeAt(imagesIndex[i] + (_currentPage * _perPageItemSize) - i);
+        showedImageUrl.removeAt(imagesIndex[i] + (_currentPage * _perPageItemSize) - i);
+        showedImageDisplayAddressUrl.removeAt(imagesIndex[i] + (_currentPage * _perPageItemSize) - i);
+        showedImagePaths.removeAt(imagesIndex[i] + (_currentPage * _perPageItemSize) - i);
+        showedImageName.removeAt(imagesIndex[i] + (_currentPage * _perPageItemSize) - i);
+        showedImagePictureKey.removeAt(imagesIndex[i] + (_currentPage * _perPageItemSize) - i);
         setState(() {
           currentShowedImagesUrl = showedImageUrl.sublist(
               _currentPage * _perPageItemSize,
               (_currentPage + 1) * _perPageItemSize > showedImageUrl.length
                   ? showedImageUrl.length
                   : (_currentPage + 1) * _perPageItemSize);
-          currentShowedImagesDisplayAddressUrl =
-              showedImageDisplayAddressUrl.sublist(
-                  _currentPage * _perPageItemSize,
-                  (_currentPage + 1) * _perPageItemSize >
-                          showedImageDisplayAddressUrl.length
-                      ? showedImageDisplayAddressUrl.length
-                      : (_currentPage + 1) * _perPageItemSize);
+          currentShowedImagesDisplayAddressUrl = showedImageDisplayAddressUrl.sublist(
+              _currentPage * _perPageItemSize,
+              (_currentPage + 1) * _perPageItemSize > showedImageDisplayAddressUrl.length
+                  ? showedImageDisplayAddressUrl.length
+                  : (_currentPage + 1) * _perPageItemSize);
         });
       } catch (e) {
         FLog.error(
@@ -1159,8 +1016,7 @@ class UploadedImagesState extends State<UploadedImages>
     bool deleteCloud = await Global.getDeleteCloud();
     try {
       Map deleteConfig = {
-        'pictureKey':
-            showedImagePictureKey[index + (_currentPage * _perPageItemSize)],
+        'pictureKey': showedImagePictureKey[index + (_currentPage * _perPageItemSize)],
         "name": showedImageName[index + (_currentPage * _perPageItemSize)],
       };
       if (deleteCloud) {
@@ -1171,14 +1027,10 @@ class UploadedImagesState extends State<UploadedImages>
         }
       }
       if (Global.defaultShowedPBhost == 'PBhostExtend1') {
-        await AlbumSQL.deleteData(
-            Global.imageDBExtend!,
-            Global.defaultShowedPBhost,
+        await AlbumSQL.deleteData(Global.imageDBExtend!, Global.defaultShowedPBhost,
             showedImageId[index + (_currentPage * _perPageItemSize)]);
         try {
-          await io.File(showedImageDisplayAddressUrl[
-                  index + _currentPage * _perPageItemSize])
-              .delete();
+          await io.File(showedImageDisplayAddressUrl[index + _currentPage * _perPageItemSize]).delete();
         } catch (e) {
           FLog.error(
               className: 'ImagePage',
@@ -1189,20 +1041,16 @@ class UploadedImagesState extends State<UploadedImages>
       } else if (Global.defaultShowedPBhost == 'PBhostExtend2' ||
           Global.defaultShowedPBhost == 'PBhostExtend3' ||
           Global.defaultShowedPBhost == 'PBhostExtend4') {
-        await AlbumSQL.deleteData(
-            Global.imageDBExtend!,
-            Global.defaultShowedPBhost,
+        await AlbumSQL.deleteData(Global.imageDBExtend!, Global.defaultShowedPBhost,
             showedImageId[index + (_currentPage * _perPageItemSize)]);
       } else {
-        await AlbumSQL.deleteData(Global.imageDB!, Global.defaultShowedPBhost,
-            showedImageId[index + (_currentPage * _perPageItemSize)]);
+        await AlbumSQL.deleteData(
+            Global.imageDB!, Global.defaultShowedPBhost, showedImageId[index + (_currentPage * _perPageItemSize)]);
       }
 
       if (deleteLocal) {
         try {
-          await io.File(
-                  showedImagePaths[index + _currentPage * _perPageItemSize])
-              .delete();
+          await io.File(showedImagePaths[index + _currentPage * _perPageItemSize]).delete();
         } catch (e) {
           FLog.error(
               className: 'ImagePage',
@@ -1214,8 +1062,7 @@ class UploadedImagesState extends State<UploadedImages>
       setState(() {
         showedImageId.removeAt(index + _perPageItemSize * _currentPage);
         showedImageUrl.removeAt(index + _perPageItemSize * _currentPage);
-        showedImageDisplayAddressUrl
-            .removeAt(index + _perPageItemSize * _currentPage);
+        showedImageDisplayAddressUrl.removeAt(index + _perPageItemSize * _currentPage);
         showedImagePictureKey.removeAt(index + _perPageItemSize * _currentPage);
         showedImageName.removeAt(index + _perPageItemSize * _currentPage);
         showedImagePaths.removeAt(index + _perPageItemSize * _currentPage);
@@ -1227,30 +1074,19 @@ class UploadedImagesState extends State<UploadedImages>
           currentShowedImagesDisplayAddressUrl = [];
         } else if (currentShowedImagesUrl.isEmpty && _currentPage > 0) {
           _currentPage--;
-          currentShowedImagesUrl = showedImageUrl.sublist(
-              _currentPage * _perPageItemSize,
-              (_currentPage + 1) * _perPageItemSize);
-          currentShowedImagesDisplayAddressUrl =
-              showedImageDisplayAddressUrl.sublist(
-                  _currentPage * _perPageItemSize,
-                  (_currentPage + 1) * _perPageItemSize);
-        } else if (showedImageUrl.length >=
-            (_currentPage + 1) * _perPageItemSize) {
-          currentShowedImagesUrl = showedImageUrl.sublist(
-              _currentPage * _perPageItemSize,
-              (_currentPage + 1) * _perPageItemSize);
-          currentShowedImagesDisplayAddressUrl =
-              showedImageDisplayAddressUrl.sublist(
-                  _currentPage * _perPageItemSize,
-                  (_currentPage + 1) * _perPageItemSize);
-        } else if (showedImageUrl.length <
-            (_currentPage + 1) * _perPageItemSize) {
-          currentShowedImagesUrl = showedImageUrl.sublist(
-              _currentPage * _perPageItemSize, showedImageUrl.length);
-          currentShowedImagesDisplayAddressUrl =
-              showedImageDisplayAddressUrl.sublist(
-                  _currentPage * _perPageItemSize,
-                  showedImageDisplayAddressUrl.length);
+          currentShowedImagesUrl =
+              showedImageUrl.sublist(_currentPage * _perPageItemSize, (_currentPage + 1) * _perPageItemSize);
+          currentShowedImagesDisplayAddressUrl = showedImageDisplayAddressUrl.sublist(
+              _currentPage * _perPageItemSize, (_currentPage + 1) * _perPageItemSize);
+        } else if (showedImageUrl.length >= (_currentPage + 1) * _perPageItemSize) {
+          currentShowedImagesUrl =
+              showedImageUrl.sublist(_currentPage * _perPageItemSize, (_currentPage + 1) * _perPageItemSize);
+          currentShowedImagesDisplayAddressUrl = showedImageDisplayAddressUrl.sublist(
+              _currentPage * _perPageItemSize, (_currentPage + 1) * _perPageItemSize);
+        } else if (showedImageUrl.length < (_currentPage + 1) * _perPageItemSize) {
+          currentShowedImagesUrl = showedImageUrl.sublist(_currentPage * _perPageItemSize, showedImageUrl.length);
+          currentShowedImagesDisplayAddressUrl = showedImageDisplayAddressUrl.sublist(
+              _currentPage * _perPageItemSize, showedImageDisplayAddressUrl.length);
         }
       });
     } catch (e) {
@@ -1289,8 +1125,7 @@ class UploadedImagesState extends State<UploadedImages>
 
   void initLoadUploadedImages() async {
     //所有的图床的图片ID
-    Map<String, dynamic> imageList =
-        await AlbumSQL.getAllTableData(Global.imageDB!, 'id');
+    Map<String, dynamic> imageList = await AlbumSQL.getAllTableData(Global.imageDB!, 'id');
     //扩展图床的图片ID
     Map<String, dynamic> imageListExtend = await AlbumSQL.getAllTableDataExtend(
       Global.imageDBExtend!,
@@ -1318,11 +1153,9 @@ class UploadedImagesState extends State<UploadedImages>
           Global.defaultShowedPBhost == 'PBhostExtend2' ||
           Global.defaultShowedPBhost == 'PBhostExtend3' ||
           Global.defaultShowedPBhost == 'PBhostExtend4') {
-        maps = await AlbumSQL.queryData(Global.imageDBExtend!,
-            Global.defaultShowedPBhost, showedImageId[i]);
+        maps = await AlbumSQL.queryData(Global.imageDBExtend!, Global.defaultShowedPBhost, showedImageId[i]);
       } else {
-        maps = await AlbumSQL.queryData(
-            Global.imageDB!, Global.defaultShowedPBhost, showedImageId[i]);
+        maps = await AlbumSQL.queryData(Global.imageDB!, Global.defaultShowedPBhost, showedImageId[i]);
       }
       if (Global.defaultShowedPBhost == 'smms') {
         showedImageUrl.add(maps[0]['url']); //smms的returnUrl就是用来复制和相册展示的url
@@ -1332,8 +1165,7 @@ class UploadedImagesState extends State<UploadedImages>
         showedImagePaths.add(maps[0]['path']);
       } else if (Global.defaultShowedPBhost == 'lskypro') {
         showedImageUrl.add(maps[0]['url']); //用来复制的url
-        showedImageDisplayAddressUrl
-            .add(maps[0]['hostSpecificArgA']); //用来相册展示的url
+        showedImageDisplayAddressUrl.add(maps[0]['hostSpecificArgA']); //用来相册展示的url
         showedImageName.add(maps[0]['name']);
         showedImagePictureKey.add(maps[0]['pictureKey']);
         showedImagePaths.add(maps[0]['path']);
@@ -1359,14 +1191,12 @@ class UploadedImagesState extends State<UploadedImages>
         showedImagePaths.add(maps[0]['path']);
       } else if (Global.defaultShowedPBhost == 'imgur') {
         showedImageUrl.add(maps[0]['url']); //用来复制的url
-        showedImageDisplayAddressUrl
-            .add(maps[0]['hostSpecificArgA']); //用来显示的url
+        showedImageDisplayAddressUrl.add(maps[0]['hostSpecificArgA']); //用来显示的url
         showedImageName.add(maps[0]['name']);
         showedImagePictureKey.add(maps[0]['pictureKey']);
         showedImagePaths.add(maps[0]['path']);
       } else if (Global.defaultShowedPBhost == 'qiniu') {
-        if (!maps[0]['url'].toString().startsWith('https://') &&
-            !maps[0]['url'].toString().startsWith('http://')) {
+        if (!maps[0]['url'].toString().startsWith('https://') && !maps[0]['url'].toString().startsWith('http://')) {
           // ignore: prefer_interpolation_to_compose_strings
           showedImageUrl.add('http://' + maps[0]['url']);
         } else {
@@ -1384,8 +1214,7 @@ class UploadedImagesState extends State<UploadedImages>
         showedImagePictureKey.add(maps[0]['pictureKey']);
         showedImagePaths.add(maps[0]['path']);
       } else if (Global.defaultShowedPBhost == 'tencent') {
-        if (!maps[0]['url'].toString().startsWith('https://') &&
-            !maps[0]['url'].toString().startsWith('http://')) {
+        if (!maps[0]['url'].toString().startsWith('https://') && !maps[0]['url'].toString().startsWith('http://')) {
           // ignore: prefer_interpolation_to_compose_strings
           showedImageUrl.add('http://' + maps[0]['url']);
         } else {
@@ -1403,8 +1232,7 @@ class UploadedImagesState extends State<UploadedImages>
         showedImagePictureKey.add(maps[0]['pictureKey']);
         showedImagePaths.add(maps[0]['path']);
       } else if (Global.defaultShowedPBhost == 'aliyun') {
-        if (!maps[0]['url'].toString().startsWith('https://') &&
-            !maps[0]['url'].toString().startsWith('http://')) {
+        if (!maps[0]['url'].toString().startsWith('https://') && !maps[0]['url'].toString().startsWith('http://')) {
           // ignore: prefer_interpolation_to_compose_strings
           showedImageUrl.add('http://' + maps[0]['url']);
         } else {
@@ -1422,8 +1250,7 @@ class UploadedImagesState extends State<UploadedImages>
         showedImagePictureKey.add(maps[0]['pictureKey']);
         showedImagePaths.add(maps[0]['path']);
       } else if (Global.defaultShowedPBhost == 'upyun') {
-        if (!maps[0]['url'].toString().startsWith('https://') &&
-            !maps[0]['url'].toString().startsWith('http://')) {
+        if (!maps[0]['url'].toString().startsWith('https://') && !maps[0]['url'].toString().startsWith('http://')) {
           // ignore: prefer_interpolation_to_compose_strings
           showedImageUrl.add('http://' + maps[0]['url']);
         } else {
@@ -1447,8 +1274,7 @@ class UploadedImagesState extends State<UploadedImages>
         showedImagePictureKey.add(maps[0]['pictureKey']);
         showedImagePaths.add(maps[0]['path']);
       } else if (Global.defaultShowedPBhost == 'PBhostExtend2') {
-        if (!maps[0]['url'].toString().startsWith('https://') &&
-            !maps[0]['url'].toString().startsWith('http://')) {
+        if (!maps[0]['url'].toString().startsWith('https://') && !maps[0]['url'].toString().startsWith('http://')) {
           // ignore: prefer_interpolation_to_compose_strings
           showedImageUrl.add('http://' + maps[0]['url']);
         } else {
@@ -1485,8 +1311,7 @@ class UploadedImagesState extends State<UploadedImages>
         showedImagePictureKey.add(maps[0]['pictureKey']);
         showedImagePaths.add(maps[0]['path']);
       } else if (Global.defaultShowedPBhost == 'PBhostExtend4') {
-        if (!maps[0]['url'].toString().startsWith('https://') &&
-            !maps[0]['url'].toString().startsWith('http://')) {
+        if (!maps[0]['url'].toString().startsWith('https://') && !maps[0]['url'].toString().startsWith('http://')) {
           // ignore: prefer_interpolation_to_compose_strings
           showedImageUrl.add('http://' + maps[0]['url']);
         } else {
@@ -1506,11 +1331,8 @@ class UploadedImagesState extends State<UploadedImages>
       }
     }
 
-    currentShowedImagesUrl = showedImageUrl.sublist(
-        0,
-        _perPageItemSize > showedImageUrl.length
-            ? showedImageUrl.length
-            : _perPageItemSize);
+    currentShowedImagesUrl =
+        showedImageUrl.sublist(0, _perPageItemSize > showedImageUrl.length ? showedImageUrl.length : _perPageItemSize);
     currentShowedImagesDisplayAddressUrl = showedImageDisplayAddressUrl.sublist(
         0,
         _perPageItemSize > showedImageDisplayAddressUrl.length
@@ -1533,13 +1355,11 @@ class UploadedImagesState extends State<UploadedImages>
               ? _perPageItemSize * (_currentPage + 1)
               : showedImageUrl.length);
       currentShowedImagesDisplayAddressUrl.clear();
-      currentShowedImagesDisplayAddressUrl =
-          showedImageDisplayAddressUrl.sublist(
-              (_currentPage) * _perPageItemSize,
-              showedImageDisplayAddressUrl.length >
-                      _perPageItemSize * (_currentPage + 1)
-                  ? _perPageItemSize * (_currentPage + 1)
-                  : showedImageDisplayAddressUrl.length);
+      currentShowedImagesDisplayAddressUrl = showedImageDisplayAddressUrl.sublist(
+          (_currentPage) * _perPageItemSize,
+          showedImageDisplayAddressUrl.length > _perPageItemSize * (_currentPage + 1)
+              ? _perPageItemSize * (_currentPage + 1)
+              : showedImageDisplayAddressUrl.length);
       selectedImagesBool = List.filled(_perPageItemSize, false);
     }
     loadUploadedImages();
@@ -1551,8 +1371,7 @@ class UploadedImagesState extends State<UploadedImages>
         refreshController.loadNoData();
       } else if (_currentPage == 0) {
         refreshController.refreshCompleted();
-      } else if (showedImageUrl.length <
-          _perPageItemSize * (_currentPage + 1)) {
+      } else if (showedImageUrl.length < _perPageItemSize * (_currentPage + 1)) {
         refreshController.loadNoData();
       } else {
         refreshController.loadComplete();
@@ -1564,12 +1383,10 @@ class UploadedImagesState extends State<UploadedImages>
     _currentPage = _currentPage - 1;
     currentShowedImagesUrl.clear();
     currentShowedImagesDisplayAddressUrl.clear();
-    currentShowedImagesUrl = showedImageUrl.sublist(
-        (_currentPage) * _perPageItemSize,
-        _perPageItemSize * (_currentPage + 1));
-    currentShowedImagesDisplayAddressUrl = showedImageDisplayAddressUrl.sublist(
-        (_currentPage) * _perPageItemSize,
-        _perPageItemSize * (_currentPage + 1));
+    currentShowedImagesUrl =
+        showedImageUrl.sublist((_currentPage) * _perPageItemSize, _perPageItemSize * (_currentPage + 1));
+    currentShowedImagesDisplayAddressUrl =
+        showedImageDisplayAddressUrl.sublist((_currentPage) * _perPageItemSize, _perPageItemSize * (_currentPage + 1));
     selectedImagesBool = List.filled(_perPageItemSize, false);
     backUploadedImages();
   }

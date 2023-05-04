@@ -43,8 +43,7 @@ class HomePage extends StatefulWidget {
   HomePageState createState() => HomePageState();
 }
 
-class HomePageState extends State<HomePage>
-    with AutomaticKeepAliveClientMixin<HomePage> {
+class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<HomePage> {
   final ImagePicker _picker = ImagePicker();
   List clipboardList = [];
   List uploadList = [];
@@ -131,28 +130,20 @@ class HomePageState extends State<HomePage>
         children: [
           TextButton(
               onPressed: () async {
-                await uploadManager.addBatchUploads(
-                    uploadPathList, uploadFileNameList);
+                await uploadManager.addBatchUploads(uploadPathList, uploadFileNameList);
                 setState(() {});
               },
               child: const Text(
                 "全部开始",
-                style: TextStyle(
-                    color: Colors.blue,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold),
+                style: TextStyle(color: Colors.blue, fontSize: 16, fontWeight: FontWeight.bold),
               )),
           TextButton(
               onPressed: () async {
-                await uploadManager.cancelBatchUploads(
-                    uploadPathList, uploadFileNameList);
+                await uploadManager.cancelBatchUploads(uploadPathList, uploadFileNameList);
               },
               child: const Text(
                 "全部取消",
-                style: TextStyle(
-                    color: Colors.blue,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold),
+                style: TextStyle(color: Colors.blue, fontSize: 16, fontWeight: FontWeight.bold),
               )),
           TextButton(
               onPressed: () async {
@@ -161,16 +152,12 @@ class HomePageState extends State<HomePage>
               },
               child: const Text(
                 "全部清空",
-                style: TextStyle(
-                    color: Colors.blue,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold),
+                style: TextStyle(color: Colors.blue, fontSize: 16, fontWeight: FontWeight.bold),
               )),
         ],
       ),
       ValueListenableBuilder(
-          valueListenable: uploadManager.getBatchUploadProgress(
-              uploadPathList, uploadFileNameList),
+          valueListenable: uploadManager.getBatchUploadProgress(uploadPathList, uploadFileNameList),
           builder: (context, value, child) {
             return Container(
               color: const Color.fromARGB(255, 219, 239, 255),
@@ -188,8 +175,7 @@ class HomePageState extends State<HomePage>
   }
 
   _imageFromCamera() async {
-    final XFile? pickedImage =
-        await _picker.pickImage(source: ImageSource.camera, imageQuality: 100);
+    final XFile? pickedImage = await _picker.pickImage(source: ImageSource.camera, imageQuality: 100);
 
     if (Global.defaultUser == ' ' || Global.defaultUser == '') {
       showToast('请先登录');
@@ -219,9 +205,7 @@ class HomePageState extends State<HomePage>
       ImageCompress imageCompress = ImageCompress();
       compressedFile = await imageCompress.compressAndGetFile(
           pickedImage.path, Global.imageFile!, Global.defaultCompressFormat,
-          minHeight: Global.minHeight,
-          minWidth: Global.minWidth,
-          quality: Global.quality);
+          minHeight: Global.minHeight, minWidth: Global.minWidth, quality: Global.quality);
       Global.imagesList.add(my_path.basename(compressedFile.path));
     } else {
       compressedFile = fileImage;
@@ -255,8 +239,7 @@ class HomePageState extends State<HomePage>
         }
         try {
           var response = await my_http.get(Uri.parse(urlList[i]));
-          String tempPath =
-              await getTemporaryDirectory().then((value) => value.path);
+          String tempPath = await getTemporaryDirectory().then((value) => value.path);
           String timeStamp = DateTime.now().millisecondsSinceEpoch.toString();
           String randomString = randomStringGenerator(5);
           io.File file = io.File('$tempPath/Web$timeStamp$randomString.jpg');
@@ -278,9 +261,7 @@ class HomePageState extends State<HomePage>
             ImageCompress imageCompress = ImageCompress();
             compressedFile = await imageCompress.compressAndGetFile(
                 file.path, Global.imageFile!, Global.defaultCompressFormat,
-                minHeight: Global.minHeight,
-                minWidth: Global.minWidth,
-                quality: Global.quality);
+                minHeight: Global.minHeight, minWidth: Global.minWidth, quality: Global.quality);
             Global.imagesList.add(my_path.basename(compressedFile.path));
           } else {
             compressedFile = file;
@@ -318,8 +299,7 @@ class HomePageState extends State<HomePage>
   }
 
   _cameraAndBack() async {
-    XFile? pickedImage =
-        await _picker.pickImage(source: ImageSource.camera, imageQuality: 100);
+    XFile? pickedImage = await _picker.pickImage(source: ImageSource.camera, imageQuality: 100);
     if (Global.defaultUser == ' ' || Global.defaultUser == '') {
       showToast('请先登录');
       return;
@@ -330,16 +310,14 @@ class HomePageState extends State<HomePage>
           return showToast('未选择图片');
         }
         if (clipboardList.length == 1) {
-          await flutter_services.Clipboard.setData(
-              flutter_services.ClipboardData(text: clipboardList[0]));
+          await flutter_services.Clipboard.setData(flutter_services.ClipboardData(text: clipboardList[0]));
         } else {
-          await flutter_services.Clipboard.setData(
-              flutter_services.ClipboardData(
-                  text: clipboardList
-                      .toString()
-                      .substring(1, clipboardList.toString().length - 1)
-                      .replaceAll(', ', '\n')
-                      .replaceAll(',', '\n')));
+          await flutter_services.Clipboard.setData(flutter_services.ClipboardData(
+              text: clipboardList
+                  .toString()
+                  .substring(1, clipboardList.toString().length - 1)
+                  .replaceAll(', ', '\n')
+                  .replaceAll(',', '\n')));
         }
         clipboardList.clear();
       }
@@ -363,16 +341,14 @@ class HomePageState extends State<HomePage>
     if (Global.multiUpload == 'fail') {
       if (Global.isCopyLink == true) {
         if (clipboardList.length == 1) {
-          await flutter_services.Clipboard.setData(
-              flutter_services.ClipboardData(text: clipboardList[0]));
+          await flutter_services.Clipboard.setData(flutter_services.ClipboardData(text: clipboardList[0]));
         } else {
-          await flutter_services.Clipboard.setData(
-              flutter_services.ClipboardData(
-                  text: clipboardList
-                      .toString()
-                      .substring(1, clipboardList.toString().length - 1)
-                      .replaceAll(', ', '\n')
-                      .replaceAll(',', '\n')));
+          await flutter_services.Clipboard.setData(flutter_services.ClipboardData(
+              text: clipboardList
+                  .toString()
+                  .substring(1, clipboardList.toString().length - 1)
+                  .replaceAll(', ', '\n')
+                  .replaceAll(',', '\n')));
         }
         clipboardList.clear();
       }
@@ -386,12 +362,8 @@ class HomePageState extends State<HomePage>
     if (Global.isCompress == true) {
       ImageCompress imageCompress = ImageCompress();
       compressedFile = await imageCompress.compressAndGetFile(
-          Global.imageOriginalFile!.path,
-          Global.imageFile!,
-          Global.defaultCompressFormat,
-          minHeight: Global.minHeight,
-          minWidth: Global.minWidth,
-          quality: Global.quality);
+          Global.imageOriginalFile!.path, Global.imageFile!, Global.defaultCompressFormat,
+          minHeight: Global.minHeight, minWidth: Global.minWidth, quality: Global.quality);
       Global.imageOriginalFile = compressedFile;
       Global.imageFile = my_path.basename(compressedFile.path);
     } else {
@@ -406,8 +378,7 @@ class HomePageState extends State<HomePage>
     var uploadResult = await uploaderentry(path: path, name: name);
     if (uploadResult[0] == "Error") {
       Global.multiUpload = 'fail';
-      return showCupertinoAlertDialog(
-          context: context, title: "上传失败!", content: "请先配置上传参数.");
+      return showCupertinoAlertDialog(context: context, title: "上传失败!", content: "请先配置上传参数.");
     } else if (uploadResult[0] == "success") {
       eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
       Map<String, dynamic> maps = {};
@@ -447,8 +418,7 @@ class HomePageState extends State<HomePage>
           'url': uploadResult[2], //github文件原始地址
           'PBhost': Global.defaultPShost,
           'pictureKey': uploadResult[3],
-          'hostSpecificArgA':
-              uploadResult[4], //实际展示的是github download url或者自定义域名+路径
+          'hostSpecificArgA': uploadResult[4], //实际展示的是github download url或者自定义域名+路径
           'hostSpecificArgB': 'test',
           'hostSpecificArgC': 'test',
           'hostSpecificArgD': 'test',
@@ -595,11 +565,9 @@ class HomePageState extends State<HomePage>
           Global.defaultPShost == 'aws' ||
           Global.defaultPShost == 'alist' ||
           Global.defaultPShost == 'webdav') {
-        await AlbumSQL.insertData(Global.imageDBExtend!,
-            pBhostToTableName[Global.defaultPShost]!, maps);
+        await AlbumSQL.insertData(Global.imageDBExtend!, pBhostToTableName[Global.defaultPShost]!, maps);
       } else {
-        await AlbumSQL.insertData(
-            Global.imageDB!, pBhostToTableName[Global.defaultPShost]!, maps);
+        await AlbumSQL.insertData(Global.imageDB!, pBhostToTableName[Global.defaultPShost]!, maps);
       }
 
       clipboardList.add(uploadResult[1]); //这里是formatedURL,应该是可以直接访问的地址
@@ -607,12 +575,10 @@ class HomePageState extends State<HomePage>
       return true;
     } else if (uploadResult[0] == "failed") {
       Global.multiUpload = 'fail';
-      return showCupertinoAlertDialog(
-          context: context, title: "上传失败!", content: "上传参数有误.");
+      return showCupertinoAlertDialog(context: context, title: "上传失败!", content: "上传参数有误.");
     } else {
       Global.multiUpload = 'fail';
-      return showCupertinoAlertDialog(
-          context: context, title: "上传失败!", content: uploadResult);
+      return showCupertinoAlertDialog(context: context, title: "上传失败!", content: uploadResult);
     }
   }
 
@@ -621,8 +587,7 @@ class HomePageState extends State<HomePage>
       maxAssets: 100,
       selectedAssets: [],
     );
-    final List<AssetEntity>? pickedImage =
-        await AssetPicker.pickAssets(context, pickerConfig: config);
+    final List<AssetEntity>? pickedImage = await AssetPicker.pickAssets(context, pickerConfig: config);
 
     if (pickedImage == null) {
       showToast("未选择图片");
@@ -651,9 +616,7 @@ class HomePageState extends State<HomePage>
         ImageCompress imageCompress = ImageCompress();
         compressedFile = await imageCompress.compressAndGetFile(
             fileImage.path, Global.imageFile!, Global.defaultCompressFormat,
-            minHeight: Global.minHeight,
-            minWidth: Global.minWidth,
-            quality: Global.quality);
+            minHeight: Global.minHeight, minWidth: Global.minWidth, quality: Global.quality);
         Global.imagesList.add(my_path.basename(compressedFile.path));
       } else {
         compressedFile = fileImage;
@@ -679,8 +642,7 @@ class HomePageState extends State<HomePage>
 
       var uploadResult = await uploaderentry(path: path, name: name);
       if (uploadResult[0] == "Error") {
-        return showCupertinoAlertDialog(
-            context: context, title: "上传失败!", content: "请先配置上传参数.");
+        return showCupertinoAlertDialog(context: context, title: "上传失败!", content: "请先配置上传参数.");
       } else if (uploadResult[0] == "success") {
         successCount++;
         successList.add(name);
@@ -865,11 +827,9 @@ class HomePageState extends State<HomePage>
             Global.defaultPShost == 'aws' ||
             Global.defaultPShost == 'alist' ||
             Global.defaultPShost == 'webdav') {
-          await AlbumSQL.insertData(Global.imageDBExtend!,
-              pBhostToTableName[Global.defaultPShost]!, maps);
+          await AlbumSQL.insertData(Global.imageDBExtend!, pBhostToTableName[Global.defaultPShost]!, maps);
         } else {
-          await AlbumSQL.insertData(
-              Global.imageDB!, pBhostToTableName[Global.defaultPShost]!, maps);
+          await AlbumSQL.insertData(Global.imageDB!, pBhostToTableName[Global.defaultPShost]!, maps);
         }
 
         clipboardList.add(uploadResult[1]);
@@ -897,18 +857,12 @@ class HomePageState extends State<HomePage>
       for (String failImage in failList) {
         content += "$failImage\n";
       }
-      return showCupertinoAlertDialog(
-          barrierDismissible: true,
-          context: context,
-          title: "上传失败!",
-          content: content);
+      return showCupertinoAlertDialog(barrierDismissible: true, context: context, title: "上传失败!", content: content);
     } else if (failCount == 0) {
       eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
       if (Global.isCopyLink == true) {
         await flutter_services.Clipboard.setData(flutter_services.ClipboardData(
-            text: clipboardList
-                .toString()
-                .substring(1, clipboardList.toString().length - 1)));
+            text: clipboardList.toString().substring(1, clipboardList.toString().length - 1)));
         clipboardList.clear();
       }
       String content = "哇塞，全部上传成功了！\n上传成功的图片列表:\n";
@@ -918,11 +872,7 @@ class HomePageState extends State<HomePage>
       if (successList.length == 1) {
         return Fluttertoast.showToast(msg: '上传成功');
       } else {
-        return showCupertinoAlertDialog(
-            barrierDismissible: true,
-            context: context,
-            title: "上传成功!",
-            content: content);
+        return showCupertinoAlertDialog(barrierDismissible: true, context: context, title: "上传成功!", content: content);
       }
     } else {
       eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
@@ -944,11 +894,7 @@ class HomePageState extends State<HomePage>
       for (String failImage in failList) {
         content += "$failImage\n";
       }
-      return showCupertinoAlertDialog(
-          barrierDismissible: true,
-          context: context,
-          title: "上传完成!",
-          content: content);
+      return showCupertinoAlertDialog(barrierDismissible: true, context: context, title: "上传完成!", content: content);
     }
   }
 
@@ -980,17 +926,11 @@ class HomePageState extends State<HomePage>
                           children: [
                             SimpleDialogOption(
                               child: Text(
-                                Global.defaultLKformat == 'rawurl'
-                                    ? 'URL格式 \u2713'
-                                    : 'URL格式',
+                                Global.defaultLKformat == 'rawurl' ? 'URL格式 \u2713' : 'URL格式',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                  color: Global.defaultLKformat == 'rawurl'
-                                      ? Colors.blue
-                                      : Colors.black,
-                                  fontWeight: Global.defaultLKformat == 'rawurl'
-                                      ? FontWeight.bold
-                                      : FontWeight.normal,
+                                  color: Global.defaultLKformat == 'rawurl' ? Colors.blue : Colors.black,
+                                  fontWeight: Global.defaultLKformat == 'rawurl' ? FontWeight.bold : FontWeight.normal,
                                 ),
                               ),
                               onPressed: () async {
@@ -1003,17 +943,11 @@ class HomePageState extends State<HomePage>
                             ),
                             SimpleDialogOption(
                               child: Text(
-                                Global.defaultLKformat == 'html'
-                                    ? 'HTML格式 \u2713'
-                                    : 'HTML格式',
+                                Global.defaultLKformat == 'html' ? 'HTML格式 \u2713' : 'HTML格式',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                  color: Global.defaultLKformat == 'html'
-                                      ? Colors.blue
-                                      : Colors.black,
-                                  fontWeight: Global.defaultLKformat == 'html'
-                                      ? FontWeight.bold
-                                      : FontWeight.normal,
+                                  color: Global.defaultLKformat == 'html' ? Colors.blue : Colors.black,
+                                  fontWeight: Global.defaultLKformat == 'html' ? FontWeight.bold : FontWeight.normal,
                                 ),
                               ),
                               onPressed: () async {
@@ -1026,17 +960,11 @@ class HomePageState extends State<HomePage>
                             ),
                             SimpleDialogOption(
                               child: Text(
-                                Global.defaultLKformat == 'BBcode'
-                                    ? 'BBcode格式 \u2713'
-                                    : 'BBcode格式',
+                                Global.defaultLKformat == 'BBcode' ? 'BBcode格式 \u2713' : 'BBcode格式',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                  color: Global.defaultLKformat == 'BBcode'
-                                      ? Colors.blue
-                                      : Colors.black,
-                                  fontWeight: Global.defaultLKformat == 'BBcode'
-                                      ? FontWeight.bold
-                                      : FontWeight.normal,
+                                  color: Global.defaultLKformat == 'BBcode' ? Colors.blue : Colors.black,
+                                  fontWeight: Global.defaultLKformat == 'BBcode' ? FontWeight.bold : FontWeight.normal,
                                 ),
                               ),
                               onPressed: () async {
@@ -1049,25 +977,18 @@ class HomePageState extends State<HomePage>
                             ),
                             SimpleDialogOption(
                               child: Text(
-                                Global.defaultLKformat == 'markdown'
-                                    ? 'markdown格式 \u2713'
-                                    : 'markdown格式',
+                                Global.defaultLKformat == 'markdown' ? 'markdown格式 \u2713' : 'markdown格式',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                  color: Global.defaultLKformat == 'markdown'
-                                      ? Colors.blue
-                                      : Colors.black,
+                                  color: Global.defaultLKformat == 'markdown' ? Colors.blue : Colors.black,
                                   fontWeight:
-                                      Global.defaultLKformat == 'markdown'
-                                          ? FontWeight.bold
-                                          : FontWeight.normal,
+                                      Global.defaultLKformat == 'markdown' ? FontWeight.bold : FontWeight.normal,
                                 ),
                               ),
                               onPressed: () async {
                                 await Global.setLKformat('markdown');
                                 if (mounted) {
-                                  showToastWithContext(
-                                      context, '已设置为markdown格式');
+                                  showToastWithContext(context, '已设置为markdown格式');
                                   Navigator.pop(context);
                                 }
                               },
@@ -1079,12 +1000,8 @@ class HomePageState extends State<HomePage>
                                     : 'markdown格式(带链接)',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                  color: Global.defaultLKformat ==
-                                          'markdown_with_link'
-                                      ? Colors.blue
-                                      : Colors.black,
-                                  fontWeight: Global.defaultLKformat ==
-                                          'markdown_with_link'
+                                  color: Global.defaultLKformat == 'markdown_with_link' ? Colors.blue : Colors.black,
+                                  fontWeight: Global.defaultLKformat == 'markdown_with_link'
                                       ? FontWeight.bold
                                       : FontWeight.normal,
                                 ),
@@ -1092,25 +1009,18 @@ class HomePageState extends State<HomePage>
                               onPressed: () async {
                                 await Global.setLKformat('markdown_with_link');
                                 if (mounted) {
-                                  showToastWithContext(
-                                      context, '已设置为md_link格式');
+                                  showToastWithContext(context, '已设置为md_link格式');
                                   Navigator.pop(context);
                                 }
                               },
                             ),
                             SimpleDialogOption(
                               child: Text(
-                                Global.defaultLKformat == 'custom'
-                                    ? '自定义格式 \u2713'
-                                    : '自定义格式',
+                                Global.defaultLKformat == 'custom' ? '自定义格式 \u2713' : '自定义格式',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                  color: Global.defaultLKformat == 'custom'
-                                      ? Colors.blue
-                                      : Colors.black,
-                                  fontWeight: Global.defaultLKformat == 'custom'
-                                      ? FontWeight.bold
-                                      : FontWeight.normal,
+                                  color: Global.defaultLKformat == 'custom' ? Colors.blue : Colors.black,
+                                  fontWeight: Global.defaultLKformat == 'custom' ? FontWeight.bold : FontWeight.normal,
                                 ),
                               ),
                               onPressed: () async {
@@ -1143,8 +1053,7 @@ class HomePageState extends State<HomePage>
                       context: context,
                       builder: (context) {
                         return SimpleDialog(
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10)),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                           title: const Text(
                             '选择重命名方式',
                             textAlign: TextAlign.center,
@@ -1161,11 +1070,9 @@ class HomePageState extends State<HomePage>
                                     await Global.setTimeStamp(value);
                                     if (mounted) {
                                       if (value) {
-                                        showToastWithContext(
-                                            context, '已开启时间戳重命名');
+                                        showToastWithContext(context, '已开启时间戳重命名');
                                       } else {
-                                        showToastWithContext(
-                                            context, '已关闭时间戳重命名');
+                                        showToastWithContext(context, '已关闭时间戳重命名');
                                       }
                                       Navigator.pop(context);
                                     }
@@ -1183,11 +1090,9 @@ class HomePageState extends State<HomePage>
                                     await Global.setRandomName(value);
                                     if (mounted) {
                                       if (value) {
-                                        showToastWithContext(
-                                            context, '已开启随机字符串重命名');
+                                        showToastWithContext(context, '已开启随机字符串重命名');
                                       } else {
-                                        showToastWithContext(
-                                            context, '已关闭随机字符串重命名');
+                                        showToastWithContext(context, '已关闭随机字符串重命名');
                                       }
                                       Navigator.pop(context);
                                     }
@@ -1204,11 +1109,9 @@ class HomePageState extends State<HomePage>
                                     await Global.setCustomeRename(value);
                                     if (mounted) {
                                       if (value) {
-                                        showToastWithContext(
-                                            context, '已开启自定义重命名');
+                                        showToastWithContext(context, '已开启自定义重命名');
                                       } else {
-                                        showToastWithContext(
-                                            context, '已关闭自定义重命名');
+                                        showToastWithContext(context, '已关闭自定义重命名');
                                       }
                                       Navigator.pop(context);
                                     }
@@ -1231,8 +1134,7 @@ class HomePageState extends State<HomePage>
                             ),
                             SimpleDialogOption(
                               child: Container(
-                                  margin: const EdgeInsets.only(
-                                      left: 20, right: 20),
+                                  margin: const EdgeInsets.only(left: 20, right: 20),
                                   child: Table(
                                     border: TableBorder.all(
                                       color: Colors.black,
@@ -1252,121 +1154,74 @@ class HomePageState extends State<HomePage>
                                           color: Colors.grey,
                                         ),
                                         children: [
-                                          TableCell(
-                                              child:
-                                                  Center(child: Text("占位符"))),
-                                          TableCell(
-                                              child: Center(child: Text("说明"))),
+                                          TableCell(child: Center(child: Text("占位符"))),
+                                          TableCell(child: Center(child: Text("说明"))),
                                         ],
                                       ),
                                       TableRow(
                                         children: [
-                                          TableCell(
-                                              child:
-                                                  Center(child: Text("{Y}"))),
-                                          TableCell(
-                                              child: Center(
-                                                  child: Text("年份(2022)"))),
+                                          TableCell(child: Center(child: Text("{Y}"))),
+                                          TableCell(child: Center(child: Text("年份(2022)"))),
                                         ],
                                       ),
                                       TableRow(
                                         children: [
-                                          TableCell(
-                                              child:
-                                                  Center(child: Text("{y}"))),
-                                          TableCell(
-                                              child: Center(
-                                                  child: Text("两位数年份(22)"))),
+                                          TableCell(child: Center(child: Text("{y}"))),
+                                          TableCell(child: Center(child: Text("两位数年份(22)"))),
                                         ],
                                       ),
                                       TableRow(
                                         children: [
-                                          TableCell(
-                                              child:
-                                                  Center(child: Text("{m}"))),
-                                          TableCell(
-                                              child: Center(
-                                                  child: Text("月份(01-12)"))),
+                                          TableCell(child: Center(child: Text("{m}"))),
+                                          TableCell(child: Center(child: Text("月份(01-12)"))),
                                         ],
                                       ),
                                       TableRow(
                                         children: [
-                                          TableCell(
-                                              child:
-                                                  Center(child: Text("{d}"))),
-                                          TableCell(
-                                              child: Center(
-                                                  child: Text("日期(01-31)"))),
+                                          TableCell(child: Center(child: Text("{d}"))),
+                                          TableCell(child: Center(child: Text("日期(01-31)"))),
                                         ],
                                       ),
                                       TableRow(
                                         children: [
-                                          TableCell(
-                                              child: Center(
-                                                  child: Text("{timestamp}"))),
-                                          TableCell(
-                                              child: Center(
-                                                  child: Text("时间戳(秒)"))),
+                                          TableCell(child: Center(child: Text("{timestamp}"))),
+                                          TableCell(child: Center(child: Text("时间戳(秒)"))),
                                         ],
                                       ),
                                       TableRow(
                                         children: [
-                                          TableCell(
-                                              child: Center(
-                                                  child: Text("{uuid}"))),
-                                          TableCell(
-                                              child:
-                                                  Center(child: Text("唯一字符串"))),
+                                          TableCell(child: Center(child: Text("{uuid}"))),
+                                          TableCell(child: Center(child: Text("唯一字符串"))),
                                         ],
                                       ),
                                       TableRow(
                                         children: [
-                                          TableCell(
-                                              child:
-                                                  Center(child: Text("{md5}"))),
-                                          TableCell(
-                                              child:
-                                                  Center(child: Text("随机md5"))),
+                                          TableCell(child: Center(child: Text("{md5}"))),
+                                          TableCell(child: Center(child: Text("随机md5"))),
                                         ],
                                       ),
                                       TableRow(
                                         children: [
-                                          TableCell(
-                                              child: Center(
-                                                  child: Text("{md5-16}"))),
-                                          TableCell(
-                                              child: Center(
-                                                  child: Text("随机md5前16位"))),
+                                          TableCell(child: Center(child: Text("{md5-16}"))),
+                                          TableCell(child: Center(child: Text("随机md5前16位"))),
                                         ],
                                       ),
                                       TableRow(
                                         children: [
-                                          TableCell(
-                                              child: Center(
-                                                  child: Text("{str-10}"))),
-                                          TableCell(
-                                              child: Center(
-                                                  child: Text("10位随机字符串"))),
+                                          TableCell(child: Center(child: Text("{str-10}"))),
+                                          TableCell(child: Center(child: Text("10位随机字符串"))),
                                         ],
                                       ),
                                       TableRow(
                                         children: [
-                                          TableCell(
-                                              child: Center(
-                                                  child: Text("{str-20}"))),
-                                          TableCell(
-                                              child: Center(
-                                                  child: Text("20位随机字符串"))),
+                                          TableCell(child: Center(child: Text("{str-20}"))),
+                                          TableCell(child: Center(child: Text("20位随机字符串"))),
                                         ],
                                       ),
                                       TableRow(
                                         children: [
-                                          TableCell(
-                                              child: Center(
-                                                  child: Text("{filename}"))),
-                                          TableCell(
-                                              child:
-                                                  Center(child: Text("原始文件名"))),
+                                          TableCell(child: Center(child: Text("{filename}"))),
+                                          TableCell(child: Center(child: Text("原始文件名"))),
                                         ],
                                       ),
                                     ],
@@ -1395,8 +1250,7 @@ class HomePageState extends State<HomePage>
                           ),
                           const Text('自动复制链接'),
                           Switch(
-                            materialTapTargetSize:
-                                MaterialTapTargetSize.shrinkWrap,
+                            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                             value: Global.isCopyLink,
                             onChanged: (value) async {
                               if (value == true) {
@@ -1463,17 +1317,13 @@ class HomePageState extends State<HomePage>
                     ),
                     const Text('空空如也哦 点击下方按钮上传',
                         textAlign: TextAlign.center,
-                        style: TextStyle(
-                            fontSize: 20,
-                            color: Color.fromARGB(136, 121, 118, 118))),
+                        style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))),
                     const SizedBox(
                       height: 10,
                     ),
                     const Text('注意：上传前请先登录',
                         textAlign: TextAlign.center,
-                        style: TextStyle(
-                            fontSize: 20,
-                            color: Color.fromARGB(136, 121, 118, 118))),
+                        style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))),
                   ],
                 ),
               )
@@ -1483,8 +1333,7 @@ class HomePageState extends State<HomePage>
                 ),
               ),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-        floatingActionButton:
-            Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+        floatingActionButton: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
           SizedBox(
               height: 40,
               width: 40,
@@ -1494,8 +1343,7 @@ class HomePageState extends State<HomePage>
                 onPressed: () async {
                   await _imageFromCamera();
                   for (int i = 0; i < Global.imagesList.length; i++) {
-                    uploadList.add(
-                        [Global.imagesFileList[i].path, Global.imagesList[i]]);
+                    uploadList.add([Global.imagesFileList[i].path, Global.imagesList[i]]);
                     uploadPathList.add(Global.imagesFileList[i].path);
                     uploadFileNameList.add(Global.imagesList[i]);
                   }
@@ -1530,10 +1378,7 @@ class HomePageState extends State<HomePage>
                   await _multiImagePickerFromGallery();
                   if (Global.imagesList.isNotEmpty) {
                     for (int i = 0; i < Global.imagesList.length; i++) {
-                      uploadList.add([
-                        Global.imagesFileList[i].path,
-                        Global.imagesList[i]
-                      ]);
+                      uploadList.add([Global.imagesFileList[i].path, Global.imagesList[i]]);
                       uploadPathList.add(Global.imagesFileList[i].path);
                       uploadFileNameList.add(Global.imagesList[i]);
                     }
@@ -1588,10 +1433,7 @@ class HomePageState extends State<HomePage>
                       });
                   if (Global.imagesList.isNotEmpty) {
                     for (int i = 0; i < Global.imagesList.length; i++) {
-                      uploadList.add([
-                        Global.imagesFileList[i].path,
-                        Global.imagesList[i]
-                      ]);
+                      uploadList.add([Global.imagesFileList[i].path, Global.imagesList[i]]);
                       uploadPathList.add(Global.imagesFileList[i].path);
                       uploadFileNameList.add(Global.imagesList[i]);
                     }
@@ -1616,8 +1458,7 @@ class HomePageState extends State<HomePage>
             buttonSize: const Size(41, 41),
             childrenButtonSize: const Size(40, 40),
             animatedIcon: AnimatedIcons.menu_close,
-            animatedIconTheme:
-                const IconThemeData(color: Colors.white, size: 33.0),
+            animatedIconTheme: const IconThemeData(color: Colors.white, size: 33.0),
             backgroundColor: Colors.blue,
             visible: true,
             curve: Curves.bounceIn,
@@ -1628,9 +1469,8 @@ class HomePageState extends State<HomePage>
                   IconData(0x0055),
                   color: Colors.white,
                 ),
-                backgroundColor: Global.defaultPShost == 'upyun'
-                    ? Colors.amber
-                    : const Color.fromARGB(255, 97, 180, 248),
+                backgroundColor:
+                    Global.defaultPShost == 'upyun' ? Colors.amber : const Color.fromARGB(255, 97, 180, 248),
                 label: '又拍',
                 labelStyle: const TextStyle(fontSize: 12.0),
                 onTap: () async {
@@ -1645,9 +1485,8 @@ class HomePageState extends State<HomePage>
                   IconData(0x0054),
                   color: Colors.white,
                 ),
-                backgroundColor: Global.defaultPShost == 'tencent'
-                    ? Colors.amber
-                    : const Color.fromARGB(255, 97, 180, 248),
+                backgroundColor:
+                    Global.defaultPShost == 'tencent' ? Colors.amber : const Color.fromARGB(255, 97, 180, 248),
                 label: '腾讯',
                 labelStyle: const TextStyle(fontSize: 12.0),
                 onTap: () async {
@@ -1662,9 +1501,8 @@ class HomePageState extends State<HomePage>
                   IconData(0x0053),
                   color: Colors.white,
                 ),
-                backgroundColor: Global.defaultPShost == 'sm.ms'
-                    ? Colors.amber
-                    : const Color.fromARGB(255, 97, 180, 248),
+                backgroundColor:
+                    Global.defaultPShost == 'sm.ms' ? Colors.amber : const Color.fromARGB(255, 97, 180, 248),
                 label: 'SM.MS',
                 labelStyle: const TextStyle(fontSize: 12.0),
                 onTap: () async {
@@ -1679,9 +1517,8 @@ class HomePageState extends State<HomePage>
                   IconData(0x0051),
                   color: Colors.white,
                 ),
-                backgroundColor: Global.defaultPShost == 'qiniu'
-                    ? Colors.amber
-                    : const Color.fromARGB(255, 97, 180, 248),
+                backgroundColor:
+                    Global.defaultPShost == 'qiniu' ? Colors.amber : const Color.fromARGB(255, 97, 180, 248),
                 label: '七牛',
                 labelStyle: const TextStyle(fontSize: 12.0),
                 onTap: () async {
@@ -1696,9 +1533,8 @@ class HomePageState extends State<HomePage>
                   IconData(0x004C),
                   color: Colors.white,
                 ),
-                backgroundColor: Global.defaultPShost == 'lsky.pro'
-                    ? Colors.amber
-                    : const Color.fromARGB(255, 97, 180, 248),
+                backgroundColor:
+                    Global.defaultPShost == 'lsky.pro' ? Colors.amber : const Color.fromARGB(255, 97, 180, 248),
                 label: '兰空',
                 labelStyle: const TextStyle(fontSize: 12.0),
                 onTap: () async {
@@ -1713,9 +1549,8 @@ class HomePageState extends State<HomePage>
                   IconData(0x0049),
                   color: Colors.white,
                 ),
-                backgroundColor: Global.defaultPShost == 'imgur'
-                    ? Colors.amber
-                    : const Color.fromARGB(255, 97, 180, 248),
+                backgroundColor:
+                    Global.defaultPShost == 'imgur' ? Colors.amber : const Color.fromARGB(255, 97, 180, 248),
                 label: 'Imgur',
                 labelStyle: const TextStyle(fontSize: 12.0),
                 onTap: () async {
@@ -1730,9 +1565,8 @@ class HomePageState extends State<HomePage>
                   IconData(0x0047),
                   color: Colors.white,
                 ),
-                backgroundColor: Global.defaultPShost == 'github'
-                    ? Colors.amber
-                    : const Color.fromARGB(255, 97, 180, 248),
+                backgroundColor:
+                    Global.defaultPShost == 'github' ? Colors.amber : const Color.fromARGB(255, 97, 180, 248),
                 label: 'Github',
                 labelStyle: const TextStyle(fontSize: 12.0),
                 onTap: () async {
@@ -1747,9 +1581,7 @@ class HomePageState extends State<HomePage>
                   IconData(0x0046),
                   color: Colors.white,
                 ),
-                backgroundColor: Global.defaultPShost == 'ftp'
-                    ? Colors.amber
-                    : const Color.fromARGB(255, 97, 180, 248),
+                backgroundColor: Global.defaultPShost == 'ftp' ? Colors.amber : const Color.fromARGB(255, 97, 180, 248),
                 label: 'FTP',
                 labelStyle: const TextStyle(fontSize: 12.0),
                 onTap: () async {
@@ -1764,9 +1596,8 @@ class HomePageState extends State<HomePage>
                   IconData(0x0041),
                   color: Colors.white,
                 ),
-                backgroundColor: Global.defaultPShost == 'aliyun'
-                    ? Colors.amber
-                    : const Color.fromARGB(255, 97, 180, 248),
+                backgroundColor:
+                    Global.defaultPShost == 'aliyun' ? Colors.amber : const Color.fromARGB(255, 97, 180, 248),
                 label: '阿里',
                 labelStyle: const TextStyle(fontSize: 12.0),
                 onTap: () async {
@@ -1781,17 +1612,8 @@ class HomePageState extends State<HomePage>
                   Icons.more_horiz_rounded,
                   color: Colors.white,
                 ),
-                backgroundColor: ![
-                  'aliyun',
-                  'ftp',
-                  'github',
-                  'imgur',
-                  'lsky.pro',
-                  'qiniu',
-                  'sm.ms',
-                  'tencent',
-                  'upyun'
-                ].contains(Global.defaultPShost)
+                backgroundColor: !['aliyun', 'ftp', 'github', 'imgur', 'lsky.pro', 'qiniu', 'sm.ms', 'tencent', 'upyun']
+                        .contains(Global.defaultPShost)
                     ? Colors.amber
                     : const Color.fromARGB(255, 97, 180, 248),
                 label: '更多',
@@ -1817,13 +1639,11 @@ class HomePageState extends State<HomePage>
                                 style: TextStyle(
                                     color: Global.defaultPShost == 'alist'
                                         ? Colors.amber
-                                        : const Color.fromARGB(
-                                            255, 97, 180, 248))),
+                                        : const Color.fromARGB(255, 97, 180, 248))),
                             onTap: () async {
                               Navigator.pop(context);
                               await setdefaultPShostRemoteAndLocal('alist');
-                              eventBus.fire(
-                                  AlbumRefreshEvent(albumKeepAlive: false));
+                              eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
                               setState(() {});
                             },
                           )),
@@ -1836,13 +1656,11 @@ class HomePageState extends State<HomePage>
                                 style: TextStyle(
                                     color: Global.defaultPShost == 'aws'
                                         ? Colors.amber
-                                        : const Color.fromARGB(
-                                            255, 97, 180, 248))),
+                                        : const Color.fromARGB(255, 97, 180, 248))),
                             onTap: () async {
                               Navigator.pop(context);
                               await setdefaultPShostRemoteAndLocal('aws');
-                              eventBus.fire(
-                                  AlbumRefreshEvent(albumKeepAlive: false));
+                              eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
                               setState(() {});
                             },
                           )),
@@ -1855,13 +1673,11 @@ class HomePageState extends State<HomePage>
                                 style: TextStyle(
                                     color: Global.defaultPShost == 'webdav'
                                         ? Colors.amber
-                                        : const Color.fromARGB(
-                                            255, 97, 180, 248))),
+                                        : const Color.fromARGB(255, 97, 180, 248))),
                             onTap: () async {
                               Navigator.pop(context);
                               await setdefaultPShostRemoteAndLocal('webdav');
-                              eventBus.fire(
-                                  AlbumRefreshEvent(albumKeepAlive: false));
+                              eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
                               setState(() {});
                             },
                           )),
@@ -1933,9 +1749,8 @@ class ListItemState extends State<ListItem> {
                           builder: (context, value, child) {
                             return Padding(
                               padding: const EdgeInsets.symmetric(vertical: 8),
-                              child: Text(
-                                  "状态: ${uploadStatus[value.toString()]}",
-                                  style: const TextStyle(fontSize: 14)),
+                              child:
+                                  Text("状态: ${uploadStatus[value.toString()]}", style: const TextStyle(fontSize: 14)),
                             );
                           }),
                   ],
@@ -1948,8 +1763,7 @@ class ListItemState extends State<ListItem> {
                             case UploadStatus.completed:
                               return IconButton(
                                   onPressed: () {
-                                    widget.onDelete(
-                                        widget.path, widget.fileName);
+                                    widget.onDelete(widget.path, widget.fileName);
                                   },
                                   icon: const Icon(
                                     Icons.delete,
@@ -1959,36 +1773,29 @@ class ListItemState extends State<ListItem> {
                             case UploadStatus.canceled:
                               return IconButton(
                                   onPressed: () async {
-                                    await widget.onUploadPlayPausedPressed(
-                                        widget.path, widget.fileName);
+                                    await widget.onUploadPlayPausedPressed(widget.path, widget.fileName);
                                   },
                                   icon: const Icon(
                                     Icons.cloud_upload_outlined,
                                     color: Colors.blue,
                                   ));
                             default:
-                              return widget.uploadTask == null ||
-                                      widget.uploadTask!.status.value ==
-                                          UploadStatus.queued
+                              return widget.uploadTask == null || widget.uploadTask!.status.value == UploadStatus.queued
                                   ? const Icon(
                                       Icons.query_builder_rounded,
                                       color: Colors.blue,
                                     )
                                   : ValueListenableBuilder(
-                                      valueListenable:
-                                          widget.uploadTask!.progress,
+                                      valueListenable: widget.uploadTask!.progress,
                                       builder: (context, value, child) {
                                         return Container(
                                           height: 20,
                                           width: 20,
-                                          margin: const EdgeInsets.fromLTRB(
-                                              0, 0, 10, 0),
+                                          margin: const EdgeInsets.fromLTRB(0, 0, 10, 0),
                                           child: CircularProgressIndicator(
                                             value: value,
                                             strokeWidth: 4,
-                                            color: widget.uploadTask!.status
-                                                        .value ==
-                                                    UploadStatus.paused
+                                            color: widget.uploadTask!.status.value == UploadStatus.paused
                                                 ? Colors.grey
                                                 : Colors.blue,
                                           ),
@@ -1998,8 +1805,7 @@ class ListItemState extends State<ListItem> {
                         })
                     : IconButton(
                         onPressed: () async {
-                          await widget.onUploadPlayPausedPressed(
-                              widget.path, widget.fileName);
+                          await widget.onUploadPlayPausedPressed(widget.path, widget.fileName);
                         },
                         icon: const Icon(
                           Icons.cloud_upload_outlined,

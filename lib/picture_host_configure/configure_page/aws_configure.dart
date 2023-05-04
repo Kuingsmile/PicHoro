@@ -2,7 +2,6 @@ import 'dart:io';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:f_logs/f_logs.dart';
 import 'package:fluro/fluro.dart';
 import 'package:path_provider/path_provider.dart';
@@ -11,7 +10,6 @@ import 'package:minio_new/minio.dart';
 import 'package:horopic/router/application.dart';
 import 'package:horopic/pages/loading.dart';
 import 'package:horopic/utils/common_functions.dart';
-import 'package:horopic/utils/sql_utils.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/event_bus_utils.dart';
 import 'package:horopic/picture_host_manage/manage_api/aws_manage_api.dart';
@@ -96,14 +94,12 @@ class AwsConfigState extends State<AwsConfig> {
         actions: [
           IconButton(
             onPressed: () async {
-              await Application.router.navigateTo(
-                  context, '/configureStorePage?psHost=aws',
-                  transition: TransitionType.cupertino);
+              await Application.router
+                  .navigateTo(context, '/configureStorePage?psHost=aws', transition: TransitionType.cupertino);
               await _initConfig();
               setState(() {});
             },
-            icon: const Icon(Icons.save_as_outlined,
-                color: Color.fromARGB(255, 255, 255, 255), size: 35),
+            icon: const Icon(Icons.save_as_outlined, color: Color.fromARGB(255, 255, 255, 255), size: 35),
           )
         ],
       ),
@@ -165,8 +161,7 @@ class AwsConfigState extends State<AwsConfig> {
                 if (value == null || value.isEmpty) {
                   return '请输入endpoint';
                 }
-                if (value.startsWith('http://') ||
-                    value.startsWith('https://')) {
+                if (value.startsWith('http://') || value.startsWith('https://')) {
                   return 'endpoint不包含http://或https://';
                 }
                 return null;
@@ -240,9 +235,8 @@ class AwsConfigState extends State<AwsConfig> {
             ListTile(
                 title: ElevatedButton(
               onPressed: () async {
-                await Application.router.navigateTo(
-                    context, '/configureStorePage?psHost=aws',
-                    transition: TransitionType.cupertino);
+                await Application.router
+                    .navigateTo(context, '/configureStorePage?psHost=aws', transition: TransitionType.cupertino);
                 await _initConfig();
                 setState(() {});
               },
@@ -284,8 +278,7 @@ class AwsConfigState extends State<AwsConfig> {
       //格式化自定义域名，不以/结尾，以http(s)://开头
       if (customUrl.isEmpty) {
         customUrl = 'None';
-      } else if (!customUrl.startsWith('http') &&
-          !customUrl.startsWith('https')) {
+      } else if (!customUrl.startsWith('http') && !customUrl.startsWith('https')) {
         customUrl = 'http://$customUrl';
       }
 
@@ -296,62 +289,26 @@ class AwsConfigState extends State<AwsConfig> {
       if (region.isEmpty || region.trim().isEmpty) {
         region = 'None';
       }
-
-      List sqlconfig = [];
-      sqlconfig.add(accessKeyID);
-      sqlconfig.add(secretAccessKey);
-      sqlconfig.add(bucket);
-      sqlconfig.add(endpoint);
-      sqlconfig.add(region);
-      sqlconfig.add(uploadPath);
-      sqlconfig.add(customUrl);
-      //添加默认用户
-      String defaultUser = await Global.getUser();
-      sqlconfig.add(defaultUser);
-
-      var queryAws = await MySqlUtils.queryAws(username: defaultUser);
-      var queryuser = await MySqlUtils.queryUser(username: defaultUser);
-
-      if (queryuser == 'Empty') {
-        return showCupertinoAlertDialog(
-            context: context, title: '错误', content: '用户不存在,请先登录');
-      }
-
-      var sqlResult = '';
-
-      if (queryAws == 'Empty') {
-        sqlResult = await MySqlUtils.insertAws(content: sqlconfig);
-      } else {
-        sqlResult = await MySqlUtils.updateAws(content: sqlconfig);
-      }
-
-      if (sqlResult == "Success") {
-        final awsConfig = AwsConfigModel(
-          accessKeyID,
-          secretAccessKey,
-          bucket,
-          endpoint,
-          region,
-          uploadPath,
-          customUrl,
-        );
-        final awsConfigJson = jsonEncode(awsConfig);
-        final awsConfigFile = await localFile;
-        await awsConfigFile.writeAsString(awsConfigJson);
-        return showCupertinoAlertDialog(
-            context: context, title: '成功', content: '配置成功');
-      } else {
-        return showCupertinoAlertDialog(
-            context: context, title: '错误', content: '数据库错误');
-      }
+      final awsConfig = AwsConfigModel(
+        accessKeyID,
+        secretAccessKey,
+        bucket,
+        endpoint,
+        region,
+        uploadPath,
+        customUrl,
+      );
+      final awsConfigJson = jsonEncode(awsConfig);
+      final awsConfigFile = await localFile;
+      await awsConfigFile.writeAsString(awsConfigJson);
+      return showCupertinoAlertDialog(context: context, title: '成功', content: '配置成功');
     } catch (e) {
       FLog.error(
           className: 'AwsConfigPage',
           methodName: 'saveConfig',
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
-      return showCupertinoAlertDialog(
-          context: context, title: '错误', content: e.toString());
+      return showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
     }
   }
 
@@ -361,8 +318,7 @@ class AwsConfigState extends State<AwsConfig> {
       String configData = await awsConfigFile.readAsString();
 
       if (configData == "Error") {
-        return showCupertinoAlertDialog(
-            context: context, title: "检查失败!", content: "请先配置上传参数.");
+        return showCupertinoAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");
       }
 
       Map configMap = jsonDecode(configData);
@@ -399,8 +355,7 @@ class AwsConfigState extends State<AwsConfig> {
           methodName: 'checkAwsConfig',
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
-      return showCupertinoAlertDialog(
-          context: context, title: "检查失败!", content: e.toString());
+      return showCupertinoAlertDialog(context: context, title: "检查失败!", content: e.toString());
     }
   }
 
@@ -432,65 +387,11 @@ class AwsConfigState extends State<AwsConfig> {
 
   _setdefault() async {
     try {
-      String defaultUser = await Global.getUser();
-      String defaultPassword = await Global.getPassword();
-
-      var queryuser = await MySqlUtils.queryUser(username: defaultUser);
-      if (queryuser == 'Empty') {
-        return Fluttertoast.showToast(
-            msg: "请先注册用户",
-            toastLength: Toast.LENGTH_SHORT,
-            timeInSecForIosWeb: 2,
-            fontSize: 16.0);
-      } else if (queryuser['password'] != defaultPassword) {
-        return Fluttertoast.showToast(
-            msg: "请先登录",
-            toastLength: Toast.LENGTH_SHORT,
-            timeInSecForIosWeb: 2,
-            fontSize: 16.0);
-      }
-
-      var queryAws = await MySqlUtils.queryAws(username: defaultUser);
-      if (queryAws == 'Empty') {
-        return Fluttertoast.showToast(
-            msg: "请先配置上传参数",
-            toastLength: Toast.LENGTH_SHORT,
-            timeInSecForIosWeb: 2,
-            fontSize: 16.0);
-      }
-      if (queryAws == 'Error') {
-        return Fluttertoast.showToast(
-            msg: "Error",
-            toastLength: Toast.LENGTH_SHORT,
-            timeInSecForIosWeb: 2,
-            fontSize: 16.0);
-      }
-      if (queryuser['defaultPShost'] == 'aws') {
-        await Global.setPShost('aws');
-        await Global.setShowedPBhost('PBhostExtend2');
-        eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-        eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
-        return Fluttertoast.showToast(
-            msg: "已经是默认配置",
-            toastLength: Toast.LENGTH_SHORT,
-            timeInSecForIosWeb: 2,
-            fontSize: 16.0);
-      } else {
-        List sqlconfig = [];
-        sqlconfig.add(defaultUser);
-        sqlconfig.add(defaultPassword);
-        sqlconfig.add('aws');
-        var updateResult = await MySqlUtils.updateUser(content: sqlconfig);
-        if (updateResult == 'Success') {
-          await Global.setPShost('aws');
-          await Global.setShowedPBhost('PBhostExtend2');
-          eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-          eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
-          showToast('已设置S3兼容平台为默认图床');
-        } else {
-          showToast('写入数据库失败');
-        }
-      }
+      await Global.setPShost('aws');
+      await Global.setShowedPBhost('PBhostExtend2');
+      eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
+      eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
+      showToast('已设置S3兼容平台为默认图床');
     } catch (e) {
       FLog.error(
           className: 'AwsConfigPage',
@@ -511,8 +412,8 @@ class AwsConfigModel {
   final String uploadPath;
   final String customUrl;
 
-  AwsConfigModel(this.accessKeyId, this.secretAccessKey, this.bucket,
-      this.endpoint, this.region, this.uploadPath, this.customUrl);
+  AwsConfigModel(
+      this.accessKeyId, this.secretAccessKey, this.bucket, this.endpoint, this.region, this.uploadPath, this.customUrl);
 
   Map<String, dynamic> toJson() => {
         'accessKeyId': accessKeyId,

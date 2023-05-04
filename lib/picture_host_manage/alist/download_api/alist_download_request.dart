@@ -26,9 +26,5 @@ class DownloadRequest {
           configMap.toString() == other.configMap.toString();
 
   @override
-  int get hashCode =>
-      url.hashCode ^
-      path.hashCode ^
-      fileName.hashCode ^
-      configMap.toString().hashCode;
+  int get hashCode => url.hashCode ^ path.hashCode ^ fileName.hashCode ^ configMap.toString().hashCode;
 }

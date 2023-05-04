@@ -8,12 +8,10 @@ import 'package:f_logs/f_logs.dart';
 
 import 'package:horopic/router/application.dart';
 import 'package:horopic/router/routers.dart';
-import 'package:horopic/picture_host_manage/common_page/loading_state.dart'
-    as loading_state;
+import 'package:horopic/picture_host_manage/common_page/loading_state.dart' as loading_state;
 import 'package:horopic/picture_host_manage/manage_api/alist_manage_api.dart';
 
 import 'package:horopic/utils/common_functions.dart';
-
 
 class AlistBucketList extends StatefulWidget {
   const AlistBucketList({Key? key}) : super(key: key);
@@ -22,12 +20,10 @@ class AlistBucketList extends StatefulWidget {
   AlistBucketListState createState() => AlistBucketListState();
 }
 
-class AlistBucketListState
-    extends loading_state.BaseLoadingPageState<AlistBucketList> {
+class AlistBucketListState extends loading_state.BaseLoadingPageState<AlistBucketList> {
   List bucketMap = [];
 
-  RefreshController refreshController =
-      RefreshController(initialRefresh: false);
+  RefreshController refreshController = RefreshController(initialRefresh: false);
 
   @override
   void initState() {
@@ -51,7 +47,6 @@ class AlistBucketListState
   initBucketList() async {
     bucketMap.clear();
     try {
-
       var bucketListResponse = await AlistManageAPI.getBucketList();
       //判断是否获取成功
       if (bucketListResponse[0] != 'success') {
@@ -79,9 +74,7 @@ class AlistBucketListState
       }
 
       for (var i = 0; i < allBucketList.length; i++) {
-        bucketMap.add({
-          for (var key in allBucketList[i].keys) key: allBucketList[i][key]
-        });
+        bucketMap.add({for (var key in allBucketList[i].keys) key: allBucketList[i][key]});
       }
       if (mounted) {
         setState(() {
@@ -113,8 +106,7 @@ class AlistBucketListState
     Map<dynamic, int> locationCount = {};
     for (var i = 0; i < elements.length; i++) {
       if (locationCount.containsKey(elements[i]['driver'])) {
-        locationCount[elements[i]['driver']] =
-            locationCount[elements[i]['driver']]! + 1;
+        locationCount[elements[i]['driver']] = locationCount[elements[i]['driver']]! + 1;
       } else {
         locationCount[elements[i]['driver']] = 1;
       }
@@ -130,9 +122,8 @@ class AlistBucketListState
         actions: [
           IconButton(
             onPressed: () async {
-              await Application.router.navigateTo(
-                  context, Routes.newAlistBucketNavigation,
-                  transition: TransitionType.cupertino);
+              await Application.router
+                  .navigateTo(context, Routes.newAlistBucketNavigation, transition: TransitionType.cupertino);
               _onRefresh();
             },
             icon: const Icon(
@@ -155,9 +146,7 @@ class AlistBucketListState
             width: 100,
             height: 100,
           ),
-          const Text('没有存储，点击右上角添加哦',
-              style: TextStyle(
-                  fontSize: 20, color: Color.fromARGB(136, 121, 118, 118)))
+          const Text('没有存储，点击右上角添加哦', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118)))
         ],
       ),
     );
@@ -169,9 +158,7 @@ class AlistBucketListState
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Text('加载失败',
-              style: TextStyle(
-                  fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))),
+          const Text('加载失败', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))),
           ElevatedButton(
             style: ButtonStyle(
               backgroundColor: MaterialStateProperty.all(Colors.blue),
@@ -276,10 +263,7 @@ class AlistBucketListState
                         ? '${element['mount_path'].toString().substring(0, 7)}...${element['mount_path'].toString().substring(element['mount_path'].toString().length - 7, element['mount_path'].toString().length)}'
                         : element['mount_path'].toString()),
                 subtitle: Text(element['disabled'] == false ? '已启用' : '被禁用',
-                    style: TextStyle(
-                        color: element['disabled'] == false
-                            ? Colors.green
-                            : Colors.red)),
+                    style: TextStyle(color: element['disabled'] == false ? Colors.green : Colors.red)),
                 onTap: () async {
                   String prefix = element['mount_path'].toString();
                   if (!prefix.endsWith('/')) {
@@ -323,10 +307,7 @@ class AlistBucketListState
                     ? '${element['mount_path'].toString().substring(0, 7)}...${element['mount_path'].toString().substring(element['mount_path'].toString().length - 7, element['mount_path'].toString().length)}'
                     : element['mount_path'].toString()),
             subtitle: Text(element['disabled'] == false ? '已启用' : '被禁用',
-                style: TextStyle(
-                    color: element['disabled'] == false
-                        ? Colors.green
-                        : Colors.red)),
+                style: TextStyle(color: element['disabled'] == false ? Colors.green : Colors.red)),
           ),
           const Divider(
             height: 0.1,
@@ -364,8 +345,8 @@ class AlistBucketListState
             minLeadingWidth: 0,
             title: const Text('存储信息', style: TextStyle(fontSize: 15)),
             onTap: () {
-              Application.router.navigateTo(context,
-                  '${Routes.alistBucketInformation}?bucketMap=${Uri.encodeComponent(jsonEncode(element))}',
+              Application.router.navigateTo(
+                  context, '${Routes.alistBucketInformation}?bucketMap=${Uri.encodeComponent(jsonEncode(element))}',
                   transition: TransitionType.none);
             },
           ),
@@ -380,11 +361,11 @@ class AlistBucketListState
             ),
             minLeadingWidth: 0,
             title: const Text('修改配置', style: TextStyle(fontSize: 15)),
-            onTap: ()async {
-              String update= 'true';
-             await Application.router.navigateTo(context,
-              '${Routes.alistNewBucketConfig}?driver=${Uri.encodeComponent(element['driver'])}&update=${Uri.encodeComponent(update)}&bucketMap=${Uri.encodeComponent(jsonEncode(element))}',
-              transition: TransitionType.cupertino);
+            onTap: () async {
+              String update = 'true';
+              await Application.router.navigateTo(context,
+                  '${Routes.alistNewBucketConfig}?driver=${Uri.encodeComponent(element['driver'])}&update=${Uri.encodeComponent(update)}&bucketMap=${Uri.encodeComponent(jsonEncode(element))}',
+                  transition: TransitionType.cupertino);
               _onRefresh();
             },
           ),
@@ -416,8 +397,7 @@ class AlistBucketListState
                 ),
               ],
               onChanged: (value) async {
-                var response = await AlistManageAPI.changeBucketState(
-                    element, value == 'true' ? false : true);
+                var response = await AlistManageAPI.changeBucketState(element, value == 'true' ? false : true);
                 if (response[0] == 'success') {
                   showToast('修改成功');
                   element['disabled'] = value == 'true' ? false : true;

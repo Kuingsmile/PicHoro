@@ -11,10 +11,7 @@ import 'package:horopic/utils/global.dart';
 
 class FTPImageUploadUtils {
   //上传接口
-  static uploadApi(
-      {required String path,
-      required String name,
-      required Map configMap}) async {
+  static uploadApi({required String path, required String name, required Map configMap}) async {
     String formatedURL = '';
     String ftpHost = configMap["ftpHost"];
     String ftpPort = configMap["ftpPort"];
@@ -25,8 +22,7 @@ class FTPImageUploadUtils {
     String uploadPath = configMap["uploadPath"];
     if (ftpType == 'SFTP') {
       try {
-        final socket =
-            await SSHSocket.connect(ftpHost, int.parse(ftpPort.toString()));
+        final socket = await SSHSocket.connect(ftpHost, int.parse(ftpPort.toString()));
         final client = SSHClient(
           socket,
           username: ftpUser,
@@ -38,11 +34,9 @@ class FTPImageUploadUtils {
         if (uploadPath == 'None') {
           uploadPath = '/';
         }
-        uploadPath =
-            '/${uploadPath.replaceAll(RegExp(r'^/*'), '').replaceAll(RegExp(r'/*$'), '')}/';
+        uploadPath = '/${uploadPath.replaceAll(RegExp(r'^/*'), '').replaceAll(RegExp(r'/*$'), '')}/';
         String urlPath = uploadPath + name;
-        var file = await sftp.open(urlPath,
-            mode: SftpFileOpenMode.create | SftpFileOpenMode.write);
+        var file = await sftp.open(urlPath, mode: SftpFileOpenMode.create | SftpFileOpenMode.write);
         int fileSize = File(path).lengthSync();
         bool operateDone = false;
         file.write(File(path).openRead().cast(), onProgress: (int sent) {
@@ -54,14 +48,12 @@ class FTPImageUploadUtils {
           await Future.delayed(const Duration(milliseconds: 100));
         }
         client.close();
-        String returnUrl =
-            'ftp://$ftpUser:$ftpPassword@$ftpHost:$ftpPort$urlPath';
+        String returnUrl = 'ftp://$ftpUser:$ftpPassword@$ftpHost:$ftpPort$urlPath';
         returnUrl = returnUrl;
         String pictureKey = jsonEncode(configMap);
         String displayUrl = returnUrl;
         if (Global.isCopyLink == true) {
-          formatedURL =
-              linkGenerateDict[Global.defaultLKformat]!(displayUrl, name);
+          formatedURL = linkGenerateDict[Global.defaultLKformat]!(displayUrl, name);
         } else {
           formatedURL = displayUrl;
         }
@@ -113,14 +105,10 @@ class FTPImageUploadUtils {
     } else if (ftpType == 'FTP') {
       FTPConnect ftpConnect;
       if (isAnonymous == 'true') {
-        ftpConnect = FTPConnect(ftpHost,
-            port: int.parse(ftpPort), securityType: SecurityType.FTP);
+        ftpConnect = FTPConnect(ftpHost, port: int.parse(ftpPort), securityType: SecurityType.FTP);
       } else {
         ftpConnect = FTPConnect(ftpHost,
-            port: int.parse(ftpPort),
-            user: ftpUser,
-            pass: ftpPassword,
-            securityType: SecurityType.FTP);
+            port: int.parse(ftpPort), user: ftpUser, pass: ftpPassword, securityType: SecurityType.FTP);
       }
 
       try {
@@ -150,15 +138,13 @@ class FTPImageUploadUtils {
             } else if (ftpPassword == 'None') {
               returnUrl = 'ftp://$ftpUser@$ftpHost:$ftpPort$urlPath';
             } else {
-              returnUrl =
-                  'ftp://$ftpUser:$ftpPassword@$ftpHost:$ftpPort$urlPath';
+              returnUrl = 'ftp://$ftpUser:$ftpPassword@$ftpHost:$ftpPort$urlPath';
             }
             returnUrl = returnUrl;
             String pictureKey = jsonEncode(configMap);
             String displayUrl = returnUrl;
             if (Global.isCopyLink == true) {
-              formatedURL =
-                  linkGenerateDict[Global.defaultLKformat]!(displayUrl, name);
+              formatedURL = linkGenerateDict[Global.defaultLKformat]!(displayUrl, name);
             } else {
               formatedURL = displayUrl;
             }
@@ -247,8 +233,7 @@ class FTPImageUploadUtils {
     try {
       if (ftpType == 'SFTP') {
         try {
-          final socket =
-              await SSHSocket.connect(ftpHost, int.parse(ftpPort.toString()));
+          final socket = await SSHSocket.connect(ftpHost, int.parse(ftpPort.toString()));
           final client = SSHClient(
             socket,
             username: ftpUser,
@@ -281,14 +266,10 @@ class FTPImageUploadUtils {
       } else if (ftpType == 'FTP') {
         FTPConnect ftpConnect;
         if (isAnonymous == 'true') {
-          ftpConnect = FTPConnect(ftpHost,
-              port: int.parse(ftpPort), securityType: SecurityType.FTP);
+          ftpConnect = FTPConnect(ftpHost, port: int.parse(ftpPort), securityType: SecurityType.FTP);
         } else {
           ftpConnect = FTPConnect(ftpHost,
-              port: int.parse(ftpPort),
-              user: ftpUser,
-              pass: ftpPassword,
-              securityType: SecurityType.FTP);
+              port: int.parse(ftpPort), user: ftpUser, pass: ftpPassword, securityType: SecurityType.FTP);
         }
         try {
           var connectResult = await ftpConnect.connect();

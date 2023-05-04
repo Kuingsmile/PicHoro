@@ -37,6 +37,47 @@ class ImgurManageAPI {
     }
   }
 
+  static Future<File> get _manageLocalFile async {
+    final path = await _localPath;
+    return File('$path/imgur_manage.txt');
+  }
+
+  static Future<String> readImgurManageConfig() async {
+    try {
+      final file = await _manageLocalFile;
+      String contents = await file.readAsString();
+      return contents;
+    } catch (e) {
+      FLog.error(
+          className: 'ImgurManageAPI',
+          methodName: 'readImgurManageConfig',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
+      return "Error";
+    }
+  }
+
+  static Future<bool> saveImgurManageConfig(String imguruser, String clientid,
+      String accesstoken, String proxy) async {
+    try {
+      final file = await _manageLocalFile;
+      await file.writeAsString(jsonEncode({
+        'imguruser': imguruser,
+        'clientid': clientid,
+        'accesstoken': accesstoken,
+        'proxy': proxy
+      }));
+      return true;
+    } catch (e) {
+      FLog.error(
+          className: 'ImgurManageAPI',
+          methodName: 'saveImgurManageConfig',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
+      return false;
+    }
+  }
+
   static Future<Map> getConfigMap() async {
     String configStr = await readImgurConfig();
     Map configMap = json.decode(configStr);
@@ -99,7 +140,7 @@ class ImgurManageAPI {
   //get album list
   static getAlbumList(String username, String accesstoken, String proxy) async {
     BaseOptions options = setBaseOptions();
-    
+
     options.headers = {
       "Authorization": "Bearer $accesstoken",
     };

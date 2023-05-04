@@ -119,8 +119,7 @@ class AliyunNewBucketConfigState extends State<AliyunNewBucketConfig> {
           ListTile(
             subtitle: ElevatedButton(
               onPressed: () async {
-                var result =
-                    await AliyunManageAPI.createBucket(newBucketConfig);
+                var result = await AliyunManageAPI.createBucket(newBucketConfig);
                 if (result[0] == 'success') {
                   resetBucketConfig();
                   if (mounted) {

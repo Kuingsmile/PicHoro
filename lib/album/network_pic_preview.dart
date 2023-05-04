@@ -7,8 +7,7 @@ class ImagePreview extends StatefulWidget {
   final int index;
   final List images;
 
-  const ImagePreview({Key? key, required this.index, required this.images})
-      : super(key: key);
+  const ImagePreview({Key? key, required this.index, required this.images}) : super(key: key);
 
   @override
   ImagePreviewState createState() => ImagePreviewState();
@@ -31,7 +30,7 @@ class ImagePreviewState extends State<ImagePreview> {
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
-        title:  titleText('图片预览'),
+        title: titleText('图片预览'),
       ),
       body: PageView.builder(
         controller: _pageController,
@@ -47,8 +46,7 @@ class ImagePreviewState extends State<ImagePreview> {
             fit: BoxFit.contain,
             mode: ExtendedImageMode.gesture,
             cache: true,
-            loadStateChanged: (state) =>
-                defaultLoadStateChanged(state, iconSize: 60),
+            loadStateChanged: (state) => defaultLoadStateChanged(state, iconSize: 60),
             initGestureConfigHandler: (state) {
               return GestureConfig(
                   minScale: 0.9,

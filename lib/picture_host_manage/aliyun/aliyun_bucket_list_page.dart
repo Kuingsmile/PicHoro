@@ -8,14 +8,11 @@ import 'package:f_logs/f_logs.dart';
 
 import 'package:horopic/router/application.dart';
 import 'package:horopic/router/routers.dart';
-import 'package:horopic/picture_host_manage/common_page/loading_state.dart'
-    as loading_state;
+import 'package:horopic/picture_host_manage/common_page/loading_state.dart' as loading_state;
 import 'package:horopic/picture_host_manage/manage_api/aliyun_manage_api.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/global.dart';
-import 'package:horopic/utils/sql_utils.dart';
-import 'package:horopic/picture_host_manage/alist/alist_file_explorer.dart'
-    show RenameDialog, RenameDialogContent;
+import 'package:horopic/picture_host_manage/alist/alist_file_explorer.dart' show RenameDialog, RenameDialogContent;
 
 class AliyunBucketList extends StatefulWidget {
   const AliyunBucketList({Key? key}) : super(key: key);
@@ -24,13 +21,11 @@ class AliyunBucketList extends StatefulWidget {
   AliyunBucketListState createState() => AliyunBucketListState();
 }
 
-class AliyunBucketListState
-    extends loading_state.BaseLoadingPageState<AliyunBucketList> {
+class AliyunBucketListState extends loading_state.BaseLoadingPageState<AliyunBucketList> {
   List bucketMap = [];
   Map<String, String> aclState = {'aclState': '未获取'};
 
-  RefreshController refreshController =
-      RefreshController(initialRefresh: false);
+  RefreshController refreshController = RefreshController(initialRefresh: false);
   TextEditingController vc = TextEditingController();
 
   @override
@@ -54,28 +49,6 @@ class AliyunBucketListState
   initBucketList() async {
     bucketMap.clear();
     try {
-      String currentUser = await Global.getUser();
-      String defaultPassword = await Global.getPassword();
-      var queryuser = await MySqlUtils.queryUser(username: currentUser);
-      if (queryuser == 'Empty') {
-        setState(() {
-          state = loading_state.LoadState.ERROR;
-        });
-        return showToast('请先登录');
-      } else if (queryuser['password'] != defaultPassword) {
-        setState(() {
-          state = loading_state.LoadState.ERROR;
-        });
-        return showToast('请先登录');
-      }
-      var queryAliyun = await MySqlUtils.queryAliyun(username: currentUser);
-      if (queryAliyun == 'Empty') {
-        setState(() {
-          state = loading_state.LoadState.ERROR;
-        });
-        return showToast('请先去配置阿里云');
-      }
-
       var bucketListResponse = await AliyunManageAPI.getBucketList();
 
       //判断是否获取成功
@@ -100,25 +73,20 @@ class AliyunBucketListState
         return;
       }
       //有bucket
-      var allBucketList =
-          bucketListResponse[1]['ListAllMyBucketsResult']['Buckets']['Bucket'];
+      var allBucketList = bucketListResponse[1]['ListAllMyBucketsResult']['Buckets']['Bucket'];
 
       if (allBucketList is! List) {
         allBucketList = [allBucketList];
       }
 
       for (var i = 0; i < allBucketList.length; i++) {
-        String formatedTime = allBucketList[i]['CreationDate']
-            .toString()
-            .replaceAll('T', ' ')
-            .replaceAll('Z', '');
+        String formatedTime = allBucketList[i]['CreationDate'].toString().replaceAll('T', ' ').replaceAll('Z', '');
 
         bucketMap.add({
           'name': allBucketList[i]['Name'],
           'location': allBucketList[i]['Location'],
           'CreationDate': formatedTime,
-          'customUrl': Global.bucketCustomUrl
-                  .containsKey('aliyun-${allBucketList[i]['Name']}')
+          'customUrl': Global.bucketCustomUrl.containsKey('aliyun-${allBucketList[i]['Name']}')
               ? Global.bucketCustomUrl['aliyun-${allBucketList[i]['Name']}']
               : '',
         });
@@ -153,8 +121,7 @@ class AliyunBucketListState
     Map<String, int> locationCount = {};
     for (var i = 0; i < elements.length; i++) {
       if (locationCount.containsKey(elements[i]['location'])) {
-        locationCount[elements[i]['location']] =
-            locationCount[elements[i]['location']]! + 1;
+        locationCount[elements[i]['location']] = locationCount[elements[i]['location']]! + 1;
       } else {
         locationCount[elements[i]['location']] = 1;
       }
@@ -170,9 +137,8 @@ class AliyunBucketListState
         actions: [
           IconButton(
             onPressed: () async {
-              await Application.router.navigateTo(
-                  context, Routes.aliyunNewBucketConfig,
-                  transition: TransitionType.cupertino);
+              await Application.router
+                  .navigateTo(context, Routes.aliyunNewBucketConfig, transition: TransitionType.cupertino);
               _onRefresh();
             },
             icon: const Icon(
@@ -195,9 +161,7 @@ class AliyunBucketListState
             width: 100,
             height: 100,
           ),
-          const Text('没有存储桶，点击右上角添加哦',
-              style: TextStyle(
-                  fontSize: 20, color: Color.fromARGB(136, 121, 118, 118)))
+          const Text('没有存储桶，点击右上角添加哦', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118)))
         ],
       ),
     );
@@ -209,9 +173,7 @@ class AliyunBucketListState
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Text('加载失败',
-              style: TextStyle(
-                  fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))),
+          const Text('加载失败', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))),
           ElevatedButton(
             style: ButtonStyle(
               backgroundColor: MaterialStateProperty.all(Colors.blue),
@@ -271,8 +233,7 @@ class AliyunBucketListState
           shrinkWrap: true,
           elements: bucketMap,
           groupBy: (element) => element['location'],
-          itemComparator: (item1, item2) =>
-              item1['CreationDate'].compareTo(item2['CreationDate']),
+          itemComparator: (item1, item2) => item1['CreationDate'].compareTo(item2['CreationDate']),
           groupComparator: (value1, value2) => value2.compareTo(value1),
           separator: const Divider(
             height: 0.1,
@@ -327,11 +288,9 @@ class AliyunBucketListState
                         element,
                         {'prefix': '', 'delimiter': '/', 'max-keys': 1000},
                       );
-                      var result =
-                          await AliyunManageAPI.queryACLPolicy(element);
+                      var result = await AliyunManageAPI.queryACLPolicy(element);
                       if (result[0] == 'success') {
-                        var granteeURI = result[1]['AccessControlPolicy']
-                            ['AccessControlList']['Grant'];
+                        var granteeURI = result[1]['AccessControlPolicy']['AccessControlList']['Grant'];
                         aclState['aclState'] = granteeURI;
                       } else {
                         aclState['aclState'] = '未获取';
@@ -373,8 +332,7 @@ class AliyunBucketListState
               element['name'],
               style: const TextStyle(fontSize: 14),
             ),
-            subtitle: Text(element['CreationDate'].substring(0, 19),
-                style: const TextStyle(fontSize: 12)),
+            subtitle: Text(element['CreationDate'].substring(0, 19), style: const TextStyle(fontSize: 12)),
           ),
           const Divider(
             height: 0.1,
@@ -395,31 +353,20 @@ class AliyunBucketListState
                   builder: (context) {
                     return RenameDialog(
                       contentWidget: RenameDialogContent(
-                        title: Global.bucketCustomUrl[
-                                    'aliyun-${element['name']}'] ==
-                                ''
+                        title: Global.bucketCustomUrl['aliyun-${element['name']}'] == ''
                             ? '设置自定义链接'
-                            : Global.bucketCustomUrl[
-                                        'aliyun-${element['name']}'] ==
-                                    null
+                            : Global.bucketCustomUrl['aliyun-${element['name']}'] == null
                                 ? '设置自定义链接'
-                                : Global
-                                            .bucketCustomUrl[
-                                                'aliyun-${element['name']}']!
-                                            .length >
-                                        20
+                                : Global.bucketCustomUrl['aliyun-${element['name']}']!.length > 20
                                     ? '${Global.bucketCustomUrl['aliyun-${element['name']}']!.substring(0, 20)}...'
-                                    : Global.bucketCustomUrl[
-                                        'aliyun-${element['name']}']!,
+                                    : Global.bucketCustomUrl['aliyun-${element['name']}']!,
                         okBtnTap: () async {
                           if (!vc.text.startsWith(RegExp(r'http|https'))) {
                             showToast('链接必须以http或https开头');
                             return;
                           }
-                          bucketMap[bucketMap.indexOf(element)]['customUrl'] =
-                              vc.text;
-                          Global.bucketCustomUrl['aliyun-${element['name']}'] =
-                              vc.text;
+                          bucketMap[bucketMap.indexOf(element)]['customUrl'] = vc.text;
+                          Global.bucketCustomUrl['aliyun-${element['name']}'] = vc.text;
                           Global.setBucketCustomUrl(Global.bucketCustomUrl);
                           showToast('设置成功');
                         },
@@ -443,13 +390,11 @@ class AliyunBucketListState
             minLeadingWidth: 0,
             title: const Text('设为默认图床', style: TextStyle(fontSize: 15)),
             onTap: () async {
-              if (aclState['aclState'] == '未获取' ||
-                  aclState['aclState'] == 'private') {
+              if (aclState['aclState'] == '未获取' || aclState['aclState'] == 'private') {
                 showToast('请先修改存储桶权限');
                 return;
               } else {
-                var result =
-                    await AliyunManageAPI.setDefaultBucket(element, null);
+                var result = await AliyunManageAPI.setDefaultBucket(element, null);
                 if (result[0] == 'success') {
                   showToast('设置成功');
                   if (mounted) {
@@ -473,8 +418,8 @@ class AliyunBucketListState
             minLeadingWidth: 0,
             title: const Text('存储桶信息', style: TextStyle(fontSize: 15)),
             onTap: () {
-              Application.router.navigateTo(context,
-                  '${Routes.aliyunBucketInformation}?bucketMap=${Uri.encodeComponent(jsonEncode(element))}',
+              Application.router.navigateTo(
+                  context, '${Routes.aliyunBucketInformation}?bucketMap=${Uri.encodeComponent(jsonEncode(element))}',
                   transition: TransitionType.none);
             },
           ),
@@ -516,8 +461,7 @@ class AliyunBucketListState
               onChanged: (value) async {
                 if (value == '未获取') {
                 } else {
-                  var response =
-                      await AliyunManageAPI.changeACLPolicy(element, value!);
+                  var response = await AliyunManageAPI.changeACLPolicy(element, value!);
                   if (response[0] == 'success') {
                     showToast('修改成功');
                     aclState['aclState'] = value;

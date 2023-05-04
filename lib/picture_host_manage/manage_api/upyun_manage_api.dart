@@ -8,11 +8,9 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'package:horopic/utils/global.dart';
-import 'package:horopic/utils/sql_utils.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/picture_host_configure/configure_page/upyun_configure.dart';
 
-//又拍云的API文档，写的是真的简陋
 class UpyunManageAPI {
   static Map<String?, String> tagConvert = {
     'download': '文件下载',
@@ -56,16 +54,113 @@ class UpyunManageAPI {
     return configMap;
   }
 
+  static Future<File> get _manageLocalFile async {
+    final path = await _localPath;
+    return File('$path/upyun_manage.txt');
+  }
+
+  static Future<String> readUpyunManageConfig() async {
+    try {
+      final file = await _manageLocalFile;
+      String contents = await file.readAsString();
+      return contents;
+    } catch (e) {
+      FLog.error(
+          className: 'UpyunManageAPI',
+          methodName: 'readUpyunManageConfig',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
+      return "Error";
+    }
+  }
+
+  static Future<bool> saveUpyunManageConfig(String email, String password, String token, String tokenname) async {
+    try {
+      final file = await _manageLocalFile;
+      await file
+          .writeAsString(jsonEncode({'email': email, 'password': password, 'token': token, 'tokenname': tokenname}));
+      return true;
+    } catch (e) {
+      FLog.error(
+          className: 'UpyunManageAPI',
+          methodName: 'saveUpyunManageConfig',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
+      return false;
+    }
+  }
+
+  static Future<File> get _operatorLocalFile async {
+    final path = await _localPath;
+    return File('$path/upyun_operator.txt');
+  }
+
+  static Future<String> readUpyunOperatorConfig() async {
+    try {
+      final file = await _operatorLocalFile;
+      String contents = await file.readAsString();
+      return contents;
+    } catch (e) {
+      FLog.error(
+          className: 'UpyunManageAPI',
+          methodName: 'readUpyunOperatorConfig',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
+      return "Error";
+    }
+  }
+
+  static Future<bool> saveUpyunOperatorConfig(String bucket, String email, String operator, String password) async {
+    try {
+      final file = await _operatorLocalFile;
+      var oldContent = {};
+      if (!await file.exists()) {
+        await file.create();
+      } else {
+        String contents = await file.readAsString();
+        oldContent = jsonDecode(contents);
+      }
+      oldContent[bucket] = {'email': email, 'operator': operator, 'password': password};
+      await file.writeAsString(jsonEncode(oldContent));
+      return true;
+    } catch (e) {
+      FLog.error(
+          className: 'UpyunManageAPI',
+          methodName: 'saveUpyunOperatorConfig',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
+      return false;
+    }
+  }
+
+  static Future<bool> deleteUpyunOperatorConfig(String bucket) async {
+    try {
+      final file = await _operatorLocalFile;
+      String contents = await file.readAsString();
+      Map oldContent = jsonDecode(contents);
+      oldContent.remove(bucket);
+      await file.writeAsString(jsonEncode(oldContent));
+      return true;
+    } catch (e) {
+      FLog.error(
+          className: 'UpyunManageAPI',
+          methodName: 'deleteUpyunOperatorConfig',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
+      return false;
+    }
+  }
+
   static getUpyunManageConfigMap() async {
-    var queryUpyunManage =
-        await MySqlUtils.queryUpyunManage(username: Global.defaultUser);
-    if (queryUpyunManage == 'Erorr' || queryUpyunManage == 'Empty') {
+    var queryUpyunManage = await UpyunManageAPI.readUpyunManageConfig();
+    if (queryUpyunManage == 'Erorr') {
       return 'Error';
     } else {
+      var jsonResult = jsonDecode(queryUpyunManage);
       Map upyunManageConfigMap = {
-        'email': queryUpyunManage['email'],
-        'password': queryUpyunManage['password'],
-        'token': queryUpyunManage['token'],
+        'email': jsonResult['email'],
+        'password': jsonResult['password'],
+        'token': jsonResult['token'],
       };
       return upyunManageConfigMap;
     }
@@ -100,8 +195,7 @@ class UpyunManageAPI {
     String operatorPassword,
   ) async {
     try {
-      String passwordMd5 =
-          md5.convert(utf8.encode(operatorPassword)).toString();
+      String passwordMd5 = md5.convert(utf8.encode(operatorPassword)).toString();
       method = method.toUpperCase();
       String date = HttpDate.format(DateTime.now());
       String stringToSing = '';
@@ -111,9 +205,7 @@ class UpyunManageAPI {
       } else {
         stringToSing = '$method&$codedUri&$date&$contentMd5';
       }
-      String signature = base64.encode(Hmac(sha1, utf8.encode(passwordMd5))
-          .convert(utf8.encode(stringToSing))
-          .bytes);
+      String signature = base64.encode(Hmac(sha1, utf8.encode(passwordMd5)).convert(utf8.encode(stringToSing)).bytes);
 
       String authorization = 'UPYUN $operatorName:$signature';
       return authorization;
@@ -158,8 +250,7 @@ class UpyunManageAPI {
         FLog.error(
             className: "UpyunManageAPI",
             methodName: "getToken",
-            text: formatErrorMessage({}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
+            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
@@ -192,8 +283,7 @@ class UpyunManageAPI {
         FLog.error(
             className: "UpyunManageAPI",
             methodName: "checkToken",
-            text: formatErrorMessage({}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
+            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
@@ -231,8 +321,7 @@ class UpyunManageAPI {
         FLog.error(
             className: "UpyunManageAPI",
             methodName: "deleteToken",
-            text: formatErrorMessage({}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
+            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
@@ -300,8 +389,7 @@ class UpyunManageAPI {
         FLog.error(
             className: "UpyunManageAPI",
             methodName: "getBucketList",
-            text: formatErrorMessage({}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
+            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
@@ -346,8 +434,7 @@ class UpyunManageAPI {
         FLog.error(
             className: "UpyunManageAPI",
             methodName: "getBucketInfo",
-            text: formatErrorMessage({}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
+            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
@@ -393,8 +480,7 @@ class UpyunManageAPI {
         FLog.error(
             className: "UpyunManageAPI",
             methodName: "deleteBucket",
-            text: formatErrorMessage({}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
+            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
@@ -439,8 +525,7 @@ class UpyunManageAPI {
         FLog.error(
             className: "UpyunManageAPI",
             methodName: "putBucket",
-            text: formatErrorMessage({}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
+            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
@@ -486,8 +571,7 @@ class UpyunManageAPI {
         FLog.error(
             className: "UpyunManageAPI",
             methodName: "getOperator",
-            text: formatErrorMessage({}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
+            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
@@ -534,8 +618,7 @@ class UpyunManageAPI {
         FLog.error(
             className: "UpyunManageAPI",
             methodName: "putOperator",
-            text: formatErrorMessage({}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
+            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
@@ -582,8 +665,7 @@ class UpyunManageAPI {
         FLog.error(
             className: "UpyunManageAPI",
             methodName: "deleteOperator",
-            text: formatErrorMessage({}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
+            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
@@ -597,19 +679,16 @@ class UpyunManageAPI {
   }
 
   //存储桶设为默认图床
-  static setDefaultBucketFromListPage(
-      Map element, Map upyunManageConfigMap, Map textMap) async {
+  static setDefaultBucketFromListPage(Map element, Map upyunManageConfigMap, Map textMap) async {
     try {
       String bucket = element['bucket_name'];
-      String usernameEmailBucket =
-          '${Global.defaultUser}_${upyunManageConfigMap['email']}_${element['bucket_name']}';
-      var queryOperator =
-          await MySqlUtils.queryUpyunOperator(username: usernameEmailBucket);
-      if (queryOperator == 'Error' || queryOperator == 'Empty') {
+      var queryOperator = await UpyunManageAPI.readUpyunOperatorConfig();
+      if (queryOperator == 'Error') {
         return ['failed'];
       }
-      String operatorName = queryOperator['operator'];
-      String operatorPassword = queryOperator['password'];
+      var jsonResult = jsonDecode(queryOperator);
+      String operatorName = jsonResult['operator'];
+      String operatorPassword = jsonResult['password'];
       String httpPrefix = 'http://';
       String url = '';
       if (element['https'] == true) {
@@ -618,8 +697,7 @@ class UpyunManageAPI {
       if (element['domains'] == null || element['domains'].length == 0) {
         return ['failed'];
       }
-      if (element['domains'].toString().startsWith('https//') ||
-          element['domains'].toString().startsWith('http//')) {
+      if (element['domains'].toString().startsWith('https//') || element['domains'].toString().startsWith('http//')) {
         url = element['domains'];
       } else {
         url = httpPrefix + element['domains'];
@@ -638,39 +716,11 @@ class UpyunManageAPI {
         }
       }
 
-      List sqlconfig = [];
-      sqlconfig.add(bucket);
-      sqlconfig.add(operatorName);
-      sqlconfig.add(operatorPassword);
-      sqlconfig.add(url);
-      sqlconfig.add(options);
-      sqlconfig.add(path);
-      String defaultUser = await Global.getUser();
-      sqlconfig.add(defaultUser);
-      var queryUpyun = await MySqlUtils.queryUpyun(username: defaultUser);
-      var queryuser = await MySqlUtils.queryUser(username: defaultUser);
-
-      if (queryuser == 'Empty') {
-        return ['failed'];
-      }
-      var sqlResult = '';
-
-      if (queryUpyun == 'Empty') {
-        sqlResult = await MySqlUtils.insertUpyun(content: sqlconfig);
-      } else {
-        sqlResult = await MySqlUtils.updateUpyun(content: sqlconfig);
-      }
-
-      if (sqlResult == "Success") {
-        final upyunConfig = UpyunConfigModel(
-            bucket, operatorName, operatorPassword, url, options, path);
-        final upyunConfigJson = jsonEncode(upyunConfig);
-        final upyunConfigFile = await _localFile;
-        await upyunConfigFile.writeAsString(upyunConfigJson);
-        return ['success'];
-      } else {
-        return ['failed'];
-      }
+      final upyunConfig = UpyunConfigModel(bucket, operatorName, operatorPassword, url, options, path);
+      final upyunConfigJson = jsonEncode(upyunConfig);
+      final upyunConfigFile = await _localFile;
+      await upyunConfigFile.writeAsString(upyunConfigJson);
+      return ['success'];
     } catch (e) {
       FLog.error(
           className: "UpyunManageAPI",
@@ -687,8 +737,7 @@ class UpyunManageAPI {
     String uri = '/$bucket$prefix';
     String operator = element['operator'];
     String password = element['password'];
-    String authorization =
-        await upyunAuthorization(method, uri, '', operator, password);
+    String authorization = await upyunAuthorization(method, uri, '', operator, password);
     BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = {
       'Authorization': authorization,
@@ -703,8 +752,7 @@ class UpyunManageAPI {
       var response = await dio.get(url);
       Map responseMap = response.data;
       if (response.statusCode == 200) {
-        if (responseMap['iter'] == null ||
-            responseMap['iter'].toString().isEmpty) {
+        if (responseMap['iter'] == null || responseMap['iter'].toString().isEmpty) {
           return ['success', responseMap['files']];
         } else {
           Map tempMap = Map.from(responseMap);
@@ -778,8 +826,7 @@ class UpyunManageAPI {
       newfolder = newfolder.substring(0, newfolder.length - 1);
     }
     String uri = '/$bucket$prefix$newfolder/';
-    String authorization =
-        await upyunAuthorization(method, uri, '', operator, password);
+    String authorization = await upyunAuthorization(method, uri, '', operator, password);
     BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = {
       'Authorization': authorization,
@@ -834,8 +881,7 @@ class UpyunManageAPI {
       prefix = '$prefix/';
     }
     String uri = '/$bucket$prefix$key';
-    String authorization =
-        await upyunAuthorization(method, uri, '', operator, password);
+    String authorization = await upyunAuthorization(method, uri, '', operator, password);
     BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = {
       'Authorization': authorization,
@@ -908,10 +954,7 @@ class UpyunManageAPI {
           }
         }
         var deleteSelfResult = await deleteFile(
-            element,
-            prefix.substring(
-                0, prefix.length - prefix.split('/').last.length - 1),
-            prefix.split('/').last);
+            element, prefix.substring(0, prefix.length - prefix.split('/').last.length - 1), prefix.split('/').last);
         if (deleteSelfResult[0] != 'success') {
           return ['failed'];
         }
@@ -967,39 +1010,11 @@ class UpyunManageAPI {
         }
       }
 
-      List sqlconfig = [];
-      sqlconfig.add(bucket);
-      sqlconfig.add(operatorName);
-      sqlconfig.add(operatorPassword);
-      sqlconfig.add(url);
-      sqlconfig.add(options);
-      sqlconfig.add(path);
-      String defaultUser = await Global.getUser();
-      sqlconfig.add(defaultUser);
-      var queryUpyun = await MySqlUtils.queryUpyun(username: defaultUser);
-      var queryuser = await MySqlUtils.queryUser(username: defaultUser);
-
-      if (queryuser == 'Empty') {
-        return ['failed'];
-      }
-      var sqlResult = '';
-
-      if (queryUpyun == 'Empty') {
-        sqlResult = await MySqlUtils.insertUpyun(content: sqlconfig);
-      } else {
-        sqlResult = await MySqlUtils.updateUpyun(content: sqlconfig);
-      }
-
-      if (sqlResult == "Success") {
-        final upyunConfig = UpyunConfigModel(
-            bucket, operatorName, operatorPassword, url, options, path);
-        final upyunConfigJson = jsonEncode(upyunConfig);
-        final upyunConfigFile = await _localFile;
-        await upyunConfigFile.writeAsString(upyunConfigJson);
-        return ['success'];
-      } else {
-        return ['failed'];
-      }
+      final upyunConfig = UpyunConfigModel(bucket, operatorName, operatorPassword, url, options, path);
+      final upyunConfigJson = jsonEncode(upyunConfig);
+      final upyunConfigFile = await _localFile;
+      await upyunConfigFile.writeAsString(upyunConfigJson);
+      return ['success'];
     } catch (e) {
       FLog.error(
           className: "UpyunManageAPI",
@@ -1011,8 +1026,7 @@ class UpyunManageAPI {
   }
 
   //重命名文件
-  static renameFile(
-      Map element, String prefix, String key, String newKey) async {
+  static renameFile(Map element, String prefix, String key, String newKey) async {
     String method = 'PUT';
 
     String bucket = element['bucket'];
@@ -1026,8 +1040,7 @@ class UpyunManageAPI {
     }
     String xUpyunMoveSource = '/$bucket$prefix$key';
     String uri = '/$bucket$prefix$newKey';
-    String authorization = await upyunAuthorization(
-        method, uri, '', operatorName, operatorPassword);
+    String authorization = await upyunAuthorization(method, uri, '', operatorName, operatorPassword);
     BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = {
       'Authorization': authorization,
@@ -1051,16 +1064,14 @@ class UpyunManageAPI {
         FLog.error(
             className: "UpyunManageAPI",
             methodName: "renameFile",
-            text: formatErrorMessage(
-                {'prefix': prefix, 'key': key, 'newKey': newKey}, e.toString(),
+            text: formatErrorMessage({'prefix': prefix, 'key': key, 'newKey': newKey}, e.toString(),
                 isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
             className: "UpyunManageAPI",
             methodName: "renameFile",
-            text: formatErrorMessage(
-                {'prefix': prefix, 'key': key, 'newKey': newKey}, e.toString()),
+            text: formatErrorMessage({'prefix': prefix, 'key': key, 'newKey': newKey}, e.toString()),
             dataLogType: DataLogType.ERRORS.toString());
       }
       return [e.toString()];
@@ -1122,9 +1133,7 @@ class UpyunManageAPI {
     String base64Policy = base64.encode(utf8.encode(json.encode(uploadPolicy)));
     String stringToSign = 'POST&/$bucket&$date&$base64Policy&$uploadFileMd5';
     String passwordMd5 = md5.convert(utf8.encode(password)).toString();
-    String signature = base64.encode(Hmac(sha1, utf8.encode(passwordMd5))
-        .convert(utf8.encode(stringToSign))
-        .bytes);
+    String signature = base64.encode(Hmac(sha1, utf8.encode(passwordMd5)).convert(utf8.encode(stringToSign)).bytes);
     String authorization = 'UPYUN $upyunOperator:$signature';
     FormData formData = FormData.fromMap({
       'authorization': authorization,
@@ -1159,19 +1168,14 @@ class UpyunManageAPI {
         FLog.error(
             className: "UpyunManageAPI",
             methodName: "uploadFile",
-            text: formatErrorMessage({
-              'filename': filename,
-              'filepath': filepath,
-              'prefix': prefix
-            }, e.toString(), isDioError: true, dioErrorMessage: e),
+            text: formatErrorMessage({'filename': filename, 'filepath': filepath, 'prefix': prefix}, e.toString(),
+                isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
             className: "UpyunManageAPI",
             methodName: "uploadFile",
-            text: formatErrorMessage(
-                {'filename': filename, 'filepath': filepath, 'prefix': prefix},
-                e.toString()),
+            text: formatErrorMessage({'filename': filename, 'filepath': filepath, 'prefix': prefix}, e.toString()),
             dataLogType: DataLogType.ERRORS.toString());
       }
       return ['error'];
@@ -1181,10 +1185,8 @@ class UpyunManageAPI {
   //从网络链接下载文件后上传
   static uploadNetworkFile(String fileLink, Map element, String prefix) async {
     try {
-      String filename =
-          fileLink.substring(fileLink.lastIndexOf("/") + 1, fileLink.length);
-      filename = filename.substring(
-          0, !filename.contains("?") ? filename.length : filename.indexOf("?"));
+      String filename = fileLink.substring(fileLink.lastIndexOf("/") + 1, fileLink.length);
+      filename = filename.substring(0, !filename.contains("?") ? filename.length : filename.indexOf("?"));
       String savePath = await getTemporaryDirectory().then((value) {
         return value.path;
       });
@@ -1211,24 +1213,21 @@ class UpyunManageAPI {
         FLog.error(
             className: "UpyunManageAPI",
             methodName: "uploadNetworkFile",
-            text: formatErrorMessage(
-                {'fileLink': fileLink, 'prefix': prefix}, e.toString(),
+            text: formatErrorMessage({'fileLink': fileLink, 'prefix': prefix}, e.toString(),
                 isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
             className: "UpyunManageAPI",
             methodName: "uploadNetworkFile",
-            text: formatErrorMessage(
-                {'fileLink': fileLink, 'prefix': prefix}, e.toString()),
+            text: formatErrorMessage({'fileLink': fileLink, 'prefix': prefix}, e.toString()),
             dataLogType: DataLogType.ERRORS.toString());
       }
       return ['failed'];
     }
   }
 
-  static uploadNetworkFileEntry(
-      List fileList, Map element, String prefix) async {
+  static uploadNetworkFileEntry(List fileList, Map element, String prefix) async {
     int successCount = 0;
     int failCount = 0;
 
@@ -1246,22 +1245,13 @@ class UpyunManageAPI {
 
     if (successCount == 0) {
       return Fluttertoast.showToast(
-          msg: '上传失败',
-          toastLength: Toast.LENGTH_SHORT,
-          timeInSecForIosWeb: 2,
-          fontSize: 16.0);
+          msg: '上传失败', toastLength: Toast.LENGTH_SHORT, timeInSecForIosWeb: 2, fontSize: 16.0);
     } else if (failCount == 0) {
       return Fluttertoast.showToast(
-          msg: '上传成功',
-          toastLength: Toast.LENGTH_SHORT,
-          timeInSecForIosWeb: 2,
-          fontSize: 16.0);
+          msg: '上传成功', toastLength: Toast.LENGTH_SHORT, timeInSecForIosWeb: 2, fontSize: 16.0);
     } else {
       return Fluttertoast.showToast(
-          msg: '成功$successCount,失败$failCount',
-          toastLength: Toast.LENGTH_SHORT,
-          timeInSecForIosWeb: 2,
-          fontSize: 16.0);
+          msg: '成功$successCount,失败$failCount', toastLength: Toast.LENGTH_SHORT, timeInSecForIosWeb: 2, fontSize: 16.0);
     }
   }
 }

@@ -109,13 +109,10 @@ class AlistConfigureStoreEditState extends State<AlistConfigureStoreEdit> {
               ),
               textAlign: TextAlign.center,
               validator: (value) {
-                if (value == null ||
-                    value.isEmpty ||
-                    value.toString().trim().isEmpty) {
+                if (value == null || value.isEmpty || value.toString().trim().isEmpty) {
                   return '请输入域名';
                 }
-                if (!value.startsWith('http://') &&
-                    !value.startsWith('https://')) {
+                if (!value.startsWith('http://') && !value.startsWith('https://')) {
                   return '以http://或https://开头';
                 }
                 return null;

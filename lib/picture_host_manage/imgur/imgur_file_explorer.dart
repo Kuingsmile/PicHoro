@@ -22,11 +22,9 @@ import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/router/application.dart';
 import 'package:horopic/router/routers.dart';
-import 'package:horopic/picture_host_manage/common_page/loading_state.dart'
-    as loading_state;
+import 'package:horopic/picture_host_manage/common_page/loading_state.dart' as loading_state;
 import 'package:horopic/utils/image_compress.dart';
-import 'package:horopic/picture_host_manage/aws/aws_file_explorer.dart'
-    show NewFolderDialog, NewFolderDialogContent;
+import 'package:horopic/picture_host_manage/aws/aws_file_explorer.dart' show NewFolderDialog, NewFolderDialogContent;
 
 class ImgurFileExplorer extends StatefulWidget {
   final Map userProfile;
@@ -43,16 +41,14 @@ class ImgurFileExplorer extends StatefulWidget {
   ImgurFileExplorerState createState() => ImgurFileExplorerState();
 }
 
-class ImgurFileExplorerState
-    extends loading_state.BaseLoadingPageState<ImgurFileExplorer> {
+class ImgurFileExplorerState extends loading_state.BaseLoadingPageState<ImgurFileExplorer> {
   List fileAllInfoList = [];
   List dirAllInfoList = [];
   List allInfoList = [];
   List selectedFilesBool = [];
   bool sorted = true;
 
-  RefreshController refreshController =
-      RefreshController(initialRefresh: false);
+  RefreshController refreshController = RefreshController(initialRefresh: false);
   TextEditingController newFolder = TextEditingController();
 
   @override
@@ -207,19 +203,17 @@ class ImgurFileExplorerState
           },
         ),
         titleSpacing: 0,
-        title:
-            Text(widget.albumInfo.isEmpty ? '文件管理' : widget.albumInfo['title'],
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 15,
-                  fontWeight: FontWeight.bold,
-                )),
+        title: Text(widget.albumInfo.isEmpty ? '文件管理' : widget.albumInfo['title'],
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+            )),
         actions: [
           IconButton(
             onPressed: () async {
-              await Application.router.navigateTo(
-                  context, Routes.imgurTokenManagePage,
-                  transition: TransitionType.cupertino);
+              await Application.router
+                  .navigateTo(context, Routes.imgurTokenManagePage, transition: TransitionType.cupertino);
             },
             icon: const Icon(Icons.perm_identity),
             iconSize: 30,
@@ -249,8 +243,7 @@ class ImgurFileExplorerState
                             return b['datetime'].compareTo(a['datetime']);
                           });
                         } else {
-                          List temp = allInfoList.sublist(
-                              dirAllInfoList.length, allInfoList.length);
+                          List temp = allInfoList.sublist(dirAllInfoList.length, allInfoList.length);
                           temp.sort((a, b) {
                             return b['datetime'].compareTo(a['datetime']);
                           });
@@ -267,8 +260,7 @@ class ImgurFileExplorerState
                             return a['datetime'].compareTo(b['datetime']);
                           });
                         } else {
-                          List temp = allInfoList.sublist(
-                              dirAllInfoList.length, allInfoList.length);
+                          List temp = allInfoList.sublist(dirAllInfoList.length, allInfoList.length);
                           temp.sort((a, b) {
                             return a['datetime'].compareTo(b['datetime']);
                           });
@@ -298,8 +290,7 @@ class ImgurFileExplorerState
                             return a['id'].compareTo(b['id']);
                           });
                         } else {
-                          List temp = allInfoList.sublist(
-                              dirAllInfoList.length, allInfoList.length);
+                          List temp = allInfoList.sublist(dirAllInfoList.length, allInfoList.length);
                           temp.sort((a, b) {
                             return a['id'].compareTo(b['id']);
                           });
@@ -316,8 +307,7 @@ class ImgurFileExplorerState
                             return b['id'].compareTo(a['id']);
                           });
                         } else {
-                          List temp = allInfoList.sublist(
-                              dirAllInfoList.length, allInfoList.length);
+                          List temp = allInfoList.sublist(dirAllInfoList.length, allInfoList.length);
                           temp.sort((a, b) {
                             return b['id'].compareTo(a['id']);
                           });
@@ -344,15 +334,12 @@ class ImgurFileExplorerState
                       if (sorted == true) {
                         if (dirAllInfoList.isEmpty) {
                           allInfoList.sort((a, b) {
-                            return double.parse(a['size'].toString())
-                                .compareTo(double.parse(b['size'].toString()));
+                            return double.parse(a['size'].toString()).compareTo(double.parse(b['size'].toString()));
                           });
                         } else {
-                          List temp = allInfoList.sublist(
-                              dirAllInfoList.length, allInfoList.length);
+                          List temp = allInfoList.sublist(dirAllInfoList.length, allInfoList.length);
                           temp.sort((a, b) {
-                            return double.parse(a['size'].toString())
-                                .compareTo(double.parse(b['size'].toString()));
+                            return double.parse(a['size'].toString()).compareTo(double.parse(b['size'].toString()));
                           });
                           allInfoList.clear();
                           allInfoList.addAll(dirAllInfoList);
@@ -364,15 +351,12 @@ class ImgurFileExplorerState
                       } else {
                         if (dirAllInfoList.isEmpty) {
                           allInfoList.sort((a, b) {
-                            return double.parse(b['size'].toString())
-                                .compareTo(double.parse(a['size'].toString()));
+                            return double.parse(b['size'].toString()).compareTo(double.parse(a['size'].toString()));
                           });
                         } else {
-                          List temp = allInfoList.sublist(
-                              dirAllInfoList.length, allInfoList.length);
+                          List temp = allInfoList.sublist(dirAllInfoList.length, allInfoList.length);
                           temp.sort((a, b) {
-                            return double.parse(b['size'].toString())
-                                .compareTo(double.parse(a['size'].toString()));
+                            return double.parse(b['size'].toString()).compareTo(double.parse(a['size'].toString()));
                           });
                           allInfoList.clear();
                           allInfoList.addAll(dirAllInfoList);
@@ -408,8 +392,7 @@ class ImgurFileExplorerState
                             }
                           });
                         } else {
-                          List temp = allInfoList.sublist(
-                              dirAllInfoList.length, allInfoList.length);
+                          List temp = allInfoList.sublist(dirAllInfoList.length, allInfoList.length);
                           temp.sort((a, b) {
                             String type = a['link'].split('.').last;
                             String type2 = b['link'].split('.').last;
@@ -442,8 +425,7 @@ class ImgurFileExplorerState
                             }
                           });
                         } else {
-                          List temp = allInfoList.sublist(
-                              dirAllInfoList.length, allInfoList.length);
+                          List temp = allInfoList.sublist(dirAllInfoList.length, allInfoList.length);
                           temp.sort((a, b) {
                             String type = a['link'].split('.').last;
                             String type2 = b['link'].split('.').last;
@@ -477,8 +459,7 @@ class ImgurFileExplorerState
                       children: [
                         ListTile(
                           minLeadingWidth: 0,
-                          leading: const Icon(Icons.image_outlined,
-                              color: Colors.blue),
+                          leading: const Icon(Icons.image_outlined, color: Colors.blue),
                           title: const Text('上传照片(可多选)'),
                           onTap: () async {
                             Navigator.pop(context);
@@ -487,34 +468,26 @@ class ImgurFileExplorerState
                               selectedAssets: [],
                             );
                             final List<AssetEntity>? pickedImage =
-                                await AssetPicker.pickAssets(context,
-                                    pickerConfig: config);
+                                await AssetPicker.pickAssets(context, pickerConfig: config);
                             if (pickedImage == null) {
                               showToast('未选择图片');
                             } else {
                               List<File> files = [];
                               for (var i = 0; i < pickedImage.length; i++) {
-                                File? fileImage =
-                                    await pickedImage[i].originFile;
+                                File? fileImage = await pickedImage[i].originFile;
                                 if (fileImage != null) {
                                   files.add(fileImage);
                                 }
                               }
                               Map configMap = widget.userProfile;
-                              configMap['albumhash'] =
-                                  widget.albumInfo['id'] ?? 'None';
+                              configMap['albumhash'] = widget.albumInfo['id'] ?? 'None';
                               for (int i = 0; i < files.length; i++) {
                                 File compressedFile;
                                 if (Global.isCompress == true) {
                                   ImageCompress imageCompress = ImageCompress();
-                                  compressedFile =
-                                      await imageCompress.compressAndGetFile(
-                                          files[i].path,
-                                          my_path.basename(files[i].path),
-                                          Global.defaultCompressFormat,
-                                          minHeight: Global.minHeight,
-                                          minWidth: Global.minWidth,
-                                          quality: Global.quality);
+                                  compressedFile = await imageCompress.compressAndGetFile(
+                                      files[i].path, my_path.basename(files[i].path), Global.defaultCompressFormat,
+                                      minHeight: Global.minHeight, minWidth: Global.minWidth, quality: Global.quality);
                                   files[i] = compressedFile;
                                 } else {
                                   compressedFile = files[i];
@@ -527,11 +500,9 @@ class ImgurFileExplorerState
                                 String uploadListStr = jsonEncode(uploadList);
                                 Global.imgurUploadList.add(uploadListStr);
                               }
-                              await Global.setImgurUploadList(
-                                  Global.imgurUploadList);
-                              String downloadPath = await ExternalPath
-                                  .getExternalStoragePublicDirectory(
-                                      ExternalPath.DIRECTORY_DOWNLOADS);
+                              await Global.setImgurUploadList(Global.imgurUploadList);
+                              String downloadPath = await ExternalPath.getExternalStoragePublicDirectory(
+                                  ExternalPath.DIRECTORY_DOWNLOADS);
                               if (mounted) {
                                 String albumName = '';
                                 if (widget.albumInfo.isEmpty) {
@@ -556,11 +527,8 @@ class ImgurFileExplorerState
                           title: const Text('上传剪贴板内链接(换行分隔多个)'),
                           onTap: () async {
                             Navigator.pop(context);
-                            var url = await flutter_services.Clipboard.getData(
-                                'text/plain');
-                            if (url == null ||
-                                url.text == null ||
-                                url.text!.isEmpty) {
+                            var url = await flutter_services.Clipboard.getData('text/plain');
+                            if (url == null || url.text == null || url.text!.isEmpty) {
                               if (mounted) {
                                 showToastWithContext(context, '剪贴板为空');
                               }
@@ -577,12 +545,11 @@ class ImgurFileExplorerState
                                       outsideDismiss: false,
                                       loading: true,
                                       loadingText: "上传中...",
-                                      requestCallBack:
-                                          ImgurManageAPI.uploadNetworkFileEntry(
-                                              fileLinkList,
-                                              widget.userProfile['accesstoken'],
-                                              widget.albumInfo['id'] ?? 'None',
-                                              widget.userProfile['proxy']),
+                                      requestCallBack: ImgurManageAPI.uploadNetworkFileEntry(
+                                          fileLinkList,
+                                          widget.userProfile['accesstoken'],
+                                          widget.albumInfo['id'] ?? 'None',
+                                          widget.userProfile['proxy']),
                                     );
                                   });
                               _getFileList();
@@ -621,16 +588,11 @@ class ImgurFileExplorerState
                                       okBtnTap: () async {
                                         String newName = newFolder.text;
                                         if (newName.isEmpty) {
-                                          showToastWithContext(
-                                              context, "相册名不能为空");
+                                          showToastWithContext(context, "相册名不能为空");
                                           return;
                                         }
-                                        var copyResult =
-                                            await ImgurManageAPI.createAlbum(
-                                                widget
-                                                    .userProfile['accesstoken'],
-                                                newName,
-                                                widget.userProfile['proxy']);
+                                        var copyResult = await ImgurManageAPI.createAlbum(
+                                            widget.userProfile['accesstoken'], newName, widget.userProfile['proxy']);
                                         if (copyResult[0] == 'success') {
                                           showToast('创建成功');
                                           _getFileList();
@@ -658,8 +620,7 @@ class ImgurFileExplorerState
           IconButton(
               onPressed: () async {
                 String downloadPath =
-                    await ExternalPath.getExternalStoragePublicDirectory(
-                        ExternalPath.DIRECTORY_DOWNLOADS);
+                    await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOADS);
                 int index = 1;
                 if (Global.imgurDownloadList.isEmpty) {
                   index = 0;
@@ -683,13 +644,10 @@ class ImgurFileExplorerState
               )),
           IconButton(
             icon: selectedFilesBool.contains(true)
-                ? const Icon(Icons.delete,
-                    color: Color.fromARGB(255, 236, 127, 120), size: 30.0)
-                : const Icon(Icons.delete_outline,
-                    color: Colors.white, size: 30.0),
+                ? const Icon(Icons.delete, color: Color.fromARGB(255, 236, 127, 120), size: 30.0)
+                : const Icon(Icons.delete_outline, color: Colors.white, size: 30.0),
             onPressed: () async {
-              if (!selectedFilesBool.contains(true) ||
-                  selectedFilesBool.isEmpty) {
+              if (!selectedFilesBool.contains(true) || selectedFilesBool.isEmpty) {
                 showToastWithContext(context, '没有选择文件');
                 return;
               }
@@ -794,12 +752,10 @@ class ImgurFileExplorerState
               width: 40,
               child: FloatingActionButton(
                 heroTag: 'download',
-                backgroundColor: selectedFilesBool.contains(true)
-                    ? const Color.fromARGB(255, 180, 236, 182)
-                    : Colors.transparent,
+                backgroundColor:
+                    selectedFilesBool.contains(true) ? const Color.fromARGB(255, 180, 236, 182) : Colors.transparent,
                 onPressed: () async {
-                  if (!selectedFilesBool.contains(true) ||
-                      selectedFilesBool.isEmpty) {
+                  if (!selectedFilesBool.contains(true) || selectedFilesBool.isEmpty) {
                     showToastWithContext(context, '没有选择文件');
                     return;
                   }
@@ -814,12 +770,10 @@ class ImgurFileExplorerState
                     return;
                   }
                   for (int i = 0; i < downloadList.length; i++) {
-                    Global.imgurDownloadList.add(
-                        'https://search.pstatic.net/common?src=${downloadList[i]['link']}');
+                    Global.imgurDownloadList.add('https://search.pstatic.net/common?src=${downloadList[i]['link']}');
                   }
                   String downloadPath =
-                      await ExternalPath.getExternalStoragePublicDirectory(
-                          ExternalPath.DIRECTORY_DOWNLOADS);
+                      await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOADS);
                   String albumName = '';
                   if (widget.albumInfo.isEmpty) {
                     albumName = '其它';
@@ -844,9 +798,8 @@ class ImgurFileExplorerState
               width: 40,
               child: FloatingActionButton(
                 heroTag: 'copy',
-                backgroundColor: selectedFilesBool.contains(true)
-                    ? const Color.fromARGB(255, 232, 177, 241)
-                    : Colors.transparent,
+                backgroundColor:
+                    selectedFilesBool.contains(true) ? const Color.fromARGB(255, 232, 177, 241) : Colors.transparent,
                 elevation: 5,
                 onPressed: () async {
                   if (!selectedFilesBool.contains(true)) {
@@ -855,8 +808,7 @@ class ImgurFileExplorerState
                   } else {
                     List multiUrls = [];
                     for (int i = 0; i < allInfoList.length; i++) {
-                      if (selectedFilesBool[i] &&
-                          allInfoList[i]['link'] != null) {
+                      if (selectedFilesBool[i] && allInfoList[i]['link'] != null) {
                         String finalFormatedurl = ' ';
                         String rawurl = '';
                         String fileName = '';
@@ -864,19 +816,16 @@ class ImgurFileExplorerState
                         fileName = i <= dirAllInfoList.length - 1
                             ? 'Directory'
                             : '${allInfoList[i]['id'].toString()}.${allInfoList[i]['link'].split('.').last}';
-                        finalFormatedurl =
-                            linkGenerateDict[Global.defaultLKformat]!(
-                                rawurl, fileName);
+                        finalFormatedurl = linkGenerateDict[Global.defaultLKformat]!(rawurl, fileName);
                         multiUrls.add(finalFormatedurl);
                       }
                     }
-                    await flutter_services.Clipboard.setData(
-                        flutter_services.ClipboardData(
-                            text: multiUrls
-                                .toString()
-                                .substring(1, multiUrls.toString().length - 1)
-                                .replaceAll(', ', '\n')
-                                .replaceAll(',', '\n')));
+                    await flutter_services.Clipboard.setData(flutter_services.ClipboardData(
+                        text: multiUrls
+                            .toString()
+                            .substring(1, multiUrls.toString().length - 1)
+                            .replaceAll(', ', '\n')
+                            .replaceAll(',', '\n')));
                     if (mounted) {
                       showToastWithContext(context, '已复制全部链接');
                     }
@@ -959,9 +908,7 @@ class ImgurFileExplorerState
               const Center(
                   child: Text('没有文件哦，点击右上角添加吧',
                       textAlign: TextAlign.center,
-                      style: TextStyle(
-                          fontSize: 20,
-                          color: Color.fromARGB(136, 121, 118, 118))))
+                      style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))))
             ],
           ),
         ));
@@ -973,9 +920,7 @@ class ImgurFileExplorerState
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Text('加载失败,请先登录或者检查网络',
-              style: TextStyle(
-                  fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))),
+          const Text('加载失败,请先登录或者检查网络', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))),
           ElevatedButton(
             style: ButtonStyle(
               backgroundColor: MaterialStateProperty.all(Colors.blue),
@@ -1055,25 +1000,19 @@ class ImgurFileExplorerState
                                   builder: (BuildContext context) {
                                     return CupertinoAlertDialog(
                                       title: const Text('通知'),
-                                      content: Text(
-                                          '确定要删除${allInfoList[index]['title']}吗？'),
+                                      content: Text('确定要删除${allInfoList[index]['title']}吗？'),
                                       actions: <Widget>[
                                         CupertinoDialogAction(
-                                          child: const Text('取消',
-                                              style: TextStyle(
-                                                  color: Colors.blue)),
+                                          child: const Text('取消', style: TextStyle(color: Colors.blue)),
                                           onPressed: () {
                                             Navigator.pop(context);
                                           },
                                         ),
                                         CupertinoDialogAction(
-                                          child: const Text('确定',
-                                              style: TextStyle(
-                                                  color: Colors.blue)),
+                                          child: const Text('确定', style: TextStyle(color: Colors.blue)),
                                           onPressed: () async {
                                             Navigator.pop(context);
-                                            var result = await ImgurManageAPI
-                                                .deleteAlbum(
+                                            var result = await ImgurManageAPI.deleteAlbum(
                                               widget.userProfile['accesstoken'],
                                               allInfoList[index]['id'],
                                               widget.userProfile['proxy'],
@@ -1083,8 +1022,7 @@ class ImgurFileExplorerState
                                               setState(() {
                                                 allInfoList.removeAt(index);
                                                 dirAllInfoList.removeAt(index);
-                                                selectedFilesBool
-                                                    .removeAt(index);
+                                                selectedFilesBool.removeAt(index);
                                               });
                                             } else {
                                               showToast('删除失败');
@@ -1107,9 +1045,7 @@ class ImgurFileExplorerState
                         fit: StackFit.loose,
                         children: [
                           Container(
-                            color: selectedFilesBool[index]
-                                ? const Color(0x311192F3)
-                                : Colors.transparent,
+                            color: selectedFilesBool[index] ? const Color(0x311192F3) : Colors.transparent,
                             child: ListTile(
                               minLeadingWidth: 0,
                               minVerticalPadding: 0,
@@ -1118,8 +1054,7 @@ class ImgurFileExplorerState
                                 width: 30,
                                 height: 32,
                               ),
-                              title: Text(allInfoList[index]['title'],
-                                  style: const TextStyle(fontSize: 16)),
+                              title: Text(allInfoList[index]['title'], style: const TextStyle(fontSize: 16)),
                               trailing: const Icon(Icons.chevron_right),
                               onTap: () {
                                 Application.router.navigateTo(context,
@@ -1132,8 +1067,7 @@ class ImgurFileExplorerState
                             // ignore: sort_child_properties_last
                             child: Container(
                               decoration: const BoxDecoration(
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(55)),
+                                  borderRadius: BorderRadius.all(Radius.circular(55)),
                                   color: Color.fromARGB(255, 235, 242, 248)),
                               padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
                               child: MSHCheckbox(
@@ -1182,8 +1116,7 @@ class ImgurFileExplorerState
                               },
                               autoClose: true,
                               padding: EdgeInsets.zero,
-                              backgroundColor:
-                                  const Color.fromARGB(255, 109, 196, 116),
+                              backgroundColor: const Color.fromARGB(255, 109, 196, 116),
                               foregroundColor: Colors.white,
                               icon: Icons.share,
                               label: '分享',
@@ -1200,32 +1133,24 @@ class ImgurFileExplorerState
                                             '确定要删除${allInfoList[index]['id']}.${allInfoList[index]['link'].split('.').last}吗？'),
                                         actions: <Widget>[
                                           CupertinoDialogAction(
-                                            child: const Text('取消',
-                                                style: TextStyle(
-                                                    color: Colors.blue)),
+                                            child: const Text('取消', style: TextStyle(color: Colors.blue)),
                                             onPressed: () {
                                               Navigator.pop(context);
                                             },
                                           ),
                                           CupertinoDialogAction(
-                                            child: const Text('确定',
-                                                style: TextStyle(
-                                                    color: Colors.blue)),
+                                            child: const Text('确定', style: TextStyle(color: Colors.blue)),
                                             onPressed: () async {
                                               Navigator.pop(context);
-                                              var result = await ImgurManageAPI
-                                                  .deleteImage(
-                                                      widget.userProfile[
-                                                          'accesstoken'],
-                                                      allInfoList[index]['id'],
-                                                      widget.userProfile[
-                                                          'proxy']);
+                                              var result = await ImgurManageAPI.deleteImage(
+                                                  widget.userProfile['accesstoken'],
+                                                  allInfoList[index]['id'],
+                                                  widget.userProfile['proxy']);
                                               if (result[0] == 'success') {
                                                 showToast('删除成功');
                                                 setState(() {
                                                   allInfoList.removeAt(index);
-                                                  selectedFilesBool
-                                                      .removeAt(index);
+                                                  selectedFilesBool.removeAt(index);
                                                 });
                                               } else {
                                                 showToast('删除失败');
@@ -1245,9 +1170,7 @@ class ImgurFileExplorerState
                         ),
                         child: Stack(fit: StackFit.loose, children: [
                           Container(
-                            color: selectedFilesBool[index]
-                                ? const Color(0x311192F3)
-                                : Colors.transparent,
+                            color: selectedFilesBool[index] ? const Color(0x311192F3) : Colors.transparent,
                             child: ListTile(
                               minLeadingWidth: 0,
                               minVerticalPadding: 0,
@@ -1259,27 +1182,17 @@ class ImgurFileExplorerState
                               title: Text(
                                   allInfoList[index]['id'].length > 20
                                       // ignore: prefer_interpolation_to_compose_strings
-                                      ? allInfoList[index]['id']
-                                              .toString()
-                                              .substring(0, 10) +
+                                      ? allInfoList[index]['id'].toString().substring(0, 10) +
                                           '...' +
                                           allInfoList[index]['id']
                                               .toString()
-                                              .substring(allInfoList[index]
-                                                          ['id']
-                                                      .toString()
-                                                      .length -
-                                                  10) +
+                                              .substring(allInfoList[index]['id'].toString().length - 10) +
                                           '.' +
-                                          allInfoList[index]['link']
-                                              .split('.')
-                                              .last
+                                          allInfoList[index]['link'].split('.').last
                                       // ignore: prefer_interpolation_to_compose_strings
                                       : allInfoList[index]['id'].toString() +
                                           '.' +
-                                          allInfoList[index]['link']
-                                              .split('.')
-                                              .last,
+                                          allInfoList[index]['link'].split('.').last,
                                   style: const TextStyle(fontSize: 14)),
                               subtitle: Text(
                                   '${DateTime.fromMillisecondsSinceEpoch(allInfoList[index]['datetime'] * 1000).toString().substring(0, 19)} ${getFileSize(int.parse(allInfoList[index]['size'].toString().split('.')[0]))}',
@@ -1301,49 +1214,27 @@ class ImgurFileExplorerState
                               onTap: () async {
                                 String urlList = '';
                                 //预览图片
-                                if (Global.imgExt.contains(allInfoList[index]
-                                        ['link']
-                                    .split('.')
-                                    .last
-                                    .toLowerCase())) {
-                                  int newImageIndex =
-                                      index - dirAllInfoList.length;
-                                  for (int i = dirAllInfoList.length;
-                                      i < allInfoList.length;
-                                      i++) {
-                                    urlList +=
-                                        'https://search.pstatic.net/common?src=${allInfoList[i]['link']},';
+                                if (Global.imgExt.contains(allInfoList[index]['link'].split('.').last.toLowerCase())) {
+                                  int newImageIndex = index - dirAllInfoList.length;
+                                  for (int i = dirAllInfoList.length; i < allInfoList.length; i++) {
+                                    urlList += 'https://search.pstatic.net/common?src=${allInfoList[i]['link']},';
                                   }
-                                  urlList =
-                                      urlList.substring(0, urlList.length - 1);
+                                  urlList = urlList.substring(0, urlList.length - 1);
                                   Application.router.navigateTo(this.context,
                                       '${Routes.albumImagePreview}?index=$newImageIndex&images=${Uri.encodeComponent(urlList)}',
                                       transition: TransitionType.none);
-                                } else if (Global.chewieExt.contains(
-                                    allInfoList[index]['link']
-                                        .split('.')
-                                        .last
-                                        .toLowerCase())) {
+                                } else if (Global.chewieExt
+                                    .contains(allInfoList[index]['link'].split('.').last.toLowerCase())) {
                                   String shareUrl = '';
                                   List videoList = [];
-                                  int newImageIndex =
-                                      index - dirAllInfoList.length;
-                                  for (int i = dirAllInfoList.length;
-                                      i < allInfoList.length;
-                                      i++) {
-                                    if (Global.chewieExt.contains(allInfoList[i]
-                                            ['link']
-                                        .split('.')
-                                        .last
-                                        .toLowerCase())) {
+                                  int newImageIndex = index - dirAllInfoList.length;
+                                  for (int i = dirAllInfoList.length; i < allInfoList.length; i++) {
+                                    if (Global.chewieExt
+                                        .contains(allInfoList[i]['link'].split('.').last.toLowerCase())) {
                                       shareUrl = allInfoList[i]['link'];
                                       videoList.add({
                                         "url": shareUrl,
-                                        "name": allInfoList[i]['id'] +
-                                            '.' +
-                                            allInfoList[i]['link']
-                                                .split('.')
-                                                .last,
+                                        "name": allInfoList[i]['id'] + '.' + allInfoList[i]['link'].split('.').last,
                                       });
                                     } else if (i < index) {
                                       newImageIndex--;
@@ -1353,46 +1244,26 @@ class ImgurFileExplorerState
                                   Application.router.navigateTo(this.context,
                                       '${Routes.netVideoPlayer}?videoList=${Uri.encodeComponent(jsonEncode(videoList))}&index=$newImageIndex&type=${Uri.encodeComponent('normal')}&headers=${Uri.encodeComponent(jsonEncode(headers))}',
                                       transition: TransitionType.none);
-                                } else if (Global.vlcExt.contains(
-                                    allInfoList[index]['link']
-                                        .split('.')
-                                        .last
-                                        .toLowerCase())) {
+                                } else if (Global.vlcExt
+                                    .contains(allInfoList[index]['link'].split('.').last.toLowerCase())) {
                                   //vlc预览视频
                                   String shareUrl = '';
                                   String subUrl = '';
                                   List videoList = [];
-                                  int newImageIndex =
-                                      index - dirAllInfoList.length;
+                                  int newImageIndex = index - dirAllInfoList.length;
                                   Map subtitleFileMap = {};
-                                  for (int i = dirAllInfoList.length;
-                                      i < allInfoList.length;
-                                      i++) {
-                                    if (Global.subtitleFileExt.contains(
-                                        allInfoList[i]['link']
-                                            .split('.')
-                                            .last
-                                            .toLowerCase())) {
-                                      subUrl =
-                                          allInfoList[i]['link'].toString();
-                                      subtitleFileMap[allInfoList[i]['link']
-                                          .split('.')
-                                          .first] = subUrl;
+                                  for (int i = dirAllInfoList.length; i < allInfoList.length; i++) {
+                                    if (Global.subtitleFileExt
+                                        .contains(allInfoList[i]['link'].split('.').last.toLowerCase())) {
+                                      subUrl = allInfoList[i]['link'].toString();
+                                      subtitleFileMap[allInfoList[i]['link'].split('.').first] = subUrl;
                                     }
-                                    if (Global.vlcExt.contains(
-                                        allInfoList[index]['link']
-                                            .split('.')
-                                            .last
-                                            .toLowerCase())) {
-                                      shareUrl =
-                                          allInfoList[i]['link'].toString();
+                                    if (Global.vlcExt
+                                        .contains(allInfoList[index]['link'].split('.').last.toLowerCase())) {
+                                      shareUrl = allInfoList[i]['link'].toString();
                                       videoList.add({
                                         "url": shareUrl,
-                                        "name": allInfoList[i]['id'] +
-                                            '.' +
-                                            allInfoList[i]['link']
-                                                .split('.')
-                                                .last,
+                                        "name": allInfoList[i]['id'] + '.' + allInfoList[i]['link'].split('.').last,
                                         "subtitlePath": '',
                                       });
                                     } else if (i < index) {
@@ -1400,14 +1271,9 @@ class ImgurFileExplorerState
                                     }
                                   }
                                   for (int i = 0; i < videoList.length; i++) {
-                                    if (subtitleFileMap.containsKey(videoList[i]
-                                            ['name']
-                                        .split('.')
-                                        .first)) {
+                                    if (subtitleFileMap.containsKey(videoList[i]['name'].split('.').first)) {
                                       videoList[i]['subtitlePath'] =
-                                          subtitleFileMap[videoList[i]['name']
-                                              .split('.')
-                                              .first];
+                                          subtitleFileMap[videoList[i]['name'].split('.').first];
                                     }
                                   }
                                   Map<String, dynamic> headers = {};
@@ -1423,8 +1289,7 @@ class ImgurFileExplorerState
                             // ignore: sort_child_properties_last
                             child: Container(
                               decoration: const BoxDecoration(
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(55)),
+                                  borderRadius: BorderRadius.all(Radius.circular(55)),
                                   color: Color.fromARGB(255, 235, 242, 248)),
                               padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
                               child: MSHCheckbox(
@@ -1494,14 +1359,10 @@ class ImgurFileExplorerState
                 allInfoList[index]['id'].toString().length > 20
                     ? allInfoList[index]['id'].toString().substring(0, 10) +
                         '...' +
-                        allInfoList[index]['id']
-                            .toString()
-                            .substring(allInfoList[index]['id'].length - 10) +
+                        allInfoList[index]['id'].toString().substring(allInfoList[index]['id'].length - 10) +
                         "." +
                         allInfoList[index]['link'].split('.').last
-                    : allInfoList[index]['id'].toString() +
-                        "." +
-                        allInfoList[index]['link'].split('.').last,
+                    : allInfoList[index]['id'].toString() + "." + allInfoList[index]['link'].split('.').last,
                 style: const TextStyle(fontSize: 14)),
             subtitle: Text(
               '${DateTime.fromMillisecondsSinceEpoch(allInfoList[index]['datetime'] * 1000).toString().substring(0, 19)}  ${getFileSize(int.parse(allInfoList[index]['size'].toString().split('.')[0]))}',
@@ -1522,8 +1383,8 @@ class ImgurFileExplorerState
               onTap: () async {
                 Navigator.pop(context);
                 Map fileMap = allInfoList[index];
-                Application.router.navigateTo(context,
-                    '${Routes.imgurFileInformation}?fileMap=${Uri.encodeComponent(jsonEncode(fileMap))}',
+                Application.router.navigateTo(
+                    context, '${Routes.imgurFileInformation}?fileMap=${Uri.encodeComponent(jsonEncode(fileMap))}',
                     transition: TransitionType.cupertino);
               }),
           const Divider(
@@ -1543,10 +1404,8 @@ class ImgurFileExplorerState
               String filename = allInfoList[index]['id'] == null
                   ? 'None'
                   : '${allInfoList[index]['id'].toString()}.${allInfoList[index]['link'].split('.').last}';
-              String formatedLink =
-                  linkGenerateDict[format]!(shareUrl, filename);
-              await flutter_services.Clipboard.setData(
-                  flutter_services.ClipboardData(text: formatedLink));
+              String formatedLink = linkGenerateDict[format]!(shareUrl, filename);
+              await flutter_services.Clipboard.setData(flutter_services.ClipboardData(text: formatedLink));
               if (mounted) {
                 Navigator.pop(context);
               }
@@ -1572,25 +1431,20 @@ class ImgurFileExplorerState
                 builder: (BuildContext context) {
                   return CupertinoAlertDialog(
                     title: const Text('通知'),
-                    content: Text(
-                        '确定要删除${allInfoList[index]['id']}.${allInfoList[index]['link'].split('.').last}吗？'),
+                    content: Text('确定要删除${allInfoList[index]['id']}.${allInfoList[index]['link'].split('.').last}吗？'),
                     actions: <Widget>[
                       CupertinoDialogAction(
-                        child: const Text('取消',
-                            style: TextStyle(color: Colors.blue)),
+                        child: const Text('取消', style: TextStyle(color: Colors.blue)),
                         onPressed: () {
                           Navigator.pop(context);
                         },
                       ),
                       CupertinoDialogAction(
-                        child: const Text('确定',
-                            style: TextStyle(color: Colors.blue)),
+                        child: const Text('确定', style: TextStyle(color: Colors.blue)),
                         onPressed: () async {
                           Navigator.pop(context);
                           var result = await ImgurManageAPI.deleteImage(
-                              widget.userProfile['accesstoken'],
-                              allInfoList[index]['id'],
-                              widget.userProfile['proxy']);
+                              widget.userProfile['accesstoken'], allInfoList[index]['id'], widget.userProfile['proxy']);
                           if (result[0] == 'success') {
                             showToast('删除成功');
                             setState(() {

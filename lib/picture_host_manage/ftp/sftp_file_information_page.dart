@@ -3,11 +3,10 @@ import 'package:horopic/utils/common_functions.dart';
 
 class SFTPFileInformation extends StatefulWidget {
   final Map fileMap;
-  const SFTPFileInformation({Key? key, required this.fileMap})
-      : super(key: key);
+  const SFTPFileInformation({Key? key, required this.fileMap}) : super(key: key);
 
   @override
- SFTPFileInformationState createState() => SFTPFileInformationState();
+  SFTPFileInformationState createState() => SFTPFileInformationState();
 }
 
 class SFTPFileInformationState extends State<SFTPFileInformation> {
@@ -57,15 +56,15 @@ class SFTPFileInformationState extends State<SFTPFileInformation> {
           ),
           ListTile(
             title: const Text('文件所有者权限'),
-            subtitle: SelectableText(permissionTranslate(widget.fileMap['permissions'].substring(1,3))),
+            subtitle: SelectableText(permissionTranslate(widget.fileMap['permissions'].substring(1, 3))),
           ),
           ListTile(
             title: const Text('文件所属组权限'),
-            subtitle: SelectableText(permissionTranslate(widget.fileMap['permissions'].substring(4,6))),
+            subtitle: SelectableText(permissionTranslate(widget.fileMap['permissions'].substring(4, 6))),
           ),
           ListTile(
             title: const Text('其他用户权限'),
-            subtitle: SelectableText(permissionTranslate(widget.fileMap['permissions'].substring(7,9))),
+            subtitle: SelectableText(permissionTranslate(widget.fileMap['permissions'].substring(7, 9))),
           ),
           ListTile(
             title: const Text('文件大小'),
@@ -74,12 +73,14 @@ class SFTPFileInformationState extends State<SFTPFileInformation> {
           ListTile(
             isThreeLine: true,
             title: const Text('文件最后修改时间'),
-            subtitle: SelectableText(DateTime.fromMillisecondsSinceEpoch(widget.fileMap['mtime'] * 1000).toString().substring(0,19)),
+            subtitle: SelectableText(
+                DateTime.fromMillisecondsSinceEpoch(widget.fileMap['mtime'] * 1000).toString().substring(0, 19)),
           ),
           ListTile(
             isThreeLine: true,
             title: const Text('文件最后访问时间'),
-            subtitle: SelectableText(DateTime.fromMillisecondsSinceEpoch(widget.fileMap['atime'] * 1000).toString().substring(0,19)),
+            subtitle: SelectableText(
+                DateTime.fromMillisecondsSinceEpoch(widget.fileMap['atime'] * 1000).toString().substring(0, 19)),
           ),
         ],
       ),
