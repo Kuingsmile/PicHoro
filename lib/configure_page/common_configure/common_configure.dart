@@ -33,7 +33,7 @@ class CommonConfigState extends State<CommonConfig> {
       body: ListView(
         children: [
           ListTile(
-            title: const Text('文件重命名方式选项'),
+            title: const Text('文件重命名方式'),
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () {
               Application.router.navigateTo(context, Routes.renameFile, transition: TransitionType.cupertino);
@@ -52,6 +52,19 @@ class CommonConfigState extends State<CommonConfig> {
           ListTile(
             title: const Text('默认复制链接格式'),
             trailing: const Icon(Icons.arrow_forward_ios),
+            onTap: () {
+              Application.router.navigateTo(context, Routes.linkFormatSelect, transition: TransitionType.cupertino);
+            },
+          ),
+          ListTile(
+            title: const Text('复制时URL编码'),
+            trailing: Switch(
+              value: Global.isURLEncode,
+              onChanged: (value) async {
+                await Global.setIsURLEncode(value);
+                setState(() {});
+              },
+            ),
             onTap: () {
               Application.router.navigateTo(context, Routes.linkFormatSelect, transition: TransitionType.cupertino);
             },

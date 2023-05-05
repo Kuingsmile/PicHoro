@@ -177,10 +177,6 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
   _imageFromCamera() async {
     final XFile? pickedImage = await _picker.pickImage(source: ImageSource.camera, imageQuality: 100);
 
-    if (Global.defaultUser == ' ' || Global.defaultUser == '') {
-      showToast('请先登录');
-      return;
-    }
     if (pickedImage == null) {
       showToast('未拍摄图片');
       return;
@@ -216,10 +212,6 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
 
   _imageFromNetwork() async {
     var url = await flutter_services.Clipboard.getData('text/plain');
-    if (Global.defaultUser == ' ' || Global.defaultUser == '') {
-      showToast('请先登录');
-      return;
-    }
     if (url == null) {
       showToast('剪贴板为空');
       return true;
@@ -300,10 +292,6 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
 
   _cameraAndBack() async {
     XFile? pickedImage = await _picker.pickImage(source: ImageSource.camera, imageQuality: 100);
-    if (Global.defaultUser == ' ' || Global.defaultUser == '') {
-      showToast('请先登录');
-      return;
-    }
     if (pickedImage == null) {
       if (Global.isCopyLink == true) {
         if (clipboardList.isEmpty) {
@@ -591,10 +579,6 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
 
     if (pickedImage == null) {
       showToast("未选择图片");
-      return;
-    }
-    if (Global.defaultUser == ' ' || Global.defaultUser == '') {
-      showToast("请先登录");
       return;
     }
 
@@ -1316,12 +1300,6 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
                       height: 10,
                     ),
                     const Text('空空如也哦 点击下方按钮上传',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    const Text('注意：上传前请先登录',
                         textAlign: TextAlign.center,
                         style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))),
                   ],

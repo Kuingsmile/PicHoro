@@ -17,6 +17,7 @@ class Global {
   static bool isTimeStamp = false; //是否使用时间戳重命名
   static bool isRandomName = false; //是否使用随机字符串重命名
   static bool isCopyLink = true; //是否复制链接
+  static bool isURLEncode = false; //是否URL编码
   static Database? imageDB; //默认相册数据库
   static Database? imageDBExtend; //扩展相册数据库
   static String defaultShowedPBhost = 'lskypro'; //默认显示的图床
@@ -502,6 +503,18 @@ class Global {
     await SpUtil.getInstance();
     bool isCopyLink = SpUtil.getBool('key_isCopyLink', defValue: true)!;
     return isCopyLink;
+  }
+
+  static setIsURLEncode(bool isURLEncode) async {
+    await SpUtil.getInstance();
+    SpUtil.putBool('key_isURLEncode', isURLEncode);
+    Global.isURLEncode = isURLEncode;
+  }
+
+  static getIsURLEncode() async {
+    await SpUtil.getInstance();
+    bool isURLEncode = SpUtil.getBool('key_isURLEncode', defValue: false)!;
+    return isURLEncode;
   }
 
   static getDatabase() async {

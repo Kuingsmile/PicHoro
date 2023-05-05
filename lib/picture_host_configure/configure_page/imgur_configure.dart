@@ -201,24 +201,16 @@ class ImgurConfigState extends State<ImgurConfig> {
         }
         dio.useProxy(proxyClean);
       }
-      try {
-        var validateResponse = await dio.post(validateURL, data: formData);
-        if (validateResponse.statusCode == 200 && validateResponse.data['success'] == true) {
-          final imgurConfig = ImgurConfigModel(clientId, proxy);
-          final imgurConfigJson = jsonEncode(imgurConfig);
-          final imgurConfigFile = await localFile;
-          await imgurConfigFile.writeAsString(imgurConfigJson);
-          return showCupertinoAlertDialog(context: context, title: '成功', content: '配置成功');
-        } else {
-          return showCupertinoAlertDialog(context: context, title: '错误', content: 'clientId错误');
-        }
-      } catch (e) {
-        FLog.error(
-            className: 'ImgurConfigPage',
-            methodName: '_saveImgurConfig_1',
-            text: formatErrorMessage({}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-        return showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
+
+      var validateResponse = await dio.post(validateURL, data: formData);
+      if (validateResponse.statusCode == 200 && validateResponse.data['success'] == true) {
+        final imgurConfig = ImgurConfigModel(clientId, proxy);
+        final imgurConfigJson = jsonEncode(imgurConfig);
+        final imgurConfigFile = await localFile;
+        await imgurConfigFile.writeAsString(imgurConfigJson);
+        return showCupertinoAlertDialog(context: context, title: '成功', content: '配置成功');
+      } else {
+        return showCupertinoAlertDialog(context: context, title: '错误', content: 'clientId错误');
       }
     } catch (e) {
       FLog.error(
@@ -266,9 +258,8 @@ class ImgurConfigState extends State<ImgurConfig> {
             context: context,
             title: '通知',
             content: '检测通过，您的配置信息为:\nclientId:\n${configMap["clientId"]}\n代理:\n${configMap["proxy"]}');
-      } else {
-        return showCupertinoAlertDialog(context: context, title: '错误', content: '配置有误，请检查网络或重新配置');
       }
+      return showCupertinoAlertDialog(context: context, title: '错误', content: '配置有误，请检查网络或重新配置');
     } catch (e) {
       FLog.error(
           className: 'ImgurConfigPage',

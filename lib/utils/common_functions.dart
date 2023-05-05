@@ -387,75 +387,68 @@ renamePictureWithCustomFormat(File file) async {
 
 //generate url formated url by raw url
 String generateUrl(String rawUrl, String fileName) {
+  if (Global.isURLEncode) {
+    rawUrl = Uri.encodeFull(rawUrl);
+  }
   return rawUrl;
 }
 
-//generate html formated url by raw url
 String generateHtmlFormatedUrl(String rawUrl, String fileName) {
-  String htmlFormatedUrl = '<img src="$rawUrl" alt="$fileName" title="$fileName" />';
-  return htmlFormatedUrl;
+  String encodedUrl = Global.isURLEncode ? Uri.encodeFull(rawUrl) : rawUrl;
+  return '<img src="$encodedUrl" alt="$fileName" title="$fileName" />';
 }
 
-//generate markdown formated url by raw url
 String generateMarkdownFormatedUrl(String rawUrl, String fileName) {
-  String markdownFormatedUrl = '![$fileName]($rawUrl)';
-  return markdownFormatedUrl;
+  String encodedUrl = Global.isURLEncode ? Uri.encodeFull(rawUrl) : rawUrl;
+  return '![$fileName]($encodedUrl)';
 }
 
-//generate markdown with link formated url by raw url
 String generateMarkdownWithLinkFormatedUrl(String rawUrl, String fileName) {
+  if (Global.isURLEncode) {
+    rawUrl = Uri.encodeFull(rawUrl);
+  }
   String markdownWithLinkFormatedUrl = '[![$fileName]($rawUrl)]($rawUrl)';
   return markdownWithLinkFormatedUrl;
 }
 
-//generate BBCode formated url by raw url
-String generateBBcodeFormatedUrl(String rawUrl, String fileName) {
-  String bbCodeFormatedUrl = '[img]$rawUrl[/img]';
-  return bbCodeFormatedUrl;
+String generateBBcodeFormatedUrl(String url, String fileName) {
+  String encodedUrl = Global.isURLEncode ? Uri.encodeFull(url) : url;
+  return '[img]$encodedUrl[/img]';
 }
 
-//generate custom formated url by url and format
 String generateCustomFormatedUrl(String url, String filename) {
-  String fileName = filename;
-  String rawUrl = url;
-  String customLinkFormat = Global.customLinkFormat;
-  String customFormatedUrl = customLinkFormat.replaceAll(r'$fileName', fileName).replaceAll(r'$url', rawUrl);
-  return customFormatedUrl;
+  String encodeUrl = Global.isURLEncode ? Uri.encodeFull(url) : url;
+  return Global.customLinkFormat.replaceAll(r'$fileName', filename).replaceAll(r'$url', encodeUrl);
 }
 
-//计算文件大小
 String getFileSize(int fileSize) {
-  String str = '';
-
-  if (fileSize < 1024) {
-    str = '${fileSize}B';
-  } else if (fileSize < 1024 * 1024) {
-    str = '${(fileSize / 1024).toStringAsFixed(2)}KB';
-  } else if (fileSize < 1024 * 1024 * 1024) {
-    str = '${(fileSize / 1024 / 1024).toStringAsFixed(2)}MB';
-  } else {
-    str = '${(fileSize / 1024 / 1024 / 1024).toStringAsFixed(2)}GB';
-  }
-  return str;
+  return fileSize < 1024
+      ? '${fileSize}B'
+      : fileSize < 1024 * 1024
+          ? '${(fileSize / 1024).toStringAsFixed(2)}KB'
+          : fileSize < 1024 * 1024 * 1024
+              ? '${(fileSize / 1024 / 1024).toStringAsFixed(2)}MB'
+              : '${(fileSize / 1024 / 1024 / 1024).toStringAsFixed(2)}GB';
 }
 
 //选择文件图标
 String selectIcon(String ext) {
   if (ext == '') {
     return 'assets/icons/unknown.png';
-  } else {
-    String extNoDot = ext.substring(1);
-    extNoDot = extNoDot.toLowerCase();
-    String iconPath = 'assets/icons/';
-    if (extNoDot == '') {
-      iconPath += '_blank.png';
-    } else if (Global.iconList.contains(extNoDot)) {
-      iconPath += '$extNoDot.png';
-    } else {
-      iconPath += 'unknown.png';
-    }
-    return iconPath;
   }
+  if (!ext.startsWith('.')) {
+    ext = '.$ext';
+  }
+  String extNoDot = ext.substring(1).toLowerCase();
+  String iconPath = 'assets/icons/';
+  if (extNoDot == '') {
+    iconPath += '_blank.png';
+  } else if (Global.iconList.contains(extNoDot)) {
+    iconPath += '$extNoDot.png';
+  } else {
+    iconPath += 'unknown.png';
+  }
+  return iconPath;
 }
 
 //获得content-type
@@ -548,7 +541,6 @@ mainInit() async {
   await Permissionutils.askPermissionManageExternalStorage();
   await Permissionutils.askPermissionMediaLibrary();
   await Permissionutils.askPermissionRequestInstallPackage();
-  //初始化全局信息，会在APP启动时执行
   String initUser = await Global.getUser();
   await Global.setUser(initUser);
   deleteApkFile();
@@ -565,6 +557,8 @@ mainInit() async {
   Global.setRandomName(initIsRandomName);
   bool initIsCopyLink = await Global.getCopyLink();
   Global.setCopyLink(initIsCopyLink);
+  bool initIsURLEncode = await Global.getIsURLEncode();
+  Global.setIsURLEncode(initIsURLEncode);
   String initShowedPBhost = await Global.getShowedPBhost();
   await Global.setShowedPBhost(initShowedPBhost);
   bool isDeleteLocal = await Global.getDeleteLocal();

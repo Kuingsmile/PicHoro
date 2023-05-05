@@ -96,7 +96,6 @@ class CompressConfigureState extends State<CompressConfigure> {
                   await Global.setquality(quality);
                 },
               ),
-              //defaultFormat select dropdown
               ListTile(
                 title: const Text('压缩后格式'),
                 trailing: DropdownButton<String>(

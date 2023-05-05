@@ -44,10 +44,12 @@ class ConfigurePageState extends State<ConfigurePage> with AutomaticKeepAliveCli
     final PackageInfo info = await PackageInfo.fromPlatform();
     String remoteVersion = ' ';
     remoteVersion = await getRemoteVersion();
-    setState(() {
-      version = info.version;
-      latestVersion = remoteVersion;
-    });
+    if (mounted) {
+      setState(() {
+        version = info.version;
+        latestVersion = remoteVersion;
+      });
+    }
   }
 
   _checkUpdate() async {
@@ -57,10 +59,9 @@ class ConfigurePageState extends State<ConfigurePage> with AutomaticKeepAliveCli
     String remoteVersion = await getRemoteVersion();
     if (version != remoteVersion) {
       _showUpdateDialog(version, remoteVersion);
-    } else {
-      return Fluttertoast.showToast(
-          msg: "已是最新版本", toastLength: Toast.LENGTH_SHORT, timeInSecForIosWeb: 2, fontSize: 16.0);
     }
+    return Fluttertoast.showToast(
+        msg: "已是最新版本", toastLength: Toast.LENGTH_SHORT, timeInSecForIosWeb: 2, fontSize: 16.0);
   }
 
   _showUpdateDialog(String version, String remoteVersion) {
