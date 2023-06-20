@@ -790,8 +790,16 @@ class SFTPFileExplorerState extends loading_state.BaseLoadingPageState<SFTPFileE
                         String finalFormatedurl = ' ';
                         String rawurl = '';
                         String fileName = '';
-                        rawurl =
-                            'ftp://${widget.element['ftpUser']}@${widget.element['ftpPassword']}@${widget.element['ftpHost']}:${widget.element['ftpPort']}${widget.bucketPrefix}${allInfoList[i]['name']}';
+                        String customUrl =
+                            widget.element['ftpCustomUrl'] == null || widget.element['ftpCustomUrl'] == ''
+                                ? 'None'
+                                : widget.element['ftpCustomUrl'];
+                        if (customUrl != 'None') {
+                          rawurl = '$customUrl${widget.bucketPrefix}${allInfoList[i]['name']}';
+                        } else {
+                          rawurl =
+                              'ftp://${widget.element['ftpUser']}@${widget.element['ftpPassword']}@${widget.element['ftpHost']}:${widget.element['ftpPort']}${widget.bucketPrefix}${allInfoList[i]['name']}';
+                        }
                         fileName = allInfoList[i]['name'];
                         finalFormatedurl = linkGenerateDict[Global.defaultLKformat]!(rawurl, fileName);
                         multiUrls.add(finalFormatedurl);
@@ -1343,8 +1351,17 @@ class SFTPFileExplorerState extends loading_state.BaseLoadingPageState<SFTPFileE
             title: const Text('复制链接(设置中的默认格式)'),
             onTap: () async {
               String format = await Global.getLKformat();
-              String shareUrl =
-                  'ftp://${widget.element['ftpUser']}@${widget.element['ftpPassword']}@${widget.element['ftpHost']}:${widget.element['ftpPort']}${widget.bucketPrefix}${allInfoList[index]['name']}';
+              String shareUrl = '';
+              String customUrl = widget.element['ftpCustomUrl'] == null || widget.element['ftpCustomUrl'] == ''
+                  ? 'None'
+                  : widget.element['ftpCustomUrl'];
+              if (customUrl != 'None') {
+                shareUrl = '$customUrl${widget.bucketPrefix}${allInfoList[index]['name']}';
+              } else {
+                shareUrl =
+                    'ftp://${widget.element['ftpUser']}@${widget.element['ftpPassword']}@${widget.element['ftpHost']}:${widget.element['ftpPort']}${widget.bucketPrefix}${allInfoList[index]['name']}';
+              }
+
               String filename = allInfoList[index]['name'];
               String formatedLink = linkGenerateDict[format]!(shareUrl, filename);
               await flutter_services.Clipboard.setData(flutter_services.ClipboardData(text: formatedLink));

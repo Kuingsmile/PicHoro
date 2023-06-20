@@ -802,6 +802,8 @@ class UploadManager {
         String ftpType = configMap["ftpType"];
         String isAnonymous = configMap["isAnonymous"].toString();
         String uploadPath = configMap["uploadPath"];
+        String? ftpCustomUrl = configMap["ftpCustomUrl"];
+        String? ftpWebPath = configMap["ftpWebPath"];
 
         if (ftpType == 'SFTP') {
           final socket = await SSHSocket.connect(ftpHost, int.parse(ftpPort.toString()));
@@ -836,10 +838,23 @@ class UploadManager {
             await Future.delayed(const Duration(milliseconds: 100));
           }
           client.close();
-          String returnUrl = 'ftp://$ftpUser:$ftpPassword@$ftpHost:$ftpPort$urlPath';
-          returnUrl = returnUrl;
+          String returnUrl = '';
+          String displayUrl = '';
+          if (ftpCustomUrl != null && ftpCustomUrl != 'None') {
+            ftpCustomUrl = ftpCustomUrl.replaceAll(RegExp(r'/$'), '');
+            if (ftpWebPath != null && ftpWebPath != 'None') {
+              ftpWebPath = ftpWebPath.replaceAll(RegExp(r'^/*'), '').replaceAll(RegExp(r'/*$'), '');
+              returnUrl = '$ftpCustomUrl/$ftpWebPath/$fileName';
+            } else {
+              urlPath = urlPath.replaceAll(RegExp(r'^/*'), '');
+              returnUrl = '$ftpCustomUrl/$urlPath';
+            }
+            displayUrl = returnUrl;
+          } else {
+            returnUrl = 'ftp://$ftpUser:$ftpPassword@$ftpHost:$ftpPort$urlPath';
+            displayUrl = returnUrl;
+          }
           String pictureKey = jsonEncode(configMap);
-          String displayUrl = returnUrl;
 
           eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
           Map<String, dynamic> maps = {};
@@ -920,16 +935,28 @@ class UploadManager {
             );
             if (res == true) {
               String returnUrl = '';
-              if (isAnonymous == 'true') {
-                returnUrl = 'ftp://$ftpHost:$ftpPort$urlPath';
-              } else if (ftpPassword == 'None') {
-                returnUrl = 'ftp://$ftpUser@$ftpHost:$ftpPort$urlPath';
+              String displayUrl = '';
+              if (ftpCustomUrl != null && ftpCustomUrl != 'None') {
+                ftpCustomUrl = ftpCustomUrl.replaceAll(RegExp(r'/$'), '');
+                if (ftpWebPath != null && ftpWebPath != 'None') {
+                  ftpWebPath = ftpWebPath.replaceAll(RegExp(r'^/*'), '').replaceAll(RegExp(r'/*$'), '');
+                  returnUrl = '$ftpCustomUrl/$ftpWebPath/$fileName';
+                } else {
+                  urlPath = urlPath.replaceAll(RegExp(r'^/*'), '');
+                  returnUrl = '$ftpCustomUrl/$urlPath';
+                }
+                displayUrl = returnUrl;
               } else {
-                returnUrl = 'ftp://$ftpUser:$ftpPassword@$ftpHost:$ftpPort$urlPath';
+                if (isAnonymous == 'true') {
+                  returnUrl = 'ftp://$ftpHost:$ftpPort$urlPath';
+                } else if (ftpPassword == 'None') {
+                  returnUrl = 'ftp://$ftpUser@$ftpHost:$ftpPort$urlPath';
+                } else {
+                  returnUrl = 'ftp://$ftpUser:$ftpPassword@$ftpHost:$ftpPort$urlPath';
+                }
+                displayUrl = returnUrl;
               }
-              returnUrl = returnUrl;
               String pictureKey = jsonEncode(configMap);
-              String displayUrl = returnUrl;
               eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
               Map<String, dynamic> maps = {};
               String formatedURL = '';

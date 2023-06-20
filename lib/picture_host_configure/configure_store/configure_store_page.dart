@@ -416,6 +416,8 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
                     String isAnonymous = psInfo['isAnonymous']!.toString();
                     String uploadPath = psInfo['uploadPath']!;
                     String ftpHomeDir = psInfo['ftpHomeDir']!;
+                    String? ftpCustomUrl = psInfo['ftpCustomUrl'];
+                    String? ftpWebPath = psInfo['ftpWebPath'];
                     bool valid = validateUndetermined([
                       ftpHost,
                       ftpPort,
@@ -438,6 +440,12 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
                     if (ftpHomeDir == ConfigureTemplate.placeholder) {
                       ftpHomeDir = 'None';
                     }
+                    if (ftpCustomUrl == ConfigureTemplate.placeholder || ftpCustomUrl == null) {
+                      ftpCustomUrl = 'None';
+                    }
+                    if (ftpWebPath == ConfigureTemplate.placeholder || ftpWebPath == null) {
+                      ftpWebPath = 'None';
+                    }
 
                     final ftpConfig = FTPConfigModel(
                       ftpHost,
@@ -448,6 +456,8 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
                       isAnonymous,
                       uploadPath,
                       ftpHomeDir,
+                      ftpCustomUrl,
+                      ftpWebPath,
                     );
                     final ftpConfigJson = jsonEncode(ftpConfig);
                     final ftpConfigFile = await FTPConfigState().localFile;

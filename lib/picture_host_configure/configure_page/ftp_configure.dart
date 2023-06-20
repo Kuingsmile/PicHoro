@@ -32,6 +32,8 @@ class FTPConfigState extends State<FTPConfig> {
   final _ftpPasswordController = TextEditingController(); //匿名登录时不需要
   final _ftpHomeDirController = TextEditingController();
   final _ftpUploadPathController = TextEditingController(); //可选
+  final _ftpCustomUrlController = TextEditingController(); //可选
+  final _ftpWebPathController = TextEditingController(); //可选
 
   Map _ftpConfigMap = {
     'ftpType': 'SFTP',
@@ -82,6 +84,16 @@ class FTPConfigState extends State<FTPConfig> {
       } else {
         _ftpHomeDirController.clear();
       }
+      if (configMap['ftpCustomUrl'] != null && configMap['ftpCustomUrl'] != 'None') {
+        _ftpCustomUrlController.text = configMap['ftpCustomUrl'];
+      } else {
+        _ftpCustomUrlController.clear();
+      }
+      if (configMap['ftpWebPath'] != null && configMap['ftpWebPath'] != 'None') {
+        _ftpWebPathController.text = configMap['ftpWebPath'];
+      } else {
+        _ftpWebPathController.clear();
+      }
       setState(() {});
     } catch (e) {
       FLog.error(
@@ -100,6 +112,8 @@ class FTPConfigState extends State<FTPConfig> {
     _ftpPasswordController.dispose();
     _ftpUploadPathController.dispose();
     _ftpHomeDirController.dispose();
+    _ftpCustomUrlController.dispose();
+    _ftpWebPathController.dispose();
     super.dispose();
   }
 
@@ -207,6 +221,24 @@ class FTPConfigState extends State<FTPConfig> {
                 contentPadding: EdgeInsets.zero,
                 label: Center(child: Text('可选: 管理功能起始路径')),
                 hintText: '例如：/home/testuser/',
+              ),
+              textAlign: TextAlign.center,
+            ),
+            TextFormField(
+              controller: _ftpCustomUrlController,
+              decoration: const InputDecoration(
+                contentPadding: EdgeInsets.zero,
+                label: Center(child: Text('可选:自定义域名')),
+                hintText: '例如https://test.com',
+              ),
+              textAlign: TextAlign.center,
+            ),
+            TextFormField(
+              controller: _ftpWebPathController,
+              decoration: const InputDecoration(
+                contentPadding: EdgeInsets.zero,
+                label: Center(child: Text('可选:拼接用web路径')),
+                hintText: '例如：/test/',
               ),
               textAlign: TextAlign.center,
             ),
@@ -359,6 +391,21 @@ class FTPConfigState extends State<FTPConfig> {
         ftpHomeDir = '$ftpHomeDir/';
       }
     }
+    String ftpCustomUrl = '';
+    if (_ftpCustomUrlController.text.isEmpty || _ftpCustomUrlController.text == '') {
+      ftpCustomUrl = 'None';
+    } else {
+      ftpCustomUrl = _ftpCustomUrlController.text;
+    }
+    String ftpWebPath = '';
+    if (_ftpWebPathController.text.isEmpty || _ftpWebPathController.text == '') {
+      ftpWebPath = 'None';
+    } else {
+      ftpWebPath = _ftpWebPathController.text;
+      if (!ftpWebPath.endsWith('/')) {
+        ftpWebPath = '$ftpWebPath/';
+      }
+    }
     final String isAnonymous = _ftpConfigMap['isAnonymous'].toString();
     final String ftpType = _ftpConfigMap['ftpType'];
 
@@ -375,8 +422,8 @@ class FTPConfigState extends State<FTPConfig> {
           bool connectResult = await ftpConnect.connect();
           await ftpConnect.disconnect();
           if (connectResult == true) {
-            final ftpConfig =
-                FTPConfigModel(ftpHost, ftpPort, ftpUser, ftpPassword, ftpType, isAnonymous, ftpUploadPath, ftpHomeDir);
+            final ftpConfig = FTPConfigModel(ftpHost, ftpPort, ftpUser, ftpPassword, ftpType, isAnonymous,
+                ftpUploadPath, ftpHomeDir, ftpCustomUrl, ftpWebPath);
             final ftpConfigJson = jsonEncode(ftpConfig);
             final ftpConfigFile = await localFile;
             await ftpConfigFile.writeAsString(ftpConfigJson);
@@ -393,8 +440,8 @@ class FTPConfigState extends State<FTPConfig> {
           );
           client.close();
 
-          final ftpConfig =
-              FTPConfigModel(ftpHost, ftpPort, ftpUser, ftpPassword, ftpType, isAnonymous, ftpUploadPath, ftpHomeDir);
+          final ftpConfig = FTPConfigModel(ftpHost, ftpPort, ftpUser, ftpPassword, ftpType, isAnonymous, ftpUploadPath,
+              ftpHomeDir, ftpCustomUrl, ftpWebPath);
           final ftpConfigJson = jsonEncode(ftpConfig);
           final ftpConfigFile = await localFile;
           await ftpConfigFile.writeAsString(ftpConfigJson);
@@ -450,7 +497,7 @@ class FTPConfigState extends State<FTPConfig> {
             context: context,
             title: '通知',
             content:
-                '检测通过，您的配置信息为:\n用户名:\n${configMap["ftpHost"]}\n端口:\n${configMap["ftpPort"]}\n用户名:\n${configMap["ftpUser"]}\n密码:\n${configMap["ftpPassword"]}\n上传路径:\n${configMap["uploadPath"]}\n管理功能起始路径:\n${configMap["ftpHomeDir"]}',
+                '检测通过，您的配置信息为:\n用户名:\n${configMap["ftpHost"]}\n端口:\n${configMap["ftpPort"]}\n用户名:\n${configMap["ftpUser"]}\n密码:\n${configMap["ftpPassword"]}\n上传路径:\n${configMap["uploadPath"]}\n管理功能起始路径:\n${configMap["ftpHomeDir"]}\n自定义URL:\n${configMap["ftpCustomUrl"]}',
           );
         } else {
           return showCupertinoAlertDialog(context: context, title: '错误', content: '检查失败，请检查配置信息');
@@ -469,7 +516,7 @@ class FTPConfigState extends State<FTPConfig> {
           context: context,
           title: '通知',
           content:
-              '检测通过，您的配置信息为:\n用户名:\n${configMap["ftpHost"]}\n端口:\n${configMap["ftpPort"]}\n用户名:\n${configMap["ftpUser"]}\n密码:\n${configMap["ftpPassword"]}\n上传路径:\n${configMap["uploadPath"]}\n管理功能起始路径:\n${configMap["ftpHomeDir"]}',
+              '检测通过，您的配置信息为:\n用户名:\n${configMap["ftpHost"]}\n端口:\n${configMap["ftpPort"]}\n用户名:\n${configMap["ftpUser"]}\n密码:\n${configMap["ftpPassword"]}\n上传路径:\n${configMap["uploadPath"]}\n管理功能起始路径:\n${configMap["ftpHomeDir"]}\n自定义URL:\n${configMap["ftpCustomUrl"]}',
         );
       }
     } catch (e) {
@@ -535,9 +582,11 @@ class FTPConfigModel {
   final String isAnonymous;
   final String uploadPath;
   final String ftpHomeDir;
+  final String ftpCustomUrl;
+  final String ftpWebPath;
 
   FTPConfigModel(this.ftpHost, this.ftpPort, this.ftpUser, this.ftpPassword, this.ftpType, this.isAnonymous,
-      this.uploadPath, this.ftpHomeDir);
+      this.uploadPath, this.ftpHomeDir, this.ftpCustomUrl, this.ftpWebPath);
 
   Map<String, dynamic> toJson() => {
         'ftpHost': ftpHost,
@@ -548,6 +597,8 @@ class FTPConfigModel {
         'isAnonymous': isAnonymous,
         'uploadPath': uploadPath,
         'ftpHomeDir': ftpHomeDir,
+        'ftpCustomUrl': ftpCustomUrl,
+        'ftpWebPath': ftpWebPath
       };
 
   static List keysList = [
@@ -560,5 +611,7 @@ class FTPConfigModel {
     'isAnonymous',
     'uploadPath',
     'ftpHomeDir',
+    'ftpCustomUrl',
+    'ftpWebPath'
   ];
 }

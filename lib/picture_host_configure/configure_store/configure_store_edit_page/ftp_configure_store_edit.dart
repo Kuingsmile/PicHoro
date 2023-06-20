@@ -29,6 +29,8 @@ class FtpConfigureStoreEditState extends State<FtpConfigureStoreEdit> {
   final _ftpPasswordController = TextEditingController(); //匿名登录时不需要
   final _ftpHomeDirController = TextEditingController();
   final _ftpUploadPathController = TextEditingController(); //可选
+  final _ftpCustomUrlController = TextEditingController(); //可选
+  final _ftpWebPathController = TextEditingController(); //可选
 
   Map _ftpConfigMap = {
     'ftpType': 'SFTP',
@@ -200,6 +202,24 @@ class FtpConfigureStoreEditState extends State<FtpConfigureStoreEdit> {
               ),
               textAlign: TextAlign.center,
             ),
+            TextFormField(
+              controller: _ftpCustomUrlController,
+              decoration: const InputDecoration(
+                contentPadding: EdgeInsets.zero,
+                label: Center(child: Text('可选: 自定义URL')),
+                hintText: '例如：https://www.test.com',
+              ),
+              textAlign: TextAlign.center,
+            ),
+            TextFormField(
+              controller: _ftpWebPathController,
+              decoration: const InputDecoration(
+                contentPadding: EdgeInsets.zero,
+                label: Center(child: Text('可选: 拼接用web路径')),
+                hintText: '例如：/test/',
+              ),
+              textAlign: TextAlign.center,
+            ),
             ListTile(
               title: const Text('FTP类型'),
               trailing: DropdownButton<String>(
@@ -269,6 +289,12 @@ class FtpConfigureStoreEditState extends State<FtpConfigureStoreEdit> {
       if (configMap['ftpHomeDir'] != 'None') {
         _ftpHomeDirController.text = configMap['ftpHomeDir'];
       }
+      if (configMap['ftpCustomUrl'] != 'None' && configMap['ftpCustomUrl'] != null) {
+        _ftpCustomUrlController.text = configMap['ftpCustomUrl'];
+      }
+      if (configMap['ftpWebPath'] != 'None' && configMap['ftpWebPath'] != null) {
+        _ftpWebPathController.text = configMap['ftpWebPath'];
+      }
       _ftpConfigMap['ftpType'] = configMap['ftpType'];
       _ftpConfigMap['isAnonymous'] = configMap['isAnonymous'].toString();
 
@@ -289,6 +315,8 @@ class FtpConfigureStoreEditState extends State<FtpConfigureStoreEdit> {
       String ftpHomeDir = _ftpHomeDirController.text;
       String ftpType = _ftpConfigMap['ftpType'];
       String isAnonymous = _ftpConfigMap['isAnonymous'].toString();
+      String ftpCustomUrl = _ftpCustomUrlController.text;
+      String ftpWebPath = _ftpWebPathController.text;
 
       if (remarkName.isEmpty || remarkName.trim().isEmpty) {
         remarkName = ConfigureTemplate.placeholder;
@@ -318,6 +346,14 @@ class FtpConfigureStoreEditState extends State<FtpConfigureStoreEdit> {
         }
       }
 
+      if (ftpCustomUrl.isEmpty || ftpCustomUrl.trim().isEmpty) {
+        ftpCustomUrl = ConfigureTemplate.placeholder;
+      }
+
+      if (ftpWebPath.isEmpty || ftpWebPath.trim().isEmpty) {
+        ftpWebPath = ConfigureTemplate.placeholder;
+      }
+
       Map psInfo = {
         'remarkName': remarkName,
         'ftpHost': ftpHost,
@@ -328,6 +364,8 @@ class FtpConfigureStoreEditState extends State<FtpConfigureStoreEdit> {
         'isAnonymous': isAnonymous,
         'uploadPath': ftpUploadPath,
         'ftpHomeDir': ftpHomeDir,
+        'ftpCustomUrl': ftpCustomUrl,
+        'ftpWebPath': ftpWebPath,
       };
 
       try {

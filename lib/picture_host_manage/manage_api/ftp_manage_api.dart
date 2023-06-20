@@ -271,9 +271,15 @@ class FTPManageAPI {
       String isAnonymous = configMap['isAnonymous'];
       String uploadPath = folder;
       String ftpHomeDir = configMap['ftpHomeDir'];
+      String? ftpCustomUrl = configMap['ftpCustomUrl'];
+      String? ftpWebPath = configMap['ftpWebPath'];
 
-      final ftpConfig =
-          FTPConfigModel(ftpHost, ftpPort, ftpUser, ftpPassword, ftpType, isAnonymous, uploadPath, ftpHomeDir);
+      ftpCustomUrl ??= 'None';
+
+      ftpWebPath ??= 'None';
+
+      final ftpConfig = FTPConfigModel(ftpHost, ftpPort, ftpUser, ftpPassword, ftpType, isAnonymous, uploadPath,
+          ftpHomeDir, ftpCustomUrl, ftpWebPath);
       final ftpConfigJson = jsonEncode(ftpConfig);
       final ftpConfigFile = await localFile;
       await ftpConfigFile.writeAsString(ftpConfigJson);

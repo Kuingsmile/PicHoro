@@ -81,17 +81,12 @@ class AliyunImageUploadUtils {
         String displayUrl = '';
 
         if (customUrl != 'None') {
-          if (!customUrl.endsWith('/')) {
-            returnUrl = '$customUrl/$urlpath';
-            displayUrl = '$customUrl/$urlpath';
-          } else {
-            customUrl = customUrl.substring(0, customUrl.length - 1);
-            returnUrl = '$customUrl/$urlpath';
-            displayUrl = '$customUrl/$urlpath';
-          }
+          customUrl = customUrl.replaceAll(RegExp(r'/$'), '');
+          returnUrl = '$customUrl/$urlpath';
+          displayUrl = returnUrl;
         } else {
           returnUrl = 'https://$host/$urlpath';
-          displayUrl = 'https://$host/$urlpath';
+          displayUrl = returnUrl;
         }
 
         if (options == 'None') {
