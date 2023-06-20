@@ -770,8 +770,16 @@ class WebdavFileExplorerState extends loading_state.BaseLoadingPageState<WebdavF
                     for (int i = 0; i < allInfoList.length; i++) {
                       if (selectedFilesBool[i]) {
                         String finalFormatedurl = ' ';
-                        String rawurl = host + allInfoList[i]['path'];
+                        String rawurl = '';
                         String fileName = allInfoList[i]['name'];
+                        String customUrl = widget.element['customUrl'] == null || widget.element['customUrl'] == ''
+                            ? 'None'
+                            : widget.element['customUrl'];
+                        if (customUrl != 'None') {
+                          rawurl = customUrl + allInfoList[i]['path'];
+                        } else {
+                          rawurl = host + allInfoList[i]['path'];
+                        }
 
                         finalFormatedurl = linkGenerateDict[Global.defaultLKformat]!(rawurl, fileName);
 
@@ -1386,9 +1394,15 @@ class WebdavFileExplorerState extends loading_state.BaseLoadingPageState<WebdavF
               String host = widget.element['host'].endsWith('/')
                   ? widget.element['host'].substring(0, widget.element['host'].length - 1)
                   : widget.element['host'];
-
-              String shareUrl = '$host${allInfoList[index]['path']}';
-
+              String shareUrl = '';
+              String customUrl = widget.element['customUrl'] == null || widget.element['customUrl'] == ''
+                  ? 'None'
+                  : widget.element['customUrl'];
+              if (customUrl != 'None') {
+                shareUrl = '$customUrl${allInfoList[index]['path']}';
+              } else {
+                shareUrl = '$host${allInfoList[index]['path']}';
+              }
               String filename = my_path.basename(allInfoList[index]['name']);
               String formatedLink = linkGenerateDict[format]!(shareUrl, filename);
               await flutter_services.Clipboard.setData(flutter_services.ClipboardData(text: formatedLink));

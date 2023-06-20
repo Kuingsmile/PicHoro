@@ -27,6 +27,8 @@ class WebdavConfigState extends State<WebdavConfig> {
   final _usernameController = TextEditingController();
   final _passwdController = TextEditingController();
   final _uploadPathController = TextEditingController();
+  final _customUrlController = TextEditingController();
+  final _webPathController = TextEditingController();
 
   @override
   void initState() {
@@ -45,6 +47,16 @@ class WebdavConfigState extends State<WebdavConfig> {
       } else {
         _uploadPathController.clear();
       }
+      if (configMap['customUrl'] != 'None' && configMap['customUrl'] != null) {
+        _customUrlController.text = configMap['customUrl'];
+      } else {
+        _customUrlController.clear();
+      }
+      if (configMap['webPath'] != 'None' && configMap['webPath'] != null) {
+        _webPathController.text = configMap['webPath'];
+      } else {
+        _webPathController.clear();
+      }
       setState(() {});
     } catch (e) {
       FLog.error(
@@ -61,6 +73,8 @@ class WebdavConfigState extends State<WebdavConfig> {
     _usernameController.dispose();
     _passwdController.dispose();
     _uploadPathController.dispose();
+    _customUrlController.dispose();
+    _webPathController.dispose();
     super.dispose();
   }
 
@@ -139,6 +153,24 @@ class WebdavConfigState extends State<WebdavConfig> {
                 contentPadding: EdgeInsets.zero,
                 label: Center(child: Text('可选：储存路径')),
                 hintText: '例如: /百度网盘/图床',
+              ),
+              textAlign: TextAlign.center,
+            ),
+            TextFormField(
+              controller: _customUrlController,
+              decoration: const InputDecoration(
+                contentPadding: EdgeInsets.zero,
+                label: Center(child: Text('可选：自定义域名')),
+                hintText: '例如: https://test.com',
+              ),
+              textAlign: TextAlign.center,
+            ),
+            TextFormField(
+              controller: _webPathController,
+              decoration: const InputDecoration(
+                contentPadding: EdgeInsets.zero,
+                label: Center(child: Text('可选：拼接路径')),
+                hintText: '例如: /pic',
               ),
               textAlign: TextAlign.center,
             ),
@@ -225,6 +257,23 @@ class WebdavConfigState extends State<WebdavConfig> {
       }
     }
 
+    String customUrl = '';
+    if (_customUrlController.text.isEmpty || _customUrlController.text == '') {
+      customUrl = 'None';
+    } else {
+      customUrl = _customUrlController.text;
+    }
+
+    String webPath = '';
+    if (_webPathController.text.isEmpty || _webPathController.text == '') {
+      webPath = 'None';
+    } else {
+      webPath = _webPathController.text;
+      if (!webPath.endsWith('/')) {
+        webPath = '$webPath/';
+      }
+    }
+
     try {
       var client = webdav.newClient(
         host,
@@ -237,7 +286,7 @@ class WebdavConfigState extends State<WebdavConfig> {
       client.setReceiveTimeout(30000);
       await client.ping();
 
-      final webdavConfig = WebdavConfigModel(host, username, password, uploadPath);
+      final webdavConfig = WebdavConfigModel(host, username, password, uploadPath, customUrl, webPath);
       final webdavConfigJson = jsonEncode(webdavConfig);
       final webdavConfigFile = await localFile;
       webdavConfigFile.writeAsString(webdavConfigJson);
@@ -280,7 +329,7 @@ class WebdavConfigState extends State<WebdavConfig> {
           context: context,
           title: '通知',
           content:
-              '检测通过，您的配置信息为：\nhost:\n${configMap["host"]}\nwebdav用户名:\n${configMap["webdavusername"]}\n密码:\n${configMap["password"]}\nuploadPath:\n${configMap["uploadPath"]}');
+              '检测通过，您的配置信息为：\nhost:\n${configMap["host"]}\nwebdav用户名:\n${configMap["webdavusername"]}\n密码:\n${configMap["password"]}\nuploadPath:\n${configMap["uploadPath"]}\n自定义域名:\n${configMap["customUrl"]}\nwebPath:\n${configMap["webPath"]}');
     } catch (e) {
       FLog.error(
           className: 'ConfigPage',
@@ -331,14 +380,18 @@ class WebdavConfigModel {
   final String webdavusername;
   final String password;
   final String uploadPath;
+  final String customUrl;
+  final String webPath;
 
-  WebdavConfigModel(this.host, this.webdavusername, this.password, this.uploadPath);
+  WebdavConfigModel(this.host, this.webdavusername, this.password, this.uploadPath, this.customUrl, this.webPath);
 
   Map<String, dynamic> toJson() => {
         'host': host,
         'webdavusername': webdavusername,
         'password': password,
         'uploadPath': uploadPath,
+        'customUrl': customUrl,
+        'webPath': webPath,
       };
 
   static List keysList = [
@@ -347,5 +400,7 @@ class WebdavConfigModel {
     'webdavusername',
     'password',
     'uploadPath',
+    'customUrl',
+    'webPath',
   ];
 }

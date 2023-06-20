@@ -63,7 +63,9 @@ class FtpConfigureStoreEditState extends State<FtpConfigureStoreEdit> {
       'ftpType',
       'isAnonymous',
       'uploadPath',
-      'ftpHomeDir'
+      'ftpHomeDir',
+      'ftpCustomUrl',
+      'ftpWebPath',
     ];
     for (String element in keys) {
       if (widget.psInfo[element] != ConfigureTemplate.placeholder) {
@@ -95,6 +97,12 @@ class FtpConfigureStoreEditState extends State<FtpConfigureStoreEdit> {
           case 'isAnonymous':
             _ftpConfigMap['isAnonymous'] = widget.psInfo[element].toString();
             break;
+          case 'ftpCustomUrl':
+            _ftpCustomUrlController.text = widget.psInfo[element];
+            break;
+          case 'ftpWebPath':
+            _ftpWebPathController.text = widget.psInfo[element];
+            break;
         }
       }
     }
@@ -109,6 +117,8 @@ class FtpConfigureStoreEditState extends State<FtpConfigureStoreEdit> {
     _ftpPasswordController.dispose();
     _ftpHomeDirController.dispose();
     _ftpUploadPathController.dispose();
+    _ftpCustomUrlController.dispose();
+    _ftpWebPathController.dispose();
     super.dispose();
   }
 

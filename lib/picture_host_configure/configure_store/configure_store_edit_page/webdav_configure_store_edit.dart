@@ -27,6 +27,8 @@ class WebdavConfigureStoreEditState extends State<WebdavConfigureStoreEdit> {
   final _webdavusernameController = TextEditingController();
   final _passwordController = TextEditingController();
   final _uploadPathController = TextEditingController();
+  final _customUrlController = TextEditingController();
+  final _webPathController = TextEditingController();
 
   @override
   void initState() {
@@ -41,6 +43,8 @@ class WebdavConfigureStoreEditState extends State<WebdavConfigureStoreEdit> {
       'webdavusername',
       'password',
       'uploadPath',
+      'customUrl',
+      'webPath',
     ];
     for (String element in keys) {
       if (widget.psInfo[element] != ConfigureTemplate.placeholder) {
@@ -60,6 +64,12 @@ class WebdavConfigureStoreEditState extends State<WebdavConfigureStoreEdit> {
           case 'uploadPath':
             _uploadPathController.text = widget.psInfo[element];
             break;
+          case 'customUrl':
+            _customUrlController.text = widget.psInfo[element];
+            break;
+          case 'webPath':
+            _webPathController.text = widget.psInfo[element];
+            break;
         }
       }
     }
@@ -72,6 +82,8 @@ class WebdavConfigureStoreEditState extends State<WebdavConfigureStoreEdit> {
     _webdavusernameController.dispose();
     _passwordController.dispose();
     _uploadPathController.dispose();
+    _customUrlController.dispose();
+    _webPathController.dispose();
     super.dispose();
   }
 
@@ -150,6 +162,24 @@ class WebdavConfigureStoreEditState extends State<WebdavConfigureStoreEdit> {
               ),
               textAlign: TextAlign.center,
             ),
+            TextFormField(
+              controller: _customUrlController,
+              decoration: const InputDecoration(
+                contentPadding: EdgeInsets.zero,
+                label: Center(child: Text('可选：自定义域名')),
+                hintText: '例如: https://test.com',
+              ),
+              textAlign: TextAlign.center,
+            ),
+            TextFormField(
+              controller: _webPathController,
+              decoration: const InputDecoration(
+                contentPadding: EdgeInsets.zero,
+                label: Center(child: Text('可选：拼接路径')),
+                hintText: '例如: /pic',
+              ),
+              textAlign: TextAlign.center,
+            ),
             ListTile(
                 title: ElevatedButton(
               onPressed: () {
@@ -184,6 +214,13 @@ class WebdavConfigureStoreEditState extends State<WebdavConfigureStoreEdit> {
       if (configMap['uploadPath'] != 'None') {
         _uploadPathController.text = configMap['uploadPath'];
       }
+
+      if (configMap['customUrl'] != 'None' && configMap['customUrl'] != null) {
+        _customUrlController.text = configMap['customUrl'];
+      }
+      if (configMap['webPath'] != 'None' && configMap['webPath'] != null) {
+        _webPathController.text = configMap['webPath'];
+      }
       showToast('导入成功');
     } catch (e) {
       showToast('导入失败');
@@ -197,6 +234,8 @@ class WebdavConfigureStoreEditState extends State<WebdavConfigureStoreEdit> {
       String webdavusername = _webdavusernameController.text;
       String password = _passwordController.text;
       String uploadPath = _uploadPathController.text;
+      String customUrl = _customUrlController.text;
+      String webPath = _webPathController.text;
 
       if (host.endsWith('/')) {
         host = host.substring(0, host.length - 1);
@@ -213,12 +252,22 @@ class WebdavConfigureStoreEditState extends State<WebdavConfigureStoreEdit> {
         uploadPath = ConfigureTemplate.placeholder;
       }
 
+      if (customUrl.isEmpty || customUrl.trim().isEmpty) {
+        customUrl = ConfigureTemplate.placeholder;
+      }
+
+      if (webPath.isEmpty || webPath.trim().isEmpty) {
+        webPath = ConfigureTemplate.placeholder;
+      }
+
       Map psInfo = {
         'remarkName': remarkName,
         'host': host,
         'webdavusername': webdavusername,
         'password': password,
         'uploadPath': uploadPath,
+        'customUrl': customUrl,
+        'webPath': webPath,
       };
 
       try {

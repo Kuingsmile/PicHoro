@@ -1234,6 +1234,11 @@ class UploadManager {
         String formatedURL = '';
         webdav.Client client = await WebdavManageAPI.getWebdavClient();
         String uploadPath = configMap['uploadPath'];
+        String? customUrl = configMap['customUrl'];
+        String? webPath = configMap['webPath'];
+
+        customUrl ??= 'None';
+        webPath ??= 'None';
 
         if (uploadPath == 'None') {
           uploadPath = '/';
@@ -1247,10 +1252,22 @@ class UploadManager {
         }
         String filePath = uploadPath + fileName;
         await client.writeFromFile(path, filePath);
-
-        String returnUrl = configMap['host'] + filePath;
-        String displayUrl = returnUrl + generateBasicAuth(configMap['webdavusername'], configMap['password']);
-
+        String returnUrl = '';
+        String displayUrl = '';
+        if (customUrl != 'None') {
+          customUrl = customUrl.replaceAll(RegExp(r'/$'), '');
+          if (webPath != 'None') {
+            webPath = webPath.replaceAll(RegExp(r'^/*'), '').replaceAll(RegExp(r'/*$'), '');
+            returnUrl = '$customUrl/$webPath/$fileName';
+          } else {
+            filePath = filePath.replaceAll(RegExp(r'^/*'), '');
+            returnUrl = '$customUrl/$filePath';
+          }
+          displayUrl = returnUrl;
+        } else {
+          returnUrl = configMap['host'] + filePath;
+          displayUrl = returnUrl + generateBasicAuth(configMap['webdavusername'], configMap['password']);
+        }
         eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
         Map<String, dynamic> maps = {};
 

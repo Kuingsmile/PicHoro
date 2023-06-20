@@ -782,6 +782,8 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
                     String webdavusername = psInfo['webdavusername']!;
                     String password = psInfo['password']!;
                     String uploadPath = psInfo['uploadPath']!;
+                    String? customUrl = psInfo['customUrl'];
+                    String? webPath = psInfo['webPath'];
                     bool valid = validateUndetermined([
                       host,
                       webdavusername,
@@ -794,12 +796,20 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
                     if (uploadPath == ConfigureTemplate.placeholder) {
                       uploadPath = 'None';
                     }
+                    if (customUrl == ConfigureTemplate.placeholder || customUrl == null) {
+                      customUrl = 'None';
+                    }
+                    if (webPath == ConfigureTemplate.placeholder || webPath == null) {
+                      webPath = 'None';
+                    }
 
                     final webdavConfig = WebdavConfigModel(
                       host,
                       webdavusername,
                       password,
                       uploadPath,
+                      customUrl,
+                      webPath,
                     );
                     final webdavConfigJson = jsonEncode(webdavConfig);
                     final webdavConfigFile = await WebdavConfigState().localFile;

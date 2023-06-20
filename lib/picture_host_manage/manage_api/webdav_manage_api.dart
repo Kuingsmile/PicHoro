@@ -184,9 +184,14 @@ class WebdavManageAPI {
       String host = configMap['host'];
       String webdavusername = configMap['webdavusername'];
       String password = configMap['password'];
+      String? customUrl = configMap['customUrl'];
+      String? webPath = configMap['webPath'];
       String uploadPath = folder;
 
-      final webdavConfig = WebdavConfigModel(host, webdavusername, password, uploadPath);
+      customUrl ??= 'None';
+      webPath ??= 'None';
+
+      final webdavConfig = WebdavConfigModel(host, webdavusername, password, uploadPath, customUrl, webPath);
       final webdavConfigJson = jsonEncode(webdavConfig);
       final webdavConfigFile = await _localFile;
       await webdavConfigFile.writeAsString(webdavConfigJson);

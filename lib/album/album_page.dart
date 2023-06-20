@@ -488,24 +488,38 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
                                       )
                                     : const Icon(Icons.error, size: 30, color: Colors.red)
                                 : Global.defaultShowedPBhost == 'PBhostExtend4'
-                                    ? ExtendedImage.network(
-                                        currentShowedImagesDisplayAddressUrl[index]
-                                            .replaceAll(RegExp(r'Basic (.*)'), ''),
-                                        clearMemoryCacheIfFailed: true,
-                                        retries: 5,
-                                        height: 150,
-                                        fit: BoxFit.fill,
-                                        headers: {
-                                          'Authorization': RegExp(r'Basic (.*)')
-                                              .firstMatch(currentShowedImagesDisplayAddressUrl[index])![0]!
-                                        },
-                                        cache: false,
-                                        border: Border.all(
-                                            color: selectedImagesBool[index] ? Colors.red : Colors.transparent,
-                                            width: 2),
-                                        borderRadius: const BorderRadius.all(Radius.circular(8)),
-                                        loadStateChanged: (state) => defaultLoadStateChanged(state, iconSize: 30),
-                                      )
+                                    ? currentShowedImagesDisplayAddressUrl[index].contains('Basic')
+                                        ? ExtendedImage.network(
+                                            currentShowedImagesDisplayAddressUrl[index]
+                                                .replaceAll(RegExp(r'Basic (.*)'), ''),
+                                            clearMemoryCacheIfFailed: true,
+                                            retries: 5,
+                                            height: 150,
+                                            fit: BoxFit.fill,
+                                            headers: {
+                                              'Authorization': RegExp(r'Basic (.*)')
+                                                  .firstMatch(currentShowedImagesDisplayAddressUrl[index])![0]!
+                                            },
+                                            cache: false,
+                                            border: Border.all(
+                                                color: selectedImagesBool[index] ? Colors.red : Colors.transparent,
+                                                width: 2),
+                                            borderRadius: const BorderRadius.all(Radius.circular(8)),
+                                            loadStateChanged: (state) => defaultLoadStateChanged(state, iconSize: 30),
+                                          )
+                                        : ExtendedImage.network(
+                                            currentShowedImagesDisplayAddressUrl[index],
+                                            clearMemoryCacheIfFailed: true,
+                                            retries: 5,
+                                            height: 150,
+                                            fit: BoxFit.fill,
+                                            cache: true,
+                                            border: Border.all(
+                                                color: selectedImagesBool[index] ? Colors.red : Colors.transparent,
+                                                width: 2),
+                                            borderRadius: const BorderRadius.all(Radius.circular(8)),
+                                            loadStateChanged: (state) => defaultLoadStateChanged(state, iconSize: 30),
+                                          )
                                     : const Icon(Icons.error, size: 30, color: Colors.red),
                       ),
                     ),

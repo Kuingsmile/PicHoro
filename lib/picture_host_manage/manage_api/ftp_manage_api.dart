@@ -273,11 +273,8 @@ class FTPManageAPI {
       String ftpHomeDir = configMap['ftpHomeDir'];
       String? ftpCustomUrl = configMap['ftpCustomUrl'];
       String? ftpWebPath = configMap['ftpWebPath'];
-
       ftpCustomUrl ??= 'None';
-
       ftpWebPath ??= 'None';
-
       final ftpConfig = FTPConfigModel(ftpHost, ftpPort, ftpUser, ftpPassword, ftpType, isAnonymous, uploadPath,
           ftpHomeDir, ftpCustomUrl, ftpWebPath);
       final ftpConfigJson = jsonEncode(ftpConfig);

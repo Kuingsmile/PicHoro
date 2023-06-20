@@ -9,13 +9,15 @@ import 'package:horopic/picture_host_manage/manage_api/webdav_manage_api.dart';
 
 class WebdavImageUploadUtils {
   //上传接口
-  static uploadApi(
-      {required String path,
-      required String name,
-      required Map configMap}) async {
+  static uploadApi({required String path, required String name, required Map configMap}) async {
     String formatedURL = '';
     webdav.Client client = await WebdavManageAPI.getWebdavClient();
     String uploadPath = configMap['uploadPath'];
+    String? customUrl = configMap['customUrl'];
+    String? webPath = configMap['webPath'];
+
+    customUrl ??= 'None';
+    webPath ??= 'None';
 
     if (uploadPath == 'None') {
       uploadPath = '/';
@@ -34,12 +36,22 @@ class WebdavImageUploadUtils {
 
       String returnUrl = '';
       String displayUrl = '';
-      returnUrl = configMap['host'] + filePath;
-      displayUrl = returnUrl +
-          generateBasicAuth(configMap['webdavusername'], configMap['password']);
+      if (customUrl != 'None') {
+        customUrl = customUrl.replaceAll(RegExp(r'/$'), '');
+        if (webPath != 'None') {
+          webPath = webPath.replaceAll(RegExp(r'^/*'), '').replaceAll(RegExp(r'/*$'), '');
+          returnUrl = '$customUrl/$webPath/$name';
+        } else {
+          filePath = filePath.replaceAll(RegExp(r'^/*'), '');
+          returnUrl = '$customUrl/$filePath';
+        }
+        displayUrl = returnUrl;
+      } else {
+        returnUrl = configMap['host'] + filePath;
+        displayUrl = returnUrl + generateBasicAuth(configMap['webdavusername'], configMap['password']);
+      }
       if (Global.isCopyLink == true) {
-        formatedURL =
-            linkGenerateDict[Global.defaultLKformat]!(returnUrl, name);
+        formatedURL = linkGenerateDict[Global.defaultLKformat]!(returnUrl, name);
       } else {
         formatedURL = returnUrl;
       }
@@ -104,8 +116,7 @@ class WebdavImageUploadUtils {
         FLog.error(
             className: "WebdavImageUploadUtils",
             methodName: "deleteApi",
-            text: formatErrorMessage({}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
+            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(
