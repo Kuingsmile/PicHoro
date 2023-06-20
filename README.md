@@ -72,7 +72,7 @@
 
 Github下载地址 [Github release](https://github.com/Kuingsmile/PicHoro/releases)  
 
-我的个人网站提供的最新版本下载地址 [https://pichoro.msq.pub/PicHoro_V2.0.0.apk](https://pichoro.msq.pub/PicHoro_V2.0.0.apk)
+我的个人网站提供的最新版本下载地址 [https://pichoro.msq.pub/PicHoro_V2.1.0.apk](https://pichoro.msq.pub/PicHoro_V2.1.0.apk)
 
 ### IOS
 
