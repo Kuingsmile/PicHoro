@@ -138,8 +138,6 @@ Github下载地址 [Github release](https://github.com/Kuingsmile/PicHoro/releas
 
 ## 开发交流
 
-由于最近微信群广告号泛滥，请先添加我的微信`pku_sq_ma`，备注`PicHoro`，我会拉你进群。
-
 ![image](https://pichoro.msq.pub/wechat.png)
 
 开发进度可以查看 [Projects](https://github.com/Kuingsmile/PicHoro/projects)，会同步更新开发进度。
