@@ -380,7 +380,7 @@ class PsHostHomePageState extends State<PsHostHomePage> with AutomaticKeepAliveC
                         if (mounted) {
                           Application.router.navigateTo(
                             context,
-                            '${Routes.imgurFileExplorer}?userProfile=${Uri.encodeComponent(jsonEncode(queryImgurManage))}&albumInfo=${Uri.encodeComponent(jsonEncode({}))}&allImages=${Uri.encodeComponent(jsonEncode([]))}',
+                            '${Routes.imgurFileExplorer}?userProfile=${Uri.encodeComponent(jsonEncode(jsonResult))}&albumInfo=${Uri.encodeComponent(jsonEncode({}))}&allImages=${Uri.encodeComponent(jsonEncode([]))}',
                             transition: TransitionType.inFromRight,
                           );
                         }
