@@ -592,18 +592,20 @@ class GithubFileExplorerState extends loading_state.BaseLoadingPageState<GithubF
                               try {
                                 String urlStr = url.text!;
                                 List fileLinkList = urlStr.split("\n");
-                                await showDialog(
-                                    context: context,
-                                    barrierDismissible: false,
-                                    builder: (context) {
-                                      return NetLoadingDialog(
-                                        outsideDismiss: false,
-                                        loading: true,
-                                        loadingText: "上传中...",
-                                        requestCallBack: GithubManageAPI.uploadNetworkFileEntry(
-                                            fileLinkList, widget.element, widget.bucketPrefix),
-                                      );
-                                    });
+                                if (context.mounted) {
+                                  await showDialog(
+                                      context: context,
+                                      barrierDismissible: false,
+                                      builder: (context) {
+                                        return NetLoadingDialog(
+                                          outsideDismiss: false,
+                                          loading: true,
+                                          loadingText: "上传中...",
+                                          requestCallBack: GithubManageAPI.uploadNetworkFileEntry(
+                                              fileLinkList, widget.element, widget.bucketPrefix),
+                                        );
+                                      });
+                                }
                                 _getBucketList();
                               } catch (e) {
                                 FLog.error(
@@ -1207,9 +1209,9 @@ class GithubFileExplorerState extends loading_state.BaseLoadingPageState<GithubF
                                   color: Color.fromARGB(255, 235, 242, 248)),
                               padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
                               child: MSHCheckbox(
-                                uncheckedColor: Colors.blue,
+                                colorConfig: MSHColorConfig.fromCheckedUncheckedDisabled(
+                                    checkedColor: Colors.blue, uncheckedColor: Colors.blue, disabledColor: Colors.blue),
                                 size: 17,
-                                checkedColor: Colors.blue,
                                 value: selectedFilesBool[index],
                                 style: MSHCheckboxStyle.fillScaleCheck,
                                 onChanged: (selected) {
@@ -1405,9 +1407,11 @@ class GithubFileExplorerState extends loading_state.BaseLoadingPageState<GithubF
                                       }
                                     }
                                     urlList = urlList.substring(0, urlList.length - 1);
-                                    Application.router.navigateTo(this.context,
-                                        '${Routes.albumImagePreview}?index=$newImageIndex&images=${Uri.encodeComponent(urlList)}',
-                                        transition: TransitionType.none);
+                                    if (context.mounted) {
+                                      Application.router.navigateTo(this.context,
+                                          '${Routes.albumImagePreview}?index=$newImageIndex&images=${Uri.encodeComponent(urlList)}',
+                                          transition: TransitionType.none);
+                                    }
                                   } else {
                                     int newImageIndex = 0;
                                     showToast('请稍候，正在获取图片地址');
@@ -1422,9 +1426,11 @@ class GithubFileExplorerState extends loading_state.BaseLoadingPageState<GithubF
                                       showToast('获取图片地址失败');
                                       return;
                                     }
-                                    Application.router.navigateTo(this.context,
-                                        '${Routes.albumImagePreview}?index=$newImageIndex&images=${Uri.encodeComponent(urlList)}',
-                                        transition: TransitionType.none);
+                                    if (context.mounted) {
+                                      Application.router.navigateTo(this.context,
+                                          '${Routes.albumImagePreview}?index=$newImageIndex&images=${Uri.encodeComponent(urlList)}',
+                                          transition: TransitionType.none);
+                                    }
                                   }
                                 } else if (Global.textExt
                                     .contains(allInfoList[index]['path'].split('.').last.toLowerCase())) {
@@ -1439,9 +1445,11 @@ class GithubFileExplorerState extends loading_state.BaseLoadingPageState<GithubF
                                       showToast('获取失败');
                                       return;
                                     }
-                                    Application.router.navigateTo(this.context,
-                                        '${Routes.mdPreview}?filePath=${Uri.encodeComponent(filePath)}&fileName=${Uri.encodeComponent(fileName)}',
-                                        transition: TransitionType.none);
+                                    if (context.mounted) {
+                                      Application.router.navigateTo(this.context,
+                                          '${Routes.mdPreview}?filePath=${Uri.encodeComponent(filePath)}&fileName=${Uri.encodeComponent(fileName)}',
+                                          transition: TransitionType.none);
+                                    }
                                   } else {
                                     showToast('请稍候，正在获取文件地址');
                                     var result = await GithubManageAPI.getRepoFileContent(
@@ -1461,9 +1469,11 @@ class GithubFileExplorerState extends loading_state.BaseLoadingPageState<GithubF
                                       showToast('获取文件失败');
                                       return;
                                     }
-                                    Application.router.navigateTo(this.context,
-                                        '${Routes.mdPreview}?filePath=${Uri.encodeComponent(filePath)}&fileName=${Uri.encodeComponent(fileName)}',
-                                        transition: TransitionType.none);
+                                    if (context.mounted) {
+                                      Application.router.navigateTo(this.context,
+                                          '${Routes.mdPreview}?filePath=${Uri.encodeComponent(filePath)}&fileName=${Uri.encodeComponent(fileName)}',
+                                          transition: TransitionType.none);
+                                    }
                                   }
                                 }
                               },
@@ -1477,9 +1487,9 @@ class GithubFileExplorerState extends loading_state.BaseLoadingPageState<GithubF
                                   color: Color.fromARGB(255, 235, 242, 248)),
                               padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
                               child: MSHCheckbox(
-                                uncheckedColor: Colors.blue,
+                                colorConfig: MSHColorConfig.fromCheckedUncheckedDisabled(
+                                    checkedColor: Colors.blue, uncheckedColor: Colors.blue, disabledColor: Colors.blue),
                                 size: 17,
-                                checkedColor: Colors.blue,
                                 value: selectedFilesBool[index],
                                 style: MSHCheckboxStyle.fillScaleCheck,
                                 onChanged: (selected) {

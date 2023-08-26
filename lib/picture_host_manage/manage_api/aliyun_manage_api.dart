@@ -177,7 +177,7 @@ class AliyunManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "AliyunManageAPI",
             methodName: "getBucketList",
@@ -248,7 +248,7 @@ class AliyunManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "AliyunManageAPI",
             methodName: "createBucket",
@@ -297,7 +297,7 @@ class AliyunManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "AliyunManageAPI",
             methodName: "queryACLPolicy",
@@ -345,7 +345,7 @@ class AliyunManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "AliyunManageAPI",
             methodName: "deleteBucket",
@@ -395,7 +395,7 @@ class AliyunManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "AliyunManageAPI",
             methodName: "changeACLPolicy",
@@ -542,7 +542,7 @@ class AliyunManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "AliyunManageAPI",
             methodName: "queryBucketFiles",
@@ -615,7 +615,7 @@ class AliyunManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "AliyunManageAPI",
             methodName: "copyFile",
@@ -669,7 +669,7 @@ class AliyunManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "AliyunManageAPI",
             methodName: "deleteFile",
@@ -817,7 +817,7 @@ class AliyunManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "AliyunManageAPI",
             methodName: "createFolder",
@@ -904,7 +904,7 @@ class AliyunManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "AliyunManageAPI",
             methodName: "uploadFile",
@@ -995,7 +995,7 @@ class AliyunManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "AliyunManageAPI",
             methodName: "uploadNetworkFile",

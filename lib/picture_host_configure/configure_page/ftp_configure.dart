@@ -427,7 +427,9 @@ class FTPConfigState extends State<FTPConfig> {
             final ftpConfigJson = jsonEncode(ftpConfig);
             final ftpConfigFile = await localFile;
             await ftpConfigFile.writeAsString(ftpConfigJson);
-            return showCupertinoAlertDialog(context: context, title: '成功', content: '配置成功');
+            if (context.mounted) {
+              return showCupertinoAlertDialog(context: context, title: '成功', content: '配置成功');
+            }
           }
         } else {
           final socket = await SSHSocket.connect(ftpHost, int.parse(ftpPort.toString()));
@@ -445,7 +447,9 @@ class FTPConfigState extends State<FTPConfig> {
           final ftpConfigJson = jsonEncode(ftpConfig);
           final ftpConfigFile = await localFile;
           await ftpConfigFile.writeAsString(ftpConfigJson);
-          return showCupertinoAlertDialog(context: context, title: '成功', content: '配置成功');
+          if (context.mounted) {
+            return showCupertinoAlertDialog(context: context, title: '成功', content: '配置成功');
+          }
         }
       } catch (e) {
         FLog.error(
@@ -453,7 +457,9 @@ class FTPConfigState extends State<FTPConfig> {
             methodName: '_saveFTPConfig_1',
             text: formatErrorMessage({}, e.toString()),
             dataLogType: DataLogType.ERRORS.toString());
-        return showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
+        if (context.mounted) {
+          return showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
+        }
       }
     } catch (e) {
       FLog.error(
@@ -461,7 +467,9 @@ class FTPConfigState extends State<FTPConfig> {
           methodName: '_saveFTPConfig_2',
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
-      return showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
+      if (context.mounted) {
+        return showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
+      }
     }
   }
 
@@ -471,7 +479,10 @@ class FTPConfigState extends State<FTPConfig> {
       String configData = await ftpConfigFile.readAsString();
 
       if (configData == "Error") {
-        return showCupertinoAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");
+        if (context.mounted) {
+          return showCupertinoAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");
+        }
+        return;
       }
 
       Map configMap = jsonDecode(configData);
@@ -493,14 +504,20 @@ class FTPConfigState extends State<FTPConfig> {
         bool connectResult = await ftpConnect.connect();
         await ftpConnect.disconnect();
         if (connectResult == true) {
-          return showCupertinoAlertDialog(
-            context: context,
-            title: '通知',
-            content:
-                '检测通过，您的配置信息为:\n用户名:\n${configMap["ftpHost"]}\n端口:\n${configMap["ftpPort"]}\n用户名:\n${configMap["ftpUser"]}\n密码:\n${configMap["ftpPassword"]}\n上传路径:\n${configMap["uploadPath"]}\n管理功能起始路径:\n${configMap["ftpHomeDir"]}\n自定义URL:\n${configMap["ftpCustomUrl"]}',
-          );
+          if (context.mounted) {
+            return showCupertinoAlertDialog(
+              context: context,
+              title: '通知',
+              content:
+                  '检测通过，您的配置信息为:\n用户名:\n${configMap["ftpHost"]}\n端口:\n${configMap["ftpPort"]}\n用户名:\n${configMap["ftpUser"]}\n密码:\n${configMap["ftpPassword"]}\n上传路径:\n${configMap["uploadPath"]}\n管理功能起始路径:\n${configMap["ftpHomeDir"]}\n自定义URL:\n${configMap["ftpCustomUrl"]}',
+            );
+          }
+          return;
         } else {
-          return showCupertinoAlertDialog(context: context, title: '错误', content: '检查失败，请检查配置信息');
+          if (context.mounted) {
+            return showCupertinoAlertDialog(context: context, title: '错误', content: '检查失败，请检查配置信息');
+          }
+          return;
         }
       } else {
         final socket = await SSHSocket.connect(ftpHost, int.parse(ftpPort.toString()));
@@ -512,12 +529,14 @@ class FTPConfigState extends State<FTPConfig> {
           },
         );
         client.close();
-        return showCupertinoAlertDialog(
-          context: context,
-          title: '通知',
-          content:
-              '检测通过，您的配置信息为:\n用户名:\n${configMap["ftpHost"]}\n端口:\n${configMap["ftpPort"]}\n用户名:\n${configMap["ftpUser"]}\n密码:\n${configMap["ftpPassword"]}\n上传路径:\n${configMap["uploadPath"]}\n管理功能起始路径:\n${configMap["ftpHomeDir"]}\n自定义URL:\n${configMap["ftpCustomUrl"]}',
-        );
+        if (context.mounted) {
+          return showCupertinoAlertDialog(
+            context: context,
+            title: '通知',
+            content:
+                '检测通过，您的配置信息为:\n用户名:\n${configMap["ftpHost"]}\n端口:\n${configMap["ftpPort"]}\n用户名:\n${configMap["ftpUser"]}\n密码:\n${configMap["ftpPassword"]}\n上传路径:\n${configMap["uploadPath"]}\n管理功能起始路径:\n${configMap["ftpHomeDir"]}\n自定义URL:\n${configMap["ftpCustomUrl"]}',
+          );
+        }
       }
     } catch (e) {
       FLog.error(
@@ -525,7 +544,9 @@ class FTPConfigState extends State<FTPConfig> {
           methodName: 'checkFTPConfig',
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
-      return showCupertinoAlertDialog(context: context, title: "检查失败!", content: e.toString());
+      if (context.mounted) {
+        return showCupertinoAlertDialog(context: context, title: "检查失败!", content: e.toString());
+      }
     }
   }
 
@@ -568,7 +589,9 @@ class FTPConfigState extends State<FTPConfig> {
           methodName: '_setdefault',
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
-      showToastWithContext(context, '错误');
+      if (context.mounted) {
+        showToastWithContext(context, '错误');
+      }
     }
   }
 }

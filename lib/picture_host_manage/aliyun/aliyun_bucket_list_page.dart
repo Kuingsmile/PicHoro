@@ -304,12 +304,14 @@ class AliyunBucketListState extends loading_state.BaseLoadingPageState<AliyunBuc
                       aclState['aclState'] = '未获取';
                     }
                     setState(() {});
-                    showModalBottomSheet(
-                        isScrollControlled: true,
-                        context: context,
-                        builder: (context) {
-                          return buildBottomSheetWidget(context, element);
-                        });
+                    if (context.mounted) {
+                      showModalBottomSheet(
+                          isScrollControlled: true,
+                          context: context,
+                          builder: (context) {
+                            return buildBottomSheetWidget(context, element);
+                          });
+                    }
                   },
                 ));
           },
@@ -512,7 +514,9 @@ class AliyunBucketListState extends loading_state.BaseLoadingPageState<AliyunBuc
                         text: formatErrorMessage({}, e.toString()),
                         dataLogType: DataLogType.ERRORS.toString());
                     showToast('删除失败');
-                    Navigator.of(context).pop();
+                    if (context.mounted) {
+                      Navigator.of(context).pop();
+                    }
                   }
                 },
               );

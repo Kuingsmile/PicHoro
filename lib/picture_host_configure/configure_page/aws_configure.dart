@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:f_logs/f_logs.dart';
 import 'package:fluro/fluro.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:minio_new/minio.dart';
+import 'package:minio/minio.dart';
 
 import 'package:horopic/router/application.dart';
 import 'package:horopic/pages/loading.dart';
@@ -301,14 +301,18 @@ class AwsConfigState extends State<AwsConfig> {
       final awsConfigJson = jsonEncode(awsConfig);
       final awsConfigFile = await localFile;
       await awsConfigFile.writeAsString(awsConfigJson);
-      return showCupertinoAlertDialog(context: context, title: '成功', content: '配置成功');
+      if (context.mounted) {
+        return showCupertinoAlertDialog(context: context, title: '成功', content: '配置成功');
+      }
     } catch (e) {
       FLog.error(
           className: 'AwsConfigPage',
           methodName: 'saveConfig',
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
-      return showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
+      if (context.mounted) {
+        return showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
+      }
     }
   }
 
@@ -318,7 +322,10 @@ class AwsConfigState extends State<AwsConfig> {
       String configData = await awsConfigFile.readAsString();
 
       if (configData == "Error") {
-        return showCupertinoAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");
+        if (context.mounted) {
+          return showCupertinoAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");
+        }
+        return;
       }
 
       Map configMap = jsonDecode(configData);
@@ -344,18 +351,22 @@ class AwsConfigState extends State<AwsConfig> {
       }
 
       await minio.bucketExists(bucket);
-      return showCupertinoAlertDialog(
-          context: context,
-          title: '通知',
-          content:
-              '检测通过，您的配置信息为:\nAccessKeyID:\n$accessKeyID\nSecretAccessKey:\n$secretAccessKey\nBucket:\n$bucket\nEndpoint:\n$endpoint\nRegion:\n$region\nUploadPath:\n${configMap['uploadPath']}\nCustomUrl:\n${configMap['customUrl']}');
+      if (context.mounted) {
+        return showCupertinoAlertDialog(
+            context: context,
+            title: '通知',
+            content:
+                '检测通过，您的配置信息为:\nAccessKeyID:\n$accessKeyID\nSecretAccessKey:\n$secretAccessKey\nBucket:\n$bucket\nEndpoint:\n$endpoint\nRegion:\n$region\nUploadPath:\n${configMap['uploadPath']}\nCustomUrl:\n${configMap['customUrl']}');
+      }
     } catch (e) {
       FLog.error(
           className: 'AwsConfigPage',
           methodName: 'checkAwsConfig',
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
-      return showCupertinoAlertDialog(context: context, title: "检查失败!", content: e.toString());
+      if (context.mounted) {
+        return showCupertinoAlertDialog(context: context, title: "检查失败!", content: e.toString());
+      }
     }
   }
 
@@ -398,7 +409,9 @@ class AwsConfigState extends State<AwsConfig> {
           methodName: '_setdefault',
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
-      showToastWithContext(context, '错误');
+      if (context.mounted) {
+        showToastWithContext(context, '错误');
+      }
     }
   }
 }

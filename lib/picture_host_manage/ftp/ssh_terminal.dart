@@ -9,7 +9,7 @@ import 'package:xterm/xterm.dart';
 
 class SSHTermimal extends StatefulWidget {
   final Map configMap;
-  SSHTermimal({
+  const SSHTermimal({
     Key? key,
     required this.configMap,
   }) : super(key: key);

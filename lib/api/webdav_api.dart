@@ -67,7 +67,7 @@ class WebdavImageUploadUtils {
         displayUrl,
       ];
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "WebdavImageUploadUtils",
             methodName: "uploadApi",
@@ -112,7 +112,7 @@ class WebdavImageUploadUtils {
         "success",
       ];
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "WebdavImageUploadUtils",
             methodName: "deleteApi",

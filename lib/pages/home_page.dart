@@ -52,7 +52,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
   var uploadManager = UploadManager(maxConcurrentTasks: 1);
 
   bool homepageKeepAlive = true;
-  var actionEventBus;
+  dynamic actionEventBus;
 
   @override
   bool get wantKeepAlive => homepageKeepAlive;
@@ -366,7 +366,9 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
     var uploadResult = await uploaderentry(path: path, name: name);
     if (uploadResult[0] == "Error") {
       Global.multiUpload = 'fail';
-      return showCupertinoAlertDialog(context: context, title: "上传失败!", content: "请先配置上传参数.");
+      if (context.mounted) {
+        return showCupertinoAlertDialog(context: context, title: "上传失败!", content: "请先配置上传参数.");
+      }
     } else if (uploadResult[0] == "success") {
       eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
       Map<String, dynamic> maps = {};
@@ -563,10 +565,16 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
       return true;
     } else if (uploadResult[0] == "failed") {
       Global.multiUpload = 'fail';
-      return showCupertinoAlertDialog(context: context, title: "上传失败!", content: "上传参数有误.");
+      if (context.mounted) {
+        return showCupertinoAlertDialog(context: context, title: "上传失败!", content: "上传参数有误.");
+      }
+      return;
     } else {
       Global.multiUpload = 'fail';
-      return showCupertinoAlertDialog(context: context, title: "上传失败!", content: uploadResult);
+      if (context.mounted) {
+        return showCupertinoAlertDialog(context: context, title: "上传失败!", content: uploadResult);
+      }
+      return;
     }
   }
 
@@ -626,7 +634,10 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
 
       var uploadResult = await uploaderentry(path: path, name: name);
       if (uploadResult[0] == "Error") {
-        return showCupertinoAlertDialog(context: context, title: "上传失败!", content: "请先配置上传参数.");
+        if (context.mounted) {
+          return showCupertinoAlertDialog(context: context, title: "上传失败!", content: "请先配置上传参数.");
+        }
+        return;
       } else if (uploadResult[0] == "success") {
         successCount++;
         successList.add(name);
@@ -841,7 +852,10 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
       for (String failImage in failList) {
         content += "$failImage\n";
       }
-      return showCupertinoAlertDialog(barrierDismissible: true, context: context, title: "上传失败!", content: content);
+      if (context.mounted) {
+        return showCupertinoAlertDialog(barrierDismissible: true, context: context, title: "上传失败!", content: content);
+      }
+      return;
     } else if (failCount == 0) {
       eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
       if (Global.isCopyLink == true) {
@@ -856,7 +870,10 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
       if (successList.length == 1) {
         return Fluttertoast.showToast(msg: '上传成功');
       } else {
-        return showCupertinoAlertDialog(barrierDismissible: true, context: context, title: "上传成功!", content: content);
+        if (context.mounted) {
+          return showCupertinoAlertDialog(barrierDismissible: true, context: context, title: "上传成功!", content: content);
+        }
+        return;
       }
     } else {
       eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
@@ -878,7 +895,10 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
       for (String failImage in failList) {
         content += "$failImage\n";
       }
-      return showCupertinoAlertDialog(barrierDismissible: true, context: context, title: "上传完成!", content: content);
+      if (context.mounted) {
+        return showCupertinoAlertDialog(barrierDismissible: true, context: context, title: "上传完成!", content: content);
+      }
+      return;
     }
   }
 
@@ -1326,17 +1346,20 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
                     uploadFileNameList.add(Global.imagesList[i]);
                   }
                   if (uploadList.isNotEmpty) {
-                    showDialog(
-                        context: context,
-                        barrierDismissible: false,
-                        builder: (context) {
-                          return NetLoadingDialog(
-                            outsideDismiss: false,
-                            loading: true,
-                            loadingText: "上传中...",
-                            requestCallBack: _upLoadImage(),
-                          );
-                        });
+                    if (context.mounted) {
+                      showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (context) {
+                            return NetLoadingDialog(
+                              outsideDismiss: false,
+                              loading: true,
+                              loadingText: "上传中...",
+                              requestCallBack: _upLoadImage(),
+                            );
+                          });
+                    }
+                    return;
                   }
                 },
                 child: const Icon(
@@ -1673,12 +1696,12 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
 }
 
 class ListItem extends StatefulWidget {
-  Function(String, String) onUploadPlayPausedPressed;
-  Function(String, String) onDelete;
-  UploadTask? uploadTask;
-  String path;
-  String fileName;
-  ListItem(
+  final Function(String, String) onUploadPlayPausedPressed;
+  final Function(String, String) onDelete;
+  final UploadTask? uploadTask;
+  final String path;
+  final String fileName;
+  const ListItem(
       {Key? key,
       required this.onUploadPlayPausedPressed,
       required this.onDelete,

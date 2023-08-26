@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:f_logs/f_logs.dart';
 import 'package:flutter/foundation.dart';
-import 'package:minio_new/minio.dart';
+import 'package:minio/minio.dart';
 import 'package:path/path.dart' as my_path;
 
 import 'package:horopic/utils/common_functions.dart';

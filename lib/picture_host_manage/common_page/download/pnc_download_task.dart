@@ -21,7 +21,7 @@ class DownloadTask {
       completer.complete(status.value);
     }
 
-    var listener;
+    dynamic listener;
     listener = () {
       if (status.value.isCompleted) {
         try {

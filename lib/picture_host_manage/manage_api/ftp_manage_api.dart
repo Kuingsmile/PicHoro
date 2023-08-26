@@ -366,7 +366,7 @@ class FTPManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "FTPManageAPI",
             methodName: "uploadNetworkFileSFTP",

@@ -330,9 +330,13 @@ class UpyunConfigState extends State<UpyunConfig> {
         final upyunConfigJson = jsonEncode(upyunConfig);
         final upyunConfigFile = await localFile;
         await upyunConfigFile.writeAsString(upyunConfigJson);
-        return showCupertinoAlertDialog(context: context, title: '成功', content: '配置成功');
+        if (context.mounted) {
+          return showCupertinoAlertDialog(context: context, title: '成功', content: '配置成功');
+        }
       } else {
-        return showCupertinoAlertDialog(context: context, title: '错误', content: '验证失败');
+        if (context.mounted) {
+          return showCupertinoAlertDialog(context: context, title: '错误', content: '验证失败');
+        }
       }
     } catch (e) {
       FLog.error(
@@ -340,7 +344,9 @@ class UpyunConfigState extends State<UpyunConfig> {
           methodName: 'saveConfig',
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
-      return showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
+      if (context.mounted) {
+        return showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
+      }
     }
   }
 
@@ -350,7 +356,10 @@ class UpyunConfigState extends State<UpyunConfig> {
       String configData = await upyunConfigFile.readAsString();
 
       if (configData == "Error") {
-        return showCupertinoAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");
+        if (context.mounted) {
+          return showCupertinoAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");
+        }
+        return;
       }
 
       Map configMap = jsonDecode(configData);
@@ -417,13 +426,17 @@ class UpyunConfigState extends State<UpyunConfig> {
       );
 
       if (response.statusCode == 200) {
-        return showCupertinoAlertDialog(
-            context: context,
-            title: '通知',
-            content:
-                '检测通过，您的配置信息为:\nBucket:\n${configMap['bucket']}\nOperator:\n${configMap['operator']}\nPassword:\n${configMap['password']}\nUrl:\n${configMap['url']}\nOptions:\n${configMap['options']}\nPath:\n${configMap['path']}');
+        if (context.mounted) {
+          return showCupertinoAlertDialog(
+              context: context,
+              title: '通知',
+              content:
+                  '检测通过，您的配置信息为:\nBucket:\n${configMap['bucket']}\nOperator:\n${configMap['operator']}\nPassword:\n${configMap['password']}\nUrl:\n${configMap['url']}\nOptions:\n${configMap['options']}\nPath:\n${configMap['path']}');
+        }
       } else {
-        return showCupertinoAlertDialog(context: context, title: '错误', content: '检查失败，请检查配置信息');
+        if (context.mounted) {
+          return showCupertinoAlertDialog(context: context, title: '错误', content: '检查失败，请检查配置信息');
+        }
       }
     } catch (e) {
       FLog.error(
@@ -431,7 +444,9 @@ class UpyunConfigState extends State<UpyunConfig> {
           methodName: 'checkUpyunConfig',
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
-      return showCupertinoAlertDialog(context: context, title: "检查失败!", content: e.toString());
+      if (context.mounted) {
+        return showCupertinoAlertDialog(context: context, title: "检查失败!", content: e.toString());
+      }
     }
   }
 
@@ -474,7 +489,9 @@ class UpyunConfigState extends State<UpyunConfig> {
           methodName: '_setdefault',
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
-      showToastWithContext(context, '错误');
+      if (context.mounted) {
+        showToastWithContext(context, '错误');
+      }
     }
   }
 }

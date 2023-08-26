@@ -382,9 +382,13 @@ class TencentConfigState extends State<TencentConfig> {
         final tencentConfigJson = jsonEncode(tencentConfig);
         final tencentConfigFile = await localFile;
         await tencentConfigFile.writeAsString(tencentConfigJson);
-        return showCupertinoAlertDialog(context: context, title: '成功', content: '配置成功');
+        if (context.mounted) {
+          return showCupertinoAlertDialog(context: context, title: '成功', content: '配置成功');
+        }
       } else {
-        return showCupertinoAlertDialog(context: context, title: '错误', content: '数据库错误');
+        if (context.mounted) {
+          return showCupertinoAlertDialog(context: context, title: '错误', content: '数据库错误');
+        }
       }
     } catch (e) {
       FLog.error(
@@ -392,7 +396,9 @@ class TencentConfigState extends State<TencentConfig> {
           methodName: 'saveConfig',
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
-      return showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
+      if (context.mounted) {
+        return showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
+      }
     }
   }
 
@@ -402,7 +408,10 @@ class TencentConfigState extends State<TencentConfig> {
       String configData = await tencentConfigFile.readAsString();
 
       if (configData == "Error") {
-        return showCupertinoAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");
+        if (context.mounted) {
+          return showCupertinoAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");
+        }
+        return;
       }
 
       Map configMap = jsonDecode(configData);
@@ -475,13 +484,17 @@ class TencentConfigState extends State<TencentConfig> {
       );
 
       if (response.statusCode == 204) {
-        return showCupertinoAlertDialog(
-            context: context,
-            title: '通知',
-            content:
-                '检测通过，您的配置信息为:\nsecretId:\n${configMap['secretId']}\nsecretKey:\n${configMap['secretKey']}\nbucket:\n${configMap['bucket']}\nappId:\n${configMap['appId']}\narea:\n${configMap['area']}\npath:\n${configMap['path']}\ncustomUrl:\n${configMap['customUrl']}\noptions:\n${configMap['options']}');
+        if (context.mounted) {
+          return showCupertinoAlertDialog(
+              context: context,
+              title: '通知',
+              content:
+                  '检测通过，您的配置信息为:\nsecretId:\n${configMap['secretId']}\nsecretKey:\n${configMap['secretKey']}\nbucket:\n${configMap['bucket']}\nappId:\n${configMap['appId']}\narea:\n${configMap['area']}\npath:\n${configMap['path']}\ncustomUrl:\n${configMap['customUrl']}\noptions:\n${configMap['options']}');
+        }
       } else {
-        return showCupertinoAlertDialog(context: context, title: '错误', content: '检查失败，请检查配置信息');
+        if (context.mounted) {
+          return showCupertinoAlertDialog(context: context, title: '错误', content: '检查失败，请检查配置信息');
+        }
       }
     } catch (e) {
       FLog.error(
@@ -489,7 +502,9 @@ class TencentConfigState extends State<TencentConfig> {
           methodName: 'checkTencentConfig',
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
-      return showCupertinoAlertDialog(context: context, title: "检查失败!", content: e.toString());
+      if (context.mounted) {
+        return showCupertinoAlertDialog(context: context, title: "检查失败!", content: e.toString());
+      }
     }
   }
 
@@ -532,7 +547,9 @@ class TencentConfigState extends State<TencentConfig> {
           methodName: '_setdefault',
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
-      showToastWithContext(context, '错误');
+      if (context.mounted) {
+        showToastWithContext(context, '错误');
+      }
     }
   }
 }

@@ -246,7 +246,7 @@ signingStr=signingStr+<body>
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "QiniuManageAPI",
             methodName: "getBucketList",
@@ -297,7 +297,7 @@ signingStr=signingStr+<body>
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "QiniuManageAPI",
             methodName: "createBucket",
@@ -341,7 +341,7 @@ signingStr=signingStr+<body>
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "QiniuManageAPI",
             methodName: "getBucketACL",
@@ -388,7 +388,7 @@ signingStr=signingStr+<body>
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "QiniuManageAPI",
             methodName: "deleteBucket",
@@ -442,7 +442,7 @@ signingStr=signingStr+<body>
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "QiniuManageAPI",
             methodName: "queryDomains",
@@ -497,7 +497,7 @@ signingStr=signingStr+<body>
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "QiniuManageAPI",
             methodName: "setACL",
@@ -672,7 +672,7 @@ signingStr=signingStr+<body>
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "QiniuManageAPI",
             methodName: "queryBucketFiles",
@@ -751,7 +751,7 @@ signingStr=signingStr+<body>
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "QiniuManageAPI",
             methodName: "createFolder",
@@ -807,7 +807,7 @@ signingStr=signingStr+<body>
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "QiniuManageAPI",
             methodName: "deleteFile",
@@ -914,7 +914,7 @@ signingStr=signingStr+<body>
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "QiniuManageAPI",
             methodName: "copyFile",
@@ -982,7 +982,7 @@ signingStr=signingStr+<body>
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "QiniuManageAPI",
             methodName: "sisyphusFetch",

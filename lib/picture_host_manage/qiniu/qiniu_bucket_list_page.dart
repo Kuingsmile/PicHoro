@@ -12,7 +12,6 @@ import 'package:horopic/router/routers.dart';
 import 'package:horopic/picture_host_manage/common_page/loading_state.dart' as loading_state;
 import 'package:horopic/picture_host_manage/manage_api/qiniu_manage_api.dart';
 import 'package:horopic/utils/common_functions.dart';
-import 'package:horopic/utils/global.dart';
 
 class QiniuBucketList extends StatefulWidget {
   const QiniuBucketList({Key? key}) : super(key: key);
@@ -592,7 +591,9 @@ class QiniuBucketListState extends loading_state.BaseLoadingPageState<QiniuBucke
                         text: formatErrorMessage({}, e.toString()),
                         dataLogType: DataLogType.ERRORS.toString());
                     showToast('删除失败');
-                    Navigator.of(context).pop();
+                    if (context.mounted) {
+                      Navigator.of(context).pop();
+                    }
                   }
                 },
               );

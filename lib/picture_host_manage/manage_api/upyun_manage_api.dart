@@ -246,7 +246,7 @@ class UpyunManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "UpyunManageAPI",
             methodName: "getToken",
@@ -279,7 +279,7 @@ class UpyunManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "UpyunManageAPI",
             methodName: "checkToken",
@@ -317,7 +317,7 @@ class UpyunManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "UpyunManageAPI",
             methodName: "deleteToken",
@@ -385,7 +385,7 @@ class UpyunManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "UpyunManageAPI",
             methodName: "getBucketList",
@@ -430,7 +430,7 @@ class UpyunManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "UpyunManageAPI",
             methodName: "getBucketInfo",
@@ -476,7 +476,7 @@ class UpyunManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "UpyunManageAPI",
             methodName: "deleteBucket",
@@ -521,7 +521,7 @@ class UpyunManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "UpyunManageAPI",
             methodName: "putBucket",
@@ -567,7 +567,7 @@ class UpyunManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "UpyunManageAPI",
             methodName: "getOperator",
@@ -614,7 +614,7 @@ class UpyunManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "UpyunManageAPI",
             methodName: "putOperator",
@@ -661,7 +661,7 @@ class UpyunManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "UpyunManageAPI",
             methodName: "deleteOperator",
@@ -778,7 +778,7 @@ class UpyunManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "UpyunManageAPI",
             methodName: "queryBucketFiles",
@@ -845,7 +845,7 @@ class UpyunManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "UpyunManageAPI",
             methodName: "createFolder",
@@ -900,7 +900,7 @@ class UpyunManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "UpyunManageAPI",
             methodName: "deleteFile",
@@ -963,7 +963,7 @@ class UpyunManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "UpyunManageAPI",
             methodName: "deleteFolder",
@@ -1060,7 +1060,7 @@ class UpyunManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "UpyunManageAPI",
             methodName: "renameFile",
@@ -1164,7 +1164,7 @@ class UpyunManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "UpyunManageAPI",
             methodName: "uploadFile",
@@ -1209,7 +1209,7 @@ class UpyunManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "UpyunManageAPI",
             methodName: "uploadNetworkFile",

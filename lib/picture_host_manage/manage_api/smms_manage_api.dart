@@ -65,7 +65,7 @@ class SmmsManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "SmmsManageAPI",
             methodName: "getUserProfile",
@@ -105,7 +105,7 @@ class SmmsManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "SmmsManageAPI",
             methodName: "getFileList",
@@ -144,7 +144,7 @@ class SmmsManageAPI {
         return ["failed"];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "SmmsManageAPI",
             methodName: "uploadFile",
@@ -222,7 +222,7 @@ class SmmsManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "SmmsManageAPI",
             methodName: "uploadNetworkFile",
@@ -290,7 +290,7 @@ class SmmsManageAPI {
         return ["failed"];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "SmmsManageAPI",
             methodName: "deleteFile",

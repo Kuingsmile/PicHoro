@@ -73,7 +73,7 @@ class _NetVideoPlayerState extends State<NetVideoPlayer> {
     _currActiveIdx = widget.index;
     if (widget.type == 'normal') {
       _videoPlayerController =
-          VideoPlayerController.network(widget.videoList[_currActiveIdx]['url'], httpHeaders: widget.headers);
+          VideoPlayerController.networkUrl(widget.videoList[_currActiveIdx]['url'], httpHeaders: widget.headers);
       _chewieController = ChewieController(
         videoPlayerController: _videoPlayerController,
         aspectRatio: 16 / 9,
@@ -211,7 +211,6 @@ class _NetVideoPlayerState extends State<NetVideoPlayer> {
           builder: (ctx) {
             switch (_controller.value.playingState) {
               case PlayingState.initialized:
-
               case PlayingState.paused:
                 return SizedBox.expand(
                   child: Container(
@@ -304,7 +303,7 @@ class _NetVideoPlayerState extends State<NetVideoPlayer> {
                                                 inactiveColor: Colors.white70,
                                                 value: sliderValue,
                                                 min: 0.0,
-                                                max: (!validPosition && _controller.value.duration == null)
+                                                max: (!validPosition)
                                                     ? 1.0
                                                     : _controller.value.duration.inSeconds.toDouble(),
                                                 onChanged: validPosition ? _onSliderPositionChanged : null,
@@ -428,6 +427,7 @@ class _NetVideoPlayerState extends State<NetVideoPlayer> {
             });
             String nextVideoUrl = widget.videoList[activeIndex]['url'];
             if (widget.type == 'normal') {
+              // ignore: deprecated_member_use
               _videoPlayerController = VideoPlayerController.network(nextVideoUrl, httpHeaders: widget.headers);
               _chewieController = ChewieController(
                 videoPlayerController: _videoPlayerController,

@@ -448,7 +448,7 @@ class AlistFileExplorerState extends loading_state.BaseLoadingPageState<AlistFil
                                 if (mounted) {
                                   Application.router
                                       .navigateTo(context,
-                                          '/alistUpDownloadManagePage?bucketName=${Uri.encodeComponent('Alist_' + widget.element['mount_path'].split('/').last)}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=0',
+                                          '/alistUpDownloadManagePage?bucketName=${Uri.encodeComponent('Alist_${widget.element['mount_path'].split('/').last}')}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=0',
                                           transition: TransitionType.inFromRight)
                                       .then((value) {
                                     _getBucketList();
@@ -505,7 +505,7 @@ class AlistFileExplorerState extends loading_state.BaseLoadingPageState<AlistFil
                                 if (mounted) {
                                   Application.router
                                       .navigateTo(context,
-                                          '/alistUpDownloadManagePage?bucketName=${Uri.encodeComponent('Alist_' + widget.element['mount_path'].split('/').last)}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=0',
+                                          '/alistUpDownloadManagePage?bucketName=${Uri.encodeComponent('Alist_${widget.element['mount_path'].split('/').last}')}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=0',
                                           transition: TransitionType.inFromRight)
                                       .then((value) {
                                     _getBucketList();
@@ -530,18 +530,20 @@ class AlistFileExplorerState extends loading_state.BaseLoadingPageState<AlistFil
                               try {
                                 String urlStr = url.text!;
                                 List fileLinkList = urlStr.split("\n");
-                                await showDialog(
-                                    context: context,
-                                    barrierDismissible: false,
-                                    builder: (context) {
-                                      return NetLoadingDialog(
-                                        outsideDismiss: false,
-                                        loading: true,
-                                        loadingText: "上传中...",
-                                        requestCallBack: AlistManageAPI.uploadNetworkFileEntry(
-                                            fileLinkList, widget.bucketPrefix == "/" ? "None" : widget.bucketPrefix),
-                                      );
-                                    });
+                                if (context.mounted) {
+                                  await showDialog(
+                                      context: context,
+                                      barrierDismissible: false,
+                                      builder: (context) {
+                                        return NetLoadingDialog(
+                                          outsideDismiss: false,
+                                          loading: true,
+                                          loadingText: "上传中...",
+                                          requestCallBack: AlistManageAPI.uploadNetworkFileEntry(
+                                              fileLinkList, widget.bucketPrefix == "/" ? "None" : widget.bucketPrefix),
+                                        );
+                                      });
+                                }
                                 _getBucketList();
                               } catch (e) {
                                 FLog.error(
@@ -622,7 +624,7 @@ class AlistFileExplorerState extends loading_state.BaseLoadingPageState<AlistFil
                 if (mounted) {
                   Application.router
                       .navigateTo(context,
-                          '/alistUpDownloadManagePage?bucketName=${Uri.encodeComponent('Alist_' + widget.element['mount_path'].split('/').last)}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=$index',
+                          '/alistUpDownloadManagePage?bucketName=${Uri.encodeComponent('Alist_${widget.element['mount_path'].split('/').last}')}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=$index',
                           transition: TransitionType.inFromRight)
                       .then((value) {
                     _getBucketList();
@@ -753,7 +755,7 @@ class AlistFileExplorerState extends loading_state.BaseLoadingPageState<AlistFil
                       await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOADS);
                   // ignore: use_build_context_synchronously
                   Application.router.navigateTo(context,
-                      '/alistUpDownloadManagePage?bucketName=${Uri.encodeComponent('Alist_' + widget.element['mount_path'].split('/').last)}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=1',
+                      '/alistUpDownloadManagePage?bucketName=${Uri.encodeComponent('Alist_${widget.element['mount_path'].split('/').last}')}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=1',
                       transition: TransitionType.inFromRight);
                 },
                 child: const Icon(
@@ -1073,9 +1075,9 @@ class AlistFileExplorerState extends loading_state.BaseLoadingPageState<AlistFil
                                   color: Color.fromARGB(255, 235, 242, 248)),
                               padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
                               child: MSHCheckbox(
-                                uncheckedColor: Colors.blue,
+                                colorConfig: MSHColorConfig.fromCheckedUncheckedDisabled(
+                                    checkedColor: Colors.blue, uncheckedColor: Colors.blue, disabledColor: Colors.blue),
                                 size: 17,
-                                checkedColor: Colors.blue,
                                 value: selectedFilesBool[index],
                                 style: MSHCheckboxStyle.fillScaleCheck,
                                 onChanged: (selected) {
@@ -1271,9 +1273,11 @@ class AlistFileExplorerState extends loading_state.BaseLoadingPageState<AlistFil
                                     }
                                   }
                                   urlList = urlList.substring(0, urlList.length - 1);
-                                  Application.router.navigateTo(this.context,
-                                      '${Routes.albumImagePreview}?index=$newImageIndex&images=${Uri.encodeComponent(urlList)}',
-                                      transition: TransitionType.none);
+                                  if (context.mounted) {
+                                    Application.router.navigateTo(this.context,
+                                        '${Routes.albumImagePreview}?index=$newImageIndex&images=${Uri.encodeComponent(urlList)}',
+                                        transition: TransitionType.none);
+                                  }
                                 } else if (allInfoList[index]['name'].split('.').last.toLowerCase() == 'pdf') {
                                   //预览PDF
                                   String shareUrl = '';
@@ -1283,10 +1287,11 @@ class AlistFileExplorerState extends loading_state.BaseLoadingPageState<AlistFil
                                       '${configMap['host']}/d${widget.bucketPrefix}${allInfoList[index]['name']}';
                                   shareUrl += '?sign=${allInfoList[index]['sign']}';
                                   Map<String, dynamic> headers = {};
-
-                                  Application.router.navigateTo(this.context,
-                                      '${Routes.pdfViewer}?url=${Uri.encodeComponent(shareUrl)}&fileName=${Uri.encodeComponent(allInfoList[index]['name'])}&headers=${Uri.encodeComponent(jsonEncode(headers))}',
-                                      transition: TransitionType.none);
+                                  if (context.mounted) {
+                                    Application.router.navigateTo(this.context,
+                                        '${Routes.pdfViewer}?url=${Uri.encodeComponent(shareUrl)}&fileName=${Uri.encodeComponent(allInfoList[index]['name'])}&headers=${Uri.encodeComponent(jsonEncode(headers))}',
+                                        transition: TransitionType.none);
+                                  }
                                 } else if (Global.textExt
                                     .contains(allInfoList[index]['name'].split('.').last.toLowerCase())) {
                                   //预览文本
@@ -1315,9 +1320,11 @@ class AlistFileExplorerState extends loading_state.BaseLoadingPageState<AlistFil
                                     showToast('获取失败');
                                     return;
                                   }
-                                  Application.router.navigateTo(this.context,
-                                      '${Routes.mdPreview}?filePath=${Uri.encodeComponent(filePath)}&fileName=${Uri.encodeComponent(fileName)}',
-                                      transition: TransitionType.none);
+                                  if (context.mounted) {
+                                    Application.router.navigateTo(this.context,
+                                        '${Routes.mdPreview}?filePath=${Uri.encodeComponent(filePath)}&fileName=${Uri.encodeComponent(fileName)}',
+                                        transition: TransitionType.none);
+                                  }
                                 } else if (Global.chewieExt
                                     .contains(allInfoList[index]['name'].split('.').last.toLowerCase())) {
                                   //预览chewie视频
@@ -1337,9 +1344,11 @@ class AlistFileExplorerState extends loading_state.BaseLoadingPageState<AlistFil
                                     }
                                   }
                                   Map<String, dynamic> headers = {};
-                                  Application.router.navigateTo(this.context,
-                                      '${Routes.netVideoPlayer}?videoList=${Uri.encodeComponent(jsonEncode(videoList))}&index=$newImageIndex&type=${Uri.encodeComponent('normal')}&headers=${Uri.encodeComponent(jsonEncode(headers))}',
-                                      transition: TransitionType.none);
+                                  if (context.mounted) {
+                                    Application.router.navigateTo(this.context,
+                                        '${Routes.netVideoPlayer}?videoList=${Uri.encodeComponent(jsonEncode(videoList))}&index=$newImageIndex&type=${Uri.encodeComponent('normal')}&headers=${Uri.encodeComponent(jsonEncode(headers))}',
+                                        transition: TransitionType.none);
+                                  }
                                 } else if (Global.vlcExt
                                     .contains(allInfoList[index]['name'].split('.').last.toLowerCase())) {
                                   //vlc预览视频
@@ -1377,9 +1386,11 @@ class AlistFileExplorerState extends loading_state.BaseLoadingPageState<AlistFil
                                     }
                                   }
                                   Map<String, dynamic> headers = {};
-                                  Application.router.navigateTo(this.context,
-                                      '${Routes.netVideoPlayer}?videoList=${Uri.encodeComponent(jsonEncode(videoList))}&index=$newImageIndex&type=${Uri.encodeComponent('mkv')}&headers=${Uri.encodeComponent(jsonEncode(headers))}',
-                                      transition: TransitionType.none);
+                                  if (context.mounted) {
+                                    Application.router.navigateTo(this.context,
+                                        '${Routes.netVideoPlayer}?videoList=${Uri.encodeComponent(jsonEncode(videoList))}&index=$newImageIndex&type=${Uri.encodeComponent('mkv')}&headers=${Uri.encodeComponent(jsonEncode(headers))}',
+                                        transition: TransitionType.none);
+                                  }
                                 }
                               },
                             ),
@@ -1392,9 +1403,11 @@ class AlistFileExplorerState extends loading_state.BaseLoadingPageState<AlistFil
                                   color: Color.fromARGB(255, 235, 242, 248)),
                               padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
                               child: MSHCheckbox(
-                                uncheckedColor: Colors.blue,
+                                colorConfig: MSHColorConfig.fromCheckedUncheckedDisabled(
+                                  checkedColor: Colors.blue,
+                                  uncheckedColor: Colors.blue,
+                                ),
                                 size: 17,
-                                checkedColor: Colors.blue,
                                 value: selectedFilesBool[index],
                                 style: MSHCheckboxStyle.fillScaleCheck,
                                 onChanged: (selected) {
@@ -1708,14 +1721,14 @@ double btnHeight = 60;
 double borderWidth = 2;
 
 class RenameDialogContent extends StatefulWidget {
-  String title;
-  String cancelBtnTitle;
-  String okBtnTitle;
-  VoidCallback cancelBtnTap;
-  VoidCallback okBtnTap;
-  TextEditingController vc;
-  String stateBoolText;
-  RenameDialogContent(
+  final String title;
+  final String cancelBtnTitle;
+  final String okBtnTitle;
+  final VoidCallback cancelBtnTap;
+  final VoidCallback okBtnTap;
+  final TextEditingController vc;
+  final String stateBoolText;
+  const RenameDialogContent(
       {super.key,
       required this.title,
       this.cancelBtnTitle = "取消",
@@ -1831,13 +1844,13 @@ class NewFolderDialog extends AlertDialog {
 //弹出框 修改自https://www.jianshu.com/p/4144837a789b
 
 class NewFolderDialogContent extends StatefulWidget {
-  String title;
-  String cancelBtnTitle;
-  String okBtnTitle;
-  VoidCallback cancelBtnTap;
-  VoidCallback okBtnTap;
-  TextEditingController vc;
-  NewFolderDialogContent({
+  final String title;
+  final String cancelBtnTitle;
+  final String okBtnTitle;
+  final VoidCallback cancelBtnTap;
+  final VoidCallback okBtnTap;
+  final TextEditingController vc;
+  const NewFolderDialogContent({
     super.key,
     required this.title,
     this.cancelBtnTitle = "取消",

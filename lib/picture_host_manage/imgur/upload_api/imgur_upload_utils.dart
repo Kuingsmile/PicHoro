@@ -5,13 +5,13 @@ import 'dart:io';
 import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import 'package:dio_proxy_adapter/dio_proxy_adapter.dart';
 
 import 'package:horopic/picture_host_manage/common_page/upload/pnc_upload_request.dart';
 import 'package:horopic/picture_host_manage/common_page/upload/pnc_upload_task.dart';
 import 'package:horopic/pages/upload_pages/upload_status.dart';
 
 import 'package:horopic/utils/common_functions.dart';
+import 'package:horopic/utils/dio_proxy_adapter.dart';
 
 class UploadManager {
   final Map<String, UploadTask> _cache = <String, UploadTask>{};
@@ -47,7 +47,7 @@ class UploadManager {
       }
       setStatus(task, UploadStatus.uploading);
 
-      var response;
+      Response response;
       String accesstoken = configMap['accesstoken'];
       String albumHash = configMap['albumhash'];
       String proxy = configMap['proxy'];
@@ -81,7 +81,7 @@ class UploadManager {
         } else {
           proxyClean = proxy;
         }
-        dio.useProxy(proxyClean);
+        dio.httpClientAdapter = useProxy(proxyClean);
       }
       String accountUrl = "https://api.imgur.com/3/image";
       response = await dio.post(
@@ -268,14 +268,14 @@ class UploadManager {
           progress.value = progressMap.values.sum / total;
         }
 
-        var progressListener;
+        Null Function() progressListener;
         progressListener = () {
           progressMap[paths[i]] = task.progress.value;
           progress.value = progressMap.values.sum / total;
         };
 
         task.progress.addListener(progressListener);
-        var listener;
+        dynamic listener;
         listener = () {
           if (task.status.value.isCompleted) {
             progressMap[paths[i]] = 1.0;
@@ -309,7 +309,7 @@ class UploadManager {
           }
         }
 
-        var listener;
+        dynamic listener;
         listener = () {
           if (task.status.value.isCompleted) {
             completed++;

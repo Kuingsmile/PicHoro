@@ -129,8 +129,9 @@ class UpyunFileExplorerState extends loading_state.BaseLoadingPageState<UpyunFil
           methodName: "_getBucketList",
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
-      showToastWithContext(context, '获取文件列表失败');
+
       if (mounted) {
+        showToastWithContext(context, '获取文件列表失败');
         setState(() {
           state = loading_state.LoadState.ERROR;
         });
@@ -539,18 +540,20 @@ class UpyunFileExplorerState extends loading_state.BaseLoadingPageState<UpyunFil
                               try {
                                 String urlStr = url.text!;
                                 List fileLinkList = urlStr.split("\n");
-                                await showDialog(
-                                    context: context,
-                                    barrierDismissible: false,
-                                    builder: (context) {
-                                      return NetLoadingDialog(
-                                        outsideDismiss: false,
-                                        loading: true,
-                                        loadingText: "上传中...",
-                                        requestCallBack: UpyunManageAPI.uploadNetworkFileEntry(
-                                            fileLinkList, widget.element, widget.bucketPrefix),
-                                      );
-                                    });
+                                if (context.mounted) {
+                                  await showDialog(
+                                      context: context,
+                                      barrierDismissible: false,
+                                      builder: (context) {
+                                        return NetLoadingDialog(
+                                          outsideDismiss: false,
+                                          loading: true,
+                                          loadingText: "上传中...",
+                                          requestCallBack: UpyunManageAPI.uploadNetworkFileEntry(
+                                              fileLinkList, widget.element, widget.bucketPrefix),
+                                        );
+                                      });
+                                }
                                 _getBucketList();
                               } catch (e) {
                                 FLog.error(
@@ -1072,9 +1075,9 @@ class UpyunFileExplorerState extends loading_state.BaseLoadingPageState<UpyunFil
                                   color: Color.fromARGB(255, 235, 242, 248)),
                               padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
                               child: MSHCheckbox(
-                                uncheckedColor: Colors.blue,
+                                colorConfig: MSHColorConfig.fromCheckedUncheckedDisabled(
+                                    checkedColor: Colors.blue, uncheckedColor: Colors.blue, disabledColor: Colors.blue),
                                 size: 17,
-                                checkedColor: Colors.blue,
                                 value: selectedFilesBool[index],
                                 style: MSHCheckboxStyle.fillScaleCheck,
                                 onChanged: (selected) {
@@ -1264,9 +1267,11 @@ class UpyunFileExplorerState extends loading_state.BaseLoadingPageState<UpyunFil
                                     showToast('获取失败');
                                     return;
                                   }
-                                  Application.router.navigateTo(this.context,
-                                      '${Routes.mdPreview}?filePath=${Uri.encodeComponent(filePath)}&fileName=${Uri.encodeComponent(fileName)}',
-                                      transition: TransitionType.none);
+                                  if (context.mounted) {
+                                    Application.router.navigateTo(this.context,
+                                        '${Routes.mdPreview}?filePath=${Uri.encodeComponent(filePath)}&fileName=${Uri.encodeComponent(fileName)}',
+                                        transition: TransitionType.none);
+                                  }
                                 } else if (Global.chewieExt
                                     .contains(allInfoList[index]['name'].split('.').last.toLowerCase())) {
                                   String shareUrl = '';
@@ -1332,9 +1337,9 @@ class UpyunFileExplorerState extends loading_state.BaseLoadingPageState<UpyunFil
                                   color: Color.fromARGB(255, 235, 242, 248)),
                               padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
                               child: MSHCheckbox(
-                                uncheckedColor: Colors.blue,
+                                colorConfig: MSHColorConfig.fromCheckedUncheckedDisabled(
+                                    checkedColor: Colors.blue, uncheckedColor: Colors.blue, disabledColor: Colors.blue),
                                 size: 17,
-                                checkedColor: Colors.blue,
                                 value: selectedFilesBool[index],
                                 style: MSHCheckboxStyle.fillScaleCheck,
                                 onChanged: (selected) {

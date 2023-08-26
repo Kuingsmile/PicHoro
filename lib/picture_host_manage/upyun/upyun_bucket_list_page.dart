@@ -792,11 +792,13 @@ class UpyunBucketListState extends loading_state.BaseLoadingPageState<UpyunBucke
               if (operatorMap.isEmpty) {
                 return showToast('没有绑定的操作员');
               }
-              await showCupertinoDialog(
-                  builder: (context) {
-                    return removeOperatorSelectionCupertinoDialog(context, element, operatorMap);
-                  },
-                  context: context);
+              if (context.mounted) {
+                await showCupertinoDialog(
+                    builder: (context) {
+                      return removeOperatorSelectionCupertinoDialog(context, element, operatorMap);
+                    },
+                    context: context);
+              }
             },
           ),
           const Divider(
@@ -837,7 +839,9 @@ class UpyunBucketListState extends loading_state.BaseLoadingPageState<UpyunBucke
                         }, e.toString()),
                         dataLogType: DataLogType.ERRORS.toString());
                     showToast('删除失败');
-                    Navigator.of(context).pop();
+                    if (context.mounted) {
+                      Navigator.of(context).pop();
+                    }
                   }
                 },
               );

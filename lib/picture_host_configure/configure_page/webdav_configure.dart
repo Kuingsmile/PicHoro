@@ -291,19 +291,23 @@ class WebdavConfigState extends State<WebdavConfig> {
       final webdavConfigFile = await localFile;
       webdavConfigFile.writeAsString(webdavConfigJson);
       setState(() {});
-      return showCupertinoAlertDialog(
-        context: context,
-        barrierDismissible: false,
-        title: '配置成功',
-        content: '配置成功！',
-      );
+      if (context.mounted) {
+        return showCupertinoAlertDialog(
+          context: context,
+          barrierDismissible: false,
+          title: '配置成功',
+          content: '配置成功！',
+        );
+      }
     } catch (e) {
       FLog.error(
           className: 'WebdavConfigPage',
           methodName: '_saveWebdavConfig',
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
-      return showCupertinoAlertDialog(context: context, title: '连接webdav服务失败', content: e.toString());
+      if (context.mounted) {
+        return showCupertinoAlertDialog(context: context, title: '连接webdav服务失败', content: e.toString());
+      }
     }
   }
 
@@ -312,7 +316,10 @@ class WebdavConfigState extends State<WebdavConfig> {
       final webdavConfigFile = await localFile;
       String configData = await webdavConfigFile.readAsString();
       if (configData == "Error") {
-        return showCupertinoAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");
+        if (context.mounted) {
+          return showCupertinoAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");
+        }
+        return;
       }
       Map configMap = jsonDecode(configData);
       var client = webdav.newClient(
@@ -325,18 +332,22 @@ class WebdavConfigState extends State<WebdavConfig> {
       client.setSendTimeout(30000);
       client.setReceiveTimeout(30000);
       await client.ping();
-      return showCupertinoAlertDialog(
-          context: context,
-          title: '通知',
-          content:
-              '检测通过，您的配置信息为：\nhost:\n${configMap["host"]}\nwebdav用户名:\n${configMap["webdavusername"]}\n密码:\n${configMap["password"]}\nuploadPath:\n${configMap["uploadPath"]}\n自定义域名:\n${configMap["customUrl"]}\nwebPath:\n${configMap["webPath"]}');
+      if (context.mounted) {
+        return showCupertinoAlertDialog(
+            context: context,
+            title: '通知',
+            content:
+                '检测通过，您的配置信息为：\nhost:\n${configMap["host"]}\nwebdav用户名:\n${configMap["webdavusername"]}\n密码:\n${configMap["password"]}\nuploadPath:\n${configMap["uploadPath"]}\n自定义域名:\n${configMap["customUrl"]}\nwebPath:\n${configMap["webPath"]}');
+      }
     } catch (e) {
       FLog.error(
           className: 'ConfigPage',
           methodName: 'checkWebdavConfig',
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
-      return showCupertinoAlertDialog(context: context, title: "检查失败!", content: e.toString());
+      if (context.mounted) {
+        return showCupertinoAlertDialog(context: context, title: "检查失败!", content: e.toString());
+      }
     }
   }
 

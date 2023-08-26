@@ -14,6 +14,7 @@ class AlistManageAPI {
   static Map driverTranslate = {
     '115 Cloud': '115网盘',
     '123Pan': '123云盘',
+    '123PanShare': '123云盘分享',
     '139Yun': '中国移动云盘',
     '189Cloud': '天翼云盘',
     '189CloudPC': '天翼云盘客户端',
@@ -120,7 +121,7 @@ class AlistManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "AlistManageAPI",
             methodName: "getToken",
@@ -187,7 +188,7 @@ class AlistManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "AlistManageAPI",
             methodName: "getBucketList",
@@ -240,7 +241,7 @@ class AlistManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "AlistManageAPI",
             methodName: "changeBucketState",
@@ -284,7 +285,7 @@ class AlistManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "AlistManageAPI",
             methodName: "deleteBucket",
@@ -326,7 +327,7 @@ class AlistManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "AlistManageAPI",
             methodName: "createBucket",
@@ -368,7 +369,7 @@ class AlistManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "AlistManageAPI",
             methodName: "updateBucket",
@@ -457,7 +458,7 @@ class AlistManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "AlistManageAPI",
             methodName: "getTotalPage",
@@ -509,7 +510,7 @@ class AlistManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "AlistManageAPI",
             methodName: "listFolderByPage",
@@ -581,7 +582,7 @@ class AlistManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "AlistManageAPI",
             methodName: "listFolder",
@@ -624,7 +625,7 @@ class AlistManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "AlistManageAPI",
             methodName: "getFileInfo",
@@ -667,7 +668,7 @@ class AlistManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "AlistManageAPI",
             methodName: "mkDir",
@@ -711,7 +712,7 @@ class AlistManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "AlistManageAPI",
             methodName: "rename",
@@ -755,7 +756,7 @@ class AlistManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "AlistManageAPI",
             methodName: "remove",
@@ -813,7 +814,7 @@ class AlistManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "AlistManageAPI",
             methodName: "uploadFile",
@@ -856,7 +857,7 @@ class AlistManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "AlistManageAPI",
             methodName: "uploadNetworkFile",

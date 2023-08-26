@@ -73,7 +73,7 @@ class GithubManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "GithubManageAPI",
             methodName: "getUserInfo",
@@ -131,7 +131,7 @@ class GithubManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "GithubManageAPI",
             methodName: "getReposList",
@@ -190,7 +190,7 @@ class GithubManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "GithubManageAPI",
             methodName: "getOtherReposList",
@@ -228,7 +228,7 @@ class GithubManageAPI {
         return showToast('创建失败');
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "GithubManageAPI",
             methodName: "createRepo",
@@ -272,7 +272,7 @@ class GithubManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "GithubManageAPI",
             methodName: "getRootDirSha",
@@ -317,7 +317,7 @@ class GithubManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "GithubManageAPI",
             methodName: "getRepoDirList",
@@ -364,7 +364,7 @@ class GithubManageAPI {
         }
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         if (e.toString().contains('This repository is empty')) {
           return ['empty'];
         } else {
@@ -413,7 +413,7 @@ class GithubManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "GithubManageAPI",
             methodName: "getRepoFileContent",
@@ -463,7 +463,7 @@ class GithubManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "GithubManageAPI",
             methodName: "deleteRepoFile",
@@ -522,7 +522,7 @@ class GithubManageAPI {
         await deleteFolder(username, repoName, '${path + dirs[i]['path']}/', branch, dirs[i]['sha']);
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "GithubManageAPI",
             methodName: "deleteFolder",
@@ -633,7 +633,7 @@ class GithubManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "GithubManageAPI",
             methodName: "createFolder",
@@ -700,7 +700,7 @@ class GithubManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "GithubManageAPI",
             methodName: "uploadFile",
@@ -750,7 +750,7 @@ class GithubManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "GithubManageAPI",
             methodName: "uploadNetworkFile",

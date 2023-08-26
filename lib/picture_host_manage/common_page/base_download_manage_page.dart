@@ -47,10 +47,10 @@ class BaseUpDownloadManagePage extends StatefulWidget {
   final String albumName;
   final String ftpHost;
   final String bucketName;
-  String downloadPath;
-  String tabIndex;
-  int currentListIndex;
-  BaseUpDownloadManagePage({
+  final String downloadPath;
+  final String tabIndex;
+  final int currentListIndex;
+  const BaseUpDownloadManagePage({
     Key? key,
     required this.userName,
     required this.repoName,
@@ -67,8 +67,8 @@ class BaseUpDownloadManagePage extends StatefulWidget {
 }
 
 class BaseUpDownloadManagePageState extends State<BaseUpDownloadManagePage> {
-  var downloadManager;
-  var uploadManager;
+  dynamic downloadManager;
+  dynamic uploadManager;
   var savedDir = '';
   List<String> uploadPathList = [];
   List<String> uploadFileNameList = [];
@@ -76,8 +76,8 @@ class BaseUpDownloadManagePageState extends State<BaseUpDownloadManagePage> {
   String currentPShost = '';
   List<String> currentUploadList = [];
   List<String> currentDownloadList = [];
-  var currentUploadManager;
-  var currentDownloadManager;
+  dynamic currentUploadManager;
+  dynamic currentDownloadManager;
   late Function currentSetUploadList;
   late Function currentSetDownloadList;
 
@@ -446,8 +446,8 @@ class BaseUpDownloadManagePageState extends State<BaseUpDownloadManagePage> {
             currentDownloadList = tempList;
             setState(() {});
           },
-          child: Row(
-            children: const [
+          child: const Row(
+            children: [
               Icon(
                 Icons.delete,
                 color: Colors.white,

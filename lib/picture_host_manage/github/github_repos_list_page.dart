@@ -50,7 +50,7 @@ class GithubReposListState extends loading_state.BaseLoadingPageState<GithubRepo
     repoMap.clear();
     try {
       Map configMap = await GithubManageAPI.getConfigMap();
-      var bucketListResponse;
+      dynamic bucketListResponse;
       if (configMap['githubusername'] == widget.showedUsername) {
         bucketListResponse = await GithubManageAPI.getReposList();
       } else {

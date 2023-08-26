@@ -14,6 +14,13 @@ import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/event_bus_utils.dart';
 import 'package:horopic/picture_host_manage/manage_api/lskypro_manage_api.dart';
 
+const Map<String, String> statusMsgMap = {
+  '403': '管理员关闭了接口功能',
+  '401': '授权失败',
+  '500': '服务器异常',
+  '404': '接口不存在',
+};
+
 class HostConfig extends StatefulWidget {
   const HostConfig({Key? key}) : super(key: key);
 
@@ -94,7 +101,7 @@ class HostConfigState extends State<HostConfig> {
               controller: _hostController,
               decoration: const InputDecoration(
                 label: Center(child: Text('域名')),
-                hintText: '例如: https://imgx.horosama.com',
+                hintText: '例如: https://lsky.test.com',
               ),
               textAlign: TextAlign.center,
               validator: (value) {
@@ -282,28 +289,25 @@ class HostConfigState extends State<HostConfig> {
             for (int i = 0; i < strategies.length; i++) {
               strategyId = '${strategyId}id : ${strategies[i]['id']}  :  ${strategies[i]['name']}\n';
             }
-
-            showCupertinoAlertDialog(
-                barrierDismissible: false, context: context, title: '储存策略Id列表', content: strategyId);
+            if (context.mounted) {
+              showCupertinoAlertDialog(
+                  barrierDismissible: false, context: context, title: '储存策略Id列表', content: strategyId);
+            }
           } else {
             showToast('获取储存策略Id列表失败');
           }
         } else {
-          if (response.statusCode == 403) {
-            showCupertinoAlertDialog(context: context, title: '错误', content: '管理员关闭了接口功能');
-            return;
-          } else if (response.statusCode == 401) {
-            showCupertinoAlertDialog(context: context, title: '错误', content: '授权失败');
-            return;
-          } else if (response.statusCode == 500) {
-            showCupertinoAlertDialog(context: context, title: '错误', content: '服务器异常');
-            return;
-          } else if (response.statusCode == 404) {
-            showCupertinoAlertDialog(context: context, title: '错误', content: '接口不存在');
+          String statusCode = response.statusCode.toString();
+          if (statusCode == '403' || statusCode == '401' || statusCode == '500' || statusCode == '404') {
+            if (context.mounted) {
+              showCupertinoAlertDialog(context: context, title: '错误', content: statusMsgMap[statusCode]!);
+            }
             return;
           }
           if (response.data['status'] == false) {
-            showCupertinoAlertDialog(context: context, title: '错误', content: response.data['message']);
+            if (context.mounted) {
+              showCupertinoAlertDialog(context: context, title: '错误', content: response.data['message']);
+            }
             return;
           }
         }
@@ -313,7 +317,9 @@ class HostConfigState extends State<HostConfig> {
             methodName: '_getStrategyId',
             text: formatErrorMessage({}, e.toString()),
             dataLogType: DataLogType.ERRORS.toString());
-        showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
+        if (context.mounted) {
+          showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
+        }
       }
     } else {
       try {
@@ -334,7 +340,10 @@ class HostConfigState extends State<HostConfig> {
             strategyId = '${strategyId}id : ${strategies[i]['id']}  :  ${strategies[i]['name']}\n';
           }
 
-          showCupertinoAlertDialog(barrierDismissible: false, context: context, title: '储存策略Id列表', content: strategyId);
+          if (context.mounted) {
+            showCupertinoAlertDialog(
+                barrierDismissible: false, context: context, title: '储存策略Id列表', content: strategyId);
+          }
         } else {
           showToast('获取储存策略Id列表失败');
         }
@@ -344,7 +353,9 @@ class HostConfigState extends State<HostConfig> {
             methodName: '_getStrategyId',
             text: formatErrorMessage({}, e.toString()),
             dataLogType: DataLogType.ERRORS.toString());
-        showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
+        if (context.mounted) {
+          showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
+        }
       }
     }
   }
@@ -399,26 +410,24 @@ class HostConfigState extends State<HostConfig> {
               albumID = '${albumID}id : ${albumIDs[i]['id']}  :  ${albumIDs[i]['name']}\n';
             }
 
-            showCupertinoAlertDialog(barrierDismissible: false, context: context, title: '相册Id列表', content: albumID);
+            if (context.mounted) {
+              showCupertinoAlertDialog(barrierDismissible: false, context: context, title: '相册Id列表', content: albumID);
+            }
           } else {
             showToast('获取相册Id列表失败');
           }
         } else {
-          if (response.statusCode == 403) {
-            showCupertinoAlertDialog(context: context, title: '错误', content: '管理员关闭了接口功能');
-            return;
-          } else if (response.statusCode == 401) {
-            showCupertinoAlertDialog(context: context, title: '错误', content: '授权失败');
-            return;
-          } else if (response.statusCode == 500) {
-            showCupertinoAlertDialog(context: context, title: '错误', content: '服务器异常');
-            return;
-          } else if (response.statusCode == 404) {
-            showCupertinoAlertDialog(context: context, title: '错误', content: '接口不存在');
+          String statusCode = response.statusCode.toString();
+          if (statusCode == '403' || statusCode == '401' || statusCode == '500' || statusCode == '404') {
+            if (context.mounted) {
+              showCupertinoAlertDialog(context: context, title: '错误', content: statusMsgMap[statusCode]!);
+            }
             return;
           }
           if (response.data['status'] == false) {
-            showCupertinoAlertDialog(context: context, title: '错误', content: response.data['message']);
+            if (context.mounted) {
+              showCupertinoAlertDialog(context: context, title: '错误', content: response.data['message']);
+            }
             return;
           }
         }
@@ -428,7 +437,9 @@ class HostConfigState extends State<HostConfig> {
             methodName: '_getAlbumId',
             text: formatErrorMessage({}, e.toString()),
             dataLogType: DataLogType.ERRORS.toString());
-        showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
+        if (context.mounted) {
+          showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
+        }
       }
     } else {
       try {
@@ -449,7 +460,9 @@ class HostConfigState extends State<HostConfig> {
             albumID = '${albumID}id : ${albumIDs[i]['id']}  :  ${albumIDs[i]['name']}\n';
           }
 
-          showCupertinoAlertDialog(barrierDismissible: false, context: context, title: '相册Id列表', content: albumID);
+          if (context.mounted) {
+            showCupertinoAlertDialog(barrierDismissible: false, context: context, title: '相册Id列表', content: albumID);
+          }
         } else {
           showToast('获取相册Id列表失败');
         }
@@ -459,7 +472,9 @@ class HostConfigState extends State<HostConfig> {
             methodName: '_getAlbumId',
             text: formatErrorMessage({}, e.toString()),
             dataLogType: DataLogType.ERRORS.toString());
-        showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
+        if (context.mounted) {
+          showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
+        }
       }
     }
   }
@@ -503,20 +518,23 @@ class HostConfigState extends State<HostConfig> {
           final hostConfigFile = await localFile;
           hostConfigFile.writeAsString(hostConfigJson);
           setState(() {});
-          return showCupertinoAlertDialog(
-              context: context, barrierDismissible: false, title: '配置成功', content: '您的密钥为：\n$token,\n请妥善保管，不要泄露给他人');
+          if (context.mounted) {
+            return showCupertinoAlertDialog(
+                context: context, barrierDismissible: false, title: '配置成功', content: '您的密钥为：\n$token,\n请妥善保管，不要泄露给他人');
+          }
         } else {
-          if (response.statusCode == 403) {
-            return showCupertinoAlertDialog(context: context, title: '错误', content: '管理员关闭了接口功能');
-          } else if (response.statusCode == 401) {
-            return showCupertinoAlertDialog(context: context, title: '错误', content: '授权失败');
-          } else if (response.statusCode == 500) {
-            return showCupertinoAlertDialog(context: context, title: '错误', content: '服务器异常');
-          } else if (response.statusCode == 404) {
-            return showCupertinoAlertDialog(context: context, title: '错误', content: '接口不存在');
+          String statusCode = response.statusCode.toString();
+          if (statusCode == '403' || statusCode == '401' || statusCode == '500' || statusCode == '404') {
+            if (context.mounted) {
+              return showCupertinoAlertDialog(context: context, title: '错误', content: statusMsgMap[statusCode]!);
+            }
+            return;
           }
           if (response.data['status'] == false) {
-            return showCupertinoAlertDialog(context: context, title: '错误', content: response.data['message']);
+            if (context.mounted) {
+              return showCupertinoAlertDialog(context: context, title: '错误', content: response.data['message']);
+            }
+            return;
           }
         }
       } catch (e) {
@@ -525,7 +543,10 @@ class HostConfigState extends State<HostConfig> {
             methodName: '_saveHostConfig',
             text: formatErrorMessage({}, e.toString()),
             dataLogType: DataLogType.ERRORS.toString());
-        return showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
+        if (context.mounted) {
+          return showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
+        }
+        return;
       }
     } else {
       String albumID = 'None';
@@ -546,12 +567,13 @@ class HostConfigState extends State<HostConfig> {
           final hostConfigJson = jsonEncode(hostConfig);
           final hostConfigFile = await localFile;
           hostConfigFile.writeAsString(hostConfigJson);
-
-          return showCupertinoAlertDialog(
-              context: context,
-              barrierDismissible: false,
-              title: '配置成功',
-              content: '您的密钥为：\n$_tokenController,\n请妥善保管，不要泄露给他人');
+          if (context.mounted) {
+            return showCupertinoAlertDialog(
+                context: context,
+                barrierDismissible: false,
+                title: '配置成功',
+                content: '您的密钥为：\n$_tokenController,\n请妥善保管，不要泄露给他人');
+          }
         } else {
           showToast('配置失败');
         }
@@ -561,7 +583,9 @@ class HostConfigState extends State<HostConfig> {
             methodName: '_saveHostConfig',
             text: formatErrorMessage({}, e.toString()),
             dataLogType: DataLogType.ERRORS.toString());
-        return showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
+        if (context.mounted) {
+          return showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
+        }
       }
     }
   }
@@ -571,7 +595,10 @@ class HostConfigState extends State<HostConfig> {
       final hostConfigFile = await localFile;
       String configData = await hostConfigFile.readAsString();
       if (configData == "Error") {
-        return showCupertinoAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");
+        if (context.mounted) {
+          return showCupertinoAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");
+        }
+        return;
       }
       Map configMap = jsonDecode(configData);
       BaseOptions options = setBaseOptions();
@@ -585,23 +612,25 @@ class HostConfigState extends State<HostConfig> {
         profileUrl,
       );
       if (response.statusCode == 200 && response.data['status'] == true) {
-        return showCupertinoAlertDialog(
-            context: context,
-            title: '通知',
-            content:
-                '检测通过，您的配置信息为：\nhost:\n${configMap["host"]}\nstrategyId:\n${configMap["strategy_id"]}\nalbumId:\n${configMap["album_id"]}\ntoken:\n${configMap["token"]}');
+        if (context.mounted) {
+          return showCupertinoAlertDialog(
+              context: context,
+              title: '通知',
+              content:
+                  '检测通过，您的配置信息为：\nhost:\n${configMap["host"]}\nstrategyId:\n${configMap["strategy_id"]}\nalbumId:\n${configMap["album_id"]}\ntoken:\n${configMap["token"]}');
+        }
       } else {
-        if (response.statusCode == 403) {
-          return showCupertinoAlertDialog(context: context, title: '错误', content: '管理员关闭了接口功能');
-        } else if (response.statusCode == 401) {
-          return showCupertinoAlertDialog(context: context, title: '错误', content: '授权失败');
-        } else if (response.statusCode == 500) {
-          return showCupertinoAlertDialog(context: context, title: '错误', content: '服务器异常');
-        } else if (response.statusCode == 404) {
-          return showCupertinoAlertDialog(context: context, title: '错误', content: '接口不存在');
+        String statusCode = response.statusCode.toString();
+        if (statusCode == '403' || statusCode == '401' || statusCode == '500' || statusCode == '404') {
+          if (context.mounted) {
+            return showCupertinoAlertDialog(context: context, title: '错误', content: statusMsgMap[statusCode]!);
+          }
+          return;
         }
         if (response.data['status'] == false) {
-          return showCupertinoAlertDialog(context: context, title: '错误', content: response.data['message']);
+          if (context.mounted) {
+            return showCupertinoAlertDialog(context: context, title: '错误', content: response.data['message']);
+          }
         }
       }
     } catch (e) {
@@ -610,7 +639,9 @@ class HostConfigState extends State<HostConfig> {
           methodName: 'checkHostConfig',
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
-      return showCupertinoAlertDialog(context: context, title: "检查失败!", content: e.toString());
+      if (context.mounted) {
+        return showCupertinoAlertDialog(context: context, title: "检查失败!", content: e.toString());
+      }
     }
   }
 
@@ -653,7 +684,9 @@ class HostConfigState extends State<HostConfig> {
           methodName: '_setdefault',
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
-      showToastWithContext(context, '错误');
+      if (context.mounted) {
+        showToastWithContext(context, '错误');
+      }
     }
   }
 }

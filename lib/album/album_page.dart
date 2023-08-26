@@ -324,10 +324,12 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
                           methodName: 'build_delete_button',
                           text: formatErrorMessage({}, e.toString()),
                           dataLogType: DataLogType.ERRORS.toString());
-                      Application.router
-                          .navigateTo(context, Routes.albumUploadedImages, transition: TransitionType.none);
-                      showCupertinoAlertDialog(
-                          barrierDismissible: true, context: context, title: '错误', content: e.toString());
+                      if (context.mounted) {
+                        Application.router
+                            .navigateTo(context, Routes.albumUploadedImages, transition: TransitionType.none);
+                        showCupertinoAlertDialog(
+                            barrierDismissible: true, context: context, title: '错误', content: e.toString());
+                      }
                     }
                   },
                 );
@@ -531,9 +533,9 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
                             color: Color.fromARGB(255, 199, 208, 216)),
                         padding: const EdgeInsets.fromLTRB(5, 5, 5, 5),
                         child: MSHCheckbox(
-                          uncheckedColor: Colors.blue,
+                          colorConfig: MSHColorConfig.fromCheckedUncheckedDisabled(
+                              checkedColor: Colors.blue, uncheckedColor: Colors.blue, disabledColor: Colors.grey),
                           size: 20,
-                          checkedColor: Colors.blue,
                           value: selectedImagesBool[index],
                           style: MSHCheckboxStyle.fillScaleCheck,
                           onChanged: (selected) {
@@ -939,7 +941,9 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
                 methodName: 'handleOnLongPress_delete',
                 text: formatErrorMessage({}, e.toString()),
                 dataLogType: DataLogType.ERRORS.toString());
-            showToastWithContext(context, '删除失败');
+            if (context.mounted) {
+              showToastWithContext(context, '删除失败');
+            }
           }
       }
     });

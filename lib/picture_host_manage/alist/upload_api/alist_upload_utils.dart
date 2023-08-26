@@ -48,7 +48,7 @@ class UploadManager {
       }
       setStatus(task, UploadStatus.uploading);
 
-      var response;
+      Response response;
       String uploadPath = configMap['uploadPath'];
 
       //格式化
@@ -265,14 +265,14 @@ class UploadManager {
           progress.value = progressMap.values.sum / total;
         }
 
-        var progressListener;
+        Null Function() progressListener;
         progressListener = () {
           progressMap[paths[i]] = task.progress.value;
           progress.value = progressMap.values.sum / total;
         };
 
         task.progress.addListener(progressListener);
-        var listener;
+        dynamic listener;
         listener = () {
           if (task.status.value.isCompleted) {
             progressMap[paths[i]] = 1.0;
@@ -306,7 +306,7 @@ class UploadManager {
           }
         }
 
-        var listener;
+        dynamic listener;
         listener = () {
           if (task.status.value.isCompleted) {
             completed++;

@@ -537,21 +537,23 @@ class ImgurFileExplorerState extends loading_state.BaseLoadingPageState<ImgurFil
                             try {
                               String urlStr = url.text!;
                               List fileLinkList = urlStr.split("\n");
-                              await showDialog(
-                                  context: context,
-                                  barrierDismissible: false,
-                                  builder: (context) {
-                                    return NetLoadingDialog(
-                                      outsideDismiss: false,
-                                      loading: true,
-                                      loadingText: "上传中...",
-                                      requestCallBack: ImgurManageAPI.uploadNetworkFileEntry(
-                                          fileLinkList,
-                                          widget.userProfile['accesstoken'],
-                                          widget.albumInfo['id'] ?? 'None',
-                                          widget.userProfile['proxy']),
-                                    );
-                                  });
+                              if (context.mounted) {
+                                await showDialog(
+                                    context: context,
+                                    barrierDismissible: false,
+                                    builder: (context) {
+                                      return NetLoadingDialog(
+                                        outsideDismiss: false,
+                                        loading: true,
+                                        loadingText: "上传中...",
+                                        requestCallBack: ImgurManageAPI.uploadNetworkFileEntry(
+                                            fileLinkList,
+                                            widget.userProfile['accesstoken'],
+                                            widget.albumInfo['id'] ?? 'None',
+                                            widget.userProfile['proxy']),
+                                      );
+                                    });
+                              }
                               _getFileList();
                               setState(() {});
                             } catch (e) {
@@ -1071,9 +1073,9 @@ class ImgurFileExplorerState extends loading_state.BaseLoadingPageState<ImgurFil
                                   color: Color.fromARGB(255, 235, 242, 248)),
                               padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
                               child: MSHCheckbox(
-                                uncheckedColor: Colors.blue,
+                                colorConfig: MSHColorConfig.fromCheckedUncheckedDisabled(
+                                    checkedColor: Colors.blue, uncheckedColor: Colors.blue, disabledColor: Colors.blue),
                                 size: 17,
-                                checkedColor: Colors.blue,
                                 value: selectedFilesBool[index],
                                 style: MSHCheckboxStyle.fillScaleCheck,
                                 onChanged: (selected) {
@@ -1293,9 +1295,9 @@ class ImgurFileExplorerState extends loading_state.BaseLoadingPageState<ImgurFil
                                   color: Color.fromARGB(255, 235, 242, 248)),
                               padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
                               child: MSHCheckbox(
-                                uncheckedColor: Colors.blue,
+                                colorConfig: MSHColorConfig.fromCheckedUncheckedDisabled(
+                                    checkedColor: Colors.blue, uncheckedColor: Colors.blue, disabledColor: Colors.blue),
                                 size: 17,
-                                checkedColor: Colors.blue,
                                 value: selectedFilesBool[index],
                                 style: MSHCheckboxStyle.fillScaleCheck,
                                 onChanged: (selected) {
@@ -1357,12 +1359,8 @@ class ImgurFileExplorerState extends loading_state.BaseLoadingPageState<ImgurFil
             minLeadingWidth: 0,
             title: Text(
                 allInfoList[index]['id'].toString().length > 20
-                    ? allInfoList[index]['id'].toString().substring(0, 10) +
-                        '...' +
-                        allInfoList[index]['id'].toString().substring(allInfoList[index]['id'].length - 10) +
-                        "." +
-                        allInfoList[index]['link'].split('.').last
-                    : allInfoList[index]['id'].toString() + "." + allInfoList[index]['link'].split('.').last,
+                    ? '${allInfoList[index]['id'].toString().substring(0, 10)}...${allInfoList[index]['id'].toString().substring(allInfoList[index]['id'].length - 10)}.${allInfoList[index]['link'].split('.').last}'
+                    : '${allInfoList[index]['id'].toString()}.${allInfoList[index]['link'].split('.').last}',
                 style: const TextStyle(fontSize: 14)),
             subtitle: Text(
               '${DateTime.fromMillisecondsSinceEpoch(allInfoList[index]['datetime'] * 1000).toString().substring(0, 19)}  ${getFileSize(int.parse(allInfoList[index]['size'].toString().split('.')[0]))}',

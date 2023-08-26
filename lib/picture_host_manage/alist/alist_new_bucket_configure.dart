@@ -268,7 +268,7 @@ class AlistNewBucketConfigState extends State<AlistNewBucketConfig> {
             additionalConfigTemp[key] = value;
           }
         });
-        var res;
+        dynamic res;
         submitData["addition"] = jsonEncode(additionalConfigTemp);
         if (widget.update == 'true') {
           submitData['id'] = widget.bucketMap['id'];

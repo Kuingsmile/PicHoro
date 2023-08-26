@@ -21,9 +21,10 @@ import 'package:horopic/utils/global.dart';
 
 class AlistUpDownloadManagePage extends StatefulWidget {
   final String bucketName;
-  String downloadPath;
-  String tabIndex;
-  AlistUpDownloadManagePage({Key? key, required this.bucketName, required this.downloadPath, required this.tabIndex})
+  final String downloadPath;
+  final String tabIndex;
+  const AlistUpDownloadManagePage(
+      {Key? key, required this.bucketName, required this.downloadPath, required this.tabIndex})
       : super(key: key);
 
   @override
@@ -257,8 +258,8 @@ class AlistUpDownloadManagePageState extends State<AlistUpDownloadManagePage> {
             await Global.setAlistDownloadList([]);
             setState(() {});
           },
-          child: Row(
-            children: const [
+          child: const Row(
+            children: [
               Icon(
                 Icons.delete,
                 color: Colors.white,
@@ -368,13 +369,13 @@ class AlistUpDownloadManagePageState extends State<AlistUpDownloadManagePage> {
 }
 
 class ListItem extends StatefulWidget {
-  Function(String, String, Map<String, dynamic>) onDownloadPlayPausedPressed;
-  Function(String, String) onDelete;
-  DownloadTask? downloadTask;
-  String url;
-  String fileName;
-  Map<String, dynamic> configMap;
-  ListItem(
+  final Function(String, String, Map<String, dynamic>) onDownloadPlayPausedPressed;
+  final Function(String, String) onDelete;
+  final DownloadTask? downloadTask;
+  final String url;
+  final String fileName;
+  final Map<String, dynamic> configMap;
+  const ListItem(
       {Key? key,
       required this.onDownloadPlayPausedPressed,
       required this.onDelete,
@@ -510,13 +511,13 @@ class ListItemState extends State<ListItem> {
 }
 
 class UploadListItem extends StatefulWidget {
-  Function(String, String, Map<String, dynamic>) onUploadPlayPausedPressed;
-  Function(String, String) onDelete;
-  UploadTask? uploadTask;
-  String path;
-  String fileName;
-  Map<String, dynamic> configMap;
-  UploadListItem(
+  final Function(String, String, Map<String, dynamic>) onUploadPlayPausedPressed;
+  final Function(String, String) onDelete;
+  final UploadTask? uploadTask;
+  final String path;
+  final String fileName;
+  final Map<String, dynamic> configMap;
+  const UploadListItem(
       {Key? key,
       required this.onUploadPlayPausedPressed,
       required this.onDelete,

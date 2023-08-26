@@ -112,7 +112,7 @@ class AliyunImageUploadUtils {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "AliyunImageUploadUtils",
             methodName: "uploadApi",
@@ -190,7 +190,7 @@ class AliyunImageUploadUtils {
           return ["failed"];
         }
       } catch (e) {
-        if (e is DioError) {
+        if (e is DioException) {
           FLog.error(
               className: "AliyunImageUploadUtils",
               methodName: "deleteApi",
@@ -210,7 +210,7 @@ class AliyunImageUploadUtils {
         return [e.toString()];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "AliyunImageUploadUtils",
             methodName: "deleteApi",

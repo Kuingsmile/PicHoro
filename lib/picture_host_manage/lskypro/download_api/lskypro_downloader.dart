@@ -6,7 +6,6 @@ import 'package:collection/collection.dart';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import 'package:f_logs/f_logs.dart';
 
 import 'package:horopic/picture_host_manage/common_page/download/pnc_download_task.dart';
 import 'package:horopic/picture_host_manage/common_page/download/pnc_download_status.dart';
@@ -36,16 +35,13 @@ class DownloadManager {
     return _dm;
   }
 
-  void Function(int, int) createCallback(url, int partialFileLength) =>
-      (int received, int total) {
-        getDownload(url)?.progress.value =
-            (received + partialFileLength) / (total + partialFileLength);
+  void Function(int, int) createCallback(url, int partialFileLength) => (int received, int total) {
+        getDownload(url)?.progress.value = (received + partialFileLength) / (total + partialFileLength);
 
         if (total == -1) {}
       };
 
-  Future<void> download(String url, String savePath, cancelToken,
-      {forceDownload = false}) async {
+  Future<void> download(String url, String savePath, cancelToken, {forceDownload = false}) async {
     try {
       var task = getDownload(url);
 
@@ -112,8 +108,7 @@ class DownloadManager {
           'lskyproDownloadManager',
           'download');
       var task = getDownload(url)!;
-      if (task.status.value != DownloadStatus.canceled &&
-          task.status.value != DownloadStatus.paused) {
+      if (task.status.value != DownloadStatus.canceled && task.status.value != DownloadStatus.paused) {
         setStatus(task, DownloadStatus.failed);
         runningTasks--;
 
@@ -229,8 +224,7 @@ class DownloadManager {
     return _cache[url];
   }
 
-  Future<DownloadStatus> whenDownloadComplete(String url,
-      {Duration timeout = const Duration(hours: 2)}) async {
+  Future<DownloadStatus> whenDownloadComplete(String url, {Duration timeout = const Duration(hours: 2)}) async {
     DownloadTask? task = getDownload(url);
 
     if (task != null) {
@@ -298,7 +292,7 @@ class DownloadManager {
           progress.value = progressMap.values.sum / total;
         }
 
-        var progressListener;
+        Null Function() progressListener;
         progressListener = () {
           progressMap[url] = task.progress.value;
           progress.value = progressMap.values.sum / total;
@@ -306,7 +300,7 @@ class DownloadManager {
 
         task.progress.addListener(progressListener);
 
-        var listener;
+        dynamic listener;
         listener = () {
           if (task.status.value.isCompleted) {
             progressMap[url] = 1.0;
@@ -344,7 +338,7 @@ class DownloadManager {
           }
         }
 
-        var listener;
+        dynamic listener;
         listener = () {
           if (task.status.value.isCompleted) {
             completed++;
@@ -379,8 +373,7 @@ class DownloadManager {
 
       var currentRequest = _queue.removeFirst();
 
-      download(
-          currentRequest.url, currentRequest.path, currentRequest.cancelToken);
+      download(currentRequest.url, currentRequest.path, currentRequest.cancelToken);
 
       await Future.delayed(const Duration(milliseconds: 500), null);
     }

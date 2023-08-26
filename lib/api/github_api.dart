@@ -74,7 +74,7 @@ class GithubImageUploadUtils {
         return ["failed"];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "GithubImageUploadUtils",
             methodName: "uploadApi",
@@ -133,7 +133,7 @@ class GithubImageUploadUtils {
         return ["failed"];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "GithubImageUploadUtils",
             methodName: "deleteApi",

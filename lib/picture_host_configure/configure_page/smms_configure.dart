@@ -166,9 +166,13 @@ class SmmsConfigState extends State<SmmsConfig> {
         final smmsConfigJson = jsonEncode(smmsConfig);
         final smmsConfigFile = await localFile;
         await smmsConfigFile.writeAsString(smmsConfigJson);
-        return showCupertinoAlertDialog(context: context, title: '成功', content: '配置成功');
+        if (context.mounted) {
+          return showCupertinoAlertDialog(context: context, title: '成功', content: '配置成功');
+        }
       } else {
-        return showCupertinoAlertDialog(context: context, title: '错误', content: '配置失败');
+        if (context.mounted) {
+          return showCupertinoAlertDialog(context: context, title: '错误', content: '配置失败');
+        }
       }
     } catch (e) {
       FLog.error(
@@ -176,7 +180,9 @@ class SmmsConfigState extends State<SmmsConfig> {
           methodName: '_saveSmmsConfig_2',
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
-      return showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
+      if (context.mounted) {
+        return showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
+      }
     }
   }
 
@@ -185,7 +191,10 @@ class SmmsConfigState extends State<SmmsConfig> {
       final smmsConfigFile = await localFile;
       String configData = await smmsConfigFile.readAsString();
       if (configData == "Error") {
-        return showCupertinoAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");
+        if (context.mounted) {
+          return showCupertinoAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");
+        }
+        return;
       }
       Map configMap = jsonDecode(configData);
       BaseOptions options = setBaseOptions();
@@ -198,12 +207,18 @@ class SmmsConfigState extends State<SmmsConfig> {
       Dio dio = Dio(options);
       var response = await dio.post(validateURL, data: formData);
       if (response.statusCode == 200 && response.data['success'] == true) {
-        return showCupertinoAlertDialog(
-            context: context, title: '通知', content: '检测通过，您的配置信息为:\ntoken:\n${configMap["token"]}');
+        if (context.mounted) {
+          return showCupertinoAlertDialog(
+              context: context, title: '通知', content: '检测通过，您的配置信息为:\ntoken:\n${configMap["token"]}');
+        }
       } else if (response.data['status'] == false) {
-        return showCupertinoAlertDialog(context: context, title: '错误', content: response.data['message']);
+        if (context.mounted) {
+          return showCupertinoAlertDialog(context: context, title: '错误', content: response.data['message']);
+        }
       } else {
-        return showCupertinoAlertDialog(context: context, title: '错误', content: '未知错误');
+        if (context.mounted) {
+          return showCupertinoAlertDialog(context: context, title: '错误', content: '未知错误');
+        }
       }
     } catch (e) {
       FLog.error(
@@ -211,7 +226,9 @@ class SmmsConfigState extends State<SmmsConfig> {
           methodName: 'checkSmmsConfig',
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
-      return showCupertinoAlertDialog(context: context, title: "检查失败!", content: e.toString());
+      if (context.mounted) {
+        return showCupertinoAlertDialog(context: context, title: "检查失败!", content: e.toString());
+      }
     }
   }
 

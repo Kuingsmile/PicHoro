@@ -139,11 +139,11 @@ class UploadListItemState extends State<UploadListItem> {
 }
 
 class ListItem extends StatefulWidget {
-  Function(String) onDownloadPlayPausedPressed;
-  Function(String) onDelete;
-  DownloadTask? downloadTask;
-  String url;
-  ListItem(
+  final Function(String) onDownloadPlayPausedPressed;
+  final Function(String) onDelete;
+  final DownloadTask? downloadTask;
+  final String url;
+  const ListItem(
       {Key? key,
       required this.onDownloadPlayPausedPressed,
       required this.onDelete,

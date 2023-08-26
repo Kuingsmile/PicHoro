@@ -123,18 +123,20 @@ class CommonConfigState extends State<CommonConfig> {
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () async {
               String currentCacheMemory = await CacheUtil.total();
-              showCupertinoAlertDialogWithConfirmFunc(
-                title: '通知',
-                content: '当前缓存大小为$currentCacheMemory MB,是否清空?',
-                context: context,
-                onConfirm: () async {
-                  await CacheUtil.clear();
-                  showToast('清理成功');
-                  if (mounted) {
-                    Navigator.pop(context);
-                  }
-                },
-              );
+              if (context.mounted) {
+                showCupertinoAlertDialogWithConfirmFunc(
+                  title: '通知',
+                  content: '当前缓存大小为$currentCacheMemory MB,是否清空?',
+                  context: context,
+                  onConfirm: () async {
+                    await CacheUtil.clear();
+                    showToast('清理成功');
+                    if (mounted) {
+                      Navigator.pop(context);
+                    }
+                  },
+                );
+              }
             },
           ),
           ListTile(

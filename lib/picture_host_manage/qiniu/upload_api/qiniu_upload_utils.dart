@@ -46,7 +46,7 @@ class UploadManager {
       }
       setStatus(task, UploadStatus.uploading);
 
-      var response;
+      Response response;
       String accessKey = configMap['accessKey'];
       String secretKey = configMap['secretKey'];
       String bucket = configMap['bucket'];
@@ -268,14 +268,14 @@ class UploadManager {
           progress.value = progressMap.values.sum / total;
         }
 
-        var progressListener;
+        Null Function() progressListener;
         progressListener = () {
           progressMap[paths[i]] = task.progress.value;
           progress.value = progressMap.values.sum / total;
         };
 
         task.progress.addListener(progressListener);
-        var listener;
+        dynamic listener;
         listener = () {
           if (task.status.value.isCompleted) {
             progressMap[paths[i]] = 1.0;
@@ -309,7 +309,7 @@ class UploadManager {
           }
         }
 
-        var listener;
+        dynamic listener;
         listener = () {
           if (task.status.value.isCompleted) {
             completed++;

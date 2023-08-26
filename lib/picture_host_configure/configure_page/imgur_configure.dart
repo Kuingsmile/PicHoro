@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 
 import 'package:dio/dio.dart';
-import 'package:dio_proxy_adapter/dio_proxy_adapter.dart';
 import 'package:f_logs/f_logs.dart';
 import 'package:fluro/fluro.dart';
 import 'package:path_provider/path_provider.dart';
@@ -11,6 +10,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:horopic/router/application.dart';
 import 'package:horopic/pages/loading.dart';
 import 'package:horopic/utils/common_functions.dart';
+import 'package:horopic/utils/dio_proxy_adapter.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/picture_host_manage/manage_api/imgur_manage_api.dart';
 import 'package:horopic/utils/event_bus_utils.dart';
@@ -199,7 +199,7 @@ class ImgurConfigState extends State<ImgurConfig> {
         } else {
           proxyClean = proxy;
         }
-        dio.useProxy(proxyClean);
+        dio.httpClientAdapter = useProxy(proxyClean);
       }
 
       var validateResponse = await dio.post(validateURL, data: formData);
@@ -208,9 +208,14 @@ class ImgurConfigState extends State<ImgurConfig> {
         final imgurConfigJson = jsonEncode(imgurConfig);
         final imgurConfigFile = await localFile;
         await imgurConfigFile.writeAsString(imgurConfigJson);
-        return showCupertinoAlertDialog(context: context, title: '成功', content: '配置成功');
+        if (context.mounted) {
+          return showCupertinoAlertDialog(context: context, title: '成功', content: '配置成功');
+        }
+        return;
       } else {
-        return showCupertinoAlertDialog(context: context, title: '错误', content: 'clientId错误');
+        if (context.mounted) {
+          return showCupertinoAlertDialog(context: context, title: '错误', content: 'clientId错误');
+        }
       }
     } catch (e) {
       FLog.error(
@@ -218,7 +223,9 @@ class ImgurConfigState extends State<ImgurConfig> {
           methodName: '_saveImgurConfig_2',
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
-      return showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
+      if (context.mounted) {
+        return showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
+      }
     }
   }
 
@@ -227,7 +234,10 @@ class ImgurConfigState extends State<ImgurConfig> {
       final imgurConfigFile = await localFile;
       String configData = await imgurConfigFile.readAsString();
       if (configData == "Error") {
-        return showCupertinoAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");
+        if (context.mounted) {
+          return showCupertinoAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");
+        }
+        return;
       }
       Map configMap = jsonDecode(configData);
 
@@ -250,23 +260,31 @@ class ImgurConfigState extends State<ImgurConfig> {
         } else {
           proxyClean = configMap["proxy"];
         }
-        dio.useProxy(proxyClean);
+        dio.httpClientAdapter = useProxy(proxyClean);
       }
       var response = await dio.post(validateURL, data: formData);
       if (response.statusCode == 200 && response.data['success'] == true) {
-        return showCupertinoAlertDialog(
-            context: context,
-            title: '通知',
-            content: '检测通过，您的配置信息为:\nclientId:\n${configMap["clientId"]}\n代理:\n${configMap["proxy"]}');
+        if (context.mounted) {
+          return showCupertinoAlertDialog(
+              context: context,
+              title: '通知',
+              content: '检测通过，您的配置信息为:\nclientId:\n${configMap["clientId"]}\n代理:\n${configMap["proxy"]}');
+        }
+        return;
       }
-      return showCupertinoAlertDialog(context: context, title: '错误', content: '配置有误，请检查网络或重新配置');
+      if (context.mounted) {
+        return showCupertinoAlertDialog(context: context, title: '错误', content: '配置有误，请检查网络或重新配置');
+      }
+      return;
     } catch (e) {
       FLog.error(
           className: 'ImgurConfigPage',
           methodName: 'checkImgurConfig',
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
-      return showCupertinoAlertDialog(context: context, title: "检查失败!", content: e.toString());
+      if (context.mounted) {
+        return showCupertinoAlertDialog(context: context, title: "检查失败!", content: e.toString());
+      }
     }
   }
 
@@ -309,7 +327,9 @@ class ImgurConfigState extends State<ImgurConfig> {
           methodName: '_setdefault',
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
-      showToastWithContext(context, '错误');
+      if (context.mounted) {
+        showToastWithContext(context, '错误');
+      }
     }
   }
 }

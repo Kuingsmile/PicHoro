@@ -562,18 +562,20 @@ class SFTPFileExplorerState extends loading_state.BaseLoadingPageState<SFTPFileE
                               try {
                                 String urlStr = url.text!;
                                 List fileLinkList = urlStr.split("\n");
-                                await showDialog(
-                                    context: context,
-                                    barrierDismissible: false,
-                                    builder: (context) {
-                                      return NetLoadingDialog(
-                                        outsideDismiss: false,
-                                        loading: true,
-                                        loadingText: "上传中...",
-                                        requestCallBack:
-                                            FTPManageAPI.uploadNetworkFileEntrySFTP(fileLinkList, widget.bucketPrefix),
-                                      );
-                                    });
+                                if (context.mounted) {
+                                  await showDialog(
+                                      context: context,
+                                      barrierDismissible: false,
+                                      builder: (context) {
+                                        return NetLoadingDialog(
+                                          outsideDismiss: false,
+                                          loading: true,
+                                          loadingText: "上传中...",
+                                          requestCallBack: FTPManageAPI.uploadNetworkFileEntrySFTP(
+                                              fileLinkList, widget.bucketPrefix),
+                                        );
+                                      });
+                                }
                                 _getBucketList();
                               } catch (e) {
                                 FLog.error(
@@ -1081,9 +1083,9 @@ class SFTPFileExplorerState extends loading_state.BaseLoadingPageState<SFTPFileE
                                   color: Color.fromARGB(255, 235, 242, 248)),
                               padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
                               child: MSHCheckbox(
-                                uncheckedColor: Colors.blue,
+                                colorConfig: MSHColorConfig.fromCheckedUncheckedDisabled(
+                                    checkedColor: Colors.blue, uncheckedColor: Colors.blue, disabledColor: Colors.blue),
                                 size: 17,
-                                checkedColor: Colors.blue,
                                 value: selectedFilesBool[index],
                                 style: MSHCheckboxStyle.fillScaleCheck,
                                 onChanged: (selected) {
@@ -1235,9 +1237,11 @@ class SFTPFileExplorerState extends loading_state.BaseLoadingPageState<SFTPFileE
                                   Map configMapTemp = await FTPManageAPI.getConfigMap();
                                   configMapTemp['name'] = allInfoList[index]['name'];
                                   String imagePath = widget.bucketPrefix + allInfoList[index]['name'];
-                                  Application.router.navigateTo(this.context,
-                                      '${Routes.sftpLocalImagePreview}?configMap=${Uri.encodeComponent(jsonEncode(configMapTemp))}&image=${Uri.encodeComponent(imagePath)}',
-                                      transition: TransitionType.none);
+                                  if (context.mounted) {
+                                    Application.router.navigateTo(this.context,
+                                        '${Routes.sftpLocalImagePreview}?configMap=${Uri.encodeComponent(jsonEncode(configMapTemp))}&image=${Uri.encodeComponent(imagePath)}',
+                                        transition: TransitionType.none);
+                                  }
                                 } else if (Global.textExt
                                     .contains(allInfoList[index]['name'].split('.').last.toLowerCase())) {
                                   showToast('开始加载，请稍候');
@@ -1249,9 +1253,11 @@ class SFTPFileExplorerState extends loading_state.BaseLoadingPageState<SFTPFileE
                                     showToast('获取文件失败');
                                     return;
                                   }
-                                  Application.router.navigateTo(this.context,
-                                      '${Routes.mdPreview}?filePath=${Uri.encodeComponent(filePath)}&fileName=${Uri.encodeComponent(fileName)}',
-                                      transition: TransitionType.none);
+                                  if (context.mounted) {
+                                    Application.router.navigateTo(this.context,
+                                        '${Routes.mdPreview}?filePath=${Uri.encodeComponent(filePath)}&fileName=${Uri.encodeComponent(fileName)}',
+                                        transition: TransitionType.none);
+                                  }
                                 }
                               },
                             ),
@@ -1264,9 +1270,9 @@ class SFTPFileExplorerState extends loading_state.BaseLoadingPageState<SFTPFileE
                                   color: Color.fromARGB(255, 235, 242, 248)),
                               padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
                               child: MSHCheckbox(
-                                uncheckedColor: Colors.blue,
+                                colorConfig: MSHColorConfig.fromCheckedUncheckedDisabled(
+                                    checkedColor: Colors.blue, uncheckedColor: Colors.blue, disabledColor: Colors.blue),
                                 size: 17,
-                                checkedColor: Colors.blue,
                                 value: selectedFilesBool[index],
                                 style: MSHCheckboxStyle.fillScaleCheck,
                                 onChanged: (selected) {
@@ -1592,13 +1598,13 @@ double btnHeight = 60;
 double borderWidth = 2;
 
 class RenameDialogContent extends StatefulWidget {
-  String title;
-  String cancelBtnTitle;
-  String okBtnTitle;
-  VoidCallback cancelBtnTap;
-  VoidCallback okBtnTap;
-  TextEditingController vc;
-  RenameDialogContent({
+  final String title;
+  final String cancelBtnTitle;
+  final String okBtnTitle;
+  final VoidCallback cancelBtnTap;
+  final VoidCallback okBtnTap;
+  final TextEditingController vc;
+  const RenameDialogContent({
     super.key,
     required this.title,
     this.cancelBtnTitle = "取消",
@@ -1715,13 +1721,13 @@ class NewFolderDialog extends AlertDialog {
 //弹出框 修改自https://www.jianshu.com/p/4144837a789b
 
 class NewFolderDialogContent extends StatefulWidget {
-  String title;
-  String cancelBtnTitle;
-  String okBtnTitle;
-  VoidCallback cancelBtnTap;
-  VoidCallback okBtnTap;
-  TextEditingController vc;
-  NewFolderDialogContent({
+  final String title;
+  final String cancelBtnTitle;
+  final String okBtnTitle;
+  final VoidCallback cancelBtnTap;
+  final VoidCallback okBtnTap;
+  final TextEditingController vc;
+  const NewFolderDialogContent({
     super.key,
     required this.title,
     this.cancelBtnTitle = "取消",

@@ -421,7 +421,9 @@ class AwsBucketListState extends loading_state.BaseLoadingPageState<AwsBucketLis
                         }, e.toString()),
                         dataLogType: DataLogType.ERRORS.toString());
                     showToast('删除失败');
-                    Navigator.of(context).pop();
+                    if (context.mounted) {
+                      Navigator.of(context).pop();
+                    }
                   }
                 },
               );

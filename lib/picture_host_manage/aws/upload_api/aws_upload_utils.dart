@@ -6,7 +6,7 @@ import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:f_logs/f_logs.dart';
-import 'package:minio_new/minio.dart';
+import 'package:minio/minio.dart';
 import 'package:path/path.dart' as my_path;
 
 import 'package:horopic/picture_host_manage/common_page/upload/pnc_upload_request.dart';
@@ -269,14 +269,14 @@ class UploadManager {
           progress.value = progressMap.values.sum / total;
         }
 
-        var progressListener;
+        Null Function() progressListener;
         progressListener = () {
           progressMap[paths[i]] = task.progress.value;
           progress.value = progressMap.values.sum / total;
         };
 
         task.progress.addListener(progressListener);
-        var listener;
+        dynamic listener;
         listener = () {
           if (task.status.value.isCompleted) {
             progressMap[paths[i]] = 1.0;
@@ -310,7 +310,7 @@ class UploadManager {
           }
         }
 
-        var listener;
+        dynamic listener;
         listener = () {
           if (task.status.value.isCompleted) {
             completed++;

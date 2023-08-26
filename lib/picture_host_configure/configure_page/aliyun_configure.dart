@@ -359,9 +359,13 @@ class AliyunConfigState extends State<AliyunConfig> {
         final aliyunConfigJson = jsonEncode(aliyunConfig);
         final aliyunConfigFile = await localFile;
         await aliyunConfigFile.writeAsString(aliyunConfigJson);
-        return showCupertinoAlertDialog(context: context, title: '成功', content: '配置成功');
+        if (context.mounted) {
+          return showCupertinoAlertDialog(context: context, title: '成功', content: '配置成功');
+        }
       } else {
-        return showCupertinoAlertDialog(context: context, title: '错误', content: '验证失败');
+        if (context.mounted) {
+          return showCupertinoAlertDialog(context: context, title: '错误', content: '验证失败');
+        }
       }
     } catch (e) {
       FLog.error(
@@ -369,7 +373,9 @@ class AliyunConfigState extends State<AliyunConfig> {
           methodName: 'saveAliyunConfig',
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
-      return showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
+      if (context.mounted) {
+        return showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
+      }
     }
   }
 
@@ -379,7 +385,9 @@ class AliyunConfigState extends State<AliyunConfig> {
       String configData = await aliyunConfigFile.readAsString();
 
       if (configData == "Error") {
-        showCupertinoAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");
+        if (context.mounted) {
+          showCupertinoAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");
+        }
         return;
       }
 
@@ -443,13 +451,19 @@ class AliyunConfigState extends State<AliyunConfig> {
       );
 
       if (response.statusCode == 204) {
-        return showCupertinoAlertDialog(
-            context: context,
-            title: '通知',
-            content:
-                '检测通过，您的配置信息为:\n\nAccessKeyId:\n${configMap['keyId']}\nAccessKeySecret:\n${configMap['keySecret']}\nBucket:\n${configMap['bucket']}\nArea:\n${configMap['area']}\nPath:\n${configMap['path']}\nCustomUrl:\n${configMap['customUrl']}\nOptions:\n${configMap['options']}');
+        if (context.mounted) {
+          return showCupertinoAlertDialog(
+              context: context,
+              title: '通知',
+              content:
+                  '检测通过，您的配置信息为:\n\nAccessKeyId:\n${configMap['keyId']}\nAccessKeySecret:\n${configMap['keySecret']}\nBucket:\n${configMap['bucket']}\nArea:\n${configMap['area']}\nPath:\n${configMap['path']}\nCustomUrl:\n${configMap['customUrl']}\nOptions:\n${configMap['options']}');
+        }
+        return;
       } else {
-        return showCupertinoAlertDialog(context: context, title: '错误', content: '检查失败，请检查配置信息');
+        if (context.mounted) {
+          return showCupertinoAlertDialog(context: context, title: '错误', content: '检查失败，请检查配置信息');
+        }
+        return;
       }
     } catch (e) {
       FLog.error(
@@ -457,7 +471,9 @@ class AliyunConfigState extends State<AliyunConfig> {
           methodName: 'checkAliyunConfig',
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
-      return showCupertinoAlertDialog(context: context, title: "检查失败!", content: e.toString());
+      if (context.mounted) {
+        return showCupertinoAlertDialog(context: context, title: "检查失败!", content: e.toString());
+      }
     }
   }
 
@@ -500,7 +516,9 @@ class AliyunConfigState extends State<AliyunConfig> {
           methodName: '_setdefault',
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
-      showToastWithContext(context, '错误');
+      if (context.mounted) {
+        showToastWithContext(context, '错误');
+      }
     }
   }
 }

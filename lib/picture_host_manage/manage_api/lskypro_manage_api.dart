@@ -69,7 +69,7 @@ class LskyproManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "LskyproManageAPI",
             methodName: "getUserInfo",
@@ -121,7 +121,7 @@ class LskyproManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "LskyproManageAPI",
             methodName: "getAlbums",
@@ -175,7 +175,7 @@ class LskyproManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "LskyproManageAPI",
             methodName: "getPhoto",
@@ -216,7 +216,7 @@ class LskyproManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "LskyproManageAPI",
             methodName: "deleteFile",
@@ -256,7 +256,7 @@ class LskyproManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "LskyproManageAPI",
             methodName: "deleteAlbum",
@@ -304,7 +304,7 @@ class LskyproManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "LskyproManageAPI",
             methodName: "uploadFile",
@@ -345,7 +345,7 @@ class LskyproManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "LskyproManageAPI",
             methodName: "uploadNetworkFile",

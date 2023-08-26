@@ -126,7 +126,7 @@ var homePageHandler = Handler(handlerFunc: (BuildContext? context, Map<String, L
 
 //相册
 var albumUploadedImagesHandler = Handler(handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
-  return UploadedImages();
+  return const UploadedImages();
 });
 
 //相册预览

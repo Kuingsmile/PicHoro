@@ -116,7 +116,7 @@ class UpyunImageUploadUtils {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "UpyunImageUploadUtils",
             methodName: "uploadApi",
@@ -191,7 +191,7 @@ class UpyunImageUploadUtils {
         return ["failed"];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "UpyunImageUploadUtils",
             methodName: "deleteApi",

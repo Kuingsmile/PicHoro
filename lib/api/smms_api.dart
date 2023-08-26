@@ -35,7 +35,7 @@ class SmmsImageUploadUtils {
         return ["failed"];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "SmmsImageUploadUtils",
             methodName: "uploadApi",
@@ -80,7 +80,7 @@ class SmmsImageUploadUtils {
         return ["failed"];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "SmmsImageUploadUtils",
             methodName: "deleteApi",

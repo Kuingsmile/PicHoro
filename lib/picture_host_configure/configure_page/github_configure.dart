@@ -286,9 +286,13 @@ class GithubConfigState extends State<GithubConfig> {
           final githubConfigJson = jsonEncode(githubConfig);
           final githubConfigFile = await localFile;
           await githubConfigFile.writeAsString(githubConfigJson);
-          return showCupertinoAlertDialog(context: context, title: '成功', content: '配置成功');
+          if (context.mounted) {
+            return showCupertinoAlertDialog(context: context, title: '成功', content: '配置成功');
+          }
         } else {
-          return showCupertinoAlertDialog(context: context, title: '错误', content: 'token错误');
+          if (context.mounted) {
+            return showCupertinoAlertDialog(context: context, title: '错误', content: 'token错误');
+          }
         }
       } catch (e) {
         FLog.error(
@@ -296,7 +300,9 @@ class GithubConfigState extends State<GithubConfig> {
             methodName: '_saveGithubConfig_1',
             text: formatErrorMessage({}, e.toString()),
             dataLogType: DataLogType.ERRORS.toString());
-        return showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
+        if (context.mounted) {
+          return showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
+        }
       }
     } catch (e) {
       FLog.error(
@@ -304,7 +310,9 @@ class GithubConfigState extends State<GithubConfig> {
           methodName: '_saveGithubConfig_2',
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
-      return showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
+      if (context.mounted) {
+        return showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
+      }
     }
   }
 
@@ -314,7 +322,10 @@ class GithubConfigState extends State<GithubConfig> {
       String configData = await githubConfigFile.readAsString();
 
       if (configData == "Error") {
-        return showCupertinoAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");
+        if (context.mounted) {
+          return showCupertinoAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");
+        }
+        return;
       }
 
       Map configMap = jsonDecode(configData);
@@ -329,14 +340,18 @@ class GithubConfigState extends State<GithubConfig> {
       var response = await dio.get(validateURL, queryParameters: queryData);
 
       if (response.statusCode == 200 && response.data.toString().contains("email")) {
-        return showCupertinoAlertDialog(
-          context: context,
-          title: '通知',
-          content:
-              '检测通过，您的配置信息为:\n用户名:\n${configMap["githubusername"]}\n仓库名:\n${configMap["repo"]}\n存储路径:\n${configMap["storePath"]}\n分支:\n${configMap["branch"]}\n自定义域名:\n${configMap["customDomain"]}',
-        );
+        if (context.mounted) {
+          return showCupertinoAlertDialog(
+            context: context,
+            title: '通知',
+            content:
+                '检测通过，您的配置信息为:\n用户名:\n${configMap["githubusername"]}\n仓库名:\n${configMap["repo"]}\n存储路径:\n${configMap["storePath"]}\n分支:\n${configMap["branch"]}\n自定义域名:\n${configMap["customDomain"]}',
+          );
+        }
       } else {
-        return showCupertinoAlertDialog(context: context, title: '错误', content: '检查失败，请检查配置信息');
+        if (context.mounted) {
+          return showCupertinoAlertDialog(context: context, title: '错误', content: '检查失败，请检查配置信息');
+        }
       }
     } catch (e) {
       FLog.error(
@@ -344,7 +359,9 @@ class GithubConfigState extends State<GithubConfig> {
           methodName: 'checkGithubConfig',
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
-      return showCupertinoAlertDialog(context: context, title: "检查失败!", content: e.toString());
+      if (context.mounted) {
+        return showCupertinoAlertDialog(context: context, title: "检查失败!", content: e.toString());
+      }
     }
   }
 
@@ -387,7 +404,9 @@ class GithubConfigState extends State<GithubConfig> {
           methodName: '_setdefault',
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
-      showToastWithContext(context, '错误');
+      if (context.mounted) {
+        showToastWithContext(context, '错误');
+      }
     }
   }
 }

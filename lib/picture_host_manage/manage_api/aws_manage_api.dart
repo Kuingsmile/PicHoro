@@ -8,7 +8,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:f_logs/f_logs.dart';
 import 'package:sqflite/utils/utils.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:minio_new/minio.dart';
+import 'package:minio/minio.dart';
 
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/common_functions.dart';
@@ -689,7 +689,7 @@ class AwsManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "AwsManageAPI",
             methodName: "uploadNetworkFile",

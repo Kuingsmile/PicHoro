@@ -6,7 +6,6 @@ import 'dart:io';
 import 'package:collection/collection.dart';
 import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
-import 'package:dio_proxy_adapter/dio_proxy_adapter.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:f_logs/f_logs.dart';
@@ -15,7 +14,7 @@ import 'package:ftpconnect/ftpconnect.dart';
 import 'package:dartssh2/dartssh2.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
-import 'package:minio_new/minio.dart';
+import 'package:minio/minio.dart';
 import 'package:webdav_client/webdav_client.dart' as webdav;
 
 import 'package:horopic/pages/upload_pages/upload_request.dart';
@@ -25,6 +24,7 @@ import 'package:horopic/utils/event_bus_utils.dart';
 import 'package:horopic/utils/uploader.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/common_functions.dart';
+import 'package:horopic/utils/dio_proxy_adapter.dart';
 import 'package:horopic/album/album_sql.dart';
 import 'package:horopic/api/tencent_api.dart';
 import 'package:horopic/api/qiniu_api.dart';
@@ -69,7 +69,7 @@ class UploadManager {
       String configData = await readPictureHostConfig();
       Map configMap = jsonDecode(configData);
       String defaultPH = await Global.getPShost();
-      var response;
+      Response response;
       if (defaultPH == 'tencent') {
         String secretId = configMap['secretId'];
         String secretKey = configMap['secretKey'];
@@ -749,7 +749,7 @@ class UploadManager {
           } else {
             proxyClean = proxy;
           }
-          dio.useProxy(proxyClean);
+          dio.httpClientAdapter = useProxy(proxyClean);
         }
         String uploadUrl = "https://api.imgur.com/3/image";
         response = await dio.post(
@@ -1471,14 +1471,14 @@ class UploadManager {
           progress.value = progressMap.values.sum / total;
         }
 
-        var progressListener;
+        Null Function() progressListener;
         progressListener = () {
           progressMap[paths[i]] = task.progress.value;
           progress.value = progressMap.values.sum / total;
         };
 
         task.progress.addListener(progressListener);
-        var listener;
+        dynamic listener;
         listener = () {
           if (task.status.value.isCompleted) {
             progressMap[paths[i]] = 1.0;
@@ -1512,7 +1512,7 @@ class UploadManager {
           }
         }
 
-        var listener;
+        dynamic listener;
         listener = () {
           if (task.status.value.isCompleted) {
             completed++;

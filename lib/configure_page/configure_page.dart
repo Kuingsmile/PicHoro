@@ -80,7 +80,7 @@ class ConfigurePageState extends State<ConfigurePage> with AutomaticKeepAliveCli
     String url = 'https://pichoro.msq.pub/PicHoro_V$remoteVersion.apk';
     RUpgrade.upgrade(url,
         fileName: 'PicHoro_V$remoteVersion.apk',
-        isAutoRequestInstall: true,
+        installType: RUpgradeInstallType.normal,
         notificationStyle: NotificationStyle.speechAndPlanTime);
     setState(() {});
   }
@@ -160,9 +160,9 @@ class ConfigurePageState extends State<ConfigurePage> with AutomaticKeepAliveCli
           ListTile(
             title: latestVersion == ' ' || latestVersion == version
                 ? const Text('检查更新')
-                : Row(
+                : const Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: const [
+                    children: [
                       Text('有新版本！', style: TextStyle(color: Colors.amber)),
                       Icon(Icons.upload, color: Colors.green),
                     ],

@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:f_logs/f_logs.dart';
 import 'package:fluro/fluro.dart';
 
-import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/pages/loading.dart';
 import 'package:horopic/picture_host_manage/manage_api/upyun_manage_api.dart';

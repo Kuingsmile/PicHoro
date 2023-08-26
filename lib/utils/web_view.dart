@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
@@ -16,10 +15,14 @@ class WebViewPage extends StatefulWidget {
 }
 
 class WebViewPageState extends State<WebViewPage> {
+  late WebViewController controller;
+
   @override
   void initState() {
     super.initState();
-    if (Platform.isAndroid) WebView.platform = AndroidWebView();
+    controller = WebViewController();
+    controller.setJavaScriptMode(widget.enableJs ? JavaScriptMode.unrestricted : JavaScriptMode.disabled);
+    controller.loadRequest(Uri.parse(widget.url));
   }
 
   @override
@@ -30,9 +33,8 @@ class WebViewPageState extends State<WebViewPage> {
         elevation: 0,
         title: widget.title == 'None' ? titleText('网页浏览') : titleText(widget.title),
       ),
-      body: WebView(
-        initialUrl: widget.url,
-        javascriptMode: widget.enableJs ? JavascriptMode.unrestricted : JavascriptMode.disabled,
+      body: WebViewWidget(
+        controller: controller,
       ),
     );
   }

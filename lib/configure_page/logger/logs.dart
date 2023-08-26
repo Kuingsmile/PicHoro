@@ -253,14 +253,21 @@ class LogPageState extends loading_state.BaseLoadingPageState<LogPage> {
       File file = File('$filePath/PicHoro_Log_$currentTimestamp.txt');
       await file.writeAsString(buffer.toString());
       await Clipboard.setData(ClipboardData(text: buffer.toString()));
-      return showCupertinoAlertDialog(context: context, title: '导出成功', content: '导出成功，日志已复制到剪切板\n文件路径：\n${file.path}');
+      if (context.mounted) {
+        return showCupertinoAlertDialog(
+            context: context, title: '导出成功', content: '导出成功，日志已复制到剪切板\n文件路径：\n${file.path}');
+      }
+      return;
     } catch (e) {
       FLog.error(
           className: 'LogPageState',
           methodName: 'exportLogToFile',
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
-      return showToastWithContext(context, '导出失败');
+      if (context.mounted) {
+        return showToastWithContext(context, '导出失败');
+      }
+      return;
     }
   }
 

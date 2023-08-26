@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:barcode_scan2/barcode_scan2.dart';
 import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
-import 'package:dio_proxy_adapter/dio_proxy_adapter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -16,6 +15,7 @@ import 'package:path/path.dart' as mypath;
 
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/common_functions.dart';
+import 'package:horopic/utils/dio_proxy_adapter.dart';
 
 import 'package:horopic/picture_host_configure/configure_page/configure_export.dart';
 
@@ -438,7 +438,7 @@ class AllPShostState extends State<AllPShost> {
           } else {
             proxyClean = imgurProxy;
           }
-          dio.useProxy(proxyClean);
+          dio.httpClientAdapter = useProxy(proxyClean);
         }
 
         try {
@@ -993,17 +993,19 @@ class AllPShostState extends State<AllPShost> {
           title: const Text('二维码扫描导入PicGo配置'),
           onTap: () async {
             await _scan();
-            showDialog(
-                context: this.context,
-                barrierDismissible: false,
-                builder: (context) {
-                  return NetLoadingDialog(
-                    outsideDismiss: false,
-                    loading: true,
-                    loadingText: "配置中...",
-                    requestCallBack: processingQRCodeResult(),
-                  );
-                });
+            if (context.mounted) {
+              showDialog(
+                  context: this.context,
+                  barrierDismissible: false,
+                  builder: (context) {
+                    return NetLoadingDialog(
+                      outsideDismiss: false,
+                      loading: true,
+                      loadingText: "配置中...",
+                      requestCallBack: processingQRCodeResult(),
+                    );
+                  });
+            }
           },
           trailing: const Icon(Icons.arrow_forward_ios),
         ),

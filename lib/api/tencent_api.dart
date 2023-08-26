@@ -157,7 +157,7 @@ class TencentImageUploadUtils {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "TencentImageUploadUtils",
             methodName: "uploadApi",
@@ -232,7 +232,7 @@ class TencentImageUploadUtils {
         return ["failed"];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "TencentImageUploadUtils",
             methodName: "deleteApi",

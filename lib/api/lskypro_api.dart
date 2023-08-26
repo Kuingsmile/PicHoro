@@ -7,10 +7,7 @@ import 'package:horopic/utils/global.dart';
 //兰空V2
 class LskyproImageUploadUtils {
   //上传接口
-  static uploadApi(
-      {required String path,
-      required String name,
-      required Map configMap}) async {
+  static uploadApi({required String path, required String name, required Map configMap}) async {
     String formatedURL = '';
     FormData formdata = FormData.fromMap({
       "file": await MultipartFile.fromFile(path, filename: name),
@@ -18,12 +15,12 @@ class LskyproImageUploadUtils {
     String albumId = configMap['album_id'];
     if (configMap["strategy_id"] == "None") {
       formdata = FormData.fromMap({});
-    } else if (albumId=='None') {
+    } else if (albumId == 'None') {
       formdata = FormData.fromMap({
         "file": await MultipartFile.fromFile(path, filename: name),
         "strategy_id": configMap["strategy_id"],
       });
-    }else{
+    } else {
       formdata = FormData.fromMap({
         "file": await MultipartFile.fromFile(path, filename: name),
         "strategy_id": configMap["strategy_id"],
@@ -51,8 +48,7 @@ class LskyproImageUploadUtils {
         String pictureKey = jsonEncode(pictureKeyMap);
 
         if (Global.isCopyLink == true) {
-          formatedURL =
-              linkGenerateDict[Global.defaultLKformat]!(returnUrl, name);
+          formatedURL = linkGenerateDict[Global.defaultLKformat]!(returnUrl, name);
         } else {
           formatedURL = returnUrl;
         }
@@ -61,7 +57,7 @@ class LskyproImageUploadUtils {
         return ["failed"];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "LskyproImageUploadUtils",
             methodName: "uploadApi",
@@ -95,8 +91,7 @@ class LskyproImageUploadUtils {
       "Accept": "application/json",
     };
     Dio dio = Dio(options);
-    String deleteUrl =
-        configMapFromPictureKey["host"] + "/api/v1/images/${configMapFromPictureKey["deletekey"]}";
+    String deleteUrl = configMapFromPictureKey["host"] + "/api/v1/images/${configMapFromPictureKey["deletekey"]}";
     try {
       var response = await dio.delete(deleteUrl, data: formdata);
       if (response.statusCode == 200 && response.data!['status'] == true) {
@@ -107,12 +102,11 @@ class LskyproImageUploadUtils {
         return ["failed"];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "LskyproImageUploadUtils",
             methodName: "deleteApi",
-            text: formatErrorMessage({}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
+            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
             dataLogType: DataLogType.ERRORS.toString());
       } else {
         FLog.error(

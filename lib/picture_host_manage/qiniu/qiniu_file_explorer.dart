@@ -1134,9 +1134,9 @@ class QiniuFileExplorerState extends loading_state.BaseLoadingPageState<QiniuFil
                                   color: Color.fromARGB(255, 235, 242, 248)),
                               padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
                               child: MSHCheckbox(
-                                uncheckedColor: Colors.blue,
+                                colorConfig: MSHColorConfig.fromCheckedUncheckedDisabled(
+                                    checkedColor: Colors.blue, uncheckedColor: Colors.blue, disabledColor: Colors.blue),
                                 size: 17,
-                                checkedColor: Colors.blue,
                                 value: selectedFilesBool[index],
                                 style: MSHCheckboxStyle.fillScaleCheck,
                                 onChanged: (selected) {
@@ -1338,9 +1338,11 @@ class QiniuFileExplorerState extends loading_state.BaseLoadingPageState<QiniuFil
                                     showToast('获取失败');
                                     return;
                                   }
-                                  Application.router.navigateTo(this.context,
-                                      '${Routes.mdPreview}?filePath=${Uri.encodeComponent(filePath)}&fileName=${Uri.encodeComponent(fileName)}',
-                                      transition: TransitionType.none);
+                                  if (context.mounted) {
+                                    Application.router.navigateTo(this.context,
+                                        '${Routes.mdPreview}?filePath=${Uri.encodeComponent(filePath)}&fileName=${Uri.encodeComponent(fileName)}',
+                                        transition: TransitionType.none);
+                                  }
                                 } else if (Global.chewieExt
                                     .contains(allInfoList[index]['key'].split('.').last.toLowerCase())) {
                                   String shareUrl = '';
@@ -1407,9 +1409,11 @@ class QiniuFileExplorerState extends loading_state.BaseLoadingPageState<QiniuFil
                                   color: Color.fromARGB(255, 235, 242, 248)),
                               padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
                               child: MSHCheckbox(
-                                uncheckedColor: Colors.blue,
+                                colorConfig: MSHColorConfig.fromCheckedUncheckedDisabled(
+                                    checkedColor: Colors.blue,
+                                    uncheckedColor: Colors.blue,
+                                    disabledColor: Colors.blue.withOpacity(0.5)),
                                 size: 17,
-                                checkedColor: Colors.blue,
                                 value: selectedFilesBool[index],
                                 style: MSHCheckboxStyle.fillScaleCheck,
                                 onChanged: (selected) {

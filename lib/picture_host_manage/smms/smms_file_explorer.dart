@@ -316,19 +316,21 @@ class SmmsFileExplorerState extends loading_state.BaseLoadingPageState<SmmsFileE
                             try {
                               String urlStr = url.text!;
                               List fileLinkList = urlStr.split("\n");
-                              await showDialog(
-                                  context: context,
-                                  barrierDismissible: false,
-                                  builder: (context) {
-                                    return NetLoadingDialog(
-                                      outsideDismiss: false,
-                                      loading: true,
-                                      loadingText: "上传中...",
-                                      requestCallBack: SmmsManageAPI.uploadNetworkFileEntry(
-                                        fileLinkList,
-                                      ),
-                                    );
-                                  });
+                              if (context.mounted) {
+                                await showDialog(
+                                    context: context,
+                                    barrierDismissible: false,
+                                    builder: (context) {
+                                      return NetLoadingDialog(
+                                        outsideDismiss: false,
+                                        loading: true,
+                                        loadingText: "上传中...",
+                                        requestCallBack: SmmsManageAPI.uploadNetworkFileEntry(
+                                          fileLinkList,
+                                        ),
+                                      );
+                                    });
+                              }
                               _getFileList();
                               setState(() {});
                             } catch (e) {
@@ -813,9 +815,9 @@ class SmmsFileExplorerState extends loading_state.BaseLoadingPageState<SmmsFileE
                                 color: Color.fromARGB(255, 235, 242, 248)),
                             padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
                             child: MSHCheckbox(
-                              uncheckedColor: Colors.blue,
+                              colorConfig: MSHColorConfig.fromCheckedUncheckedDisabled(
+                                  checkedColor: Colors.blue, uncheckedColor: Colors.blue, disabledColor: Colors.blue),
                               size: 16,
-                              checkedColor: Colors.blue,
                               value: selectedFilesBool[index],
                               style: MSHCheckboxStyle.fillScaleCheck,
                               onChanged: (selected) {

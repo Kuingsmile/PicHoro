@@ -320,9 +320,13 @@ class QiniuConfigState extends State<QiniuConfig> {
         final qiniuConfigJson = jsonEncode(qiniuConfig);
         final qiniuConfigFile = await localFile;
         await qiniuConfigFile.writeAsString(qiniuConfigJson);
-        return showCupertinoAlertDialog(context: context, title: '成功', content: '配置成功');
+        if (context.mounted) {
+          return showCupertinoAlertDialog(context: context, title: '成功', content: '配置成功');
+        }
       } else {
-        return showCupertinoAlertDialog(context: context, title: '错误', content: '验证失败');
+        if (context.mounted) {
+          return showCupertinoAlertDialog(context: context, title: '错误', content: '验证失败');
+        }
       }
     } catch (e) {
       FLog.error(
@@ -330,7 +334,9 @@ class QiniuConfigState extends State<QiniuConfig> {
           methodName: '_saveQiniuConfig',
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
-      return showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
+      if (context.mounted) {
+        return showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
+      }
     }
   }
 
@@ -340,7 +346,10 @@ class QiniuConfigState extends State<QiniuConfig> {
       String configData = await qiniuConfigFile.readAsString();
 
       if (configData == "Error") {
-        return showCupertinoAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");
+        if (context.mounted) {
+          return showCupertinoAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");
+        }
+        return;
       }
 
       Map configMap = jsonDecode(configData);
@@ -380,13 +389,17 @@ class QiniuConfigState extends State<QiniuConfig> {
       PutResponse putresult = await storage.putFile(File(assetFilePath), uploadToken);
 
       if (putresult.key == key || putresult.key == '${configMap['path']}$key') {
-        return showCupertinoAlertDialog(
-            context: context,
-            title: '通知',
-            content:
-                '检测通过，您的配置信息为:\naccessKey:\n${configMap['accessKey']}\nsecretKey:\n${configMap['secretKey']}\nbucket:\n${configMap['bucket']}\nurl:\n${configMap['url']}\narea:\n${configMap['area']}\noptions:\n${configMap['options']}\npath:\n${configMap['path']}');
+        if (context.mounted) {
+          return showCupertinoAlertDialog(
+              context: context,
+              title: '通知',
+              content:
+                  '检测通过，您的配置信息为:\naccessKey:\n${configMap['accessKey']}\nsecretKey:\n${configMap['secretKey']}\nbucket:\n${configMap['bucket']}\nurl:\n${configMap['url']}\narea:\n${configMap['area']}\noptions:\n${configMap['options']}\npath:\n${configMap['path']}');
+        }
       } else {
-        return showCupertinoAlertDialog(context: context, title: '错误', content: '检查失败，请检查配置信息');
+        if (context.mounted) {
+          return showCupertinoAlertDialog(context: context, title: '错误', content: '检查失败，请检查配置信息');
+        }
       }
     } catch (e) {
       FLog.error(
@@ -394,7 +407,9 @@ class QiniuConfigState extends State<QiniuConfig> {
           methodName: 'checkQiniuConfig',
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
-      return showCupertinoAlertDialog(context: context, title: "检查失败!", content: e.toString());
+      if (context.mounted) {
+        return showCupertinoAlertDialog(context: context, title: "检查失败!", content: e.toString());
+      }
     }
   }
 
@@ -437,7 +452,9 @@ class QiniuConfigState extends State<QiniuConfig> {
           methodName: '_setdefault',
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
-      showToastWithContext(context, '错误');
+      if (context.mounted) {
+        showToastWithContext(context, '错误');
+      }
     }
   }
 }

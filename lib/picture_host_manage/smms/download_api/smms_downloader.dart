@@ -161,6 +161,7 @@ class DownloadManager {
 
       return await _addDownloadRequest(DownloadRequest(url, downloadFilename));
     }
+    return null;
   }
 
   Future<DownloadTask> _addDownloadRequest(
@@ -281,7 +282,7 @@ class DownloadManager {
       return getDownload(urls.first)?.progress ?? progress;
     }
 
-    var progressMap = Map<String, double>();
+    var progressMap = <String, double>{};
 
     for (var url in urls) {
       DownloadTask? task = getDownload(url);
@@ -294,7 +295,7 @@ class DownloadManager {
           progress.value = progressMap.values.sum / total;
         }
 
-        var progressListener;
+        Null Function() progressListener;
         progressListener = () {
           progressMap[url] = task.progress.value;
           progress.value = progressMap.values.sum / total;
@@ -302,7 +303,7 @@ class DownloadManager {
 
         task.progress.addListener(progressListener);
 
-        var listener;
+        dynamic listener;
         listener = () {
           if (task.status.value.isCompleted) {
             progressMap[url] = 1.0;
@@ -340,7 +341,7 @@ class DownloadManager {
           }
         }
 
-        var listener;
+        dynamic listener;
         listener = () {
           if (task.status.value.isCompleted) {
             completed++;

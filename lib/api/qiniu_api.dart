@@ -25,8 +25,7 @@ class QiniuImageUploadUtils {
   }
 
   //url安全的base64编码的上传策略
-  static String geturlSafeBase64EncodePutPolicy(
-      String bucket, String key, String path) {
+  static String geturlSafeBase64EncodePutPolicy(String bucket, String key, String path) {
     Map<String, dynamic> putPolicy;
     if (path == 'None') {
       putPolicy = {
@@ -46,8 +45,7 @@ class QiniuImageUploadUtils {
   }
 
   //获取上传凭证
-  static String getUploadToken(
-      String accessKey, String secretKey, String urlSafeBase64EncodePutPolicy) {
+  static String getUploadToken(String accessKey, String secretKey, String urlSafeBase64EncodePutPolicy) {
     var hmacSha1 = Hmac(sha1, utf8.encode(secretKey));
     var sign = hmacSha1.convert(utf8.encode(urlSafeBase64EncodePutPolicy));
     String encodedSign = urlSafeBase64Encode(sign.bytes);
@@ -55,15 +53,8 @@ class QiniuImageUploadUtils {
   }
 
   //获取管理凭证
-  static String getAuthToken(
-      String method,
-      String path,
-      String? query,
-      String host,
-      String contentType,
-      String body,
-      String accessKey,
-      String secretKey) {
+  static String getAuthToken(String method, String path, String? query, String host, String contentType, String body,
+      String accessKey, String secretKey) {
     var signStr = '${method.toUpperCase()} $path';
 
     if (query != null && query.isNotEmpty) {
@@ -86,10 +77,7 @@ class QiniuImageUploadUtils {
   }
 
   //上传接口
-  static uploadApi(
-      {required String path,
-      required String name,
-      required Map configMap}) async {
+  static uploadApi({required String path, required String name, required Map configMap}) async {
     String accessKey = configMap['accessKey'];
     String secretKey = configMap['secretKey'];
     String bucket = configMap['bucket'];
@@ -115,10 +103,8 @@ class QiniuImageUploadUtils {
     }
     String key = name;
 
-    String urlSafeBase64EncodePutPolicy =
-        geturlSafeBase64EncodePutPolicy(bucket, key, qiniupath);
-    String uploadToken =
-        getUploadToken(accessKey, secretKey, urlSafeBase64EncodePutPolicy);
+    String urlSafeBase64EncodePutPolicy = geturlSafeBase64EncodePutPolicy(bucket, key, qiniupath);
+    String uploadToken = getUploadToken(accessKey, secretKey, urlSafeBase64EncodePutPolicy);
 
     try {
       Storage storage = Storage(
@@ -143,8 +129,7 @@ class QiniuImageUploadUtils {
         }
         String formatedURL = '';
         if (Global.isCopyLink == true) {
-          formatedURL =
-              linkGenerateDict[Global.defaultLKformat]!(returnUrl, name);
+          formatedURL = linkGenerateDict[Global.defaultLKformat]!(returnUrl, name);
         } else {
           formatedURL = returnUrl;
         }
@@ -155,7 +140,7 @@ class QiniuImageUploadUtils {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "QiniuUpload",
             methodName: "uploadApi",
@@ -180,7 +165,7 @@ class QiniuImageUploadUtils {
 
   static deleteApi({required Map deleteMap, required Map configMap}) async {
     String fileName = deleteMap['name'];
-    Map configMapFromPictureKey = jsonDecode(deleteMap['pictureKey']); 
+    Map configMapFromPictureKey = jsonDecode(deleteMap['pictureKey']);
 
     String accessKey = configMapFromPictureKey['accessKey'];
     String secretKey = configMapFromPictureKey['secretKey'];
@@ -190,7 +175,7 @@ class QiniuImageUploadUtils {
     if (qiniupath.startsWith('/')) {
       qiniupath = qiniupath.substring(1);
     }
-    if (fileName.startsWith('/')){
+    if (fileName.startsWith('/')) {
       fileName = fileName.substring(1);
     }
 
@@ -203,15 +188,8 @@ class QiniuImageUploadUtils {
     String encodedEntryURI = urlSafeBase64Encode(utf8.encode('$bucket:$key'));
 
     BaseOptions baseOptions = setBaseOptions();
-    String authToken = getAuthToken(
-        'DELETE',
-        '/delete/$encodedEntryURI',
-        null,
-        'rs.qiniuapi.com',
-        'application/x-www-form-urlencoded',
-        '',
-        accessKey,
-        secretKey);
+    String authToken = getAuthToken('DELETE', '/delete/$encodedEntryURI', null, 'rs.qiniuapi.com',
+        'application/x-www-form-urlencoded', '', accessKey, secretKey);
     baseOptions.headers = {
       "Authorization": "Qiniu $authToken",
       "Content-Type": "application/x-www-form-urlencoded",
@@ -230,7 +208,7 @@ class QiniuImageUploadUtils {
         return ["failed"];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "QiniuUpload",
             methodName: "deleteApi",

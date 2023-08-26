@@ -536,18 +536,20 @@ class TencentFileExplorerState extends loading_state.BaseLoadingPageState<Tencen
                               try {
                                 String urlStr = url.text!;
                                 List fileLinkList = urlStr.split("\n");
-                                await showDialog(
-                                    context: context,
-                                    barrierDismissible: false,
-                                    builder: (context) {
-                                      return NetLoadingDialog(
-                                        outsideDismiss: false,
-                                        loading: true,
-                                        loadingText: "上传中...",
-                                        requestCallBack: TencentManageAPI.uploadNetworkFileEntry(
-                                            fileLinkList, widget.element, widget.bucketPrefix),
-                                      );
-                                    });
+                                if (context.mounted) {
+                                  await showDialog(
+                                      context: context,
+                                      barrierDismissible: false,
+                                      builder: (context) {
+                                        return NetLoadingDialog(
+                                          outsideDismiss: false,
+                                          loading: true,
+                                          loadingText: "上传中...",
+                                          requestCallBack: TencentManageAPI.uploadNetworkFileEntry(
+                                              fileLinkList, widget.element, widget.bucketPrefix),
+                                        );
+                                      });
+                                }
                                 _getBucketList();
                               } catch (e) {
                                 FLog.error(
@@ -1093,9 +1095,9 @@ class TencentFileExplorerState extends loading_state.BaseLoadingPageState<Tencen
                                   color: Color.fromARGB(255, 235, 242, 248)),
                               padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
                               child: MSHCheckbox(
-                                uncheckedColor: Colors.blue,
+                                colorConfig: MSHColorConfig.fromCheckedUncheckedDisabled(
+                                    checkedColor: Colors.blue, uncheckedColor: Colors.blue, disabledColor: Colors.blue),
                                 size: 17,
-                                checkedColor: Colors.blue,
                                 value: selectedFilesBool[index],
                                 style: MSHCheckboxStyle.fillScaleCheck,
                                 onChanged: (selected) {
@@ -1288,17 +1290,21 @@ class TencentFileExplorerState extends loading_state.BaseLoadingPageState<Tencen
                                     }
                                   }
                                   urlList = urlList.substring(0, urlList.length - 1);
-                                  Application.router.navigateTo(this.context,
-                                      '${Routes.albumImagePreview}?index=$newImageIndex&images=${Uri.encodeComponent(urlList)}',
-                                      transition: TransitionType.none);
+                                  if (context.mounted) {
+                                    Application.router.navigateTo(this.context,
+                                        '${Routes.albumImagePreview}?index=$newImageIndex&images=${Uri.encodeComponent(urlList)}',
+                                        transition: TransitionType.none);
+                                  }
                                 } else if (allInfoList[index]['Key'].split('.').last.toLowerCase() == 'pdf') {
                                   String shareUrl = '';
                                   shareUrl =
                                       'https://${widget.element['name']}.cos.${widget.element['location']}.myqcloud.com/${allInfoList[index]['Key']}';
                                   Map<String, dynamic> headers = {};
-                                  Application.router.navigateTo(this.context,
-                                      '${Routes.pdfViewer}?url=${Uri.encodeComponent(shareUrl)}&fileName=${Uri.encodeComponent(allInfoList[index]['Key'])}&headers=${Uri.encodeComponent(jsonEncode(headers))}',
-                                      transition: TransitionType.none);
+                                  if (context.mounted) {
+                                    Application.router.navigateTo(this.context,
+                                        '${Routes.pdfViewer}?url=${Uri.encodeComponent(shareUrl)}&fileName=${Uri.encodeComponent(allInfoList[index]['Key'])}&headers=${Uri.encodeComponent(jsonEncode(headers))}',
+                                        transition: TransitionType.none);
+                                  }
                                 } else if (Global.textExt
                                     .contains(allInfoList[index]['Key'].split('.').last.toLowerCase())) {
                                   String shareUrl = '';
@@ -1311,9 +1317,11 @@ class TencentFileExplorerState extends loading_state.BaseLoadingPageState<Tencen
                                     showToast('获取失败');
                                     return;
                                   }
-                                  Application.router.navigateTo(this.context,
-                                      '${Routes.mdPreview}?filePath=${Uri.encodeComponent(filePath)}&fileName=${Uri.encodeComponent(fileName)}',
-                                      transition: TransitionType.none);
+                                  if (context.mounted) {
+                                    Application.router.navigateTo(this.context,
+                                        '${Routes.mdPreview}?filePath=${Uri.encodeComponent(filePath)}&fileName=${Uri.encodeComponent(fileName)}',
+                                        transition: TransitionType.none);
+                                  }
                                 } else if (Global.chewieExt
                                     .contains(allInfoList[index]['Key'].split('.').last.toLowerCase())) {
                                   //预览chewie视频
@@ -1331,9 +1339,11 @@ class TencentFileExplorerState extends loading_state.BaseLoadingPageState<Tencen
                                     }
                                   }
                                   Map<String, dynamic> headers = {};
-                                  Application.router.navigateTo(this.context,
-                                      '${Routes.netVideoPlayer}?videoList=${Uri.encodeComponent(jsonEncode(videoList))}&index=$newImageIndex&type=${Uri.encodeComponent('normal')}&headers=${Uri.encodeComponent(jsonEncode(headers))}',
-                                      transition: TransitionType.none);
+                                  if (context.mounted) {
+                                    Application.router.navigateTo(this.context,
+                                        '${Routes.netVideoPlayer}?videoList=${Uri.encodeComponent(jsonEncode(videoList))}&index=$newImageIndex&type=${Uri.encodeComponent('normal')}&headers=${Uri.encodeComponent(jsonEncode(headers))}',
+                                        transition: TransitionType.none);
+                                  }
                                 } else if (Global.vlcExt
                                     .contains(allInfoList[index]['Key'].split('.').last.toLowerCase())) {
                                   //vlc预览视频
@@ -1369,9 +1379,11 @@ class TencentFileExplorerState extends loading_state.BaseLoadingPageState<Tencen
                                     }
                                   }
                                   Map<String, dynamic> headers = {};
-                                  Application.router.navigateTo(this.context,
-                                      '${Routes.netVideoPlayer}?videoList=${Uri.encodeComponent(jsonEncode(videoList))}&index=$newImageIndex&type=${Uri.encodeComponent('mkv')}&headers=${Uri.encodeComponent(jsonEncode(headers))}',
-                                      transition: TransitionType.none);
+                                  if (context.mounted) {
+                                    Application.router.navigateTo(this.context,
+                                        '${Routes.netVideoPlayer}?videoList=${Uri.encodeComponent(jsonEncode(videoList))}&index=$newImageIndex&type=${Uri.encodeComponent('mkv')}&headers=${Uri.encodeComponent(jsonEncode(headers))}',
+                                        transition: TransitionType.none);
+                                  }
                                 }
                               },
                             ),
@@ -1384,9 +1396,9 @@ class TencentFileExplorerState extends loading_state.BaseLoadingPageState<Tencen
                                   color: Color.fromARGB(255, 235, 242, 248)),
                               padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
                               child: MSHCheckbox(
-                                uncheckedColor: Colors.blue,
+                                colorConfig: MSHColorConfig.fromCheckedUncheckedDisabled(
+                                    checkedColor: Colors.blue, uncheckedColor: Colors.blue, disabledColor: Colors.blue),
                                 size: 17,
-                                checkedColor: Colors.blue,
                                 value: selectedFilesBool[index],
                                 style: MSHCheckboxStyle.fillScaleCheck,
                                 onChanged: (selected) {

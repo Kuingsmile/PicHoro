@@ -292,7 +292,7 @@ class DownloadManager {
           progress.value = progressMap.values.sum / total;
         }
 
-        var progressListener;
+        Null Function() progressListener;
         progressListener = () {
           progressMap[url] = task.progress.value;
           progress.value = progressMap.values.sum / total;
@@ -300,7 +300,7 @@ class DownloadManager {
 
         task.progress.addListener(progressListener);
 
-        var listener;
+        dynamic listener;
         listener = () {
           if (task.status.value.isCompleted) {
             progressMap[url] = 1.0;
@@ -338,7 +338,7 @@ class DownloadManager {
           }
         }
 
-        var listener;
+        dynamic listener;
         listener = () {
           if (task.status.value.isCompleted) {
             completed++;

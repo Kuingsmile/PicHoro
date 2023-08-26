@@ -169,7 +169,7 @@ class TencentManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "TencentManageAPI",
             methodName: "getBucketList",
@@ -245,7 +245,7 @@ class TencentManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "TencentManageAPI",
             methodName: "createBucket",
@@ -292,7 +292,7 @@ class TencentManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "TencentManageAPI",
             methodName: "deleteBucket",
@@ -343,7 +343,7 @@ class TencentManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "TencentManageAPI",
             methodName: "queryACLPolicy",
@@ -390,7 +390,7 @@ class TencentManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "TencentManageAPI",
             methodName: "changeACLPolicy",
@@ -525,7 +525,7 @@ class TencentManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "TencentManageAPI",
             methodName: "queryBucketFiles",
@@ -587,7 +587,7 @@ class TencentManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "TencentManageAPI",
             methodName: "deleteFile",
@@ -689,7 +689,7 @@ class TencentManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "TencentManageAPI",
             methodName: "copyFile",
@@ -780,7 +780,7 @@ class TencentManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "TencentManageAPI",
             methodName: "downloadFile",
@@ -832,7 +832,7 @@ class TencentManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "TencentManageAPI",
             methodName: "createFolder",
@@ -917,7 +917,7 @@ class TencentManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "TencentManageAPI",
             methodName: "uploadFile",
@@ -1001,7 +1001,7 @@ class TencentManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "TencentManageAPI",
             methodName: "uploadNetworkFile",

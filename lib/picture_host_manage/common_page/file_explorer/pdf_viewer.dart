@@ -52,7 +52,7 @@ class PdfViewerState extends State<PdfViewer> {
   }
 
   void _showContextMenu(BuildContext context, PdfTextSelectionChangedDetails details) {
-    final OverlayState? overlayState = Overlay.of(context);
+    final OverlayState overlayState = Overlay.of(context);
     _overlayEntry = OverlayEntry(
       builder: (context) => Positioned(
         top: details.globalSelectedRegion!.center.dy - 55,
@@ -60,13 +60,13 @@ class PdfViewerState extends State<PdfViewer> {
         child: ElevatedButton(
           child: const Text('复制', style: TextStyle(fontSize: 17)),
           onPressed: () {
-            Clipboard.setData(ClipboardData(text: details.selectedText));
+            Clipboard.setData(ClipboardData(text: details.selectedText!));
             _pdfViewerController.clearSelection();
           },
         ),
       ),
     );
-    overlayState!.insert(_overlayEntry!);
+    overlayState.insert(_overlayEntry!);
   }
 
   @override

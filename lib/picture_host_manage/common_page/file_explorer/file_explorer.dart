@@ -326,9 +326,11 @@ class FileExplorerState extends State<FileExplorer> {
                                         color: Color.fromARGB(255, 235, 242, 248)),
                                     padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
                                     child: MSHCheckbox(
-                                      uncheckedColor: Colors.blue,
+                                      colorConfig: MSHColorConfig.fromCheckedUncheckedDisabled(
+                                          checkedColor: Colors.blue,
+                                          uncheckedColor: Colors.blue,
+                                          disabledColor: Colors.blue),
                                       size: 17,
-                                      checkedColor: Colors.blue,
                                       value: selectedFilesBool[index],
                                       style: MSHCheckboxStyle.fillScaleCheck,
                                       onChanged: (selected) {
@@ -452,9 +454,11 @@ class FileExplorerState extends State<FileExplorer> {
                                         color: Color.fromARGB(255, 235, 242, 248)),
                                     padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
                                     child: MSHCheckbox(
-                                      uncheckedColor: Colors.blue,
+                                      colorConfig: MSHColorConfig.fromCheckedUncheckedDisabled(
+                                          checkedColor: Colors.blue,
+                                          uncheckedColor: Colors.blue,
+                                          disabledColor: Colors.blue),
                                       size: 17,
-                                      checkedColor: Colors.blue,
                                       value: selectedFilesBool[index],
                                       style: MSHCheckboxStyle.fillScaleCheck,
                                       onChanged: (selected) {

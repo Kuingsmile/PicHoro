@@ -1,11 +1,11 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:dio/dio.dart';
-import 'package:dio_proxy_adapter/dio_proxy_adapter.dart';
 import 'package:f_logs/f_logs.dart';
 
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/global.dart';
+import 'package:horopic/utils/dio_proxy_adapter.dart';
 
 class ImgurImageUploadUtils {
   //上传接口
@@ -30,7 +30,7 @@ class ImgurImageUploadUtils {
       } else {
         proxyClean = proxy;
       }
-      dio.useProxy(proxyClean);
+      dio.httpClientAdapter = useProxy(proxyClean);
     }
     //官方文档里写的是https://api.imgur.com/3/upload emmmmmm
     String uploadUrl = "https://api.imgur.com/3/image";
@@ -57,7 +57,7 @@ class ImgurImageUploadUtils {
         return ["failed"];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "ImgurImageUploadUtils",
             methodName: "uploadApi",
@@ -98,7 +98,7 @@ class ImgurImageUploadUtils {
       } else {
         proxyClean = proxy;
       }
-      dio.useProxy(proxyClean);
+      dio.httpClientAdapter = useProxy(proxyClean);
     }
 
     try {
@@ -109,7 +109,7 @@ class ImgurImageUploadUtils {
         return ["failed"];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "ImgurImageUploadUtils",
             methodName: "deleteApi",

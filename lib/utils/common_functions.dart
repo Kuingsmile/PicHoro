@@ -84,9 +84,9 @@ supportedExtensions(String ext) {
 
 BaseOptions setBaseOptions() {
   BaseOptions baseOptions = BaseOptions(
-    sendTimeout: Global.defaultOutTime,
-    receiveTimeout: Global.defaultOutTime,
-    connectTimeout: Global.defaultOutTime,
+    sendTimeout: Duration(milliseconds: Global.defaultOutTime),
+    receiveTimeout: Duration(milliseconds: Global.defaultOutTime),
+    connectTimeout: Duration(milliseconds: Global.defaultOutTime),
   );
   return baseOptions;
 }
@@ -363,7 +363,7 @@ renamePictureWithCustomFormat(File file) async {
   String month = DateTime.now().month.toString();
   String day = DateTime.now().day.toString();
   String timestampSecond = (DateTime.now().millisecondsSinceEpoch / 1000).floor().toString();
-  String uuidWithoutDash = Uuid().v4().replaceAll('-', '');
+  String uuidWithoutDash = const Uuid().v4().replaceAll('-', '');
   String randommd5 = md5.convert(utf8.encode(uuidWithoutDash)).toString();
   String randommd5Short = randommd5.substring(0, 16);
   String tenRandomString = randomStringGenerator(10);
@@ -479,11 +479,11 @@ formatErrorMessage(
   Map parameters,
   String error, {
   bool isDioError = false,
-  DioError? dioErrorMessage = null,
+  DioException? dioErrorMessage,
 }) {
   String formatedParameters = '';
   String formatedError = '';
-  String formatedDioError = '';
+  String? formatedDioError = '';
 
   if (parameters.isNotEmpty) {
     parameters.forEach((key, value) {
@@ -508,7 +508,7 @@ flogErr(Object e, Map parameters, String className, String methodName) {
   FLog.error(
       className: className,
       methodName: methodName,
-      text: e is DioError
+      text: e is DioException
           ? formatErrorMessage(parameters, e.toString(), isDioError: true, dioErrorMessage: e)
           : formatErrorMessage(parameters, e.toString()),
       dataLogType: DataLogType.ERRORS.toString());

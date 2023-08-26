@@ -527,18 +527,20 @@ class WebdavFileExplorerState extends loading_state.BaseLoadingPageState<WebdavF
                               try {
                                 String urlStr = url.text!;
                                 List fileLinkList = urlStr.split("\n");
-                                await showDialog(
-                                    context: context,
-                                    barrierDismissible: false,
-                                    builder: (context) {
-                                      return NetLoadingDialog(
-                                        outsideDismiss: false,
-                                        loading: true,
-                                        loadingText: "上传中...",
-                                        requestCallBack:
-                                            WebdavManageAPI.uploadNetworkFileEntry(fileLinkList, widget.bucketPrefix),
-                                      );
-                                    });
+                                if (context.mounted) {
+                                  await showDialog(
+                                      context: context,
+                                      barrierDismissible: false,
+                                      builder: (context) {
+                                        return NetLoadingDialog(
+                                          outsideDismiss: false,
+                                          loading: true,
+                                          loadingText: "上传中...",
+                                          requestCallBack:
+                                              WebdavManageAPI.uploadNetworkFileEntry(fileLinkList, widget.bucketPrefix),
+                                        );
+                                      });
+                                }
                                 _getBucketList();
                               } catch (e) {
                                 FLog.error(
@@ -1062,9 +1064,9 @@ class WebdavFileExplorerState extends loading_state.BaseLoadingPageState<WebdavF
                                   color: Color.fromARGB(255, 235, 242, 248)),
                               padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
                               child: MSHCheckbox(
-                                uncheckedColor: Colors.blue,
+                                colorConfig: MSHColorConfig.fromCheckedUncheckedDisabled(
+                                    checkedColor: Colors.blue, uncheckedColor: Colors.blue, disabledColor: Colors.blue),
                                 size: 17,
-                                checkedColor: Colors.blue,
                                 value: selectedFilesBool[index],
                                 style: MSHCheckboxStyle.fillScaleCheck,
                                 onChanged: (selected) {
@@ -1260,9 +1262,11 @@ class WebdavFileExplorerState extends loading_state.BaseLoadingPageState<WebdavF
                                     showToast('获取失败');
                                     return;
                                   }
-                                  Application.router.navigateTo(this.context,
-                                      '${Routes.mdPreview}?filePath=${Uri.encodeComponent(filePath)}&fileName=${Uri.encodeComponent(fileName)}',
-                                      transition: TransitionType.none);
+                                  if (context.mounted) {
+                                    Application.router.navigateTo(this.context,
+                                        '${Routes.mdPreview}?filePath=${Uri.encodeComponent(filePath)}&fileName=${Uri.encodeComponent(fileName)}',
+                                        transition: TransitionType.none);
+                                  }
                                 } else if (Global.chewieExt
                                     .contains(allInfoList[index]['name'].split('.').last.toLowerCase())) {
                                   //预览chewie视频
@@ -1297,9 +1301,9 @@ class WebdavFileExplorerState extends loading_state.BaseLoadingPageState<WebdavF
                                   color: Color.fromARGB(255, 235, 242, 248)),
                               padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
                               child: MSHCheckbox(
-                                uncheckedColor: Colors.blue,
+                                colorConfig: MSHColorConfig.fromCheckedUncheckedDisabled(
+                                    checkedColor: Colors.blue, uncheckedColor: Colors.blue, disabledColor: Colors.blue),
                                 size: 17,
-                                checkedColor: Colors.blue,
                                 value: selectedFilesBool[index],
                                 style: MSHCheckboxStyle.fillScaleCheck,
                                 onChanged: (selected) {
@@ -1618,14 +1622,14 @@ double btnHeight = 60;
 double borderWidth = 2;
 
 class RenameDialogContent extends StatefulWidget {
-  String title;
-  String cancelBtnTitle;
-  String okBtnTitle;
-  VoidCallback cancelBtnTap;
-  VoidCallback okBtnTap;
-  TextEditingController vc;
-  String stateBoolText;
-  RenameDialogContent(
+  final String title;
+  final String cancelBtnTitle;
+  final String okBtnTitle;
+  final VoidCallback cancelBtnTap;
+  final VoidCallback okBtnTap;
+  final TextEditingController vc;
+  final String stateBoolText;
+  const RenameDialogContent(
       {super.key,
       required this.title,
       this.cancelBtnTitle = "取消",
@@ -1741,13 +1745,13 @@ class NewFolderDialog extends AlertDialog {
 //弹出框 修改自https://www.jianshu.com/p/4144837a789b
 
 class NewFolderDialogContent extends StatefulWidget {
-  String title;
-  String cancelBtnTitle;
-  String okBtnTitle;
-  VoidCallback cancelBtnTap;
-  VoidCallback okBtnTap;
-  TextEditingController vc;
-  NewFolderDialogContent({
+  final String title;
+  final String cancelBtnTitle;
+  final String okBtnTitle;
+  final VoidCallback cancelBtnTap;
+  final VoidCallback okBtnTap;
+  final TextEditingController vc;
+  const NewFolderDialogContent({
     super.key,
     required this.title,
     this.cancelBtnTitle = "取消",

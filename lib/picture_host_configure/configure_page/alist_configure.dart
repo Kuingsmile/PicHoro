@@ -246,8 +246,11 @@ class AlistConfigState extends State<AlistConfig> {
       final alistConfigFile = await localFile;
       alistConfigFile.writeAsString(alistConfigJson);
       setState(() {});
-      return showCupertinoAlertDialog(
-          context: context, barrierDismissible: false, title: '配置成功', content: '配置成功,请返回上一页');
+      if (context.mounted) {
+        return showCupertinoAlertDialog(
+            context: context, barrierDismissible: false, title: '配置成功', content: '配置成功,请返回上一页');
+      }
+      return;
     }
     if (_usernameController.text.isNotEmpty && _passwdController.text.isNotEmpty) {
       final username = _usernameController.text;
@@ -268,8 +271,11 @@ class AlistConfigState extends State<AlistConfig> {
           final alistConfigFile = await localFile;
           alistConfigFile.writeAsString(alistConfigJson);
           setState(() {});
-          return showCupertinoAlertDialog(
-              context: context, barrierDismissible: false, title: '配置成功', content: '您的密钥为：\n$token,\n请妥善保管，不要泄露给他人');
+          if (context.mounted) {
+            return showCupertinoAlertDialog(
+                context: context, barrierDismissible: false, title: '配置成功', content: '您的密钥为：\n$token,\n请妥善保管，不要泄露给他人');
+          }
+          return;
         } else {
           showToast('获取token失败');
         }
@@ -279,7 +285,10 @@ class AlistConfigState extends State<AlistConfig> {
             methodName: '_saveAlistConfig',
             text: formatErrorMessage({}, e.toString()),
             dataLogType: DataLogType.ERRORS.toString());
-        return showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
+        if (context.mounted) {
+          return showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
+        }
+        return;
       }
     } else {
       String uploadPath = _uploadPathController.text;
@@ -304,12 +313,14 @@ class AlistConfigState extends State<AlistConfig> {
           final alistConfigJson = jsonEncode(alistConfig);
           final alistConfigFile = await localFile;
           alistConfigFile.writeAsString(alistConfigJson);
-
-          return showCupertinoAlertDialog(
-              context: context,
-              barrierDismissible: false,
-              title: '配置成功',
-              content: '您的密钥为：\n$_tokenController,\n请妥善保管，不要泄露给他人');
+          if (context.mounted) {
+            return showCupertinoAlertDialog(
+                context: context,
+                barrierDismissible: false,
+                title: '配置成功',
+                content: '您的密钥为：\n$_tokenController,\n请妥善保管，不要泄露给他人');
+          }
+          return;
         } else {
           showToast('配置失败');
         }
@@ -319,7 +330,10 @@ class AlistConfigState extends State<AlistConfig> {
             methodName: '_saveAlistConfig',
             text: formatErrorMessage({}, e.toString()),
             dataLogType: DataLogType.ERRORS.toString());
-        return showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
+        if (context.mounted) {
+          return showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
+        }
+        return;
       }
     }
   }
@@ -329,7 +343,10 @@ class AlistConfigState extends State<AlistConfig> {
       final alistConfigFile = await localFile;
       String configData = await alistConfigFile.readAsString();
       if (configData == "Error") {
-        return showCupertinoAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");
+        if (context.mounted) {
+          return showCupertinoAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");
+        }
+        return;
       }
       Map configMap = jsonDecode(configData);
       String token = configMap['token'];
@@ -351,13 +368,19 @@ class AlistConfigState extends State<AlistConfig> {
         Dio dio = Dio(options);
         var response = await dio.post(profileUrl, data: dataMap);
         if (response.statusCode == 200 && response.data['message'] == 'success') {
-          return showCupertinoAlertDialog(
-              context: context,
-              title: '通知',
-              content:
-                  '检测通过，您的配置信息为：\nhost:\n${configMap["host"]}\nalist用户名:\n${configMap["alistusername"]}\n密码:\n${configMap["password"]}\ntoken:\n${configMap["token"]}\nuploadPath:\n${configMap["uploadPath"]}');
+          if (context.mounted) {
+            return showCupertinoAlertDialog(
+                context: context,
+                title: '通知',
+                content:
+                    '检测通过，您的配置信息为：\nhost:\n${configMap["host"]}\nalist用户名:\n${configMap["alistusername"]}\n密码:\n${configMap["password"]}\ntoken:\n${configMap["token"]}\nuploadPath:\n${configMap["uploadPath"]}');
+          }
+          return;
         } else {
-          return showCupertinoAlertDialog(context: context, title: '通知', content: '检测失败，请检查配置信息');
+          if (context.mounted) {
+            return showCupertinoAlertDialog(context: context, title: '通知', content: '检测失败，请检查配置信息');
+          }
+          return;
         }
       }
       BaseOptions options = setBaseOptions();
@@ -375,13 +398,19 @@ class AlistConfigState extends State<AlistConfig> {
         queryParameters: query,
       );
       if (response.statusCode == 200 && response.data['message'] == 'success') {
-        return showCupertinoAlertDialog(
-            context: context,
-            title: '通知',
-            content:
-                '检测通过，您的配置信息为：\nhost:\n${configMap["host"]}\nalist用户名:\n${configMap["alistusername"]}\n密码:\n${configMap["password"]}\ntoken:\n${configMap["token"]}\nuploadPath:\n${configMap["uploadPath"]}');
+        if (context.mounted) {
+          return showCupertinoAlertDialog(
+              context: context,
+              title: '通知',
+              content:
+                  '检测通过，您的配置信息为：\nhost:\n${configMap["host"]}\nalist用户名:\n${configMap["alistusername"]}\n密码:\n${configMap["password"]}\ntoken:\n${configMap["token"]}\nuploadPath:\n${configMap["uploadPath"]}');
+        }
+        return;
       } else {
-        return showCupertinoAlertDialog(context: context, title: '通知', content: '检测失败，请检查配置信息');
+        if (context.mounted) {
+          return showCupertinoAlertDialog(context: context, title: '通知', content: '检测失败，请检查配置信息');
+        }
+        return;
       }
     } catch (e) {
       FLog.error(
@@ -389,7 +418,10 @@ class AlistConfigState extends State<AlistConfig> {
           methodName: 'checkAlistConfig',
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
-      return showCupertinoAlertDialog(context: context, title: "检查失败!", content: e.toString());
+      if (context.mounted) {
+        return showCupertinoAlertDialog(context: context, title: "检查失败!", content: e.toString());
+      }
+      return;
     }
   }
 
@@ -432,7 +464,9 @@ class AlistConfigState extends State<AlistConfig> {
           methodName: '_setdefault',
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
-      showToastWithContext(context, '错误');
+      if (context.mounted) {
+        showToastWithContext(context, '错误');
+      }
     }
   }
 }

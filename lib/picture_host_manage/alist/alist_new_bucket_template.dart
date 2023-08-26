@@ -126,6 +126,153 @@ Map alistNewBucketTemplate = {
       "alert": ""
     }
   },
+  "123PanShare": {
+    "common": [
+      {
+        "name": "mount_path",
+        "translate": "挂载路径",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": true,
+        "help": ""
+      },
+      {
+        "name": "order",
+        "translate": "序号",
+        "type": "number",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": "用于排序"
+      },
+      {
+        "name": "remark",
+        "translate": "备注",
+        "type": "text",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "cache_expiration",
+        "translate": "缓存过期分钟",
+        "type": "number",
+        "default": "30",
+        "options": "",
+        "required": true,
+        "help": "此存储的缓存过期时间(分钟)"
+      },
+      {
+        "name": "web_proxy",
+        "translate": "Web代理",
+        "type": "bool",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "webdav_policy",
+        "translate": "WebDAV策略",
+        "type": "select",
+        "default": "302_redirect",
+        "options": "302_redirect,use_proxy_url,native_proxy",
+        "options_translate": "302重定向,使用代理地址,本地代理",
+        "required": true,
+        "help": ""
+      },
+      {
+        "name": "down_proxy_url",
+        "translate": "下载代理URL",
+        "type": "text",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "extract_folder",
+        "translate": "提取文件夹",
+        "type": "select",
+        "default": "",
+        "options": "front,back",
+        "options_translate": "提取到最前,提取到最后",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "enable_sign",
+        "translate": "启用签名",
+        "type": "bool",
+        "default": "false",
+        "options": "",
+        "required": true,
+        "help": ""
+      }
+    ],
+    "additional": [
+      {
+        "name": "sharekey",
+        "translate": "分享key",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": true,
+        "help": ""
+      },
+      {
+        "name": "sharepassword",
+        "translate": "分享密码",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": true,
+        "help": ""
+      },
+      {
+        "name": "order_by",
+        "translate": "排序",
+        "type": "select",
+        "default": "file_name",
+        "options": "file_name,size,update_at",
+        "options_translate": "文件名称,大小,修改时间",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "order_direction",
+        "translate": "排序方向",
+        "type": "select",
+        "default": "asc",
+        "options": "asc,desc",
+        "options_translate": "升序,降序",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "root_folder_id",
+        "translate": "根文件夹ID",
+        "type": "string",
+        "default": "0",
+        "options": "",
+        "required": true,
+        "help": ""
+      }
+    ],
+    "config": {
+      "name": "123PanShare",
+      "local_sort": true,
+      "only_local": false,
+      "only_proxy": false,
+      "no_cache": false,
+      "no_upload": true,
+      "need_ms": false,
+      "default_root": "0",
+      "alert": ""
+    }
+  },
   "123Pan": {
     "common": [
       {

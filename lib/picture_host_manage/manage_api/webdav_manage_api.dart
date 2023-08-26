@@ -89,7 +89,7 @@ class WebdavManageAPI {
       }
       return ['success', fileList];
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "WebdavManageAPI",
             methodName: "getFileList",
@@ -112,7 +112,7 @@ class WebdavManageAPI {
       await client.mkdirAll(path);
       return ['success'];
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "WebdavManageAPI",
             methodName: "createDir",
@@ -135,7 +135,7 @@ class WebdavManageAPI {
       await client.remove(path);
       return ['success'];
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "WebdavManageAPI",
             methodName: "deleteFile",
@@ -161,7 +161,7 @@ class WebdavManageAPI {
       await client.rename(path, newName, true);
       return ['success'];
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "WebdavManageAPI",
             methodName: "renameFile",
@@ -217,7 +217,7 @@ class WebdavManageAPI {
       await client.writeFromFile(filepath, prefix + filename);
       return ['success'];
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "WebdavManageAPI",
             methodName: "uploadFile",
@@ -261,7 +261,7 @@ class WebdavManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioError) {
+      if (e is DioException) {
         FLog.error(
             className: "WebdavManageAPI",
             methodName: "uploadNetworkFile",

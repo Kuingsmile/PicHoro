@@ -84,9 +84,9 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
     );
     if (ConfigureStoreFile().checkIfOneUndetermined(pictureHostInfo)) {
       psInfoListTile.add(
-        ListTile(
+        const ListTile(
           title: Center(
-              child: Row(mainAxisAlignment: MainAxisAlignment.center, children: const [
+              child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
             Text('尚未配置', style: TextStyle(color: Color.fromARGB(255, 88, 171, 240), fontSize: 16)),
           ])),
         ),
