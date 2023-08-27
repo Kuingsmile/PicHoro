@@ -6,7 +6,7 @@
   </a>
 </div>
 
-&emsp;&emsp;一款基于flutter的手机端云存储平台/图床管理和文件上传/下载工具，最新版本**V2.1.2**，与PicGo配置互通，可直接扫码导入，主要功能包括云存储/图床/云服务器平台,以及网盘管理（通过[Alist](https://alist.nn.ci/zh/))，文件上传和下载管理，以及各种格式的链接分享。
+&emsp;&emsp;一款基于flutter的手机端云存储平台/图床管理和文件上传/下载工具，最新版本**V2.1.3**，与PicGo配置互通，可直接扫码导入，主要功能包括云存储/图床/云服务器平台,以及网盘管理（通过[Alist](https://alist.nn.ci/zh/))，文件上传和下载管理，以及各种格式的链接分享。
 
 &emsp;&emsp;支持多种图片/PDF/文本文件/音视频的在线预览和播放，具体支持的格式请查看[支持的格式列表](https://github.com/Kuingsmile/PicHoro/blob/main/supported_format.md "支持的格式列表")
 
@@ -51,20 +51,20 @@
 
 ## 文件预览支持
 
-| 平台| 图片 | PDF | 文本文件 | 视频|
-| ---------------- | :--: | :--: | :--: | :--: |
-|Alist|✅|✅|✅|✅|
-|阿里云|✅|✅|✅|✅|
-|S3|✅|✅|✅|✅|
-|腾讯云|✅|✅|✅|✅|
-|又拍云|✅|✅|✅|✅|
-|七牛云|✅|✅|✅|✅|
-|WebDav|✅|✅|✅|✅|
-|FTP|  ✅|❌|✅|❌|
-|Github|✅|❌|✅|❌|
-|Imgur|✅|❌|❌|✅|
-|兰空|✅|❌|❌|❌|
-|SM.MS|✅|❌|❌|❌|
+| 平台   | 图片  |  PDF  | 文本文件 | 视频  |
+| ------ | :---: | :---: | :------: | :---: |
+| Alist  |   ✅   |   ✅   |    ✅     |   ✅   |
+| 阿里云 |   ✅   |   ✅   |    ✅     |   ✅   |
+| S3     |   ✅   |   ✅   |    ✅     |   ✅   |
+| 腾讯云 |   ✅   |   ✅   |    ✅     |   ✅   |
+| 又拍云 |   ✅   |   ✅   |    ✅     |   ✅   |
+| 七牛云 |   ✅   |   ✅   |    ✅     |   ✅   |
+| WebDav |   ✅   |   ✅   |    ✅     |   ✅   |
+| FTP    |   ✅   |   ❌   |    ✅     |   ❌   |
+| Github |   ✅   |   ❌   |    ✅     |   ❌   |
+| Imgur  |   ✅   |   ❌   |    ❌     |   ✅   |
+| 兰空   |   ✅   |   ❌   |    ❌     |   ❌   |
+| SM.MS  |   ✅   |   ❌   |    ❌     |   ❌   |
 
 ## 下载
 
@@ -72,7 +72,7 @@
 
 Github下载地址 [Github release](https://github.com/Kuingsmile/PicHoro/releases)  
 
-我的个人网站提供的最新版本下载地址 [https://pichoro.msq.pub/PicHoro_V2.1.2.apk](https://pichoro.msq.pub/PicHoro_V2.1.2.apk)
+我的个人网站提供的最新版本下载地址 [https://pichoro.msq.pub/PicHoro_V2.1.3.apk](https://pichoro.msq.pub/PicHoro_V2.1.3.apk)
 
 ### IOS
 
@@ -109,6 +109,14 @@ Github下载地址 [Github release](https://github.com/Kuingsmile/PicHoro/releas
 
   详细更新日志请查看[更新日志](https://github.com/Kuingsmile/PicHoro/blob/main/Version_update_log.md "更新日志")
 
+- 2023-08-26: **V2.1.3**:
+
+  - 依赖：从Flutter 3.3版本迁移至 3.13 版本
+  - 优化：移除了底部栏的文字标签
+  - 更新：阿里云存储桶区域现在支持无地域属性
+  - 更新：腾讯云移除了不再支持的莫斯科区域
+  - 更新：FTP现在删除功能会额外校验路径，避免误删除
+
 - 2023-07-25: **V2.1.2**:
 
   - 修复：修复了imgur仓库无法进入的问题
@@ -121,13 +129,6 @@ Github下载地址 [Github release](https://github.com/Kuingsmile/PicHoro/releas
 
   - webdav现在支持设置自定义域名
   - ftp现在支持设置自定义域名
-
-- 2023-05-04: **V2.0.0**:
-
-  - 移除了用户登录和云端同步系统，现在所有数据保存于用户本地
-  - 移除了imgur管理登录页面对clientsecret的需求
-  - 更新了alist驱动列表，与最新版(3.16.3)保持同步
-  - 修复了重复设置Alist为默认图床时，默认相册设置错误的问题
 
 ## 开发计划
 
@@ -152,7 +153,7 @@ Github下载地址 [Github release](https://github.com/Kuingsmile/PicHoro/releas
 
 如果你想要修改或自行构建 PicHoro，可以依照下面的指示：
 
-1. 你需要有 Android Studio和 Android SDK 21+ 的环境，并安装了Flutter 3.0+版本。flutter环境配置可以参考 [Flutter 官方文档](https://flutter.dev/docs/get-started/install)。
+1. 你需要有 Android Studio和 Android SDK 21+ 的环境，并安装了Flutter 3.13版本。flutter环境配置可以参考 [Flutter 官方文档](https://flutter.dev/docs/get-started/install)。
 2. `git clone https://github.com/Kuingsmile/PicHoro.git` 并进入项目。
 3. Windows 推荐使用VScode编辑和调试代码。
 
@@ -187,29 +188,6 @@ Github下载地址 [Github release](https://github.com/Kuingsmile/PicHoro/releas
 ### 依赖包修改
 
 本APP使用的部分依赖包需要手动修改源代码才可使用，需要修改的依赖包如下：
-
-#### flutter_speed_dial
-
-文件路径示例: `D:\flutter\.pub-cache\hosted\pub.flutter-io.cn\flutter_speed_dial-6.1.0+1\lib\src\speed_dial.dart`
-
-如下修改`dispose`函数：
-
-```dart
-@override
-  void dispose() {
-    if (widget.renderOverlay &&
-        (backgroundOverlay != null && backgroundOverlay!.mounted)) {
-      backgroundOverlay?.remove();
-    }
-    if (overlayEntry != null && overlayEntry!.mounted) {
-      overlayEntry?.remove();
-      overlayEntry?.dispose();
-    }
-    _controller.dispose();
-    widget.openCloseDial?.removeListener(_onOpenCloseDial);
-    super.dispose();
-  }
-```
 
 #### minio_new
 
@@ -275,8 +253,8 @@ Github下载地址 [Github release](https://github.com/Kuingsmile/PicHoro/releas
 
 ### 软件打包
 
-如果你需要自行构建，可以使用 `flutter build apk` 或者 进入 `android` 目录，使用 `gradlew assembleRelease` 命令构建。
-构建成功后，会在 `build\app\outputs\apk\release` 目录下生成 `app-release.apk` 文件。
+如果你需要自行构建，可以使用 `flutter build apk --release`命令构建。
+构建成功后，会在 `build\app\outputs\flutter-apk\release` 目录下生成 `app-release.apk` 文件。
 
 请设置`minifyEnabled false`和`shrinkResources false`，否则打包release版本后可能会出现闪退。
 
