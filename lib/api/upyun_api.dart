@@ -2,140 +2,141 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
-import 'package:f_logs/f_logs.dart';
+import 'package:path/path.dart' as my_path;
 
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/global.dart';
+import 'package:horopic/utils/picbed/upyun.dart';
 
 class UpyunImageUploadUtils {
   //上传接口
-  static uploadApi({required String path, required String name, required Map configMap}) async {
-    String bucket = configMap['bucket'];
-    String upyunOperator = configMap['operator'];
-    String password = configMap['password'];
-    String url = configMap['url'];
-    String options = configMap['options'];
-    String upyunpath = configMap['path'];
-    if (options == ' ' || options.trim() == '') {
-      options = '';
-    }
-
-    //格式化
-    if (url != "None") {
-      if (!url.startsWith(RegExp(r'http(s)?://'))) {
-        url = 'http://$url';
-      }
-    }
-    //格式化
-    if (upyunpath != 'None') {
-      if (upyunpath.startsWith('/')) {
-        upyunpath = upyunpath.substring(1);
-      }
-      if (!upyunpath.endsWith('/')) {
-        upyunpath = '$upyunpath/';
-      }
-    }
-    String host = 'http://v0.api.upyun.com';
-    //云存储的路径
-    String urlpath = '';
-    if (upyunpath != 'None') {
-      urlpath = '/$upyunpath$name';
-    } else {
-      urlpath = '/$name';
-    }
-    String date = HttpDate.format(DateTime.now());
-    File uploadFile = File(path);
-    String uploadFileMd5 = await uploadFile.readAsBytes().then((value) {
-      return md5.convert(value).toString();
-    });
-    Map<String, dynamic> uploadPolicy = {
-      'bucket': bucket,
-      'save-key': urlpath,
-      'expiration': DateTime.now().millisecondsSinceEpoch + 1800000,
-      'date': date,
-      'content-md5': uploadFileMd5,
-    };
-    String base64Policy = base64.encode(utf8.encode(json.encode(uploadPolicy)));
-    String stringToSign = 'POST&/$bucket&$date&$base64Policy&$uploadFileMd5';
-    String passwordMd5 = md5.convert(utf8.encode(password)).toString();
-    String signature = base64.encode(Hmac(sha1, utf8.encode(passwordMd5)).convert(utf8.encode(stringToSign)).bytes);
-    String authorization = 'UPYUN $upyunOperator:$signature';
-    FormData formData = FormData.fromMap({
-      'authorization': authorization,
-      'policy': base64Policy,
-      'file': await MultipartFile.fromFile(path, filename: name),
-    });
-    BaseOptions baseoptions = setBaseOptions();
-    String contentLength = await uploadFile.length().then((value) {
-      return value.toString();
-    });
-    baseoptions.headers = {
-      'Host': 'v0.api.upyun.com',
-      'Content-Type': Global.multipartString,
-      'Content-Length': contentLength,
-      'Date': date,
-      'Authorization': authorization,
-      'Content-MD5': uploadFileMd5,
-    };
-    Dio dio = Dio(baseoptions);
+  static uploadApi({
+    required String path,
+    required String name,
+    required Map configMap,
+    Function(int, int)? onSendProgress,
+    CancelToken? cancelToken,
+  }) async {
     try {
+      String bucket = configMap['bucket'] ?? '';
+      String upyunOperator = configMap['operator'] ?? '';
+      String password = configMap['password'] ?? '';
+      String url = configMap['url'] ?? '';
+      String options = configMap['options'] ?? '';
+      String upyunpath = configMap['path'] ?? '';
+      String antiLeechToken = configMap['antiLeechToken'] ?? '';
+      String antiLeechExpiration = configMap['antiLeechExpiration'] ?? '';
+      if (options.trim() == '') {
+        options = '';
+      }
+
+      if (url != "None") {
+        if (!url.startsWith(RegExp(r'http(s)?://'))) {
+          url = 'http://$url';
+        }
+      }
+      if (upyunpath == '/' || upyunpath == '') {
+        upyunpath = 'None';
+      }
+      if (upyunpath != 'None') {
+        if (upyunpath.startsWith('/')) {
+          upyunpath = upyunpath.substring(1);
+        }
+        if (!upyunpath.endsWith('/')) {
+          upyunpath = '$upyunpath/';
+        }
+      }
+      String host = 'http://v0.api.upyun.com';
+      //云存储的路径
+      String urlpath = '';
+      if (upyunpath != 'None') {
+        urlpath = '/$upyunpath$name';
+      } else {
+        urlpath = '/$name';
+      }
+      String date = HttpDate.format(DateTime.now());
+      File uploadFile = File(path);
+      String uploadFileMd5 = await uploadFile.readAsBytes().then((value) {
+        return md5.convert(value).toString();
+      });
+      String base64Policy =
+          getUpyunUploadPolicy(bucket: bucket, saveKey: urlpath, contentMd5: uploadFileMd5, date: date);
+
+      String authorization = getUpyunUploadAuthHeader(
+          bucket: bucket,
+          saveKey: urlpath,
+          contentMd5: uploadFileMd5,
+          operator: upyunOperator,
+          password: password,
+          base64Policy: base64Policy,
+          date: date);
+      FormData formData = FormData.fromMap({
+        'authorization': authorization,
+        'policy': base64Policy,
+        'file': await MultipartFile.fromFile(path, filename: my_path.basename(path)),
+      });
+      BaseOptions baseoptions = setBaseOptions();
+      String contentLength = await uploadFile.length().then((value) {
+        return value.toString();
+      });
+      baseoptions.headers = {
+        'Host': 'v0.api.upyun.com',
+        'Content-Type': Global.multipartString,
+        'Content-Length': contentLength,
+        'Date': date,
+        'Authorization': authorization,
+        'Content-MD5': uploadFileMd5,
+      };
+      Dio dio = Dio(baseoptions);
+
       var response = await dio.post(
         '$host/$bucket',
         data: formData,
+        onSendProgress: onSendProgress,
+        cancelToken: cancelToken,
       );
-
-      if (response.statusCode == 200) {
-        String returnUrl = '';
-        String displayUrl = '';
-        if (urlpath.startsWith('/')) {
-          urlpath = urlpath.substring(1);
-        }
-
-        if (!url.endsWith('/')) {
-          returnUrl = '$url/$urlpath';
-          displayUrl = '$url/$urlpath';
-        } else {
-          url = url.substring(0, url.length - 1);
-          returnUrl = '$url/$urlpath';
-          displayUrl = '$url/$urlpath';
-        }
-
-        returnUrl = '$returnUrl$options';
-        displayUrl = '$displayUrl$options';
-
-        String formatedURL = '';
-        if (Global.isCopyLink == true) {
-          formatedURL = linkGenerateDict[Global.defaultLKformat]!(returnUrl, name);
-        } else {
-          formatedURL = returnUrl;
-        }
-        Map pictureKeyMap = Map.from(configMap);
-        String pictureKey = jsonEncode(pictureKeyMap);
-        return ["success", formatedURL, returnUrl, pictureKey, displayUrl];
-      } else {
+      if (response.statusCode != 200) {
         return ['failed'];
       }
-    } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "UpyunImageUploadUtils",
-            methodName: "uploadApi",
-            text: formatErrorMessage({
-              'path': path,
-              'name': name,
-            }, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "UpyunImageUploadUtils",
-            methodName: "uploadApi",
-            text: formatErrorMessage({
-              'path': path,
-              'name': name,
-            }, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
+      String returnUrl = '';
+      String displayUrl = '';
+      String antiLeechQuery = getUpyunAntiLeechParam(
+          saveKey: urlpath, antiLeechToken: antiLeechToken, antiLeechExpiration: antiLeechExpiration);
+      if (urlpath.startsWith('/')) {
+        urlpath = urlpath.substring(1);
       }
-      return [e.toString()];
+      if (url.endsWith('/')) {
+        url = url.substring(0, url.length - 1);
+      }
+
+      returnUrl = '$url/$urlpath$options';
+      if (antiLeechQuery != '') {
+        if (options != '') {
+          returnUrl = '$url/$urlpath$options&$antiLeechQuery';
+        } else {
+          returnUrl = '$url/$urlpath?$antiLeechQuery';
+        }
+      }
+      displayUrl = returnUrl;
+      String formatedURL = '';
+      if (Global.isCopyLink == true) {
+        formatedURL = linkGenerateDict[Global.defaultLKformat]!(returnUrl, my_path.basename(path));
+      } else {
+        formatedURL = returnUrl;
+      }
+      Map pictureKeyMap = Map.from(configMap);
+      String pictureKey = jsonEncode(pictureKeyMap);
+      return ["success", formatedURL, returnUrl, pictureKey, displayUrl];
+    } catch (e) {
+      flogError(
+          e,
+          {
+            'path': path,
+            'name': name,
+          },
+          "UpyunImageUploadUtils",
+          "uploadApi");
+      return ["failed"];
     }
   }
 
@@ -183,32 +184,19 @@ class UpyunImageUploadUtils {
       var response = await dio.delete(
         deleteHost,
       );
-      if (response.statusCode == 200) {
-        return [
-          "success",
-        ];
-      } else {
+      if (response.statusCode != 200) {
         return ["failed"];
       }
+      return ["success"];
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "UpyunImageUploadUtils",
-            methodName: "deleteApi",
-            text: formatErrorMessage({
-              'fileName': fileName,
-            }, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "UpyunImageUploadUtils",
-            methodName: "deleteApi",
-            text: formatErrorMessage({
-              'fileName': fileName,
-            }, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
-      return [e.toString()];
+      flogError(
+          e,
+          {
+            'fileName': fileName,
+          },
+          "UpyunImageUploadUtils",
+          "deleteApi");
+      return ["failed"];
     }
   }
 }

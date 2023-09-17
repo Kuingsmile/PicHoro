@@ -2,78 +2,79 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
-import 'package:f_logs/f_logs.dart';
 import 'package:path/path.dart' as my_path;
 
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/global.dart';
 
 class AliyunImageUploadUtils {
-  //上传接口
-  static uploadApi({required String path, required String name, required Map configMap}) async {
-    String keyId = configMap['keyId'];
-    String keySecret = configMap['keySecret'];
-    String bucket = configMap['bucket'];
-    String area = configMap['area'];
-    String aliyunpath = configMap['path'];
-    String customUrl = configMap['customUrl'];
-    String options = configMap['options'];
-    //格式化
-    if (customUrl != "None") {
-      if (!customUrl.startsWith(RegExp(r'http(s)?://'))) {
-        customUrl = 'http://$customUrl';
-      }
-    }
-    //格式化
-    if (aliyunpath != 'None') {
-      aliyunpath = '${aliyunpath.replaceAll(RegExp(r'^/*'), '').replaceAll(RegExp(r'/*$'), '')}/';
-    }
-    String host = '$bucket.$area.aliyuncs.com';
-    //云存储的路径
-    String urlpath = '';
-    //阿里云不能以/开头
-    if (aliyunpath != 'None') {
-      urlpath = '$aliyunpath$name';
-    } else {
-      urlpath = name;
-    }
-
-    Map<String, dynamic> uploadPolicy = {
-      "expiration": "2034-12-01T12:00:00.000Z",
-      "conditions": [
-        {"bucket": bucket},
-        ["content-length-range", 0, 104857600],
-        {"key": urlpath}
-      ]
-    };
-    String base64Policy = base64.encode(utf8.encode(json.encode(uploadPolicy)));
-    String singature = base64.encode(Hmac(sha1, utf8.encode(keySecret)).convert(utf8.encode(base64Policy)).bytes);
-    Map<String, dynamic> formMap = {
-      'key': urlpath,
-      'OSSAccessKeyId': keyId,
-      'policy': base64Policy,
-      'Signature': singature,
-      'file': await MultipartFile.fromFile(path, filename: name),
-    };
-    if (getContentType(my_path.extension(path)) != null) {
-      formMap['x-oss-content-type'] = getContentType(my_path.extension(path));
-    }
-    FormData formData = FormData.fromMap(formMap);
-    BaseOptions baseoptions = setBaseOptions();
-    File uploadFile = File(path);
-    String contentLength = await uploadFile.length().then((value) {
-      return value.toString();
-    });
-    baseoptions.headers = {
-      'Host': host,
-      'Content-Type': Global.multipartString,
-      'Content-Length': contentLength,
-    };
-    Dio dio = Dio(baseoptions);
+  static uploadApi({
+    required String path,
+    required String name,
+    required Map configMap,
+    Function(int, int)? onSendProgress,
+    CancelToken? cancelToken,
+  }) async {
     try {
+      String keyId = configMap['keyId'] ?? '';
+      String keySecret = configMap['keySecret'] ?? '';
+      String bucket = configMap['bucket'] ?? '';
+      String area = configMap['area'] ?? '';
+      String aliyunpath = configMap['path'] ?? '';
+      String customUrl = configMap['customUrl'] ?? '';
+      String options = configMap['options'] ?? '';
+      //格式化
+      if (customUrl != "None") {
+        if (!customUrl.startsWith(RegExp(r'http(s)?://'))) {
+          customUrl = 'http://$customUrl';
+        }
+      }
+      //格式化
+      if (aliyunpath != 'None') {
+        aliyunpath = '${aliyunpath.replaceAll(RegExp(r'^/*'), '').replaceAll(RegExp(r'/*$'), '')}/';
+      }
+      String host = '$bucket.$area.aliyuncs.com';
+      //云存储的路径 阿里云不能以/开头
+      String urlpath = aliyunpath != 'None' ? '$aliyunpath$name' : name;
+
+      Map<String, dynamic> uploadPolicy = {
+        "expiration": "2034-12-01T12:00:00.000Z",
+        "conditions": [
+          {"bucket": bucket},
+          ["content-length-range", 0, 104857600],
+          {"key": urlpath}
+        ]
+      };
+      String base64Policy = base64.encode(utf8.encode(json.encode(uploadPolicy)));
+      String singature = base64.encode(Hmac(sha1, utf8.encode(keySecret)).convert(utf8.encode(base64Policy)).bytes);
+      Map<String, dynamic> formMap = {
+        'key': urlpath,
+        'OSSAccessKeyId': keyId,
+        'policy': base64Policy,
+        'Signature': singature,
+        'file': await MultipartFile.fromFile(path, filename: my_path.basename(name)),
+      };
+      if (getContentType(my_path.extension(path)) != null) {
+        formMap['x-oss-content-type'] = getContentType(my_path.extension(path));
+      }
+      FormData formData = FormData.fromMap(formMap);
+      BaseOptions baseoptions = setBaseOptions();
+      File uploadFile = File(path);
+      String contentLength = await uploadFile.length().then((value) {
+        return value.toString();
+      });
+      baseoptions.headers = {
+        'Host': host,
+        'Content-Type': Global.multipartString,
+        'Content-Length': contentLength,
+      };
+      Dio dio = Dio(baseoptions);
+
       var response = await dio.post(
         'https://$host',
         data: formData,
+        onSendProgress: onSendProgress,
+        cancelToken: cancelToken,
       );
 
       if (response.statusCode == 204) {
@@ -112,26 +113,15 @@ class AliyunImageUploadUtils {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "AliyunImageUploadUtils",
-            methodName: "uploadApi",
-            text: formatErrorMessage({
-              'path': path,
-              'name': name,
-            }, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "AliyunImageUploadUtils",
-            methodName: "uploadApi",
-            text: formatErrorMessage({
-              'path': path,
-              'name': name,
-            }, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
-      return [e.toString()];
+      flogError(
+          e,
+          {
+            'path': path,
+            'name': name,
+          },
+          "AliyunImageUploadUtils",
+          "uploadApi");
+      return ['failed'];
     }
   }
 
@@ -178,52 +168,16 @@ class AliyunImageUploadUtils {
       };
       Dio dio = Dio(baseOptions);
 
-      try {
-        var response = await dio.delete(
-          deleteHost,
-        );
-        if (response.statusCode == 204) {
-          return [
-            "success",
-          ];
-        } else {
-          return ["failed"];
-        }
-      } catch (e) {
-        if (e is DioException) {
-          FLog.error(
-              className: "AliyunImageUploadUtils",
-              methodName: "deleteApi",
-              text: formatErrorMessage({
-                'fileName': fileName,
-              }, e.toString(), isDioError: true, dioErrorMessage: e),
-              dataLogType: DataLogType.ERRORS.toString());
-        } else {
-          FLog.error(
-              className: "AliyunImageUploadUtils",
-              methodName: "deleteApi",
-              text: formatErrorMessage({
-                'fileName': fileName,
-              }, e.toString()),
-              dataLogType: DataLogType.ERRORS.toString());
-        }
-        return [e.toString()];
+      var response = await dio.delete(
+        deleteHost,
+      );
+      if (response.statusCode != 204) {
+        return ["failed"];
       }
+      return ["success"];
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "AliyunImageUploadUtils",
-            methodName: "deleteApi",
-            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "AliyunImageUploadUtils",
-            methodName: "deleteApi",
-            text: formatErrorMessage({}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
-      return [e.toString()];
+      flogError(e, {}, "AliyunImageUploadUtils", "deleteApi");
+      return ["failed"];
     }
   }
 }

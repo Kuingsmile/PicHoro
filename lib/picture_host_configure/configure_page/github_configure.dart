@@ -40,16 +40,16 @@ class GithubConfigState extends State<GithubConfig> {
   _initConfig() async {
     try {
       Map configMap = await GithubManageAPI.getConfigMap();
-      _githubusernameController.text = configMap['githubusername'];
-      _repoController.text = configMap['repo'];
-      _tokenController.text = configMap['token'];
-      if (configMap['storePath'] != 'None') {
+      _githubusernameController.text = configMap['githubusername'] ?? '';
+      _repoController.text = configMap['repo'] ?? '';
+      _tokenController.text = configMap['token'] ?? '';
+      if (configMap['storePath'] != 'None' && configMap['storePath'] != null) {
         _storePathController.text = configMap['storePath'];
       } else {
         _storePathController.clear();
       }
-      _branchController.text = configMap['branch'];
-      if (configMap['customDomain'] != 'None') {
+      _branchController.text = configMap['branch'] ?? '';
+      if (configMap['customDomain'] != 'None' && configMap['customDomain'] != null) {
         _customDomainController.text = configMap['customDomain'];
       } else {
         _customDomainController.clear();
@@ -228,86 +228,56 @@ class GithubConfigState extends State<GithubConfig> {
   }
 
   Future _saveGithubConfig() async {
-    String token = 'Bearer ';
-    String githubUserApi = 'https://api.github.com/user';
-    final String githubusername = _githubusernameController.text;
-    final String repo = _repoController.text;
-    String storePath = '';
-    if (_storePathController.text.isEmpty || _storePathController.text.trim().isEmpty) {
-      storePath = 'None';
-    } else {
-      storePath = _storePathController.text;
-      if (!storePath.endsWith('/')) {
-        storePath = '$storePath/';
-      }
-    }
-
-    String branch = '';
-    if (_branchController.text.isEmpty || _branchController.text.trim().isEmpty) {
-      branch = 'main';
-    } else {
-      branch = _branchController.text;
-    }
-    String customDomain = '';
-    if (_customDomainController.text.isEmpty || _customDomainController.text.trim().isEmpty) {
-      customDomain = 'None';
-    } else {
-      customDomain = _customDomainController.text;
-      if (!customDomain.startsWith('http') && !customDomain.startsWith('https')) {
-        customDomain = 'http://$customDomain';
-      }
-      if (customDomain.endsWith('/')) {
-        customDomain = customDomain.substring(0, customDomain.length - 1);
-      }
-    }
-
-    if (_tokenController.text.startsWith('Bearer ')) {
-      token = _tokenController.text;
-    } else {
-      token = token + _tokenController.text;
-    }
-
     try {
-      BaseOptions options = setBaseOptions();
-      options.headers = {
-        "Accept": 'application/vnd.github+json',
-        "Authorization": token,
-      };
-      //需要加一个空的formdata，不然会报错
-      Map<String, dynamic> queryData = {};
-      Dio dio = Dio(options);
-
-      try {
-        var validateResponse = await dio.get(githubUserApi, queryParameters: queryData);
-        if (validateResponse.statusCode == 200 && validateResponse.data.toString().contains("email")) {
-          //验证成功
-
-          final githubConfig = GithubConfigModel(githubusername, repo, token, storePath, branch, customDomain);
-          final githubConfigJson = jsonEncode(githubConfig);
-          final githubConfigFile = await localFile;
-          await githubConfigFile.writeAsString(githubConfigJson);
-          if (context.mounted) {
-            return showCupertinoAlertDialog(context: context, title: '成功', content: '配置成功');
-          }
-        } else {
-          if (context.mounted) {
-            return showCupertinoAlertDialog(context: context, title: '错误', content: 'token错误');
-          }
-        }
-      } catch (e) {
-        FLog.error(
-            className: 'GithubConfigPage',
-            methodName: '_saveGithubConfig_1',
-            text: formatErrorMessage({}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-        if (context.mounted) {
-          return showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
+      String token = 'Bearer ';
+      final String githubusername = _githubusernameController.text;
+      final String repo = _repoController.text;
+      String storePath = '';
+      if (_storePathController.text.isEmpty ||
+          _storePathController.text.trim().isEmpty ||
+          _storePathController.text == '/') {
+        storePath = 'None';
+      } else {
+        storePath = _storePathController.text;
+        if (!storePath.endsWith('/')) {
+          storePath = '$storePath/';
         }
       }
+
+      String branch = '';
+      if (_branchController.text.isEmpty || _branchController.text.trim().isEmpty) {
+        branch = 'main';
+      } else {
+        branch = _branchController.text;
+      }
+      String customDomain = '';
+      if (_customDomainController.text.isEmpty || _customDomainController.text.trim().isEmpty) {
+        customDomain = 'None';
+      } else {
+        customDomain = _customDomainController.text;
+        if (!customDomain.startsWith('http') && !customDomain.startsWith('https')) {
+          customDomain = 'http://$customDomain';
+        }
+        if (customDomain.endsWith('/')) {
+          customDomain = customDomain.substring(0, customDomain.length - 1);
+        }
+      }
+
+      if (_tokenController.text.startsWith('Bearer ')) {
+        token = _tokenController.text;
+      } else {
+        token = token + _tokenController.text;
+      }
+
+      final githubConfig = GithubConfigModel(githubusername, repo, token, storePath, branch, customDomain);
+      final githubConfigJson = jsonEncode(githubConfig);
+      final githubConfigFile = await localFile;
+      await githubConfigFile.writeAsString(githubConfigJson);
+      showToast('保存成功');
     } catch (e) {
       FLog.error(
           className: 'GithubConfigPage',
-          methodName: '_saveGithubConfig_2',
+          methodName: '_saveGithubConfig',
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
       if (context.mounted) {
@@ -318,10 +288,9 @@ class GithubConfigState extends State<GithubConfig> {
 
   checkGithubConfig() async {
     try {
-      final githubConfigFile = await localFile;
-      String configData = await githubConfigFile.readAsString();
+      String configData = await readGithubConfig();
 
-      if (configData == "Error") {
+      if (configData == "") {
         if (context.mounted) {
           return showCupertinoAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");
         }
@@ -368,7 +337,7 @@ class GithubConfigState extends State<GithubConfig> {
   Future<File> get localFile async {
     final path = await _localPath;
     String defaultUser = await Global.getUser();
-    return File('$path/${defaultUser}_github_config.txt');
+    return ensureFileExists(File('$path/${defaultUser}_github_config.txt'));
   }
 
   Future<String> get _localPath async {
@@ -377,37 +346,17 @@ class GithubConfigState extends State<GithubConfig> {
   }
 
   Future<String> readGithubConfig() async {
-    try {
-      final file = await localFile;
-      String contents = await file.readAsString();
-      return contents;
-    } catch (e) {
-      FLog.error(
-          className: 'GithubConfigPage',
-          methodName: 'readGithubConfig',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
-      return "Error";
-    }
+    final file = await localFile;
+    String contents = await file.readAsString();
+    return contents;
   }
 
   _setdefault() async {
-    try {
-      await Global.setPShost('github');
-      await Global.setShowedPBhost('github');
-      eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-      eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
-      showToast('已设置Github为默认图床');
-    } catch (e) {
-      FLog.error(
-          className: 'GithubConfigPage',
-          methodName: '_setdefault',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
-      if (context.mounted) {
-        showToastWithContext(context, '错误');
-      }
-    }
+    await Global.setPShost('github');
+    await Global.setShowedPBhost('github');
+    eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
+    eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
+    showToast('已设置Github为默认图床');
   }
 }
 

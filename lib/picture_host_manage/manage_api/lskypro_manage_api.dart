@@ -13,7 +13,7 @@ class LskyproManageAPI {
   static Future<File> get _localFile async {
     final path = await _localPath;
     String defaultUser = await Global.getUser();
-    return File('$path/${defaultUser}_host_config.txt');
+    return ensureFileExists(File('$path/${defaultUser}_host_config.txt'));
   }
 
   static Future<String> get _localPath async {
@@ -38,6 +38,9 @@ class LskyproManageAPI {
 
   static Future<Map> getConfigMap() async {
     String configStr = await readLskyproConfig();
+    if (configStr == '') {
+      return {};
+    }
     Map configMap = json.decode(configStr);
     return configMap;
   }
@@ -51,17 +54,18 @@ class LskyproManageAPI {
   }
 
   static getUserInfo() async {
-    Map configMap = await getConfigMap();
-    String token = configMap["token"];
-    String host = configMap["host"];
-    BaseOptions options = setBaseOptions();
-    options.headers = {
-      "Authorization": token,
-      "Accept": "application/json",
-    };
-    Dio dio = Dio(options);
-    String userInfoUrl = "$host/api/v1/profile";
     try {
+      Map configMap = await getConfigMap();
+      String token = configMap["token"];
+      String host = configMap["host"];
+      BaseOptions options = setBaseOptions();
+      options.headers = {
+        "Authorization": token,
+        "Accept": "application/json",
+      };
+      Dio dio = Dio(options);
+      String userInfoUrl = "$host/api/v1/profile";
+
       var response = await dio.get(userInfoUrl);
       if (response.statusCode == 200 && response.data!['status'] == true) {
         return ['success', response.data];
@@ -87,17 +91,18 @@ class LskyproManageAPI {
   }
 
   static getAlbums() async {
-    Map configMap = await getConfigMap();
-    String token = configMap["token"];
-    String host = configMap["host"];
-    BaseOptions options = setBaseOptions();
-    options.headers = {
-      "Authorization": token,
-      "Accept": "application/json",
-    };
-    Dio dio = Dio(options);
-    String userInfoUrl = "$host/api/v1/albums";
     try {
+      Map configMap = await getConfigMap();
+      String token = configMap["token"];
+      String host = configMap["host"];
+      BaseOptions options = setBaseOptions();
+      options.headers = {
+        "Authorization": token,
+        "Accept": "application/json",
+      };
+      Dio dio = Dio(options);
+      String userInfoUrl = "$host/api/v1/albums";
+
       int page = 1;
       int lastPage = 1;
       List albums = [];
@@ -139,18 +144,18 @@ class LskyproManageAPI {
   }
 
   static getPhoto(int? albumId) async {
-    Map configMap = await getConfigMap();
-    String token = configMap["token"];
-    String host = configMap["host"];
-    BaseOptions options = setBaseOptions();
-    options.headers = {
-      "Authorization": token,
-      "Accept": "application/json",
-    };
-    Dio dio = Dio(options);
-    String userInfoUrl = "$host/api/v1/images";
-
     try {
+      Map configMap = await getConfigMap();
+      String token = configMap["token"];
+      String host = configMap["host"];
+      BaseOptions options = setBaseOptions();
+      options.headers = {
+        "Authorization": token,
+        "Accept": "application/json",
+      };
+      Dio dio = Dio(options);
+      String userInfoUrl = "$host/api/v1/images";
+
       int page = 1;
       int lastPage = 1;
       List images = [];
@@ -195,20 +200,21 @@ class LskyproManageAPI {
   //删除图片
 
   static deleteFile(String deleteKey) async {
-    Map configMap = await getConfigMap();
-    String token = configMap["token"];
-    String host = configMap["host"];
-    Map<String, dynamic> formdata = {
-      "key": deleteKey,
-    };
-    BaseOptions options = setBaseOptions();
-    options.headers = {
-      "Authorization": token,
-      "Accept": "application/json",
-    };
-    Dio dio = Dio(options);
-    String deleteUrl = "$host/api/v1/images/$deleteKey";
     try {
+      Map configMap = await getConfigMap();
+      String token = configMap["token"];
+      String host = configMap["host"];
+      Map<String, dynamic> formdata = {
+        "key": deleteKey,
+      };
+      BaseOptions options = setBaseOptions();
+      options.headers = {
+        "Authorization": token,
+        "Accept": "application/json",
+      };
+      Dio dio = Dio(options);
+      String deleteUrl = "$host/api/v1/images/$deleteKey";
+
       var response = await dio.delete(deleteUrl, data: formdata);
       if (response.statusCode == 200 && response.data!['status'] == true) {
         return ['success'];
@@ -235,20 +241,21 @@ class LskyproManageAPI {
 
   //删除相册
   static deleteAlbum(String id) async {
-    Map configMap = await getConfigMap();
-    String token = configMap["token"];
-    String host = configMap["host"];
-    Map<String, dynamic> formdata = {
-      "id": id,
-    };
-    BaseOptions options = setBaseOptions();
-    options.headers = {
-      "Authorization": token,
-      "Accept": "application/json",
-    };
-    Dio dio = Dio(options);
-    String deleteUrl = "$host/api/v1/albums/$id";
     try {
+      Map configMap = await getConfigMap();
+      String token = configMap["token"];
+      String host = configMap["host"];
+      Map<String, dynamic> formdata = {
+        "id": id,
+      };
+      BaseOptions options = setBaseOptions();
+      options.headers = {
+        "Authorization": token,
+        "Accept": "application/json",
+      };
+      Dio dio = Dio(options);
+      String deleteUrl = "$host/api/v1/albums/$id";
+
       var response = await dio.delete(deleteUrl, data: formdata);
       if (response.statusCode == 200 && response.data!['status'] == true) {
         return ['success'];
@@ -274,29 +281,30 @@ class LskyproManageAPI {
   }
 
   static uploadFile(String filename, String path) async {
-    Map configMap = await getConfigMap();
-    String token = configMap["token"];
-    String host = configMap["host"];
-    FormData formdata = FormData.fromMap({
-      "file": await MultipartFile.fromFile(path, filename: filename),
-    });
-    if (configMap["strategy_id"] == "None") {
-      formdata = FormData.fromMap({});
-    } else {
-      formdata = FormData.fromMap({
-        "file": await MultipartFile.fromFile(path, filename: filename),
-        "strategy_id": configMap["strategy_id"],
-      });
-    }
-    BaseOptions options = setBaseOptions();
-    options.headers = {
-      "Authorization": token,
-      "Accept": "application/json",
-      "Content-Type": "multipart/form-data",
-    };
-    Dio dio = Dio(options);
-    String uploadUrl = "$host/api/v1/upload";
     try {
+      Map configMap = await getConfigMap();
+      String token = configMap["token"];
+      String host = configMap["host"];
+      FormData formdata = FormData.fromMap({
+        "file": await MultipartFile.fromFile(path, filename: filename),
+      });
+      if (configMap["strategy_id"] == "None") {
+        formdata = FormData.fromMap({});
+      } else {
+        formdata = FormData.fromMap({
+          "file": await MultipartFile.fromFile(path, filename: filename),
+          "strategy_id": configMap["strategy_id"],
+        });
+      }
+      BaseOptions options = setBaseOptions();
+      options.headers = {
+        "Authorization": token,
+        "Accept": "application/json",
+        "Content-Type": "multipart/form-data",
+      };
+      Dio dio = Dio(options);
+      String uploadUrl = "$host/api/v1/upload";
+
       var response = await dio.post(uploadUrl, data: formdata);
       if (response.statusCode == 200 && response.data!['status'] == true) {
         return ['success'];

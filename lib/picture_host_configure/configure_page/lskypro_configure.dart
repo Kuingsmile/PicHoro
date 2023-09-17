@@ -46,14 +46,14 @@ class HostConfigState extends State<HostConfig> {
   _initConfig() async {
     try {
       Map configMap = await LskyproManageAPI.getConfigMap();
-      _hostController.text = configMap['host'];
-      _strategyIdController.text = configMap['strategy_id'];
+      _hostController.text = configMap['host'] ?? '';
+      _strategyIdController.text = configMap['strategy_id'] ?? '';
       if (configMap['album_id'] != 'None' && configMap['album_id'] != null) {
         _albumIdController.text = configMap['album_id'];
       } else {
         _albumIdController.clear();
       }
-      _tokenController = configMap['token'];
+      _tokenController = configMap['token'] ?? '';
       setState(() {});
     } catch (e) {
       FLog.error(
@@ -121,7 +121,6 @@ class HostConfigState extends State<HostConfig> {
             ),
             TextFormField(
               controller: _passwdController,
-              obscureText: true,
               decoration: const InputDecoration(
                 label: Center(child: Text('密码')),
                 hintText: '输入密码',
@@ -592,9 +591,8 @@ class HostConfigState extends State<HostConfig> {
 
   checkHostConfig() async {
     try {
-      final hostConfigFile = await localFile;
-      String configData = await hostConfigFile.readAsString();
-      if (configData == "Error") {
+      String configData = await readHostConfig();
+      if (configData == "") {
         if (context.mounted) {
           return showCupertinoAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");
         }
@@ -648,7 +646,7 @@ class HostConfigState extends State<HostConfig> {
   Future<File> get localFile async {
     final path = await _localPath;
     String defaultUser = await Global.getUser();
-    return File('$path/${defaultUser}_host_config.txt');
+    return ensureFileExists(File('$path/${defaultUser}_host_config.txt'));
   }
 
   Future<String> get _localPath async {
@@ -657,37 +655,17 @@ class HostConfigState extends State<HostConfig> {
   }
 
   Future<String> readHostConfig() async {
-    try {
-      final file = await localFile;
-      String contents = await file.readAsString();
-      return contents;
-    } catch (e) {
-      FLog.error(
-          className: 'HostConfigPage',
-          methodName: 'readHostConfig',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
-      return "Error";
-    }
+    final file = await localFile;
+    String contents = await file.readAsString();
+    return contents;
   }
 
   _setdefault() async {
-    try {
-      await Global.setPShost('lsky.pro');
-      await Global.setShowedPBhost('lskypro');
-      eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-      eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
-      showToast('已设置兰空图床为默认图床');
-    } catch (e) {
-      FLog.error(
-          className: 'LskyproPage',
-          methodName: '_setdefault',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
-      if (context.mounted) {
-        showToastWithContext(context, '错误');
-      }
-    }
+    await Global.setPShost('lsky.pro');
+    await Global.setShowedPBhost('lskypro');
+    eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
+    eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
+    showToast('已设置兰空图床为默认图床');
   }
 }
 

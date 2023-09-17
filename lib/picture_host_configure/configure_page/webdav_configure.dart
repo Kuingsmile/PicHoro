@@ -39,9 +39,9 @@ class WebdavConfigState extends State<WebdavConfig> {
   _initConfig() async {
     try {
       Map configMap = await WebdavManageAPI.getConfigMap();
-      _hostController.text = configMap['host'];
-      _usernameController.text = configMap['webdavusername'];
-      _passwdController.text = configMap['password'];
+      _hostController.text = configMap['host'] ?? '';
+      _usernameController.text = configMap['webdavusername'] ?? '';
+      _passwdController.text = configMap['password'] ?? '';
       if (configMap['uploadPath'] != 'None' && configMap['uploadPath'] != null) {
         _uploadPathController.text = configMap['uploadPath'];
       } else {
@@ -134,7 +134,6 @@ class WebdavConfigState extends State<WebdavConfig> {
             ),
             TextFormField(
               controller: _passwdController,
-              obscureText: true,
               decoration: const InputDecoration(
                 label: Center(child: Text('密码')),
                 hintText: '输入密码',
@@ -275,30 +274,12 @@ class WebdavConfigState extends State<WebdavConfig> {
     }
 
     try {
-      var client = webdav.newClient(
-        host,
-        user: username,
-        password: password,
-      );
-      client.setHeaders({'accept-charset': 'utf-8'});
-      client.setConnectTimeout(30000);
-      client.setSendTimeout(30000);
-      client.setReceiveTimeout(30000);
-      await client.ping();
-
       final webdavConfig = WebdavConfigModel(host, username, password, uploadPath, customUrl, webPath);
       final webdavConfigJson = jsonEncode(webdavConfig);
       final webdavConfigFile = await localFile;
       webdavConfigFile.writeAsString(webdavConfigJson);
       setState(() {});
-      if (context.mounted) {
-        return showCupertinoAlertDialog(
-          context: context,
-          barrierDismissible: false,
-          title: '配置成功',
-          content: '配置成功！',
-        );
-      }
+      showToast('保存成功');
     } catch (e) {
       FLog.error(
           className: 'WebdavConfigPage',
@@ -306,16 +287,15 @@ class WebdavConfigState extends State<WebdavConfig> {
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
       if (context.mounted) {
-        return showCupertinoAlertDialog(context: context, title: '连接webdav服务失败', content: e.toString());
+        return showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
       }
     }
   }
 
   checkWebdavConfig() async {
     try {
-      final webdavConfigFile = await localFile;
-      String configData = await webdavConfigFile.readAsString();
-      if (configData == "Error") {
+      final configData = await readWebdavConfig();
+      if (configData == "") {
         if (context.mounted) {
           return showCupertinoAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");
         }
@@ -333,11 +313,20 @@ class WebdavConfigState extends State<WebdavConfig> {
       client.setReceiveTimeout(30000);
       await client.ping();
       if (context.mounted) {
-        return showCupertinoAlertDialog(
-            context: context,
-            title: '通知',
-            content:
-                '检测通过，您的配置信息为：\nhost:\n${configMap["host"]}\nwebdav用户名:\n${configMap["webdavusername"]}\n密码:\n${configMap["password"]}\nuploadPath:\n${configMap["uploadPath"]}\n自定义域名:\n${configMap["customUrl"]}\nwebPath:\n${configMap["webPath"]}');
+        return showCupertinoAlertDialog(context: context, title: '通知', content: """检测通过，您的配置信息为：
+host:
+${configMap["host"]}
+webdav用户名:
+${configMap["webdavusername"]}
+密码:
+${configMap["password"]}
+uploadPath:
+${configMap["uploadPath"]}
+自定义域名:
+${configMap["customUrl"]}
+webPath:
+${configMap["webPath"]}
+""");
       }
     } catch (e) {
       FLog.error(
@@ -354,7 +343,7 @@ class WebdavConfigState extends State<WebdavConfig> {
   Future<File> get localFile async {
     final path = await _localPath;
     String defaultUser = await Global.getUser();
-    return File('$path/${defaultUser}_webdav_config.txt');
+    return ensureFileExists(File('$path/${defaultUser}_webdav_config.txt'));
   }
 
   Future<String> get _localPath async {
@@ -363,18 +352,9 @@ class WebdavConfigState extends State<WebdavConfig> {
   }
 
   Future<String> readWebdavConfig() async {
-    try {
-      final file = await localFile;
-      String contents = await file.readAsString();
-      return contents;
-    } catch (e) {
-      FLog.error(
-          className: 'WebdavConfigPage',
-          methodName: 'readWebdavConfig',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
-      return "Error";
-    }
+    final file = await localFile;
+    String contents = await file.readAsString();
+    return contents;
   }
 
   _setdefault() async {

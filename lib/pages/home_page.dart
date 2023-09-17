@@ -1,4 +1,4 @@
-import 'dart:io' as io;
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -181,7 +181,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
       showToast('未拍摄图片');
       return;
     }
-    final io.File fileImage = io.File(pickedImage.path);
+    final File fileImage = File(pickedImage.path);
 
     Global.imagesList.clear();
     Global.imagesFileList.clear();
@@ -196,17 +196,16 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
     } else {
       Global.imageFile = my_path.basename(fileImage.path);
     }
-    io.File compressedFile;
+    File compressedFile;
     if (Global.isCompress == true) {
       ImageCompress imageCompress = ImageCompress();
       compressedFile = await imageCompress.compressAndGetFile(
-          pickedImage.path, Global.imageFile!, Global.defaultCompressFormat,
+          pickedImage.path, my_path.basename(Global.imageFile!), Global.defaultCompressFormat,
           minHeight: Global.minHeight, minWidth: Global.minWidth, quality: Global.quality);
-      Global.imagesList.add(my_path.basename(compressedFile.path));
     } else {
       compressedFile = fileImage;
-      Global.imagesList.add(Global.imageFile!);
     }
+    Global.imagesList.add(Global.imageFile!);
     Global.imagesFileList.add(compressedFile);
   }
 
@@ -234,7 +233,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
           String tempPath = await getTemporaryDirectory().then((value) => value.path);
           String timeStamp = DateTime.now().millisecondsSinceEpoch.toString();
           String randomString = randomStringGenerator(5);
-          io.File file = io.File('$tempPath/Web$timeStamp$randomString.jpg');
+          File file = File('$tempPath/Web$timeStamp$randomString.jpg');
           await file.writeAsBytes(response.bodyBytes);
           Global.imageFile = file.path;
 
@@ -248,17 +247,16 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
           } else {
             Global.imageFile = my_path.basename(file.path);
           }
-          io.File compressedFile;
+          File compressedFile;
           if (Global.isCompress == true) {
             ImageCompress imageCompress = ImageCompress();
             compressedFile = await imageCompress.compressAndGetFile(
-                file.path, Global.imageFile!, Global.defaultCompressFormat,
+                file.path, my_path.basename(Global.imageFile!), Global.defaultCompressFormat,
                 minHeight: Global.minHeight, minWidth: Global.minWidth, quality: Global.quality);
-            Global.imagesList.add(my_path.basename(compressedFile.path));
           } else {
             compressedFile = file;
-            Global.imagesList.add(Global.imageFile!);
           }
+          Global.imagesList.add(Global.imageFile!);
           Global.imagesFileList.add(compressedFile);
           successCount++;
         } catch (e) {
@@ -312,7 +310,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
       return showToast('链接已复制');
     }
 
-    io.File fileImage = io.File(pickedImage.path);
+    File fileImage = File(pickedImage.path);
 
     if (Global.iscustomRename == true) {
       Global.imageFile = await renamePictureWithCustomFormat(fileImage);
@@ -346,37 +344,31 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
   }
 
   _uploadAndBackToCamera() async {
-    io.File compressedFile;
+    File compressedFile;
     if (Global.isCompress == true) {
       ImageCompress imageCompress = ImageCompress();
       compressedFile = await imageCompress.compressAndGetFile(
-          Global.imageOriginalFile!.path, Global.imageFile!, Global.defaultCompressFormat,
+          Global.imageOriginalFile!.path, my_path.basename(Global.imageFile!), Global.defaultCompressFormat,
           minHeight: Global.minHeight, minWidth: Global.minWidth, quality: Global.quality);
-      Global.imageOriginalFile = compressedFile;
-      Global.imageFile = my_path.basename(compressedFile.path);
     } else {
       compressedFile = Global.imageOriginalFile!;
-      Global.imageOriginalFile = compressedFile;
     }
+    Global.imageOriginalFile = compressedFile;
     String path = Global.imageOriginalFile!.path;
-    String name = Global.imageFile!.split('/').last;
+    String fullName = Global.imageFile!;
     Global.imageFile = null;
     Global.imageOriginalFile = null;
 
-    var uploadResult = await uploaderentry(path: path, name: name);
-    if (uploadResult[0] == "Error") {
-      Global.multiUpload = 'fail';
-      if (context.mounted) {
-        return showCupertinoAlertDialog(context: context, title: "上传失败!", content: "请先配置上传参数.");
-      }
-    } else if (uploadResult[0] == "success") {
+    var uploadResult = await uploaderentry(path: path, name: fullName);
+
+    if (uploadResult[0] == "success") {
       eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
       Map<String, dynamic> maps = {};
       if (Global.defaultPShost == 'sm.ms') {
         //["success", formatedURL, returnUrl, pictureKey]
         maps = {
           'path': path,
-          'name': name,
+          'name': fullName,
           'url': uploadResult[2], //返回地址可以直接访问
           'PBhost': Global.defaultPShost,
           'pictureKey': uploadResult[3],
@@ -390,7 +382,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
         //["success", formatedURL, returnUrl, pictureKey, displayUrl]
         maps = {
           'path': path,
-          'name': name,
+          'name': fullName,
           'url': uploadResult[2], //原图地址
           'PBhost': Global.defaultPShost,
           'pictureKey': uploadResult[3],
@@ -404,7 +396,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
         //["success", formatedURL, returnUrl, pictureKey, downloadUrl]
         maps = {
           'path': path,
-          'name': name,
+          'name': fullName,
           'url': uploadResult[2], //github文件原始地址
           'PBhost': Global.defaultPShost,
           'pictureKey': uploadResult[3],
@@ -418,7 +410,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
         // ["success", formatedURL, returnUrl, pictureKey,cdnUrl]
         maps = {
           'path': path,
-          'name': name,
+          'name': fullName,
           'url': uploadResult[2], //imgur文件原始地址
           'PBhost': Global.defaultPShost,
           'pictureKey': uploadResult[3],
@@ -432,7 +424,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
         // ["success", formatedURL, returnUrl, pictureKey,displayUrl]
         maps = {
           'path': path,
-          'name': name,
+          'name': fullName,
           'url': uploadResult[2], //qiniu文件原始地址
           'PBhost': Global.defaultPShost,
           'pictureKey': uploadResult[3],
@@ -446,7 +438,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
         // ["success", formatedURL, returnUrl, pictureKey,displayUrl]
         maps = {
           'path': path,
-          'name': name,
+          'name': fullName,
           'url': uploadResult[2], //tencent文件原始地址
           'PBhost': Global.defaultPShost,
           'pictureKey': uploadResult[3],
@@ -460,7 +452,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
         // ["success", formatedURL, returnUrl, pictureKey,displayUrl]
         maps = {
           'path': path,
-          'name': name,
+          'name': fullName,
           'url': uploadResult[2], //aliyun文件原始地址
           'PBhost': Global.defaultPShost,
           'pictureKey': uploadResult[3],
@@ -474,7 +466,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
         // ["success", formatedURL, returnUrl, pictureKey,displayUrl]
         maps = {
           'path': path,
-          'name': name,
+          'name': fullName,
           'url': uploadResult[2], //upyun文件原始地址
           'PBhost': Global.defaultPShost,
           'pictureKey': uploadResult[3],
@@ -488,7 +480,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
         // ["success", formatedURL, returnUrl, pictureKey,displayUrl]
         maps = {
           'path': path,
-          'name': name,
+          'name': fullName,
           'url': uploadResult[2], //ftp文件原始地址
           'PBhost': Global.defaultPShost,
           'pictureKey': uploadResult[3],
@@ -510,7 +502,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
         // ["success", formatedURL, returnUrl, pictureKey,displayUrl]
         maps = {
           'path': path,
-          'name': name,
+          'name': fullName,
           'url': uploadResult[2], //aws文件原始地址
           'PBhost': Global.defaultPShost,
           'pictureKey': uploadResult[3],
@@ -524,7 +516,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
         // ["success", formatedURL, returnUrl, pictureKey, displayUrl,hostPicUrl]
         maps = {
           'path': path,
-          'name': name,
+          'name': fullName,
           'url': uploadResult[2], //alist文件原始地址
           'PBhost': Global.defaultPShost,
           'pictureKey': uploadResult[3],
@@ -539,7 +531,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
         // ["success", formatedURL, returnUrl, pictureKey, displayUrl]
         maps = {
           'path': path,
-          'name': name,
+          'name': fullName,
           'url': uploadResult[2], //alist文件原始地址
           'PBhost': Global.defaultPShost,
           'pictureKey': uploadResult[3],
@@ -563,16 +555,10 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
       clipboardList.add(uploadResult[1]); //这里是formatedURL,应该是可以直接访问的地址
       Global.multiUpload = 'success';
       return true;
-    } else if (uploadResult[0] == "failed") {
-      Global.multiUpload = 'fail';
-      if (context.mounted) {
-        return showCupertinoAlertDialog(context: context, title: "上传失败!", content: "上传参数有误.");
-      }
-      return;
     } else {
       Global.multiUpload = 'fail';
       if (context.mounted) {
-        return showCupertinoAlertDialog(context: context, title: "上传失败!", content: uploadResult);
+        return showCupertinoAlertDialog(context: context, title: "上传失败!", content: "上传参数有误.");
       }
       return;
     }
@@ -591,7 +577,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
     }
 
     for (var i = 0; i < pickedImage.length; i++) {
-      io.File? fileImage = await pickedImage[i].originFile;
+      File? fileImage = await pickedImage[i].originFile;
 
       if (Global.iscustomRename == true) {
         Global.imageFile = await renamePictureWithCustomFormat(fileImage!);
@@ -603,17 +589,16 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
         Global.imageFile = my_path.basename(fileImage!.path);
       }
 
-      io.File compressedFile;
+      File compressedFile;
       if (Global.isCompress == true) {
         ImageCompress imageCompress = ImageCompress();
         compressedFile = await imageCompress.compressAndGetFile(
-            fileImage.path, Global.imageFile!, Global.defaultCompressFormat,
+            fileImage.path, my_path.basename(Global.imageFile!), Global.defaultCompressFormat,
             minHeight: Global.minHeight, minWidth: Global.minWidth, quality: Global.quality);
-        Global.imagesList.add(my_path.basename(compressedFile.path));
       } else {
         compressedFile = fileImage;
-        Global.imagesList.add(Global.imageFile!);
       }
+      Global.imagesList.add(Global.imageFile!);
       Global.imagesFileList.add(compressedFile);
     }
   }
@@ -630,22 +615,16 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
 
     for (var i = 0; i < Global.imagesFileList.length; i++) {
       String path = Global.imagesFileList[i].path;
-      String name = Global.imagesList[i].split('/').last;
 
-      var uploadResult = await uploaderentry(path: path, name: name);
-      if (uploadResult[0] == "Error") {
-        if (context.mounted) {
-          return showCupertinoAlertDialog(context: context, title: "上传失败!", content: "请先配置上传参数.");
-        }
-        return;
-      } else if (uploadResult[0] == "success") {
+      var uploadResult = await uploaderentry(path: path, name: Global.imagesList[i]);
+      if (uploadResult[0] == "success") {
         successCount++;
-        successList.add(name);
+        successList.add(Global.imagesList[i]);
         Map<String, dynamic> maps = {};
         if (Global.defaultPShost == 'sm.ms') {
           maps = {
             'path': path,
-            'name': name,
+            'name': Global.imagesList[i],
             'url': uploadResult[2],
             'PBhost': Global.defaultPShost,
             'pictureKey': uploadResult[3],
@@ -659,7 +638,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
           //["success", formatedURL, returnUrl, pictureKey, displayUrl]
           maps = {
             'path': path,
-            'name': name,
+            'name': Global.imagesList[i],
             'url': uploadResult[2], //原图地址
             'PBhost': Global.defaultPShost,
             'pictureKey': uploadResult[3],
@@ -672,7 +651,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
         } else if (Global.defaultPShost == 'github') {
           maps = {
             'path': path,
-            'name': name,
+            'name': Global.imagesList[i],
             'url': uploadResult[2],
             'PBhost': Global.defaultPShost,
             'pictureKey': uploadResult[3],
@@ -686,7 +665,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
           // ["success", formatedURL, returnUrl, pictureKey,cdnUrl]
           maps = {
             'path': path,
-            'name': name,
+            'name': Global.imagesList[i],
             'url': uploadResult[2], //imgur文件原始地址
             'PBhost': Global.defaultPShost,
             'pictureKey': uploadResult[3],
@@ -700,7 +679,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
           // ["success", formatedURL, returnUrl, pictureKey,displayUrl]
           maps = {
             'path': path,
-            'name': name,
+            'name': Global.imagesList[i],
             'url': uploadResult[2], //qiniu文件原始地址
             'PBhost': Global.defaultPShost,
             'pictureKey': uploadResult[3],
@@ -714,7 +693,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
           // ["success", formatedURL, returnUrl, pictureKey,displayUrl]
           maps = {
             'path': path,
-            'name': name,
+            'name': Global.imagesList[i],
             'url': uploadResult[2], //tencent文件原始地址
             'PBhost': Global.defaultPShost,
             'pictureKey': uploadResult[3],
@@ -728,7 +707,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
           // ["success", formatedURL, returnUrl, pictureKey,displayUrl]
           maps = {
             'path': path,
-            'name': name,
+            'name': Global.imagesList[i],
             'url': uploadResult[2], //aliyun文件原始地址
             'PBhost': Global.defaultPShost,
             'pictureKey': uploadResult[3],
@@ -742,7 +721,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
           // ["success", formatedURL, returnUrl, pictureKey,displayUrl]
           maps = {
             'path': path,
-            'name': name,
+            'name': Global.imagesList[i],
             'url': uploadResult[2], //upyun文件原始地址
             'PBhost': Global.defaultPShost,
             'pictureKey': uploadResult[3],
@@ -755,7 +734,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
         } else if (Global.defaultPShost == 'ftp') {
           maps = {
             'path': path,
-            'name': name,
+            'name': Global.imagesList[i],
             'url': uploadResult[2], //ftp文件原始地址
             'PBhost': Global.defaultPShost,
             'pictureKey': uploadResult[3],
@@ -777,7 +756,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
           // ["success", formatedURL, returnUrl, pictureKey,displayUrl]
           maps = {
             'path': path,
-            'name': name,
+            'name': Global.imagesList[i],
             'url': uploadResult[2], //aws文件原始地址
             'PBhost': Global.defaultPShost,
             'pictureKey': uploadResult[3],
@@ -791,7 +770,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
           // ["success", formatedURL, returnUrl, pictureKey, displayUrl,hostPicUrl]
           maps = {
             'path': path,
-            'name': name,
+            'name': Global.imagesList[i],
             'url': uploadResult[2], //alist文件原始地址
             'PBhost': Global.defaultPShost,
             'pictureKey': uploadResult[3],
@@ -806,7 +785,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
           // ["success", formatedURL, returnUrl, pictureKey, displayUrl]
           maps = {
             'path': path,
-            'name': name,
+            'name': Global.imagesList[i],
             'url': uploadResult[2], //alist文件原始地址
             'PBhost': Global.defaultPShost,
             'pictureKey': uploadResult[3],
@@ -828,12 +807,9 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
         }
 
         clipboardList.add(uploadResult[1]);
-      } else if (uploadResult[0] == "failed") {
-        failCount++;
-        failList.add(name);
       } else {
         failCount++;
-        failList.add(name);
+        failList.add(Global.imagesList[i]);
       }
     }
 
@@ -848,7 +824,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
     });
 
     if (successCount == 0) {
-      String content = "哭唧唧，全部上传失败了=_=\n\n上传失败的图片列表:\n\n";
+      String content = "全部上传失败\n\n失败的图片列表:\n\n";
       for (String failImage in failList) {
         content += "$failImage\n";
       }
@@ -863,7 +839,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
             text: clipboardList.toString().substring(1, clipboardList.toString().length - 1)));
         clipboardList.clear();
       }
-      String content = "哇塞，全部上传成功了！\n上传成功的图片列表:\n";
+      String content = "图片列表:\n";
       for (String successImage in successList) {
         content += "$successImage\n";
       }
@@ -1189,7 +1165,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
                                       TableRow(
                                         children: [
                                           TableCell(child: Center(child: Text("{timestamp}"))),
-                                          TableCell(child: Center(child: Text("时间戳(秒)"))),
+                                          TableCell(child: Center(child: Text("时间戳(毫秒)"))),
                                         ],
                                       ),
                                       TableRow(
@@ -1303,7 +1279,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
             ),
           ],
           title: titleText(
-            'PicHoro',
+            '${psNameTranslate[Global.defaultPShost]}',
           ),
         ),
         body: uploadList.isEmpty
@@ -1319,7 +1295,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
                     const SizedBox(
                       height: 10,
                     ),
-                    const Text('空空如也哦 点击下方按钮上传',
+                    const Text('',
                         textAlign: TextAlign.center,
                         style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))),
                   ],

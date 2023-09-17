@@ -2,14 +2,18 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
-import 'package:f_logs/f_logs.dart';
+import 'package:path/path.dart' as my_path;
 
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/global.dart';
 
 class TencentImageUploadUtils {
   //表单上传的signature
-  static String getUploadAuthorization(String secretKey, String keyTime, String uploadPolicyStr) {
+  static String getUploadAuthorization(
+    String secretKey,
+    String keyTime,
+    String uploadPolicyStr,
+  ) {
     String signKey = Hmac(sha1, utf8.encode(secretKey)).convert(utf8.encode(keyTime)).toString();
     String stringtosign = sha1.convert(utf8.encode(uploadPolicyStr)).toString();
     String signature = Hmac(sha1, utf8.encode(signKey)).convert(utf8.encode(stringtosign)).toString();
@@ -44,139 +48,135 @@ class TencentImageUploadUtils {
   }
 
   //上传接口
-  static uploadApi({required String path, required String name, required Map configMap}) async {
-    String secretId = configMap['secretId'];
-    String secretKey = configMap['secretKey'];
-    String bucket = configMap['bucket'];
-    String area = configMap['area'];
-    String tencentpath = configMap['path'];
-    String customUrl = configMap['customUrl'];
-    String options = configMap['options'];
-
-    if (customUrl != "None") {
-      if (!customUrl.startsWith(RegExp(r'http(s)?://'))) {
-        customUrl = 'http://$customUrl';
-      }
-    }
-
-    if (tencentpath != 'None') {
-      tencentpath = '${tencentpath.replaceAll(RegExp(r'^/*'), '').replaceAll(RegExp(r'/*$'), '')}/';
-    }
-    String host = '$bucket.cos.$area.myqcloud.com';
-    //云存储的路径
-    String urlpath = '';
-    if (tencentpath != 'None') {
-      urlpath = '/$tencentpath$name';
-    } else {
-      urlpath = '/$name';
-    }
-    int startTimestamp = DateTime.now().millisecondsSinceEpoch ~/ 1000;
-    int endTimestamp = startTimestamp + 86400;
-    String keyTime = '$startTimestamp;$endTimestamp';
-    Map<String, dynamic> uploadPolicy = {
-      "expiration": "2033-03-03T09:38:12.414Z",
-      "conditions": [
-        {"acl": "default"},
-        {"bucket": bucket},
-        {"key": urlpath},
-        {"q-sign-algorithm": "sha1"},
-        {"q-ak": secretId},
-        {"q-sign-time": keyTime}
-      ]
-    };
-    String uploadPolicyStr = jsonEncode(uploadPolicy);
-    String singature = TencentImageUploadUtils.getUploadAuthorization(secretKey, keyTime, uploadPolicyStr);
-    FormData formData = FormData.fromMap({
-      'key': urlpath,
-      'policy': base64Encode(utf8.encode(uploadPolicyStr)),
-      'acl': 'default',
-      'q-sign-algorithm': 'sha1',
-      'q-ak': secretId,
-      'q-key-time': keyTime,
-      'q-sign-time': keyTime,
-      'q-signature': singature,
-      'file': await MultipartFile.fromFile(path, filename: name),
-    });
-    BaseOptions baseoptions = setBaseOptions();
-    File uploadFile = File(path);
-    String contentLength = await uploadFile.length().then((value) {
-      return value.toString();
-    });
-    baseoptions.headers = {
-      'Host': host,
-      'Content-Type': Global.multipartString,
-      'Content-Length': contentLength,
-    };
-    Dio dio = Dio(baseoptions);
-
+  static uploadApi({
+    required String path,
+    required String name,
+    required Map configMap,
+    Function(int, int)? onSendProgress,
+    CancelToken? cancelToken,
+  }) async {
     try {
+      String secretId = configMap['secretId'] ?? '';
+      String secretKey = configMap['secretKey'] ?? '';
+      String bucket = configMap['bucket'] ?? '';
+      String area = configMap['area'] ?? '';
+      String tencentpath = configMap['path'] ?? '';
+      String customUrl = configMap['customUrl'] ?? '';
+      String options = configMap['options'] ?? '';
+
+      if (customUrl != "None") {
+        if (!customUrl.startsWith(RegExp(r'http(s)?://'))) {
+          customUrl = 'http://$customUrl';
+        }
+      }
+
+      if (tencentpath != 'None') {
+        tencentpath = '${tencentpath.replaceAll(RegExp(r'^/*'), '').replaceAll(RegExp(r'/*$'), '')}/';
+      }
+      String host = '$bucket.cos.$area.myqcloud.com';
+      //云存储的路径
+      String urlpath = '';
+      if (tencentpath != 'None') {
+        urlpath = '/$tencentpath$name';
+      } else {
+        urlpath = '/$name';
+      }
+      int startTimestamp = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+      int endTimestamp = startTimestamp + 86400;
+      String keyTime = '$startTimestamp;$endTimestamp';
+      Map<String, dynamic> uploadPolicy = {
+        "expiration": "2033-03-03T09:38:12.414Z",
+        "conditions": [
+          {"acl": "default"},
+          {"bucket": bucket},
+          {"key": urlpath},
+          {"q-sign-algorithm": "sha1"},
+          {"q-ak": secretId},
+          {"q-sign-time": keyTime}
+        ]
+      };
+      String uploadPolicyStr = jsonEncode(uploadPolicy);
+      String singature = TencentImageUploadUtils.getUploadAuthorization(secretKey, keyTime, uploadPolicyStr);
+      FormData formData = FormData.fromMap({
+        'key': urlpath,
+        'policy': base64Encode(utf8.encode(uploadPolicyStr)),
+        'acl': 'default',
+        'q-sign-algorithm': 'sha1',
+        'q-ak': secretId,
+        'q-key-time': keyTime,
+        'q-sign-time': keyTime,
+        'q-signature': singature,
+        'file': await MultipartFile.fromFile(path, filename: my_path.basename(name)),
+      });
+      BaseOptions baseoptions = setBaseOptions();
+      File uploadFile = File(path);
+      String contentLength = await uploadFile.length().then((value) {
+        return value.toString();
+      });
+      baseoptions.headers = {
+        'Host': host,
+        'Content-Type': Global.multipartString,
+        'Content-Length': contentLength,
+      };
+      Dio dio = Dio(baseoptions);
+
       var response = await dio.post(
         'https://$host',
         data: formData,
+        onSendProgress: onSendProgress,
+        cancelToken: cancelToken,
       );
-
-      if (response.statusCode == 204) {
-        String returnUrl = '';
-        String displayUrl = '';
-
-        if (customUrl != 'None') {
-          if (!customUrl.endsWith('/')) {
-            returnUrl = '$customUrl$urlpath';
-            displayUrl = '$customUrl$urlpath';
-          } else {
-            customUrl = customUrl.substring(0, customUrl.length - 1);
-            returnUrl = '$customUrl$urlpath';
-            displayUrl = '$customUrl$urlpath';
-          }
-        } else {
-          returnUrl = 'https://$host$urlpath';
-          displayUrl = 'https://$host$urlpath';
-        }
-
-        if (options == 'None') {
-          displayUrl = "$displayUrl?imageMogr2/thumbnail/500x500";
-        } else {
-          //网站后缀以?开头
-          if (!options.startsWith('?')) {
-            options = '?$options';
-          }
-          returnUrl = '$returnUrl$options';
-          displayUrl = '$displayUrl$options';
-        }
-
-        String formatedURL = '';
-        if (Global.isCopyLink == true) {
-          formatedURL = linkGenerateDict[Global.defaultLKformat]!(returnUrl, name);
-        } else {
-          formatedURL = returnUrl;
-        }
-        Map pictureKeyMap = Map.from(configMap);
-        String pictureKey = jsonEncode(pictureKeyMap);
-        return ["success", formatedURL, returnUrl, pictureKey, displayUrl];
-      } else {
+      if (response.statusCode != 204) {
         return ['failed'];
       }
-    } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "TencentImageUploadUtils",
-            methodName: "uploadApi",
-            text: formatErrorMessage({
-              'path': path,
-              'name': name,
-            }, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
+
+      String returnUrl = '';
+      String displayUrl = '';
+
+      if (customUrl != 'None') {
+        if (!customUrl.endsWith('/')) {
+          returnUrl = '$customUrl$urlpath';
+          displayUrl = '$customUrl$urlpath';
+        } else {
+          customUrl = customUrl.substring(0, customUrl.length - 1);
+          returnUrl = '$customUrl$urlpath';
+          displayUrl = '$customUrl$urlpath';
+        }
       } else {
-        FLog.error(
-            className: "TencentImageUploadUtils",
-            methodName: "uploadApi",
-            text: formatErrorMessage({
-              'path': path,
-              'name': name,
-            }, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
+        returnUrl = 'https://$host$urlpath';
+        displayUrl = 'https://$host$urlpath';
       }
-      return [e.toString()];
+
+      if (options == 'None') {
+        displayUrl = "$displayUrl?imageMogr2/thumbnail/500x500";
+      } else {
+        //网站后缀以?开头
+        if (!options.startsWith('?')) {
+          options = '?$options';
+        }
+        returnUrl = '$returnUrl$options';
+        displayUrl = '$displayUrl$options';
+      }
+
+      String formatedURL = '';
+      if (Global.isCopyLink == true) {
+        formatedURL = linkGenerateDict[Global.defaultLKformat]!(returnUrl, name);
+      } else {
+        formatedURL = returnUrl;
+      }
+      Map pictureKeyMap = Map.from(configMap);
+      String pictureKey = jsonEncode(pictureKeyMap);
+      return ["success", formatedURL, returnUrl, pictureKey, displayUrl];
+    } catch (e) {
+      flogError(
+          e,
+          {
+            'path': path,
+            'name': name,
+          },
+          "TencentImageUploadUtils",
+          "uploadApi");
+      return ['failed'];
     }
   }
 
@@ -224,32 +224,19 @@ class TencentImageUploadUtils {
       var response = await dio.delete(
         deleteHost,
       );
-      if (response.statusCode == 204) {
-        return [
-          "success",
-        ];
-      } else {
-        return ["failed"];
+      if (response.statusCode != 204) {
+        return ['failed'];
       }
+      return ["success"];
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "TencentImageUploadUtils",
-            methodName: "deleteApi",
-            text: formatErrorMessage({
-              'fileName': fileName,
-            }, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "TencentImageUploadUtils",
-            methodName: "deleteApi",
-            text: formatErrorMessage({
-              'fileName': fileName,
-            }, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
-      return [e.toString()];
+      flogError(
+          e,
+          {
+            'fileName': fileName,
+          },
+          "TencentImageUploadUtils",
+          "deleteApi");
+      return ['failed'];
     }
   }
 }

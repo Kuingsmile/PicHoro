@@ -4,7 +4,7 @@ Modified under MIT license
 See file LICENSE of original project at https://github.com/PicGo/flutter-picgo
 */
 
-import 'dart:io' as io;
+import 'package:universal_io/io.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 
@@ -476,9 +476,9 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
                                 loadStateChanged: (state) => defaultLoadStateChanged(state, iconSize: 30),
                               )
                             : Global.defaultShowedPBhost == 'PBhostExtend1'
-                                ? io.File(currentShowedImagesDisplayAddressUrl[index]).existsSync()
+                                ? File(currentShowedImagesDisplayAddressUrl[index]).existsSync()
                                     ? ExtendedImage.file(
-                                        io.File(currentShowedImagesDisplayAddressUrl[index]),
+                                        File(currentShowedImagesDisplayAddressUrl[index]),
                                         fit: BoxFit.fill,
                                         clearMemoryCacheIfFailed: true,
                                         height: 150,
@@ -970,7 +970,7 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
           await AlbumSQL.deleteData(Global.imageDBExtend!, Global.defaultShowedPBhost,
               showedImageId[imagesIndex[i] + (_currentPage * _perPageItemSize) - i]);
           try {
-            await io.File(showedImageDisplayAddressUrl[imagesIndex[i] + _currentPage * _perPageItemSize - i]).delete();
+            await File(showedImageDisplayAddressUrl[imagesIndex[i] + _currentPage * _perPageItemSize - i]).delete();
           } catch (e) {
             FLog.error(
                 className: 'ImagePage',
@@ -990,7 +990,7 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
 
         if (deleteLocal) {
           try {
-            await io.File(showedImagePaths[imagesIndex[i] + (_currentPage * _perPageItemSize) - i]).delete();
+            await File(showedImagePaths[imagesIndex[i] + (_currentPage * _perPageItemSize) - i]).delete();
           } catch (e) {
             FLog.error(
                 className: 'ImagePage',
@@ -1048,7 +1048,7 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
         await AlbumSQL.deleteData(Global.imageDBExtend!, Global.defaultShowedPBhost,
             showedImageId[index + (_currentPage * _perPageItemSize)]);
         try {
-          await io.File(showedImageDisplayAddressUrl[index + _currentPage * _perPageItemSize]).delete();
+          await File(showedImageDisplayAddressUrl[index + _currentPage * _perPageItemSize]).delete();
         } catch (e) {
           FLog.error(
               className: 'ImagePage',
@@ -1068,7 +1068,7 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
 
       if (deleteLocal) {
         try {
-          await io.File(showedImagePaths[index + _currentPage * _perPageItemSize]).delete();
+          await File(showedImagePaths[index + _currentPage * _perPageItemSize]).delete();
         } catch (e) {
           FLog.error(
               className: 'ImagePage',

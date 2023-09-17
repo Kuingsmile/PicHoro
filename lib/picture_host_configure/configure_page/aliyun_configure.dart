@@ -45,21 +45,21 @@ class AliyunConfigState extends State<AliyunConfig> {
   _initConfig() async {
     try {
       Map configMap = await AliyunManageAPI.getConfigMap();
-      _keyIdController.text = configMap['keyId'];
-      _keySecretController.text = configMap['keySecret'];
-      _bucketController.text = configMap['bucket'];
-      _areaController.text = configMap['area'];
-      if (configMap['path'] != 'None') {
+      _keyIdController.text = configMap['keyId'] ?? '';
+      _keySecretController.text = configMap['keySecret'] ?? '';
+      _bucketController.text = configMap['bucket'] ?? '';
+      _areaController.text = configMap['area'] ?? '';
+      if (configMap['path'] != 'None' && configMap['path'] != null) {
         _pathController.text = configMap['path'];
       } else {
         _pathController.clear();
       }
-      if (configMap['customUrl'] != 'None') {
+      if (configMap['customUrl'] != 'None' && configMap['customUrl'] != null) {
         _customUrlController.text = configMap['customUrl'];
       } else {
         _customUrlController.clear();
       }
-      if (configMap['options'] != 'None') {
+      if (configMap['options'] != 'None' && configMap['options'] != null) {
         _optionsController.text = configMap['options'];
       } else {
         _optionsController.clear();
@@ -268,7 +268,7 @@ class AliyunConfigState extends State<AliyunConfig> {
       String customUrl = _customUrlController.text;
       String options = _optionsController.text;
       //格式化路径为以/结尾，不以/开头
-      if (path.isEmpty || path.replaceAll(' ', '').isEmpty) {
+      if (path.isEmpty || path.replaceAll(' ', '').isEmpty || path == '/') {
         path = 'None';
       } else {
         if (!path.endsWith('/')) {
@@ -297,76 +297,11 @@ class AliyunConfigState extends State<AliyunConfig> {
         options = 'None';
       }
 
-      //save asset image to app dir
-      String assetPath = 'assets/validateImage/PicHoroValidate.jpeg';
-      String appDir = await getApplicationDocumentsDirectory().then((value) {
-        return value.path;
-      });
-      String assetFilePath = '$appDir/PicHoroValidate.jpeg';
-      File assetFile = File(assetFilePath);
-
-      if (!assetFile.existsSync()) {
-        ByteData data = await rootBundle.load(assetPath);
-        List<int> bytes = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
-        await assetFile.writeAsBytes(bytes);
-      }
-      String key = 'PicHoroValidate.jpeg';
-      String host = '$bucket.$area.aliyuncs.com';
-      String urlpath = '';
-      if (path != 'None') {
-        urlpath = '$path$key';
-      } else {
-        urlpath = key;
-      }
-
-      Map<String, dynamic> uploadPolicy = {
-        "expiration": "2034-12-01T12:00:00.000Z",
-        "conditions": [
-          {"bucket": bucket},
-          ["content-length-range", 0, 104857600],
-          {"key": urlpath}
-        ]
-      };
-      String base64Policy = base64.encode(utf8.encode(json.encode(uploadPolicy)));
-      String singature = base64.encode(Hmac(sha1, utf8.encode(keySecret)).convert(utf8.encode(base64Policy)).bytes);
-      FormData formData = FormData.fromMap({
-        'key': urlpath,
-        'OSSAccessKeyId': keyId,
-        'policy': base64Policy,
-        'Signature': singature,
-        //阿里默认的content-type是application/octet-stream，这里改成image/xxx
-        'x-oss-content-type': 'image/${my_path.extension(assetFilePath).replaceFirst('.', '')}',
-        'file': await MultipartFile.fromFile(assetFilePath, filename: key),
-      });
-
-      BaseOptions baseoptions = setBaseOptions();
-      String contentLength = await assetFile.length().then((value) {
-        return value.toString();
-      });
-      baseoptions.headers = {
-        'Host': host,
-        'Content-Type': Global.multipartString,
-        'Content-Length': contentLength,
-      };
-      Dio dio = Dio(baseoptions);
-      var response = await dio.post(
-        'https://$host',
-        data: formData,
-      );
-      //阿里默认返回204
-      if (response.statusCode == 204) {
-        final aliyunConfig = AliyunConfigModel(keyId, keySecret, bucket, area, path, customUrl, options);
-        final aliyunConfigJson = jsonEncode(aliyunConfig);
-        final aliyunConfigFile = await localFile;
-        await aliyunConfigFile.writeAsString(aliyunConfigJson);
-        if (context.mounted) {
-          return showCupertinoAlertDialog(context: context, title: '成功', content: '配置成功');
-        }
-      } else {
-        if (context.mounted) {
-          return showCupertinoAlertDialog(context: context, title: '错误', content: '验证失败');
-        }
-      }
+      final aliyunConfig = AliyunConfigModel(keyId, keySecret, bucket, area, path, customUrl, options);
+      final aliyunConfigJson = jsonEncode(aliyunConfig);
+      final aliyunConfigFile = await localFile;
+      await aliyunConfigFile.writeAsString(aliyunConfigJson);
+      showToast('保存成功');
     } catch (e) {
       FLog.error(
           className: 'AliyunConfigPage',
@@ -381,10 +316,9 @@ class AliyunConfigState extends State<AliyunConfig> {
 
   checkAliyunConfig() async {
     try {
-      final aliyunConfigFile = await localFile;
-      String configData = await aliyunConfigFile.readAsString();
+      String configData = await readAliyunConfig();
 
-      if (configData == "Error") {
+      if (configData == "") {
         if (context.mounted) {
           showCupertinoAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");
         }
@@ -480,7 +414,7 @@ class AliyunConfigState extends State<AliyunConfig> {
   Future<File> get localFile async {
     final path = await _localPath;
     String defaultUser = await Global.getUser();
-    return File('$path/${defaultUser}_aliyun_config.txt');
+    return ensureFileExists(File('$path/${defaultUser}_aliyun_config.txt'));
   }
 
   Future<String> get _localPath async {
@@ -489,37 +423,16 @@ class AliyunConfigState extends State<AliyunConfig> {
   }
 
   Future<String> readAliyunConfig() async {
-    try {
-      final file = await localFile;
-      String contents = await file.readAsString();
-      return contents;
-    } catch (e) {
-      FLog.error(
-          className: 'AliyunConfigPage',
-          methodName: 'readAliyunConfig',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
-      return "Error";
-    }
+    final file = await localFile;
+    String contents = await file.readAsString();
+    return contents;
   }
 
   _setdefault() async {
-    try {
-      await Global.setPShost('aliyun');
-      await Global.setShowedPBhost('aliyun');
-      showToast('已设置阿里云为默认图床');
-      eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
-      eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-    } catch (e) {
-      FLog.error(
-          className: 'AliyunConfigPage',
-          methodName: '_setdefault',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
-      if (context.mounted) {
-        showToastWithContext(context, '错误');
-      }
-    }
+    await Global.setPShost('aliyun');
+    await Global.setShowedPBhost('aliyun');
+    showToast('已设置阿里云为默认图床');
+    eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
   }
 }
 

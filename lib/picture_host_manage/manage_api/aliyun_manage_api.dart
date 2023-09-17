@@ -15,40 +15,41 @@ import 'package:horopic/picture_host_configure/configure_page/aliyun_configure.d
 
 class AliyunManageAPI {
   static Map<String, String> areaCodeName = {
-    'oss-cn-hangzhou': '华东1（杭州）',
-    'oss-cn-shanghai': '华东2（上海）',
-    'oss-cn-nanjing': '华东5（南京本地地域）',
-    'oss-cn-fuzhou': '华东6（福州本地地域）',
-    'oss-cn-qingdao': '华北1（青岛）',
-    'oss-cn-beijing': '华北2（北京）',
-    'oss-cn-zhangjiakou': '华北3（张家口）',
-    'oss-cn-huhehaote': '华北5（呼和浩特）',
-    'oss-cn-wulanchabu': '华北6（乌兰察布）',
-    'oss-cn-shenzhen': '华南1（深圳）',
-    'oss-cn-heyuan': '华南2（河源）',
-    'oss-cn-guangzhou': '华南3（广州）',
-    'oss-cn-chengdu': '西南1（成都）',
-    'oss-cn-hongkong': '中国（香港）',
-    'oss-us-west-1': '美国（硅谷）',
-    'oss-us-east-1': '美国（弗吉尼亚）',
-    'oss-ap-northeast-1': '日本（东京）',
-    'oss-ap-northeast-2': '韩国（首尔）',
+    'oss-cn-hangzhou': '华东1(杭州)',
+    'oss-cn-shanghai': '华东2(上海)',
+    'oss-cn-nanjing': '华东5(南京本地地域)',
+    'oss-cn-fuzhou': '华东6(福州本地地域)',
+    'oss-cn-qingdao': '华北1(青岛)',
+    'oss-cn-beijing': '华北2(北京)',
+    'oss-cn-zhangjiakou': '华北3(张家口)',
+    'oss-cn-huhehaote': '华北5(呼和浩特)',
+    'oss-cn-wulanchabu': '华北6(乌兰察布)',
+    'oss-cn-shenzhen': '华南1(深圳)',
+    'oss-cn-heyuan': '华南2(河源)',
+    'oss-cn-guangzhou': '华南3(广州)',
+    'oss-cn-chengdu': '西南1(成都)',
+    'oss-cn-hongkong': '中国(香港)',
+    'oss-us-west-1': '美国(硅谷)',
+    'oss-us-east-1': '美国(弗吉尼亚)',
+    'oss-ap-northeast-1': '日本(东京)',
+    'oss-ap-northeast-2': '韩国(首尔)',
     'oss-ap-southeast-1': '新加坡',
-    'oss-ap-southeast-2': '澳大利亚（悉尼）',
-    'oss-ap-southeast-3': '马来西亚（吉隆坡）',
-    'oss-ap-southeast-5': '印度尼西亚（雅加达）',
-    'oss-ap-southeast-6': '菲律宾（马尼拉）',
-    'oss-ap-southeast-7': '泰国（曼谷）',
-    'oss-ap-south-1': '印度（孟买）',
-    'oss-eu-central-1': '德国（法兰克福）',
-    'oss-eu-west-1': '英国（伦敦）',
-    'oss-me-east-1': '阿联酋（迪拜）',
+    'oss-ap-southeast-2': '澳大利亚(悉尼)',
+    'oss-ap-southeast-3': '马来西亚(吉隆坡)',
+    'oss-ap-southeast-5': '印度尼西亚(雅加达)',
+    'oss-ap-southeast-6': '菲律宾(马尼拉)',
+    'oss-ap-southeast-7': '泰国(曼谷)',
+    'oss-ap-south-1': '印度(孟买)',
+    'oss-eu-central-1': '德国(法兰克福)',
+    'oss-eu-west-1': '英国(伦敦)',
+    'oss-me-east-1': '阿联酋(迪拜)',
+    'oss-rg-china-mainland': '无地域属性'
   };
 
   static Future<File> get _localFile async {
     final path = await _localPath;
     String defaultUser = await Global.getUser();
-    return File('$path/${defaultUser}_aliyun_config.txt');
+    return ensureFileExists(File('$path/${defaultUser}_aliyun_config.txt'));
   }
 
   static Future<String> get _localPath async {
@@ -73,6 +74,9 @@ class AliyunManageAPI {
 
   static Future<Map> getConfigMap() async {
     String configStr = await readAliyunConfig();
+    if (configStr == '') {
+      return {};
+    }
     Map configMap = json.decode(configStr);
     return configMap;
   }
@@ -143,29 +147,30 @@ class AliyunManageAPI {
             'contentType': contentType,
           }, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
-      return "";
+      rethrow;
     }
   }
 
   //获取bucket列表
   static getBucketList() async {
-    String method = 'GET';
-    String canonicalizedResource = '/';
-    String contentMd5 = '';
-    String contentType = '';
-    String host = 'oss-cn-hangzhou.aliyuncs.com';
-    String authorization = await aliyunAuthorization(method, canonicalizedResource, {}, contentMd5, contentType);
-    BaseOptions baseoptions = setBaseOptions();
-    baseoptions.headers = {
-      'Authorization': authorization,
-      'Date': HttpDate.format(DateTime.now()),
-    };
-    Map<String, dynamic> queryParameters = {
-      'max-keys': 1000,
-    };
-
-    Dio dio = Dio(baseoptions);
     try {
+      String method = 'GET';
+      String canonicalizedResource = '/';
+      String contentMd5 = '';
+      String contentType = '';
+      String host = 'oss-cn-hangzhou.aliyuncs.com';
+      String authorization = await aliyunAuthorization(method, canonicalizedResource, {}, contentMd5, contentType);
+      BaseOptions baseoptions = setBaseOptions();
+      baseoptions.headers = {
+        'Authorization': authorization,
+        'Date': HttpDate.format(DateTime.now()),
+      };
+      Map<String, dynamic> queryParameters = {
+        'max-keys': 1000,
+      };
+
+      Dio dio = Dio(baseoptions);
+
       var response = await dio.get('https://$host', queryParameters: queryParameters);
       if (response.statusCode == 200) {
         String responseBody = response.data;
@@ -177,65 +182,54 @@ class AliyunManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "AliyunManageAPI",
-            methodName: "getBucketList",
-            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "AliyunManageAPI",
-            methodName: "getBucketList",
-            text: formatErrorMessage({}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogError(e, {}, "AliyunManageAPI", "getBucketList");
       return [e.toString()];
     }
   }
 
   //新建存储桶
   static createBucket(Map newBucketConfigMap) async {
-    String method = 'PUT';
-    String bucketName = newBucketConfigMap['bucketName'];
-    String region = newBucketConfigMap['region'];
-    bool multiAZ = newBucketConfigMap['multiAZ'];
-    String xCosACL = newBucketConfigMap['xCosACL'];
-
-    if (multiAZ == true &&
-        region != 'oss-cn-shenzhen' &&
-        region != 'oss-cn-beijing' &&
-        region != 'oss-cn-hangzhou' &&
-        region != 'oss-cn-shanghai' &&
-        region != 'oss-cn-hongkong' &&
-        region != 'oss-ap-southeast-1' &&
-        region != 'oss-ap-southeast-5') {
-      return [
-        'multiAZ error',
-      ];
-    }
-    var body = '<CreateBucketConfiguration><DataRedundancyType>ZRS</DataRedundancyType></CreateBucketConfiguration>';
-    BaseOptions baseoptions = setBaseOptions();
-    baseoptions.headers = {
-      'Date': HttpDate.format(DateTime.now()),
-      'x-oss-acl': xCosACL,
-    };
-    if (multiAZ == true) {
-      baseoptions.headers['content-type'] = 'application/xml';
-      baseoptions.headers['content-length'] = body.length.toString();
-      String contentMd5 = await getContentMd5(body);
-      baseoptions.headers['content-md5'] = await getContentMd5(body);
-      String authorization =
-          await aliyunAuthorization(method, '/$bucketName/', baseoptions.headers, contentMd5, 'application/xml');
-      baseoptions.headers['Authorization'] = authorization;
-    } else {
-      baseoptions.headers['content-type'] = 'application/json';
-      String authorization =
-          await aliyunAuthorization(method, '/$bucketName/', baseoptions.headers, '', 'application/json');
-      baseoptions.headers['Authorization'] = authorization;
-    }
-    Dio dio = Dio(baseoptions);
     try {
+      String method = 'PUT';
+      String bucketName = newBucketConfigMap['bucketName'];
+      String region = newBucketConfigMap['region'];
+      bool multiAZ = newBucketConfigMap['multiAZ'];
+      String xCosACL = newBucketConfigMap['xCosACL'];
+
+      if (multiAZ == true &&
+          region != 'oss-cn-shenzhen' &&
+          region != 'oss-cn-beijing' &&
+          region != 'oss-cn-hangzhou' &&
+          region != 'oss-cn-shanghai' &&
+          region != 'oss-cn-hongkong' &&
+          region != 'oss-ap-southeast-1' &&
+          region != 'oss-ap-southeast-5') {
+        return [
+          'multiAZ error',
+        ];
+      }
+      var body = '<CreateBucketConfiguration><DataRedundancyType>ZRS</DataRedundancyType></CreateBucketConfiguration>';
+      BaseOptions baseoptions = setBaseOptions();
+      baseoptions.headers = {
+        'Date': HttpDate.format(DateTime.now()),
+        'x-oss-acl': xCosACL,
+      };
+      if (multiAZ == true) {
+        baseoptions.headers['content-type'] = 'application/xml';
+        baseoptions.headers['content-length'] = body.length.toString();
+        String contentMd5 = await getContentMd5(body);
+        baseoptions.headers['content-md5'] = await getContentMd5(body);
+        String authorization =
+            await aliyunAuthorization(method, '/$bucketName/', baseoptions.headers, contentMd5, 'application/xml');
+        baseoptions.headers['Authorization'] = authorization;
+      } else {
+        baseoptions.headers['content-type'] = 'application/json';
+        String authorization =
+            await aliyunAuthorization(method, '/$bucketName/', baseoptions.headers, '', 'application/json');
+        baseoptions.headers['Authorization'] = authorization;
+      }
+      Dio dio = Dio(baseoptions);
+
       Response response;
       if (multiAZ == true) {
         response = await dio.put('https://$bucketName.$region.aliyuncs.com', data: body);
@@ -248,43 +242,33 @@ class AliyunManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "AliyunManageAPI",
-            methodName: "createBucket",
-            text: formatErrorMessage({
-              'newBucketConfigMap': newBucketConfigMap,
-            }, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "AliyunManageAPI",
-            methodName: "createBucket",
-            text: formatErrorMessage({
-              'newBucketConfigMap': newBucketConfigMap,
-            }, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogError(
+          e,
+          {
+            'newBucketConfigMap': newBucketConfigMap,
+          },
+          "AliyunManageAPI",
+          "createBucket");
       return [e.toString()];
     }
   }
 
   //查询存储桶权限
   static queryACLPolicy(Map element) async {
-    String bucket = element['name'];
-    String region = element['location'];
-    String method = 'GET';
-    String urlpath = '/$bucket/?acl';
-    String host = '$bucket.$region.aliyuncs.com';
-
-    BaseOptions baseoptions = setBaseOptions();
-    baseoptions.headers = {
-      'Date': HttpDate.format(DateTime.now()),
-    };
-    String authorization = await aliyunAuthorization(method, urlpath, baseoptions.headers, '', '');
-    baseoptions.headers['Authorization'] = authorization;
-
     try {
+      String bucket = element['name'];
+      String region = element['location'];
+      String method = 'GET';
+      String urlpath = '/$bucket/?acl';
+      String host = '$bucket.$region.aliyuncs.com';
+
+      BaseOptions baseoptions = setBaseOptions();
+      baseoptions.headers = {
+        'Date': HttpDate.format(DateTime.now()),
+      };
+      String authorization = await aliyunAuthorization(method, urlpath, baseoptions.headers, '', '');
+      baseoptions.headers['Authorization'] = authorization;
+
       Dio dio = Dio(baseoptions);
       var response = await dio.get('https://$host?acl', queryParameters: {'acl': ''});
       var responseBody = response.data;
@@ -297,46 +281,31 @@ class AliyunManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "AliyunManageAPI",
-            methodName: "queryACLPolicy",
-            text: formatErrorMessage({
-              'element': element,
-            }, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "AliyunManageAPI",
-            methodName: "queryACLPolicy",
-            text: formatErrorMessage({
-              'element': element,
-            }, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogError(e, {'element': element}, "AliyunManageAPI", "queryACLPolicy");
       return [e.toString()];
     }
   }
 
   //删除存储桶
   static deleteBucket(Map element) async {
-    String bucket = element['name'];
-    String region = element['location'];
-
-    String method = 'DELETE';
-    String urlpath = '/$bucket/';
-
-    String host = '$bucket.$region.aliyuncs.com';
-    BaseOptions baseoptions = setBaseOptions();
-    baseoptions.headers = {
-      'Date': HttpDate.format(DateTime.now()),
-      'content-type': 'application/json',
-    };
-    String authorization = await aliyunAuthorization(method, urlpath, baseoptions.headers, '', 'application/json');
-
-    baseoptions.headers['Authorization'] = authorization;
-    Dio dio = Dio(baseoptions);
     try {
+      String bucket = element['name'];
+      String region = element['location'];
+
+      String method = 'DELETE';
+      String urlpath = '/$bucket/';
+
+      String host = '$bucket.$region.aliyuncs.com';
+      BaseOptions baseoptions = setBaseOptions();
+      baseoptions.headers = {
+        'Date': HttpDate.format(DateTime.now()),
+        'content-type': 'application/json',
+      };
+      String authorization = await aliyunAuthorization(method, urlpath, baseoptions.headers, '', 'application/json');
+
+      baseoptions.headers['Authorization'] = authorization;
+      Dio dio = Dio(baseoptions);
+
       var response = await dio.delete('https://$host');
 
       if (response.statusCode == 204) {
@@ -345,49 +314,39 @@ class AliyunManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "AliyunManageAPI",
-            methodName: "deleteBucket",
-            text: formatErrorMessage({
-              'element': element,
-            }, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "AliyunManageAPI",
-            methodName: "deleteBucket",
-            text: formatErrorMessage({
-              'element': element,
-            }, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogError(
+          e,
+          {
+            'element': element,
+          },
+          "AliyunManageAPI",
+          "deleteBucket");
       return [e.toString()];
     }
   }
 
   //更改存储桶权限
   static changeACLPolicy(Map element, String newACL) async {
-    String bucket = element['name'];
-    String region = element['location'];
-
-    String method = 'PUT';
-    String urlpath = '/$bucket/?acl';
-
-    String host = '$bucket.$region.aliyuncs.com';
-    BaseOptions baseoptions = setBaseOptions();
-    Map<String, dynamic> header = {
-      'Date': HttpDate.format(DateTime.now()),
-      'x-oss-acl': newACL,
-      'content-type': 'application/json',
-    };
-    String authorization = await aliyunAuthorization(method, urlpath, header, '', 'application/json');
-
-    baseoptions.headers = header;
-    baseoptions.headers['Authorization'] = authorization;
-    Dio dio = Dio(baseoptions);
-
     try {
+      String bucket = element['name'];
+      String region = element['location'];
+
+      String method = 'PUT';
+      String urlpath = '/$bucket/?acl';
+
+      String host = '$bucket.$region.aliyuncs.com';
+      BaseOptions baseoptions = setBaseOptions();
+      Map<String, dynamic> header = {
+        'Date': HttpDate.format(DateTime.now()),
+        'x-oss-acl': newACL,
+        'content-type': 'application/json',
+      };
+      String authorization = await aliyunAuthorization(method, urlpath, header, '', 'application/json');
+
+      baseoptions.headers = header;
+      baseoptions.headers['Authorization'] = authorization;
+      Dio dio = Dio(baseoptions);
+
       var response = await dio.put('https://$host/?acl');
       if (response.statusCode == 200) {
         return ['success'];
@@ -395,25 +354,14 @@ class AliyunManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "AliyunManageAPI",
-            methodName: "changeACLPolicy",
-            text: formatErrorMessage({
-              'element': element,
-              'newACL': newACL,
-            }, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "AliyunManageAPI",
-            methodName: "changeACLPolicy",
-            text: formatErrorMessage({
-              'element': element,
-              'newACL': newACL,
-            }, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogError(
+          e,
+          {
+            'element': element,
+            'newACL': newACL,
+          },
+          "AliyunManageAPI",
+          "changeACLPolicy");
       return [e.toString()];
     }
   }
@@ -456,25 +404,25 @@ class AliyunManageAPI {
 
   //查询存储桶文件列表
   static queryBucketFiles(Map element, Map<String, dynamic> query) async {
-    String bucket = element['name'];
-    String region = element['location'];
-
-    String method = 'GET';
-    String urlpath = '/$bucket/';
-
-    String host = '$bucket.$region.aliyuncs.com';
-    BaseOptions baseoptions = setBaseOptions();
-    baseoptions.headers = {
-      'Date': HttpDate.format(DateTime.now()),
-    };
-    query['max-keys'] = 1000;
-    query['list-type'] = 2;
-    String authorization = await aliyunAuthorization(method, urlpath, baseoptions.headers, '', '');
-    baseoptions.headers['Authorization'] = authorization;
-
-    Dio dio = Dio(baseoptions);
-
     try {
+      String bucket = element['name'];
+      String region = element['location'];
+
+      String method = 'GET';
+      String urlpath = '/$bucket/';
+
+      String host = '$bucket.$region.aliyuncs.com';
+      BaseOptions baseoptions = setBaseOptions();
+      baseoptions.headers = {
+        'Date': HttpDate.format(DateTime.now()),
+      };
+      query['max-keys'] = 1000;
+      query['list-type'] = 2;
+      String authorization = await aliyunAuthorization(method, urlpath, baseoptions.headers, '', '');
+      baseoptions.headers['Authorization'] = authorization;
+
+      Dio dio = Dio(baseoptions);
+
       String marker = '';
       var response = await dio.get('https://$host/', queryParameters: query);
       var responseBody = response.data;
@@ -542,25 +490,14 @@ class AliyunManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "AliyunManageAPI",
-            methodName: "queryBucketFiles",
-            text: formatErrorMessage({
-              'element': element,
-              'query': query,
-            }, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "AliyunManageAPI",
-            methodName: "queryBucketFiles",
-            text: formatErrorMessage({
-              'element': element,
-              'query': query,
-            }, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogError(
+          e,
+          {
+            'element': element,
+            'query': query,
+          },
+          "AliyunManageAPI",
+          "queryBucketFiles");
       return [e.toString()];
     }
   }
@@ -582,32 +519,33 @@ class AliyunManageAPI {
 
   //重命名文件
   static copyFile(Map element, String key, String newKey) async {
-    String bucket = element['name'];
-    String region = element['location'];
-    String method = 'PUT';
-    String host = '$bucket.$region.aliyuncs.com';
-    String newName = '';
-    if (key.substring(0, key.lastIndexOf('/') + 1) == '') {
-      newName = newKey;
-    } else {
-      newName = key.substring(0, key.lastIndexOf('/') + 1) + newKey;
-    }
-
-    String urlpath = '/$bucket/$newName';
-    String xOssCopySource = '/$bucket/${Uri.encodeComponent(key)}';
-    BaseOptions baseoptions = setBaseOptions();
-    baseoptions.headers = {
-      'Date': HttpDate.format(DateTime.now()),
-      'x-oss-copy-source': xOssCopySource,
-      'x-oss-forbid-overwrite': 'false',
-      'Host': host,
-      'content-type': 'application/json',
-    };
-    String authorization = await aliyunAuthorization(method, urlpath, baseoptions.headers, '', 'application/json');
-    baseoptions.headers['Authorization'] = authorization;
-
-    Dio dio = Dio(baseoptions);
     try {
+      String bucket = element['name'];
+      String region = element['location'];
+      String method = 'PUT';
+      String host = '$bucket.$region.aliyuncs.com';
+      String newName = '';
+      if (key.substring(0, key.lastIndexOf('/') + 1) == '') {
+        newName = newKey;
+      } else {
+        newName = key.substring(0, key.lastIndexOf('/') + 1) + newKey;
+      }
+
+      String urlpath = '/$bucket/$newName';
+      String xOssCopySource = '/$bucket/${Uri.encodeComponent(key)}';
+      BaseOptions baseoptions = setBaseOptions();
+      baseoptions.headers = {
+        'Date': HttpDate.format(DateTime.now()),
+        'x-oss-copy-source': xOssCopySource,
+        'x-oss-forbid-overwrite': 'false',
+        'Host': host,
+        'content-type': 'application/json',
+      };
+      String authorization = await aliyunAuthorization(method, urlpath, baseoptions.headers, '', 'application/json');
+      baseoptions.headers['Authorization'] = authorization;
+
+      Dio dio = Dio(baseoptions);
+
       var response = await dio.put('https://$host/${Uri.encodeComponent(newName)}');
       if (response.statusCode == 200) {
         return ['success'];
@@ -615,53 +553,41 @@ class AliyunManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "AliyunManageAPI",
-            methodName: "copyFile",
-            text: formatErrorMessage({
-              'element': element,
-              'key': key,
-              'newKey': newKey,
-            }, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "AliyunManageAPI",
-            methodName: "copyFile",
-            text: formatErrorMessage({
-              'element': element,
-              'key': key,
-              'newKey': newKey,
-            }, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogError(
+          e,
+          {
+            'element': element,
+            'key': key,
+            'newKey': newKey,
+          },
+          "AliyunManageAPI",
+          "copyFile");
       return [e.toString()];
     }
   }
 
   //删除文件
   static deleteFile(Map element, String key) async {
-    String bucket = element['name'];
-    String region = element['location'];
-    String method = 'DELETE';
-    String urlpath = '/$bucket/$key';
-    String host = '$bucket.$region.aliyuncs.com';
-
-    BaseOptions baseoptions = setBaseOptions();
-    String contentMD5 = '';
-    String contentType = 'application/json';
-    baseoptions.headers = {
-      'Date': HttpDate.format(DateTime.now()),
-      'content-type': contentType,
-    };
-
-    String authorization = await aliyunAuthorization(method, urlpath, baseoptions.headers, contentMD5, contentType);
-
-    baseoptions.headers['Authorization'] = authorization;
-    Dio dio = Dio(baseoptions);
-
     try {
+      String bucket = element['name'];
+      String region = element['location'];
+      String method = 'DELETE';
+      String urlpath = '/$bucket/$key';
+      String host = '$bucket.$region.aliyuncs.com';
+
+      BaseOptions baseoptions = setBaseOptions();
+      String contentMD5 = '';
+      String contentType = 'application/json';
+      baseoptions.headers = {
+        'Date': HttpDate.format(DateTime.now()),
+        'content-type': contentType,
+      };
+
+      String authorization = await aliyunAuthorization(method, urlpath, baseoptions.headers, contentMD5, contentType);
+
+      baseoptions.headers['Authorization'] = authorization;
+      Dio dio = Dio(baseoptions);
+
       var response = await dio.delete('https://$host/$key');
       if (response.statusCode == HttpStatus.noContent) {
         return ['success'];
@@ -669,25 +595,14 @@ class AliyunManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "AliyunManageAPI",
-            methodName: "deleteFile",
-            text: formatErrorMessage({
-              'element': element,
-              'key': key,
-            }, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "AliyunManageAPI",
-            methodName: "deleteFile",
-            text: formatErrorMessage({
-              'element': element,
-              'key': key,
-            }, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogError(
+          e,
+          {
+            'element': element,
+            'key': key,
+          },
+          "AliyunManageAPI",
+          "deleteFile");
       return [e.toString()];
     }
   }
@@ -781,31 +696,32 @@ class AliyunManageAPI {
 
   //新建文件夹
   static createFolder(Map element, String prefix, String newfolder) async {
-    String bucket = element['name'];
-    String region = element['location'];
-
-    String method = 'PUT';
-
-    String host = '$bucket.$region.aliyuncs.com';
-
-    String urlpath = '/$bucket/$prefix$newfolder/';
-    if (urlpath.substring(urlpath.length - 1) != '/') {
-      urlpath = '$urlpath/';
-    }
-    BaseOptions baseoptions = setBaseOptions();
-    String contentMD5 = '';
-    String contentType = 'application/json';
-    baseoptions.headers = {
-      'Date': HttpDate.format(DateTime.now()),
-      'content-type': contentType,
-      'content-length': '0',
-      'Host': host,
-    };
-    String authorization = await aliyunAuthorization(method, urlpath, baseoptions.headers, contentMD5, contentType);
-
-    baseoptions.headers['Authorization'] = authorization;
-    Dio dio = Dio(baseoptions);
     try {
+      String bucket = element['name'];
+      String region = element['location'];
+
+      String method = 'PUT';
+
+      String host = '$bucket.$region.aliyuncs.com';
+
+      String urlpath = '/$bucket/$prefix$newfolder/';
+      if (urlpath.substring(urlpath.length - 1) != '/') {
+        urlpath = '$urlpath/';
+      }
+      BaseOptions baseoptions = setBaseOptions();
+      String contentMD5 = '';
+      String contentType = 'application/json';
+      baseoptions.headers = {
+        'Date': HttpDate.format(DateTime.now()),
+        'content-type': contentType,
+        'content-length': '0',
+        'Host': host,
+      };
+      String authorization = await aliyunAuthorization(method, urlpath, baseoptions.headers, contentMD5, contentType);
+
+      baseoptions.headers['Authorization'] = authorization;
+      Dio dio = Dio(baseoptions);
+
       String url = 'https://$host/$prefix$newfolder';
       if (url.substring(url.length - 1) != '/') {
         url = '$url/';
@@ -817,27 +733,15 @@ class AliyunManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "AliyunManageAPI",
-            methodName: "createFolder",
-            text: formatErrorMessage({
-              'element': element,
-              'prefix': prefix,
-              'newfolder': newfolder,
-            }, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "AliyunManageAPI",
-            methodName: "createFolder",
-            text: formatErrorMessage({
-              'element': element,
-              'prefix': prefix,
-              'newfolder': newfolder,
-            }, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogError(
+          e,
+          {
+            'element': element,
+            'prefix': prefix,
+            'newfolder': newfolder,
+          },
+          "AliyunManageAPI",
+          "createFolder");
       return [e.toString()];
     }
   }
@@ -849,51 +753,52 @@ class AliyunManageAPI {
     String filepath,
     String prefix,
   ) async {
-    Map configMap = await getConfigMap();
-    String bucket = element['name'];
-    String region = element['location'];
-
-    String keyId = configMap['keyId'];
-    String keySecret = configMap['keySecret'];
-    String host = '$bucket.$region.aliyuncs.com';
-    //不要加/，否则会导致签名错误
-    String urlpath = '$prefix$filename';
-    //上传策略
-    Map<String, dynamic> uploadPolicy = {
-      "expiration": "2034-12-01T12:00:00.000Z",
-      "conditions": [
-        {"bucket": bucket},
-        ["content-length-range", 0, 104857600],
-        {"key": urlpath}
-      ]
-    };
-    String base64Policy = base64.encode(utf8.encode(json.encode(uploadPolicy)));
-    String singature = base64.encode(Hmac(sha1, utf8.encode(keySecret)).convert(utf8.encode(base64Policy)).bytes);
-
-    Map<String, dynamic> formMap = {
-      'key': urlpath,
-      'OSSAccessKeyId': keyId,
-      'policy': base64Policy,
-      'Signature': singature,
-      'file': await MultipartFile.fromFile(filepath, filename: filename),
-    };
-    if (getContentType(my_path.extension(filepath)) != null) {
-      formMap['x-oss-content-type'] = getContentType(my_path.extension(filepath));
-    }
-    FormData formData = FormData.fromMap(formMap);
-
-    BaseOptions baseoptions = setBaseOptions();
-    File uploadFile = File(filepath);
-    String contentLength = await uploadFile.length().then((value) {
-      return value.toString();
-    });
-    baseoptions.headers = {
-      'Host': host,
-      'Content-Type': Global.multipartString,
-      'Content-Length': contentLength,
-    };
-    Dio dio = Dio(baseoptions);
     try {
+      Map configMap = await getConfigMap();
+      String bucket = element['name'];
+      String region = element['location'];
+
+      String keyId = configMap['keyId'];
+      String keySecret = configMap['keySecret'];
+      String host = '$bucket.$region.aliyuncs.com';
+      //不要加/，否则会导致签名错误
+      String urlpath = '$prefix$filename';
+      //上传策略
+      Map<String, dynamic> uploadPolicy = {
+        "expiration": "2034-12-01T12:00:00.000Z",
+        "conditions": [
+          {"bucket": bucket},
+          ["content-length-range", 0, 104857600],
+          {"key": urlpath}
+        ]
+      };
+      String base64Policy = base64.encode(utf8.encode(json.encode(uploadPolicy)));
+      String singature = base64.encode(Hmac(sha1, utf8.encode(keySecret)).convert(utf8.encode(base64Policy)).bytes);
+
+      Map<String, dynamic> formMap = {
+        'key': urlpath,
+        'OSSAccessKeyId': keyId,
+        'policy': base64Policy,
+        'Signature': singature,
+        'file': await MultipartFile.fromFile(filepath, filename: filename),
+      };
+      if (getContentType(my_path.extension(filepath)) != null) {
+        formMap['x-oss-content-type'] = getContentType(my_path.extension(filepath));
+      }
+      FormData formData = FormData.fromMap(formMap);
+
+      BaseOptions baseoptions = setBaseOptions();
+      File uploadFile = File(filepath);
+      String contentLength = await uploadFile.length().then((value) {
+        return value.toString();
+      });
+      baseoptions.headers = {
+        'Host': host,
+        'Content-Type': Global.multipartString,
+        'Content-Length': contentLength,
+      };
+      Dio dio = Dio(baseoptions);
+
       var response = await dio.post(
         'https://$host',
         data: formData,
@@ -904,29 +809,16 @@ class AliyunManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "AliyunManageAPI",
-            methodName: "uploadFile",
-            text: formatErrorMessage({
-              'element': element,
-              'filename': filename,
-              'filepath': filepath,
-              'prefix': prefix,
-            }, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "AliyunManageAPI",
-            methodName: "uploadFile",
-            text: formatErrorMessage({
-              'element': element,
-              'filename': filename,
-              'filepath': filepath,
-              'prefix': prefix,
-            }, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogError(
+          e,
+          {
+            'element': element,
+            'filename': filename,
+            'filepath': filepath,
+            'prefix': prefix,
+          },
+          "AliyunManageAPI",
+          "uploadFile");
       return ['error'];
     }
   }
@@ -995,20 +887,8 @@ class AliyunManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "AliyunManageAPI",
-            methodName: "uploadNetworkFile",
-            text: formatErrorMessage({'fileLink': fileLink, 'element': element, 'prefix': prefix}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "AliyunManageAPI",
-            methodName: "uploadNetworkFile",
-            text: formatErrorMessage({'fileLink': fileLink, 'element': element, 'prefix': prefix}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogError(
+          e, {'fileLink': fileLink, 'element': element, 'prefix': prefix}, "AliyunManageAPI", "uploadNetworkFile");
       return ['failed'];
     }
   }

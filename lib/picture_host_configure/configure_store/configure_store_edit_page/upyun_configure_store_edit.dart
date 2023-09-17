@@ -29,6 +29,8 @@ class UpyunConfigureStoreEditState extends State<UpyunConfigureStoreEdit> {
   final _urlController = TextEditingController();
   final _optionsController = TextEditingController();
   final _pathController = TextEditingController();
+  final _antiLeechTokenController = TextEditingController();
+  final _antiLeechExpirationController = TextEditingController();
 
   @override
   void initState() {
@@ -45,6 +47,8 @@ class UpyunConfigureStoreEditState extends State<UpyunConfigureStoreEdit> {
       'url',
       'options',
       'path',
+      'antiLeechToken',
+      'antiLeechExpiration',
     ];
     for (String element in keys) {
       if (widget.psInfo[element] != ConfigureTemplate.placeholder) {
@@ -70,6 +74,12 @@ class UpyunConfigureStoreEditState extends State<UpyunConfigureStoreEdit> {
           case 'path':
             _pathController.text = widget.psInfo[element];
             break;
+          case 'antiLeechToken':
+            _antiLeechTokenController.text = widget.psInfo[element];
+            break;
+          case 'antiLeechExpiration':
+            _antiLeechExpirationController.text = widget.psInfo[element];
+            break;
         }
       }
     }
@@ -84,6 +94,8 @@ class UpyunConfigureStoreEditState extends State<UpyunConfigureStoreEdit> {
     _urlController.dispose();
     _optionsController.dispose();
     _pathController.dispose();
+    _antiLeechTokenController.dispose();
+    _antiLeechExpirationController.dispose();
     super.dispose();
   }
 
@@ -184,6 +196,26 @@ class UpyunConfigureStoreEditState extends State<UpyunConfigureStoreEdit> {
               ),
               textAlign: TextAlign.center,
             ),
+            TextFormField(
+              controller: _antiLeechTokenController,
+              decoration: const InputDecoration(
+                contentPadding: EdgeInsets.zero,
+                label: Center(child: Text('可选: 防盗链Token')),
+                hintText: '例如abc',
+                hintStyle: TextStyle(fontSize: 13),
+              ),
+              textAlign: TextAlign.center,
+            ),
+            TextFormField(
+              controller: _antiLeechExpirationController,
+              decoration: const InputDecoration(
+                contentPadding: EdgeInsets.zero,
+                label: Center(child: Text('可选: 防盗链过期时间')),
+                hintText: '例如3600,单位秒',
+                hintStyle: TextStyle(fontSize: 13),
+              ),
+              textAlign: TextAlign.center,
+            ),
             ListTile(
                 title: ElevatedButton(
               onPressed: () {
@@ -211,16 +243,24 @@ class UpyunConfigureStoreEditState extends State<UpyunConfigureStoreEdit> {
   _importConfig() async {
     try {
       Map configMap = await UpyunManageAPI.getConfigMap();
-      _bucketController.text = configMap['bucket'];
-      _operatorController.text = configMap['operator'];
-      _passwordController.text = configMap['password'];
-      _urlController.text = configMap['url'];
-      if (configMap['path'] != 'None') {
+      _bucketController.text = configMap['bucket'] ?? '';
+      _operatorController.text = configMap['operator'] ?? '';
+      _passwordController.text = configMap['password'] ?? '';
+      _urlController.text = configMap['url'] ?? '';
+      if (configMap['path'] != 'None' && configMap['path'] != null && configMap['path'] != '/') {
         _pathController.text = configMap['path'];
       }
 
       if (configMap['options'] != 'None' || configMap['options'].toString().trim() != '') {
         _optionsController.text = configMap['options'];
+      }
+
+      if (configMap['antiLeechToken'] != 'None' || configMap['antiLeechToken'].toString().trim() != '') {
+        _antiLeechTokenController.text = configMap['antiLeechToken'];
+      }
+
+      if (configMap['antiLeechExpiration'] != 'None' || configMap['antiLeechExpiration'].toString().trim() != '') {
+        _antiLeechExpirationController.text = configMap['antiLeechExpiration'];
       }
       showToast('导入成功');
     } catch (e) {
@@ -237,6 +277,8 @@ class UpyunConfigureStoreEditState extends State<UpyunConfigureStoreEdit> {
       String url = _urlController.text;
       String options = _optionsController.text;
       String path = _pathController.text;
+      String antiLeechToken = _antiLeechTokenController.text;
+      String antiLeechExpiration = _antiLeechExpirationController.text;
 
       if (remarkName.isEmpty || remarkName.trim().isEmpty) {
         remarkName = ConfigureTemplate.placeholder;
@@ -268,6 +310,8 @@ class UpyunConfigureStoreEditState extends State<UpyunConfigureStoreEdit> {
         'url': url,
         'options': options,
         'path': path,
+        'antiLeechToken': antiLeechToken,
+        'antiLeechExpiration': antiLeechExpiration,
       };
 
       try {

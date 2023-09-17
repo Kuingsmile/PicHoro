@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:f_logs/f_logs.dart';
 import 'package:flutter/foundation.dart';
 import 'package:minio/minio.dart';
 import 'package:path/path.dart' as my_path;
@@ -92,15 +91,15 @@ class AwsImageUploadUtils {
       String pictureKey = jsonEncode(pictureKeyMap);
       return ["success", formatedURL, returnUrl, pictureKey, displayUrl];
     } catch (e) {
-      FLog.error(
-          className: "AwsImageUploadUtils",
-          methodName: "uploadApi",
-          text: formatErrorMessage({
+      flogError(
+          e,
+          {
             'path': path,
             'name': name,
-          }, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
-      return [e.toString()];
+          },
+          "AwsImageUploadUtils",
+          "uploadApi");
+      return ['failed'];
     }
   }
 
@@ -150,15 +149,14 @@ class AwsImageUploadUtils {
 
       return ['success'];
     } catch (e) {
-      FLog.error(
-          className: "AwsImageUploadUtils",
-          methodName: "deleteApi",
-          text: formatErrorMessage({
+      flogError(
+          e,
+          {
             'fileName': fileName,
-          }, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
-
-      return [e.toString()];
+          },
+          "AwsImageUploadUtils",
+          "deleteApi");
+      return ['failed'];
     }
   }
 }

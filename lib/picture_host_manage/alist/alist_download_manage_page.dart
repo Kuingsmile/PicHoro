@@ -9,7 +9,7 @@ import 'package:fluro/fluro.dart';
 
 import 'package:horopic/picture_host_manage/alist/download_api/alist_downloader.dart';
 import 'package:horopic/picture_host_manage/alist/download_api/alist_download_task.dart';
-import 'package:horopic/picture_host_manage/tencent/download_api/download_status.dart';
+import 'package:horopic/picture_host_manage/common_page/download/pnc_download_status.dart';
 import 'package:horopic/picture_host_manage/alist/upload_api/alist_upload_utils.dart';
 import 'package:horopic/pages/upload_pages/upload_status.dart';
 import 'package:horopic/picture_host_manage/alist/upload_api/alist_upload_task.dart';

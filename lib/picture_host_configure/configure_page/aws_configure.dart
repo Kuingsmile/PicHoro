@@ -41,24 +41,24 @@ class AwsConfigState extends State<AwsConfig> {
   _initConfig() async {
     try {
       Map configMap = await AwsManageAPI.getConfigMap();
-      _accessKeyIDController.text = configMap['accessKeyId'];
-      _secretAccessKeyController.text = configMap['secretAccessKey'];
-      _bucketController.text = configMap['bucket'];
-      _endpointController.text = configMap['endpoint'];
+      _accessKeyIDController.text = configMap['accessKeyId'] ?? '';
+      _secretAccessKeyController.text = configMap['secretAccessKey'] ?? '';
+      _bucketController.text = configMap['bucket'] ?? '';
+      _endpointController.text = configMap['endpoint'] ?? '';
 
-      if (configMap['region'] != 'None') {
+      if (configMap['region'] != 'None' && configMap['region'] != null) {
         _regionController.text = configMap['region'];
       } else {
         _regionController.clear();
       }
 
-      if (configMap['uploadPath'] != 'None') {
+      if (configMap['uploadPath'] != 'None' && configMap['uploadPath'] != null) {
         _uploadPathController.text = configMap['uploadPath'];
       } else {
         _uploadPathController.clear();
       }
 
-      if (configMap['customUrl'] != 'None') {
+      if (configMap['customUrl'] != 'None' && configMap['customUrl'] != null) {
         _customUrlController.text = configMap['customUrl'];
       } else {
         _customUrlController.clear();
@@ -265,7 +265,7 @@ class AwsConfigState extends State<AwsConfig> {
       String uploadPath = _uploadPathController.text;
       String customUrl = _customUrlController.text;
       //格式化路径为以/结尾，不以/开头
-      if (uploadPath.isEmpty || uploadPath.trim().isEmpty) {
+      if (uploadPath.isEmpty || uploadPath.trim().isEmpty || uploadPath == '/') {
         uploadPath = 'None';
       } else {
         if (!uploadPath.endsWith('/')) {
@@ -301,9 +301,7 @@ class AwsConfigState extends State<AwsConfig> {
       final awsConfigJson = jsonEncode(awsConfig);
       final awsConfigFile = await localFile;
       await awsConfigFile.writeAsString(awsConfigJson);
-      if (context.mounted) {
-        return showCupertinoAlertDialog(context: context, title: '成功', content: '配置成功');
-      }
+      showToast('保存成功');
     } catch (e) {
       FLog.error(
           className: 'AwsConfigPage',
@@ -318,10 +316,9 @@ class AwsConfigState extends State<AwsConfig> {
 
   checkAwsConfig() async {
     try {
-      final awsConfigFile = await localFile;
-      String configData = await awsConfigFile.readAsString();
+      String configData = await readAwsConfig();
 
-      if (configData == "Error") {
+      if (configData == "") {
         if (context.mounted) {
           return showCupertinoAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");
         }
@@ -373,7 +370,7 @@ class AwsConfigState extends State<AwsConfig> {
   Future<File> get localFile async {
     final path = await _localPath;
     String defaultUser = await Global.getUser();
-    return File('$path/${defaultUser}_aws_config.txt');
+    return ensureFileExists(File('$path/${defaultUser}_aws_config.txt'));
   }
 
   Future<String> get _localPath async {
@@ -382,37 +379,17 @@ class AwsConfigState extends State<AwsConfig> {
   }
 
   Future<String> readAwsConfig() async {
-    try {
-      final file = await localFile;
-      String contents = await file.readAsString();
-      return contents;
-    } catch (e) {
-      FLog.error(
-          className: 'AwsConfigPage',
-          methodName: 'readAwsConfig',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
-      return "Error";
-    }
+    final file = await localFile;
+    String contents = await file.readAsString();
+    return contents;
   }
 
   _setdefault() async {
-    try {
-      await Global.setPShost('aws');
-      await Global.setShowedPBhost('PBhostExtend2');
-      eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-      eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
-      showToast('已设置S3兼容平台为默认图床');
-    } catch (e) {
-      FLog.error(
-          className: 'AwsConfigPage',
-          methodName: '_setdefault',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
-      if (context.mounted) {
-        showToastWithContext(context, '错误');
-      }
-    }
+    await Global.setPShost('aws');
+    await Global.setShowedPBhost('PBhostExtend2');
+    eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
+    eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
+    showToast('已设置S3兼容平台为默认图床');
   }
 }
 

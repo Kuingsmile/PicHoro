@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:f_logs/f_logs.dart';
 
-import 'package:horopic/picture_host_manage/tencent/download_api/download_status.dart';
+import 'package:horopic/picture_host_manage/common_page/download/pnc_download_status.dart';
 import 'package:horopic/picture_host_manage/alist/download_api/alist_download_request.dart';
 import 'package:horopic/utils/common_functions.dart';
 

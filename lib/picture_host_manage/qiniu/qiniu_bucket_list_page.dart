@@ -425,7 +425,7 @@ class QiniuBucketListState extends loading_state.BaseLoadingPageState<QiniuBucke
                   textMap['name'] = element['name'];
                   var queryQiniuManage = await QiniuManageAPI.readQiniuManageConfig();
                   if (queryQiniuManage == 'Error') {
-                    showToast('数据读取错误');
+                    showToast('请先设置域名和区域');
                     return;
                   } else {
                     var jsonResult = jsonDecode(queryQiniuManage);

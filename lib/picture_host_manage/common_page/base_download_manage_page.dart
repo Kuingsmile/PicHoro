@@ -251,7 +251,7 @@ class BaseUpDownloadManagePageState extends State<BaseUpDownloadManagePage> {
           child: UploadListItem(
               onUploadPlayPausedPressed: (path, fileName, configMap) async {
                 var task = uploadManager.getUpload(jsonDecode(currentUploadList[i])[1]);
-                if (task != null && !task.status.isCompleted) {
+                if (task != null && !task.status.value.isCompleted) {
                   switch (task.status.value) {
                     case UploadStatus.uploading:
                       await uploadManager.pauseUpload(path, fileName);
@@ -355,7 +355,10 @@ class BaseUpDownloadManagePageState extends State<BaseUpDownloadManagePage> {
           child: ListItem(
               onDownloadPlayPausedPressed: (url) async {
                 var task = downloadManager.getDownload(currentDownloadList[i]);
-                if (task != null && !task.status.isCompleted) {
+                if (task != null &&
+                    task.status.value != DownloadStatus.completed &&
+                    task.status.value != DownloadStatus.failed &&
+                    task.status.value != DownloadStatus.canceled) {
                   switch (task.status.value) {
                     case DownloadStatus.downloading:
                       await downloadManager.pauseDownload(url);

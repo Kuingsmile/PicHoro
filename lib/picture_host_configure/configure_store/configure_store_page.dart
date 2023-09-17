@@ -705,6 +705,8 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
                     String url = psInfo['url']!;
                     String options = psInfo['options']!;
                     String path = psInfo['path']!;
+                    String antiLeechToken = psInfo['antiLeechToken']!;
+                    String antiLeechType = psInfo['antiLeechType']!;
 
                     bool valid = validateUndetermined([
                       bucket,
@@ -720,7 +722,8 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
                       path = 'None';
                     }
 
-                    final upyunConfig = UpyunConfigModel(bucket, operator, password, url, options, path);
+                    final upyunConfig =
+                        UpyunConfigModel(bucket, operator, password, url, options, path, antiLeechToken, antiLeechType);
                     final upyunConfigJson = jsonEncode(upyunConfig);
                     final upyunConfigFile = await UpyunConfigState().localFile;
                     await upyunConfigFile.writeAsString(upyunConfigJson);

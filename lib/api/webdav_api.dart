@@ -1,6 +1,4 @@
 import 'dart:convert';
-import 'package:dio/dio.dart';
-import 'package:f_logs/f_logs.dart';
 import 'package:webdav_client/webdav_client.dart' as webdav;
 
 import 'package:horopic/utils/common_functions.dart';
@@ -10,28 +8,28 @@ import 'package:horopic/picture_host_manage/manage_api/webdav_manage_api.dart';
 class WebdavImageUploadUtils {
   //上传接口
   static uploadApi({required String path, required String name, required Map configMap}) async {
-    String formatedURL = '';
-    webdav.Client client = await WebdavManageAPI.getWebdavClient();
-    String uploadPath = configMap['uploadPath'];
-    String? customUrl = configMap['customUrl'];
-    String? webPath = configMap['webPath'];
-
-    customUrl ??= 'None';
-    webPath ??= 'None';
-
-    if (uploadPath == 'None') {
-      uploadPath = '/';
-    } else {
-      if (!uploadPath.startsWith('/')) {
-        uploadPath = '/$uploadPath';
-      }
-      if (!uploadPath.endsWith('/')) {
-        uploadPath = '$uploadPath/';
-      }
-    }
-    String filePath = uploadPath + name;
-
     try {
+      String formatedURL = '';
+      webdav.Client client = await WebdavManageAPI.getWebdavClient();
+      String uploadPath = configMap['uploadPath'];
+      String? customUrl = configMap['customUrl'];
+      String? webPath = configMap['webPath'];
+
+      customUrl ??= 'None';
+      webPath ??= 'None';
+
+      if (uploadPath == 'None') {
+        uploadPath = '/';
+      } else {
+        if (!uploadPath.startsWith('/')) {
+          uploadPath = '/$uploadPath';
+        }
+        if (!uploadPath.endsWith('/')) {
+          uploadPath = '$uploadPath/';
+        }
+      }
+      String filePath = uploadPath + name;
+
       await client.writeFromFile(path, filePath);
 
       String returnUrl = '';
@@ -67,36 +65,27 @@ class WebdavImageUploadUtils {
         displayUrl,
       ];
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "WebdavImageUploadUtils",
-            methodName: "uploadApi",
-            text: formatErrorMessage({
-              'path': path,
-              'name': name,
-            }, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "WebdavImageUploadUtils",
-            methodName: "uploadApi",
-            text: formatErrorMessage({
-              'path': path,
-              'name': name,
-            }, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
-      return [e.toString()];
+      flogError(
+          e,
+          {
+            'path': path,
+            'name': name,
+          },
+          "WebdavImageUploadUtils",
+          "uploadApi");
+
+      return ["failed"];
     }
   }
 
   static deleteApi({required Map deleteMap, required Map configMap}) async {
-    Map configMapFromPictureKey = jsonDecode(deleteMap['pictureKey']);
-    String host = configMapFromPictureKey['host'];
-    String webdavusername = configMapFromPictureKey['webdavusername'];
-    String password = configMapFromPictureKey['password'];
-
     try {
+      Map configMapFromPictureKey = jsonDecode(deleteMap['pictureKey']);
+
+      String host = configMapFromPictureKey['host'];
+      String webdavusername = configMapFromPictureKey['webdavusername'];
+      String password = configMapFromPictureKey['password'];
+
       webdav.Client client = webdav.newClient(
         host,
         user: webdavusername,
@@ -108,24 +97,10 @@ class WebdavImageUploadUtils {
       client.setReceiveTimeout(30000);
       await client.remove(configMapFromPictureKey['pictureKey']);
 
-      return [
-        "success",
-      ];
+      return ["success"];
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "WebdavImageUploadUtils",
-            methodName: "deleteApi",
-            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "WebdavImageUploadUtils",
-            methodName: "deleteApi",
-            text: formatErrorMessage({}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
-      return [e.toString()];
+      flogError(e, {}, "WebdavImageUploadUtils", "deleteApi");
+      return ["failed"];
     }
   }
 }

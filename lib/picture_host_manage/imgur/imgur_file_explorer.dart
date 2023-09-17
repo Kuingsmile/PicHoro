@@ -772,7 +772,7 @@ class ImgurFileExplorerState extends loading_state.BaseLoadingPageState<ImgurFil
                     return;
                   }
                   for (int i = 0; i < downloadList.length; i++) {
-                    Global.imgurDownloadList.add('https://search.pstatic.net/common?src=${downloadList[i]['link']}');
+                    Global.imgurDownloadList.add('${downloadList[i]['link']}');
                   }
                   String downloadPath =
                       await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOADS);
@@ -1219,7 +1219,7 @@ class ImgurFileExplorerState extends loading_state.BaseLoadingPageState<ImgurFil
                                 if (Global.imgExt.contains(allInfoList[index]['link'].split('.').last.toLowerCase())) {
                                   int newImageIndex = index - dirAllInfoList.length;
                                   for (int i = dirAllInfoList.length; i < allInfoList.length; i++) {
-                                    urlList += 'https://search.pstatic.net/common?src=${allInfoList[i]['link']},';
+                                    urlList += '${allInfoList[i]['link']},';
                                   }
                                   urlList = urlList.substring(0, urlList.length - 1);
                                   Application.router.navigateTo(this.context,

@@ -110,12 +110,6 @@ class DownloadManager {
       var task = getDownload(url)!;
       if (task.status.value != DownloadStatus.canceled && task.status.value != DownloadStatus.paused) {
         setStatus(task, DownloadStatus.failed);
-        runningTasks--;
-
-        if (_queue.isNotEmpty) {
-          _startExecution();
-        }
-        rethrow;
       }
     }
 
@@ -134,7 +128,6 @@ class DownloadManager {
   void setStatus(DownloadTask? task, DownloadStatus status) {
     if (task != null) {
       task.status.value = status;
-
       // tasks.add(task);
       if (status.isCompleted) {
         disposeNotifiers(task);

@@ -44,22 +44,22 @@ class TencentConfigState extends State<TencentConfig> {
   _initConfig() async {
     try {
       Map configMap = await TencentManageAPI.getConfigMap();
-      _secretIdController.text = configMap['secretId'];
-      _secretKeyController.text = configMap['secretKey'];
-      _bucketController.text = configMap['bucket'];
-      _appIdController.text = configMap['appId'];
-      _areaController.text = configMap['area'];
-      if (configMap['path'] != 'None') {
+      _secretIdController.text = configMap['secretId'] ?? '';
+      _secretKeyController.text = configMap['secretKey'] ?? '';
+      _bucketController.text = configMap['bucket'] ?? '';
+      _appIdController.text = configMap['appId'] ?? '';
+      _areaController.text = configMap['area'] ?? '';
+      if (configMap['path'] != 'None' && configMap['path'] != null) {
         _pathController.text = configMap['path'];
       } else {
         _pathController.clear();
       }
-      if (configMap['customUrl'] != 'None') {
+      if (configMap['customUrl'] != 'None' && configMap['customUrl'] != null) {
         _customUrlController.text = configMap['customUrl'];
       } else {
         _customUrlController.clear();
       }
-      if (configMap['options'] != 'None') {
+      if (configMap['options'] != 'None' && configMap['options'] != null) {
         _optionsController.text = configMap['options'];
       } else {
         _optionsController.clear();
@@ -282,7 +282,7 @@ class TencentConfigState extends State<TencentConfig> {
       String customUrl = _customUrlController.text;
       String options = _optionsController.text;
       //格式化路径为以/结尾，不以/开头
-      if (path.isEmpty || path.replaceAll(' ', '').isEmpty) {
+      if (path.isEmpty || path.replaceAll(' ', '').isEmpty || path == '/') {
         path = 'None';
       } else {
         if (!path.endsWith('/')) {
@@ -312,84 +312,11 @@ class TencentConfigState extends State<TencentConfig> {
         options = 'None';
       }
 
-      //save asset image to app dir
-      String assetPath = 'assets/validateImage/PicHoroValidate.jpeg';
-      String appDir = await getApplicationDocumentsDirectory().then((value) {
-        return value.path;
-      });
-      String assetFilePath = '$appDir/PicHoroValidate.jpeg';
-      File assetFile = File(assetFilePath);
-
-      if (!assetFile.existsSync()) {
-        ByteData data = await rootBundle.load(assetPath);
-        List<int> bytes = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
-        await assetFile.writeAsBytes(bytes);
-      }
-      String key = 'PicHoroValidate.jpeg';
-      String host = '$bucket.cos.$area.myqcloud.com';
-      String urlpath = '';
-      if (path != 'None') {
-        urlpath = '$path$key';
-      } else {
-        urlpath = key;
-      }
-      int startTimestamp = DateTime.now().millisecondsSinceEpoch ~/ 1000;
-      int endTimestamp = startTimestamp + 86400;
-      String keyTime = '$startTimestamp;$endTimestamp';
-      Map<String, dynamic> uploadPolicy = {
-        "expiration": "2033-03-03T09:38:12.414Z",
-        "conditions": [
-          {"acl": "default"},
-          {"bucket": bucket},
-          {"key": urlpath},
-          {"q-sign-algorithm": "sha1"},
-          {"q-ak": secretId},
-          {"q-sign-time": keyTime}
-        ]
-      };
-      String uploadPolicyStr = jsonEncode(uploadPolicy);
-      String singature = TencentImageUploadUtils.getUploadAuthorization(secretKey, keyTime, uploadPolicyStr);
-      //policy中的字段，除了bucket，其它的都要在formdata中添加
-      FormData formData = FormData.fromMap({
-        'key': urlpath,
-        'policy': base64Encode(utf8.encode(uploadPolicyStr)),
-        'acl': 'default',
-        'q-sign-algorithm': 'sha1',
-        'q-ak': secretId,
-        'q-key-time': keyTime,
-        'q-sign-time': keyTime,
-        'q-signature': singature,
-        'file': await MultipartFile.fromFile(assetFilePath, filename: key),
-      });
-
-      BaseOptions baseoptions = setBaseOptions();
-      String contentLength = await assetFile.length().then((value) {
-        return value.toString();
-      });
-      baseoptions.headers = {
-        'Host': host,
-        'Content-Type': Global.multipartString,
-        'Content-Length': contentLength,
-      };
-      Dio dio = Dio(baseoptions);
-      var response = await dio.post(
-        'http://$host',
-        data: formData,
-      );
-      //腾讯默认返回204
-      if (response.statusCode == 204) {
-        final tencentConfig = TencentConfigModel(secretId, secretKey, bucket, appId, area, path, customUrl, options);
-        final tencentConfigJson = jsonEncode(tencentConfig);
-        final tencentConfigFile = await localFile;
-        await tencentConfigFile.writeAsString(tencentConfigJson);
-        if (context.mounted) {
-          return showCupertinoAlertDialog(context: context, title: '成功', content: '配置成功');
-        }
-      } else {
-        if (context.mounted) {
-          return showCupertinoAlertDialog(context: context, title: '错误', content: '数据库错误');
-        }
-      }
+      final tencentConfig = TencentConfigModel(secretId, secretKey, bucket, appId, area, path, customUrl, options);
+      final tencentConfigJson = jsonEncode(tencentConfig);
+      final tencentConfigFile = await localFile;
+      await tencentConfigFile.writeAsString(tencentConfigJson);
+      showToast('保存成功');
     } catch (e) {
       FLog.error(
           className: 'TencentConfigPage',
@@ -404,10 +331,9 @@ class TencentConfigState extends State<TencentConfig> {
 
   checkTencentConfig() async {
     try {
-      final tencentConfigFile = await localFile;
-      String configData = await tencentConfigFile.readAsString();
+      String configData = await readTencentConfig();
 
-      if (configData == "Error") {
+      if (configData == "") {
         if (context.mounted) {
           return showCupertinoAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");
         }
@@ -485,11 +411,24 @@ class TencentConfigState extends State<TencentConfig> {
 
       if (response.statusCode == 204) {
         if (context.mounted) {
-          return showCupertinoAlertDialog(
-              context: context,
-              title: '通知',
-              content:
-                  '检测通过，您的配置信息为:\nsecretId:\n${configMap['secretId']}\nsecretKey:\n${configMap['secretKey']}\nbucket:\n${configMap['bucket']}\nappId:\n${configMap['appId']}\narea:\n${configMap['area']}\npath:\n${configMap['path']}\ncustomUrl:\n${configMap['customUrl']}\noptions:\n${configMap['options']}');
+          return showCupertinoAlertDialog(context: context, title: '通知', content: """检测通过，您的配置信息为:
+secretId:
+${configMap['secretId']}
+secretKey:
+${configMap['secretKey']}
+bucket:
+${configMap['bucket']}
+appId:
+${configMap['appId']}
+area:
+${configMap['area']}
+path:
+${configMap['path']}
+customUrl:
+${configMap['customUrl']}
+options:
+${configMap['options']}
+""");
         }
       } else {
         if (context.mounted) {
@@ -511,7 +450,7 @@ class TencentConfigState extends State<TencentConfig> {
   Future<File> get localFile async {
     final path = await _localPath;
     String defaultUser = await Global.getUser();
-    return File('$path/${defaultUser}_tencent_config.txt');
+    return ensureFileExists(File('$path/${defaultUser}_tencent_config.txt'));
   }
 
   Future<String> get _localPath async {
@@ -520,37 +459,17 @@ class TencentConfigState extends State<TencentConfig> {
   }
 
   Future<String> readTencentConfig() async {
-    try {
-      final file = await localFile;
-      String contents = await file.readAsString();
-      return contents;
-    } catch (e) {
-      FLog.error(
-          className: 'TencentConfigPage',
-          methodName: 'readTencentConfig',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
-      return "Error";
-    }
+    final file = await localFile;
+    String contents = await file.readAsString();
+    return contents;
   }
 
   _setdefault() async {
-    try {
-      await Global.setPShost('tencent');
-      await Global.setShowedPBhost('tencent');
-      eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-      eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
-      showToast('已设置腾讯云为默认图床');
-    } catch (e) {
-      FLog.error(
-          className: 'TencentConfigPage',
-          methodName: '_setdefault',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
-      if (context.mounted) {
-        showToastWithContext(context, '错误');
-      }
-    }
+    await Global.setPShost('tencent');
+    await Global.setShowedPBhost('tencent');
+    eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
+    eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
+    showToast('已设置腾讯云为默认图床');
   }
 }
 

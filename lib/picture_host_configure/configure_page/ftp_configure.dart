@@ -59,27 +59,27 @@ class FTPConfigState extends State<FTPConfig> {
     resetFtpConfigMap();
     try {
       Map configMap = await FTPManageAPI.getConfigMap();
-      _ftpHostController.text = configMap['ftpHost'];
-      _ftpPortController.text = configMap['ftpPort'];
-      _ftpConfigMap['ftpType'] = configMap['ftpType'];
-      _ftpConfigMap['isAnonymous'] = configMap['isAnonymous'].toString();
+      _ftpHostController.text = configMap['ftpHost'] ?? '';
+      _ftpPortController.text = configMap['ftpPort'] ?? '';
+      _ftpConfigMap['ftpType'] = configMap['ftpType'] ?? '';
+      _ftpConfigMap['isAnonymous'] = configMap['isAnonymous']?.toString() ?? '';
 
-      if (configMap['ftpUser'] != 'None') {
+      if (configMap['ftpUser'] != 'None' && configMap['ftpUser'] != null) {
         _ftpUserController.text = configMap['ftpUser'];
       } else {
         _ftpUserController.clear();
       }
-      if (configMap['ftpPassword'] != 'None') {
+      if (configMap['ftpPassword'] != 'None' && configMap['ftpPassword'] != null) {
         _ftpPasswordController.text = configMap['ftpPassword'];
       } else {
         _ftpPasswordController.clear();
       }
-      if (configMap['uploadPath'] != 'None') {
+      if (configMap['uploadPath'] != 'None' && configMap['uploadPath'] != null) {
         _ftpUploadPathController.text = configMap['uploadPath'];
       } else {
         _ftpUploadPathController.clear();
       }
-      if (configMap['ftpHomeDir'] != 'None') {
+      if (configMap['ftpHomeDir'] != 'None' && configMap['ftpHomeDir'] != null) {
         _ftpHomeDirController.text = configMap['ftpHomeDir'];
       } else {
         _ftpHomeDirController.clear();
@@ -374,7 +374,9 @@ class FTPConfigState extends State<FTPConfig> {
       ftpPassword = _ftpPasswordController.text;
     }
     String ftpUploadPath = '';
-    if (_ftpUploadPathController.text.isEmpty || _ftpUploadPathController.text == '') {
+    if (_ftpUploadPathController.text.isEmpty ||
+        _ftpUploadPathController.text == '' ||
+        _ftpUploadPathController.text == '/') {
       ftpUploadPath = 'None';
     } else {
       ftpUploadPath = _ftpUploadPathController.text;
@@ -398,7 +400,7 @@ class FTPConfigState extends State<FTPConfig> {
       ftpCustomUrl = _ftpCustomUrlController.text;
     }
     String ftpWebPath = '';
-    if (_ftpWebPathController.text.isEmpty || _ftpWebPathController.text == '') {
+    if (_ftpWebPathController.text.isEmpty || _ftpWebPathController.text == '' || _ftpWebPathController.text == '/') {
       ftpWebPath = 'None';
     } else {
       ftpWebPath = _ftpWebPathController.text;
@@ -410,57 +412,12 @@ class FTPConfigState extends State<FTPConfig> {
     final String ftpType = _ftpConfigMap['ftpType'];
 
     try {
-      try {
-        if (ftpType == 'FTP') {
-          FTPConnect ftpConnect;
-          if (isAnonymous == 'true') {
-            ftpConnect = FTPConnect(ftpHost, port: int.parse(ftpPort), securityType: SecurityType.FTP);
-          } else {
-            ftpConnect = FTPConnect(ftpHost,
-                port: int.parse(ftpPort), user: ftpUser, pass: ftpPassword, securityType: SecurityType.FTP);
-          }
-          bool connectResult = await ftpConnect.connect();
-          await ftpConnect.disconnect();
-          if (connectResult == true) {
-            final ftpConfig = FTPConfigModel(ftpHost, ftpPort, ftpUser, ftpPassword, ftpType, isAnonymous,
-                ftpUploadPath, ftpHomeDir, ftpCustomUrl, ftpWebPath);
-            final ftpConfigJson = jsonEncode(ftpConfig);
-            final ftpConfigFile = await localFile;
-            await ftpConfigFile.writeAsString(ftpConfigJson);
-            if (context.mounted) {
-              return showCupertinoAlertDialog(context: context, title: '成功', content: '配置成功');
-            }
-          }
-        } else {
-          final socket = await SSHSocket.connect(ftpHost, int.parse(ftpPort.toString()));
-          final client = SSHClient(
-            socket,
-            username: ftpUser,
-            onPasswordRequest: () {
-              return ftpPassword;
-            },
-          );
-          client.close();
-
-          final ftpConfig = FTPConfigModel(ftpHost, ftpPort, ftpUser, ftpPassword, ftpType, isAnonymous, ftpUploadPath,
-              ftpHomeDir, ftpCustomUrl, ftpWebPath);
-          final ftpConfigJson = jsonEncode(ftpConfig);
-          final ftpConfigFile = await localFile;
-          await ftpConfigFile.writeAsString(ftpConfigJson);
-          if (context.mounted) {
-            return showCupertinoAlertDialog(context: context, title: '成功', content: '配置成功');
-          }
-        }
-      } catch (e) {
-        FLog.error(
-            className: 'FTPConfigPage',
-            methodName: '_saveFTPConfig_1',
-            text: formatErrorMessage({}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-        if (context.mounted) {
-          return showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
-        }
-      }
+      final ftpConfig = FTPConfigModel(ftpHost, ftpPort, ftpUser, ftpPassword, ftpType, isAnonymous, ftpUploadPath,
+          ftpHomeDir, ftpCustomUrl, ftpWebPath);
+      final ftpConfigJson = jsonEncode(ftpConfig);
+      final ftpConfigFile = await localFile;
+      await ftpConfigFile.writeAsString(ftpConfigJson);
+      showToast('保存成功');
     } catch (e) {
       FLog.error(
           className: 'FTPConfigPage',
@@ -475,10 +432,9 @@ class FTPConfigState extends State<FTPConfig> {
 
   checkFTPConfig() async {
     try {
-      final ftpConfigFile = await localFile;
-      String configData = await ftpConfigFile.readAsString();
+      String configData = await readFTPConfig();
 
-      if (configData == "Error") {
+      if (configData == "") {
         if (context.mounted) {
           return showCupertinoAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");
         }
@@ -553,7 +509,7 @@ class FTPConfigState extends State<FTPConfig> {
   Future<File> get localFile async {
     final path = await _localPath;
     String defaultUser = await Global.getUser();
-    return File('$path/${defaultUser}_ftp_config.txt');
+    return ensureFileExists(File('$path/${defaultUser}_ftp_config.txt'));
   }
 
   Future<String> get _localPath async {
@@ -562,37 +518,17 @@ class FTPConfigState extends State<FTPConfig> {
   }
 
   Future<String> readFTPConfig() async {
-    try {
-      final file = await localFile;
-      String contents = await file.readAsString();
-      return contents;
-    } catch (e) {
-      FLog.error(
-          className: 'FTPConfigPage',
-          methodName: 'readFTPConfig',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
-      return "Error";
-    }
+    final file = await localFile;
+    String contents = await file.readAsString();
+    return contents;
   }
 
   _setdefault() async {
-    try {
-      await Global.setPShost('ftp');
-      await Global.setShowedPBhost('PBhostExtend1');
-      eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-      eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
-      showToast('已设置FTP为默认图床');
-    } catch (e) {
-      FLog.error(
-          className: 'FTPConfigPage',
-          methodName: '_setdefault',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
-      if (context.mounted) {
-        showToastWithContext(context, '错误');
-      }
-    }
+    await Global.setPShost('ftp');
+    await Global.setShowedPBhost('PBhostExtend1');
+    eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
+    eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
+    showToast('已设置FTP为默认图床');
   }
 }
 

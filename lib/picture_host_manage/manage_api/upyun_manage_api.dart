@@ -25,7 +25,7 @@ class UpyunManageAPI {
   static Future<File> get _localFile async {
     final path = await _localPath;
     String defaultUser = await Global.getUser();
-    return File('$path/${defaultUser}_upyun_config.txt');
+    return ensureFileExists(File('$path/${defaultUser}_upyun_config.txt'));
   }
 
   static Future<String> get _localPath async {
@@ -50,6 +50,9 @@ class UpyunManageAPI {
 
   static Future<Map> getConfigMap() async {
     String configStr = await readUpyunConfig();
+    if (configStr == '') {
+      return {};
+    }
     Map configMap = json.decode(configStr);
     return configMap;
   }
@@ -153,7 +156,7 @@ class UpyunManageAPI {
 
   static getUpyunManageConfigMap() async {
     var queryUpyunManage = await UpyunManageAPI.readUpyunManageConfig();
-    if (queryUpyunManage == 'Erorr') {
+    if (queryUpyunManage == 'Error' || queryUpyunManage == '') {
       return 'Error';
     } else {
       var jsonResult = jsonDecode(queryUpyunManage);
@@ -240,25 +243,12 @@ class UpyunManageAPI {
         'https://api.upyun.com/oauth/tokens',
         data: jsonEncode(params),
       );
-      if (response.statusCode == 200) {
-        return ['success', response.data];
-      } else {
+      if (response.statusCode != 200) {
         return ['failed'];
       }
+      return ['success', response.data];
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "UpyunManageAPI",
-            methodName: "getToken",
-            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "UpyunManageAPI",
-            methodName: "getToken",
-            text: formatErrorMessage({}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogError(e, {}, 'UpyunManageAPI', 'getToken');
       return ['failed'];
     }
   }
@@ -273,25 +263,12 @@ class UpyunManageAPI {
       var response = await dio.get(
         'https://api.upyun.com/oauth/tokens',
       );
-      if (response.statusCode == 200) {
-        return ['success'];
-      } else {
+      if (response.statusCode != 200) {
         return ['failed'];
       }
+      return ['success'];
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "UpyunManageAPI",
-            methodName: "checkToken",
-            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "UpyunManageAPI",
-            methodName: "checkToken",
-            text: formatErrorMessage({}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogError(e, {}, 'UpyunManageAPI', 'checkToken');
       return ['failed'];
     }
   }
@@ -311,46 +288,34 @@ class UpyunManageAPI {
         queryParameters: params,
       );
 
-      if (response.statusCode == 200) {
-        return ['success'];
-      } else {
+      if (response.statusCode != 200) {
         return ['failed'];
       }
+      return ['success'];
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "UpyunManageAPI",
-            methodName: "deleteToken",
-            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "UpyunManageAPI",
-            methodName: "deleteToken",
-            text: formatErrorMessage({}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogError(e, {}, 'UpyunManageAPI', 'deleteToken');
       return ['failed'];
     }
   }
 
   static getBucketList() async {
-    var configMap = await getUpyunManageConfigMap();
-    if (configMap == 'Error') {
-      return ['failed'];
-    }
-    String token = configMap['token'];
-    String host = 'https://api.upyun.com/buckets';
-    BaseOptions baseoptions = setBaseOptions();
-    baseoptions.headers = {
-      'Authorization': 'Bearer $token',
-    };
-    Map<String, dynamic> queryParameters = {
-      'limit': 100,
-      'bucket_type': 'file',
-    };
-    Dio dio = Dio(baseoptions);
     try {
+      var configMap = await getUpyunManageConfigMap();
+      if (configMap == 'Error') {
+        return ['failed'];
+      }
+      String token = configMap['token'];
+      String host = 'https://api.upyun.com/buckets';
+      BaseOptions baseoptions = setBaseOptions();
+      baseoptions.headers = {
+        'Authorization': 'Bearer $token',
+      };
+      Map<String, dynamic> queryParameters = {
+        'limit': 100,
+        'bucket_type': 'file',
+      };
+      Dio dio = Dio(baseoptions);
+
       String max = '';
       var response = await dio.get(
         host,
@@ -385,19 +350,7 @@ class UpyunManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "UpyunManageAPI",
-            methodName: "getBucketList",
-            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "UpyunManageAPI",
-            methodName: "getBucketList",
-            text: formatErrorMessage({}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogError(e, {}, 'UpyunManageAPI', 'getBucketList');
       return [e.toString()];
     }
   }
@@ -424,25 +377,12 @@ class UpyunManageAPI {
         host,
         queryParameters: params,
       );
-      if (response.statusCode == 200) {
-        return ['success', response.data];
-      } else {
+      if (response.statusCode != 200) {
         return ['failed'];
       }
+      return ['success', response.data];
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "UpyunManageAPI",
-            methodName: "getBucketInfo",
-            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "UpyunManageAPI",
-            methodName: "getBucketInfo",
-            text: formatErrorMessage({}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogError(e, {}, 'UpyunManageAPI', 'getBucketInfo');
       return [e.toString()];
     }
   }
@@ -470,25 +410,12 @@ class UpyunManageAPI {
         host,
         data: params,
       );
-      if (response.statusCode == 200) {
-        return ['success'];
-      } else {
+      if (response.statusCode != 200) {
         return ['failed'];
       }
+      return ['success'];
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "UpyunManageAPI",
-            methodName: "deleteBucket",
-            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "UpyunManageAPI",
-            methodName: "deleteBucket",
-            text: formatErrorMessage({}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogError(e, {}, 'UpyunManageAPI', 'deleteBucket');
       return [e.toString()];
     }
   }
@@ -515,27 +442,12 @@ class UpyunManageAPI {
         host,
         data: params,
       );
-      if (response.statusCode == 201) {
-        return ['success'];
-      } else {
+      if (response.statusCode != 201) {
         return ['failed'];
       }
+      return ['success'];
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "UpyunManageAPI",
-            methodName: "putBucket",
-            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "UpyunManageAPI",
-            methodName: "putBucket",
-            text: formatErrorMessage({
-              'bucketName': bucketName,
-            }, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogError(e, {}, 'UpyunManageAPI', 'putBucket');
       return [e.toString()];
     }
   }
@@ -561,25 +473,12 @@ class UpyunManageAPI {
         host,
         queryParameters: params,
       );
-      if (response.statusCode == 200) {
-        return ['success', response.data['operators']];
-      } else {
+      if (response.statusCode != 200) {
         return ['failed'];
       }
+      return ['success', response.data['operators']];
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "UpyunManageAPI",
-            methodName: "getOperator",
-            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "UpyunManageAPI",
-            methodName: "getOperator",
-            text: formatErrorMessage({}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogError(e, {}, 'UpyunManageAPI', 'getOperator');
       return [e.toString()];
     }
   }
@@ -606,27 +505,12 @@ class UpyunManageAPI {
         host,
         data: params,
       );
-      if (response.statusCode == 201) {
-        return [
-          'success',
-        ];
-      } else {
+      if (response.statusCode != 201) {
         return ['failed'];
       }
+      return ['success'];
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "UpyunManageAPI",
-            methodName: "putOperator",
-            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "UpyunManageAPI",
-            methodName: "putOperator",
-            text: formatErrorMessage({}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogError(e, {}, 'UpyunManageAPI', 'addOperator');
       return [e.toString()];
     }
   }
@@ -653,27 +537,12 @@ class UpyunManageAPI {
         host,
         queryParameters: params,
       );
-      if (response.statusCode == 200) {
-        return [
-          'success',
-        ];
-      } else {
+      if (response.statusCode != 200) {
         return ['failed'];
       }
+      return ['success'];
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "UpyunManageAPI",
-            methodName: "deleteOperator",
-            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "UpyunManageAPI",
-            methodName: "deleteOperator",
-            text: formatErrorMessage({}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogError(e, {}, 'UpyunManageAPI', 'deleteOperator');
       return [e.toString()];
     }
   }
@@ -705,6 +574,8 @@ class UpyunManageAPI {
 
       String options = textMap['option'];
       String path = textMap['path'];
+      String antiLeechToken = textMap['antiLeechToken'];
+      String antiLeechExpire = textMap['antiLeechExpire'];
       if (path.isEmpty || path.replaceAll(' ', '').isEmpty) {
         path = 'None';
       } else {
@@ -716,7 +587,8 @@ class UpyunManageAPI {
         }
       }
 
-      final upyunConfig = UpyunConfigModel(bucket, operatorName, operatorPassword, url, options, path);
+      final upyunConfig =
+          UpyunConfigModel(bucket, operatorName, operatorPassword, url, options, path, antiLeechToken, antiLeechExpire);
       final upyunConfigJson = jsonEncode(upyunConfig);
       final upyunConfigFile = await _localFile;
       await upyunConfigFile.writeAsString(upyunConfigJson);
@@ -778,23 +650,7 @@ class UpyunManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "UpyunManageAPI",
-            methodName: "queryBucketFiles",
-            text: formatErrorMessage({
-              'prefix': prefix,
-            }, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "UpyunManageAPI",
-            methodName: "queryBucketFiles",
-            text: formatErrorMessage({
-              'prefix': prefix,
-            }, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogError(e, {'prefix': prefix}, 'UpyunManageAPI', 'queryBucketFiles');
       return [e.toString()];
     }
   }
@@ -845,25 +701,14 @@ class UpyunManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "UpyunManageAPI",
-            methodName: "createFolder",
-            text: formatErrorMessage({
-              'prefix': prefix,
-              'newfolder': newfolder,
-            }, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "UpyunManageAPI",
-            methodName: "createFolder",
-            text: formatErrorMessage({
-              'prefix': prefix,
-              'newfolder': newfolder,
-            }, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogError(
+          e,
+          {
+            'prefix': prefix,
+            'newfolder': newfolder,
+          },
+          'UpyunManageAPI',
+          'createFolder');
       return [e.toString()];
     }
   }
@@ -892,33 +737,20 @@ class UpyunManageAPI {
     Dio dio = Dio(baseoptions);
     try {
       var response = await dio.delete(url);
-      if (response.statusCode == 200) {
-        return [
-          'success',
-        ];
-      } else {
+      if (response.statusCode != 200) {
         return ['failed'];
       }
+      return ['success'];
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "UpyunManageAPI",
-            methodName: "deleteFile",
-            text: formatErrorMessage({
-              'prefix': prefix,
-              'key': key,
-            }, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "UpyunManageAPI",
-            methodName: "deleteFile",
-            text: formatErrorMessage({
-              'prefix': prefix,
-              'key': key,
-            }, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogError(
+          e,
+          {
+            'prefix': prefix,
+            'key': key,
+          },
+          'UpyunManageAPI',
+          'deleteFile');
+
       return [e.toString()];
     }
   }
@@ -963,23 +795,7 @@ class UpyunManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "UpyunManageAPI",
-            methodName: "deleteFolder",
-            text: formatErrorMessage({
-              'prefix': prefix,
-            }, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "UpyunManageAPI",
-            methodName: "deleteFolder",
-            text: formatErrorMessage({
-              'prefix': prefix,
-            }, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogError(e, {'prefix': prefix}, 'UpyunManageAPI', 'deleteFolder');
       return ['failed'];
     }
   }
@@ -993,6 +809,8 @@ class UpyunManageAPI {
       String operatorPassword = element['password'];
       String url = element['url'];
       String options = configMap['options'];
+      String antiLeechToken = configMap['antiLeechToken'];
+      String antiLeechExpire = configMap['antiLeechExpire'];
       String path = '';
       if (folder == null) {
         path = configMap['path'];
@@ -1010,7 +828,8 @@ class UpyunManageAPI {
         }
       }
 
-      final upyunConfig = UpyunConfigModel(bucket, operatorName, operatorPassword, url, options, path);
+      final upyunConfig =
+          UpyunConfigModel(bucket, operatorName, operatorPassword, url, options, path, antiLeechToken, antiLeechExpire);
       final upyunConfigJson = jsonEncode(upyunConfig);
       final upyunConfigFile = await _localFile;
       await upyunConfigFile.writeAsString(upyunConfigJson);
@@ -1060,20 +879,7 @@ class UpyunManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "UpyunManageAPI",
-            methodName: "renameFile",
-            text: formatErrorMessage({'prefix': prefix, 'key': key, 'newKey': newKey}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "UpyunManageAPI",
-            methodName: "renameFile",
-            text: formatErrorMessage({'prefix': prefix, 'key': key, 'newKey': newKey}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogError(e, {'prefix': prefix, 'key': key, 'newKey': newKey}, 'UpyunManageAPI', 'renameFile');
       return [e.toString()];
     }
   }
@@ -1164,20 +970,7 @@ class UpyunManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "UpyunManageAPI",
-            methodName: "uploadFile",
-            text: formatErrorMessage({'filename': filename, 'filepath': filepath, 'prefix': prefix}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "UpyunManageAPI",
-            methodName: "uploadFile",
-            text: formatErrorMessage({'filename': filename, 'filepath': filepath, 'prefix': prefix}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogError(e, {'filename': filename, 'filepath': filepath, 'prefix': prefix}, 'UpyunManageAPI', 'uploadFile');
       return ['error'];
     }
   }
@@ -1209,20 +1002,7 @@ class UpyunManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "UpyunManageAPI",
-            methodName: "uploadNetworkFile",
-            text: formatErrorMessage({'fileLink': fileLink, 'prefix': prefix}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "UpyunManageAPI",
-            methodName: "uploadNetworkFile",
-            text: formatErrorMessage({'fileLink': fileLink, 'prefix': prefix}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogError(e, {'fileLink': fileLink, 'prefix': prefix}, 'UpyunManageAPI', 'uploadNetworkFile');
       return ['failed'];
     }
   }

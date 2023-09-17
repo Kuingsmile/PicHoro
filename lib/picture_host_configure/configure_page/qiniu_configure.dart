@@ -43,17 +43,17 @@ class QiniuConfigState extends State<QiniuConfig> {
   _initConfig() async {
     try {
       Map configMap = await QiniuManageAPI.getConfigMap();
-      _accessKeyController.text = configMap['accessKey'];
-      _secretKeyController.text = configMap['secretKey'];
-      _bucketController.text = configMap['bucket'];
-      _urlController.text = configMap['url'];
-      _areaController.text = configMap['area'];
-      if (configMap['options'] != 'None') {
+      _accessKeyController.text = configMap['accessKey'] ?? '';
+      _secretKeyController.text = configMap['secretKey'] ?? '';
+      _bucketController.text = configMap['bucket'] ?? '';
+      _urlController.text = configMap['url'] ?? '';
+      _areaController.text = configMap['area'] ?? '';
+      if (configMap['options'] != 'None' && configMap['options'] != null) {
         _optionsController.text = configMap['options'];
       } else {
         _optionsController.clear();
       }
-      if (configMap['path'] != 'None') {
+      if (configMap['path'] != 'None' && configMap['path'] != null) {
         _pathController.text = configMap['path'];
       } else {
         _pathController.clear();
@@ -280,7 +280,9 @@ class QiniuConfigState extends State<QiniuConfig> {
       }
 
       String path = '';
-      if (_pathController.text.isNotEmpty && _pathController.text.replaceAll(' ', '').isNotEmpty) {
+      if (_pathController.text.isNotEmpty &&
+          _pathController.text.replaceAll(' ', '').isNotEmpty &&
+          _pathController.text != '/') {
         path = _pathController.text;
         if (path.startsWith('/')) {
           path = path.substring(1);
@@ -292,42 +294,11 @@ class QiniuConfigState extends State<QiniuConfig> {
         path = 'None';
       }
 
-      //save asset image to app dir
-      String assetPath = 'assets/validateImage/PicHoroValidate.jpeg';
-      String appDir = await getApplicationDocumentsDirectory().then((value) {
-        return value.path;
-      });
-      String assetFilePath = '$appDir/PicHoroValidate.jpeg';
-      File assetFile = File(assetFilePath);
-
-      if (!assetFile.existsSync()) {
-        ByteData data = await rootBundle.load(assetPath);
-        List<int> bytes = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
-        await assetFile.writeAsBytes(bytes);
-      }
-      String key = 'PicHoroValidate.jpeg';
-
-      String urlSafeBase64EncodePutPolicy = QiniuImageUploadUtils.geturlSafeBase64EncodePutPolicy(bucket, key, path);
-      String uploadToken = QiniuImageUploadUtils.getUploadToken(accessKey, secretKey, urlSafeBase64EncodePutPolicy);
-      Storage storage = Storage(
-          config: Config(
-        retryLimit: 5,
-      ));
-      PutResponse putresult = await storage.putFile(File(assetFilePath), uploadToken);
-
-      if (putresult.key == key || putresult.key == '$path$key') {
-        final qiniuConfig = QiniuConfigModel(accessKey, secretKey, bucket, url, area, options, path);
-        final qiniuConfigJson = jsonEncode(qiniuConfig);
-        final qiniuConfigFile = await localFile;
-        await qiniuConfigFile.writeAsString(qiniuConfigJson);
-        if (context.mounted) {
-          return showCupertinoAlertDialog(context: context, title: '成功', content: '配置成功');
-        }
-      } else {
-        if (context.mounted) {
-          return showCupertinoAlertDialog(context: context, title: '错误', content: '验证失败');
-        }
-      }
+      final qiniuConfig = QiniuConfigModel(accessKey, secretKey, bucket, url, area, options, path);
+      final qiniuConfigJson = jsonEncode(qiniuConfig);
+      final qiniuConfigFile = await localFile;
+      await qiniuConfigFile.writeAsString(qiniuConfigJson);
+      showToast('保存成功');
     } catch (e) {
       FLog.error(
           className: 'QiniuConfigPage',
@@ -342,10 +313,9 @@ class QiniuConfigState extends State<QiniuConfig> {
 
   checkQiniuConfig() async {
     try {
-      final qiniuConfigFile = await localFile;
-      String configData = await qiniuConfigFile.readAsString();
+      String configData = await readQiniuConfig();
 
-      if (configData == "Error") {
+      if (configData == "") {
         if (context.mounted) {
           return showCupertinoAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");
         }
@@ -416,7 +386,7 @@ class QiniuConfigState extends State<QiniuConfig> {
   Future<File> get localFile async {
     final path = await _localPath;
     String defaultUser = await Global.getUser();
-    return File('$path/${defaultUser}_qiniu_config.txt');
+    return ensureFileExists(File('$path/${defaultUser}_qiniu_config.txt'));
   }
 
   Future<String> get _localPath async {
@@ -425,37 +395,17 @@ class QiniuConfigState extends State<QiniuConfig> {
   }
 
   Future<String> readQiniuConfig() async {
-    try {
-      final file = await localFile;
-      String contents = await file.readAsString();
-      return contents;
-    } catch (e) {
-      FLog.error(
-          className: 'QiniuConfigPage',
-          methodName: 'readQiniuConfig',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
-      return "Error";
-    }
+    final file = await localFile;
+    String contents = await file.readAsString();
+    return contents;
   }
 
   _setdefault() async {
-    try {
-      await Global.setPShost('qiniu');
-      await Global.setShowedPBhost('qiniu');
-      eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-      eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
-      showToast('已设置七牛云为默认图床');
-    } catch (e) {
-      FLog.error(
-          className: 'QiniuConfigPage',
-          methodName: '_setdefault',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
-      if (context.mounted) {
-        showToastWithContext(context, '错误');
-      }
-    }
+    await Global.setPShost('qiniu');
+    await Global.setShowedPBhost('qiniu');
+    eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
+    eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
+    showToast('已设置七牛云为默认图床');
   }
 }
 

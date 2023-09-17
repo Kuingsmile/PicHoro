@@ -2,8 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
-import 'package:qiniu_flutter_sdk/qiniu_flutter_sdk.dart';
-import 'package:f_logs/f_logs.dart';
+import 'package:path/path.dart' as my_path;
 
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/global.dart';
@@ -77,55 +76,78 @@ class QiniuImageUploadUtils {
   }
 
   //上传接口
-  static uploadApi({required String path, required String name, required Map configMap}) async {
-    String accessKey = configMap['accessKey'];
-    String secretKey = configMap['secretKey'];
-    String bucket = configMap['bucket'];
-    String url = configMap['url'];
-    String options = configMap['options'];
-    String qiniupath = configMap['path'];
-
-    if (!url.startsWith('http') && !url.startsWith('https')) {
-      url = 'http://$url';
-    }
-    if (url.endsWith('/')) {
-      url = url.substring(0, url.length - 1);
-    }
-
-    //不为None才处理
-    if (qiniupath != 'None') {
-      if (qiniupath.startsWith('/')) {
-        qiniupath = qiniupath.substring(1);
-      }
-      if (!qiniupath.endsWith('/')) {
-        qiniupath = '$qiniupath/';
-      }
-    }
-    String key = name;
-
-    String urlSafeBase64EncodePutPolicy = geturlSafeBase64EncodePutPolicy(bucket, key, qiniupath);
-    String uploadToken = getUploadToken(accessKey, secretKey, urlSafeBase64EncodePutPolicy);
-
+  static uploadApi({
+    required String path,
+    required String name,
+    required Map configMap,
+    Function(int, int)? onSendProgress,
+    CancelToken? cancelToken,
+  }) async {
     try {
-      Storage storage = Storage(
-          config: Config(
-        retryLimit: 5,
-      ));
-      var uploadResult = await storage.putFile(File(path), uploadToken);
+      String accessKey = configMap['accessKey'] ?? '';
+      String secretKey = configMap['secretKey'] ?? '';
+      String bucket = configMap['bucket'] ?? '';
+      String url = configMap['url'] ?? '';
+      String area = configMap['area'] ?? '';
+      String options = configMap['options'] ?? '';
+      String qiniupath = configMap['path'] ?? 'None';
 
-      if (uploadResult.key == key || uploadResult.key == '$qiniupath$key') {
+      if (!url.startsWith('http') && !url.startsWith('https')) {
+        url = 'http://$url';
+      }
+      if (url.endsWith('/')) {
+        url = url.substring(0, url.length - 1);
+      }
+      String urlpath = '';
+      //不为None才处理
+      if (qiniupath != 'None') {
+        if (qiniupath.startsWith('/')) {
+          qiniupath = qiniupath.substring(1);
+        }
+        if (!qiniupath.endsWith('/')) {
+          qiniupath = '$qiniupath/';
+        }
+        urlpath = '$qiniupath$name';
+      } else {
+        urlpath = name;
+      }
+      String key = name;
+
+      String urlSafeBase64EncodePutPolicy = geturlSafeBase64EncodePutPolicy(bucket, key, qiniupath);
+      String uploadToken = getUploadToken(accessKey, secretKey, urlSafeBase64EncodePutPolicy);
+      String host = QiniuImageUploadUtils.areaHostMap[area]!;
+      FormData formData = FormData.fromMap({
+        "key": urlpath,
+        "fileName": name,
+        "token": uploadToken,
+        "file": await MultipartFile.fromFile(path, filename: my_path.basename(path)),
+      });
+      BaseOptions baseoptions = setBaseOptions();
+      //不需要加Content-Type，host，Content-Length
+      baseoptions.headers = {
+        'Authorization': 'UpToken $uploadToken',
+      };
+      Dio dio = Dio(baseoptions);
+      var response = await dio.post(
+        host,
+        data: formData,
+        onSendProgress: onSendProgress,
+        cancelToken: cancelToken,
+      );
+
+      if (response.statusCode == HttpStatus.ok) {
         String returnUrl = '';
         String displayUrl = '';
 
         if (options == 'None') {
-          returnUrl = '$url/${uploadResult.key}';
-          displayUrl = '$url/${uploadResult.key}?imageView2/2/w/500/h/500';
+          returnUrl = '$url/${response.data['key']}';
+          displayUrl = '$url/${response.data['key']}?imageView2/2/w/500/h/500';
         } else {
           if (!options.startsWith('?')) {
             options = '?$options';
           }
-          returnUrl = '$url/${uploadResult.key}$options';
-          displayUrl = '$url/${uploadResult.key}$options';
+          returnUrl = '$url/${response.data['key']}$options';
+          displayUrl = '$url/${response.data['key']}$options';
         }
         String formatedURL = '';
         if (Global.isCopyLink == true) {
@@ -140,26 +162,15 @@ class QiniuImageUploadUtils {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "QiniuUpload",
-            methodName: "uploadApi",
-            text: formatErrorMessage({
-              'path': path,
-              'name': name,
-            }, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "QiniuUpload",
-            methodName: "uploadApi",
-            text: formatErrorMessage({
-              'path': path,
-              'name': name,
-            }, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
-      return [e.toString()];
+      flogError(
+          e,
+          {
+            'path': path,
+            'name': name,
+          },
+          "QiniuImageUploadUtils",
+          "uploadApi");
+      return ['failed'];
     }
   }
 
@@ -200,32 +211,19 @@ class QiniuImageUploadUtils {
 
     try {
       var response = await dio.delete(deleteUrl);
-      if (response.statusCode == 200) {
-        return [
-          "success",
-        ];
-      } else {
+      if (response.statusCode != 200) {
         return ["failed"];
       }
+      return ["success"];
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "QiniuUpload",
-            methodName: "deleteApi",
-            text: formatErrorMessage({
-              'fileName': fileName,
-            }, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "QiniuUpload",
-            methodName: "deleteApi",
-            text: formatErrorMessage({
-              'fileName': fileName,
-            }, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
-      return [e.toString()];
+      flogError(
+          e,
+          {
+            'fileName': fileName,
+          },
+          "QiniuImageUploadUtils",
+          "deleteApi");
+      return ["failed"];
     }
   }
 }

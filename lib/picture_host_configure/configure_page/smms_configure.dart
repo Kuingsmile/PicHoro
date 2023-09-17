@@ -34,7 +34,7 @@ class SmmsConfigState extends State<SmmsConfig> {
   _initConfig() async {
     try {
       Map configMap = await SmmsManageAPI.getConfigMap();
-      _tokenController.text = configMap['token'];
+      _tokenController.text = configMap['token'] ?? '';
     } catch (e) {
       FLog.error(
           className: 'SmmsConfigState',
@@ -150,34 +150,15 @@ class SmmsConfigState extends State<SmmsConfig> {
     try {
       final token = _tokenController.text;
 
-      String validateURL = "https://smms.app/api/v2/profile";
-      BaseOptions options = setBaseOptions();
-      options.headers = {
-        "Content-Type": 'multipart/form-data',
-        "Authorization": token,
-      };
-      //需要加一个空的formdata，不然会报错
-      FormData formData = FormData.fromMap({});
-      Dio dio = Dio(options);
-
-      var validateResponse = await dio.post(validateURL, data: formData);
-      if (validateResponse.statusCode == 200 && validateResponse.data['success'] == true) {
-        final smmsConfig = SmmsConfigModel(token);
-        final smmsConfigJson = jsonEncode(smmsConfig);
-        final smmsConfigFile = await localFile;
-        await smmsConfigFile.writeAsString(smmsConfigJson);
-        if (context.mounted) {
-          return showCupertinoAlertDialog(context: context, title: '成功', content: '配置成功');
-        }
-      } else {
-        if (context.mounted) {
-          return showCupertinoAlertDialog(context: context, title: '错误', content: '配置失败');
-        }
-      }
+      final smmsConfig = SmmsConfigModel(token);
+      final smmsConfigJson = jsonEncode(smmsConfig);
+      final smmsConfigFile = await localFile;
+      await smmsConfigFile.writeAsString(smmsConfigJson);
+      showToast('保存成功');
     } catch (e) {
       FLog.error(
           className: 'SmmsConfigState',
-          methodName: '_saveSmmsConfig_2',
+          methodName: '_saveSmmsConfig',
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
       if (context.mounted) {
@@ -188,9 +169,8 @@ class SmmsConfigState extends State<SmmsConfig> {
 
   checkSmmsConfig() async {
     try {
-      final smmsConfigFile = await localFile;
-      String configData = await smmsConfigFile.readAsString();
-      if (configData == "Error") {
+      String configData = await readHostConfig();
+      if (configData == "") {
         if (context.mounted) {
           return showCupertinoAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");
         }
@@ -235,7 +215,7 @@ class SmmsConfigState extends State<SmmsConfig> {
   Future<File> get localFile async {
     final path = await _localPath;
     String defaultUser = await Global.getUser();
-    return File('$path/${defaultUser}_smms_config.txt');
+    return ensureFileExists(File('$path/${defaultUser}_smms_config.txt'));
   }
 
   Future<String> get _localPath async {
@@ -244,18 +224,9 @@ class SmmsConfigState extends State<SmmsConfig> {
   }
 
   Future<String> readHostConfig() async {
-    try {
-      final file = await localFile;
-      String contents = await file.readAsString();
-      return contents;
-    } catch (e) {
-      FLog.error(
-          className: 'SmmsConfigState',
-          methodName: 'readHostConfig',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
-      return "Error";
-    }
+    final file = await localFile;
+    String contents = await file.readAsString();
+    return contents;
   }
 
   _setdefault() async {

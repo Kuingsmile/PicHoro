@@ -35,7 +35,7 @@ class QiniuManageAPI {
   static Future<File> get localFile async {
     final path = await _localPath;
     String defaultUser = await Global.getUser();
-    return File('$path/${defaultUser}_qiniu_config.txt');
+    return ensureFileExists(File('$path/${defaultUser}_qiniu_config.txt'));
   }
 
   static Future<String> get _localPath async {
@@ -95,6 +95,9 @@ class QiniuManageAPI {
 
   static Future<Map> getConfigMap() async {
     String configStr = await readQiniuConfig();
+    if (configStr == '') {
+      return {};
+    }
     Map configMap = json.decode(configStr);
     return configMap;
   }
@@ -223,22 +226,24 @@ signingStr=signingStr+<body>
 
   //获取存储桶名字列表
   static getBucketNameList() async {
-    Map configMap = await getConfigMap();
-    String method = 'GET';
-    String urlpath = '/buckets';
-    String accessKey = configMap['accessKey'];
-    String secretKey = configMap['secretKey'];
-    String host = 'uc.qbox.me';
-
-    String authorization = await qiniuAuthorization(method, urlpath, null, host, null, null, '', accessKey, secretKey);
-    authorization = 'Qiniu $authorization';
-    BaseOptions baseoptions = setBaseOptions();
-    baseoptions.headers = {
-      'Authorization': authorization,
-      'Host': host,
-    };
-    Dio dio = Dio(baseoptions);
     try {
+      Map configMap = await getConfigMap();
+      String method = 'GET';
+      String urlpath = '/buckets';
+      String accessKey = configMap['accessKey'];
+      String secretKey = configMap['secretKey'];
+      String host = 'uc.qbox.me';
+
+      String authorization =
+          await qiniuAuthorization(method, urlpath, null, host, null, null, '', accessKey, secretKey);
+      authorization = 'Qiniu $authorization';
+      BaseOptions baseoptions = setBaseOptions();
+      baseoptions.headers = {
+        'Authorization': authorization,
+        'Host': host,
+      };
+      Dio dio = Dio(baseoptions);
+
       var response = await dio.get('https://$host/buckets');
       if (response.statusCode == 200) {
         return ['success', response.data];
@@ -246,47 +251,36 @@ signingStr=signingStr+<body>
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "QiniuManageAPI",
-            methodName: "getBucketList",
-            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "QiniuManageAPI",
-            methodName: "getBucketList",
-            text: formatErrorMessage({}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogError(e, {}, "QiniuManageAPI", "getBucketList");
       return [e.toString()];
     }
   }
 
   //新建存储桶
   static createBucket(Map newBucketConfigMap) async {
-    Map configMap = await getConfigMap();
-    String bucket = newBucketConfigMap['bucketName'];
-    String region = newBucketConfigMap['region'];
-
-    String method = 'POST';
-    String urlpath = '/mkbucketv3/$bucket/region/$region';
-    String accessKey = configMap['accessKey'];
-    String secretKey = configMap['secretKey'];
-    String host = 'uc.qbox.me';
-
-    String authorization =
-        await qiniuAuthorization(method, urlpath, null, host, 'application/json', null, '', accessKey, secretKey);
-
-    BaseOptions baseoptions = setBaseOptions();
-    baseoptions.headers = {
-      'Authorization': 'Qiniu $authorization',
-      'Host': host,
-      'Content-Type': 'application/json',
-    };
-
-    Dio dio = Dio(baseoptions);
     try {
+      Map configMap = await getConfigMap();
+      String bucket = newBucketConfigMap['bucketName'];
+      String region = newBucketConfigMap['region'];
+
+      String method = 'POST';
+      String urlpath = '/mkbucketv3/$bucket/region/$region';
+      String accessKey = configMap['accessKey'];
+      String secretKey = configMap['secretKey'];
+      String host = 'uc.qbox.me';
+
+      String authorization =
+          await qiniuAuthorization(method, urlpath, null, host, 'application/json', null, '', accessKey, secretKey);
+
+      BaseOptions baseoptions = setBaseOptions();
+      baseoptions.headers = {
+        'Authorization': 'Qiniu $authorization',
+        'Host': host,
+        'Content-Type': 'application/json',
+      };
+
+      Dio dio = Dio(baseoptions);
+
       var response = await dio.post(
         'https://$host$urlpath',
       );
@@ -297,42 +291,30 @@ signingStr=signingStr+<body>
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "QiniuManageAPI",
-            methodName: "createBucket",
-            text: formatErrorMessage({'newBucketConfigMap': newBucketConfigMap}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "QiniuManageAPI",
-            methodName: "createBucket",
-            text: formatErrorMessage({'newBucketConfigMap': newBucketConfigMap}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogError(e, {'newBucketConfigMap': newBucketConfigMap}, "QiniuManageAPI", "createBucket");
       return [e.toString()];
     }
   }
 
   static getBucketACL(Map element) async {
-    Map configMap = await getConfigMap();
-    String bucket = element['name'];
-    String method = 'POST';
-    String urlpath = '/v2/bucketInfo?bucket=$bucket&fs=true';
-    String accessKey = configMap['accessKey'];
-    String secretKey = configMap['secretKey'];
-    String host = 'uc.qiniuapi.com';
-    String authorization =
-        await qiniuAuthorization(method, urlpath, null, host, 'application/json', null, '', accessKey, secretKey);
-    BaseOptions baseoptions = setBaseOptions();
-    baseoptions.headers = {
-      'Authorization': 'Qiniu $authorization',
-      'Host': host,
-      'Content-Type': 'application/json',
-    };
-    Dio dio = Dio(baseoptions);
     try {
+      Map configMap = await getConfigMap();
+      String bucket = element['name'];
+      String method = 'POST';
+      String urlpath = '/v2/bucketInfo?bucket=$bucket&fs=true';
+      String accessKey = configMap['accessKey'];
+      String secretKey = configMap['secretKey'];
+      String host = 'uc.qiniuapi.com';
+      String authorization =
+          await qiniuAuthorization(method, urlpath, null, host, 'application/json', null, '', accessKey, secretKey);
+      BaseOptions baseoptions = setBaseOptions();
+      baseoptions.headers = {
+        'Authorization': 'Qiniu $authorization',
+        'Host': host,
+        'Content-Type': 'application/json',
+      };
+      Dio dio = Dio(baseoptions);
+
       var response = await dio.post('https://$host$urlpath');
 
       if (response.statusCode == 200) {
@@ -341,45 +323,34 @@ signingStr=signingStr+<body>
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "QiniuManageAPI",
-            methodName: "getBucketACL",
-            text: formatErrorMessage({'element': element}, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "QiniuManageAPI",
-            methodName: "getBucketACL",
-            text: formatErrorMessage({'element': element}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogError(e, {'element': element}, "QiniuManageAPI", "getBucketACL");
       return [e.toString()];
     }
   }
 
   //删除存储桶
   static deleteBucket(Map element) async {
-    Map configMap = await getConfigMap();
-    String bucket = element['name'];
-
-    String method = 'POST';
-    String urlpath = '/drop/$bucket';
-    String accessKey = configMap['accessKey'];
-    String secretKey = configMap['secretKey'];
-    String host = 'uc.qbox.me';
-
-    String authorization =
-        await qiniuAuthorization(method, urlpath, null, host, 'application/json', null, '', accessKey, secretKey);
-
-    BaseOptions baseoptions = setBaseOptions();
-    baseoptions.headers = {
-      'Authorization': 'Qiniu $authorization',
-      'Host': host,
-      'Content-Type': 'application/json',
-    };
-    Dio dio = Dio(baseoptions);
     try {
+      Map configMap = await getConfigMap();
+      String bucket = element['name'];
+
+      String method = 'POST';
+      String urlpath = '/drop/$bucket';
+      String accessKey = configMap['accessKey'];
+      String secretKey = configMap['secretKey'];
+      String host = 'uc.qbox.me';
+
+      String authorization =
+          await qiniuAuthorization(method, urlpath, null, host, 'application/json', null, '', accessKey, secretKey);
+
+      BaseOptions baseoptions = setBaseOptions();
+      baseoptions.headers = {
+        'Authorization': 'Qiniu $authorization',
+        'Host': host,
+        'Content-Type': 'application/json',
+      };
+      Dio dio = Dio(baseoptions);
+
       var response = await dio.post('https://$host$urlpath');
 
       if (response.statusCode == 200) {
@@ -388,40 +359,29 @@ signingStr=signingStr+<body>
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "QiniuManageAPI",
-            methodName: "deleteBucket",
-            text: formatErrorMessage({'element': element}, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "QiniuManageAPI",
-            methodName: "deleteBucket",
-            text: formatErrorMessage({'element': element}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogError(e, {'element': element}, "QiniuManageAPI", "deleteBucket");
       return [e.toString()];
     }
   }
 
   //查询绑定域名
   static queryDomains(Map element) async {
-    Map configMap = await getConfigMap();
-    String bucket = element['name'];
-
-    String method = 'GET';
-    String urlpath = '/v2/domains?tbl=$bucket';
-    String accessKey = configMap['accessKey'];
-    String secretKey = configMap['secretKey'];
-    String host = 'uc.qbox.me';
-
-    String authorization = await qiniuAuthorization(
-        method, urlpath, null, host, 'application/x-www-form-urlencoded', null, '', accessKey, secretKey);
-
-    BaseOptions baseoptions = setBaseOptions();
-    Dio dio = Dio(baseoptions);
     try {
+      Map configMap = await getConfigMap();
+      String bucket = element['name'];
+
+      String method = 'GET';
+      String urlpath = '/v2/domains?tbl=$bucket';
+      String accessKey = configMap['accessKey'];
+      String secretKey = configMap['secretKey'];
+      String host = 'uc.qbox.me';
+
+      String authorization = await qiniuAuthorization(
+          method, urlpath, null, host, 'application/x-www-form-urlencoded', null, '', accessKey, secretKey);
+
+      BaseOptions baseoptions = setBaseOptions();
+      Dio dio = Dio(baseoptions);
+
       var response = await dio.get(
         'https://uc.qbox.me/v2/domains',
         queryParameters: {
@@ -442,40 +402,29 @@ signingStr=signingStr+<body>
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "QiniuManageAPI",
-            methodName: "queryDomains",
-            text: formatErrorMessage({'element': element}, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "QiniuManageAPI",
-            methodName: "queryDomains",
-            text: formatErrorMessage({'element': element}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogError(e, {'element': element}, "QiniuManageAPI", "queryDomains");
       return [e.toString()];
     }
   }
 
   //设置权限
   static setACL(Map element, String acl) async {
-    Map configMap = await getConfigMap();
-    String bucket = element['name'];
-
-    String method = 'POST';
-    String urlpath = '/private?bucket=$bucket&private=$acl';
-    String accessKey = configMap['accessKey'];
-    String secretKey = configMap['secretKey'];
-    String host = 'uc.qbox.me';
-
-    String authorization = await qiniuAuthorization(
-        method, urlpath, null, host, 'application/x-www-form-urlencoded', null, '', accessKey, secretKey);
-
-    BaseOptions baseoptions = setBaseOptions();
-    Dio dio = Dio(baseoptions);
     try {
+      Map configMap = await getConfigMap();
+      String bucket = element['name'];
+
+      String method = 'POST';
+      String urlpath = '/private?bucket=$bucket&private=$acl';
+      String accessKey = configMap['accessKey'];
+      String secretKey = configMap['secretKey'];
+      String host = 'uc.qbox.me';
+
+      String authorization = await qiniuAuthorization(
+          method, urlpath, null, host, 'application/x-www-form-urlencoded', null, '', accessKey, secretKey);
+
+      BaseOptions baseoptions = setBaseOptions();
+      Dio dio = Dio(baseoptions);
+
       var response = await dio.post(
         'https://uc.qbox.me/private',
         queryParameters: {
@@ -497,19 +446,7 @@ signingStr=signingStr+<body>
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "QiniuManageAPI",
-            methodName: "setACL",
-            text: formatErrorMessage({'element': element}, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "QiniuManageAPI",
-            methodName: "setACL",
-            text: formatErrorMessage({'element': element}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogError(e, {'element': element}, "QiniuManageAPI", "setACL");
       return [e.toString()];
     }
   }
@@ -572,34 +509,34 @@ signingStr=signingStr+<body>
 
   //查询存储桶文件列表
   static queryBucketFiles(Map element, Map<String, dynamic> query) async {
-    Map configMap = await getConfigMap();
-    String bucket = element['name'];
-
-    String method = 'GET';
-    String urlpath = '/list';
-    String accessKey = configMap['accessKey'];
-    String secretKey = configMap['secretKey'];
-    String host = 'rsf.qiniuapi.com';
-    String queryStr = '';
-
-    if (query['delimiter'] == null && query['prefix'] == null) {
-      queryStr = 'bucket=$bucket&limit=1000';
-    } else if (query['delimiter'] == null && query['prefix'] != null) {
-      queryStr = 'bucket=$bucket&limit=1000&prefix=${Uri.encodeComponent(query['prefix'])}';
-    } else if (query['delimiter'] != null && query['prefix'] == null) {
-      queryStr = 'bucket=$bucket&limit=1000&delimiter=${Uri.encodeComponent(query['delimiter'])}';
-    } else {
-      queryStr =
-          'bucket=$bucket&limit=1000&prefix=${Uri.encodeComponent(query['prefix'])}&delimiter=${Uri.encodeComponent(query['delimiter'])}';
-    }
-
-    String authorization = await qiniuAuthorization(
-        method, urlpath, queryStr, host, 'application/x-www-form-urlencoded', null, '', accessKey, secretKey);
-
-    BaseOptions baseoptions = setBaseOptions();
-    Dio dio = Dio(baseoptions);
-
     try {
+      Map configMap = await getConfigMap();
+      String bucket = element['name'];
+
+      String method = 'GET';
+      String urlpath = '/list';
+      String accessKey = configMap['accessKey'];
+      String secretKey = configMap['secretKey'];
+      String host = 'rsf.qiniuapi.com';
+      String queryStr = '';
+
+      if (query['delimiter'] == null && query['prefix'] == null) {
+        queryStr = 'bucket=$bucket&limit=1000';
+      } else if (query['delimiter'] == null && query['prefix'] != null) {
+        queryStr = 'bucket=$bucket&limit=1000&prefix=${Uri.encodeComponent(query['prefix'])}';
+      } else if (query['delimiter'] != null && query['prefix'] == null) {
+        queryStr = 'bucket=$bucket&limit=1000&delimiter=${Uri.encodeComponent(query['delimiter'])}';
+      } else {
+        queryStr =
+            'bucket=$bucket&limit=1000&prefix=${Uri.encodeComponent(query['prefix'])}&delimiter=${Uri.encodeComponent(query['delimiter'])}';
+      }
+
+      String authorization = await qiniuAuthorization(
+          method, urlpath, queryStr, host, 'application/x-www-form-urlencoded', null, '', accessKey, secretKey);
+
+      BaseOptions baseoptions = setBaseOptions();
+      Dio dio = Dio(baseoptions);
+
       String marker = '';
       String newQuery = queryStr;
       var response = await dio.get(
@@ -672,20 +609,7 @@ signingStr=signingStr+<body>
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "QiniuManageAPI",
-            methodName: "queryBucketFiles",
-            text: formatErrorMessage({'element': element, 'query': query}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "QiniuManageAPI",
-            methodName: "queryBucketFiles",
-            text: formatErrorMessage({'element': element, 'query': query}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogError(e, {'element': element, 'query': query}, "QiniuManageAPI", "queryBucketFiles");
       return [e.toString()];
     }
   }
@@ -711,28 +635,28 @@ signingStr=signingStr+<body>
 
   //新建文件夹
   static createFolder(Map element, String prefix, String newfolder) async {
-    Map configMap = await getConfigMap();
-    String bucket = element['name'];
-    String area = element['area'];
-    String host = QiniuImageUploadUtils.areaHostMap[area]!;
-    String accessKey = configMap['accessKey'];
-    String secretKey = configMap['secretKey'];
-    String urlSafeBase64EncodePutPolicy =
-        QiniuImageUploadUtils.geturlSafeBase64EncodePutPolicy(bucket, prefix, newfolder);
-    String uploadToken = QiniuImageUploadUtils.getUploadToken(accessKey, secretKey, urlSafeBase64EncodePutPolicy);
-
-    String urlpath = '$prefix$newfolder';
-    FormData formData = FormData.fromMap({
-      "key": urlpath,
-      "fileName": newfolder,
-      "token": uploadToken,
-      "file": '',
-    });
-
-    BaseOptions baseoptions = setBaseOptions();
-    Dio dio = Dio(baseoptions);
-
     try {
+      Map configMap = await getConfigMap();
+      String bucket = element['name'];
+      String area = element['area'];
+      String host = QiniuImageUploadUtils.areaHostMap[area]!;
+      String accessKey = configMap['accessKey'];
+      String secretKey = configMap['secretKey'];
+      String urlSafeBase64EncodePutPolicy =
+          QiniuImageUploadUtils.geturlSafeBase64EncodePutPolicy(bucket, prefix, newfolder);
+      String uploadToken = QiniuImageUploadUtils.getUploadToken(accessKey, secretKey, urlSafeBase64EncodePutPolicy);
+
+      String urlpath = '$prefix$newfolder';
+      FormData formData = FormData.fromMap({
+        "key": urlpath,
+        "fileName": newfolder,
+        "token": uploadToken,
+        "file": '',
+      });
+
+      BaseOptions baseoptions = setBaseOptions();
+      Dio dio = Dio(baseoptions);
+
       var response = await dio.post(
         host,
         data: formData,
@@ -744,50 +668,35 @@ signingStr=signingStr+<body>
       );
 
       if (response.statusCode == 200) {
-        return [
-          'success',
-        ];
+        return ['success'];
       } else {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "QiniuManageAPI",
-            methodName: "createFolder",
-            text: formatErrorMessage({'element': element, 'prefix': prefix, 'newfolder': newfolder}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "QiniuManageAPI",
-            methodName: "createFolder",
-            text: formatErrorMessage({'element': element, 'prefix': prefix, 'newfolder': newfolder}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogError(e, {'element': element, 'prefix': prefix, 'newfolder': newfolder}, "QiniuManageAPI", "createFolder");
       return [e.toString()];
     }
   }
 
   //删除文件
   static deleteFile(Map element, String key) async {
-    Map configMap = await getConfigMap();
-    String bucket = element['name'];
-
-    String method = 'DELETE';
-    String urlpath = '/delete';
-    String encodeEntryURI = urlSafeBase64Encode(utf8.encode('$bucket:$key'));
-    urlpath = '$urlpath/$encodeEntryURI';
-    String accessKey = configMap['accessKey'];
-    String secretKey = configMap['secretKey'];
-    String host = 'rs.qiniuapi.com';
-    String authorization = await qiniuAuthorization(
-        method, urlpath, null, host, 'application/x-www-form-urlencoded', null, '', accessKey, secretKey);
-
-    BaseOptions baseoptions = setBaseOptions();
-    Dio dio = Dio(baseoptions);
-
     try {
+      Map configMap = await getConfigMap();
+      String bucket = element['name'];
+
+      String method = 'DELETE';
+      String urlpath = '/delete';
+      String encodeEntryURI = urlSafeBase64Encode(utf8.encode('$bucket:$key'));
+      urlpath = '$urlpath/$encodeEntryURI';
+      String accessKey = configMap['accessKey'];
+      String secretKey = configMap['secretKey'];
+      String host = 'rs.qiniuapi.com';
+      String authorization = await qiniuAuthorization(
+          method, urlpath, null, host, 'application/x-www-form-urlencoded', null, '', accessKey, secretKey);
+
+      BaseOptions baseoptions = setBaseOptions();
+      Dio dio = Dio(baseoptions);
+
       var response = await dio.delete(
         'https://$host$urlpath',
         options: Options(
@@ -800,27 +709,12 @@ signingStr=signingStr+<body>
       );
 
       if (response.statusCode == 200) {
-        return [
-          'success',
-        ];
+        return ['success'];
       } else {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "QiniuManageAPI",
-            methodName: "deleteFile",
-            text: formatErrorMessage({'element': element, 'key': key}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "QiniuManageAPI",
-            methodName: "deleteFile",
-            text: formatErrorMessage({'element': element, 'key': key}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogError(e, {'element': element, 'key': key}, "QiniuManageAPI", "deleteFile");
       return [e.toString()];
     }
   }
@@ -874,25 +768,25 @@ signingStr=signingStr+<body>
 
   //复制/移动/重命名文件
   static copyFile(String operateType, Map element, String key, String newKey, bool isCover) async {
-    Map configMap = await getConfigMap();
-    String bucket = element['name'];
-
-    String method = 'POST';
-    String entryURISrc = '$bucket:$key';
-    String entryURIDest = '$bucket:$newKey';
-    String encodeEntryURI = urlSafeBase64Encode(utf8.encode(entryURISrc));
-    String encodeEntryURIDest = urlSafeBase64Encode(utf8.encode(entryURIDest));
-    String urlpath = '/$operateType/$encodeEntryURI/$encodeEntryURIDest/force/$isCover';
-    String accessKey = configMap['accessKey'];
-    String secretKey = configMap['secretKey'];
-    String host = 'rs.qiniuapi.com';
-    String authorization = await qiniuAuthorization(
-        method, urlpath, null, host, 'application/x-www-form-urlencoded', null, '', accessKey, secretKey);
-
-    BaseOptions baseoptions = setBaseOptions();
-    Dio dio = Dio(baseoptions);
-
     try {
+      Map configMap = await getConfigMap();
+      String bucket = element['name'];
+
+      String method = 'POST';
+      String entryURISrc = '$bucket:$key';
+      String entryURIDest = '$bucket:$newKey';
+      String encodeEntryURI = urlSafeBase64Encode(utf8.encode(entryURISrc));
+      String encodeEntryURIDest = urlSafeBase64Encode(utf8.encode(entryURIDest));
+      String urlpath = '/$operateType/$encodeEntryURI/$encodeEntryURIDest/force/$isCover';
+      String accessKey = configMap['accessKey'];
+      String secretKey = configMap['secretKey'];
+      String host = 'rs.qiniuapi.com';
+      String authorization = await qiniuAuthorization(
+          method, urlpath, null, host, 'application/x-www-form-urlencoded', null, '', accessKey, secretKey);
+
+      BaseOptions baseoptions = setBaseOptions();
+      Dio dio = Dio(baseoptions);
+
       var response = await dio.post(
         'https://$host$urlpath',
         options: Options(
@@ -914,20 +808,7 @@ signingStr=signingStr+<body>
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "QiniuManageAPI",
-            methodName: "copyFile",
-            text: formatErrorMessage({'element': element, 'key': key, 'newKey': newKey}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "QiniuManageAPI",
-            methodName: "copyFile",
-            text: formatErrorMessage({'element': element, 'key': key, 'newKey': newKey}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogError(e, {'element': element, 'key': key, 'newKey': newKey}, "QiniuManageAPI", "copyFile");
       if (e.toString().contains('614')) {
         return ['existed'];
       } else {
@@ -938,31 +819,32 @@ signingStr=signingStr+<body>
 
   //异步第三方资源抓取
   static sisyphusFetch(Map element, String bucketPrefix, String link) async {
-    Map configMap = await getConfigMap();
-    String bucket = element['name'];
-    String region = element['area'];
-    String host = 'api-$region.qiniuapi.com';
-    String contentType = 'application/json';
-    String method = 'POST';
-    String urlpath = '/sisyphus/fetch';
-    String accessKey = configMap['accessKey'];
-    String secretKey = configMap['secretKey'];
-    String fileNames = link.split('/').last;
-    if (fileNames.contains('?')) {
-      fileNames = fileNames.split('?').first;
-    }
-    Map<String, dynamic> body = {
-      'url': link,
-      'bucket': bucket,
-      'key': bucketPrefix + fileNames,
-    };
-    String bodyString = json.encode(body);
-    String authorization =
-        await qiniuAuthorization(method, urlpath, null, host, contentType, null, bodyString, accessKey, secretKey);
-
-    BaseOptions baseoptions = setBaseOptions();
-    Dio dio = Dio(baseoptions);
     try {
+      Map configMap = await getConfigMap();
+      String bucket = element['name'];
+      String region = element['area'];
+      String host = 'api-$region.qiniuapi.com';
+      String contentType = 'application/json';
+      String method = 'POST';
+      String urlpath = '/sisyphus/fetch';
+      String accessKey = configMap['accessKey'];
+      String secretKey = configMap['secretKey'];
+      String fileNames = link.split('/').last;
+      if (fileNames.contains('?')) {
+        fileNames = fileNames.split('?').first;
+      }
+      Map<String, dynamic> body = {
+        'url': link,
+        'bucket': bucket,
+        'key': bucketPrefix + fileNames,
+      };
+      String bodyString = json.encode(body);
+      String authorization =
+          await qiniuAuthorization(method, urlpath, null, host, contentType, null, bodyString, accessKey, secretKey);
+
+      BaseOptions baseoptions = setBaseOptions();
+      Dio dio = Dio(baseoptions);
+
       var response = await dio.post(
         'https://$host$urlpath',
         data: body,
@@ -982,20 +864,7 @@ signingStr=signingStr+<body>
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "QiniuManageAPI",
-            methodName: "sisyphusFetch",
-            text: formatErrorMessage({'element': element, 'bucketPrefix': bucketPrefix, 'link': link}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "QiniuManageAPI",
-            methodName: "sisyphusFetch",
-            text: formatErrorMessage({'element': element, 'bucketPrefix': bucketPrefix, 'link': link}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogError(e, {'element': element, 'bucketPrefix': bucketPrefix, 'link': link}, "QiniuManageAPI", "sisyphusFetch");
       return [e.toString()];
     }
   }

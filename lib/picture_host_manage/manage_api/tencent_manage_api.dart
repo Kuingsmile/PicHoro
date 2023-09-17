@@ -37,14 +37,13 @@ class TencentManageAPI {
     'na-ashburn': '弗吉尼亚(美东)',
     'na-toronto': '多伦多',
     'sa-saopaulo': '圣保罗',
-    'eu-frankfurt': '法兰克福',
-    'eu-moscow': '莫斯科',
+    'eu-frankfurt': '法兰克福'
   };
 
   static Future<File> get _localFile async {
     final path = await _localPath;
     String defaultUser = await Global.getUser();
-    return File('$path/${defaultUser}_tencent_config.txt');
+    return ensureFileExists(File('$path/${defaultUser}_tencent_config.txt'));
   }
 
   static Future<String> get _localPath async {
@@ -69,6 +68,9 @@ class TencentManageAPI {
 
   static Future<Map> getConfigMap() async {
     String configStr = await readTencentConfig();
+    if (configStr == '') {
+      return {};
+    }
     Map configMap = json.decode(configStr);
     return configMap;
   }
@@ -137,27 +139,28 @@ class TencentManageAPI {
 
   //获取存储桶列表
   static getBucketList() async {
-    Map configMap = await getConfigMap();
-    String method = 'GET';
-    String urlpath = '/';
-    String secretId = configMap['secretId'];
-    String secretKey = configMap['secretKey'];
-
-    String host = 'service.cos.myqcloud.com';
-
-    Map header = {
-      'Host': 'service.cos.myqcloud.com',
-    };
-
-    String authorization = tecentAuthorization(method, urlpath, header, secretId, secretKey, {});
-
-    BaseOptions baseoptions = setBaseOptions();
-    baseoptions.headers = {
-      'Authorization': authorization,
-      'Host': host,
-    };
-    Dio dio = Dio(baseoptions);
     try {
+      Map configMap = await getConfigMap();
+      String method = 'GET';
+      String urlpath = '/';
+      String secretId = configMap['secretId'];
+      String secretKey = configMap['secretKey'];
+
+      String host = 'service.cos.myqcloud.com';
+
+      Map header = {
+        'Host': 'service.cos.myqcloud.com',
+      };
+
+      String authorization = tecentAuthorization(method, urlpath, header, secretId, secretKey, {});
+
+      BaseOptions baseoptions = setBaseOptions();
+      baseoptions.headers = {
+        'Authorization': authorization,
+        'Host': host,
+      };
+      Dio dio = Dio(baseoptions);
+
       var response = await dio.get('https://$host');
       if (response.statusCode == 200) {
         String responseBody = response.data;
@@ -169,69 +172,58 @@ class TencentManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "TencentManageAPI",
-            methodName: "getBucketList",
-            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "TencentManageAPI",
-            methodName: "getBucketList",
-            text: formatErrorMessage({}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogError(e, {}, "TencentManageAPI", "getBucketList");
       return [e.toString()];
     }
   }
 
   //新建存储桶
   static createBucket(Map newBucketConfigMap) async {
-    Map configMap = await getConfigMap();
-    String appId = configMap['appId'];
-    String bucket = newBucketConfigMap['bucketName'];
-    String region = newBucketConfigMap['region'];
-    bool multiAZ = newBucketConfigMap['multiAZ'];
-    String xCosACL = newBucketConfigMap['xCosACL'];
-
-    if (multiAZ == true &&
-        (region != 'ap-beijing' && region != 'ap-guangzhou') &&
-        (region != 'ap-shanghai' && region != 'ap-singapore')) {
-      return [
-        'multiAZ error',
-      ];
-    }
-    var body = '<CreateBucketConfiguration><BucketAZConfig>MAZ</BucketAZConfig></CreateBucketConfiguration>';
-    var bodyMd5 = md5.convert(utf8.encode(body));
-    String base64BodyMd5 = base64.encode(bodyMd5.bytes);
-    if (!bucket.endsWith('-appId')) {
-      bucket = '$bucket-$appId';
-    }
-
-    String method = 'PUT';
-    String urlpath = '/';
-    String secretId = configMap['secretId'];
-    String secretKey = configMap['secretKey'];
-    String host = '$bucket.cos.$region.myqcloud.com';
-    Map<String, dynamic> header = {
-      'Host': host,
-      'x-cos-acl': xCosACL,
-    };
-
-    if (multiAZ == true) {
-      header['content-type'] = 'application/xml';
-      header['content-length'] = body.length.toString();
-      header['content-md5'] = base64BodyMd5;
-    }
-
-    String authorization = tecentAuthorization(method, urlpath, header, secretId, secretKey, {});
-
-    BaseOptions baseoptions = setBaseOptions();
-    baseoptions.headers = header;
-    baseoptions.headers['Authorization'] = authorization;
-    Dio dio = Dio(baseoptions);
     try {
+      Map configMap = await getConfigMap();
+      String appId = configMap['appId'];
+      String bucket = newBucketConfigMap['bucketName'];
+      String region = newBucketConfigMap['region'];
+      bool multiAZ = newBucketConfigMap['multiAZ'];
+      String xCosACL = newBucketConfigMap['xCosACL'];
+
+      if (multiAZ == true &&
+          (region != 'ap-beijing' && region != 'ap-guangzhou') &&
+          (region != 'ap-shanghai' && region != 'ap-singapore')) {
+        return [
+          'multiAZ error',
+        ];
+      }
+      var body = '<CreateBucketConfiguration><BucketAZConfig>MAZ</BucketAZConfig></CreateBucketConfiguration>';
+      var bodyMd5 = md5.convert(utf8.encode(body));
+      String base64BodyMd5 = base64.encode(bodyMd5.bytes);
+      if (!bucket.endsWith('-appId')) {
+        bucket = '$bucket-$appId';
+      }
+
+      String method = 'PUT';
+      String urlpath = '/';
+      String secretId = configMap['secretId'];
+      String secretKey = configMap['secretKey'];
+      String host = '$bucket.cos.$region.myqcloud.com';
+      Map<String, dynamic> header = {
+        'Host': host,
+        'x-cos-acl': xCosACL,
+      };
+
+      if (multiAZ == true) {
+        header['content-type'] = 'application/xml';
+        header['content-length'] = body.length.toString();
+        header['content-md5'] = base64BodyMd5;
+      }
+
+      String authorization = tecentAuthorization(method, urlpath, header, secretId, secretKey, {});
+
+      BaseOptions baseoptions = setBaseOptions();
+      baseoptions.headers = header;
+      baseoptions.headers['Authorization'] = authorization;
+      Dio dio = Dio(baseoptions);
+
       Response response;
       if (multiAZ == true) {
         response = await dio.put('https://$host', data: body);
@@ -245,45 +237,33 @@ class TencentManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "TencentManageAPI",
-            methodName: "createBucket",
-            text: formatErrorMessage({'newBucketConfigMap': newBucketConfigMap}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "TencentManageAPI",
-            methodName: "createBucket",
-            text: formatErrorMessage({'newBucketConfigMap': newBucketConfigMap}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogError(e, {'newBucketConfigMap': newBucketConfigMap}, "TencentManageAPI", "createBucket");
       return [e.toString()];
     }
   }
 
   //删除存储桶
   static deleteBucket(Map element) async {
-    Map configMap = await getConfigMap();
-    String bucket = element['name'];
-    String region = element['location'];
-
-    String method = 'DELETE';
-    String urlpath = '/';
-    String secretId = configMap['secretId'];
-    String secretKey = configMap['secretKey'];
-    String host = '$bucket.cos.$region.myqcloud.com';
-    Map<String, dynamic> header = {
-      'Host': host,
-    };
-    String authorization = tecentAuthorization(method, urlpath, header, secretId, secretKey, {});
-
-    BaseOptions baseoptions = setBaseOptions();
-    baseoptions.headers = header;
-    baseoptions.headers['Authorization'] = authorization;
-    Dio dio = Dio(baseoptions);
     try {
+      Map configMap = await getConfigMap();
+      String bucket = element['name'];
+      String region = element['location'];
+
+      String method = 'DELETE';
+      String urlpath = '/';
+      String secretId = configMap['secretId'];
+      String secretKey = configMap['secretKey'];
+      String host = '$bucket.cos.$region.myqcloud.com';
+      Map<String, dynamic> header = {
+        'Host': host,
+      };
+      String authorization = tecentAuthorization(method, urlpath, header, secretId, secretKey, {});
+
+      BaseOptions baseoptions = setBaseOptions();
+      baseoptions.headers = header;
+      baseoptions.headers['Authorization'] = authorization;
+      Dio dio = Dio(baseoptions);
+
       var response = await dio.delete('https://$host');
 
       if (response.statusCode == 204) {
@@ -292,45 +272,38 @@ class TencentManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "TencentManageAPI",
-            methodName: "deleteBucket",
-            text: formatErrorMessage({'element': element}, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "TencentManageAPI",
-            methodName: "deleteBucket",
-            text: formatErrorMessage({'element': element}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogError(
+        e,
+        {'element': element},
+        "TencentManageAPI",
+        "deleteBucket",
+      );
       return [e.toString()];
     }
   }
 
   //查询存储桶权限
   static queryACLPolicy(Map element) async {
-    Map configMap = await getConfigMap();
-    String bucket = element['name'];
-    String region = element['location'];
-
-    String method = 'GET';
-    String urlpath = '/';
-    String secretId = configMap['secretId'];
-    String secretKey = configMap['secretKey'];
-    String host = '$bucket.cos.$region.myqcloud.com';
-    Map<String, dynamic> header = {
-      'Host': host,
-    };
-    String authorization = tecentAuthorization(method, urlpath, header, secretId, secretKey, {'acl': ''});
-
-    BaseOptions baseoptions = setBaseOptions();
-    baseoptions.headers = header;
-    baseoptions.headers['Authorization'] = authorization;
-    Dio dio = Dio(baseoptions);
-
     try {
+      Map configMap = await getConfigMap();
+      String bucket = element['name'];
+      String region = element['location'];
+
+      String method = 'GET';
+      String urlpath = '/';
+      String secretId = configMap['secretId'];
+      String secretKey = configMap['secretKey'];
+      String host = '$bucket.cos.$region.myqcloud.com';
+      Map<String, dynamic> header = {
+        'Host': host,
+      };
+      String authorization = tecentAuthorization(method, urlpath, header, secretId, secretKey, {'acl': ''});
+
+      BaseOptions baseoptions = setBaseOptions();
+      baseoptions.headers = header;
+      baseoptions.headers['Authorization'] = authorization;
+      Dio dio = Dio(baseoptions);
+
       var response = await dio.get('https://$host/?acl');
       var responseBody = response.data;
       final myTransformer = Xml2Json();
@@ -343,46 +316,34 @@ class TencentManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "TencentManageAPI",
-            methodName: "queryACLPolicy",
-            text: formatErrorMessage({'element': element}, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "TencentManageAPI",
-            methodName: "queryACLPolicy",
-            text: formatErrorMessage({'element': element}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogError(e, {'element': element}, "TencentManageAPI", "queryACLPolicy");
       return [e.toString()];
     }
   }
 
   //更改存储桶权限
   static changeACLPolicy(Map element, String newACL) async {
-    Map configMap = await getConfigMap();
-    String bucket = element['name'];
-    String region = element['location'];
-
-    String method = 'PUT';
-    String urlpath = '/';
-    String secretId = configMap['secretId'];
-    String secretKey = configMap['secretKey'];
-    String host = '$bucket.cos.$region.myqcloud.com';
-    Map<String, dynamic> header = {
-      'Host': host,
-      'x-cos-acl': newACL,
-    };
-    String authorization = tecentAuthorization(method, urlpath, header, secretId, secretKey, {'acl': ''});
-
-    BaseOptions baseoptions = setBaseOptions();
-    baseoptions.headers = header;
-    baseoptions.headers['Authorization'] = authorization;
-    Dio dio = Dio(baseoptions);
-
     try {
+      Map configMap = await getConfigMap();
+      String bucket = element['name'];
+      String region = element['location'];
+
+      String method = 'PUT';
+      String urlpath = '/';
+      String secretId = configMap['secretId'];
+      String secretKey = configMap['secretKey'];
+      String host = '$bucket.cos.$region.myqcloud.com';
+      Map<String, dynamic> header = {
+        'Host': host,
+        'x-cos-acl': newACL,
+      };
+      String authorization = tecentAuthorization(method, urlpath, header, secretId, secretKey, {'acl': ''});
+
+      BaseOptions baseoptions = setBaseOptions();
+      baseoptions.headers = header;
+      baseoptions.headers['Authorization'] = authorization;
+      Dio dio = Dio(baseoptions);
+
       var response = await dio.put('https://$host/?acl');
       if (response.statusCode == 200) {
         return ['success'];
@@ -390,20 +351,7 @@ class TencentManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "TencentManageAPI",
-            methodName: "changeACLPolicy",
-            text: formatErrorMessage({'element': element, 'newACL': newACL}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "TencentManageAPI",
-            methodName: "changeACLPolicy",
-            text: formatErrorMessage({'element': element, 'newACL': newACL}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogError(e, {'element': element, 'newACL': newACL}, "TencentManageAPI", "changeACLPolicy");
       return [e.toString()];
     }
   }
@@ -444,28 +392,28 @@ class TencentManageAPI {
 
   //查询存储桶文件列表
   static queryBucketFiles(Map element, Map<String, dynamic> query) async {
-    Map configMap = await getConfigMap();
-    String bucket = element['name'];
-    String region = element['location'];
-
-    String method = 'GET';
-    String urlpath = '/';
-    String secretId = configMap['secretId'];
-    String secretKey = configMap['secretKey'];
-    String host = '$bucket.cos.$region.myqcloud.com';
-    Map<String, dynamic> header = {
-      'Host': host,
-    };
-    query['max-keys'] = 1000;
-
-    String authorization = tecentAuthorization(method, urlpath, header, secretId, secretKey, query);
-
-    BaseOptions baseoptions = setBaseOptions();
-    baseoptions.headers = header;
-    baseoptions.headers['Authorization'] = authorization;
-    Dio dio = Dio(baseoptions);
-
     try {
+      Map configMap = await getConfigMap();
+      String bucket = element['name'];
+      String region = element['location'];
+
+      String method = 'GET';
+      String urlpath = '/';
+      String secretId = configMap['secretId'];
+      String secretKey = configMap['secretKey'];
+      String host = '$bucket.cos.$region.myqcloud.com';
+      Map<String, dynamic> header = {
+        'Host': host,
+      };
+      query['max-keys'] = 1000;
+
+      String authorization = tecentAuthorization(method, urlpath, header, secretId, secretKey, query);
+
+      BaseOptions baseoptions = setBaseOptions();
+      baseoptions.headers = header;
+      baseoptions.headers['Authorization'] = authorization;
+      Dio dio = Dio(baseoptions);
+
       String marker = '';
       var response = await dio.get('https://$host', queryParameters: query);
       var responseBody = response.data;
@@ -525,20 +473,7 @@ class TencentManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "TencentManageAPI",
-            methodName: "queryBucketFiles",
-            text: formatErrorMessage({'element': element, 'query': query}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "TencentManageAPI",
-            methodName: "queryBucketFiles",
-            text: formatErrorMessage({'element': element, 'query': query}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogError(e, {'element': element, 'query': query}, "TencentManageAPI", "queryBucketFiles");
       return [e.toString()];
     }
   }
@@ -560,26 +495,26 @@ class TencentManageAPI {
 
   //删除文件
   static deleteFile(Map element, String key) async {
-    Map configMap = await getConfigMap();
-    String bucket = element['name'];
-    String region = element['location'];
-
-    String method = 'DELETE';
-    String urlpath = '/$key';
-    String secretId = configMap['secretId'];
-    String secretKey = configMap['secretKey'];
-    String host = '$bucket.cos.$region.myqcloud.com';
-    Map<String, dynamic> header = {
-      'Host': host,
-    };
-    String authorization = tecentAuthorization(method, urlpath, header, secretId, secretKey, {});
-
-    BaseOptions baseoptions = setBaseOptions();
-    baseoptions.headers = header;
-    baseoptions.headers['Authorization'] = authorization;
-    Dio dio = Dio(baseoptions);
-
     try {
+      Map configMap = await getConfigMap();
+      String bucket = element['name'];
+      String region = element['location'];
+
+      String method = 'DELETE';
+      String urlpath = '/$key';
+      String secretId = configMap['secretId'];
+      String secretKey = configMap['secretKey'];
+      String host = '$bucket.cos.$region.myqcloud.com';
+      Map<String, dynamic> header = {
+        'Host': host,
+      };
+      String authorization = tecentAuthorization(method, urlpath, header, secretId, secretKey, {});
+
+      BaseOptions baseoptions = setBaseOptions();
+      baseoptions.headers = header;
+      baseoptions.headers['Authorization'] = authorization;
+      Dio dio = Dio(baseoptions);
+
       var response = await dio.delete('https://$host/$key');
       if (response.statusCode == 204) {
         return ['success'];
@@ -587,20 +522,7 @@ class TencentManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "TencentManageAPI",
-            methodName: "deleteFile",
-            text: formatErrorMessage({'element': element, 'key': key}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "TencentManageAPI",
-            methodName: "deleteFile",
-            text: formatErrorMessage({'element': element, 'key': key}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogError(e, {'element': element, 'key': key}, "TencentManageAPI", "deleteFile");
       return [e.toString()];
     }
   }
@@ -652,57 +574,48 @@ class TencentManageAPI {
 
   //重命名文件
   static copyFile(Map element, String key, String newKey) async {
-    Map configMap = await getConfigMap();
-    String bucket = element['name'];
-    String region = element['location'];
-
-    String method = 'PUT';
-
-    String secretId = configMap['secretId'];
-    String secretKey = configMap['secretKey'];
-    String host = '$bucket.cos.$region.myqcloud.com';
-    String newName = '';
-    if (key.substring(0, key.lastIndexOf('/') + 1) == '') {
-      newName = newKey;
-    } else {
-      newName = key.substring(0, key.lastIndexOf('/') + 1) + newKey;
-    }
-    String urlpath = '/$newName';
-    String xCosCopySource = '/$bucket.cos.$region.myqcloud.com/${Uri.encodeComponent(key)}';
-
-    Map<String, dynamic> header = {
-      'Host': host,
-      'x-cos-copy-source': xCosCopySource,
-    };
-    String authorization = tecentAuthorization(method, urlpath, header, secretId, secretKey, {});
-
-    BaseOptions baseoptions = setBaseOptions();
-    baseoptions.headers = header;
-    baseoptions.headers['Authorization'] = authorization;
-    Dio dio = Dio(baseoptions);
-
     try {
-      var response = await dio.put('https://$host/$newName');
-      if (response.statusCode == 200) {
-        return ['success'];
+      Map configMap = await getConfigMap();
+      String bucket = element['name'];
+      String region = element['location'];
+
+      String method = 'PUT';
+
+      String secretId = configMap['secretId'];
+      String secretKey = configMap['secretKey'];
+      String host = '$bucket.cos.$region.myqcloud.com';
+      String newName = '';
+      if (key.substring(0, key.lastIndexOf('/') + 1) == '') {
+        newName = newKey;
       } else {
+        newName = key.substring(0, key.lastIndexOf('/') + 1) + newKey;
+      }
+      String urlpath = '/$newName';
+      String xCosCopySource = '/$bucket.cos.$region.myqcloud.com/${Uri.encodeComponent(key)}';
+
+      Map<String, dynamic> header = {
+        'Host': host,
+        'x-cos-copy-source': xCosCopySource,
+      };
+      String authorization = tecentAuthorization(method, urlpath, header, secretId, secretKey, {});
+
+      BaseOptions baseoptions = setBaseOptions();
+      baseoptions.headers = header;
+      baseoptions.headers['Authorization'] = authorization;
+      Dio dio = Dio(baseoptions);
+
+      var response = await dio.put('https://$host/$newName');
+      if (response.statusCode != 200) {
         return ['failed'];
       }
+      return ['success'];
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "TencentManageAPI",
-            methodName: "copyFile",
-            text: formatErrorMessage({'element': element, 'key': key, 'newKey': newKey}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "TencentManageAPI",
-            methodName: "copyFile",
-            text: formatErrorMessage({'element': element, 'key': key, 'newKey': newKey}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogError(
+        e,
+        {'element': element, 'key': key, 'newKey': newKey},
+        "TencentManageAPI",
+        "copyFile",
+      );
       return [e.toString()];
     }
   }
@@ -751,28 +664,29 @@ class TencentManageAPI {
 
   //下载文件
   static downloadFile(Map element, String key, String path) async {
-    Map configMap = await getConfigMap();
-    String bucket = element['name'];
-    String region = element['location'];
-
-    String method = 'GET';
-
-    String secretId = configMap['secretId'];
-    String secretKey = configMap['secretKey'];
-    String host = '$bucket.cos.$region.myqcloud.com';
-
-    String urlpath = '/$key';
-
-    Map<String, dynamic> header = {
-      'Host': host,
-    };
-    String authorization = tecentAuthorization(method, urlpath, header, secretId, secretKey, {});
-
-    BaseOptions baseoptions = setBaseOptions();
-    baseoptions.headers = header;
-    baseoptions.headers['Authorization'] = authorization;
-    Dio dio = Dio(baseoptions);
     try {
+      Map configMap = await getConfigMap();
+      String bucket = element['name'];
+      String region = element['location'];
+
+      String method = 'GET';
+
+      String secretId = configMap['secretId'];
+      String secretKey = configMap['secretKey'];
+      String host = '$bucket.cos.$region.myqcloud.com';
+
+      String urlpath = '/$key';
+
+      Map<String, dynamic> header = {
+        'Host': host,
+      };
+      String authorization = tecentAuthorization(method, urlpath, header, secretId, secretKey, {});
+
+      BaseOptions baseoptions = setBaseOptions();
+      baseoptions.headers = header;
+      baseoptions.headers['Authorization'] = authorization;
+      Dio dio = Dio(baseoptions);
+
       Response response = await dio.download('https://$host/$key', path);
       if (response.statusCode == 200) {
         return ['success'];
@@ -780,51 +694,44 @@ class TencentManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "TencentManageAPI",
-            methodName: "downloadFile",
-            text: formatErrorMessage({'element': element, 'key': key, 'path': path}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "TencentManageAPI",
-            methodName: "downloadFile",
-            text: formatErrorMessage({'element': element, 'key': key, 'path': path}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogError(
+        e,
+        {'element': element, 'key': key, 'path': path},
+        "TencentManageAPI",
+        "downloadFile",
+      );
       return [e.toString()];
     }
   }
 
   //新建文件夹
   static createFolder(Map element, String prefix, String newfolder) async {
-    Map configMap = await getConfigMap();
-    String bucket = element['name'];
-    String region = element['location'];
-
-    String method = 'PUT';
-
-    String secretId = configMap['secretId'];
-    String secretKey = configMap['secretKey'];
-    String host = '$bucket.cos.$region.myqcloud.com';
-
-    String urlpath = '/$prefix$newfolder';
-    if (urlpath.substring(urlpath.length - 1) != '/') {
-      urlpath = '$urlpath/';
-    }
-
-    Map<String, dynamic> header = {
-      'Host': host,
-    };
-    String authorization = tecentAuthorization(method, urlpath, header, secretId, secretKey, {});
-
-    BaseOptions baseoptions = setBaseOptions();
-    baseoptions.headers = header;
-    baseoptions.headers['Authorization'] = authorization;
-    Dio dio = Dio(baseoptions);
     try {
+      Map configMap = await getConfigMap();
+      String bucket = element['name'];
+      String region = element['location'];
+
+      String method = 'PUT';
+
+      String secretId = configMap['secretId'];
+      String secretKey = configMap['secretKey'];
+      String host = '$bucket.cos.$region.myqcloud.com';
+
+      String urlpath = '/$prefix$newfolder';
+      if (urlpath.substring(urlpath.length - 1) != '/') {
+        urlpath = '$urlpath/';
+      }
+
+      Map<String, dynamic> header = {
+        'Host': host,
+      };
+      String authorization = tecentAuthorization(method, urlpath, header, secretId, secretKey, {});
+
+      BaseOptions baseoptions = setBaseOptions();
+      baseoptions.headers = header;
+      baseoptions.headers['Authorization'] = authorization;
+      Dio dio = Dio(baseoptions);
+
       var response = await dio.put('https://$host$urlpath');
       if (response.statusCode == 200) {
         return ['success'];
@@ -832,20 +739,7 @@ class TencentManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "TencentManageAPI",
-            methodName: "createFolder",
-            text: formatErrorMessage({'element': element, 'prefix': prefix, 'newfolder': newfolder}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "TencentManageAPI",
-            methodName: "createFolder",
-            text: formatErrorMessage({'element': element, 'prefix': prefix, 'newfolder': newfolder}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogError(e, {'element': element, 'prefix': prefix, 'newfolder': newfolder}, "TencentManageAPI", "createFolder");
       return [e.toString()];
     }
   }
@@ -857,56 +751,57 @@ class TencentManageAPI {
     String filepath,
     String prefix,
   ) async {
-    Map configMap = await getConfigMap();
-    String bucket = element['name'];
-    String region = element['location'];
-
-    String secretId = configMap['secretId'];
-    String secretKey = configMap['secretKey'];
-    String host = '$bucket.cos.$region.myqcloud.com';
-
-    String urlpath = '/$prefix$filename';
-    //上传策略
-    int startTimestamp = DateTime.now().millisecondsSinceEpoch ~/ 1000;
-    int endTimestamp = startTimestamp + 86400;
-    String keyTime = '$startTimestamp;$endTimestamp';
-    Map<String, dynamic> uploadPolicy = {
-      "expiration": "2033-03-03T09:38:12.414Z",
-      "conditions": [
-        {"acl": "default"},
-        {"bucket": bucket},
-        {"key": urlpath},
-        {"q-sign-algorithm": "sha1"},
-        {"q-ak": secretId},
-        {"q-sign-time": keyTime}
-      ]
-    };
-    String uploadPolicyStr = jsonEncode(uploadPolicy);
-    String singature = TencentImageUploadUtils.getUploadAuthorization(secretKey, keyTime, uploadPolicyStr);
-    FormData formData = FormData.fromMap({
-      'key': urlpath,
-      'policy': base64Encode(utf8.encode(uploadPolicyStr)),
-      'acl': 'default',
-      'q-sign-algorithm': 'sha1',
-      'q-ak': secretId,
-      'q-key-time': keyTime,
-      'q-sign-time': keyTime,
-      'q-signature': singature,
-      'file': await MultipartFile.fromFile(filepath, filename: filename),
-    });
-
-    BaseOptions baseoptions = setBaseOptions();
-    File uploadFile = File(filepath);
-    String contentLength = await uploadFile.length().then((value) {
-      return value.toString();
-    });
-    baseoptions.headers = {
-      'Host': host,
-      'Content-Type': Global.multipartString,
-      'Content-Length': contentLength,
-    };
-    Dio dio = Dio(baseoptions);
     try {
+      Map configMap = await getConfigMap();
+      String bucket = element['name'];
+      String region = element['location'];
+
+      String secretId = configMap['secretId'];
+      String secretKey = configMap['secretKey'];
+      String host = '$bucket.cos.$region.myqcloud.com';
+
+      String urlpath = '/$prefix$filename';
+      //上传策略
+      int startTimestamp = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+      int endTimestamp = startTimestamp + 86400;
+      String keyTime = '$startTimestamp;$endTimestamp';
+      Map<String, dynamic> uploadPolicy = {
+        "expiration": "2033-03-03T09:38:12.414Z",
+        "conditions": [
+          {"acl": "default"},
+          {"bucket": bucket},
+          {"key": urlpath},
+          {"q-sign-algorithm": "sha1"},
+          {"q-ak": secretId},
+          {"q-sign-time": keyTime}
+        ]
+      };
+      String uploadPolicyStr = jsonEncode(uploadPolicy);
+      String singature = TencentImageUploadUtils.getUploadAuthorization(secretKey, keyTime, uploadPolicyStr);
+      FormData formData = FormData.fromMap({
+        'key': urlpath,
+        'policy': base64Encode(utf8.encode(uploadPolicyStr)),
+        'acl': 'default',
+        'q-sign-algorithm': 'sha1',
+        'q-ak': secretId,
+        'q-key-time': keyTime,
+        'q-sign-time': keyTime,
+        'q-signature': singature,
+        'file': await MultipartFile.fromFile(filepath, filename: filename),
+      });
+
+      BaseOptions baseoptions = setBaseOptions();
+      File uploadFile = File(filepath);
+      String contentLength = await uploadFile.length().then((value) {
+        return value.toString();
+      });
+      baseoptions.headers = {
+        'Host': host,
+        'Content-Type': Global.multipartString,
+        'Content-Length': contentLength,
+      };
+      Dio dio = Dio(baseoptions);
+
       var response = await dio.post(
         'https://$host',
         data: formData,
@@ -917,22 +812,8 @@ class TencentManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "TencentManageAPI",
-            methodName: "uploadFile",
-            text: formatErrorMessage(
-                {'element': element, 'filename': filename, 'filepath': filepath, 'prefix': prefix}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "TencentManageAPI",
-            methodName: "uploadFile",
-            text: formatErrorMessage(
-                {'element': element, 'filename': filename, 'filepath': filepath, 'prefix': prefix}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogError(e, {'element': element, 'filename': filename, 'filepath': filepath, 'prefix': prefix},
+          "TencentManageAPI", "uploadFile");
       return ['error'];
     }
   }
@@ -1001,20 +882,8 @@ class TencentManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "TencentManageAPI",
-            methodName: "uploadNetworkFile",
-            text: formatErrorMessage({'fileLink': fileLink, 'element': element, 'prefix': prefix}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "TencentManageAPI",
-            methodName: "uploadNetworkFile",
-            text: formatErrorMessage({'fileLink': fileLink, 'element': element, 'prefix': prefix}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogError(
+          e, {'fileLink': fileLink, 'element': element, 'prefix': prefix}, "TencentManageAPI", "uploadNetworkFile");
       return ['failed'];
     }
   }

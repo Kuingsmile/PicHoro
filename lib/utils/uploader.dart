@@ -27,30 +27,20 @@ Future<File> get _localFile async {
   String defaultConfig = await Global.getPShost();
   String defaultUser = await Global.getUser();
 
-  return File('${directory.path}/${defaultUser}_${getpdconfig(defaultConfig)}.txt');
+  return ensureFileExists(File('${directory.path}/${defaultUser}_${getpdconfig(defaultConfig)}.txt'));
 }
 
 //读取图床配置文件
 Future<String> readPictureHostConfig() async {
-  try {
-    final file = await _localFile;
-    String contents = await file.readAsString();
-    return contents;
-  } catch (e) {
-    flogErr(
-      e,
-      {},
-      'Uploader',
-      "readPictureHostConfig",
-    );
-    return "Error";
-  }
+  final file = await _localFile;
+  String contents = await file.readAsString();
+  return contents;
 }
 
 uploaderentry({required String path, required String name}) async {
   String configData = await readPictureHostConfig();
-  if (configData == "Error") {
-    return ["Error"];
+  if (configData == '') {
+    return ["failed"];
   }
   Map configMap = jsonDecode(configData);
   String defaultConfig = await Global.getPShost();
@@ -58,12 +48,6 @@ uploaderentry({required String path, required String name}) async {
     var result = await uploadFunc[defaultConfig]!(path: path, name: name, configMap: configMap);
     return result;
   } catch (e) {
-    flogErr(
-      e,
-      {'path': path, 'name': name},
-      'Uploader',
-      "uploaderentry",
-    );
-    return ["Error"];
+    return ["failed"];
   }
 }

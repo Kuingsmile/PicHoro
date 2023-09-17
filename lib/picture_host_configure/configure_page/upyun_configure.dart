@@ -1,12 +1,10 @@
 import 'dart:io';
 import 'dart:convert';
-
-import 'package:crypto/crypto.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:f_logs/f_logs.dart';
 import 'package:fluro/fluro.dart';
+import 'package:horopic/api/upyun_api.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'package:horopic/router/application.dart';
@@ -32,6 +30,8 @@ class UpyunConfigState extends State<UpyunConfig> {
   final _urlController = TextEditingController();
   final _optionsController = TextEditingController();
   final _pathController = TextEditingController();
+  final _antiLeechTokenController = TextEditingController();
+  final _antiLeechExpirationController = TextEditingController();
 
   @override
   void initState() {
@@ -42,19 +42,29 @@ class UpyunConfigState extends State<UpyunConfig> {
   _initConfig() async {
     try {
       Map configMap = await UpyunManageAPI.getConfigMap();
-      _bucketController.text = configMap['bucket'];
-      _operatorController.text = configMap['operator'];
-      _passwordController.text = configMap['password'];
-      _urlController.text = configMap['url'];
+      _bucketController.text = configMap['bucket'] ?? '';
+      _operatorController.text = configMap['operator'] ?? '';
+      _passwordController.text = configMap['password'] ?? '';
+      _urlController.text = configMap['url'] ?? '';
       if (configMap['options'] != 'None' || configMap['options'].trim() != '') {
-        _optionsController.text = configMap['options'];
+        _optionsController.text = configMap['options'] ?? '';
       } else {
         _optionsController.clear();
       }
       if (configMap['path'] != 'None') {
-        _pathController.text = configMap['path'];
+        _pathController.text = configMap['path'] ?? '';
       } else {
         _pathController.clear();
+      }
+      if (configMap['antiLeechToken'] != 'None') {
+        _antiLeechTokenController.text = configMap['antiLeechToken'] ?? '';
+      } else {
+        _antiLeechTokenController.clear();
+      }
+      if (configMap['antiLeechExpiration'] != 'None') {
+        _antiLeechExpirationController.text = configMap['antiLeechExpiration'] ?? '';
+      } else {
+        _antiLeechExpirationController.clear();
       }
     } catch (e) {
       FLog.error(
@@ -73,6 +83,8 @@ class UpyunConfigState extends State<UpyunConfig> {
     _urlController.dispose();
     _optionsController.dispose();
     _pathController.dispose();
+    _antiLeechTokenController.dispose();
+    _antiLeechExpirationController.dispose();
     super.dispose();
   }
 
@@ -107,7 +119,7 @@ class UpyunConfigState extends State<UpyunConfig> {
               ),
               textAlign: TextAlign.center,
               validator: (value) {
-                if (value == null || value.isEmpty) {
+                if (value == null || value.isEmpty || value.trim() == '') {
                   return '请输入bucket';
                 }
                 return null;
@@ -172,6 +184,26 @@ class UpyunConfigState extends State<UpyunConfig> {
                 contentPadding: EdgeInsets.zero,
                 label: Center(child: Text('可选: 存储路径')),
                 hintText: '例如test/',
+                hintStyle: TextStyle(fontSize: 13),
+              ),
+              textAlign: TextAlign.center,
+            ),
+            TextFormField(
+              controller: _antiLeechTokenController,
+              decoration: const InputDecoration(
+                contentPadding: EdgeInsets.zero,
+                label: Center(child: Text('可选: 防盗链Token')),
+                hintText: '例如abc',
+                hintStyle: TextStyle(fontSize: 13),
+              ),
+              textAlign: TextAlign.center,
+            ),
+            TextFormField(
+              controller: _antiLeechExpirationController,
+              decoration: const InputDecoration(
+                contentPadding: EdgeInsets.zero,
+                label: Center(child: Text('可选: 防盗链过期时间')),
+                hintText: '例如3600,单位秒',
                 hintStyle: TextStyle(fontSize: 13),
               ),
               textAlign: TextAlign.center,
@@ -243,9 +275,11 @@ class UpyunConfigState extends State<UpyunConfig> {
       String url = _urlController.text;
       String options = _optionsController.text;
       String path = _pathController.text;
+      String antiLeechToken = _antiLeechTokenController.text;
+      String antiLeechExpiration = _antiLeechExpirationController.text;
 
       //格式化路径为以/结尾，不以/开头
-      if (path.isEmpty || path.replaceAll(' ', '').isEmpty) {
+      if (path.isEmpty || path.replaceAll(' ', '').isEmpty || path == '/') {
         path = 'None';
       } else {
         if (!path.endsWith('/')) {
@@ -263,81 +297,12 @@ class UpyunConfigState extends State<UpyunConfig> {
         url = url.substring(0, url.length - 1);
       }
 
-      //save asset image to app dir
-      String assetPath = 'assets/validateImage/PicHoroValidate.jpeg';
-      String appDir = await getApplicationDocumentsDirectory().then((value) {
-        return value.path;
-      });
-      String assetFilePath = '$appDir/PicHoroValidate.jpeg';
-      File assetFile = File(assetFilePath);
-
-      if (!assetFile.existsSync()) {
-        ByteData data = await rootBundle.load(assetPath);
-        List<int> bytes = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
-        await assetFile.writeAsBytes(bytes);
-      }
-      String key = 'PicHoroValidate.jpeg';
-      String host = 'http://v0.api.upyun.com';
-      String urlpath = '';
-
-      if (path != 'None') {
-        urlpath = '/$path$key';
-      } else {
-        urlpath = '/$key';
-      }
-      String date = HttpDate.format(DateTime.now());
-      String assetFileMd5 = await assetFile.readAsBytes().then((value) {
-        return md5.convert(value).toString();
-      });
-      Map<String, dynamic> uploadPolicy = {
-        'bucket': bucket,
-        'save-key': urlpath,
-        'expiration': DateTime.now().millisecondsSinceEpoch + 1800000,
-        'date': date,
-        'content-md5': assetFileMd5,
-      };
-      String base64Policy = base64.encode(utf8.encode(json.encode(uploadPolicy)));
-      String stringToSign = 'POST&/$bucket&$date&$base64Policy&$assetFileMd5';
-      String passwordMd5 = md5.convert(utf8.encode(password)).toString();
-      String signature = base64.encode(Hmac(sha1, utf8.encode(passwordMd5)).convert(utf8.encode(stringToSign)).bytes);
-      String authorization = 'UPYUN $upyunOperator:$signature';
-      FormData formData = FormData.fromMap({
-        'authorization': authorization,
-        'policy': base64Policy,
-        'file': await MultipartFile.fromFile(assetFilePath, filename: key),
-      });
-
-      BaseOptions baseoptions = setBaseOptions();
-      String contentLength = await assetFile.length().then((value) {
-        return value.toString();
-      });
-      baseoptions.headers = {
-        'Host': 'v0.api.upyun.com',
-        'Content-Type': Global.multipartString,
-        'Content-Length': contentLength,
-        'Date': date,
-        'Authorization': authorization,
-        'Content-MD5': assetFileMd5,
-      };
-      Dio dio = Dio(baseoptions);
-      var response = await dio.post(
-        '$host/$bucket',
-        data: formData,
-      );
-
-      if (response.statusCode == 200) {
-        final upyunConfig = UpyunConfigModel(bucket, upyunOperator, password, url, options, path);
-        final upyunConfigJson = jsonEncode(upyunConfig);
-        final upyunConfigFile = await localFile;
-        await upyunConfigFile.writeAsString(upyunConfigJson);
-        if (context.mounted) {
-          return showCupertinoAlertDialog(context: context, title: '成功', content: '配置成功');
-        }
-      } else {
-        if (context.mounted) {
-          return showCupertinoAlertDialog(context: context, title: '错误', content: '验证失败');
-        }
-      }
+      final upyunConfig =
+          UpyunConfigModel(bucket, upyunOperator, password, url, options, path, antiLeechToken, antiLeechExpiration);
+      final upyunConfigJson = jsonEncode(upyunConfig);
+      final upyunConfigFile = await localFile;
+      await upyunConfigFile.writeAsString(upyunConfigJson);
+      showToast('保存成功');
     } catch (e) {
       FLog.error(
           className: 'UpyunConfigPageState',
@@ -352,10 +317,9 @@ class UpyunConfigState extends State<UpyunConfig> {
 
   checkUpyunConfig() async {
     try {
-      final upyunConfigFile = await localFile;
-      String configData = await upyunConfigFile.readAsString();
+      final configData = await readUpyunConfig();
 
-      if (configData == "Error") {
+      if (configData == '') {
         if (context.mounted) {
           return showCupertinoAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");
         }
@@ -378,60 +342,27 @@ class UpyunConfigState extends State<UpyunConfig> {
         await assetFile.writeAsBytes(bytes);
       }
       String key = 'PicHoroValidate.jpeg';
-      String host = 'http://v0.api.upyun.com';
-      String urlpath = '';
-      if (configMap['path'] != 'None') {
-        urlpath = '${configMap['path']}$key';
-      } else {
-        urlpath = key;
-      }
-      String date = HttpDate.format(DateTime.now());
-      String assetFileMd5 = await assetFile.readAsBytes().then((value) {
-        return md5.convert(value).toString();
-      });
-      Map<String, dynamic> uploadPolicy = {
-        'bucket': configMap['bucket'],
-        'save-key': urlpath,
-        'expiration': DateTime.now().millisecondsSinceEpoch + 1800000,
-        'date': date,
-        'content-md5': assetFileMd5,
-      };
-      String base64Policy = base64.encode(utf8.encode(json.encode(uploadPolicy)));
-      String stringToSign = "POST&/${configMap['bucket']}&$date&$base64Policy&$assetFileMd5";
-      String passwordMd5 = md5.convert(utf8.encode(configMap['password'])).toString();
-      String signature = base64.encode(Hmac(sha1, utf8.encode(passwordMd5)).convert(utf8.encode(stringToSign)).bytes);
-      String authorization = 'UPYUN ${configMap['operator']}:$signature';
-      FormData formData = FormData.fromMap({
-        'authorization': authorization,
-        'policy': base64Policy,
-        'file': await MultipartFile.fromFile(assetFilePath, filename: key),
-      });
-
-      BaseOptions baseoptions = setBaseOptions();
-      String contentLength = await assetFile.length().then((value) {
-        return value.toString();
-      });
-      baseoptions.headers = {
-        'Host': 'v0.api.upyun.com',
-        'Content-Type': Global.multipartString,
-        'Content-Length': contentLength,
-        'Date': date,
-        'Authorization': authorization,
-        'Content-MD5': assetFileMd5,
-      };
-      Dio dio = Dio(baseoptions);
-      var response = await dio.post(
-        '$host/${configMap['bucket']}',
-        data: formData,
-      );
-
-      if (response.statusCode == 200) {
+      var checkResult = await UpyunImageUploadUtils.uploadApi(path: assetFilePath, name: key, configMap: configMap);
+      if (checkResult[0] == 'success') {
         if (context.mounted) {
-          return showCupertinoAlertDialog(
-              context: context,
-              title: '通知',
-              content:
-                  '检测通过，您的配置信息为:\nBucket:\n${configMap['bucket']}\nOperator:\n${configMap['operator']}\nPassword:\n${configMap['password']}\nUrl:\n${configMap['url']}\nOptions:\n${configMap['options']}\nPath:\n${configMap['path']}');
+          return showCupertinoAlertDialog(context: context, title: '通知', content: """检测通过，您的配置信息为:
+Bucket:
+${configMap['bucket']}
+Operator:
+${configMap['operator']}
+Password:
+${configMap['password']}
+Url:
+${configMap['url']}
+Options:
+${configMap['options']}
+Path:
+${configMap['path']}
+AntiLeechToken:
+${configMap['antiLeechToken']}
+AntiLeechExpiration:
+${configMap['antiLeechExpiration']}
+""");
         }
       } else {
         if (context.mounted) {
@@ -450,49 +381,29 @@ class UpyunConfigState extends State<UpyunConfig> {
     }
   }
 
-  Future<File> get localFile async {
-    final path = await _localPath;
-    String defaultUser = await Global.getUser();
-    return File('$path/${defaultUser}_upyun_config.txt');
-  }
-
   Future<String> get _localPath async {
     final directory = await getApplicationDocumentsDirectory();
     return directory.path;
   }
 
+  Future<File> get localFile async {
+    final path = await _localPath;
+    String defaultUser = await Global.getUser();
+    return ensureFileExists(File('$path/${defaultUser}_upyun_config.txt'));
+  }
+
   Future<String> readUpyunConfig() async {
-    try {
-      final file = await localFile;
-      String contents = await file.readAsString();
-      return contents;
-    } catch (e) {
-      FLog.error(
-          className: 'UpyunConfigPageState',
-          methodName: 'readUpyunConfig',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
-      return "Error";
-    }
+    final file = await localFile;
+    String contents = await file.readAsString();
+    return contents;
   }
 
   _setdefault() async {
-    try {
-      await Global.setPShost('upyun');
-      await Global.setShowedPBhost('upyun');
-      eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-      eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
-      showToast('已设置又拍云为默认图床');
-    } catch (e) {
-      FLog.error(
-          className: 'UpyunConfigPageState',
-          methodName: '_setdefault',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
-      if (context.mounted) {
-        showToastWithContext(context, '错误');
-      }
-    }
+    await Global.setPShost('upyun');
+    await Global.setShowedPBhost('upyun');
+    eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
+    eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
+    showToast('已设置又拍云为默认图床');
   }
 }
 
@@ -503,8 +414,11 @@ class UpyunConfigModel {
   final String url;
   final String options;
   final String path;
+  final String antiLeechToken;
+  final String antiLeechExpiration;
 
-  UpyunConfigModel(this.bucket, this.upyunoperator, this.password, this.url, this.options, this.path);
+  UpyunConfigModel(this.bucket, this.upyunoperator, this.password, this.url, this.options, this.path,
+      this.antiLeechToken, this.antiLeechExpiration);
 
   Map<String, dynamic> toJson() => {
         'bucket': bucket,
@@ -513,6 +427,8 @@ class UpyunConfigModel {
         'url': url,
         'options': options,
         'path': path,
+        'antiLeechToken': antiLeechToken,
+        'antiLeechExpiration': antiLeechExpiration,
       };
 
   static List keysList = [
@@ -523,5 +439,7 @@ class UpyunConfigModel {
     'url',
     'options',
     'path',
+    'antiLeechToken',
+    'antiLeechExpiration',
   ];
 }

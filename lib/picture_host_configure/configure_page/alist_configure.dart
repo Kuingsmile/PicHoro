@@ -39,8 +39,8 @@ class AlistConfigState extends State<AlistConfig> {
   _initConfig() async {
     try {
       Map configMap = await AlistManageAPI.getConfigMap();
-      _hostController.text = configMap['host'];
-      _tokenController = configMap['token'];
+      _hostController.text = configMap['host'] ?? '';
+      _tokenController = configMap['token'] ?? '';
       if (configMap['alistusername'] != 'None' && configMap['alistusername'] != null) {
         _usernameController.text = configMap['alistusername'];
       } else {
@@ -125,7 +125,6 @@ class AlistConfigState extends State<AlistConfig> {
             ),
             TextFormField(
               controller: _passwdController,
-              obscureText: true,
               decoration: const InputDecoration(
                 label: Center(child: Text('可选：密码')),
                 hintText: '输入密码',
@@ -246,10 +245,7 @@ class AlistConfigState extends State<AlistConfig> {
       final alistConfigFile = await localFile;
       alistConfigFile.writeAsString(alistConfigJson);
       setState(() {});
-      if (context.mounted) {
-        return showCupertinoAlertDialog(
-            context: context, barrierDismissible: false, title: '配置成功', content: '配置成功,请返回上一页');
-      }
+      showToast('保存成功');
       return;
     }
     if (_usernameController.text.isNotEmpty && _passwdController.text.isNotEmpty) {
@@ -340,9 +336,8 @@ class AlistConfigState extends State<AlistConfig> {
 
   checkAlistConfig() async {
     try {
-      final alistConfigFile = await localFile;
-      String configData = await alistConfigFile.readAsString();
-      if (configData == "Error") {
+      String configData = await readAlistConfig();
+      if (configData == "") {
         if (context.mounted) {
           return showCupertinoAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");
         }
@@ -428,7 +423,7 @@ class AlistConfigState extends State<AlistConfig> {
   Future<File> get localFile async {
     final path = await _localPath;
     String defaultUser = await Global.getUser();
-    return File('$path/${defaultUser}_alist_config.txt');
+    return ensureFileExists(File('$path/${defaultUser}_alist_config.txt'));
   }
 
   Future<String> get _localPath async {
@@ -437,37 +432,17 @@ class AlistConfigState extends State<AlistConfig> {
   }
 
   Future<String> readAlistConfig() async {
-    try {
-      final file = await localFile;
-      String contents = await file.readAsString();
-      return contents;
-    } catch (e) {
-      FLog.error(
-          className: 'AlistConfigPage',
-          methodName: 'readAlistConfig',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
-      return "Error";
-    }
+    final file = await localFile;
+    String contents = await file.readAsString();
+    return contents;
   }
 
   _setdefault() async {
-    try {
-      await Global.setPShost('alist');
-      await Global.setShowedPBhost('PBhostExtend3');
-      eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-      eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
-      showToast('已设置Alist为默认图床');
-    } catch (e) {
-      FLog.error(
-          className: 'alistPage',
-          methodName: '_setdefault',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
-      if (context.mounted) {
-        showToastWithContext(context, '错误');
-      }
-    }
+    await Global.setPShost('alist');
+    await Global.setShowedPBhost('PBhostExtend3');
+    eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
+    eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
+    showToast('已设置Alist为默认图床');
   }
 }
 

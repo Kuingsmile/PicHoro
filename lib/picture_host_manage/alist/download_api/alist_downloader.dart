@@ -7,10 +7,9 @@ import 'package:collection/collection.dart';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import 'package:f_logs/f_logs.dart';
 
 import 'package:horopic/picture_host_manage/alist/download_api/alist_download_task.dart';
-import 'package:horopic/picture_host_manage/tencent/download_api/download_status.dart';
+import 'package:horopic/picture_host_manage/common_page/download/pnc_download_status.dart';
 import 'package:horopic/picture_host_manage/alist/download_api/alist_download_request.dart';
 import 'package:horopic/utils/common_functions.dart';
 
@@ -132,34 +131,17 @@ class DownloadManager {
         }
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: 'alist_DownloadManager',
-            methodName: 'download',
-            text: formatErrorMessage({
-              'url': url,
-              'savePath': savePath,
-            }, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: 'alist_DownloadManager',
-            methodName: 'download',
-            text: formatErrorMessage({
-              'url': url,
-              'savePath': savePath,
-            }, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogError(
+          e,
+          {
+            'url': url,
+            'savePath': savePath,
+          },
+          'alist_DownloadManager',
+          'download');
       var task = getDownload(url)!;
       if (task.status.value != DownloadStatus.canceled && task.status.value != DownloadStatus.paused) {
         setStatus(task, DownloadStatus.failed);
-        runningTasks--;
-
-        if (_queue.isNotEmpty) {
-          _startExecution();
-        }
-        rethrow;
       }
     }
 

@@ -105,11 +105,6 @@ class UploadManager {
       var task = getUpload(fileName)!;
       if (task.status.value != UploadStatus.canceled && task.status.value != UploadStatus.completed) {
         setStatus(task, UploadStatus.failed);
-        runningTasks--;
-        if (_queue.isNotEmpty) {
-          _startExecution();
-        }
-        rethrow;
       }
     }
     runningTasks--;

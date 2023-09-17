@@ -16,7 +16,7 @@ class FTPManageAPI {
   static Future<File> get localFile async {
     final path = await _localPath;
     String defaultUser = await Global.getUser();
-    return File('$path/${defaultUser}_ftp_config.txt');
+    return ensureFileExists(File('$path/${defaultUser}_ftp_config.txt'));
   }
 
   static Future<String> get _localPath async {
@@ -41,6 +41,9 @@ class FTPManageAPI {
 
   static Future<Map> getConfigMap() async {
     String configStr = await readFTPConfig();
+    if (configStr == '') {
+      return {};
+    }
     Map configMap = json.decode(configStr);
     return configMap;
   }
@@ -54,12 +57,13 @@ class FTPManageAPI {
   }
 
   static getDirectoryContentSFTP(String folder) async {
-    Map configMap = await getConfigMap();
-    String ftpHost = configMap['ftpHost'];
-    String ftpPort = configMap['ftpPort'];
-    String ftpUser = configMap['ftpUser'];
-    String ftpPassword = configMap['ftpPassword'];
     try {
+      Map configMap = await getConfigMap();
+      String ftpHost = configMap['ftpHost'];
+      String ftpPort = configMap['ftpPort'];
+      String ftpUser = configMap['ftpUser'];
+      String ftpPassword = configMap['ftpPassword'];
+
       final socket = await SSHSocket.connect(ftpHost, int.parse(ftpPort));
       final client = SSHClient(
         socket,
@@ -103,12 +107,13 @@ class FTPManageAPI {
   }
 
   static executeCommandSFTP(String command) async {
-    Map configMap = await getConfigMap();
-    String ftpHost = configMap['ftpHost'];
-    String ftpPort = configMap['ftpPort'];
-    String ftpUser = configMap['ftpUser'];
-    String ftpPassword = configMap['ftpPassword'];
     try {
+      Map configMap = await getConfigMap();
+      String ftpHost = configMap['ftpHost'];
+      String ftpPort = configMap['ftpPort'];
+      String ftpUser = configMap['ftpUser'];
+      String ftpPassword = configMap['ftpPassword'];
+
       final socket = await SSHSocket.connect(ftpHost, int.parse(ftpPort));
       final client = SSHClient(
         socket,
@@ -131,12 +136,13 @@ class FTPManageAPI {
   }
 
   static renameFileSFTP(String oldName, String newName) async {
-    Map configMap = await getConfigMap();
-    String ftpHost = configMap['ftpHost'];
-    String ftpPort = configMap['ftpPort'];
-    String ftpUser = configMap['ftpUser'];
-    String ftpPassword = configMap['ftpPassword'];
     try {
+      Map configMap = await getConfigMap();
+      String ftpHost = configMap['ftpHost'];
+      String ftpPort = configMap['ftpPort'];
+      String ftpUser = configMap['ftpUser'];
+      String ftpPassword = configMap['ftpPassword'];
+
       final socket = await SSHSocket.connect(ftpHost, int.parse(ftpPort));
       final client = SSHClient(
         socket,
@@ -161,12 +167,13 @@ class FTPManageAPI {
 
   //新建文件夹
   static createFolderSFTP(String folderName) async {
-    Map configMap = await getConfigMap();
-    String ftpHost = configMap['ftpHost'];
-    String ftpPort = configMap['ftpPort'];
-    String ftpUser = configMap['ftpUser'];
-    String ftpPassword = configMap['ftpPassword'];
     try {
+      Map configMap = await getConfigMap();
+      String ftpHost = configMap['ftpHost'];
+      String ftpPort = configMap['ftpPort'];
+      String ftpUser = configMap['ftpUser'];
+      String ftpPassword = configMap['ftpPassword'];
+
       final socket = await SSHSocket.connect(ftpHost, int.parse(ftpPort));
       final client = SSHClient(
         socket,
@@ -190,12 +197,13 @@ class FTPManageAPI {
 
   //删除文件夹
   static deleteFolderSFTP(String folderName) async {
-    Map configMap = await getConfigMap();
-    String ftpHost = configMap['ftpHost'];
-    String ftpPort = configMap['ftpPort'];
-    String ftpUser = configMap['ftpUser'];
-    String ftpPassword = configMap['ftpPassword'];
     try {
+      Map configMap = await getConfigMap();
+      String ftpHost = configMap['ftpHost'];
+      String ftpPort = configMap['ftpPort'];
+      String ftpUser = configMap['ftpUser'];
+      String ftpPassword = configMap['ftpPassword'];
+
       final socket = await SSHSocket.connect(ftpHost, int.parse(ftpPort));
       final client = SSHClient(
         socket,
@@ -205,10 +213,7 @@ class FTPManageAPI {
         },
       );
       //no * in folderName
-      if (folderName.contains('*')) {
-        return ["failed"];
-      }
-      if (folderName.contains('?')) {
+      if (folderName.contains('*') || folderName.contains('?') || folderName == '/') {
         return ["failed"];
       }
 
@@ -227,12 +232,13 @@ class FTPManageAPI {
 
   //删除文件
   static deleteFileSFTP(String fileName) async {
-    Map configMap = await getConfigMap();
-    String ftpHost = configMap['ftpHost'];
-    String ftpPort = configMap['ftpPort'];
-    String ftpUser = configMap['ftpUser'];
-    String ftpPassword = configMap['ftpPassword'];
     try {
+      Map configMap = await getConfigMap();
+      String ftpHost = configMap['ftpHost'];
+      String ftpPort = configMap['ftpPort'];
+      String ftpUser = configMap['ftpUser'];
+      String ftpPassword = configMap['ftpPassword'];
+
       final socket = await SSHSocket.connect(ftpHost, int.parse(ftpPort));
       final client = SSHClient(
         socket,
@@ -241,12 +247,10 @@ class FTPManageAPI {
           return ftpPassword;
         },
       );
-      if (fileName.contains('*')) {
+      if (fileName.contains('*') || fileName == '/' || fileName.contains('?')) {
         return ["failed"];
       }
-      if (fileName.contains('?')) {
-        return ["failed"];
-      }
+
       await client.run('rm -f $fileName');
       client.close();
       return ['success', ''];
@@ -292,12 +296,13 @@ class FTPManageAPI {
   }
 
   static uploadFileSFTP(String uploadPath, String filePath, String fileName) async {
-    Map configMap = await getConfigMap();
-    String ftpHost = configMap['ftpHost'];
-    String ftpPort = configMap['ftpPort'];
-    String ftpUser = configMap['ftpUser'];
-    String ftpPassword = configMap['ftpPassword'];
     try {
+      Map configMap = await getConfigMap();
+      String ftpHost = configMap['ftpHost'];
+      String ftpPort = configMap['ftpPort'];
+      String ftpUser = configMap['ftpUser'];
+      String ftpPassword = configMap['ftpPassword'];
+
       final socket = await SSHSocket.connect(ftpHost, int.parse(ftpPort));
       final client = SSHClient(
         socket,
@@ -366,23 +371,13 @@ class FTPManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "FTPManageAPI",
-            methodName: "uploadNetworkFileSFTP",
-            text: formatErrorMessage({
-              'fileLink': fileLink,
-            }, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "FTPManageAPI",
-            methodName: "uploadNetworkFileSFTP",
-            text: formatErrorMessage({
-              'fileLink': fileLink,
-            }, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogError(
+          e,
+          {
+            'fileLink': fileLink,
+          },
+          "FTPManageAPI",
+          "uploadNetworkFileSFTP");
       return ['failed'];
     }
   }

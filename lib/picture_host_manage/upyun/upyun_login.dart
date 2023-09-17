@@ -31,7 +31,7 @@ class UpyunLogInState extends State<UpyunLogIn> {
   _saveuserpasswd() async {
     try {
       var queryUpyunManage = await UpyunManageAPI.readUpyunManageConfig();
-      if (queryUpyunManage == 'Error') {
+      if (queryUpyunManage == 'Error' || queryUpyunManage == '') {
         var getTokenResult = await UpyunManageAPI.getToken(_userNametext.text, _passwordcontroller.text);
         if (getTokenResult[0] == 'success') {
           String token = getTokenResult[1]['access_token'];
@@ -136,7 +136,6 @@ class UpyunLogInState extends State<UpyunLogIn> {
             padding: const EdgeInsets.only(left: 15, right: 15, top: 15),
             child: TextFormField(
               controller: _passwordcontroller,
-              obscureText: true,
               obscuringCharacter: '*',
               decoration: const InputDecoration(
                 hintText: '请输入又拍云密码',

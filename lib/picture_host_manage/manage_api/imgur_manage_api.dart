@@ -14,7 +14,7 @@ class ImgurManageAPI {
   static Future<File> get _localFile async {
     final path = await _localPath;
     String defaultUser = await Global.getUser();
-    return File('$path/${defaultUser}_imgur_config.txt');
+    return ensureFileExists(File('$path/${defaultUser}_imgur_config.txt'));
   }
 
   static Future<String> get _localPath async {
@@ -75,6 +75,9 @@ class ImgurManageAPI {
 
   static Future<Map> getConfigMap() async {
     String configStr = await readImgurConfig();
+    if (configStr == '') {
+      return {};
+    }
     Map configMap = json.decode(configStr);
     return configMap;
   }

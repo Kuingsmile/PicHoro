@@ -140,7 +140,6 @@ class WebdavConfigureStoreEditState extends State<WebdavConfigureStoreEdit> {
             ),
             TextFormField(
               controller: _passwordController,
-              obscureText: true,
               decoration: const InputDecoration(
                 label: Center(child: Text('密码')),
                 hintText: '输入密码',

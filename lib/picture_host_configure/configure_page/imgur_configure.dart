@@ -36,8 +36,8 @@ class ImgurConfigState extends State<ImgurConfig> {
   _initConfig() async {
     try {
       Map configMap = await ImgurManageAPI.getConfigMap();
-      _clientIdController.text = configMap['clientId'];
-      if (configMap['proxy'] != 'None') {
+      _clientIdController.text = configMap['clientId'] ?? '';
+      if (configMap['proxy'] != 'None' && configMap['proxy'] != null) {
         _proxyController.text = configMap['proxy'];
       } else {
         _proxyController.clear();
@@ -164,63 +164,30 @@ class ImgurConfigState extends State<ImgurConfig> {
   }
 
   Future _saveImgurConfig() async {
-    String clientId = '';
-    if (_clientIdController.text.startsWith('Client-ID ')) {
-      clientId = _clientIdController.text.substring(10);
-    } else {
-      clientId = _clientIdController.text;
-    }
-    String proxy = '';
-    if (_proxyController.text == '' || _proxyController.text.isEmpty) {
-      proxy = 'None';
-    } else {
-      proxy = _proxyController.text;
-    }
-
     try {
-      String baiduPicUrl =
-          "https://dss0.bdstatic.com/5aV1bjqh_Q23odCf/static/superman/img/logo/logo_white-d0c9fe2af5.png";
-      String validateURL = "https://api.imgur.com/3/image";
-
-      BaseOptions options = setBaseOptions();
-      options.headers = {
-        "Authorization": "Client-ID $clientId",
-      };
-      //需要加一个空的formdata，不然会报错
-      FormData formData = FormData.fromMap({
-        "image": baiduPicUrl,
-      });
-      Dio dio = Dio(options);
-
-      String proxyClean = '';
-      if (proxy != 'None') {
-        if (proxy.startsWith('http://') || proxy.startsWith('https://')) {
-          proxyClean = proxy.split('://')[1];
-        } else {
-          proxyClean = proxy;
-        }
-        dio.httpClientAdapter = useProxy(proxyClean);
-      }
-
-      var validateResponse = await dio.post(validateURL, data: formData);
-      if (validateResponse.statusCode == 200 && validateResponse.data['success'] == true) {
-        final imgurConfig = ImgurConfigModel(clientId, proxy);
-        final imgurConfigJson = jsonEncode(imgurConfig);
-        final imgurConfigFile = await localFile;
-        await imgurConfigFile.writeAsString(imgurConfigJson);
-        if (context.mounted) {
-          return showCupertinoAlertDialog(context: context, title: '成功', content: '配置成功');
-        }
-        return;
+      String clientId = '';
+      if (_clientIdController.text.startsWith('Client-ID ')) {
+        clientId = _clientIdController.text.substring(10);
       } else {
-        if (context.mounted) {
-          return showCupertinoAlertDialog(context: context, title: '错误', content: 'clientId错误');
-        }
+        clientId = _clientIdController.text;
       }
+      String proxy = '';
+      if (_proxyController.text == '' || _proxyController.text.isEmpty) {
+        proxy = 'None';
+      } else {
+        proxy = _proxyController.text;
+      }
+
+      final imgurConfig = ImgurConfigModel(clientId, proxy);
+      final imgurConfigJson = jsonEncode(imgurConfig);
+      final imgurConfigFile = await localFile;
+      await imgurConfigFile.writeAsString(imgurConfigJson);
+      showToast('保存成功');
+      return;
     } catch (e) {
       FLog.error(
           className: 'ImgurConfigPage',
-          methodName: '_saveImgurConfig_2',
+          methodName: '_saveImgurConfig',
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
       if (context.mounted) {
@@ -231,9 +198,8 @@ class ImgurConfigState extends State<ImgurConfig> {
 
   checkImgurConfig() async {
     try {
-      final imgurConfigFile = await localFile;
-      String configData = await imgurConfigFile.readAsString();
-      if (configData == "Error") {
+      String configData = await readHostConfig();
+      if (configData == "") {
         if (context.mounted) {
           return showCupertinoAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");
         }
@@ -291,7 +257,7 @@ class ImgurConfigState extends State<ImgurConfig> {
   Future<File> get localFile async {
     final path = await _localPath;
     String defaultUser = await Global.getUser();
-    return File('$path/${defaultUser}_imgur_config.txt');
+    return ensureFileExists(File('$path/${defaultUser}_imgur_config.txt'));
   }
 
   Future<String> get _localPath async {
@@ -300,37 +266,17 @@ class ImgurConfigState extends State<ImgurConfig> {
   }
 
   Future<String> readHostConfig() async {
-    try {
-      final file = await localFile;
-      String contents = await file.readAsString();
-      return contents;
-    } catch (e) {
-      FLog.error(
-          className: 'ImgurConfigPage',
-          methodName: 'readHostConfig',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
-      return "Error";
-    }
+    final file = await localFile;
+    String contents = await file.readAsString();
+    return contents;
   }
 
   _setdefault() async {
-    try {
-      await Global.setPShost('imgur');
-      await Global.setShowedPBhost('imgur');
-      eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-      eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
-      showToast('已设置Imgur为默认图床');
-    } catch (e) {
-      FLog.error(
-          className: 'ImgurConfigPage',
-          methodName: '_setdefault',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
-      if (context.mounted) {
-        showToastWithContext(context, '错误');
-      }
-    }
+    await Global.setPShost('imgur');
+    await Global.setShowedPBhost('imgur');
+    eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
+    eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
+    showToast('已设置Imgur为默认图床');
   }
 }
 

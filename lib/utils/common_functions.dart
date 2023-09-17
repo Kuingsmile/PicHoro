@@ -22,6 +22,21 @@ import 'package:horopic/router/routers.dart';
 import 'package:horopic/utils/permission.dart';
 import 'package:horopic/picture_host_configure/configure_store/configure_store_file.dart';
 
+Map<String, String> psNameTranslate = {
+  'aliyun': '阿里云',
+  'qiniu': '七牛云',
+  'tencent': '腾讯云',
+  'upyun': '又拍云',
+  'aws': 'S3兼容平台',
+  'ftp': 'FTP',
+  'github': 'GitHub',
+  'sm.ms': 'SM.MS',
+  'imgur': 'Imgur',
+  'lsky.pro': '兰空图床',
+  'alist': 'Alist V3',
+  'webdav': 'WebDAV',
+};
+
 Map downloadStatus = {
   'DownloadStatus.downloading': "下载中",
   'DownloadStatus.paused': "暂停",
@@ -39,6 +54,26 @@ Map uploadStatus = {
   'UploadStatus.queued': "排队中",
   'UploadStatus.paused': "暂停",
 };
+
+flogError(Object e, Map parameters, String className, String methodName) {
+  FLog.error(
+      className: className,
+      methodName: methodName,
+      text: e is DioException
+          ? formatErrorMessage(parameters, e.toString(), isDioError: true, dioErrorMessage: e)
+          : formatErrorMessage(parameters, e.toString()),
+      dataLogType: DataLogType.ERRORS.toString());
+}
+
+Future<File> ensureFileExists(File file) async {
+  bool exists = await file.exists();
+
+  if (!exists) {
+    await file.create(recursive: true);
+  }
+
+  return file;
+}
 
 //默认图床参数和配置文件名对应关系
 String getpdconfig(String defaultConfig) {
@@ -327,7 +362,7 @@ String randomStringGenerator(int length) {
 String renameFileWithTimestamp() {
   var now = DateTime.now();
   var timestamp = now.millisecondsSinceEpoch;
-  var newFileName = timestamp.toString() + randomStringGenerator(5);
+  var newFileName = timestamp.toString();
   return newFileName;
 }
 
@@ -362,7 +397,7 @@ renamePictureWithCustomFormat(File file) async {
   String yearTwoDigit = yearFourDigit.substring(2, 4);
   String month = DateTime.now().month.toString();
   String day = DateTime.now().day.toString();
-  String timestampSecond = (DateTime.now().millisecondsSinceEpoch / 1000).floor().toString();
+  String timestampMilliSecond = (DateTime.now().millisecondsSinceEpoch).floor().toString();
   String uuidWithoutDash = const Uuid().v4().replaceAll('-', '');
   String randommd5 = md5.convert(utf8.encode(uuidWithoutDash)).toString();
   String randommd5Short = randommd5.substring(0, 16);
@@ -374,7 +409,7 @@ renamePictureWithCustomFormat(File file) async {
       .replaceAll('{y}', yearTwoDigit)
       .replaceAll('{m}', month)
       .replaceAll('{d}', day)
-      .replaceAll('{timestamp}', timestampSecond)
+      .replaceAll('{timestamp}', timestampMilliSecond)
       .replaceAll('{uuid}', uuidWithoutDash)
       .replaceAll('{md5}', randommd5)
       .replaceAll('{md5-16}', randommd5Short)
@@ -395,19 +430,19 @@ String generateUrl(String rawUrl, String fileName) {
 
 String generateHtmlFormatedUrl(String rawUrl, String fileName) {
   String encodedUrl = Global.isURLEncode ? Uri.encodeFull(rawUrl) : rawUrl;
-  return '<img src="$encodedUrl" alt="$fileName" title="$fileName" />';
+  return '<img src="$encodedUrl" alt="${my_path.basename(fileName)}" title="${my_path.basename(fileName)}" />';
 }
 
 String generateMarkdownFormatedUrl(String rawUrl, String fileName) {
   String encodedUrl = Global.isURLEncode ? Uri.encodeFull(rawUrl) : rawUrl;
-  return '![$fileName]($encodedUrl)';
+  return '![${my_path.basename(fileName)}]($encodedUrl)';
 }
 
 String generateMarkdownWithLinkFormatedUrl(String rawUrl, String fileName) {
   if (Global.isURLEncode) {
     rawUrl = Uri.encodeFull(rawUrl);
   }
-  String markdownWithLinkFormatedUrl = '[![$fileName]($rawUrl)]($rawUrl)';
+  String markdownWithLinkFormatedUrl = '[![${my_path.basename(fileName)}]($rawUrl)]($rawUrl)';
   return markdownWithLinkFormatedUrl;
 }
 
@@ -418,7 +453,7 @@ String generateBBcodeFormatedUrl(String url, String fileName) {
 
 String generateCustomFormatedUrl(String url, String filename) {
   String encodeUrl = Global.isURLEncode ? Uri.encodeFull(url) : url;
-  return Global.customLinkFormat.replaceAll(r'$fileName', filename).replaceAll(r'$url', encodeUrl);
+  return Global.customLinkFormat.replaceAll(r'$fileName', my_path.basename(filename)).replaceAll(r'$url', encodeUrl);
 }
 
 String getFileSize(int fileSize) {

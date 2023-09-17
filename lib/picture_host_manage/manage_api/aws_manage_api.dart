@@ -18,7 +18,7 @@ class AwsManageAPI {
   static Future<File> get _localFile async {
     final path = await _localPath;
     String defaultUser = await Global.getUser();
-    return File('$path/${defaultUser}_aws_config.txt');
+    return ensureFileExists(File('$path/${defaultUser}_aws_config.txt'));
   }
 
   static Future<String> get _localPath async {
@@ -43,6 +43,9 @@ class AwsManageAPI {
 
   static Future<Map> getConfigMap() async {
     String configStr = await readAwsConfig();
+    if (configStr == '') {
+      return {};
+    }
     Map configMap = json.decode(configStr);
     return configMap;
   }
@@ -85,28 +88,29 @@ class AwsManageAPI {
 
   //获取存储桶列表
   static getBucketList() async {
-    Map configMap = await getConfigMap();
-    String accessKeyId = configMap['accessKeyId'];
-    String secretAccessKey = configMap['secretAccessKey'];
-    String endpoint = configMap['endpoint'];
-    String region = configMap['region'];
-
-    Minio minio;
-    if (region == 'None') {
-      minio = Minio(
-        endPoint: endpoint,
-        accessKey: accessKeyId,
-        secretKey: secretAccessKey,
-      );
-    } else {
-      minio = Minio(
-        endPoint: endpoint,
-        accessKey: accessKeyId,
-        secretKey: secretAccessKey,
-        region: region,
-      );
-    }
     try {
+      Map configMap = await getConfigMap();
+      String accessKeyId = configMap['accessKeyId'];
+      String secretAccessKey = configMap['secretAccessKey'];
+      String endpoint = configMap['endpoint'];
+      String region = configMap['region'];
+
+      Minio minio;
+      if (region == 'None') {
+        minio = Minio(
+          endPoint: endpoint,
+          accessKey: accessKeyId,
+          secretKey: secretAccessKey,
+        );
+      } else {
+        minio = Minio(
+          endPoint: endpoint,
+          accessKey: accessKeyId,
+          secretKey: secretAccessKey,
+          region: region,
+        );
+      }
+
       var response = await minio.listBuckets();
       return ['success', response];
     } catch (e) {
@@ -121,23 +125,23 @@ class AwsManageAPI {
   }
 
   static getBucketRegion(String bucket) async {
-    Map configMap = await getConfigMap();
-    String accessKeyId = configMap['accessKeyId'];
-    String secretAccessKey = configMap['secretAccessKey'];
-    String endpoint = configMap['endpoint'];
-
-    if (endpoint.contains('amazonaws.com')) {
-      endpoint = 's3.us-east-1.amazonaws.com';
-    }
-    Minio minio;
-
-    minio = Minio(
-      endPoint: endpoint,
-      accessKey: accessKeyId,
-      secretKey: secretAccessKey,
-    );
-
     try {
+      Map configMap = await getConfigMap();
+      String accessKeyId = configMap['accessKeyId'];
+      String secretAccessKey = configMap['secretAccessKey'];
+      String endpoint = configMap['endpoint'];
+
+      if (endpoint.contains('amazonaws.com')) {
+        endpoint = 's3.us-east-1.amazonaws.com';
+      }
+      Minio minio;
+
+      minio = Minio(
+        endPoint: endpoint,
+        accessKey: accessKeyId,
+        secretKey: secretAccessKey,
+      );
+
       var response = await minio.getBucketRegion(bucket);
 
       return ['success', response];
@@ -154,35 +158,36 @@ class AwsManageAPI {
 
   //新建存储桶
   static createBucket(Map newBucketConfigMap) async {
-    Map configMap = await getConfigMap();
-    String accessKeyId = configMap['accessKeyId'];
-    String secretAccessKey = configMap['secretAccessKey'];
-    String bucket = newBucketConfigMap['bucketName'];
-    String endpoint = configMap['endpoint'];
-    String region = newBucketConfigMap['region'];
-
-    if (endpoint.contains('amazonaws.com')) {
-      if (!endpoint.contains(region)) {
-        endpoint = 's3.$region.amazonaws.com';
-      }
-    }
-
-    Minio minio;
-    if (region == 'None') {
-      minio = Minio(
-        endPoint: endpoint,
-        accessKey: accessKeyId,
-        secretKey: secretAccessKey,
-      );
-    } else {
-      minio = Minio(
-        endPoint: endpoint,
-        accessKey: accessKeyId,
-        secretKey: secretAccessKey,
-        region: region,
-      );
-    }
     try {
+      Map configMap = await getConfigMap();
+      String accessKeyId = configMap['accessKeyId'];
+      String secretAccessKey = configMap['secretAccessKey'];
+      String bucket = newBucketConfigMap['bucketName'];
+      String endpoint = configMap['endpoint'];
+      String region = newBucketConfigMap['region'];
+
+      if (endpoint.contains('amazonaws.com')) {
+        if (!endpoint.contains(region)) {
+          endpoint = 's3.$region.amazonaws.com';
+        }
+      }
+
+      Minio minio;
+      if (region == 'None') {
+        minio = Minio(
+          endPoint: endpoint,
+          accessKey: accessKeyId,
+          secretKey: secretAccessKey,
+        );
+      } else {
+        minio = Minio(
+          endPoint: endpoint,
+          accessKey: accessKeyId,
+          secretKey: secretAccessKey,
+          region: region,
+        );
+      }
+
       if (region == 'None') {
         await minio.makeBucket(bucket);
       } else {
@@ -201,34 +206,35 @@ class AwsManageAPI {
 
   //删除存储桶
   static deleteBucket(Map element) async {
-    Map configMap = await getConfigMap();
-    String accessKeyId = configMap['accessKeyId'];
-    String secretAccessKey = configMap['secretAccessKey'];
-    String bucket = element['name'];
-    String endpoint = configMap['endpoint'];
-    String region = element['region'];
-
-    if (endpoint.contains('amazonaws.com')) {
-      if (!endpoint.contains(region)) {
-        endpoint = 's3.$region.amazonaws.com';
-      }
-    }
-    Minio minio;
-    if (region == 'None') {
-      minio = Minio(
-        endPoint: endpoint,
-        accessKey: accessKeyId,
-        secretKey: secretAccessKey,
-      );
-    } else {
-      minio = Minio(
-        endPoint: endpoint,
-        accessKey: accessKeyId,
-        secretKey: secretAccessKey,
-        region: region,
-      );
-    }
     try {
+      Map configMap = await getConfigMap();
+      String accessKeyId = configMap['accessKeyId'];
+      String secretAccessKey = configMap['secretAccessKey'];
+      String bucket = element['name'];
+      String endpoint = configMap['endpoint'];
+      String region = element['region'];
+
+      if (endpoint.contains('amazonaws.com')) {
+        if (!endpoint.contains(region)) {
+          endpoint = 's3.$region.amazonaws.com';
+        }
+      }
+      Minio minio;
+      if (region == 'None') {
+        minio = Minio(
+          endPoint: endpoint,
+          accessKey: accessKeyId,
+          secretKey: secretAccessKey,
+        );
+      } else {
+        minio = Minio(
+          endPoint: endpoint,
+          accessKey: accessKeyId,
+          secretKey: secretAccessKey,
+          region: region,
+        );
+      }
+
       var response = await minio.removeBucket(bucket);
 
       return ['success', response];
@@ -292,36 +298,37 @@ class AwsManageAPI {
 
   //查询存储桶文件列表
   static queryBucketFiles(Map element, Map<String, dynamic> query) async {
-    Map configMap = await getConfigMap();
-    String accessKeyId = configMap['accessKeyId'];
-    String secretAccessKey = configMap['secretAccessKey'];
-    String bucket = element['name'];
-    String endpoint = configMap['endpoint'];
-
-    String region = element['region'];
-
-    if (endpoint.contains('amazonaws.com')) {
-      if (!endpoint.contains(region)) {
-        endpoint = 's3.$region.amazonaws.com';
-      }
-    }
-
-    Minio minio;
-    if (region == 'None') {
-      minio = Minio(
-        endPoint: endpoint,
-        accessKey: accessKeyId,
-        secretKey: secretAccessKey,
-      );
-    } else {
-      minio = Minio(
-        endPoint: endpoint,
-        accessKey: accessKeyId,
-        secretKey: secretAccessKey,
-        region: region,
-      );
-    }
     try {
+      Map configMap = await getConfigMap();
+      String accessKeyId = configMap['accessKeyId'];
+      String secretAccessKey = configMap['secretAccessKey'];
+      String bucket = element['name'];
+      String endpoint = configMap['endpoint'];
+
+      String region = element['region'];
+
+      if (endpoint.contains('amazonaws.com')) {
+        if (!endpoint.contains(region)) {
+          endpoint = 's3.$region.amazonaws.com';
+        }
+      }
+
+      Minio minio;
+      if (region == 'None') {
+        minio = Minio(
+          endPoint: endpoint,
+          accessKey: accessKeyId,
+          secretKey: secretAccessKey,
+        );
+      } else {
+        minio = Minio(
+          endPoint: endpoint,
+          accessKey: accessKeyId,
+          secretKey: secretAccessKey,
+          region: region,
+        );
+      }
+
       Map objects = {
         'contents': [],
         'commonPrefixes': [],
@@ -347,35 +354,36 @@ class AwsManageAPI {
 
   //删除文件
   static deleteFile(Map element, String key) async {
-    Map configMap = await getConfigMap();
-    String accessKeyId = configMap['accessKeyId'];
-    String secretAccessKey = configMap['secretAccessKey'];
-    String bucket = element['name'];
-    String endpoint = configMap['endpoint'];
-    String region = element['region'];
-
-    if (endpoint.contains('amazonaws.com')) {
-      if (!endpoint.contains(region)) {
-        endpoint = 's3.$region.amazonaws.com';
-      }
-    }
-
-    Minio minio;
-    if (region == 'None') {
-      minio = Minio(
-        endPoint: endpoint,
-        accessKey: accessKeyId,
-        secretKey: secretAccessKey,
-      );
-    } else {
-      minio = Minio(
-        endPoint: endpoint,
-        accessKey: accessKeyId,
-        secretKey: secretAccessKey,
-        region: region,
-      );
-    }
     try {
+      Map configMap = await getConfigMap();
+      String accessKeyId = configMap['accessKeyId'];
+      String secretAccessKey = configMap['secretAccessKey'];
+      String bucket = element['name'];
+      String endpoint = configMap['endpoint'];
+      String region = element['region'];
+
+      if (endpoint.contains('amazonaws.com')) {
+        if (!endpoint.contains(region)) {
+          endpoint = 's3.$region.amazonaws.com';
+        }
+      }
+
+      Minio minio;
+      if (region == 'None') {
+        minio = Minio(
+          endPoint: endpoint,
+          accessKey: accessKeyId,
+          secretKey: secretAccessKey,
+        );
+      } else {
+        minio = Minio(
+          endPoint: endpoint,
+          accessKey: accessKeyId,
+          secretKey: secretAccessKey,
+          region: region,
+        );
+      }
+
       var response = await minio.removeObject(bucket, key);
 
       return ['success', response];
@@ -392,10 +400,11 @@ class AwsManageAPI {
 
   //删除文件夹
   static deleteFolder(Map element, String prefix) async {
-    var queryResult = await queryBucketFiles(element, {
-      'prefix': prefix,
-    });
     try {
+      var queryResult = await queryBucketFiles(element, {
+        'prefix': prefix,
+      });
+
       if (queryResult[0] == 'success') {
         List files = [];
         List folders = [];
@@ -435,33 +444,34 @@ class AwsManageAPI {
 
   //重命名文件
   static copyFile(Map element, String key, String newKey) async {
-    Map configMap = await getConfigMap();
-    String accessKeyId = configMap['accessKeyId'];
-    String secretAccessKey = configMap['secretAccessKey'];
-    String bucket = element['name'];
-    String endpoint = configMap['endpoint'];
-    String region = element['region'];
-    if (endpoint.contains('amazonaws.com')) {
-      if (!endpoint.contains(region)) {
-        endpoint = 's3.$region.amazonaws.com';
-      }
-    }
-    Minio minio;
-    if (region == 'None') {
-      minio = Minio(
-        endPoint: endpoint,
-        accessKey: accessKeyId,
-        secretKey: secretAccessKey,
-      );
-    } else {
-      minio = Minio(
-        endPoint: endpoint,
-        accessKey: accessKeyId,
-        secretKey: secretAccessKey,
-        region: region,
-      );
-    }
     try {
+      Map configMap = await getConfigMap();
+      String accessKeyId = configMap['accessKeyId'];
+      String secretAccessKey = configMap['secretAccessKey'];
+      String bucket = element['name'];
+      String endpoint = configMap['endpoint'];
+      String region = element['region'];
+      if (endpoint.contains('amazonaws.com')) {
+        if (!endpoint.contains(region)) {
+          endpoint = 's3.$region.amazonaws.com';
+        }
+      }
+      Minio minio;
+      if (region == 'None') {
+        minio = Minio(
+          endPoint: endpoint,
+          accessKey: accessKeyId,
+          secretKey: secretAccessKey,
+        );
+      } else {
+        minio = Minio(
+          endPoint: endpoint,
+          accessKey: accessKeyId,
+          secretKey: secretAccessKey,
+          region: region,
+        );
+      }
+
       var response = await minio.copyObject(
         bucket,
         newKey,
@@ -523,33 +533,34 @@ class AwsManageAPI {
 
   //新建文件夹
   static createFolder(Map element, String prefix, String newfolder) async {
-    Map configMap = await getConfigMap();
-    String accessKeyId = configMap['accessKeyId'];
-    String secretAccessKey = configMap['secretAccessKey'];
-    String bucket = element['name'];
-    String endpoint = configMap['endpoint'];
-    String region = element['region'];
-    if (endpoint.contains('amazonaws.com')) {
-      if (!endpoint.contains(region)) {
-        endpoint = 's3.$region.amazonaws.com';
-      }
-    }
-    Minio minio;
-    if (region == 'None') {
-      minio = Minio(
-        endPoint: endpoint,
-        accessKey: accessKeyId,
-        secretKey: secretAccessKey,
-      );
-    } else {
-      minio = Minio(
-        endPoint: endpoint,
-        accessKey: accessKeyId,
-        secretKey: secretAccessKey,
-        region: region,
-      );
-    }
     try {
+      Map configMap = await getConfigMap();
+      String accessKeyId = configMap['accessKeyId'];
+      String secretAccessKey = configMap['secretAccessKey'];
+      String bucket = element['name'];
+      String endpoint = configMap['endpoint'];
+      String region = element['region'];
+      if (endpoint.contains('amazonaws.com')) {
+        if (!endpoint.contains(region)) {
+          endpoint = 's3.$region.amazonaws.com';
+        }
+      }
+      Minio minio;
+      if (region == 'None') {
+        minio = Minio(
+          endPoint: endpoint,
+          accessKey: accessKeyId,
+          secretKey: secretAccessKey,
+        );
+      } else {
+        minio = Minio(
+          endPoint: endpoint,
+          accessKey: accessKeyId,
+          secretKey: secretAccessKey,
+          region: region,
+        );
+      }
+
       var response = await minio.putObject(bucket, '$prefix$newfolder/placeholder.txt', Stream.fromIterable([]));
       return ['success', response];
     } catch (e) {
@@ -570,42 +581,43 @@ class AwsManageAPI {
     String filepath,
     String prefix,
   ) async {
-    Map configMap = await getConfigMap();
-    String accessKeyId = configMap['accessKeyId'];
-    String secretAccessKey = configMap['secretAccessKey'];
-    String bucket = element['name'];
-    String endpoint = configMap['endpoint'];
-    String region = element['region'];
-    String uploadPath = prefix;
-    if (endpoint.contains('amazonaws.com')) {
-      if (!endpoint.contains(region)) {
-        endpoint = 's3.$region.amazonaws.com';
-      }
-    }
-    //云存储的路径
-    String urlpath = '';
-    if (uploadPath != '') {
-      urlpath = '$uploadPath$filename';
-    } else {
-      urlpath = filename;
-    }
-
-    Minio minio;
-    if (region == 'None') {
-      minio = Minio(
-        endPoint: endpoint,
-        accessKey: accessKeyId,
-        secretKey: secretAccessKey,
-      );
-    } else {
-      minio = Minio(
-        endPoint: endpoint,
-        accessKey: accessKeyId,
-        secretKey: secretAccessKey,
-        region: region,
-      );
-    }
     try {
+      Map configMap = await getConfigMap();
+      String accessKeyId = configMap['accessKeyId'];
+      String secretAccessKey = configMap['secretAccessKey'];
+      String bucket = element['name'];
+      String endpoint = configMap['endpoint'];
+      String region = element['region'];
+      String uploadPath = prefix;
+      if (endpoint.contains('amazonaws.com')) {
+        if (!endpoint.contains(region)) {
+          endpoint = 's3.$region.amazonaws.com';
+        }
+      }
+      //云存储的路径
+      String urlpath = '';
+      if (uploadPath != '') {
+        urlpath = '$uploadPath$filename';
+      } else {
+        urlpath = filename;
+      }
+
+      Minio minio;
+      if (region == 'None') {
+        minio = Minio(
+          endPoint: endpoint,
+          accessKey: accessKeyId,
+          secretKey: secretAccessKey,
+        );
+      } else {
+        minio = Minio(
+          endPoint: endpoint,
+          accessKey: accessKeyId,
+          secretKey: secretAccessKey,
+          region: region,
+        );
+      }
+
       Stream<Uint8List> stream = File(filepath).openRead().cast();
       await minio.putObject(
         bucket,
@@ -689,20 +701,7 @@ class AwsManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "AwsManageAPI",
-            methodName: "uploadNetworkFile",
-            text: formatErrorMessage({'fileLink': fileLink, 'element': element, 'prefix': prefix}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "AwsManageAPI",
-            methodName: "uploadNetworkFile",
-            text: formatErrorMessage({'fileLink': fileLink, 'element': element, 'prefix': prefix}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogError(e, {'fileLink': fileLink, 'element': element, 'prefix': prefix}, "AwsManageAPI", "uploadNetworkFile");
       return ['failed'];
     }
   }

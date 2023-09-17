@@ -15,7 +15,7 @@ class WebdavManageAPI {
   static Future<io.File> get _localFile async {
     final path = await _localPath;
     String defaultUser = await Global.getUser();
-    return io.File('$path/${defaultUser}_webdav_config.txt');
+    return ensureFileExists(io.File('$path/${defaultUser}_webdav_config.txt'));
   }
 
   static Future<String> get _localPath async {
@@ -40,6 +40,9 @@ class WebdavManageAPI {
 
   static Future<Map> getConfigMap() async {
     String configStr = await readWebdavConfig();
+    if (configStr == '') {
+      return {};
+    }
     Map configMap = json.decode(configStr);
     return configMap;
   }
@@ -70,9 +73,8 @@ class WebdavManageAPI {
   }
 
   static getFileList(String path) async {
-    webdav.Client client = await getWebdavClient();
-
     try {
+      webdav.Client client = await getWebdavClient();
       var response = await client.readDir(path);
       List fileList = [];
       for (var item in response) {
@@ -89,65 +91,29 @@ class WebdavManageAPI {
       }
       return ['success', fileList];
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "WebdavManageAPI",
-            methodName: "getFileList",
-            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "WebdavManageAPI",
-            methodName: "getFileList",
-            text: formatErrorMessage({}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogError(e, {}, "WebdavManageAPI", "getFileList");
       return [e.toString()];
     }
   }
 
   static createDir(String path) async {
-    webdav.Client client = await getWebdavClient();
     try {
+      webdav.Client client = await getWebdavClient();
       await client.mkdirAll(path);
       return ['success'];
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "WebdavManageAPI",
-            methodName: "createDir",
-            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "WebdavManageAPI",
-            methodName: "createDir",
-            text: formatErrorMessage({}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogError(e, {}, "WebdavManageAPI", "createDir");
       return [e.toString()];
     }
   }
 
   static deleteFile(String path) async {
-    webdav.Client client = await getWebdavClient();
     try {
+      webdav.Client client = await getWebdavClient();
       await client.remove(path);
       return ['success'];
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "WebdavManageAPI",
-            methodName: "deleteFile",
-            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "WebdavManageAPI",
-            methodName: "deleteFile",
-            text: formatErrorMessage({}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogError(e, {}, "WebdavManageAPI", "deleteFile");
       return [e.toString()];
     }
   }
@@ -156,24 +122,12 @@ class WebdavManageAPI {
     String path,
     String newName,
   ) async {
-    webdav.Client client = await getWebdavClient();
     try {
+      webdav.Client client = await getWebdavClient();
       await client.rename(path, newName, true);
       return ['success'];
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "WebdavManageAPI",
-            methodName: "renameFile",
-            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "WebdavManageAPI",
-            methodName: "renameFile",
-            text: formatErrorMessage({}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogError(e, {}, "WebdavManageAPI", "renameFile");
       return [e.toString()];
     }
   }
@@ -217,20 +171,7 @@ class WebdavManageAPI {
       await client.writeFromFile(filepath, prefix + filename);
       return ['success'];
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "WebdavManageAPI",
-            methodName: "uploadFile",
-            text: formatErrorMessage({'filename': filename, 'filepath': filepath, 'prefix': prefix}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "WebdavManageAPI",
-            methodName: "uploadFile",
-            text: formatErrorMessage({'filename': filename, 'filepath': filepath, 'prefix': prefix}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogError(e, {'filename': filename, 'filepath': filepath, 'prefix': prefix}, "WebdavManageAPI", "uploadFile");
       return ['error'];
     }
   }
@@ -261,20 +202,7 @@ class WebdavManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "WebdavManageAPI",
-            methodName: "uploadNetworkFile",
-            text: formatErrorMessage({'fileLink': fileLink, 'prefix': prefix}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "WebdavManageAPI",
-            methodName: "uploadNetworkFile",
-            text: formatErrorMessage({'fileLink': fileLink, 'prefix': prefix}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogError(e, {'fileLink': fileLink, 'prefix': prefix}, "WebdavManageAPI", "uploadNetworkFile");
       return ['failed'];
     }
   }

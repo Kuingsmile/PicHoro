@@ -2,27 +2,20 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:barcode_scan2/barcode_scan2.dart';
-import 'package:crypto/crypto.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:fluro/fluro.dart';
 import 'package:f_logs/f_logs.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:qiniu_flutter_sdk/qiniu_flutter_sdk.dart';
-import 'package:path/path.dart' as mypath;
 
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/common_functions.dart';
-import 'package:horopic/utils/dio_proxy_adapter.dart';
 
 import 'package:horopic/picture_host_configure/configure_page/configure_export.dart';
 
 import 'package:horopic/pages/loading.dart';
 
-import 'package:horopic/api/qiniu_api.dart';
-import 'package:horopic/api/tencent_api.dart';
 import 'package:horopic/router/application.dart';
 import 'package:horopic/router/routers.dart';
 
@@ -70,65 +63,65 @@ class AllPShostState extends State<AllPShost> {
     }
   }
 
-  //smms配置
   static Future<String> get localPath async {
     final directory = await getApplicationDocumentsDirectory();
     return directory.path;
   }
 
+  //smms配置
   Future<File> get smmsFile async {
     final path = await localPath;
     String defaultUser = await Global.getUser();
-    return File('$path/${defaultUser}_smms_config.txt');
+    return ensureFileExists(File('$path/${defaultUser}_smms_config.txt'));
   }
 
 //lskypro配置
   Future<File> get lskyFile async {
     final path = await localPath;
     String defaultUser = await Global.getUser();
-    return File('$path/${defaultUser}_host_config.txt');
+    return ensureFileExists(File('$path/${defaultUser}_host_config.txt'));
   }
 
 //github配置
   Future<File> get githubFile async {
     final path = await localPath;
     String defaultUser = await Global.getUser();
-    return File('$path/${defaultUser}_github_config.txt');
+    return ensureFileExists(File('$path/${defaultUser}_github_config.txt'));
   }
 
   //imgur配置
   Future<File> get imgurFile async {
     final path = await localPath;
     String defaultUser = await Global.getUser();
-    return File('$path/${defaultUser}_imgur_config.txt');
+    return ensureFileExists(File('$path/${defaultUser}_imgur_config.txt'));
   }
 
   //qiniu配置
   Future<File> get qiniuFile async {
     final path = await localPath;
     String defaultUser = await Global.getUser();
-    return File('$path/${defaultUser}_qiniu_config.txt');
+    return ensureFileExists(File('$path/${defaultUser}_qiniu_config.txt'));
   }
 
   //tencent配置
   Future<File> get tencentFile async {
     final path = await localPath;
     String defaultUser = await Global.getUser();
-    return File('$path/${defaultUser}_tencent_config.txt');
+    return ensureFileExists(File('$path/${defaultUser}_tencent_config.txt'));
   }
 
   //aliyun配置
   Future<File> get aliyunFile async {
     final path = await localPath;
     String defaultUser = await Global.getUser();
-    return File('$path/${defaultUser}_aliyun_config.txt');
+    return ensureFileExists(File('$path/${defaultUser}_aliyun_config.txt'));
   }
 
   //upyun配置
   Future<File> get upyunFile async {
     final path = await localPath;
     String defaultUser = await Global.getUser();
-    return File('$path/${defaultUser}_upyun_config.txt');
+    return ensureFileExists(File('$path/${defaultUser}_upyun_config.txt'));
   }
 
   exportConfiguration(String pshost) async {
@@ -150,9 +143,13 @@ class AllPShostState extends State<AllPShost> {
         "webdav": "$configPath/${defaultUser}_webdav_config.txt",
       };
       String config = await File(configFilePath[pshost]!).readAsString();
+      if (config == '') {
+        return Fluttertoast.showToast(
+            msg: "该图床未配置", toastLength: Toast.LENGTH_SHORT, timeInSecForIosWeb: 2, fontSize: 16.0);
+      }
       Map<String, dynamic> configMap = jsonDecode(config);
-      Map configMap2 = {pshost: configMap};
-      String configJson = jsonEncode(configMap2);
+      Map configMapWithPshost = {pshost: configMap};
+      String configJson = jsonEncode(configMapWithPshost);
       configJson = configJson.replaceAll('None', '');
       configJson = configJson.replaceAll('keyId', 'accessKeyId');
       configJson = configJson.replaceAll('keySecret', 'accessKeySecret');
@@ -194,6 +191,9 @@ class AllPShostState extends State<AllPShost> {
           continue;
         }
         String config = await File(configFilePath[key]!).readAsString();
+        if (config == '') {
+          continue;
+        }
         Map<String, dynamic> configMap2 = jsonDecode(config);
         configMap[key] = configMap2;
       }
@@ -230,36 +230,13 @@ class AllPShostState extends State<AllPShost> {
     Map<String, dynamic> jsonResult = jsonDecode(result);
 
     if (jsonResult['smms'] != null) {
-      final smmsToken = jsonResult['smms']['token'];
+      final smmsToken = jsonResult['smms']['token'] ?? '';
       try {
-        String validateURL = "https://smms.app/api/v2/profile";
-        BaseOptions options = setBaseOptions();
-        options.headers = {
-          "Content-Type": 'multipart/form-data',
-          "Authorization": smmsToken,
-        };
-        //需要加一个空的formdata，不然会报错
-        FormData formData = FormData.fromMap({});
-        Dio dio = Dio(options);
-        try {
-          var validateResponse = await dio.post(validateURL, data: formData);
-          if (validateResponse.statusCode == 200 && validateResponse.data['success'] == true) {
-            final smmsConfig = SmmsConfigModel(smmsToken);
-            final smmsConfigJson = jsonEncode(smmsConfig);
-            final smmsConfigFile = await smmsFile;
-            await smmsConfigFile.writeAsString(smmsConfigJson);
-            showToast("sm.ms配置成功");
-          } else {
-            showToast("sm.ms验证失败");
-          }
-        } catch (e) {
-          FLog.error(
-              className: 'AllPShostState',
-              methodName: 'processingQRCodeResult_smms_1',
-              text: formatErrorMessage({}, e.toString()),
-              dataLogType: DataLogType.ERRORS.toString());
-          rethrow;
-        }
+        final smmsConfig = SmmsConfigModel(smmsToken);
+        final smmsConfigJson = jsonEncode(smmsConfig);
+        final smmsConfigFile = await smmsFile;
+        await smmsConfigFile.writeAsString(smmsConfigJson);
+        showToast("sm.ms配置成功");
       } catch (e) {
         FLog.error(
             className: 'AllPShostState',
@@ -272,22 +249,21 @@ class AllPShostState extends State<AllPShost> {
 
     if (jsonResult['github'] != null) {
       try {
-        String token = jsonResult['github']['token'];
-        String githubUserApi = 'https://api.github.com/user';
-        String usernameRepo = jsonResult['github']['repo'];
+        String token = jsonResult['github']['token'] ?? '';
+        String usernameRepo = jsonResult['github']['repo'] ?? '';
         String githubusername = usernameRepo.substring(0, usernameRepo.indexOf('/'));
         String repo = usernameRepo.substring(usernameRepo.indexOf('/') + 1);
-        String storePath = jsonResult['github']['path'];
-        if (storePath == '' || storePath.isEmpty) {
+        String storePath = jsonResult['github']['path'] ?? '';
+        if (storePath == '' || storePath.isEmpty || storePath == '/') {
           storePath = 'None';
         } else if (!storePath.endsWith('/')) {
           storePath = '$storePath/';
         }
-        String branch = jsonResult['github']['branch'];
+        String branch = jsonResult['github']['branch'] ?? '';
         if (branch == '' || branch.isEmpty) {
           branch = 'main';
         }
-        String customDomain = jsonResult['github']['customUrl'];
+        String customDomain = jsonResult['github']['customUrl'] ?? '';
         if (customDomain == '' || customDomain.isEmpty) {
           customDomain = 'None';
         }
@@ -300,46 +276,16 @@ class AllPShostState extends State<AllPShost> {
           }
         }
         token = token.startsWith('Bearer ') ? token : 'Bearer $token';
-        try {
-          BaseOptions options = setBaseOptions();
-          options.headers = {
-            "Accept": 'application/vnd.github+json',
-            "Authorization": token,
-          };
-          //需要加一个空的formdata，不然会报错
-          Map<String, dynamic> queryData = {};
-          Dio dio = Dio(options);
-          try {
-            var validateResponse = await dio.get(githubUserApi, queryParameters: queryData);
-            if (validateResponse.statusCode == 200 && validateResponse.data.toString().contains("email")) {
-              final githubConfig = GithubConfigModel(githubusername, repo, token, storePath, branch, customDomain);
-              final githubConfigJson = jsonEncode(githubConfig);
-              final githubConfigFile = await githubFile;
-              await githubConfigFile.writeAsString(githubConfigJson);
-              showToast("Github配置成功");
-            } else {
-              showToast("Github验证失败");
-            }
-          } catch (e) {
-            FLog.error(
-                className: 'AllPShostState',
-                methodName: 'processingQRCodeResult_github_1',
-                text: formatErrorMessage({}, e.toString()),
-                dataLogType: DataLogType.ERRORS.toString());
-            showToast("Github验证失败");
-          }
-        } catch (e) {
-          FLog.error(
-              className: 'AllPShostState',
-              methodName: 'processingQRCodeResult_github_2',
-              text: formatErrorMessage({}, e.toString()),
-              dataLogType: DataLogType.ERRORS.toString());
-          showToast("Github配置错误");
-        }
+
+        final githubConfig = GithubConfigModel(githubusername, repo, token, storePath, branch, customDomain);
+        final githubConfigJson = jsonEncode(githubConfig);
+        final githubConfigFile = await githubFile;
+        await githubConfigFile.writeAsString(githubConfigJson);
+        showToast("Github配置成功");
       } catch (e) {
         FLog.error(
             className: 'AllPShostState',
-            methodName: 'processingQRCodeResult_github_3',
+            methodName: 'processingQRCodeResult_github',
             text: formatErrorMessage({}, e.toString()),
             dataLogType: DataLogType.ERRORS.toString());
         showToast("Github配置错误");
@@ -349,57 +295,32 @@ class AllPShostState extends State<AllPShost> {
     if (jsonResult['lankong'] != null) {
       try {
         String lankongVersion = jsonResult['lankong']['lskyProVersion'];
-        if (lankongVersion == 'V2') {
-          String lankongVtwoHost = jsonResult['lankong']['server'];
-          if (lankongVtwoHost.endsWith('/')) {
-            lankongVtwoHost = lankongVtwoHost.substring(0, lankongVtwoHost.length - 1);
-          }
-          String lankongToken = jsonResult['lankong']['token'];
-          if (lankongToken.startsWith('Bearer ')) {
-          } else {
-            lankongToken = 'Bearer $lankongToken';
-          }
-          String lanKongstrategyId = jsonResult['lankong']['strategyId'];
-          if (lanKongstrategyId == '' || lanKongstrategyId.isEmpty) {
-            lanKongstrategyId = 'None';
-          }
-          String lanKongalbumId = jsonResult['lankong']['albumId'];
-          if (lanKongalbumId == '' || lanKongalbumId.isEmpty) {
-            lanKongalbumId = 'None';
-          }
-
-          BaseOptions options = setBaseOptions();
-          options.headers = {
-            "Accept": "application/json",
-            "Authorization": lankongToken,
-          };
-          String profileUrl = "$lankongVtwoHost/api/v1/profile";
-          Dio dio = Dio(options);
-          try {
-            var response = await dio.get(
-              profileUrl,
-            );
-            if (response.statusCode == 200 && response.data['status'] == true) {
-              HostConfigModel hostConfig =
-                  HostConfigModel(lankongVtwoHost, lankongToken, lanKongstrategyId, lanKongalbumId);
-              final hostConfigJson = jsonEncode(hostConfig);
-              final hostConfigFile = await lskyFile;
-              hostConfigFile.writeAsString(hostConfigJson);
-              showToast("兰空配置成功");
-            } else {
-              showToast("兰空验证失败");
-            }
-          } catch (e) {
-            FLog.error(
-                className: 'AllPShostState',
-                methodName: 'processingQRCodeResult_lankong_2',
-                text: formatErrorMessage({}, e.toString()),
-                dataLogType: DataLogType.ERRORS.toString());
-            showToast("兰空配置错误");
-          }
-        } else {
+        if (lankongVersion == 'V1') {
           showToast("不支持兰空V1");
         }
+        String lankongVtwoHost = jsonResult['lankong']['server'];
+        if (lankongVtwoHost.endsWith('/')) {
+          lankongVtwoHost = lankongVtwoHost.substring(0, lankongVtwoHost.length - 1);
+        }
+        String lankongToken = jsonResult['lankong']['token'];
+        if (lankongToken.startsWith('Bearer ')) {
+        } else {
+          lankongToken = 'Bearer $lankongToken';
+        }
+        String lanKongstrategyId = jsonResult['lankong']['strategyId'];
+        if (lanKongstrategyId == '' || lanKongstrategyId.isEmpty) {
+          lanKongstrategyId = 'None';
+        }
+        String lanKongalbumId = jsonResult['lankong']['albumId'];
+        if (lanKongalbumId == '' || lanKongalbumId.isEmpty) {
+          lanKongalbumId = 'None';
+        }
+
+        HostConfigModel hostConfig = HostConfigModel(lankongVtwoHost, lankongToken, lanKongstrategyId, lanKongalbumId);
+        final hostConfigJson = jsonEncode(hostConfig);
+        final hostConfigFile = await lskyFile;
+        hostConfigFile.writeAsString(hostConfigJson);
+        showToast("兰空配置成功");
       } catch (e) {
         FLog.error(
             className: 'AllPShostState',
@@ -411,55 +332,17 @@ class AllPShostState extends State<AllPShost> {
     }
 
     if (jsonResult['imgur'] != null) {
-      final imgurclientId = jsonResult['imgur']['clientId'];
-      String imgurProxy = jsonResult['imgur']['proxy'];
+      final imgurclientId = jsonResult['imgur']['clientId'] ?? '';
+      String imgurProxy = jsonResult['imgur']['proxy'] ?? '';
       if (imgurProxy.isEmpty) {
         imgurProxy = 'None';
       }
       try {
-        String baiduPicUrl =
-            "https://dss0.bdstatic.com/5aV1bjqh_Q23odCf/static/superman/img/logo/logo_white-d0c9fe2af5.png";
-        String validateURL = "https://api.imgur.com/3/image";
-
-        BaseOptions options = setBaseOptions();
-        options.headers = {
-          "Authorization": "Client-ID $imgurclientId",
-        };
-        //需要加一个空的formdata，不然会报错
-        FormData formData = FormData.fromMap({
-          "image": baiduPicUrl,
-        });
-        Dio dio = Dio(options);
-        String proxyClean = '';
-
-        if (imgurProxy != 'None') {
-          if (imgurProxy.startsWith('http://') || imgurProxy.startsWith('https://')) {
-            proxyClean = imgurProxy.split('://')[1];
-          } else {
-            proxyClean = imgurProxy;
-          }
-          dio.httpClientAdapter = useProxy(proxyClean);
-        }
-
-        try {
-          var validateResponse = await dio.post(validateURL, data: formData);
-          if (validateResponse.statusCode == 200 && validateResponse.data['success'] == true) {
-            final imgurConfig = ImgurConfigModel(imgurclientId, imgurProxy);
-            final imgurConfigJson = jsonEncode(imgurConfig);
-            final imgurConfigFile = await smmsFile;
-            await imgurConfigFile.writeAsString(imgurConfigJson);
-            showToast("Imgur配置成功");
-          } else {
-            showToast("Imgur验证失败");
-          }
-        } catch (e) {
-          FLog.error(
-              className: 'AllPShostState',
-              methodName: 'processingQRCodeResult_imgur_1',
-              text: formatErrorMessage({}, e.toString()),
-              dataLogType: DataLogType.ERRORS.toString());
-          rethrow;
-        }
+        final imgurConfig = ImgurConfigModel(imgurclientId, imgurProxy);
+        final imgurConfigJson = jsonEncode(imgurConfig);
+        final imgurConfigFile = await smmsFile;
+        await imgurConfigFile.writeAsString(imgurConfigJson);
+        showToast("Imgur配置成功");
       } catch (e) {
         FLog.error(
             className: 'AllPShostState',
@@ -471,13 +354,13 @@ class AllPShostState extends State<AllPShost> {
     }
 
     if (jsonResult['qiniu'] != null) {
-      String qiniuAccessKey = jsonResult['qiniu']['accessKey'];
-      String qiniuSecretKey = jsonResult['qiniu']['secretKey'];
-      String qiniuBucket = jsonResult['qiniu']['bucket'];
-      String qiniuUrl = jsonResult['qiniu']['url'];
-      String qiniuArea = jsonResult['qiniu']['area'];
-      String qiniuOptions = jsonResult['qiniu']['options'];
-      String qiniuPath = jsonResult['qiniu']['path'];
+      String qiniuAccessKey = jsonResult['qiniu']['accessKey'] ?? '';
+      String qiniuSecretKey = jsonResult['qiniu']['secretKey'] ?? '';
+      String qiniuBucket = jsonResult['qiniu']['bucket'] ?? '';
+      String qiniuUrl = jsonResult['qiniu']['url'] ?? '';
+      String qiniuArea = jsonResult['qiniu']['area'] ?? '';
+      String qiniuOptions = jsonResult['qiniu']['options'] ?? '';
+      String qiniuPath = jsonResult['qiniu']['path'] ?? '';
 
       try {
         if (!qiniuUrl.startsWith('http') && !qiniuUrl.startsWith('https')) {
@@ -500,53 +383,16 @@ class AllPShostState extends State<AllPShost> {
 
         if (qiniuOptions.isEmpty) {
           qiniuOptions = 'None';
-        } else {
-          if (!qiniuOptions.startsWith('?')) {
-            qiniuOptions = '?$qiniuOptions';
-          }
+        } else if (!qiniuOptions.startsWith('?')) {
+          qiniuOptions = '?$qiniuOptions';
         }
-        String assetPath = 'assets/validateImage/PicHoroValidate.jpeg';
-        String appDir = await getApplicationDocumentsDirectory().then((value) {
-          return value.path;
-        });
-        String assetFilePath = '$appDir/PicHoroValidate.jpeg';
-        File assetFile = File(assetFilePath);
 
-        if (!assetFile.existsSync()) {
-          ByteData data = await rootBundle.load(assetPath);
-          List<int> bytes = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
-          await assetFile.writeAsBytes(bytes);
-        }
-        String key = 'PicHoroValidate.jpeg';
-        String urlSafeBase64EncodePutPolicy =
-            QiniuImageUploadUtils.geturlSafeBase64EncodePutPolicy(qiniuBucket, key, qiniuPath);
-        String uploadToken =
-            QiniuImageUploadUtils.getUploadToken(qiniuAccessKey, qiniuSecretKey, urlSafeBase64EncodePutPolicy);
-        Storage storage = Storage(
-            config: Config(
-          retryLimit: 5,
-        ));
-
-        try {
-          PutResponse putresult = await storage.putFile(File(assetFilePath), uploadToken);
-          if (putresult.key == key || putresult.key == '$qiniuPath$key') {
-            final qiniuConfig = QiniuConfigModel(
-                qiniuAccessKey, qiniuSecretKey, qiniuBucket, qiniuUrl, qiniuArea, qiniuOptions, qiniuPath);
-            final qiniuConfigJson = jsonEncode(qiniuConfig);
-            final qiniuConfigFile = await qiniuFile;
-            await qiniuConfigFile.writeAsString(qiniuConfigJson);
-            showToast("七牛配置成功");
-          } else {
-            showToast("七牛验证失败");
-          }
-        } catch (e) {
-          FLog.error(
-              className: 'AllPShostState',
-              methodName: 'processingQRCodeResult_qiniu_1',
-              text: formatErrorMessage({}, e.toString()),
-              dataLogType: DataLogType.ERRORS.toString());
-          rethrow;
-        }
+        final qiniuConfig =
+            QiniuConfigModel(qiniuAccessKey, qiniuSecretKey, qiniuBucket, qiniuUrl, qiniuArea, qiniuOptions, qiniuPath);
+        final qiniuConfigJson = jsonEncode(qiniuConfig);
+        final qiniuConfigFile = await qiniuFile;
+        await qiniuConfigFile.writeAsString(qiniuConfigJson);
+        showToast("七牛配置成功");
       } catch (e) {
         FLog.error(
             className: 'AllPShostState',
@@ -559,150 +405,79 @@ class AllPShostState extends State<AllPShost> {
 
     if (jsonResult['tcyun'] != null) {
       String tencentVersion = jsonResult['tcyun']['version'];
-      if (tencentVersion == 'v5') {
-        String tencentSecretId = jsonResult['tcyun']['secretId'];
-        String tencentSecretKey = jsonResult['tcyun']['secretKey'];
-        String tencentBucket = jsonResult['tcyun']['bucket'];
-        String tencentAppId = jsonResult['tcyun']['appId'];
-        String tencentArea = jsonResult['tcyun']['area'];
-        String tencentPath = jsonResult['tcyun']['path'];
-        String tencentCustomUrl = jsonResult['tcyun']['customUrl'];
-        String tencentOptions = jsonResult['tcyun']['options'];
-
-        try {
-          if (tencentCustomUrl.isNotEmpty) {
-            if (!tencentCustomUrl.startsWith('http') && !tencentCustomUrl.startsWith('https')) {
-              tencentCustomUrl = 'http://$tencentCustomUrl';
-            }
-            if (tencentCustomUrl.endsWith('/')) {
-              tencentCustomUrl = tencentCustomUrl.substring(0, tencentCustomUrl.length - 1);
-            }
-          } else {
-            tencentCustomUrl = 'None';
-          }
-
-          if (tencentPath.isEmpty) {
-            tencentPath = 'None';
-          } else {
-            if (tencentPath.startsWith('/')) {
-              tencentPath = tencentPath.substring(1);
-            }
-            if (!tencentPath.endsWith('/')) {
-              tencentPath = '$tencentPath/';
-            }
-          }
-
-          if (tencentOptions.isEmpty) {
-            tencentOptions = 'None';
-          } else {
-            if (!tencentOptions.startsWith('?')) {
-              tencentOptions = '?$tencentOptions';
-            }
-          }
-          String assetPath = 'assets/validateImage/PicHoroValidate.jpeg';
-          String appDir = await getApplicationDocumentsDirectory().then((value) {
-            return value.path;
-          });
-          String assetFilePath = '$appDir/PicHoroValidate.jpeg';
-          File assetFile = File(assetFilePath);
-
-          if (!assetFile.existsSync()) {
-            ByteData data = await rootBundle.load(assetPath);
-            List<int> bytes = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
-            await assetFile.writeAsBytes(bytes);
-          }
-          String key = 'PicHoroValidate.jpeg';
-          String host = '$tencentBucket.cos.$tencentArea.myqcloud.com';
-          String urlpath = '';
-          if (tencentPath != 'None') {
-            urlpath = '$tencentPath$key';
-          } else {
-            urlpath = key;
-          }
-          int startTimestamp = DateTime.now().millisecondsSinceEpoch ~/ 1000;
-          int endTimestamp = startTimestamp + 86400;
-          String keyTime = '$startTimestamp;$endTimestamp';
-          Map<String, dynamic> uploadPolicy = {
-            "expiration": "2033-03-03T09:38:12.414Z",
-            "conditions": [
-              {"acl": "default"},
-              {"bucket": tencentBucket},
-              {"key": urlpath},
-              {"q-sign-algorithm": "sha1"},
-              {"q-ak": tencentSecretId},
-              {"q-sign-time": keyTime}
-            ]
-          };
-          String uploadPolicyStr = jsonEncode(uploadPolicy);
-          String singature = TencentImageUploadUtils.getUploadAuthorization(tencentSecretKey, keyTime, uploadPolicyStr);
-          //policy中的字段，除了bucket，其它的都要在formdata中添加
-          FormData formData = FormData.fromMap({
-            'key': urlpath,
-            'policy': base64Encode(utf8.encode(uploadPolicyStr)),
-            'acl': 'default',
-            'q-sign-algorithm': 'sha1',
-            'q-ak': tencentSecretId,
-            'q-key-time': keyTime,
-            'q-sign-time': keyTime,
-            'q-signature': singature,
-            'file': await MultipartFile.fromFile(assetFilePath, filename: key),
-          });
-
-          BaseOptions baseoptions = setBaseOptions();
-          String contentLength = await assetFile.length().then((value) {
-            return value.toString();
-          });
-          baseoptions.headers = {
-            'Host': host,
-            'Content-Type': Global.multipartString,
-            'Content-Length': contentLength,
-          };
-          Dio dio = Dio(baseoptions);
-
-          var response = await dio.post(
-            'http://$host',
-            data: formData,
-          );
-
-          if (response.statusCode == 204) {
-            final tencentConfig = TencentConfigModel(
-              tencentSecretId,
-              tencentSecretKey,
-              tencentBucket,
-              tencentAppId,
-              tencentArea,
-              tencentPath,
-              tencentCustomUrl,
-              tencentOptions,
-            );
-            final tencentConfigJson = jsonEncode(tencentConfig);
-            final tencentConfigFile = await tencentFile;
-            await tencentConfigFile.writeAsString(tencentConfigJson);
-            showToast("腾讯云配置成功");
-          } else {
-            showToast("腾讯云验证失败");
-          }
-        } catch (e) {
-          FLog.error(
-              className: 'TencentConfigPage',
-              methodName: 'saveTencentConfig',
-              text: formatErrorMessage({}, e.toString()),
-              dataLogType: DataLogType.ERRORS.toString());
-          showToast("腾讯云配置错误");
-        }
-      } else {
+      if (tencentVersion != 'v5') {
         showToast("不支持腾讯V4");
+      }
+      String tencentSecretId = jsonResult['tcyun']['secretId'] ?? '';
+      String tencentSecretKey = jsonResult['tcyun']['secretKey'] ?? '';
+      String tencentBucket = jsonResult['tcyun']['bucket'] ?? '';
+      String tencentAppId = jsonResult['tcyun']['appId'] ?? '';
+      String tencentArea = jsonResult['tcyun']['area'] ?? '';
+      String tencentPath = jsonResult['tcyun']['path'] ?? '';
+      String tencentCustomUrl = jsonResult['tcyun']['customUrl'] ?? '';
+      String tencentOptions = jsonResult['tcyun']['options'] ?? '';
+
+      try {
+        if (tencentCustomUrl.isNotEmpty) {
+          if (!tencentCustomUrl.startsWith('http') && !tencentCustomUrl.startsWith('https')) {
+            tencentCustomUrl = 'http://$tencentCustomUrl';
+          }
+          if (tencentCustomUrl.endsWith('/')) {
+            tencentCustomUrl = tencentCustomUrl.substring(0, tencentCustomUrl.length - 1);
+          }
+        } else {
+          tencentCustomUrl = 'None';
+        }
+
+        if (tencentPath.isEmpty || tencentPath == '/') {
+          tencentPath = 'None';
+        } else {
+          if (tencentPath.startsWith('/')) {
+            tencentPath = tencentPath.substring(1);
+          }
+          if (!tencentPath.endsWith('/')) {
+            tencentPath = '$tencentPath/';
+          }
+        }
+
+        if (tencentOptions.isEmpty) {
+          tencentOptions = 'None';
+        } else if (!tencentOptions.startsWith('?')) {
+          tencentOptions = '?$tencentOptions';
+        }
+
+        final tencentConfig = TencentConfigModel(
+          tencentSecretId,
+          tencentSecretKey,
+          tencentBucket,
+          tencentAppId,
+          tencentArea,
+          tencentPath,
+          tencentCustomUrl,
+          tencentOptions,
+        );
+        final tencentConfigJson = jsonEncode(tencentConfig);
+        final tencentConfigFile = await tencentFile;
+        await tencentConfigFile.writeAsString(tencentConfigJson);
+        showToast("腾讯云配置成功");
+      } catch (e) {
+        FLog.error(
+            className: 'TencentConfigPage',
+            methodName: 'saveTencentConfig',
+            text: formatErrorMessage({}, e.toString()),
+            dataLogType: DataLogType.ERRORS.toString());
+        showToast("腾讯云配置错误");
       }
     }
 
     if (jsonResult['aliyun'] != null) {
-      String aliyunKeyId = jsonResult['aliyun']['accessKeyId'];
-      String aliyunKeySecret = jsonResult['aliyun']['accessKeySecret'];
-      String aliyunBucket = jsonResult['aliyun']['bucket'];
-      String aliyunArea = jsonResult['aliyun']['area'];
-      String aliyunPath = jsonResult['aliyun']['path'];
-      String aliyunCustomUrl = jsonResult['aliyun']['customUrl'];
-      String aliyunOptions = jsonResult['aliyun']['options'];
+      String aliyunKeyId = jsonResult['aliyun']['accessKeyId'] ?? '';
+      String aliyunKeySecret = jsonResult['aliyun']['accessKeySecret'] ?? '';
+      String aliyunBucket = jsonResult['aliyun']['bucket'] ?? '';
+      String aliyunArea = jsonResult['aliyun']['area'] ?? '';
+      String aliyunPath = jsonResult['aliyun']['path'] ?? '';
+      String aliyunCustomUrl = jsonResult['aliyun']['customUrl'] ?? '';
+      String aliyunOptions = jsonResult['aliyun']['options'] ?? '';
 
       try {
         if (aliyunCustomUrl.isNotEmpty) {
@@ -716,7 +491,7 @@ class AllPShostState extends State<AllPShost> {
           aliyunCustomUrl = 'None';
         }
 
-        if (aliyunPath.isEmpty) {
+        if (aliyunPath.isEmpty || aliyunPath == '/') {
           aliyunPath = 'None';
         } else {
           if (aliyunPath.startsWith('/')) {
@@ -729,84 +504,23 @@ class AllPShostState extends State<AllPShost> {
 
         if (aliyunOptions.isEmpty) {
           aliyunOptions = 'None';
-        } else {
-          if (!aliyunOptions.startsWith('?')) {
-            aliyunOptions = '?$aliyunOptions';
-          }
+        } else if (!aliyunOptions.startsWith('?')) {
+          aliyunOptions = '?$aliyunOptions';
         }
-        String assetPath = 'assets/validateImage/PicHoroValidate.jpeg';
-        String appDir = await getApplicationDocumentsDirectory().then((value) {
-          return value.path;
-        });
-        String assetFilePath = '$appDir/PicHoroValidate.jpeg';
-        File assetFile = File(assetFilePath);
 
-        if (!assetFile.existsSync()) {
-          ByteData data = await rootBundle.load(assetPath);
-          List<int> bytes = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
-          await assetFile.writeAsBytes(bytes);
-        }
-        String key = 'PicHoroValidate.jpeg';
-        String host = '$aliyunBucket.$aliyunArea.aliyuncs.com';
-        String urlpath = '';
-        if (aliyunPath != 'None') {
-          urlpath = '$aliyunPath$key';
-        } else {
-          urlpath = key;
-        }
-        Map<String, dynamic> uploadPolicy = {
-          "expiration": "2034-12-01T12:00:00.000Z",
-          "conditions": [
-            {"bucket": aliyunBucket},
-            ["content-length-range", 0, 104857600],
-            {"key": urlpath}
-          ]
-        };
-        String base64Policy = base64.encode(utf8.encode(json.encode(uploadPolicy)));
-        String singature =
-            base64.encode(Hmac(sha1, utf8.encode(aliyunKeySecret)).convert(utf8.encode(base64Policy)).bytes);
-        FormData formData = FormData.fromMap({
-          'key': urlpath,
-          'OSSAccessKeyId': aliyunKeyId,
-          'policy': base64Policy,
-          'Signature': singature,
-          //阿里默认的content-type是application/octet-stream，这里改成image/xxx
-          'x-oss-content-type': 'image/${mypath.extension(assetFilePath).replaceFirst('.', '')}',
-          'file': await MultipartFile.fromFile(assetFilePath, filename: key),
-        });
-
-        BaseOptions baseoptions = setBaseOptions();
-        String contentLength = await assetFile.length().then((value) {
-          return value.toString();
-        });
-        baseoptions.headers = {
-          'Host': host,
-          'Content-Type': Global.multipartString,
-          'Content-Length': contentLength,
-        };
-        Dio dio = Dio(baseoptions);
-        var response = await dio.post(
-          'https://$host',
-          data: formData,
+        final aliyunConfig = AliyunConfigModel(
+          aliyunKeyId,
+          aliyunKeySecret,
+          aliyunBucket,
+          aliyunArea,
+          aliyunPath,
+          aliyunCustomUrl,
+          aliyunOptions,
         );
-
-        if (response.statusCode == 204) {
-          final aliyunConfig = AliyunConfigModel(
-            aliyunKeyId,
-            aliyunKeySecret,
-            aliyunBucket,
-            aliyunArea,
-            aliyunPath,
-            aliyunCustomUrl,
-            aliyunOptions,
-          );
-          final aliyunConfigJson = jsonEncode(aliyunConfig);
-          final aliyunConfigFile = await aliyunFile;
-          await aliyunConfigFile.writeAsString(aliyunConfigJson);
-          showToast("阿里云配置成功");
-        } else {
-          showToast("阿里云验证失败");
-        }
+        final aliyunConfigJson = jsonEncode(aliyunConfig);
+        final aliyunConfigFile = await aliyunFile;
+        await aliyunConfigFile.writeAsString(aliyunConfigJson);
+        showToast("阿里云配置成功");
       } catch (e) {
         FLog.error(
             className: 'AliyunConfigPage',
@@ -818,12 +532,14 @@ class AllPShostState extends State<AllPShost> {
     }
 
     if (jsonResult['upyun'] != null) {
-      String upyunBucket = jsonResult['upyun']['bucket'];
-      String upyunOperator = jsonResult['upyun']['operator'];
-      String upyunPassword = jsonResult['upyun']['password'];
-      String upyunUrl = jsonResult['upyun']['url'];
-      String upyunOptions = jsonResult['upyun']['options'];
-      String upyunPath = jsonResult['upyun']['path'];
+      String upyunBucket = jsonResult['upyun']['bucket'] ?? '';
+      String upyunOperator = jsonResult['upyun']['operator'] ?? '';
+      String upyunPassword = jsonResult['upyun']['password'] ?? '';
+      String upyunUrl = jsonResult['upyun']['url'] ?? '';
+      String upyunOptions = jsonResult['upyun']['options'] ?? '';
+      String upyunPath = jsonResult['upyun']['path'] ?? '';
+      String upyunAntiLeechToken = jsonResult['upyun']['antiLeechToken'] ?? '';
+      String upyunAntiLeechExpiration = jsonResult['upyun']['antiLeechExpiration'] ?? '';
       try {
         if (!upyunUrl.startsWith('http') && !upyunUrl.startsWith('https')) {
           upyunUrl = 'http://$upyunUrl';
@@ -833,7 +549,7 @@ class AllPShostState extends State<AllPShost> {
           upyunUrl = upyunUrl.substring(0, upyunUrl.length - 1);
         }
 
-        if (upyunPath.isEmpty) {
+        if (upyunPath.isEmpty || upyunPath == '/') {
           upyunPath = 'None';
         } else {
           if (upyunPath.startsWith('/')) {
@@ -844,84 +560,21 @@ class AllPShostState extends State<AllPShost> {
             upyunPath = '$upyunPath/';
           }
         }
-        //save asset image to app dir
-        String assetPath = 'assets/validateImage/PicHoroValidate.jpeg';
-        String appDir = await getApplicationDocumentsDirectory().then((value) {
-          return value.path;
-        });
-        String assetFilePath = '$appDir/PicHoroValidate.jpeg';
-        File assetFile = File(assetFilePath);
 
-        if (!assetFile.existsSync()) {
-          ByteData data = await rootBundle.load(assetPath);
-          List<int> bytes = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
-          await assetFile.writeAsBytes(bytes);
-        }
-        String key = 'PicHoroValidate.jpeg';
-        String host = 'http://v0.api.upyun.com';
-        String urlpath = '';
-        if (upyunPath != 'None') {
-          urlpath = '/$upyunPath$key';
-        } else {
-          urlpath = '/$key';
-        }
-        String date = HttpDate.format(DateTime.now());
-        String assetFileMd5 = await assetFile.readAsBytes().then((value) {
-          return md5.convert(value).toString();
-        });
-        Map<String, dynamic> uploadPolicy = {
-          'bucket': upyunBucket,
-          'save-key': urlpath,
-          'expiration': DateTime.now().millisecondsSinceEpoch + 1800000,
-          'date': date,
-          'content-md5': assetFileMd5,
-        };
-        String base64Policy = base64.encode(utf8.encode(json.encode(uploadPolicy)));
-        String stringToSign = 'POST&/$upyunBucket&$date&$base64Policy&$assetFileMd5';
-        String passwordMd5 = md5.convert(utf8.encode(upyunPassword)).toString();
-        String signature = base64.encode(Hmac(sha1, utf8.encode(passwordMd5)).convert(utf8.encode(stringToSign)).bytes);
-        String authorization = 'UPYUN $upyunOperator:$signature';
-        FormData formData = FormData.fromMap({
-          'authorization': authorization,
-          'policy': base64Policy,
-          'file': await MultipartFile.fromFile(assetFilePath, filename: key),
-        });
-
-        BaseOptions baseoptions = setBaseOptions();
-        String contentLength = await assetFile.length().then((value) {
-          return value.toString();
-        });
-        baseoptions.headers = {
-          'Host': 'v0.api.upyun.com',
-          'Content-Type': Global.multipartString,
-          'Content-Length': contentLength,
-          'Date': date,
-          'Authorization': authorization,
-          'Content-MD5': assetFileMd5,
-        };
-        Dio dio = Dio(baseoptions);
-
-        var response = await dio.post(
-          '$host/$upyunBucket',
-          data: formData,
+        final upyunConfig = UpyunConfigModel(
+          upyunBucket,
+          upyunOperator,
+          upyunPassword,
+          upyunUrl,
+          upyunOptions,
+          upyunPath,
+          upyunAntiLeechToken,
+          upyunAntiLeechExpiration,
         );
-
-        if (response.statusCode == 200) {
-          final upyunConfig = UpyunConfigModel(
-            upyunBucket,
-            upyunOperator,
-            upyunPassword,
-            upyunUrl,
-            upyunOptions,
-            upyunPath,
-          );
-          final upyunConfigJson = jsonEncode(upyunConfig);
-          final upyunConfigFile = await upyunFile;
-          await upyunConfigFile.writeAsString(upyunConfigJson);
-          showToast("又拍云配置成功");
-        } else {
-          showToast("又拍云验证失败");
-        }
+        final upyunConfigJson = jsonEncode(upyunConfig);
+        final upyunConfigFile = await upyunFile;
+        await upyunConfigFile.writeAsString(upyunConfigJson);
+        showToast("又拍云配置成功");
       } catch (e) {
         FLog.error(
             className: 'UpyunConfigPage',

@@ -12,18 +12,18 @@ import 'package:horopic/utils/global.dart';
 class FTPImageUploadUtils {
   //上传接口
   static uploadApi({required String path, required String name, required Map configMap}) async {
-    String formatedURL = '';
-    String ftpHost = configMap["ftpHost"];
-    String ftpPort = configMap["ftpPort"];
-    String ftpUser = configMap["ftpUser"];
-    String ftpPassword = configMap["ftpPassword"];
-    String ftpType = configMap["ftpType"];
-    String isAnonymous = configMap["isAnonymous"];
-    String uploadPath = configMap["uploadPath"];
-    String? ftpCustomUrl = configMap["ftpCustomUrl"];
-    String? ftpWebPath = configMap["ftpWebPath"];
-    if (ftpType == 'SFTP') {
-      try {
+    try {
+      String formatedURL = '';
+      String ftpHost = configMap["ftpHost"] ?? '';
+      String ftpPort = configMap["ftpPort"] ?? '';
+      String ftpUser = configMap["ftpUser"] ?? '';
+      String ftpPassword = configMap["ftpPassword"] ?? '';
+      String ftpType = configMap["ftpType"] ?? '';
+      String isAnonymous = configMap["isAnonymous"].toString();
+      String uploadPath = configMap["uploadPath"] ?? '';
+      String? ftpCustomUrl = configMap["ftpCustomUrl"] ?? '';
+      String? ftpWebPath = configMap["ftpWebPath"] ?? '';
+      if (ftpType == 'SFTP') {
         final socket = await SSHSocket.connect(ftpHost, int.parse(ftpPort.toString()));
         final client = SSHClient(
           socket,
@@ -106,27 +106,15 @@ class FTPImageUploadUtils {
           uploadPath,
           '$ftpCachePath/$thumbnailFileName'
         ];
-      } catch (e) {
-        FLog.error(
-            className: "FTPImageUploadUtils",
-            methodName: "uploadApiSFTP",
-            text: formatErrorMessage({
-              'path': path,
-              'name': name,
-            }, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-        return ['failed'];
-      }
-    } else if (ftpType == 'FTP') {
-      FTPConnect ftpConnect;
-      if (isAnonymous == 'true') {
-        ftpConnect = FTPConnect(ftpHost, port: int.parse(ftpPort), securityType: SecurityType.FTP);
-      } else {
-        ftpConnect = FTPConnect(ftpHost,
-            port: int.parse(ftpPort), user: ftpUser, pass: ftpPassword, securityType: SecurityType.FTP);
-      }
+      } else if (ftpType == 'FTP') {
+        FTPConnect ftpConnect;
+        if (isAnonymous == 'true') {
+          ftpConnect = FTPConnect(ftpHost, port: int.parse(ftpPort), securityType: SecurityType.FTP);
+        } else {
+          ftpConnect = FTPConnect(ftpHost,
+              port: int.parse(ftpPort), user: ftpUser, pass: ftpPassword, securityType: SecurityType.FTP);
+        }
 
-      try {
         var connectResult = await ftpConnect.connect();
         if (connectResult == true) {
           if (uploadPath == 'None') {
@@ -234,17 +222,17 @@ class FTPImageUploadUtils {
               dataLogType: DataLogType.ERRORS.toString());
           return ['failed'];
         }
-      } catch (e) {
-        FLog.error(
-            className: "FTPImageUploadUtils",
-            methodName: "uploadApiFTP",
-            text: formatErrorMessage({
-              'path': path,
-              'name': name,
-            }, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-        return ['failed'];
       }
+    } catch (e) {
+      FLog.error(
+          className: "FTPImageUploadUtils",
+          methodName: "uploadApiFTP",
+          text: formatErrorMessage({
+            'path': path,
+            'name': name,
+          }, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
+      return ['failed'];
     }
   }
 
@@ -260,37 +248,28 @@ class FTPImageUploadUtils {
     String name = deleteMap['name'];
     try {
       if (ftpType == 'SFTP') {
-        try {
-          final socket = await SSHSocket.connect(ftpHost, int.parse(ftpPort.toString()));
-          final client = SSHClient(
-            socket,
-            username: ftpUser,
-            onPasswordRequest: () {
-              return ftpPassword;
-            },
-          );
-          final sftp = await client.sftp();
-          if (uploadPath == 'None') {
-            uploadPath = '/';
-          }
-          if (!uploadPath.startsWith('/')) {
-            uploadPath = '/$uploadPath';
-          }
-          if (!uploadPath.endsWith('/')) {
-            uploadPath = '$uploadPath/';
-          }
-          String urlPath = uploadPath + name;
-          await sftp.remove(urlPath);
-          client.close();
-          return ['success'];
-        } catch (e) {
-          FLog.error(
-              className: "FTPImageUploadUtils",
-              methodName: "deleteApi",
-              text: formatErrorMessage({}, e.toString()),
-              dataLogType: DataLogType.ERRORS.toString());
-          return ['failed'];
+        final socket = await SSHSocket.connect(ftpHost, int.parse(ftpPort.toString()));
+        final client = SSHClient(
+          socket,
+          username: ftpUser,
+          onPasswordRequest: () {
+            return ftpPassword;
+          },
+        );
+        final sftp = await client.sftp();
+        if (uploadPath == 'None') {
+          uploadPath = '/';
         }
+        if (!uploadPath.startsWith('/')) {
+          uploadPath = '/$uploadPath';
+        }
+        if (!uploadPath.endsWith('/')) {
+          uploadPath = '$uploadPath/';
+        }
+        String urlPath = uploadPath + name;
+        await sftp.remove(urlPath);
+        client.close();
+        return ['success'];
       } else if (ftpType == 'FTP') {
         FTPConnect ftpConnect;
         if (isAnonymous == 'true') {
@@ -299,39 +278,18 @@ class FTPImageUploadUtils {
           ftpConnect = FTPConnect(ftpHost,
               port: int.parse(ftpPort), user: ftpUser, pass: ftpPassword, securityType: SecurityType.FTP);
         }
-        try {
-          var connectResult = await ftpConnect.connect();
-          if (connectResult == true) {
-            await ftpConnect.changeDirectory(uploadPath);
-            bool res = await ftpConnect.deleteFile(name);
-            if (res == true) {
-              return [
-                'success',
-              ];
-            } else {
-              FLog.error(
-                  className: "FTPImageUploadUtils",
-                  methodName: "deleteApi",
-                  text: formatErrorMessage({}, 'delete failed'),
-                  dataLogType: DataLogType.ERRORS.toString());
-              return ['failed'];
-            }
-          } else {
-            FLog.error(
-                className: "FTPImageUploadUtils",
-                methodName: "deleteApiFTP",
-                text: formatErrorMessage({}, 'connect failed'),
-                dataLogType: DataLogType.ERRORS.toString());
-            return ['failed'];
-          }
-        } catch (e) {
-          FLog.error(
-              className: "FTPImageUploadUtils",
-              methodName: "deleteApiFTP",
-              text: formatErrorMessage({}, e.toString()),
-              dataLogType: DataLogType.ERRORS.toString());
-          return ['failed'];
+
+        var connectResult = await ftpConnect.connect();
+        if (connectResult != true) {
+          throw Exception('connect failed');
         }
+
+        await ftpConnect.changeDirectory(uploadPath);
+        bool res = await ftpConnect.deleteFile(name);
+        if (res != true) {
+          throw Exception('delete failed');
+        }
+        return ['success'];
       }
     } catch (e) {
       FLog.error(
@@ -339,7 +297,7 @@ class FTPImageUploadUtils {
           methodName: "deleteApi",
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
-      return [e.toString()];
+      return ['failed'];
     }
   }
 }

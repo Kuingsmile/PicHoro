@@ -15,7 +15,7 @@ class SmmsManageAPI {
   static Future<File> get _localFile async {
     final path = await _localPath;
     String defaultUser = await Global.getUser();
-    return File('$path/${defaultUser}_smms_config.txt');
+    return ensureFileExists(File('$path/${defaultUser}_smms_config.txt'));
   }
 
   static Future<String> get _localPath async {
@@ -40,23 +40,26 @@ class SmmsManageAPI {
 
   static Future<Map> getConfigMap() async {
     String configStr = await readSmmsConfig();
+    if (configStr == '') {
+      return {};
+    }
     Map configMap = json.decode(configStr);
     return configMap;
   }
 
   static getUserProfile() async {
-    Map configMap = await getConfigMap();
-    String token = configMap['token'];
-
-    BaseOptions baseoptions = setBaseOptions();
-    baseoptions.headers = {
-      'Authorization': token,
-      'Content-Type': 'multipart/form-data',
-    };
-    Dio dio = Dio(baseoptions);
-    FormData formData = FormData.fromMap({});
-
     try {
+      Map configMap = await getConfigMap();
+      String token = configMap['token'];
+
+      BaseOptions baseoptions = setBaseOptions();
+      baseoptions.headers = {
+        'Authorization': token,
+        'Content-Type': 'multipart/form-data',
+      };
+      Dio dio = Dio(baseoptions);
+      FormData formData = FormData.fromMap({});
+
       var response = await dio.post('${smmsAPIUrl}profile', data: formData);
       if (response.statusCode == 200 && response.data['success'] == true) {
         Map userProfile = response.data['data'];
@@ -65,38 +68,26 @@ class SmmsManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "SmmsManageAPI",
-            methodName: "getUserProfile",
-            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "SmmsManageAPI",
-            methodName: "getUserProfile",
-            text: formatErrorMessage({}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogError(e, {}, "SmmsManageAPI", "getUserProfile");
       return [e.toString()];
     }
   }
 
   static getFileList({required int page}) async {
-    Map configMap = await getConfigMap();
-    String token = configMap['token'];
-
-    BaseOptions baseoptions = setBaseOptions();
-    baseoptions.headers = {
-      'Authorization': token,
-      'Content-Type': 'multipart/form-data',
-    };
-    Dio dio = Dio(baseoptions);
-    Map<String, dynamic> params = {
-      'page': page,
-    };
-
     try {
+      Map configMap = await getConfigMap();
+      String token = configMap['token'];
+
+      BaseOptions baseoptions = setBaseOptions();
+      baseoptions.headers = {
+        'Authorization': token,
+        'Content-Type': 'multipart/form-data',
+      };
+      Dio dio = Dio(baseoptions);
+      Map<String, dynamic> params = {
+        'page': page,
+      };
+
       var response = await dio.get('${smmsAPIUrl}upload_history', queryParameters: params);
       if (response.statusCode == 200 && response.data['success'] == true) {
         Map result = response.data;
@@ -105,59 +96,33 @@ class SmmsManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "SmmsManageAPI",
-            methodName: "getFileList",
-            text: formatErrorMessage({'page': page}, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "SmmsManageAPI",
-            methodName: "getFileList",
-            text: formatErrorMessage({'page': page}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogError(e, {'page': page}, "SmmsManageAPI", "getFileList");
       return [e.toString()];
     }
   }
 
   static uploadFile(String filename, String path) async {
-    Map configMap = await getConfigMap();
-    FormData formdata = FormData.fromMap({
-      "smfile": await MultipartFile.fromFile(path, filename: filename),
-      "format": "json",
-    });
-    BaseOptions options = setBaseOptions();
-    options.headers = {
-      "Authorization": configMap["token"],
-      "Content-Type": "multipart/form-data",
-    };
-    Dio dio = Dio(options);
     try {
+      Map configMap = await getConfigMap();
+      FormData formdata = FormData.fromMap({
+        "smfile": await MultipartFile.fromFile(path, filename: filename),
+        "format": "json",
+      });
+      BaseOptions options = setBaseOptions();
+      options.headers = {
+        "Authorization": configMap["token"],
+        "Content-Type": "multipart/form-data",
+      };
+      Dio dio = Dio(options);
+
       var response = await dio.post('${smmsAPIUrl}upload', data: formdata);
       if (response.statusCode == 200 && response.data!['success'] == true) {
-        return [
-          "success",
-        ];
+        return ["success"];
       } else {
         return ["failed"];
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "SmmsManageAPI",
-            methodName: "uploadFile",
-            text: formatErrorMessage({'filename': filename, 'path': path}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "SmmsManageAPI",
-            methodName: "uploadFile",
-            text: formatErrorMessage({'filename': filename, 'path': path}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogError(e, {'filename': filename, 'path': path}, "SmmsManageAPI", "uploadFile");
       return ['error'];
     }
   }
@@ -222,19 +187,7 @@ class SmmsManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "SmmsManageAPI",
-            methodName: "uploadNetworkFile",
-            text: formatErrorMessage({'fileLink': fileLink}, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "SmmsManageAPI",
-            methodName: "uploadNetworkFile",
-            text: formatErrorMessage({'fileLink': fileLink}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogError(e, {'fileLink': fileLink}, "SmmsManageAPI", "uploadNetworkFile");
       return ['failed'];
     }
   }
@@ -269,20 +222,20 @@ class SmmsManageAPI {
   }
 
   static deleteFile(String hash) async {
-    Map configMap = await getConfigMap();
-    Map<String, dynamic> formdata = {
-      "hash": hash,
-      "format": "json",
-    };
-
-    BaseOptions options = setBaseOptions();
-    options.headers = {
-      "Authorization": configMap["token"],
-    };
-    Dio dio = Dio(options);
-    String deleteUrl = "${smmsAPIUrl}delete/$hash";
-
     try {
+      Map configMap = await getConfigMap();
+      Map<String, dynamic> formdata = {
+        "hash": hash,
+        "format": "json",
+      };
+
+      BaseOptions options = setBaseOptions();
+      options.headers = {
+        "Authorization": configMap["token"],
+      };
+      Dio dio = Dio(options);
+      String deleteUrl = "${smmsAPIUrl}delete/$hash";
+
       var response = await dio.get(deleteUrl, queryParameters: formdata);
       if (response.statusCode == 200 && response.data!['success'] == true) {
         return ["success"];
@@ -290,19 +243,7 @@ class SmmsManageAPI {
         return ["failed"];
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "SmmsManageAPI",
-            methodName: "deleteFile",
-            text: formatErrorMessage({'hash': hash}, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "SmmsManageAPI",
-            methodName: "deleteFile",
-            text: formatErrorMessage({'hash': hash}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogError(e, {'hash': hash}, "SmmsManageAPI", "deleteFile");
       return [e.toString()];
     }
   }

@@ -29,6 +29,8 @@ class UpyunBucketListState extends loading_state.BaseLoadingPageState<UpyunBucke
   TextEditingController passwdController = TextEditingController();
   TextEditingController optionController = TextEditingController();
   TextEditingController pathController = TextEditingController();
+  TextEditingController antiLeechTokenController = TextEditingController();
+  TextEditingController antiLeechExpireController = TextEditingController();
   TextEditingController defaultOperatorController = TextEditingController();
   TextEditingController defaultPasswordController = TextEditingController();
   List selectionList = [];
@@ -378,6 +380,24 @@ class UpyunBucketListState extends loading_state.BaseLoadingPageState<UpyunBucke
               height: 10,
             ),
             CupertinoTextField(
+              prefix: const Text('防盗链密钥', style: TextStyle(fontSize: 16, color: Color.fromARGB(255, 121, 118, 118))),
+              textAlign: TextAlign.center,
+              controller: antiLeechTokenController,
+              placeholder: '防盗链密钥，非必填',
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            CupertinoTextField(
+              prefix: const Text('过期时间', style: TextStyle(fontSize: 16, color: Color.fromARGB(255, 121, 118, 118))),
+              textAlign: TextAlign.center,
+              controller: antiLeechExpireController,
+              placeholder: '防盗链过期时间，非必填',
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            CupertinoTextField(
               prefix: const Text('操作员：', style: TextStyle(fontSize: 16, color: Color.fromARGB(255, 121, 118, 118))),
               textAlign: TextAlign.center,
               controller: defaultOperatorController,
@@ -481,6 +501,17 @@ class UpyunBucketListState extends loading_state.BaseLoadingPageState<UpyunBucke
                   textMap['path'] = '';
                 } else {
                   textMap['path'] = path;
+                }
+                if (antiLeechTokenController.text == '' || antiLeechTokenController.text.replaceAll(' ', '').isEmpty) {
+                  textMap['antiLeechToken'] = '';
+                } else {
+                  textMap['antiLeechToken'] = antiLeechTokenController.text;
+                }
+                if (antiLeechExpireController.text == '' ||
+                    antiLeechExpireController.text.replaceAll(' ', '').isEmpty) {
+                  textMap['antiLeechExpire'] = '';
+                } else {
+                  textMap['antiLeechExpire'] = antiLeechExpireController.text;
                 }
                 if (operator == '' || password == '') {
                   showToast('请设定操作员和密码');

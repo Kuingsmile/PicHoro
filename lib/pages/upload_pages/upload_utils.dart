@@ -4,18 +4,16 @@ import 'dart:convert';
 import 'dart:io';
 // ignore: depend_on_referenced_packages
 import 'package:collection/collection.dart';
-import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:f_logs/f_logs.dart';
-import 'package:path/path.dart' as my_path;
+import 'package:horopic/api/api.dart';
 import 'package:ftpconnect/ftpconnect.dart';
 import 'package:dartssh2/dartssh2.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:minio/minio.dart';
-import 'package:webdav_client/webdav_client.dart' as webdav;
 
 import 'package:horopic/pages/upload_pages/upload_request.dart';
 import 'package:horopic/pages/upload_pages/upload_status.dart';
@@ -24,13 +22,7 @@ import 'package:horopic/utils/event_bus_utils.dart';
 import 'package:horopic/utils/uploader.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/common_functions.dart';
-import 'package:horopic/utils/dio_proxy_adapter.dart';
 import 'package:horopic/album/album_sql.dart';
-import 'package:horopic/api/tencent_api.dart';
-import 'package:horopic/api/qiniu_api.dart';
-import 'package:horopic/picture_host_manage/manage_api/alist_manage_api.dart';
-import 'package:horopic/picture_host_manage/manage_api/webdav_manage_api.dart';
-import 'package:horopic/picture_host_configure/configure_page/alist_configure.dart';
 
 class UploadManager {
   final Map<String, UploadTask> _cache = <String, UploadTask>{};
@@ -69,112 +61,22 @@ class UploadManager {
       String configData = await readPictureHostConfig();
       Map configMap = jsonDecode(configData);
       String defaultPH = await Global.getPShost();
-      Response response;
       if (defaultPH == 'tencent') {
-        String secretId = configMap['secretId'];
-        String secretKey = configMap['secretKey'];
-        String bucket = configMap['bucket'];
-        String area = configMap['area'];
-        String tencentpath = configMap['path'];
-        String customUrl = configMap['customUrl'];
-        String options = configMap['options'];
-        if (customUrl != "None") {
-          if (!customUrl.startsWith(RegExp(r'http(s)?://'))) {
-            customUrl = 'http://$customUrl';
-          }
-        }
+        var tencentUploadResult = await TencentImageUploadUtils.uploadApi(
+            path: path,
+            name: fileName,
+            configMap: configMap,
+            onSendProgress: createCallback(path, fileName),
+            cancelToken: canceltoken);
 
-        if (tencentpath != 'None') {
-          if (tencentpath.startsWith('/')) {
-            tencentpath = tencentpath.substring(1);
-          }
-          if (!tencentpath.endsWith('/')) {
-            tencentpath = '$tencentpath/';
-          }
-        }
-        String host = '$bucket.cos.$area.myqcloud.com';
-        //云存储的路径
-        String urlpath = '';
-        if (tencentpath != 'None') {
-          urlpath = '/$tencentpath$fileName';
-        } else {
-          urlpath = '/$fileName';
-        }
-        int startTimestamp = DateTime.now().millisecondsSinceEpoch ~/ 1000;
-        int endTimestamp = startTimestamp + 86400;
-        String keyTime = '$startTimestamp;$endTimestamp';
-        Map<String, dynamic> uploadPolicy = {
-          "expiration": "2033-03-03T09:38:12.414Z",
-          "conditions": [
-            {"acl": "default"},
-            {"bucket": bucket},
-            {"key": urlpath},
-            {"q-sign-algorithm": "sha1"},
-            {"q-ak": secretId},
-            {"q-sign-time": keyTime}
-          ]
-        };
-        String uploadPolicyStr = jsonEncode(uploadPolicy);
-        String singature = TencentImageUploadUtils.getUploadAuthorization(secretKey, keyTime, uploadPolicyStr);
-        FormData formData = FormData.fromMap({
-          'key': urlpath,
-          'policy': base64Encode(utf8.encode(uploadPolicyStr)),
-          'acl': 'default',
-          'q-sign-algorithm': 'sha1',
-          'q-ak': secretId,
-          'q-key-time': keyTime,
-          'q-sign-time': keyTime,
-          'q-signature': singature,
-          'file': await MultipartFile.fromFile(path, filename: my_path.basename(path)),
-        });
-        BaseOptions baseoptions = setBaseOptions();
-        File uploadFile = File(path);
-        String contentLength = await uploadFile.length().then((value) {
-          return value.toString();
-        });
-        baseoptions.headers = {
-          'Host': host,
-          'Content-Type': Global.multipartString,
-          'Content-Length': contentLength,
-        };
-        response = await dio.post(
-          'https://$host',
-          data: formData,
-          onSendProgress: createCallback(path, fileName),
-          cancelToken: canceltoken,
-        );
-        if (response.statusCode == HttpStatus.noContent) {
+        if (tencentUploadResult[0] == 'success') {
           eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
           Map<String, dynamic> maps = {};
-          String returnUrl = '';
-          String displayUrl = '';
+          String formatedURL = tencentUploadResult[1];
+          String returnUrl = tencentUploadResult[2];
+          String pictureKey = tencentUploadResult[3];
+          String displayUrl = tencentUploadResult[4];
 
-          if (customUrl != 'None') {
-            if (!customUrl.endsWith('/')) {
-              returnUrl = '$customUrl$urlpath';
-              displayUrl = '$customUrl$urlpath';
-            } else {
-              customUrl = customUrl.substring(0, customUrl.length - 1);
-              returnUrl = '$customUrl$urlpath';
-              displayUrl = '$customUrl$urlpath';
-            }
-          } else {
-            returnUrl = 'https://$host$urlpath';
-            displayUrl = 'https://$host$urlpath';
-          }
-
-          if (options == 'None') {
-            displayUrl = "$displayUrl?imageMogr2/thumbnail/500x500";
-          } else {
-            //网站后缀以?开头
-            if (!options.startsWith('?')) {
-              options = '?$options';
-            }
-            returnUrl = '$returnUrl$options';
-            displayUrl = '$displayUrl$options';
-          }
-
-          String formatedURL = '';
           if (Global.isCopyLink == true) {
             formatedURL = linkGenerateDict[Global.defaultLKformat]!(returnUrl, fileName);
           } else {
@@ -182,8 +84,6 @@ class UploadManager {
           }
           await Clipboard.setData(ClipboardData(text: formatedURL));
 
-          Map pictureKeyMap = Map.from(configMap);
-          String pictureKey = jsonEncode(pictureKeyMap);
           maps = {
             'path': path,
             'name': fileName,
@@ -198,114 +98,26 @@ class UploadManager {
           };
           await AlbumSQL.insertData(Global.imageDB!, pBhostToTableName[Global.defaultPShost]!, maps);
           setStatus(task, UploadStatus.completed);
+        } else {
+          throw Exception('上传失败');
         }
       } else if (defaultPH == 'aliyun') {
-        String keyId = configMap['keyId'];
-        String keySecret = configMap['keySecret'];
-        String bucket = configMap['bucket'];
-        String area = configMap['area'];
-        String aliyunpath = configMap['path'];
-        String customUrl = configMap['customUrl'];
-        String options = configMap['options'];
-        //格式化
-        if (customUrl != "None") {
-          if (!customUrl.startsWith('http') && !customUrl.startsWith('https')) {
-            customUrl = 'http://$customUrl';
-          }
-        }
-        //格式化
-        if (aliyunpath != 'None') {
-          if (aliyunpath.startsWith('/')) {
-            aliyunpath = aliyunpath.substring(1);
-          }
-          if (!aliyunpath.endsWith('/')) {
-            aliyunpath = '$aliyunpath/';
-          }
-        }
-        String host = '$bucket.$area.aliyuncs.com';
-        //云存储的路径
-        String urlpath = '';
-        //阿里云不能以/开头
-        if (aliyunpath != 'None') {
-          urlpath = '$aliyunpath$fileName';
-        } else {
-          urlpath = fileName;
-        }
-
-        Map<String, dynamic> uploadPolicy = {
-          "expiration": "2034-12-01T12:00:00.000Z",
-          "conditions": [
-            {"bucket": bucket},
-            ["content-length-range", 0, 104857600],
-            {"key": urlpath}
-          ]
-        };
-        String base64Policy = base64.encode(utf8.encode(json.encode(uploadPolicy)));
-        String singature = base64.encode(Hmac(sha1, utf8.encode(keySecret)).convert(utf8.encode(base64Policy)).bytes);
-        FormData formData = FormData.fromMap({
-          'key': urlpath,
-          'OSSAccessKeyId': keyId,
-          'policy': base64Policy,
-          'Signature': singature,
-          'x-oss-content-type': 'image/${my_path.extension(path).replaceFirst('.', '')}',
-          'file': await MultipartFile.fromFile(path, filename: my_path.basename(path)),
-        });
-        BaseOptions baseoptions = setBaseOptions();
-        File uploadFile = File(path);
-        String contentLength = await uploadFile.length().then((value) {
-          return value.toString();
-        });
-        baseoptions.headers = {
-          'Host': host,
-          'Content-Type': Global.multipartString,
-          'Content-Length': contentLength,
-        };
-        Dio dio = Dio(baseoptions);
-        response = await dio.post(
-          'https://$host',
-          data: formData,
-          onSendProgress: createCallback(path, fileName),
-          cancelToken: canceltoken,
-        );
-        if (response.statusCode == HttpStatus.noContent) {
+        var aliUploadResult = await AliyunImageUploadUtils.uploadApi(
+            path: path,
+            name: fileName,
+            configMap: configMap,
+            onSendProgress: createCallback(path, fileName),
+            cancelToken: canceltoken);
+        if (aliUploadResult[0] == 'success') {
           eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
           Map<String, dynamic> maps = {};
-          String returnUrl = '';
-          String displayUrl = '';
+          String formatedURL = aliUploadResult[1];
+          String returnUrl = aliUploadResult[2];
+          String pictureKey = aliUploadResult[3];
+          String displayUrl = aliUploadResult[4];
 
-          if (customUrl != 'None') {
-            if (!customUrl.endsWith('/')) {
-              returnUrl = '$customUrl/$urlpath';
-              displayUrl = '$customUrl/$urlpath';
-            } else {
-              customUrl = customUrl.substring(0, customUrl.length - 1);
-              returnUrl = '$customUrl/$urlpath';
-              displayUrl = '$customUrl/$urlpath';
-            }
-          } else {
-            returnUrl = 'https://$host/$urlpath';
-            displayUrl = 'https://$host/$urlpath';
-          }
-
-          if (options == 'None') {
-            displayUrl = "$displayUrl?x-oss-process=image/resize,m_lfit,h_500,w_500";
-          } else {
-            //网站后缀以?开头
-            if (!options.startsWith('?')) {
-              options = '?$options';
-            }
-            returnUrl = '$returnUrl$options';
-            displayUrl = '$displayUrl$options';
-          }
-
-          String formatedURL = '';
-          if (Global.isCopyLink == true) {
-            formatedURL = linkGenerateDict[Global.defaultLKformat]!(returnUrl, fileName);
-          } else {
-            formatedURL = returnUrl;
-          }
           await Clipboard.setData(ClipboardData(text: formatedURL));
-          String pictureKey = jsonEncode(configMap);
+
           maps = {
             'path': path,
             'name': fileName,
@@ -320,85 +132,27 @@ class UploadManager {
           };
           await AlbumSQL.insertData(Global.imageDB!, pBhostToTableName[Global.defaultPShost]!, maps);
           setStatus(task, UploadStatus.completed);
+        } else {
+          throw Exception('上传失败');
         }
       } else if (defaultPH == 'qiniu') {
-        String accessKey = configMap['accessKey'];
-        String secretKey = configMap['secretKey'];
-        String bucket = configMap['bucket'];
-        String url = configMap['url'];
-        String area = configMap['area'];
-        String options = configMap['options'];
-        String qiniupath = configMap['path'];
+        var qiniuUploadResult = await QiniuImageUploadUtils.uploadApi(
+            path: path,
+            name: fileName,
+            configMap: configMap,
+            onSendProgress: createCallback(path, fileName),
+            cancelToken: canceltoken);
 
-        if (!url.startsWith('http') && !url.startsWith('https')) {
-          url = 'http://$url';
-        }
-        if (url.endsWith('/')) {
-          url = url.substring(0, url.length - 1);
-        }
-        String urlpath = '';
-        //不为None才处理
-        if (qiniupath != 'None') {
-          if (qiniupath.startsWith('/')) {
-            qiniupath = qiniupath.substring(1);
-          }
-          if (!qiniupath.endsWith('/')) {
-            qiniupath = '$qiniupath/';
-          }
-          urlpath = '$qiniupath$fileName';
-        } else {
-          urlpath = fileName;
-        }
-        String key = fileName;
-
-        String urlSafeBase64EncodePutPolicy =
-            QiniuImageUploadUtils.geturlSafeBase64EncodePutPolicy(bucket, key, qiniupath);
-        String uploadToken = QiniuImageUploadUtils.getUploadToken(accessKey, secretKey, urlSafeBase64EncodePutPolicy);
-        String host = QiniuImageUploadUtils.areaHostMap[area]!;
-        FormData formData = FormData.fromMap({
-          "key": urlpath,
-          "fileName": fileName,
-          "token": uploadToken,
-          "file": await MultipartFile.fromFile(path, filename: my_path.basename(path)),
-        });
-        BaseOptions baseoptions = setBaseOptions();
-        //不需要加Content-Type，host，Content-Length
-        baseoptions.headers = {
-          'Authorization': 'UpToken $uploadToken',
-        };
-        Dio dio = Dio(baseoptions);
-        response = await dio.post(
-          host,
-          data: formData,
-          onSendProgress: createCallback(path, fileName),
-          cancelToken: canceltoken,
-        );
-
-        if (response.statusCode == HttpStatus.ok) {
+        if (qiniuUploadResult[0] == 'success') {
           eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
           Map<String, dynamic> maps = {};
-          String returnUrl = '';
-          String displayUrl = '';
+          String formatedURL = qiniuUploadResult[1];
+          String returnUrl = qiniuUploadResult[2];
+          String pictureKey = qiniuUploadResult[3];
+          String displayUrl = qiniuUploadResult[4];
 
-          if (options == 'None') {
-            returnUrl = '$url/${response.data['key']}';
-            displayUrl = '$url/${response.data['key']}?imageView2/2/w/500/h/500';
-          } else {
-            if (!options.startsWith('?')) {
-              options = '?$options';
-            }
-            returnUrl = '$url/${response.data['key']}$options';
-            displayUrl = '$url/${response.data['key']}$options';
-          }
-          String formatedURL = '';
-          if (Global.isCopyLink == true) {
-            formatedURL = linkGenerateDict[Global.defaultLKformat]!(returnUrl, fileName);
-          } else {
-            formatedURL = returnUrl;
-          }
           await Clipboard.setData(ClipboardData(text: formatedURL));
-          Map pictureKeyMap = Map.from(configMap);
-          String pictureKey = jsonEncode(pictureKeyMap);
+
           maps = {
             'path': path,
             'name': fileName,
@@ -413,111 +167,26 @@ class UploadManager {
           };
           await AlbumSQL.insertData(Global.imageDB!, pBhostToTableName[Global.defaultPShost]!, maps);
           setStatus(task, UploadStatus.completed);
+        } else {
+          throw Exception('上传失败');
         }
       } else if (defaultPH == 'upyun') {
-        String bucket = configMap['bucket'];
-        String upyunOperator = configMap['operator'];
-        String password = configMap['password'];
-        String url = configMap['url'];
-        String options = configMap['options'];
-        String upyunpath = configMap['path'];
-        if (options == ' ' || options.trim() == '') {
-          options = '';
-        }
-        //格式化
-        if (url != "None") {
-          if (!url.startsWith('http') && !url.startsWith('https')) {
-            url = 'http://$url';
-          }
-        }
-        //格式化
-        if (upyunpath != 'None') {
-          if (upyunpath.startsWith('/')) {
-            upyunpath = upyunpath.substring(1);
-          }
-          if (!upyunpath.endsWith('/')) {
-            upyunpath = '$upyunpath/';
-          }
-        }
-        String host = 'http://v0.api.upyun.com';
-        //云存储的路径
-        String urlpath = '';
-        if (upyunpath != 'None') {
-          urlpath = '/$upyunpath$fileName';
-        } else {
-          urlpath = '/$fileName';
-        }
-        String date = HttpDate.format(DateTime.now());
-        File uploadFile = File(path);
-        String uploadFileMd5 = await uploadFile.readAsBytes().then((value) {
-          return md5.convert(value).toString();
-        });
-        Map<String, dynamic> uploadPolicy = {
-          'bucket': bucket,
-          'save-key': urlpath,
-          'expiration': DateTime.now().millisecondsSinceEpoch + 1800000,
-          'date': date,
-          'content-md5': uploadFileMd5,
-        };
-        String base64Policy = base64.encode(utf8.encode(json.encode(uploadPolicy)));
-        String stringToSign = 'POST&/$bucket&$date&$base64Policy&$uploadFileMd5';
-        String passwordMd5 = md5.convert(utf8.encode(password)).toString();
-        String signature = base64.encode(Hmac(sha1, utf8.encode(passwordMd5)).convert(utf8.encode(stringToSign)).bytes);
-        String authorization = 'UPYUN $upyunOperator:$signature';
-        FormData formData = FormData.fromMap({
-          'authorization': authorization,
-          'policy': base64Policy,
-          'file': await MultipartFile.fromFile(path, filename: my_path.basename(path)),
-        });
-        BaseOptions baseoptions = setBaseOptions();
-        String contentLength = await uploadFile.length().then((value) {
-          return value.toString();
-        });
-        baseoptions.headers = {
-          'Host': 'v0.api.upyun.com',
-          'Content-Type': Global.multipartString,
-          'Content-Length': contentLength,
-          'Date': date,
-          'Authorization': authorization,
-          'Content-MD5': uploadFileMd5,
-        };
-        Dio dio = Dio(baseoptions);
-        response = await dio.post(
-          '$host/$bucket',
-          data: formData,
-          onSendProgress: createCallback(path, fileName),
-          cancelToken: canceltoken,
-        );
-        if (response.statusCode == HttpStatus.ok) {
+        var upyunUploadResult = await UpyunImageUploadUtils.uploadApi(
+            path: path,
+            name: fileName,
+            configMap: configMap,
+            onSendProgress: createCallback(path, fileName),
+            cancelToken: canceltoken);
+
+        if (upyunUploadResult[0] == 'success') {
           eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
           Map<String, dynamic> maps = {};
-          String returnUrl = '';
-          String displayUrl = '';
-          if (urlpath.startsWith('/')) {
-            urlpath = urlpath.substring(1);
-          }
+          String formatedURL = upyunUploadResult[1];
+          String returnUrl = upyunUploadResult[2];
+          String pictureKey = upyunUploadResult[3];
+          String displayUrl = upyunUploadResult[4];
 
-          if (!url.endsWith('/')) {
-            returnUrl = '$url/$urlpath';
-            displayUrl = '$url/$urlpath';
-          } else {
-            url = url.substring(0, url.length - 1);
-            returnUrl = '$url/$urlpath';
-            displayUrl = '$url/$urlpath';
-          }
-
-          returnUrl = '$returnUrl$options';
-          displayUrl = '$displayUrl$options';
-
-          String formatedURL = '';
-          if (Global.isCopyLink == true) {
-            formatedURL = linkGenerateDict[Global.defaultLKformat]!(returnUrl, fileName);
-          } else {
-            formatedURL = returnUrl;
-          }
           await Clipboard.setData(ClipboardData(text: formatedURL));
-          Map pictureKeyMap = Map.from(configMap);
-          String pictureKey = jsonEncode(pictureKeyMap);
           maps = {
             'path': path,
             'name': fileName,
@@ -532,56 +201,27 @@ class UploadManager {
           };
           await AlbumSQL.insertData(Global.imageDB!, pBhostToTableName[Global.defaultPShost]!, maps);
           setStatus(task, UploadStatus.completed);
+        } else {
+          throw Exception('上传失败');
         }
       } else if (defaultPH == 'lsky.pro') {
-        FormData formdata = FormData.fromMap({
-          "file": await MultipartFile.fromFile(path, filename: my_path.basename(path)),
-        });
-        if (configMap["strategy_id"] == "None") {
-          formdata = FormData.fromMap({});
-        } else if (configMap["album_id"] == "None") {
-          formdata = FormData.fromMap({
-            "file": await MultipartFile.fromFile(path, filename: my_path.basename(path)),
-            "strategy_id": configMap["strategy_id"],
-          });
-        } else {
-          formdata = FormData.fromMap({
-            "file": await MultipartFile.fromFile(path, filename: my_path.basename(path)),
-            "strategy_id": configMap["strategy_id"],
-            "album_id": configMap["album_id"],
-          });
-        }
-        BaseOptions options = setBaseOptions();
-        options.headers = {
-          "Authorization": configMap["token"],
-          "Accept": "application/json",
-          "Content-Type": "multipart/form-data",
-        };
-        Dio dio = Dio(options);
-        String uploadUrl = configMap["host"] + "/api/v1/upload";
-        response = await dio.post(
-          uploadUrl,
-          data: formdata,
-          onSendProgress: createCallback(path, fileName),
-          cancelToken: canceltoken,
-        );
-        if (response.statusCode == HttpStatus.ok && response.data!['status'] == true) {
+        var lskyproUploadResult = await LskyproImageUploadUtils.uploadApi(
+            path: path,
+            name: fileName,
+            configMap: configMap,
+            onSendProgress: createCallback(path, fileName),
+            cancelToken: canceltoken);
+
+        if (lskyproUploadResult[0] == 'success') {
           eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
           Map<String, dynamic> maps = {};
-          String returnUrl = '';
-          String displayUrl = '';
-          returnUrl = response.data!['data']['links']['url'];
-          displayUrl = response.data!['data']['links']['thumbnail_url'];
-          String formatedURL = '';
-          if (Global.isCopyLink == true) {
-            formatedURL = linkGenerateDict[Global.defaultLKformat]!(returnUrl, fileName);
-          } else {
-            formatedURL = returnUrl;
-          }
+          String formatedURL = lskyproUploadResult[1];
+          String returnUrl = lskyproUploadResult[2];
+          String pictureKey = lskyproUploadResult[3];
+          String displayUrl = lskyproUploadResult[4];
+
           await Clipboard.setData(ClipboardData(text: formatedURL));
-          Map pictureKeyMap = Map.from(configMap);
-          pictureKeyMap['deletekey'] = response.data!['data']['key'];
-          String pictureKey = jsonEncode(pictureKeyMap);
+
           maps = {
             'path': path,
             'name': fileName,
@@ -596,36 +236,24 @@ class UploadManager {
           };
           await AlbumSQL.insertData(Global.imageDB!, pBhostToTableName[Global.defaultPShost]!, maps);
           setStatus(task, UploadStatus.completed);
+        } else {
+          throw Exception('上传失败');
         }
       } else if (defaultPH == 'sm.ms') {
-        FormData formdata = FormData.fromMap({
-          "smfile": await MultipartFile.fromFile(path, filename: my_path.basename(path)),
-          "format": "json",
-        });
-        BaseOptions options = setBaseOptions();
-        options.headers = {
-          "Authorization": configMap["token"],
-          "Content-Type": "multipart/form-data",
-        };
-        Dio dio = Dio(options);
-        String uploadUrl = "https://smms.app/api/v2/upload";
-        response = await dio.post(
-          uploadUrl,
-          data: formdata,
-          onSendProgress: createCallback(path, fileName),
-          cancelToken: canceltoken,
-        );
-        if (response.statusCode == HttpStatus.ok && response.data!['success'] == true) {
+        var smmsUploadResult = await SmmsImageUploadUtils.uploadApi(
+            path: path,
+            name: fileName,
+            configMap: configMap,
+            onSendProgress: createCallback(path, fileName),
+            cancelToken: canceltoken);
+
+        if (smmsUploadResult[0] == 'success') {
           eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
           Map<String, dynamic> maps = {};
-          String returnUrl = response.data!['data']['url'];
-          String pictureKey = response.data!['data']['hash'];
-          String formatedURL = '';
-          if (Global.isCopyLink == true) {
-            formatedURL = linkGenerateDict[Global.defaultLKformat]!(returnUrl, fileName);
-          } else {
-            formatedURL = returnUrl;
-          }
+          String formatedURL = smmsUploadResult[1];
+          String returnUrl = smmsUploadResult[2];
+          String pictureKey = smmsUploadResult[3];
+
           await Clipboard.setData(ClipboardData(text: formatedURL));
           maps = {
             'path': path,
@@ -641,79 +269,25 @@ class UploadManager {
           };
           await AlbumSQL.insertData(Global.imageDB!, pBhostToTableName[Global.defaultPShost]!, maps);
           setStatus(task, UploadStatus.completed);
+        } else {
+          throw Exception('上传失败');
         }
       } else if (defaultPH == 'github') {
         maxConcurrentTasks = 1;
-        String base64Image = base64Encode(File(path).readAsBytesSync());
-        Map<String, dynamic> queryBody = {
-          'message': 'uploaded by horopic app',
-          'content': base64Image,
-          'branch': configMap["branch"], //分支
-        };
-        BaseOptions options = setBaseOptions();
-        options.headers = {
-          "Authorization": configMap["token"],
-          "Accept": "application/vnd.github+json",
-        };
-
-        String trimedPath = configMap['storePath'].toString().trim();
-        if (trimedPath.startsWith('/')) {
-          trimedPath = trimedPath.substring(1);
-        }
-        if (trimedPath.endsWith('/')) {
-          trimedPath = trimedPath.substring(0, trimedPath.length - 1);
-        }
-        Dio dio = Dio(options);
-        String uploadUrl = '';
-        if (trimedPath == 'None') {
-          uploadUrl =
-              "https://api.github.com/repos/${configMap["githubusername"]}/${configMap["repo"]}/contents/$fileName";
-        } else {
-          uploadUrl =
-              "https://api.github.com/repos/${configMap["githubusername"]}/${configMap["repo"]}/contents/$trimedPath/$fileName";
-        }
-
-        response = await dio.put(
-          uploadUrl,
-          data: jsonEncode(queryBody),
+        var githubUploadResult = await GithubImageUploadUtils.uploadApi(
+          path: path,
+          name: fileName,
+          configMap: configMap,
           onSendProgress: createCallback(path, fileName),
         );
-        if (response.statusCode == HttpStatus.ok || response.statusCode == HttpStatus.created) {
+        if (githubUploadResult[0] == 'success') {
           eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
           Map<String, dynamic> maps = {};
-          String returnUrl = response.data!['content']['html_url'];
-          Map pictureKeyMap = Map.from(configMap);
-          pictureKeyMap['sha'] = response.data!['content']['sha'];
-          String pictureKey = jsonEncode(pictureKeyMap);
-          String downloadUrl = '';
-          String formatedURL = '';
-          if (configMap['customDomain'] != 'None') {
-            if (configMap['customDomain'].toString().endsWith('/')) {
-              String trimedCustomDomain =
-                  configMap['customDomain'].toString().substring(0, configMap['customDomain'].toString().length - 1);
-              if (trimedPath == 'None') {
-                downloadUrl = '$trimedCustomDomain$fileName';
-              } else {
-                downloadUrl = '$trimedCustomDomain$trimedPath/$fileName';
-              }
-            } else {
-              if (trimedPath == 'None') {
-                downloadUrl = '${configMap['customDomain']}/$fileName';
-              } else {
-                downloadUrl = '${configMap['customDomain']}/$trimedPath/$fileName';
-              }
-            }
-          } else {
-            downloadUrl = response.data!['content']['download_url'];
-          }
-          if (!downloadUrl.startsWith('http') && !downloadUrl.startsWith('https')) {
-            downloadUrl = 'http://$downloadUrl';
-          }
-          if (Global.isCopyLink == true) {
-            formatedURL = linkGenerateDict[Global.defaultLKformat]!(downloadUrl, fileName);
-          } else {
-            formatedURL = downloadUrl;
-          }
+          String formatedURL = githubUploadResult[1];
+          String returnUrl = githubUploadResult[2];
+          String pictureKey = githubUploadResult[3];
+          String downloadUrl = githubUploadResult[4];
+
           await Clipboard.setData(ClipboardData(text: formatedURL));
           maps = {
             'path': path,
@@ -729,55 +303,24 @@ class UploadManager {
           };
           await AlbumSQL.insertData(Global.imageDB!, pBhostToTableName[Global.defaultPShost]!, maps);
           setStatus(task, UploadStatus.completed);
+        } else {
+          throw Exception('上传失败');
         }
       } else if (defaultPH == 'imgur') {
-        String base64Image = base64Encode(File(path).readAsBytesSync());
-        FormData formdata = FormData.fromMap({
-          "image": base64Image,
-        });
-        BaseOptions options = setBaseOptions();
-        options.headers = {
-          "Authorization": "Client-ID ${configMap["clientId"]}",
-        };
-        Dio dio = Dio(options);
-        String proxy = configMap["proxy"];
-        String proxyClean = '';
-        //判断是否有代理
-        if (proxy != 'None') {
-          if (proxy.startsWith('http://') || proxy.startsWith('https://')) {
-            proxyClean = proxy.split('://')[1];
-          } else {
-            proxyClean = proxy;
-          }
-          dio.httpClientAdapter = useProxy(proxyClean);
-        }
-        String uploadUrl = "https://api.imgur.com/3/image";
-        response = await dio.post(
-          uploadUrl,
-          data: formdata,
-          onSendProgress: createCallback(path, fileName),
-          cancelToken: canceltoken,
-        );
-        if (response.statusCode == HttpStatus.ok || response.data!['success'] == true) {
+        var imgurUploadResult = await ImgurImageUploadUtils.uploadApi(
+            path: path,
+            name: fileName,
+            configMap: configMap,
+            onSendProgress: createCallback(path, fileName),
+            cancelToken: canceltoken);
+
+        if (imgurUploadResult[0] == 'success') {
           eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
           Map<String, dynamic> maps = {};
-          String returnUrl = response.data!['data']['link'];
-          Map pictureKeyMap = {
-            'clientId': configMap['clientId'],
-            'deletehash': response.data!['data']['deletehash'],
-          };
-          String pictureKey = jsonEncode(pictureKeyMap);
-
-          String formatedURL = '';
-          if (Global.isCopyLink == true) {
-            formatedURL = linkGenerateDict[Global.defaultLKformat]!(returnUrl, fileName);
-          } else {
-            formatedURL = returnUrl;
-          }
-          //相册显示地址用cdn加速,但是复制的时候还是用原图地址
-          //https://search.pstatic.net/common?src=
-
-          String cdnUrl = 'https://search.pstatic.net/common?src=$returnUrl';
+          String formatedURL = imgurUploadResult[1];
+          String returnUrl = imgurUploadResult[2];
+          String pictureKey = imgurUploadResult[3];
+          String cdnUrl = imgurUploadResult[4];
           await Clipboard.setData(ClipboardData(text: formatedURL));
           maps = {
             'path': path,
@@ -793,6 +336,8 @@ class UploadManager {
           };
           await AlbumSQL.insertData(Global.imageDB!, pBhostToTableName[Global.defaultPShost]!, maps);
           setStatus(task, UploadStatus.completed);
+        } else {
+          throw Exception('上传失败');
         }
       } else if (defaultPH == 'ftp') {
         String ftpHost = configMap["ftpHost"];
@@ -1111,190 +656,74 @@ class UploadManager {
         await AlbumSQL.insertData(Global.imageDBExtend!, pBhostToTableName[Global.defaultPShost]!, maps);
         setStatus(task, UploadStatus.completed);
       } else if (defaultPH == 'alist') {
-        String uploadPath = configMap['uploadPath'];
-        String token = configMap['token'];
-        String today = getToday('yyyyMMdd');
-        String alistToday = await Global.getTodayAlistUpdate();
-        if (alistToday != today && token != '') {
-          var res = await AlistManageAPI.getToken(configMap['host'], configMap['alistusername'], configMap['password']);
-          if (res[0] == 'success') {
-            token = res[1];
-            final alistConfig = AlistConfigModel(
-              configMap['host'],
-              configMap['alistusername'],
-              configMap['password'],
-              token,
-              uploadPath,
-            );
-            final alistConfigJson = jsonEncode(alistConfig);
-            final alistConfigFile = await AlistConfigState().localFile;
-            alistConfigFile.writeAsString(alistConfigJson);
-            await Global.setTodayAlistUpdate(today);
-          } else {
-            throw 'tokenError';
-          }
-        }
-
-        if (uploadPath != 'None') {
-          if (uploadPath.startsWith('/')) {
-            uploadPath = uploadPath.substring(1);
-          }
-          if (!uploadPath.endsWith('/')) {
-            uploadPath = '$uploadPath/';
-          }
-        } else {
-          uploadPath = '/';
-        }
-        //云存储的路径
-        String filePath = uploadPath + fileName;
-
-        BaseOptions options = setBaseOptions();
-        File uploadFile = File(path);
-        int contentLength = await uploadFile.length().then((value) {
-          return value;
-        });
-        options.headers = {
-          "Authorization": token,
-          "Content-Type": Global.multipartString,
-          "file-path": Uri.encodeComponent(filePath),
-          "Content-Length": contentLength,
-        };
-        Dio dio = Dio(options);
-        String uploadUrl = configMap["host"] + "/api/fs/form";
-        FormData formdata = FormData.fromMap({
-          "file": await MultipartFile.fromFile(path, filename: fileName),
-        });
-        var response = await dio.put(
-          uploadUrl,
-          data: formdata,
+        var alistUploadResult = await AlistImageUploadUtils.uploadApi(
+          path: path,
+          name: fileName,
+          configMap: configMap,
           onSendProgress: createCallback(path, fileName),
         );
-        if (response.statusCode == HttpStatus.ok && response.data!['message'] == 'success') {
-          String infoGetUrl = configMap["host"] + "/api/fs/get";
-          String refreshUrl = configMap["host"] + "/api/fs/list";
-          BaseOptions getOptions = setBaseOptions();
-          getOptions.headers = {
-            "Authorization": configMap["token"],
-            "Content-Type": "application/json",
+
+        if (alistUploadResult[0] == 'success') {
+          eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
+          Map<String, dynamic> maps = {};
+          String formatedURL = alistUploadResult[1];
+          String returnUrl = alistUploadResult[2];
+          String pictureKey = alistUploadResult[3];
+          //返回缩略图地址用来在相册显示
+          String displayUrl = alistUploadResult[4];
+          String hostPicUrl = alistUploadResult[5];
+
+          await Clipboard.setData(ClipboardData(text: formatedURL));
+
+          maps = {
+            'path': path,
+            'name': fileName,
+            'url': returnUrl,
+            'PBhost': Global.defaultPShost,
+            'pictureKey': pictureKey,
+            'hostSpecificArgA': displayUrl,
+            'hostSpecificArgB': hostPicUrl,
           };
-          Dio dioGet = Dio(getOptions);
-          Dio dioRefresh = Dio(getOptions);
-          Map getformData = {
-            "path": filePath,
-          };
-          Map refreshListFormData = {"password": "", "page": 1, "per_page": 1, "path": uploadPath, "refresh": true};
-          var refreshResponse = await dioRefresh.post(refreshUrl, data: refreshListFormData);
-          if (refreshResponse.statusCode == 200 && refreshResponse.data!['message'] == 'success') {
-            var responseGet = await dioGet.post(infoGetUrl, data: getformData);
-            if (responseGet.statusCode == 200 && responseGet.data['message'] == 'success') {
-              eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-              Map<String, dynamic> maps = {};
-
-              String returnUrl = responseGet.data!['data']['raw_url'];
-              //返回缩略图地址用来在相册显示
-              String displayUrl = responseGet.data!['data']['thumb'] == "" || responseGet.data!['data']['thumb'] == null
-                  ? returnUrl
-                  : responseGet.data!['data']['thumb'];
-              String hostPicUrl = responseGet.data!['data']['sign'] == "" || responseGet.data!['data']['sign'] == null
-                  ? returnUrl
-                  : configMap['host'] + '/d/' + filePath + '?sign=' + responseGet.data!['data']['sign'];
-
-              String formatedURL = '';
-              if (Global.isCopyLink == true) {
-                formatedURL = linkGenerateDict[Global.defaultLKformat]!(hostPicUrl, fileName);
-              } else {
-                formatedURL = hostPicUrl;
-              }
-              await Clipboard.setData(ClipboardData(text: formatedURL));
-
-              Map pictureKeyMap = Map.from(configMap);
-              pictureKeyMap['sign'] = responseGet.data!['data']['sign'];
-              pictureKeyMap['uploadPath'] = uploadPath;
-              pictureKeyMap['filenames'] = fileName;
-              String pictureKey = jsonEncode(pictureKeyMap);
-              maps = {
-                'path': path,
-                'name': fileName,
-                'url': returnUrl,
-                'PBhost': Global.defaultPShost,
-                'pictureKey': pictureKey,
-                'hostSpecificArgA': displayUrl,
-                'hostSpecificArgB': hostPicUrl,
-              };
-              List letter = 'CDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-              for (int i = 0; i < letter.length; i++) {
-                maps['hostSpecificArg${letter[i]}'] = 'test';
-              }
-              await AlbumSQL.insertData(Global.imageDBExtend!, pBhostToTableName[Global.defaultPShost]!, maps);
-              setStatus(task, UploadStatus.completed);
-            }
+          List letter = 'CDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+          for (int i = 0; i < letter.length; i++) {
+            maps['hostSpecificArg${letter[i]}'] = 'test';
           }
+          await AlbumSQL.insertData(Global.imageDBExtend!, pBhostToTableName[Global.defaultPShost]!, maps);
+          setStatus(task, UploadStatus.completed);
+        } else {
+          throw Exception('上传失败');
         }
       } else if (defaultPH == 'webdav') {
-        String formatedURL = '';
-        webdav.Client client = await WebdavManageAPI.getWebdavClient();
-        String uploadPath = configMap['uploadPath'];
-        String? customUrl = configMap['customUrl'];
-        String? webPath = configMap['webPath'];
+        var webdavUploadResult =
+            await WebdavImageUploadUtils.uploadApi(path: path, name: fileName, configMap: configMap);
+        if (webdavUploadResult[0] == 'success') {
+          String formatedURL = webdavUploadResult[1];
+          String returnUrl = webdavUploadResult[2];
+          String pictureKey = webdavUploadResult[3];
+          String displayUrl = webdavUploadResult[4];
 
-        customUrl ??= 'None';
-        webPath ??= 'None';
+          eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
+          Map<String, dynamic> maps = {};
 
-        if (uploadPath == 'None') {
-          uploadPath = '/';
-        } else {
-          if (!uploadPath.startsWith('/')) {
-            uploadPath = '/$uploadPath';
+          await Clipboard.setData(ClipboardData(text: formatedURL));
+
+          maps = {
+            'path': path,
+            'name': fileName,
+            'url': returnUrl,
+            'PBhost': Global.defaultPShost,
+            'pictureKey': pictureKey,
+            'hostSpecificArgA': displayUrl,
+          };
+          List letter = 'BCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+          for (int i = 0; i < letter.length; i++) {
+            maps['hostSpecificArg${letter[i]}'] = 'test';
           }
-          if (!uploadPath.endsWith('/')) {
-            uploadPath = '$uploadPath/';
-          }
-        }
-        String filePath = uploadPath + fileName;
-        await client.writeFromFile(path, filePath);
-        String returnUrl = '';
-        String displayUrl = '';
-        if (customUrl != 'None') {
-          customUrl = customUrl.replaceAll(RegExp(r'/$'), '');
-          if (webPath != 'None') {
-            webPath = webPath.replaceAll(RegExp(r'^/*'), '').replaceAll(RegExp(r'/*$'), '');
-            returnUrl = '$customUrl/$webPath/$fileName';
-          } else {
-            filePath = filePath.replaceAll(RegExp(r'^/*'), '');
-            returnUrl = '$customUrl/$filePath';
-          }
-          displayUrl = returnUrl;
+          await AlbumSQL.insertData(Global.imageDBExtend!, pBhostToTableName[Global.defaultPShost]!, maps);
+          setStatus(task, UploadStatus.completed);
         } else {
-          returnUrl = configMap['host'] + filePath;
-          displayUrl = returnUrl + generateBasicAuth(configMap['webdavusername'], configMap['password']);
+          throw 'webdavUploadError';
         }
-        eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-        Map<String, dynamic> maps = {};
-
-        if (Global.isCopyLink == true) {
-          formatedURL = linkGenerateDict[Global.defaultLKformat]!(returnUrl, fileName);
-        } else {
-          formatedURL = returnUrl;
-        }
-        await Clipboard.setData(ClipboardData(text: formatedURL));
-
-        Map pictureKeyMap = Map.from(configMap);
-        pictureKeyMap['pictureKey'] = filePath;
-        String pictureKey = jsonEncode(pictureKeyMap);
-        maps = {
-          'path': path,
-          'name': fileName,
-          'url': returnUrl,
-          'PBhost': Global.defaultPShost,
-          'pictureKey': pictureKey,
-          'hostSpecificArgA': displayUrl,
-        };
-        List letter = 'BCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-        for (int i = 0; i < letter.length; i++) {
-          maps['hostSpecificArg${letter[i]}'] = 'test';
-        }
-        await AlbumSQL.insertData(Global.imageDBExtend!, pBhostToTableName[Global.defaultPShost]!, maps);
-        setStatus(task, UploadStatus.completed);
       }
     } catch (e) {
       FLog.error(
@@ -1308,11 +737,6 @@ class UploadManager {
       var task = getUpload(fileName)!;
       if (task.status.value != UploadStatus.canceled && task.status.value != UploadStatus.completed) {
         setStatus(task, UploadStatus.failed);
-        runningTasks--;
-        if (_queue.isNotEmpty) {
-          _startExecution();
-        }
-        rethrow;
       }
     }
     runningTasks--;

@@ -211,7 +211,7 @@ class PsHostHomePageState extends State<PsHostHomePage> with AutomaticKeepAliveC
                   child: InkWell(
                 onTap: () async {
                   var queryUpyunManage = await UpyunManageAPI.readUpyunManageConfig();
-                  if (queryUpyunManage == 'Error') {
+                  if (queryUpyunManage == 'Error' || queryUpyunManage == '') {
                     if (mounted) {
                       Application.router.navigateTo(
                         context,

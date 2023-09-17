@@ -49,6 +49,8 @@ class TabsPageState extends State<PicHoroAPP> {
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
+        showSelectedLabels: false,
+        showUnselectedLabels: false,
         onTap: (value) {
           setState(() {
             _selectedIndex = value;
@@ -66,7 +68,7 @@ class TabsPageState extends State<PicHoroAPP> {
             label: '相册',
           ),
           BottomNavigationBarItem(
-            icon: Icon(IconData(0xe6ab, fontFamily: 'iconfont')),
+            icon: Icon(Icons.storage),
             label: '仓库',
           ),
           BottomNavigationBarItem(icon: Icon(Icons.settings), label: '设置'),

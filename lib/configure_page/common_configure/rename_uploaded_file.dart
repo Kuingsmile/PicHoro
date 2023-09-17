@@ -15,7 +15,7 @@ class RenameFileState extends State<RenameFile> {
     '{y}': "两位数年份(22)",
     '{m}': "月份(01-12)",
     '{d}': "日期(01-31)",
-    '{timestamp}': "时间戳(秒)",
+    '{timestamp}': "时间戳(毫秒)",
     '{uuid}': "唯一字符串",
     '{md5}': "随机md5",
     '{md5-16}': "随机md5前16位",
