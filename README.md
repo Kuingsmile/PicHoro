@@ -138,6 +138,12 @@ Github下载地址 [Github release](https://github.com/Kuingsmile/PicHoro/releas
 
 ## 开发说明
 
+### 依赖项目
+
+请在clone本项目后，将以下项目clone到本地，放在同级目录下，否则无法正常运行。
+
+`https://github.com/Kuingsmile/flutterdep`
+
 ### 软件修改
 
 如果你想要修改或自行构建 PicHoro，可以依照下面的指示：
@@ -180,7 +186,7 @@ Github下载地址 [Github release](https://github.com/Kuingsmile/PicHoro/releas
 
 #### minio_new
 
-文件路径示例: `D:\flutter\.pub-cache\hosted\pub.flutter-io.cn\minio_new-1.0.1\lib\src\minio.dart`
+该依赖已经包含在了`https://github.com/Kuingsmile/flutterdep`中，无需手动修改。
 
 1. `queries['maxKeys']`修改为`queries['max-keys']`
 2. 添加导入 `import 'package:xml2json/xml2json.dart';`
