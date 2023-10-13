@@ -30,10 +30,18 @@ class LskyproImageUploadUtils {
             "album_id": albumId,
           });
         } else {
-          formdata = FormData.fromMap({
-            "file": await MultipartFile.fromFile(path, filename: my_path.basename(name)),
-            "strategy_id": configMap["strategy_id"],
-          });
+          if (albumId == 'None') {
+            formdata = FormData.fromMap({
+              "file": await MultipartFile.fromFile(path, filename: my_path.basename(name)),
+              "strategy_id": strategyId,
+            });
+          } else {
+            formdata = FormData.fromMap({
+              "file": await MultipartFile.fromFile(path, filename: my_path.basename(name)),
+              "strategy_id": configMap["strategy_id"],
+              "album_id": configMap["album_id"],
+            });
+          }
         }
       }
       BaseOptions options = setBaseOptions();
