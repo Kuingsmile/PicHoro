@@ -743,6 +743,7 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
                     String password = psInfo['password']!;
                     String token = psInfo['token']!;
                     String uploadPath = psInfo['uploadPath']!;
+                    String? webPath = psInfo['webPath'];
                     bool valid = validateUndetermined([
                       host,
                     ]);
@@ -759,6 +760,9 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
                     if (password == ConfigureTemplate.placeholder) {
                       password = 'None';
                     }
+                    if (webPath == ConfigureTemplate.placeholder || webPath == null) {
+                      webPath = 'None';
+                    }
 
                     final alistConfig = AlistConfigModel(
                       host,
@@ -766,6 +770,7 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
                       password,
                       token,
                       uploadPath,
+                      webPath,
                     );
                     final alistConfigJson = jsonEncode(alistConfig);
                     final alistConfigFile = await AlistConfigState().localFile;

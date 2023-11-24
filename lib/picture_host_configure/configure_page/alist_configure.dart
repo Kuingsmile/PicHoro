@@ -27,6 +27,7 @@ class AlistConfigState extends State<AlistConfig> {
   final _usernameController = TextEditingController();
   final _passwdController = TextEditingController();
   final _uploadPathController = TextEditingController();
+  final _alistWebpathController = TextEditingController();
   String _tokenController = '';
   bool _isAnonymous = false;
 
@@ -56,6 +57,11 @@ class AlistConfigState extends State<AlistConfig> {
       } else {
         _uploadPathController.clear();
       }
+      if (configMap['webPath'] != 'None' && configMap['webPath'] != null) {
+        _alistWebpathController.text = configMap['webPath'];
+      } else {
+        _alistWebpathController.clear();
+      }
       setState(() {});
     } catch (e) {
       FLog.error(
@@ -72,6 +78,7 @@ class AlistConfigState extends State<AlistConfig> {
     _usernameController.dispose();
     _passwdController.dispose();
     _uploadPathController.dispose();
+    _alistWebpathController.dispose();
     super.dispose();
   }
 
@@ -137,6 +144,15 @@ class AlistConfigState extends State<AlistConfig> {
                 contentPadding: EdgeInsets.zero,
                 label: Center(child: Text('可选：储存路径')),
                 hintText: '例如: /百度网盘/图床',
+              ),
+              textAlign: TextAlign.center,
+            ),
+            TextFormField(
+              controller: _alistWebpathController,
+              decoration: const InputDecoration(
+                contentPadding: EdgeInsets.zero,
+                label: Center(child: Text('可选：拼接路径')),
+                hintText: '例如: /pic',
               ),
               textAlign: TextAlign.center,
             ),
@@ -240,7 +256,16 @@ class AlistConfigState extends State<AlistConfig> {
       if (uploadPath.isEmpty || uploadPath == '/' || uploadPath.trim() == '') {
         uploadPath = 'None';
       }
-      final alistConfig = AlistConfigModel(host, 'None', 'None', '', uploadPath);
+      String webPath = '';
+      if (_alistWebpathController.text.isEmpty || _alistWebpathController.text == '') {
+        webPath = 'None';
+      } else {
+        webPath = _alistWebpathController.text;
+        if (!webPath.endsWith('/')) {
+          webPath = '$webPath/';
+        }
+      }
+      final alistConfig = AlistConfigModel(host, 'None', 'None', '', uploadPath, webPath);
       final alistConfigJson = jsonEncode(alistConfig);
       final alistConfigFile = await localFile;
       alistConfigFile.writeAsString(alistConfigJson);
@@ -256,13 +281,22 @@ class AlistConfigState extends State<AlistConfig> {
       if (uploadPath.isEmpty || uploadPath == '/' || uploadPath.trim() == '') {
         uploadPath = 'None';
       }
+      String webPath = '';
+      if (_alistWebpathController.text.isEmpty || _alistWebpathController.text == '') {
+        webPath = 'None';
+      } else {
+        webPath = _alistWebpathController.text;
+        if (!webPath.endsWith('/')) {
+          webPath = '$webPath/';
+        }
+      }
 
       try {
         var res = await AlistManageAPI.getToken(host, username, password);
         if (res[0] == 'success') {
           token = res[1];
           _tokenController = token;
-          final alistConfig = AlistConfigModel(host, username, password, token, uploadPath);
+          final alistConfig = AlistConfigModel(host, username, password, token, uploadPath, webPath);
           final alistConfigJson = jsonEncode(alistConfig);
           final alistConfigFile = await localFile;
           alistConfigFile.writeAsString(alistConfigJson);
@@ -291,6 +325,15 @@ class AlistConfigState extends State<AlistConfig> {
       if (uploadPath.isEmpty || uploadPath == '/' || uploadPath.trim() == '') {
         uploadPath = 'None';
       }
+      String webPath = '';
+      if (_alistWebpathController.text.isEmpty || _alistWebpathController.text == '') {
+        webPath = 'None';
+      } else {
+        webPath = _alistWebpathController.text;
+        if (!webPath.endsWith('/')) {
+          webPath = '$webPath/';
+        }
+      }
       BaseOptions options = setBaseOptions();
       Map<String, dynamic> query = {
         'group': 0,
@@ -304,8 +347,8 @@ class AlistConfigState extends State<AlistConfig> {
         var response = await dio.get('$host/api/admin/setting/list', queryParameters: query);
         if (response.statusCode == 200 && response.data['message'] == 'success') {
           Map configMap = await AlistManageAPI.getConfigMap();
-          final alistConfig =
-              AlistConfigModel(host, configMap['alistusername'], configMap['password'], _tokenController, uploadPath);
+          final alistConfig = AlistConfigModel(
+              host, configMap['alistusername'], configMap['password'], _tokenController, uploadPath, webPath);
           final alistConfigJson = jsonEncode(alistConfig);
           final alistConfigFile = await localFile;
           alistConfigFile.writeAsString(alistConfigJson);
@@ -368,7 +411,7 @@ class AlistConfigState extends State<AlistConfig> {
                 context: context,
                 title: '通知',
                 content:
-                    '检测通过，您的配置信息为：\nhost:\n${configMap["host"]}\nalist用户名:\n${configMap["alistusername"]}\n密码:\n${configMap["password"]}\ntoken:\n${configMap["token"]}\nuploadPath:\n${configMap["uploadPath"]}');
+                    '检测通过，您的配置信息为：\nhost:\n${configMap["host"]}\nalist用户名:\n${configMap["alistusername"]}\n密码:\n${configMap["password"]}\ntoken:\n${configMap["token"]}\nuploadPath:\n${configMap["uploadPath"]}\nwebPath:\n${configMap["webPath"]}');
           }
           return;
         } else {
@@ -398,7 +441,7 @@ class AlistConfigState extends State<AlistConfig> {
               context: context,
               title: '通知',
               content:
-                  '检测通过，您的配置信息为：\nhost:\n${configMap["host"]}\nalist用户名:\n${configMap["alistusername"]}\n密码:\n${configMap["password"]}\ntoken:\n${configMap["token"]}\nuploadPath:\n${configMap["uploadPath"]}');
+                  '检测通过，您的配置信息为：\nhost:\n${configMap["host"]}\nalist用户名:\n${configMap["alistusername"]}\n密码:\n${configMap["password"]}\ntoken:\n${configMap["token"]}\nuploadPath:\n${configMap["uploadPath"]}\nwebPath:\n${configMap["webPath"]}');
         }
         return;
       } else {
@@ -452,8 +495,9 @@ class AlistConfigModel {
   final String password;
   final String token;
   final String uploadPath;
+  final String webPath;
 
-  AlistConfigModel(this.host, this.alistusername, this.password, this.token, this.uploadPath);
+  AlistConfigModel(this.host, this.alistusername, this.password, this.token, this.uploadPath, this.webPath);
 
   Map<String, dynamic> toJson() => {
         'host': host,
@@ -461,14 +505,8 @@ class AlistConfigModel {
         'password': password,
         'token': token,
         'uploadPath': uploadPath,
+        'webPath': webPath,
       };
 
-  static List keysList = [
-    'remarkName',
-    'host',
-    'alistusername',
-    'password',
-    'token',
-    'uploadPath',
-  ];
+  static List keysList = ['remarkName', 'host', 'alistusername', 'password', 'token', 'uploadPath', 'webPath'];
 }

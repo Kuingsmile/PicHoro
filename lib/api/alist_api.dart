@@ -21,6 +21,8 @@ class AlistImageUploadUtils {
         "file": await MultipartFile.fromFile(path, filename: name),
       });
       String uploadPath = configMap['uploadPath'];
+      String? webPath = configMap['webPath'];
+      webPath ??= 'None';
       String token = configMap['token'];
       String today = getToday('yyyyMMdd');
       String alistToday = await Global.getTodayAlistUpdate();
@@ -29,12 +31,7 @@ class AlistImageUploadUtils {
         if (res[0] == 'success') {
           token = res[1];
           final alistConfig = AlistConfigModel(
-            configMap['host'],
-            configMap['alistusername'],
-            configMap['password'],
-            token,
-            uploadPath,
-          );
+              configMap['host'], configMap['alistusername'], configMap['password'], token, uploadPath, webPath);
           final alistConfigJson = jsonEncode(alistConfig);
           final alistConfigFile = await AlistConfigState().localFile;
           alistConfigFile.writeAsString(alistConfigJson);
@@ -53,6 +50,7 @@ class AlistImageUploadUtils {
           uploadPath = '$uploadPath/';
         }
       }
+
       String filePath = uploadPath + name;
 
       BaseOptions options = setBaseOptions();
@@ -104,9 +102,16 @@ class AlistImageUploadUtils {
       pictureKeyMap['uploadPath'] = uploadPath;
       pictureKeyMap['filenames'] = name;
       String pictureKey = jsonEncode(pictureKeyMap);
+
+      if (webPath != 'None') {
+        webPath = '${webPath.replaceAll(RegExp(r'^/*'), '').replaceAll(RegExp(r'/*$'), '')}/$name';
+      }
+
       String hostPicUrl = responseGet.data!['data']['sign'] == "" || responseGet.data!['data']['sign'] == null
           ? returnUrl
-          : configMap['host'] + '/d' + filePath + '?sign=' + responseGet.data!['data']['sign'];
+          : webPath != 'None'
+              ? configMap['host'] + '/d' + '/$webPath/' + '?sign=' + responseGet.data!['data']['sign']
+              : configMap['host'] + '/d' + filePath + '?sign=' + responseGet.data!['data']['sign'];
 
       if (Global.isCopyLink == true) {
         formatedURL = linkGenerateDict[Global.defaultLKformat]!(hostPicUrl, name);
@@ -134,6 +139,8 @@ class AlistImageUploadUtils {
       "names": [configMapFromPictureKey['filenames']]
     };
     String uploadPath = configMap['uploadPath'];
+    String? webPath = configMap['webPath'];
+    webPath ??= 'None';
     String token = configMap['token'];
     String today = getToday('yyyyMMdd');
     String alistToday = await Global.getTodayAlistUpdate();
@@ -149,6 +156,7 @@ class AlistImageUploadUtils {
         configMap['password'],
         token,
         uploadPath,
+        webPath,
       );
       final alistConfigJson = jsonEncode(alistConfig);
       final alistConfigFile = await AlistConfigState().localFile;

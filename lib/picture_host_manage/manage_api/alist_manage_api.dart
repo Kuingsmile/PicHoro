@@ -138,6 +138,8 @@ class AlistManageAPI {
   static refreshToken() async {
     Map configMap = await getConfigMap();
     String uploadPath = configMap['uploadPath'];
+    String? webPath = configMap['webPath'];
+    webPath ??= 'None';
     String token = configMap['token'];
     var res = await AlistManageAPI.getToken(configMap['host'], configMap['alistusername'], configMap['password']);
     if (res[0] == 'success') {
@@ -148,6 +150,7 @@ class AlistManageAPI {
         configMap['password'],
         token,
         uploadPath,
+        webPath,
       );
       final alistConfigJson = jsonEncode(alistConfig);
       final alistConfigFile = await AlistConfigState().localFile;
@@ -323,6 +326,8 @@ class AlistManageAPI {
       String password = configMap['password'];
       String token = configMap['token'];
       String uploadPath = path;
+      String? webPath = configMap['webPath'];
+      webPath ??= 'None';
 
       if (uploadPath == '/' || uploadPath == '') {
         uploadPath = 'None';
@@ -334,6 +339,7 @@ class AlistManageAPI {
         password,
         token,
         uploadPath,
+        webPath,
       );
       final alistConfigJson = jsonEncode(alistConfig);
       final alistConfigFile = await _localFile;
