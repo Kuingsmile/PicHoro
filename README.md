@@ -6,7 +6,7 @@
   </a>
 </div>
 
-&emsp;&emsp;一款基于flutter的手机端云存储平台/图床管理和文件上传/下载工具，最新版本**V2.2.2**，与PicGo配置互通，可直接扫码导入，主要功能包括云存储/图床/云服务器平台,以及网盘管理（通过[Alist](https://alist.nn.ci/zh/))，文件上传和下载管理，以及各种格式的链接分享。
+&emsp;&emsp;一款基于flutter的手机端云存储平台/图床管理和文件上传/下载工具，最新版本**V2.2.3**，与PicGo配置互通，可直接扫码导入，主要功能包括云存储/图床/云服务器平台,以及网盘管理（通过[Alist](https://alist.nn.ci/zh/))，文件上传和下载管理，以及各种格式的链接分享。
 
 &emsp;&emsp;支持多种图片/PDF/文本文件/音视频的在线预览和播放，具体支持的格式请查看[支持的格式列表](https://github.com/Kuingsmile/PicHoro/blob/main/supported_format.md "支持的格式列表")
 
@@ -72,7 +72,7 @@
 
 Github下载地址 [Github release](https://github.com/Kuingsmile/PicHoro/releases)  
 
-我的个人网站提供的最新版本下载地址 [https://pichoro.msq.pub/PicHoro_V2.2.2.apk](https://pichoro.msq.pub/PicHoro_V2.2.2.apk)
+我的个人网站提供的最新版本下载地址 [https://pichoro.msq.pub/PicHoro_V2.2.3.apk](https://pichoro.msq.pub/PicHoro_V2.2.3.apk)
 
 ### IOS
 
