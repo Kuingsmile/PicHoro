@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -87,8 +86,8 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
         return;
       }
       List imageList = [];
-      if (json.decode(_initialIntent!.extra!['android.intent.extra.STREAM']) is List) {
-        imageList = json.decode(_initialIntent!.extra!['android.intent.extra.STREAM']);
+      if (_initialIntent!.extra!['android.intent.extra.STREAM'] is List) {
+        imageList = _initialIntent!.extra!['android.intent.extra.STREAM'];
       } else {
         imageList.add(_initialIntent!.extra!['android.intent.extra.STREAM']);
       }
@@ -133,7 +132,16 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
         Global.imageFile = null;
         Global.imageOriginalFile = null;
       });
-    } catch (_) {}
+    } catch (e) {
+      FLog.error(
+          className: 'HomePage',
+          methodName: '_initIntent',
+          text: formatErrorMessage({
+            'intent': _initialIntent,
+          }, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
+      return showToast('获取图片失败');
+    }
   }
 
   clearAllList() {
