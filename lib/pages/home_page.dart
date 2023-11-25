@@ -359,7 +359,6 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
             'url': url,
           }, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
-      return showToast('获取图片失败');
     }
   }
 
