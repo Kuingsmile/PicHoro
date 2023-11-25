@@ -959,6 +959,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.2.2"
+  receive_intent:
+    dependency: "direct main"
+    description:
+      name: receive_intent
+      sha256: "84671fa21d7fdbe38c1a658f3b7656afd5e9852e99f25ce6ff80fd5f04cc8b53"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.4"
   sembast:
     dependency: transitive
     description:
@@ -1210,6 +1218,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.2.2"
+  uri_to_file:
+    dependency: "direct main"
+    description:
+      name: uri_to_file
+      sha256: cbbb38f975d22311efacc9a53cdcb806708606666d8092314b81c5cb7983b700
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.0"
   url_launcher:
     dependency: "direct main"
     description:

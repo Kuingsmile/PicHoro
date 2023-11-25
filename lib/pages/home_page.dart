@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -20,6 +21,8 @@ import 'package:horopic/picture_host_configure/default_picture_host_select.dart'
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/uploader.dart';
+import 'package:receive_intent/receive_intent.dart' as ic_intent;
+import 'package:uri_to_file/uri_to_file.dart';
 
 import 'package:horopic/pages/upload_pages/upload_task.dart';
 import 'package:horopic/pages/upload_pages/upload_utils.dart';
@@ -50,6 +53,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
   List<String> uploadPathList = [];
   List<String> uploadFileNameList = [];
   var uploadManager = UploadManager(maxConcurrentTasks: 1);
+  ic_intent.Intent? _initialIntent;
 
   bool homepageKeepAlive = true;
   dynamic actionEventBus;
@@ -66,7 +70,70 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
       },
     );
     super.initState();
+    _initIntent();
     uploadManager = UploadManager(maxConcurrentTasks: 1);
+  }
+
+  Future<void> _initIntent() async {
+    final receivedIntent = await ic_intent.ReceiveIntent.getInitialIntent();
+
+    if (!mounted) return;
+
+    setState(() {
+      _initialIntent = receivedIntent;
+    });
+    try {
+      if (_initialIntent!.extra!['android.intent.extra.STREAM'] == null) {
+        return;
+      }
+      List imageList = [];
+      if (json.decode(_initialIntent!.extra!['android.intent.extra.STREAM']) is List) {
+        imageList = json.decode(_initialIntent!.extra!['android.intent.extra.STREAM']);
+      } else {
+        imageList.add(_initialIntent!.extra!['android.intent.extra.STREAM']);
+      }
+
+      for (int i = 0; i < imageList.length; i++) {
+        File imageFile = await toFile(imageList[i]);
+        String imagePath = imageFile.path;
+        if (imagePath.isNotEmpty) {
+          if (Global.iscustomRename == true) {
+            Global.imageFile = await renamePictureWithCustomFormat(imageFile);
+          } else if (Global.isTimeStamp == true) {
+            Global.imageFile = await renamePictureWithTimestamp(imageFile);
+          } else if (Global.isRandomName == true) {
+            Global.imageFile = await renamePictureWithRandomString(imageFile);
+          } else {
+            Global.imageFile = my_path.basename(imageFile.path);
+          }
+
+          File compressedFile;
+          if (Global.isCompress == true) {
+            ImageCompress imageCompress = ImageCompress();
+            compressedFile = await imageCompress.compressAndGetFile(
+                imageFile.path, my_path.basename(Global.imageFile!), Global.defaultCompressFormat,
+                minHeight: Global.minHeight, minWidth: Global.minWidth, quality: Global.quality);
+          } else {
+            compressedFile = imageFile;
+          }
+          Global.imagesList.add(Global.imageFile!);
+          Global.imagesFileList.add(compressedFile);
+        }
+      }
+      if (Global.imagesList.isNotEmpty) {
+        for (int i = 0; i < Global.imagesList.length; i++) {
+          uploadList.add([Global.imagesFileList[i].path, Global.imagesList[i]]);
+          uploadPathList.add(Global.imagesFileList[i].path);
+          uploadFileNameList.add(Global.imagesList[i]);
+        }
+      }
+      setState(() {
+        Global.imagesList.clear();
+        Global.imagesFileList.clear();
+        Global.imageFile = null;
+        Global.imageOriginalFile = null;
+      });
+    } catch (_) {}
   }
 
   clearAllList() {
