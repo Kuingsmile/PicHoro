@@ -51,7 +51,7 @@ class GithubReposListState extends loading_state.BaseLoadingPageState<GithubRepo
     try {
       Map configMap = await GithubManageAPI.getConfigMap();
       dynamic bucketListResponse;
-      if (configMap['githubusername'] == widget.showedUsername) {
+      if (configMap['githubusername'].toString().toLowerCase() == widget.showedUsername.toLowerCase()) {
         bucketListResponse = await GithubManageAPI.getReposList();
       } else {
         bucketListResponse = await GithubManageAPI.getOtherReposList(widget.showedUsername);
@@ -134,7 +134,7 @@ class GithubReposListState extends loading_state.BaseLoadingPageState<GithubRepo
             onPressed: () async {
               try {
                 var configMap = await GithubManageAPI.getConfigMap();
-                if (configMap['githubusername'] == widget.showedUsername) {
+                if (configMap['githubusername'].toString().toLowerCase() == widget.showedUsername.toLowerCase()) {
                   if (mounted) {
                     await Application.router
                         .navigateTo(context, Routes.githubNewRepoConfig, transition: TransitionType.cupertino);
@@ -330,7 +330,7 @@ class GithubReposListState extends loading_state.BaseLoadingPageState<GithubRepo
             onTap: () async {
               try {
                 var configMap = await GithubManageAPI.getConfigMap();
-                if (widget.showedUsername != configMap['githubusername']) {
+                if (widget.showedUsername.toLowerCase() != configMap['githubusername'].toString().toLowerCase()) {
                   showToast('该仓库不属于当前登录用户');
                   return;
                 }
