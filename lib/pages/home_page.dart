@@ -140,7 +140,6 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
             'intent': _initialIntent,
           }, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
-      return showToast('获取图片失败');
     }
   }
 
@@ -359,6 +358,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
             'url': url,
           }, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
+      return showToast('获取图片失败');
     }
   }
 

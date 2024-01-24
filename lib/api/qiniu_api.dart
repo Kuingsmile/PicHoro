@@ -16,6 +16,7 @@ class QiniuImageUploadUtils {
     'na0': 'https://upload-na0.qiniup.com', //北美
     'as0': 'https://upload-as0.qiniup.com', //东南亚
     'ap-northeast-1': 'https://upload-ap-northeast-1.qiniup.com', //亚太首尔
+    'ap-southeast-2': 'https://upload-ap-southeast-2.qiniup.com', //亚太-河内
   };
   //url安全的base64编码
   static String urlSafeBase64Encode(List<int> bytes) {

@@ -348,6 +348,12 @@ class QiniuConfigState extends State<QiniuConfig> {
           qiniupath = '$qiniupath/';
         }
       }
+      String urlPath = '';
+      if (qiniupath == 'None') {
+        urlPath = key;
+      } else {
+        urlPath = '$qiniupath$key';
+      }
       String urlSafeBase64EncodePutPolicy =
           QiniuImageUploadUtils.geturlSafeBase64EncodePutPolicy(configMap['bucket'], key, qiniupath);
       String uploadToken = QiniuImageUploadUtils.getUploadToken(
@@ -356,8 +362,8 @@ class QiniuConfigState extends State<QiniuConfig> {
           config: Config(
         retryLimit: 5,
       ));
-      PutResponse putresult = await storage.putFile(File(assetFilePath), uploadToken);
-
+      PutResponse putresult =
+          await storage.putFile(File(assetFilePath), uploadToken, options: PutOptions(key: urlPath));
       if (putresult.key == key || putresult.key == '${configMap['path']}$key') {
         if (context.mounted) {
           return showCupertinoAlertDialog(
