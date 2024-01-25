@@ -20,6 +20,7 @@ class QiniuManageAPI {
     'na0': 'https://upload-na0.qiniup.com', //北美
     'as0': 'https://upload-as0.qiniup.com', //东南亚
     'ap-northeast-1': 'https://upload-ap-northeast-1.qiniup.com', //亚太首尔
+    'ap-southeast-2': 'https://upload-ap-southeast-2.qiniup.com', //亚太-河内
   };
 
   static Map<String, String> areaCodeName = {
@@ -30,6 +31,7 @@ class QiniuManageAPI {
     'na0': '北美-洛杉矶',
     'as0': '亚太-新加坡',
     'ap-northeast-1': '亚太-首尔',
+    'ap-southeast-2': '亚太-河内',
   };
 
   static Future<File> get localFile async {
