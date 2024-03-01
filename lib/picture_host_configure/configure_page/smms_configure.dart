@@ -104,7 +104,7 @@ class SmmsConfigState extends State<SmmsConfig> {
                       });
                 }
               },
-              child: titleText('提交表单', fontsize: null),
+              child: titleText('保存设置', fontsize: null),
             )),
             ListTile(
                 title: ElevatedButton(
@@ -180,12 +180,12 @@ class SmmsConfigState extends State<SmmsConfig> {
       BaseOptions options = setBaseOptions();
       options.headers = {
         "Authorization": configMap["token"],
-        "Content-Type": "multipart/form-data",
       };
       String validateURL = "https://smms.app/api/v2/profile";
-      FormData formData = FormData.fromMap({});
       Dio dio = Dio(options);
-      var response = await dio.post(validateURL, data: formData);
+      var response = await dio.post(
+        validateURL,
+      );
       if (response.statusCode == 200 && response.data['success'] == true) {
         if (context.mounted) {
           return showCupertinoAlertDialog(
