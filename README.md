@@ -130,6 +130,10 @@ Github下载地址 [Github release](https://github.com/Kuingsmile/PicHoro/releas
 
 遇到Bug或有好的建议可以在 [Github Issues](https://github.com/Kuingsmile/PicHoro/issues) 中提出。
 
+微信交流群：
+
+![wechat](https://pichoro.msq.pub/wechat.png)
+
 ## 开发说明
 
 ### 依赖项目
