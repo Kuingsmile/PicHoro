@@ -10,7 +10,7 @@
 
 &emsp;&emsp;支持多种图片/PDF/文本文件/音视频的在线预览和播放，具体支持的格式请查看[支持的格式列表](https://github.com/Kuingsmile/PicHoro/blob/main/supported_format.md "支持的格式列表")
 
-桌面端如果也希望进行图床管理，推荐使用我的另一个项目`PicList`，[https://github.com/Kuingsmile/PicList](https://github.com/Kuingsmile/PicList)
+桌面端如果也希望进行图床管理，推荐使用我的另一个项目 `PicList`，[https://github.com/Kuingsmile/PicList](https://github.com/Kuingsmile/PicList)
 
 &emsp;&emsp;项目介绍和配置手册网址:
 
@@ -51,26 +51,26 @@
 
 ## 文件预览支持
 
-| 平台   | 图片  |  PDF  | 文本文件 | 视频  |
-| ------ | :---: | :---: | :------: | :---: |
-| Alist  |   ✅   |   ✅   |    ✅     |   ✅   |
-| 阿里云 |   ✅   |   ✅   |    ✅     |   ✅   |
-| S3     |   ✅   |   ✅   |    ✅     |   ✅   |
-| 腾讯云 |   ✅   |   ✅   |    ✅     |   ✅   |
-| 又拍云 |   ✅   |   ✅   |    ✅     |   ✅   |
-| 七牛云 |   ✅   |   ✅   |    ✅     |   ✅   |
-| WebDav |   ✅   |   ✅   |    ✅     |   ✅   |
-| FTP    |   ✅   |   ❌   |    ✅     |   ❌   |
-| Github |   ✅   |   ❌   |    ✅     |   ❌   |
-| Imgur  |   ✅   |   ❌   |    ❌     |   ✅   |
-| 兰空   |   ✅   |   ❌   |    ❌     |   ❌   |
-| SM.MS  |   ✅   |   ❌   |    ❌     |   ❌   |
+| 平台   | 图片 | PDF | 文本文件 | 视频 |
+| ------ | :--: | :-: | :------: | :--: |
+| Alist  |  ✅  | ✅ |    ✅    |  ✅  |
+| 阿里云 |  ✅  | ✅ |    ✅    |  ✅  |
+| S3     |  ✅  | ✅ |    ✅    |  ✅  |
+| 腾讯云 |  ✅  | ✅ |    ✅    |  ✅  |
+| 又拍云 |  ✅  | ✅ |    ✅    |  ✅  |
+| 七牛云 |  ✅  | ✅ |    ✅    |  ✅  |
+| WebDav |  ✅  | ✅ |    ✅    |  ✅  |
+| FTP    |  ✅  | ❌ |    ✅    |  ❌  |
+| Github |  ✅  | ❌ |    ✅    |  ❌  |
+| Imgur  |  ✅  | ❌ |    ❌    |  ✅  |
+| 兰空   |  ✅  | ❌ |    ❌    |  ❌  |
+| SM.MS  |  ✅  | ❌ |    ❌    |  ❌  |
 
 ## 下载
 
 ### 安卓
 
-Github下载地址 [Github release](https://github.com/Kuingsmile/PicHoro/releases)  
+Github下载地址 [Github release](https://github.com/Kuingsmile/PicHoro/releases)
 
 我的个人网站提供的最新版本下载地址 [https://pichoro.msq.pub/PicHoro_V2.2.4.apk](https://pichoro.msq.pub/PicHoro_V2.2.4.apk)
 
@@ -111,7 +111,7 @@ Github下载地址 [Github release](https://github.com/Kuingsmile/PicHoro/releas
 
 ## 2024-02-21 **V2.2.4**
 
-- 新增：七牛云新增`亚太-河内`区域支持
+- 新增：七牛云新增 `亚太-河内`区域支持
 - 新增：优化了github用户名的判断逻辑
 - 修复：修复了七牛云检查配置时，即使配置正确也会提示错误的问题
 
@@ -130,7 +130,7 @@ Github下载地址 [Github release](https://github.com/Kuingsmile/PicHoro/releas
 
 遇到Bug或有好的建议可以在 [Github Issues](https://github.com/Kuingsmile/PicHoro/issues) 中提出。
 
-微信交流群：
+Telegram交流群：
 
 ![wechat](https://pichoro.msq.pub/wechat.png)
 
@@ -184,11 +184,11 @@ Github下载地址 [Github release](https://github.com/Kuingsmile/PicHoro/releas
 
 #### minio_new
 
-该依赖已经包含在了`https://github.com/Kuingsmile/flutterdep`中，无需手动修改。
+该依赖已经包含在了 `https://github.com/Kuingsmile/flutterdep`中，无需手动修改。
 
-1. `queries['maxKeys']`修改为`queries['max-keys']`
+1. `queries['maxKeys']`修改为 `queries['max-keys']`
 2. 添加导入 `import 'package:xml2json/xml2json.dart';`
-3. 如下修改`listBuckets`函数
+3. 如下修改 `listBuckets`函数
 
 ```dart
   Future<List<Bucket>> listBuckets() async {
@@ -249,7 +249,7 @@ Github下载地址 [Github release](https://github.com/Kuingsmile/PicHoro/releas
 如果你需要自行构建，可以使用 `flutter build apk --release`命令构建。
 构建成功后，会在 `build\app\outputs\flutter-apk\release` 目录下生成 `app-release.apk` 文件。
 
-请设置`minifyEnabled false`和`shrinkResources false`，否则打包release版本后可能会出现闪退。
+请设置 `minifyEnabled false`和 `shrinkResources false`，否则打包release版本后可能会出现闪退。
 
 ## License
 
