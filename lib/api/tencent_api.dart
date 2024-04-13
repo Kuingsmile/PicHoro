@@ -8,16 +8,19 @@ import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/global.dart';
 
 class TencentImageUploadUtils {
+  static String _hmacSha1(String key, String data) {
+    return Hmac(sha1, utf8.encode(key)).convert(utf8.encode(data)).toString();
+  }
+
   //表单上传的signature
   static String getUploadAuthorization(
     String secretKey,
     String keyTime,
     String uploadPolicyStr,
   ) {
-    String signKey = Hmac(sha1, utf8.encode(secretKey)).convert(utf8.encode(keyTime)).toString();
+    String signKey = _hmacSha1(secretKey, keyTime);
     String stringtosign = sha1.convert(utf8.encode(uploadPolicyStr)).toString();
-    String signature = Hmac(sha1, utf8.encode(signKey)).convert(utf8.encode(stringtosign)).toString();
-    return signature;
+    return _hmacSha1(signKey, stringtosign);
   }
 
   //authorization
@@ -25,7 +28,7 @@ class TencentImageUploadUtils {
     int startTimestamp = DateTime.now().millisecondsSinceEpoch ~/ 1000;
     int endTimestamp = startTimestamp + 86400;
     String keyTime = '$startTimestamp;$endTimestamp';
-    String signKey = Hmac(sha1, utf8.encode(secretKey)).convert(utf8.encode(keyTime)).toString();
+    String signKey = _hmacSha1(secretKey, keyTime);
     String lowerMethod = method.toLowerCase();
     String headerList = '';
     String httpHeaders = '';

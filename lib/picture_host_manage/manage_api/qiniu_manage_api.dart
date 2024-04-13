@@ -16,7 +16,7 @@ class QiniuManageAPI {
     'z0': 'https://upload.qiniup.com', //华东
     'cn-east-2': 'https://upload-cn-east-2.qiniup.com', //华东 浙江2
     'z1': 'https://upload-z1.qiniup.com', //华北
-    'z2': 'https://upload-z2.qiniup.com', //华南
+    'z2': 'https://upload-z2.qiniup.com', //广东
     'na0': 'https://upload-na0.qiniup.com', //北美
     'as0': 'https://upload-as0.qiniup.com', //东南亚
     'ap-northeast-1': 'https://upload-ap-northeast-1.qiniup.com', //亚太首尔
