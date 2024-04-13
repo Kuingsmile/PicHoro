@@ -5,8 +5,26 @@ import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/global.dart';
 
 class GithubImageUploadUtils {
+  static Dio _getDio(Map configMap) {
+    BaseOptions options = setBaseOptions();
+    options.headers = {
+      "Authorization": configMap["token"],
+      "Accept": "application/vnd.github+json",
+    };
+    return Dio(options);
+  }
+
+  static String _getTrimmedPath(String path) {
+    return path.trim().replaceAll(RegExp(r'^/+'), '').replaceAll(RegExp(r'/+$'), '');
+  }
+
+  static String _getUrl(String username, String repo, String path, String name) {
+    String trimmedPath = _getTrimmedPath(path);
+    return "https://api.github.com/repos/$username/$repo/contents/${trimmedPath == 'None' ? name : '$trimmedPath/$name'}";
+  }
+
   //上传接口
-  static uploadApi({
+  static Future<List<String>> uploadApi({
     required String path,
     required String name,
     required Map configMap,
@@ -22,23 +40,10 @@ class GithubImageUploadUtils {
         'branch': configMap["branch"], //分支
       };
 
-      BaseOptions options = setBaseOptions();
-
-      options.headers = {
-        "Authorization": configMap["token"],
-        "Accept": "application/vnd.github+json",
-      };
-      String trimedPath = configMap['storePath'].toString().trim();
-      trimedPath = trimedPath.replaceAll(RegExp(r'^/+'), '').replaceAll(RegExp(r'/+$'), '');
-      Dio dio = Dio(options);
-      String uploadUrl = '';
-      if (trimedPath == 'None') {
-        uploadUrl = "https://api.github.com/repos/${configMap["githubusername"]}/${configMap["repo"]}/contents/$name";
-      } else {
-        uploadUrl =
-            "https://api.github.com/repos/${configMap["githubusername"]}/${configMap["repo"]}/contents/$trimedPath/$name";
-      }
-
+      Dio dio = _getDio(configMap);
+      String trimedPath = _getTrimmedPath(configMap['storePath'].toString());
+      String uploadUrl =
+          _getUrl(configMap["githubusername"], configMap["repo"], configMap['storePath'].toString(), name);
       var response = await dio.put(uploadUrl, data: jsonEncode(queryBody), onSendProgress: onSendProgress);
       if (response.statusCode != 200 && response.statusCode != 201) {
         return ["failed"];
@@ -50,33 +55,19 @@ class GithubImageUploadUtils {
       String pictureKey = jsonEncode(pictureKeyMap);
       String downloadUrl = '';
       if (configMap['customDomain'] != 'None') {
-        if (configMap['customDomain'].toString().endsWith('/')) {
-          String trimedCustomDomain =
-              configMap['customDomain'].toString().substring(0, configMap['customDomain'].toString().length - 1);
-          if (trimedPath == 'None') {
-            downloadUrl = '$trimedCustomDomain$name';
-          } else {
-            downloadUrl = '$trimedCustomDomain$trimedPath/$name';
-          }
-        } else {
-          if (trimedPath == 'None') {
-            downloadUrl = '${configMap['customDomain']}/$name';
-          } else {
-            downloadUrl = '${configMap['customDomain']}/$trimedPath/$name';
-          }
+        String customDomain = configMap['customDomain'].toString();
+        if (customDomain.endsWith('/')) {
+          customDomain = customDomain.substring(0, customDomain.length - 1);
         }
+        downloadUrl = trimedPath == 'None' ? '$customDomain/$name' : '$customDomain/$trimedPath/$name';
       } else {
         downloadUrl = response.data!['content']['download_url'];
       }
-      if (!downloadUrl.startsWith('http') && !downloadUrl.startsWith('https')) {
+      if (!downloadUrl.startsWith('http')) {
         downloadUrl = 'http://$downloadUrl';
       }
       //复制的链接地址应该是downloadUrl
-      if (Global.isCopyLink == true) {
-        formatedURL = linkGenerateDict[Global.defaultLKformat]!(downloadUrl, name);
-      } else {
-        formatedURL = downloadUrl;
-      }
+      formatedURL = Global.isCopyLink ? linkGenerateDict[Global.defaultLKformat]!(downloadUrl, name) : downloadUrl;
       return ["success", formatedURL, returnUrl, pictureKey, downloadUrl];
     } catch (e) {
       flogError(
@@ -91,32 +82,17 @@ class GithubImageUploadUtils {
     }
   }
 
-  static deleteApi({required Map deleteMap, required Map configMap}) async {
+  static Future<List<String>> deleteApi({required Map deleteMap, required Map configMap}) async {
     Map configMapFromPictureKey = jsonDecode(deleteMap['pictureKey']);
     Map<String, dynamic> formdata = {
       "message": "deleted by PicHoro app",
       "sha": configMapFromPictureKey['sha'],
       "branch": configMapFromPictureKey["branch"],
     };
-    BaseOptions options = setBaseOptions();
-    options.headers = {
-      "Authorization": configMapFromPictureKey["token"],
-      "Accept": "application/vnd.github+json",
-    };
 
-    Dio dio = Dio(options);
-    String trimedPath = configMapFromPictureKey['storePath'].toString().trim();
-
-    trimedPath = trimedPath.replaceAll(RegExp(r'^/+'), '').replaceAll(RegExp(r'/+$'), '');
-
-    String deleteUrl = '';
-    if (trimedPath == 'None') {
-      deleteUrl =
-          "https://api.github.com/repos/${configMapFromPictureKey["githubusername"]}/${configMapFromPictureKey["repo"]}/contents/${deleteMap["name"]}";
-    } else {
-      deleteUrl =
-          "https://api.github.com/repos/${configMapFromPictureKey["githubusername"]}/${configMapFromPictureKey["repo"]}/contents/$trimedPath/${deleteMap["name"]}";
-    }
+    Dio dio = _getDio(configMapFromPictureKey);
+    String deleteUrl = _getUrl(configMapFromPictureKey["githubusername"], configMapFromPictureKey["repo"],
+        configMapFromPictureKey['storePath'].toString(), deleteMap["name"]);
     try {
       var response = await dio.delete(deleteUrl, data: jsonEncode(formdata));
       if (response.statusCode != 200) {

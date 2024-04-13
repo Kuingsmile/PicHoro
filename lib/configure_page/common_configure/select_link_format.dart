@@ -40,7 +40,7 @@ class LinkFormatSelectState extends State<LinkFormatSelect> {
         children: [
           _buildListTile('URL格式', 'rawurl'),
           _buildListTile('HTML格式', 'html'),
-          _buildListTile('BBcode格式', 'BBcode'),
+          _buildListTile('BBcode格式', 'bbcode'),
           _buildListTile('Markdown格式', 'markdown'),
           _buildListTile('Markdown格式(带链接)', 'markdown_with_link'),
           ListTile(

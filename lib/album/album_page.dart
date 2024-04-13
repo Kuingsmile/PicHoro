@@ -167,15 +167,15 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
                             ),
                             SimpleDialogOption(
                               child: Text(
-                                Global.defaultLKformat == 'BBcode' ? 'BBcode格式 \u2713' : 'BBcode格式',
+                                Global.defaultLKformat == 'bbcode' ? 'BBcode格式 \u2713' : 'BBcode格式',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                  color: Global.defaultLKformat == 'BBcode' ? Colors.blue : Colors.black,
-                                  fontWeight: Global.defaultLKformat == 'BBcode' ? FontWeight.bold : FontWeight.normal,
+                                  color: Global.defaultLKformat == 'bbcode' ? Colors.blue : Colors.black,
+                                  fontWeight: Global.defaultLKformat == 'bbcode' ? FontWeight.bold : FontWeight.normal,
                                 ),
                               ),
                               onPressed: () async {
-                                await Global.setLKformat('BBcode');
+                                await Global.setLKformat('bbcode');
                                 if (mounted) {
                                   showToastWithContext(context, '已设置为BBcode格式');
                                   Navigator.pop(context);
