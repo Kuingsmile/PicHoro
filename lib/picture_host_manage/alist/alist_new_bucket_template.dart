@@ -8,134 +8,7 @@ Map alistNewBucketTemplate = {
         "default": "",
         "options": "",
         "required": true,
-        "help": "你要挂载的路径，唯一，不能重复"
-      },
-      {
-        "name": "order",
-        "translate": "序号",
-        "type": "number",
-        "default": "",
-        "options": "",
-        "required": false,
-        "help": "用于排序"
-      },
-      {
-        "name": "remark",
-        "translate": "备注",
-        "type": "text",
-        "default": "",
-        "options": "",
-        "required": false,
-        "help": ""
-      },
-      {
-        "name": "cache_expiration",
-        "translate": "缓存过期分钟",
-        "type": "number",
-        "default": "30",
-        "options": "",
-        "required": true,
-        "help": "此存储的缓存过期时间(分钟)"
-      },
-      {
-        "name": "webdav_policy",
-        "translate": "WebDAV策略",
-        "type": "select",
-        "default": "native_proxy",
-        "options": "use_proxy_url,native_proxy",
-        "options_translate": "使用代理地址,本地代理",
-        "required": true,
-        "help": ""
-      },
-      {
-        "name": "down_proxy_url",
-        "translate": "下载代理URL",
-        "type": "text",
-        "default": "",
-        "options": "",
-        "required": false,
-        "help": ""
-      },
-      {
-        "name": "extract_folder",
-        "translate": "提取文件夹",
-        "type": "select",
-        "default": "",
-        "options": "front,back",
-        "options_translate": "提取到最前,提取到最后",
-        "required": false,
-        "help": ""
-      },
-      {
-        "name": "enable_sign",
-        "translate": "启用签名",
-        "type": "bool",
-        "default": "false",
-        "options": "",
-        "required": true,
-        "help": ""
-      }
-    ],
-    "additional": [
-      {
-        "name": "cookie",
-        "translate": "Cookie",
-        "type": "string",
-        "default": "",
-        "options": "",
-        "required": false,
-        "help": "cookie或二维码令牌必须选填一项"
-      },
-      {
-        "name": "qrcode_token",
-        "translate": "二维码令牌",
-        "type": "string",
-        "default": "",
-        "options": "",
-        "required": false,
-        "help": "cookie或二维码令牌必须选填一项"
-      },
-      {
-        "name": "page_size",
-        "translate": "每页数量",
-        "type": "number",
-        "default": "56",
-        "options": "",
-        "required": false,
-        "help": ""
-      },
-      {
-        "name": "root_folder_id",
-        "translate": "根文件夹ID",
-        "type": "string",
-        "default": "0",
-        "options": "",
-        "required": true,
-        "help": ""
-      }
-    ],
-    "config": {
-      "name": "115 Cloud",
-      "local_sort": false,
-      "only_local": true,
-      "only_proxy": true,
-      "no_cache": false,
-      "no_upload": false,
-      "need_ms": false,
-      "default_root": "0",
-      "alert": ""
-    }
-  },
-  "123PanShare": {
-    "common": [
-      {
-        "name": "mount_path",
-        "translate": "挂载路径",
-        "type": "string",
-        "default": "",
-        "options": "",
-        "required": true,
-        "help": ""
+        "help": "要挂载到的路径，它是唯一的，不能重复"
       },
       {
         "name": "order",
@@ -214,42 +87,50 @@ Map alistNewBucketTemplate = {
     ],
     "additional": [
       {
-        "name": "sharekey",
-        "translate": "分享key",
+        "name": "cookie",
+        "translate": "Cookie",
         "type": "string",
         "default": "",
         "options": "",
-        "required": true,
-        "help": ""
+        "required": false,
+        "help": "需要 QR 代码令牌和 cookie 中的一个"
       },
       {
-        "name": "sharepassword",
-        "translate": "分享密码",
+        "name": "qrcode_token",
+        "translate": "二维码令牌",
         "type": "string",
         "default": "",
         "options": "",
-        "required": true,
-        "help": ""
+        "required": false,
+        "help": "需要 QR 代码令牌和 cookie 中的一个"
       },
       {
-        "name": "order_by",
-        "translate": "排序",
+        "name": "qrcode_source",
+        "translate": "Qrcode 源",
         "type": "select",
-        "default": "file_name",
-        "options": "file_name,size,update_at",
-        "options_translate": "文件名称,大小,修改时间",
+        "default": "linux",
+        "options": "web,android,ios,linux,mac,windows,tv",
+        "options_translate": "网页,安卓,iOS,Linux,Mac,Windows,Tv",
         "required": false,
-        "help": ""
+        "help": "选择二维码设备，默认 linux"
       },
       {
-        "name": "order_direction",
-        "translate": "排序方向",
-        "type": "select",
-        "default": "asc",
-        "options": "asc,desc",
-        "options_translate": "升序,降序",
+        "name": "page_size",
+        "translate": "每页数量",
+        "type": "number",
+        "default": "56",
+        "options": "",
         "required": false,
-        "help": ""
+        "help": "115 驱动程序的列表 API 的每页大小"
+      },
+      {
+        "name": "limit_rate",
+        "translate": "限制速率",
+        "type": "number",
+        "default": "2",
+        "options": "",
+        "required": false,
+        "help": "限制所有 api 请求速率(1r/[limit_rate]s)"
       },
       {
         "name": "root_folder_id",
@@ -262,14 +143,187 @@ Map alistNewBucketTemplate = {
       }
     ],
     "config": {
-      "name": "123PanShare",
-      "local_sort": true,
+      "name": "115 Cloud",
+      "local_sort": false,
+      "only_local": false,
+      "only_proxy": false,
+      "no_cache": false,
+      "no_upload": false,
+      "need_ms": false,
+      "default_root": "0",
+      "alert": ""
+    }
+  },
+  "115 Share": {
+    "common": [
+      {
+        "name": "mount_path",
+        "translate": "挂载路径",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": true,
+        "help": "要挂载到的路径，它是唯一的，不能重复"
+      },
+      {
+        "name": "order",
+        "translate": "序号",
+        "type": "number",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": "用于排序"
+      },
+      {
+        "name": "remark",
+        "translate": "备注",
+        "type": "text",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "cache_expiration",
+        "translate": "缓存过期分钟",
+        "type": "number",
+        "default": "30",
+        "options": "",
+        "required": true,
+        "help": "此存储的缓存过期时间(分钟)"
+      },
+      {
+        "name": "web_proxy",
+        "translate": "Web代理",
+        "type": "bool",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "webdav_policy",
+        "translate": "WebDAV策略",
+        "type": "select",
+        "default": "302_redirect",
+        "options": "302_redirect,use_proxy_url,native_proxy",
+        "options_translate": "302重定向,使用代理地址,本地代理",
+        "required": true,
+        "help": ""
+      },
+      {
+        "name": "down_proxy_url",
+        "translate": "下载代理URL",
+        "type": "text",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "extract_folder",
+        "translate": "提取文件夹",
+        "type": "select",
+        "default": "",
+        "options": "front,back",
+        "options_translate": "提取到最前,提取到最后",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "enable_sign",
+        "translate": "启用签名",
+        "type": "bool",
+        "default": "false",
+        "options": "",
+        "required": true,
+        "help": ""
+      }
+    ],
+    "additional": [
+      {
+        "name": "cookie",
+        "translate": "Cookie",
+        "type": "text",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": "需要 QR 代码令牌和 cookie 中的一个"
+      },
+      {
+        "name": "qrcode_token",
+        "translate": "二维码令牌",
+        "type": "text",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": "需要 QR 代码令牌和 cookie 中的一个"
+      },
+      {
+        "name": "qrcode_source",
+        "translate": "Qrcode 源",
+        "type": "select",
+        "default": "linux",
+        "options": "web,android,ios,linux,mac,windows,tv",
+        "options_translate": "网页,安卓,iOS,Linux,Mac,Windows,Tv",
+        "required": false,
+        "help": "选择二维码设备，默认 linux"
+      },
+      {
+        "name": "page_size",
+        "translate": "每页数量",
+        "type": "number",
+        "default": "20",
+        "options": "",
+        "required": false,
+        "help": "115 驱动程序的列表 API 的每页大小"
+      },
+      {
+        "name": "limit_rate",
+        "translate": "限制速率",
+        "type": "number",
+        "default": "2",
+        "options": "",
+        "required": false,
+        "help": "限制所有 api 请求速率(1r/[limit_rate]s)"
+      },
+      {
+        "name": "share_code",
+        "translate": "分享码",
+        "type": "text",
+        "default": "",
+        "options": "",
+        "required": true,
+        "help": "分享链接的分享码"
+      },
+      {
+        "name": "receive_code",
+        "translate": "提取码",
+        "type": "text",
+        "default": "",
+        "options": "",
+        "required": true,
+        "help": "115 分享链接提取码"
+      },
+      {
+        "name": "root_folder_id",
+        "translate": "根文件夹ID",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": ""
+      }
+    ],
+    "config": {
+      "name": "115 Share",
+      "local_sort": false,
       "only_local": false,
       "only_proxy": false,
       "no_cache": false,
       "no_upload": true,
       "need_ms": false,
-      "default_root": "0",
+      "default_root": "",
       "alert": ""
     }
   },
@@ -282,7 +336,7 @@ Map alistNewBucketTemplate = {
         "default": "",
         "options": "",
         "required": true,
-        "help": ""
+        "help": "要挂载到的路径，它是唯一的，不能重复"
       },
       {
         "name": "order",
@@ -379,6 +433,15 @@ Map alistNewBucketTemplate = {
         "help": ""
       },
       {
+        "name": "root_folder_id",
+        "translate": "根文件夹ID",
+        "type": "string",
+        "default": "0",
+        "options": "",
+        "required": true,
+        "help": ""
+      },
+      {
         "name": "order_by",
         "translate": "排序",
         "type": "select",
@@ -397,24 +460,6 @@ Map alistNewBucketTemplate = {
         "options_translate": "升序,降序",
         "required": false,
         "help": ""
-      },
-      {
-        "name": "root_folder_id",
-        "translate": "根文件夹ID",
-        "type": "string",
-        "default": "0",
-        "options": "",
-        "required": true,
-        "help": ""
-      },
-      {
-        "name": "stream_upload",
-        "translate": "流式上传",
-        "type": "bool",
-        "default": "",
-        "options": "",
-        "required": false,
-        "help": ""
       }
     ],
     "config": {
@@ -429,7 +474,7 @@ Map alistNewBucketTemplate = {
       "alert": ""
     }
   },
-  "139Yun": {
+  "123PanLink": {
     "common": [
       {
         "name": "mount_path",
@@ -438,7 +483,143 @@ Map alistNewBucketTemplate = {
         "default": "",
         "options": "",
         "required": true,
+        "help": "要挂载到的路径，它是唯一的，不能重复"
+      },
+      {
+        "name": "order",
+        "translate": "序号",
+        "type": "number",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": "用于排序"
+      },
+      {
+        "name": "remark",
+        "translate": "备注",
+        "type": "text",
+        "default": "",
+        "options": "",
+        "required": false,
         "help": ""
+      },
+      {
+        "name": "cache_expiration",
+        "translate": "缓存过期分钟",
+        "type": "number",
+        "default": "30",
+        "options": "",
+        "required": true,
+        "help": "此存储的缓存过期时间(分钟)"
+      },
+      {
+        "name": "web_proxy",
+        "translate": "Web代理",
+        "type": "bool",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "webdav_policy",
+        "translate": "WebDAV策略",
+        "type": "select",
+        "default": "302_redirect",
+        "options": "302_redirect,use_proxy_url,native_proxy",
+        "options_translate": "302重定向,使用代理地址,本地代理",
+        "required": true,
+        "help": ""
+      },
+      {
+        "name": "down_proxy_url",
+        "translate": "下载代理URL",
+        "type": "text",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "extract_folder",
+        "translate": "提取文件夹",
+        "type": "select",
+        "default": "",
+        "options": "front,back",
+        "options_translate": "提取到最前,提取到最后",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "enable_sign",
+        "translate": "启用签名",
+        "type": "bool",
+        "default": "false",
+        "options": "",
+        "required": true,
+        "help": ""
+      }
+    ],
+    "additional": [
+      {
+        "name": "origin_urls",
+        "translate": "原始链接",
+        "type": "text",
+        "default": "https://vip.123pan.com/29/folder/file.mp3",
+        "options": "",
+        "required": true,
+        "help": "结构: FolderName: [FileSize:][Modified:]Url"
+      },
+      {
+        "name": "private_key",
+        "translate": "私钥",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "uid",
+        "translate": "账户uid",
+        "type": "number",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "valid_duration",
+        "translate": "有效时长",
+        "type": "number",
+        "default": "30",
+        "options": "",
+        "required": false,
+        "help": "分钟"
+      }
+    ],
+    "config": {
+      "name": "123PanLink",
+      "local_sort": false,
+      "only_local": false,
+      "only_proxy": false,
+      "no_cache": false,
+      "no_upload": false,
+      "need_ms": false,
+      "default_root": "",
+      "alert": ""
+    }
+  },
+  "123PanShare": {
+    "common": [
+      {
+        "name": "mount_path",
+        "translate": "挂载路径",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": true,
+        "help": "要挂载到的路径，它是唯一的，不能重复"
       },
       {
         "name": "order",
@@ -537,6 +718,191 @@ Map alistNewBucketTemplate = {
     ],
     "additional": [
       {
+        "name": "sharekey",
+        "translate": "分享key",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": true,
+        "help": ""
+      },
+      {
+        "name": "sharepassword",
+        "translate": "分享密码",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "root_folder_id",
+        "translate": "根文件夹ID",
+        "type": "string",
+        "default": "0",
+        "options": "",
+        "required": true,
+        "help": ""
+      },
+      {
+        "name": "order_by",
+        "translate": "排序",
+        "type": "select",
+        "default": "file_name",
+        "options": "file_name,size,update_at",
+        "options_translate": "文件名称,大小,修改时间",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "order_direction",
+        "translate": "排序方向",
+        "type": "select",
+        "default": "asc",
+        "options": "asc,desc",
+        "options_translate": "升序,降序",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "accesstoken",
+        "translate": "访问令牌",
+        "type": "text",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": ""
+      }
+    ],
+    "config": {
+      "name": "123PanShare",
+      "local_sort": true,
+      "only_local": false,
+      "only_proxy": false,
+      "no_cache": false,
+      "no_upload": true,
+      "need_ms": false,
+      "default_root": "0",
+      "alert": ""
+    }
+  },
+  "139Yun": {
+    "common": [
+      {
+        "name": "mount_path",
+        "translate": "挂载路径",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": true,
+        "help": "要挂载到的路径，它是唯一的，不能重复"
+      },
+      {
+        "name": "order",
+        "translate": "序号",
+        "type": "number",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": "用于排序"
+      },
+      {
+        "name": "remark",
+        "translate": "备注",
+        "type": "text",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "cache_expiration",
+        "translate": "缓存过期分钟",
+        "type": "number",
+        "default": "30",
+        "options": "",
+        "required": true,
+        "help": "此存储的缓存过期时间(分钟)"
+      },
+      {
+        "name": "web_proxy",
+        "translate": "Web代理",
+        "type": "bool",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "webdav_policy",
+        "translate": "WebDAV策略",
+        "type": "select",
+        "default": "302_redirect",
+        "options": "302_redirect,use_proxy_url,native_proxy",
+        "options_translate": "302重定向,使用代理地址,本地代理",
+        "required": true,
+        "help": ""
+      },
+      {
+        "name": "proxy_range",
+        "translate": "代理range",
+        "type": "bool",
+        "default": "true",
+        "options": "",
+        "required": false,
+        "help": "Need to enable proxy"
+      },
+      {
+        "name": "down_proxy_url",
+        "translate": "下载代理URL",
+        "type": "text",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "order_by",
+        "translate": "排序",
+        "type": "select",
+        "default": "",
+        "options": "name,size,modified",
+        "options_translate": "名称,大小,修改时间",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "order_direction",
+        "translate": "排序方向",
+        "type": "select",
+        "default": "",
+        "options": "asc,desc",
+        "options_translate": "升序,降序",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "extract_folder",
+        "translate": "提取文件夹",
+        "type": "select",
+        "default": "",
+        "options": "front,back",
+        "options_translate": "提取到最前,提取到最后",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "enable_sign",
+        "translate": "启用签名",
+        "type": "bool",
+        "default": "false",
+        "options": "",
+        "required": true,
+        "help": ""
+      }
+    ],
+    "additional": [
+      {
         "name": "authorization",
         "translate": "授权密钥",
         "type": "text",
@@ -559,8 +925,8 @@ Map alistNewBucketTemplate = {
         "translate": "类型",
         "type": "select",
         "default": "personal",
-        "options": "personal,family",
-        "options_translate": "个人云,家庭云",
+        "options": "personal,family,personal_new",
+        "options_translate": "个人云,家庭云,新的个人盘",
         "required": false,
         "help": ""
       },
@@ -595,7 +961,7 @@ Map alistNewBucketTemplate = {
         "default": "",
         "options": "",
         "required": true,
-        "help": ""
+        "help": "要挂载到的路径，它是唯一的，不能重复"
       },
       {
         "name": "order",
@@ -739,7 +1105,7 @@ Map alistNewBucketTemplate = {
       "no_upload": false,
       "need_ms": false,
       "default_root": "-11",
-      "alert": ""
+      "alert": "如果此驱动无法工作，你可以尝试使用“天翼网盘客户端”驱动。"
     }
   },
   "189CloudPC": {
@@ -906,11 +1272,38 @@ Map alistNewBucketTemplate = {
       },
       {
         "name": "upload_method",
-        "translate": "秒传",
+        "translate": "上传方式",
         "type": "select",
         "default": "stream",
         "options": "stream,rapid,old",
         "options_translate": "流式,秒传,旧版",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "upload_thread",
+        "translate": "上传线程数",
+        "type": "string",
+        "default": "3",
+        "options": "",
+        "required": false,
+        "help": "1<=thread<=32"
+      },
+      {
+        "name": "family_transfer",
+        "translate": "家庭转移",
+        "type": "bool",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "rapid_upload",
+        "translate": "秒传",
+        "type": "bool",
+        "default": "",
+        "options": "",
         "required": false,
         "help": ""
       },
@@ -945,7 +1338,7 @@ Map alistNewBucketTemplate = {
         "default": "",
         "options": "",
         "required": true,
-        "help": ""
+        "help": "要挂载到的路径，它是唯一的，不能重复"
       },
       {
         "name": "order",
@@ -1093,7 +1486,7 @@ Map alistNewBucketTemplate = {
         "default": "",
         "options": "",
         "required": true,
-        "help": ""
+        "help": "要挂载到的路径，它是唯一的，不能重复"
       },
       {
         "name": "order",
@@ -1140,6 +1533,15 @@ Map alistNewBucketTemplate = {
         "options_translate": "302重定向,使用代理地址,本地代理",
         "required": true,
         "help": ""
+      },
+      {
+        "name": "proxy_range",
+        "translate": "代理range",
+        "type": "bool",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": "Need to enable proxy"
       },
       {
         "name": "down_proxy_url",
@@ -1259,7 +1661,7 @@ Map alistNewBucketTemplate = {
         "default": "",
         "options": "",
         "required": true,
-        "help": ""
+        "help": "要挂载到的路径，它是唯一的，不能重复"
       },
       {
         "name": "order",
@@ -1297,6 +1699,15 @@ Map alistNewBucketTemplate = {
         "options_translate": "302重定向,使用代理地址,本地代理",
         "required": true,
         "help": ""
+      },
+      {
+        "name": "proxy_range",
+        "translate": "代理range",
+        "type": "bool",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": "Need to enable proxy"
       },
       {
         "name": "down_proxy_url",
@@ -1371,7 +1782,7 @@ Map alistNewBucketTemplate = {
         "default": "",
         "options": "",
         "required": true,
-        "help": ""
+        "help": "要挂载到的路径，它是唯一的，不能重复"
       },
       {
         "name": "order",
@@ -1515,8 +1926,7 @@ Map alistNewBucketTemplate = {
       "no_upload": false,
       "need_ms": false,
       "default_root": "root",
-      "alert":
-          "warning|There may be an infinite loop bug in this driver.\nDeprecated, no longer maintained and will be removed in a future version.\nWe recommend using the official driver AliyundriveOpen."
+      "alert": "在这个驱动中可能有一个死循环的错误。 已废弃，不再维护，并将在未来的版本中删除。 我们建议使用官方驱动的 阿里云盘Open。"
     }
   },
   "AliyundriveOpen": {
@@ -1528,7 +1938,7 @@ Map alistNewBucketTemplate = {
         "default": "",
         "options": "",
         "required": true,
-        "help": ""
+        "help": "要挂载到的路径，它是唯一的，不能重复"
       },
       {
         "name": "order",
@@ -1607,12 +2017,13 @@ Map alistNewBucketTemplate = {
     ],
     "additional": [
       {
-        "name": "refresh_token",
-        "translate": "刷新令牌",
-        "type": "string",
-        "default": "",
-        "options": "",
-        "required": true,
+        "name": "drive_type",
+        "translate": "云盘类型",
+        "type": "select",
+        "default": "default",
+        "options": "default,resource,backup",
+        "options_translate": "默认,资源库,备份盘",
+        "required": false,
         "help": ""
       },
       {
@@ -1620,6 +2031,15 @@ Map alistNewBucketTemplate = {
         "translate": "根文件夹ID",
         "type": "string",
         "default": "root",
+        "options": "",
+        "required": true,
+        "help": ""
+      },
+      {
+        "name": "refresh_token",
+        "translate": "刷新令牌",
+        "type": "string",
+        "default": "",
         "options": "",
         "required": true,
         "help": ""
@@ -1648,7 +2068,7 @@ Map alistNewBucketTemplate = {
         "name": "oauth_token_url",
         "translate": "OAuth令牌URL",
         "type": "string",
-        "default": "https://api.xhofe.top/alist/ali_open/token",
+        "default": "https://api.nn.ci/alist/ali_open/token",
         "options": "",
         "required": false,
         "help": ""
@@ -1660,7 +2080,7 @@ Map alistNewBucketTemplate = {
         "default": "",
         "options": "",
         "required": false,
-        "help": "Keep it empty if you don't have one"
+        "help": "如果你没有，请留空"
       },
       {
         "name": "client_secret",
@@ -1669,7 +2089,7 @@ Map alistNewBucketTemplate = {
         "default": "",
         "options": "",
         "required": false,
-        "help": "Keep it empty if you don't have one"
+        "help": "如果你没有，请留空"
       },
       {
         "name": "remove_way",
@@ -1682,13 +2102,32 @@ Map alistNewBucketTemplate = {
         "help": ""
       },
       {
+        "name": "rapid_upload",
+        "translate": "秒传",
+        "type": "bool",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": "如果您启用此选项，文件将先上传到服务器，所以进度将不正确"
+      },
+      {
         "name": "internal_upload",
         "translate": "内部上传",
         "type": "bool",
         "default": "",
         "options": "",
         "required": false,
-        "help": "If you are using Aliyun ECS is located in Beijing, you can turn it on to boost the upload speed"
+        "help": "如果您在使用位于北京的阿里云服务器，您可以开启它来提高上传速度"
+      },
+      {
+        "name": "livp_download_format",
+        "translate": "Livp下载格式",
+        "type": "select",
+        "default": "jpeg",
+        "options": "jpeg,mov",
+        "options_translate": "JPEG,MOV",
+        "required": false,
+        "help": ""
       }
     ],
     "config": {
@@ -1712,7 +2151,7 @@ Map alistNewBucketTemplate = {
         "default": "",
         "options": "",
         "required": true,
-        "help": ""
+        "help": "要挂载到的路径，它是唯一的，不能重复"
       },
       {
         "name": "order",
@@ -1868,7 +2307,7 @@ Map alistNewBucketTemplate = {
         "default": "",
         "options": "",
         "required": true,
-        "help": ""
+        "help": "要挂载到的路径，它是唯一的，不能重复"
       },
       {
         "name": "order",
@@ -2020,6 +2459,33 @@ Map alistNewBucketTemplate = {
         "options": "",
         "required": true,
         "help": ""
+      },
+      {
+        "name": "upload_thread",
+        "translate": "上传线程",
+        "type": "string",
+        "default": "3",
+        "options": "",
+        "required": false,
+        "help": "1<=thread<=32"
+      },
+      {
+        "name": "upload_api",
+        "translate": "上传接口",
+        "type": "string",
+        "default": "https://d.pcs.baidu.com",
+        "options": "",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "custom_upload_part_size",
+        "translate": "自定义上传分块大小",
+        "type": "number",
+        "default": "0",
+        "options": "",
+        "required": false,
+        "help": "0 表示根据VIP等级对应大小"
       }
     ],
     "config": {
@@ -2043,7 +2509,7 @@ Map alistNewBucketTemplate = {
         "default": "",
         "options": "",
         "required": true,
-        "help": ""
+        "help": "要挂载到的路径，它是唯一的，不能重复"
       },
       {
         "name": "order",
@@ -2170,6 +2636,15 @@ Map alistNewBucketTemplate = {
         "help": ""
       },
       {
+        "name": "delete_origin",
+        "translate": "删除原文件",
+        "type": "bool",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": ""
+      },
+      {
         "name": "client_id",
         "translate": "客户端ID",
         "type": "string",
@@ -2186,6 +2661,15 @@ Map alistNewBucketTemplate = {
         "options": "",
         "required": true,
         "help": ""
+      },
+      {
+        "name": "upload_thread",
+        "translate": "上传线程",
+        "type": "string",
+        "default": "3",
+        "options": "",
+        "required": false,
+        "help": "1<=thread<=32"
       }
     ],
     "config": {
@@ -2356,6 +2840,142 @@ Map alistNewBucketTemplate = {
       "alert": ""
     }
   },
+  "ChaoXingGroupDrive": {
+    "common": [
+      {
+        "name": "mount_path",
+        "translate": "挂载路径",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": true,
+        "help": "要挂载到的路径，它是唯一的，不能重复"
+      },
+      {
+        "name": "order",
+        "translate": "序号",
+        "type": "number",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": "用于排序"
+      },
+      {
+        "name": "remark",
+        "translate": "备注",
+        "type": "text",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "cache_expiration",
+        "translate": "缓存过期分钟",
+        "type": "number",
+        "default": "30",
+        "options": "",
+        "required": true,
+        "help": "此存储的缓存过期时间(分钟)"
+      },
+      {
+        "name": "webdav_policy",
+        "translate": "WebDAV策略",
+        "type": "select",
+        "default": "native_proxy",
+        "options": "use_proxy_url,native_proxy",
+        "options_translate": "使用代理地址,本地代理",
+        "required": true,
+        "help": ""
+      },
+      {
+        "name": "down_proxy_url",
+        "translate": "下载代理URL",
+        "type": "text",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "extract_folder",
+        "translate": "提取文件夹",
+        "type": "select",
+        "default": "",
+        "options": "front,back",
+        "options_translate": "提取到最前,提取到最后",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "enable_sign",
+        "translate": "启用签名",
+        "type": "bool",
+        "default": "false",
+        "options": "",
+        "required": true,
+        "help": ""
+      }
+    ],
+    "additional": [
+      {
+        "name": "user_name",
+        "translate": "用户名",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": true,
+        "help": ""
+      },
+      {
+        "name": "password",
+        "translate": "密码",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": true,
+        "help": ""
+      },
+      {
+        "name": "bbsid",
+        "translate": "bbsid",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": true,
+        "help": ""
+      },
+      {
+        "name": "root_folder_id",
+        "translate": "根文件夹ID",
+        "type": "string",
+        "default": "-1",
+        "options": "",
+        "required": true,
+        "help": ""
+      },
+      {
+        "name": "cookie",
+        "translate": "cookie",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": ""
+      }
+    ],
+    "config": {
+      "name": "ChaoXingGroupDrive",
+      "local_sort": false,
+      "only_local": false,
+      "only_proxy": true,
+      "no_cache": false,
+      "no_upload": false,
+      "need_ms": false,
+      "default_root": "-1",
+      "alert": ""
+    }
+  },
   "Cloudreve": {
     "common": [
       {
@@ -2365,7 +2985,7 @@ Map alistNewBucketTemplate = {
         "default": "",
         "options": "",
         "required": true,
-        "help": ""
+        "help": "要挂载到的路径，它是唯一的，不能重复"
       },
       {
         "name": "order",
@@ -2478,11 +3098,461 @@ Map alistNewBucketTemplate = {
         "options": "",
         "required": false,
         "help": ""
+      },
+      {
+        "name": "custom_ua",
+        "translate": "自定义UA",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "enable_thumb_and_folder_size",
+        "translate": "启用缩略图和文件夹大小",
+        "type": "bool",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": ""
       }
     ],
     "config": {
       "name": "Cloudreve",
       "local_sort": false,
+      "only_local": false,
+      "only_proxy": false,
+      "no_cache": false,
+      "no_upload": false,
+      "need_ms": false,
+      "default_root": "/",
+      "alert": ""
+    }
+  },
+  "Crypt": {
+    "common": [
+      {
+        "name": "mount_path",
+        "translate": "挂载路径",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": true,
+        "help": "要挂载到的路径，它是唯一的，不能重复"
+      },
+      {
+        "name": "order",
+        "translate": "序号",
+        "type": "number",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": "use to sort"
+      },
+      {
+        "name": "remark",
+        "translate": "备注",
+        "type": "text",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "webdav_policy",
+        "translate": "WebDAV策略",
+        "type": "select",
+        "default": "native_proxy",
+        "options": "use_proxy_url,native_proxy",
+        "options_translate": "使用代理地址,本地代理",
+        "required": true,
+        "help": ""
+      },
+      {
+        "name": "down_proxy_url",
+        "translate": "下载代理URL",
+        "type": "text",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "order_by",
+        "translate": "排序",
+        "type": "select",
+        "default": "",
+        "options": "name,size,modified",
+        "options_translate": "名称,大小,修改时间",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "order_direction",
+        "translate": "排序方向",
+        "type": "select",
+        "default": "",
+        "options": "asc,desc",
+        "options_translate": "升序,降序",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "extract_folder",
+        "translate": "提取文件夹",
+        "type": "select",
+        "default": "",
+        "options": "front,back",
+        "options_translate": "提取到最前,提取到最后",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "enable_sign",
+        "translate": "启用签名",
+        "type": "bool",
+        "default": "false",
+        "options": "",
+        "required": true,
+        "help": ""
+      }
+    ],
+    "additional": [
+      {
+        "name": "filename_encryption",
+        "translate": "文件名加密",
+        "type": "select",
+        "default": "off",
+        "options": "off,standard,obfuscate",
+        "options_translate": "关闭,标准,混淆",
+        "required": true,
+        "help": ""
+      },
+      {
+        "name": "directory_name_encryption",
+        "translate": "目录名加密",
+        "type": "select",
+        "default": "false",
+        "options": "false,true",
+        "options_translate": "关闭,开启",
+        "required": true,
+        "help": ""
+      },
+      {
+        "name": "remote_path",
+        "translate": "加密后文件存储路径",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": true,
+        "help": "这是加密数据存储的位置"
+      },
+      {
+        "name": "password",
+        "translate": "密码",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": true,
+        "help": "the main password"
+      },
+      {
+        "name": "salt",
+        "translate": "加盐",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": "如果您不知道什么是加盐，可以视为第二个密码。可选，推荐。"
+      },
+      {
+        "name": "encrypted_suffix",
+        "translate": "加密后缀",
+        "type": "string",
+        "default": ".bin",
+        "options": "",
+        "required": true,
+        "help": "高级选项！加密的文件将使用此后缀"
+      },
+      {
+        "name": "filename_encoding",
+        "translate": "文件名编码",
+        "type": "select",
+        "default": "base64",
+        "options": "base64,base32,base32768",
+        "options_translate": "base64,base32,base32768",
+        "required": true,
+        "help": "for advanced user only!"
+      },
+      {
+        "name": "thumbnail",
+        "translate": "缩略图",
+        "type": "bool",
+        "default": "false",
+        "options": "",
+        "required": true,
+        "help": "启用在缩略图文件夹下预先生成的缩略图"
+      },
+      {
+        "name": "show_hidden",
+        "translate": "显示隐藏",
+        "type": "bool",
+        "default": "true",
+        "options": "",
+        "required": false,
+        "help": "显示隐藏目录以及文件"
+      }
+    ],
+    "config": {
+      "name": "Crypt",
+      "local_sort": true,
+      "only_local": false,
+      "only_proxy": true,
+      "no_cache": true,
+      "no_upload": false,
+      "need_ms": false,
+      "default_root": "/",
+      "alert": ""
+    }
+  },
+  "Doge": {
+    "common": [
+      {
+        "name": "mount_path",
+        "translate": "挂载路径",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": true,
+        "help": "要挂载到的路径，它是唯一的，不能重复"
+      },
+      {
+        "name": "order",
+        "translate": "序号",
+        "type": "number",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": "用于排序"
+      },
+      {
+        "name": "remark",
+        "translate": "备注",
+        "type": "text",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "cache_expiration",
+        "translate": "缓存过期分钟",
+        "type": "number",
+        "default": "30",
+        "options": "",
+        "required": true,
+        "help": "此存储的缓存过期时间(分钟)"
+      },
+      {
+        "name": "web_proxy",
+        "translate": "Web代理",
+        "type": "bool",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "webdav_policy",
+        "translate": "WebDAV策略",
+        "type": "select",
+        "default": "302_redirect",
+        "options": "302_redirect,use_proxy_url,native_proxy",
+        "options_translate": "302重定向,使用代理地址,本地代理",
+        "required": true,
+        "help": ""
+      },
+      {
+        "name": "down_proxy_url",
+        "translate": "下载代理URL",
+        "type": "text",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "order_by",
+        "translate": "排序",
+        "type": "select",
+        "default": "",
+        "options": "name,size,modified",
+        "options_translate": "名称,大小,修改时间",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "order_direction",
+        "translate": "排序方向",
+        "type": "select",
+        "default": "",
+        "options": "asc,desc",
+        "options_translate": "升序,降序",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "extract_folder",
+        "translate": "提取文件夹",
+        "type": "select",
+        "default": "",
+        "options": "front,back",
+        "options_translate": "提取到最前,提取到最后",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "enable_sign",
+        "translate": "启用签名",
+        "type": "bool",
+        "default": "false",
+        "options": "",
+        "required": true,
+        "help": ""
+      }
+    ],
+    "additional": [
+      {
+        "name": "root_folder_path",
+        "translate": "根目录路径",
+        "type": "string",
+        "default": "/",
+        "options": "",
+        "required": true,
+        "help": ""
+      },
+      {
+        "name": "bucket",
+        "translate": "Bucket",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": true,
+        "help": ""
+      },
+      {
+        "name": "endpoint",
+        "translate": "Endpoint",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": true,
+        "help": ""
+      },
+      {
+        "name": "region",
+        "translate": "Region",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "access_key_id",
+        "translate": "Access Key ID",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": true,
+        "help": ""
+      },
+      {
+        "name": "secret_access_key",
+        "translate": "Secret Access Key",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": true,
+        "help": ""
+      },
+      {
+        "name": "session_token",
+        "translate": "会话令牌",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "custom_host",
+        "translate": "自定义主机",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "sign_url_expire",
+        "translate": "签名URL过期时间",
+        "type": "number",
+        "default": "4",
+        "options": "",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "placeholder",
+        "translate": "占位文件名",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "force_path_style",
+        "translate": "强制路径样式",
+        "type": "bool",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "list_object_version",
+        "translate": "列出对象版本",
+        "type": "select",
+        "default": "v1",
+        "options": "v1,v2",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "remove_bucket",
+        "translate": "移除Bucket",
+        "type": "bool",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": "使用自定义主机时从路径中删除bucket名称。"
+      },
+      {
+        "name": "add_filename_to_disposition",
+        "translate": "添加文件名到内容头部",
+        "type": "bool",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": "添加filename到Content-Disposition头中。"
+      }
+    ],
+    "config": {
+      "name": "Doge",
+      "local_sort": true,
       "only_local": false,
       "only_proxy": false,
       "no_cache": false,
@@ -2501,7 +3571,7 @@ Map alistNewBucketTemplate = {
         "default": "",
         "options": "",
         "required": true,
-        "help": ""
+        "help": "要挂载到的路径，它是唯一的，不能重复"
       },
       {
         "name": "order",
@@ -2646,7 +3716,7 @@ Map alistNewBucketTemplate = {
         "default": "",
         "options": "",
         "required": true,
-        "help": ""
+        "help": "要挂载到的路径，它是唯一的，不能重复"
       },
       {
         "name": "order",
@@ -2781,6 +3851,133 @@ Map alistNewBucketTemplate = {
       "no_upload": false,
       "need_ms": false,
       "default_root": "/",
+      "alert": ""
+    }
+  },
+  "FeijiPan": {
+    "common": [
+      {
+        "name": "mount_path",
+        "translate": "挂载路径",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": true,
+        "help": "要挂载到的路径，它是唯一的，不能重复"
+      },
+      {
+        "name": "order",
+        "translate": "序号",
+        "type": "number",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": "用于排序"
+      },
+      {
+        "name": "remark",
+        "translate": "备注",
+        "type": "text",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "cache_expiration",
+        "translate": "缓存过期分钟",
+        "type": "number",
+        "default": "30",
+        "options": "",
+        "required": true,
+        "help": "此存储的缓存过期时间(分钟)"
+      },
+      {
+        "name": "web_proxy",
+        "translate": "Web代理",
+        "type": "bool",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "webdav_policy",
+        "translate": "WebDAV策略",
+        "type": "select",
+        "default": "302_redirect",
+        "options": "302_redirect,use_proxy_url,native_proxy",
+        "options_translate": "302重定向,使用代理地址,本地代理",
+        "required": true,
+        "help": ""
+      },
+      {
+        "name": "down_proxy_url",
+        "translate": "下载代理URL",
+        "type": "text",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "extract_folder",
+        "translate": "提取文件夹",
+        "type": "select",
+        "default": "",
+        "options": "front,back",
+        "options_translate": "提取到最前,提取到最后",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "enable_sign",
+        "translate": "启用签名",
+        "type": "bool",
+        "default": "false",
+        "options": "",
+        "required": true,
+        "help": ""
+      }
+    ],
+    "additional": [
+      {
+        "name": "root_folder_id",
+        "translate": "根文件夹ID",
+        "type": "string",
+        "default": "0",
+        "options": "",
+        "required": true,
+        "help": ""
+      },
+      {
+        "name": "username",
+        "translate": "用户名",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": true,
+        "help": ""
+      },
+      {
+        "name": "password",
+        "translate": "密码",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": true,
+        "help": ""
+      }
+    ],
+    "config": {
+      "name": "FeijiPan",
+      "local_sort": false,
+      "only_local": false,
+      "only_proxy": false,
+      "no_cache": false,
+      "no_upload": false,
+      "need_ms": false,
+      "default_root": "0",
       "alert": ""
     }
   },
@@ -3095,6 +4292,133 @@ Map alistNewBucketTemplate = {
       "alert": ""
     }
   },
+  "ILanZou": {
+    "common": [
+      {
+        "name": "mount_path",
+        "translate": "挂载路径",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": true,
+        "help": "要挂载到的路径，它是唯一的，不能重复"
+      },
+      {
+        "name": "order",
+        "translate": "序号",
+        "type": "number",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": "use to sort"
+      },
+      {
+        "name": "remark",
+        "translate": "备注",
+        "type": "text",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "cache_expiration",
+        "translate": "缓存过期分钟",
+        "type": "number",
+        "default": "30",
+        "options": "",
+        "required": true,
+        "help": "此存储的缓存过期时间(分钟)"
+      },
+      {
+        "name": "web_proxy",
+        "translate": "Web代理",
+        "type": "bool",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "webdav_policy",
+        "translate": "WebDAV策略",
+        "type": "select",
+        "default": "302_redirect",
+        "options": "302_redirect,use_proxy_url,native_proxy",
+        "options_translate": "302重定向,使用代理地址,本地代理",
+        "required": true,
+        "help": ""
+      },
+      {
+        "name": "down_proxy_url",
+        "translate": "下载代理URL",
+        "type": "text",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "extract_folder",
+        "translate": "提取文件夹",
+        "type": "select",
+        "default": "",
+        "options": "front,back",
+        "options_translate": "提取到最前,提取到最后",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "enable_sign",
+        "translate": "启用签名",
+        "type": "bool",
+        "default": "false",
+        "options": "",
+        "required": true,
+        "help": ""
+      }
+    ],
+    "additional": [
+      {
+        "name": "root_folder_id",
+        "translate": "根文件夹ID",
+        "type": "string",
+        "default": "0",
+        "options": "",
+        "required": true,
+        "help": ""
+      },
+      {
+        "name": "username",
+        "translate": "用户名",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": true,
+        "help": ""
+      },
+      {
+        "name": "password",
+        "translate": "密码",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": true,
+        "help": ""
+      }
+    ],
+    "config": {
+      "name": "ILanZou",
+      "local_sort": false,
+      "only_local": false,
+      "only_proxy": false,
+      "no_cache": false,
+      "no_upload": false,
+      "need_ms": false,
+      "default_root": "0",
+      "alert": ""
+    }
+  },
   "IPFS API": {
     "common": [
       {
@@ -3354,8 +4678,26 @@ Map alistNewBucketTemplate = {
         "translate": "类型",
         "type": "select",
         "default": "cookie",
-        "options": "cookie,url",
-        "options_translate": "Cookie,URL",
+        "options": "account,cookie,url",
+        "options_translate": "账号,cookie,URL",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "account",
+        "translate": "账号",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "password",
+        "translate": "密码",
+        "type": "string",
+        "default": "",
+        "options": "",
         "required": false,
         "help": ""
       },
@@ -3423,6 +4765,151 @@ Map alistNewBucketTemplate = {
       "no_upload": false,
       "need_ms": false,
       "default_root": "-1",
+      "alert": ""
+    }
+  },
+  "Lark": {
+    "common": [
+      {
+        "name": "mount_path",
+        "translate": "挂载路径",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": true,
+        "help": "要挂载到的路径，它是唯一的，不能重复"
+      },
+      {
+        "name": "order",
+        "translate": "序号",
+        "type": "number",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": "用于排序"
+      },
+      {
+        "name": "remark",
+        "translate": "备注",
+        "type": "text",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "cache_expiration",
+        "translate": "缓存过期分钟",
+        "type": "number",
+        "default": "30",
+        "options": "",
+        "required": true,
+        "help": "此存储的缓存过期时间(分钟)"
+      },
+      {
+        "name": "web_proxy",
+        "translate": "Web代理",
+        "type": "bool",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "webdav_policy",
+        "translate": "WebDAV策略",
+        "type": "select",
+        "default": "302_redirect",
+        "options": "302_redirect,use_proxy_url,native_proxy",
+        "options_translate": "302重定向,使用代理地址,本地代理",
+        "required": true,
+        "help": ""
+      },
+      {
+        "name": "down_proxy_url",
+        "translate": "下载代理URL",
+        "type": "text",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "extract_folder",
+        "translate": "提取文件夹",
+        "type": "select",
+        "default": "",
+        "options": "front,back",
+        "options_translate": "提取到最前,提取到最后",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "enable_sign",
+        "translate": "启用签名",
+        "type": "bool",
+        "default": "false",
+        "options": "",
+        "required": true,
+        "help": ""
+      }
+    ],
+    "additional": [
+      {
+        "name": "root_folder_path",
+        "translate": "根文件夹路径",
+        "type": "string",
+        "default": "/",
+        "options": "",
+        "required": true,
+        "help": ""
+      },
+      {
+        "name": "app_id",
+        "translate": "app id",
+        "type": "text",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": "app id"
+      },
+      {
+        "name": "app_secret",
+        "translate": "app secret",
+        "type": "text",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": "app secret"
+      },
+      {
+        "name": "external_mode",
+        "translate": "外部预览模式",
+        "type": "bool",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": "external mode"
+      },
+      {
+        "name": "tenant_url_prefix",
+        "translate": "租户URL前缀",
+        "type": "text",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": "tenant url prefix"
+      }
+    ],
+    "config": {
+      "name": "Lark",
+      "local_sort": false,
+      "only_local": false,
+      "only_proxy": false,
+      "no_cache": false,
+      "no_upload": false,
+      "need_ms": false,
+      "default_root": "/",
       "alert": ""
     }
   },
@@ -3534,6 +5021,15 @@ Map alistNewBucketTemplate = {
         "help": "启用缩略图"
       },
       {
+        "name": "thumb_cache_folder",
+        "translate": "缩略图缓存文件夹",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": ""
+      },
+      {
         "name": "show_hidden",
         "translate": "显示隐藏",
         "type": "bool",
@@ -3550,6 +5046,15 @@ Map alistNewBucketTemplate = {
         "options": "",
         "required": false,
         "help": ""
+      },
+      {
+        "name": "recycle_bin_path",
+        "translate": "回收站路径",
+        "type": "string",
+        "default": "delete permanently",
+        "options": "",
+        "required": false,
+        "help": "回收站的路径，如果空或保留“永久删除”则永久删除"
       }
     ],
     "config": {
@@ -3825,6 +5330,24 @@ Map alistNewBucketTemplate = {
         "options": "",
         "required": true,
         "help": ""
+      },
+      {
+        "name": "two_fa_code",
+        "translate": "2FA代码",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": "2FA 6位数字代码，仅填写2FA 代码将不支持重载驱动程序"
+      },
+      {
+        "name": "two_fa_secret",
+        "translate": "2FA密钥",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": "2FA secret"
       }
     ],
     "config": {
@@ -3945,6 +5468,15 @@ Map alistNewBucketTemplate = {
         "help": ""
       },
       {
+        "name": "sms_code",
+        "translate": "短信验证码",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": "input 'send' send sms "
+      },
+      {
         "name": "root_folder_id",
         "translate": "根文件夹ID",
         "type": "string",
@@ -3990,6 +5522,15 @@ Map alistNewBucketTemplate = {
         "options": "",
         "required": false,
         "help": ""
+      },
+      {
+        "name": "upload_thread",
+        "translate": "上传线程数",
+        "type": "string",
+        "default": "3",
+        "options": "",
+        "required": false,
+        "help": "1<=thread<=32"
       }
     ],
     "config": {
@@ -4001,7 +5542,125 @@ Map alistNewBucketTemplate = {
       "no_upload": false,
       "need_ms": false,
       "default_root": "",
-      "alert": "warning|This network disk may store your password in clear text. Please set your password carefully"
+      "alert": "这个网盘可能将您的密码以明文存储，请小心设置您的密码"
+    }
+  },
+  "NeteaseMusic": {
+    "common": [
+      {
+        "name": "mount_path",
+        "translate": "挂载路径",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": true,
+        "help": "要挂载到的路径，它是唯一的，不能重复"
+      },
+      {
+        "name": "order",
+        "translate": "序号",
+        "type": "number",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": "use to sort"
+      },
+      {
+        "name": "remark",
+        "translate": "备注",
+        "type": "text",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "cache_expiration",
+        "translate": "缓存过期分钟",
+        "type": "number",
+        "default": "30",
+        "options": "",
+        "required": true,
+        "help": "此存储的缓存过期时间(分钟)"
+      },
+      {
+        "name": "web_proxy",
+        "translate": "Web代理",
+        "type": "bool",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "webdav_policy",
+        "translate": "WebDAV策略",
+        "type": "select",
+        "default": "302_redirect",
+        "options": "302_redirect,use_proxy_url,native_proxy",
+        "options_translate": "302重定向,使用代理地址,本地代理",
+        "required": true,
+        "help": ""
+      },
+      {
+        "name": "down_proxy_url",
+        "translate": "下载代理URL",
+        "type": "text",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "extract_folder",
+        "translate": "提取文件夹",
+        "type": "select",
+        "default": "",
+        "options": "front,back",
+        "options_translate": "提取到最前,提取到最后",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "enable_sign",
+        "translate": "启用签名",
+        "type": "bool",
+        "default": "false",
+        "options": "",
+        "required": true,
+        "help": ""
+      }
+    ],
+    "additional": [
+      {
+        "name": "cookie",
+        "translate": "Cookie",
+        "type": "text",
+        "default": "",
+        "options": "",
+        "required": true,
+        "help": ""
+      },
+      {
+        "name": "song_limit",
+        "translate": "歌曲数量限制",
+        "type": "number",
+        "default": "200",
+        "options": "",
+        "required": false,
+        "help": "only get 200 songs by default"
+      }
+    ],
+    "config": {
+      "name": "NeteaseMusic",
+      "local_sort": false,
+      "only_local": false,
+      "only_proxy": false,
+      "no_cache": false,
+      "no_upload": false,
+      "need_ms": false,
+      "default_root": "",
+      "alert": ""
     }
   },
   "Onedrive": {
@@ -4192,6 +5851,15 @@ Map alistNewBucketTemplate = {
         "options": "",
         "required": false,
         "help": ""
+      },
+      {
+        "name": "custom_host",
+        "translate": "自定义主机",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": "Custom host for onedrive download link"
       }
     ],
     "config": {
@@ -4376,6 +6044,15 @@ Map alistNewBucketTemplate = {
         "options": "",
         "required": false,
         "help": ""
+      },
+      {
+        "name": "custom_host",
+        "translate": "自定义主机",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": "Custom host for onedrive download link"
       }
     ],
     "config": {
@@ -4520,6 +6197,24 @@ Map alistNewBucketTemplate = {
         "translate": "密码",
         "type": "string",
         "default": "",
+        "options": "",
+        "required": true,
+        "help": ""
+      },
+      {
+        "name": "client_id",
+        "translate": "客户端ID",
+        "type": "string",
+        "default": "YNxT9w7GMdWvEOKa",
+        "options": "",
+        "required": true,
+        "help": ""
+      },
+      {
+        "name": "client_secret",
+        "translate": "客户端密钥",
+        "type": "string",
+        "default": "dbw2OtmVEeuUvIptb1Coyg",
         "options": "",
         "required": true,
         "help": ""
@@ -4698,6 +6393,24 @@ Map alistNewBucketTemplate = {
         "required": true,
         "help": ""
       },
+      {
+        "name": "client_id",
+        "translate": "客户端ID",
+        "type": "string",
+        "default": "YNxT9w7GMdWvEOKa",
+        "options": "",
+        "required": true,
+        "help": ""
+      },
+      {
+        "name": "client_secret",
+        "translate": "客户端密钥",
+        "type": "string",
+        "default": "dbw2OtmVEeuUvIptb1Coyg",
+        "options": "",
+        "required": true,
+        "help": ""
+      }
     ],
     "config": {
       "name": "PikPakShare",
@@ -4831,6 +6544,163 @@ Map alistNewBucketTemplate = {
     "config": {
       "name": "Quark",
       "local_sort": false,
+      "only_local": true,
+      "only_proxy": false,
+      "no_cache": false,
+      "no_upload": false,
+      "need_ms": false,
+      "default_root": "0",
+      "alert": ""
+    }
+  },
+  "Quqi": {
+    "common": [
+      {
+        "name": "mount_path",
+        "translate": "挂载路径",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": true,
+        "help": "要挂载到的路径，它是唯一的，不能重复"
+      },
+      {
+        "name": "order",
+        "translate": "序号",
+        "type": "number",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": "use to sort"
+      },
+      {
+        "name": "remark",
+        "translate": "备注",
+        "type": "text",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "cache_expiration",
+        "translate": "缓存过期分钟",
+        "type": "number",
+        "default": "30",
+        "options": "",
+        "required": true,
+        "help": "此存储的缓存过期时间(分钟)"
+      },
+      {
+        "name": "webdav_policy",
+        "translate": "WebDAV策略",
+        "type": "select",
+        "default": "native_proxy",
+        "options": "use_proxy_url,native_proxy",
+        "options_translate": "使用代理地址,本地代理",
+        "required": true,
+        "help": ""
+      },
+      {
+        "name": "down_proxy_url",
+        "translate": "下载代理URL",
+        "type": "text",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "order_by",
+        "translate": "排序",
+        "type": "select",
+        "default": "",
+        "options": "name,size,modified",
+        "options_translate": "名称,大小,修改时间",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "order_direction",
+        "translate": "排序方向",
+        "type": "select",
+        "default": "",
+        "options": "asc,desc",
+        "options_translate": "升序,降序",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "extract_folder",
+        "translate": "提取文件夹",
+        "type": "select",
+        "default": "",
+        "options": "front,back",
+        "options_translate": "提取到最前,提取到最后",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "enable_sign",
+        "translate": "启用签名",
+        "type": "bool",
+        "default": "false",
+        "options": "",
+        "required": true,
+        "help": ""
+      }
+    ],
+    "additional": [
+      {
+        "name": "root_folder_id",
+        "translate": "根文件夹ID",
+        "type": "string",
+        "default": "0",
+        "options": "",
+        "required": true,
+        "help": ""
+      },
+      {
+        "name": "phone",
+        "translate": "手机号码",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "password",
+        "translate": "密码",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "cookie",
+        "translate": "Cookie",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": "Cookie can be used on multiple clients at the same time"
+      },
+      {
+        "name": "cdn",
+        "translate": "CDN加速",
+        "type": "bool",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help":
+            "If you enable this option, the download speed can be increased, but there will be some performance loss"
+      }
+    ],
+    "config": {
+      "name": "Quqi",
+      "local_sort": true,
       "only_local": true,
       "only_proxy": false,
       "no_cache": false,
@@ -4999,6 +6869,15 @@ Map alistNewBucketTemplate = {
         "default": "",
         "options": "",
         "required": true,
+        "help": ""
+      },
+      {
+        "name": "session_token",
+        "translate": "会话令牌",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": false,
         "help": ""
       },
       {
@@ -5219,6 +7098,15 @@ Map alistNewBucketTemplate = {
         "default": "/",
         "options": "",
         "required": true,
+        "help": ""
+      },
+      {
+        "name": "ignore_symlink_error",
+        "translate": "忽略符号链接错误",
+        "type": "bool",
+        "default": "false",
+        "options": "",
+        "required": false,
         "help": ""
       }
     ],
@@ -5487,12 +7375,30 @@ Map alistNewBucketTemplate = {
         "help": ""
       },
       {
+        "name": "token",
+        "translate": "Token",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": ""
+      },
+      {
         "name": "repoId",
         "translate": "仓库ID",
         "type": "string",
         "default": "",
         "options": "",
         "required": true,
+        "help": ""
+      },
+      {
+        "name": "repoPwd",
+        "translate": "仓库密码",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": false,
         "help": ""
       }
     ],
@@ -5649,6 +7555,15 @@ Map alistNewBucketTemplate = {
         "default": "Asc",
         "options": "Asc,Desc",
         "options_translate": "升序,降序",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "use_s3_upload_method",
+        "translate": "使用S3上传方法",
+        "type": "bool",
+        "default": "true",
+        "options": "",
         "required": false,
         "help": ""
       }
@@ -6246,6 +8161,448 @@ Map alistNewBucketTemplate = {
       "alert": ""
     }
   },
+  "ThunderX": {
+    "common": [
+      {
+        "name": "mount_path",
+        "translate": "挂载路径",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": true,
+        "help": "要挂载到的路径，它是唯一的，不能重复"
+      },
+      {
+        "name": "order",
+        "translate": "序号",
+        "type": "number",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": "use to sort"
+      },
+      {
+        "name": "remark",
+        "translate": "备注",
+        "type": "text",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "cache_expiration",
+        "translate": "缓存过期分钟",
+        "type": "number",
+        "default": "30",
+        "options": "",
+        "required": true,
+        "help": "The cache expiration time for this storage"
+      },
+      {
+        "name": "webdav_policy",
+        "translate": "WebDAV策略",
+        "type": "select",
+        "default": "native_proxy",
+        "options": "use_proxy_url,native_proxy",
+        "options_translate": "使用代理地址,本地代理",
+        "required": true,
+        "help": ""
+      },
+      {
+        "name": "down_proxy_url",
+        "translate": "下载代理URL",
+        "type": "text",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "order_by",
+        "translate": "排序",
+        "type": "select",
+        "default": "",
+        "options": "name,size,modified",
+        "options_translate": "名称,大小,修改时间",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "order_direction",
+        "translate": "排序方向",
+        "type": "select",
+        "default": "",
+        "options": "asc,desc",
+        "options_translate": "升序,降序",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "extract_folder",
+        "translate": "提取文件夹",
+        "type": "select",
+        "default": "",
+        "options": "front,back",
+        "options_translate": "提取到最前,提取到最后",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "enable_sign",
+        "translate": "启用签名",
+        "type": "bool",
+        "default": "false",
+        "options": "",
+        "required": true,
+        "help": ""
+      }
+    ],
+    "additional": [
+      {
+        "name": "root_folder_id",
+        "translate": "根文件夹ID",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "username",
+        "translate": "用户名",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": true,
+        "help": ""
+      },
+      {
+        "name": "password",
+        "translate": "密码",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": true,
+        "help": ""
+      },
+      {
+        "name": "captcha_token",
+        "translate": "验证码",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "use_video_url",
+        "translate": "使用视频URL",
+        "type": "bool",
+        "default": "true",
+        "options": "",
+        "required": false,
+        "help": ""
+      }
+    ],
+    "config": {
+      "name": "ThunderX",
+      "local_sort": true,
+      "only_local": false,
+      "only_proxy": true,
+      "no_cache": false,
+      "no_upload": false,
+      "need_ms": false,
+      "default_root": "",
+      "alert": ""
+    }
+  },
+  "ThunderXExpert": {
+    "common": [
+      {
+        "name": "mount_path",
+        "translate": "挂载路径",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": true,
+        "help": "要挂载到的路径，它是唯一的，不能重复"
+      },
+      {
+        "name": "order",
+        "translate": "序号",
+        "type": "number",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": "use to sort"
+      },
+      {
+        "name": "remark",
+        "translate": "备注",
+        "type": "text",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "cache_expiration",
+        "translate": "缓存过期分钟",
+        "type": "number",
+        "default": "30",
+        "options": "",
+        "required": true,
+        "help": "The cache expiration time for this storage"
+      },
+      {
+        "name": "web_proxy",
+        "translate": "Web代理",
+        "type": "bool",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "webdav_policy",
+        "translate": "WebDAV策略",
+        "type": "select",
+        "default": "302_redirect",
+        "options": "302_redirect,use_proxy_url,native_proxy",
+        "options_translate": "302重定向,使用代理地址,本地代理",
+        "required": true,
+        "help": ""
+      },
+      {
+        "name": "down_proxy_url",
+        "translate": "下载代理URL",
+        "type": "text",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "order_by",
+        "translate": "排序",
+        "type": "select",
+        "default": "",
+        "options": "name,size,modified",
+        "options_translate": "名称,大小,修改时间",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "order_direction",
+        "translate": "排序方向",
+        "type": "select",
+        "default": "",
+        "options": "asc,desc",
+        "options_translate": "升序,降序",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "extract_folder",
+        "translate": "提取文件夹",
+        "type": "select",
+        "default": "",
+        "options": "front,back",
+        "options_translate": "提取到最前,提取到最后",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "enable_sign",
+        "translate": "启用签名",
+        "type": "bool",
+        "default": "false",
+        "options": "",
+        "required": true,
+        "help": ""
+      }
+    ],
+    "additional": [
+      {
+        "name": "root_folder_id",
+        "translate": "根文件夹ID",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "login_type",
+        "translate": "登录类型",
+        "type": "select",
+        "default": "user",
+        "options": "user,refresh_token",
+        "options_translate": "用户名,刷新令牌",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "sign_type",
+        "translate": "签名类型",
+        "type": "select",
+        "default": "algorithms",
+        "options": "algorithms,captcha_sign",
+        "options_translate": "算法,验证码签名",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "username",
+        "translate": "用户名",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": true,
+        "help": "login type is user,this is required"
+      },
+      {
+        "name": "password",
+        "translate": "密码",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": true,
+        "help": "login type is user,this is required"
+      },
+      {
+        "name": "refresh_token",
+        "translate": "刷新令牌",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": true,
+        "help": "login type is refresh_token,this is required"
+      },
+      {
+        "name": "algorithms",
+        "translate": "算法",
+        "type": "string",
+        "default":
+            "lHwINjLeqssT28Ym99p5MvR,xvFcxvtqPKCa9Ajf,2ywOP8spKHzfuhZMUYZ9IpsViq0t8vT0,FTBrJism20SHKQ2m2,BHrWJsPwjnr5VeLtOUr2191X9uXhWmt,yu0QgHEjNmDoPNwXN17so2hQlDT83T,OcaMfLMCGZ7oYlvZGIbTqb4U7cCY,jBGGu0GzXOjtCXYwkOBb+c6TZ/Nymv,YLWRjVor2rOuYEL,94wjoPazejyNC+gRpOj+JOm1XXvxa",
+        "options": "",
+        "required": true,
+        "help": "sign type is algorithms,this is required"
+      },
+      {
+        "name": "captcha_sign",
+        "translate": "验证码签名",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": true,
+        "help": "sign type is captcha_sign,this is required"
+      },
+      {
+        "name": "timestamp",
+        "translate": "时间戳",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": true,
+        "help": "sign type is captcha_sign,this is required"
+      },
+      {
+        "name": "captcha_token",
+        "translate": "验证码",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "device_id",
+        "translate": "设备ID",
+        "type": "string",
+        "default": "9aa5c268e7bcfc197a9ad88e2fb330e5",
+        "options": "",
+        "required": true,
+        "help": ""
+      },
+      {
+        "name": "client_id",
+        "translate": "客户端ID",
+        "type": "string",
+        "default": "ZQL_zwA4qhHcoe_2",
+        "options": "",
+        "required": true,
+        "help": ""
+      },
+      {
+        "name": "client_secret",
+        "translate": "客户端密钥",
+        "type": "string",
+        "default": "Og9Vr1L8Ee6bh0olFxFDRg",
+        "options": "",
+        "required": true,
+        "help": ""
+      },
+      {
+        "name": "client_version",
+        "translate": "客户端版本",
+        "type": "string",
+        "default": "1.05.0.2115",
+        "options": "",
+        "required": true,
+        "help": ""
+      },
+      {
+        "name": "package_name",
+        "translate": "包名",
+        "type": "string",
+        "default": "com.thunder.downloader",
+        "options": "",
+        "required": true,
+        "help": ""
+      },
+      {
+        "name": "user_agent",
+        "translate": "UA",
+        "type": "string",
+        "default":
+            "ANDROID-com.thunder.downloader/1.05.0.2115 netWorkType/4G appid/40 deviceName/Xiaomi_M2004j7ac deviceModel/M2004J7AC OSVersion/12 protocolVersion/301 platformVersion/10 sdkVersion/220200 Oauth2Client/0.9 (Linux 4_14_186-perf-gdcf98eab238b) (JAVA 0)",
+        "options": "",
+        "required": true,
+        "help": ""
+      },
+      {
+        "name": "download_user_agent",
+        "translate": "下载UA",
+        "type": "string",
+        "default": "Dalvik/2.1.0 (Linux; U; Android 12; M2004J7AC Build/SP1A.210812.016)",
+        "options": "",
+        "required": true,
+        "help": ""
+      },
+      {
+        "name": "use_video_url",
+        "translate": "使用视频URL",
+        "type": "bool",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": ""
+      }
+    ],
+    "config": {
+      "name": "ThunderXExpert",
+      "local_sort": true,
+      "only_local": false,
+      "only_proxy": false,
+      "no_cache": false,
+      "no_upload": false,
+      "need_ms": false,
+      "default_root": "",
+      "alert": ""
+    }
+  },
   "Trainbit": {
     "common": [
       {
@@ -6664,8 +9021,8 @@ Map alistNewBucketTemplate = {
         "help": ""
       },
       {
-        "name": "custom_host",
-        "translate": "自定义域名",
+        "name": "anti_theft_chain_token",
+        "translate": "防盗链Token",
         "type": "string",
         "default": "",
         "options": "",
@@ -6821,6 +9178,142 @@ Map alistNewBucketTemplate = {
       "no_upload": true,
       "need_ms": false,
       "default_root": "",
+      "alert": ""
+    }
+  },
+  "VTencent": {
+    "common": [
+      {
+        "name": "mount_path",
+        "translate": "挂载路径",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": true,
+        "help": "The path you want to mount to, it is unique and cannot be repeated"
+      },
+      {
+        "name": "order",
+        "translate": "序号",
+        "type": "number",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": "use to sort"
+      },
+      {
+        "name": "remark",
+        "translate": "备注",
+        "type": "text",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "cache_expiration",
+        "translate": "缓存过期分钟",
+        "type": "number",
+        "default": "30",
+        "options": "",
+        "required": true,
+        "help": "The cache expiration time for this storage"
+      },
+      {
+        "name": "webdav_policy",
+        "translate": "WebDAV策略",
+        "type": "select",
+        "default": "native_proxy",
+        "options": "use_proxy_url,native_proxy",
+        "options_translate": "使用代理地址,本地代理",
+        "required": true,
+        "help": ""
+      },
+      {
+        "name": "down_proxy_url",
+        "translate": "下载代理URL",
+        "type": "text",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "extract_folder",
+        "type": "select",
+        "default": "",
+        "options": "front,back",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "enable_sign",
+        "translate": "提取文件夹",
+        "type": "bool",
+        "default": "false",
+        "options": "",
+        "required": true,
+        "help": ""
+      }
+    ],
+    "additional": [
+      {
+        "name": "root_folder_id",
+        "translate": "根文件夹ID",
+        "type": "string",
+        "default": "9",
+        "options": "",
+        "required": true,
+        "help": ""
+      },
+      {
+        "name": "cookie",
+        "translate": "Cookie",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": true,
+        "help": ""
+      },
+      {
+        "name": "tf_uid",
+        "translate": "UID",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "order_by",
+        "translate": "排序",
+        "type": "select",
+        "default": "",
+        "options": "Name,Size,UpdateTime,CreatTime",
+        "options_translate": "名称,大小,修改时间,创建时间",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "order_direction",
+        "translate": "排序方向",
+        "type": "select",
+        "default": "",
+        "options": "Asc,Desc",
+        "options_translate": "升序,降序",
+        "required": false,
+        "help": ""
+      }
+    ],
+    "config": {
+      "name": "VTencent",
+      "local_sort": false,
+      "only_local": false,
+      "only_proxy": true,
+      "no_cache": false,
+      "no_upload": false,
+      "need_ms": false,
+      "default_root": "9",
       "alert": ""
     }
   },
@@ -7123,6 +9616,15 @@ Map alistNewBucketTemplate = {
         "options": "",
         "required": true,
         "help": ""
+      },
+      {
+        "name": "tls_insecure_skip_verify",
+        "translate": "跳过TLS验证",
+        "type": "bool",
+        "default": "false",
+        "options": "",
+        "required": false,
+        "help": ""
       }
     ],
     "config": {
@@ -7134,6 +9636,144 @@ Map alistNewBucketTemplate = {
       "no_upload": false,
       "need_ms": false,
       "default_root": "/",
+      "alert": ""
+    }
+  },
+  "WeiYun": {
+    "common": [
+      {
+        "name": "mount_path",
+        "translate": "挂载路径",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": true,
+        "help": "要挂载到的路径，它是唯一的，不能重复"
+      },
+      {
+        "name": "order",
+        "translate": "序号",
+        "type": "number",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": "use to sort"
+      },
+      {
+        "name": "remark",
+        "translate": "备注",
+        "type": "text",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "cache_expiration",
+        "translate": "缓存过期分钟",
+        "type": "number",
+        "default": "30",
+        "options": "",
+        "required": true,
+        "help": "此存储的缓存过期时间(分钟)"
+      },
+      {
+        "name": "webdav_policy",
+        "translate": "WebDAV策略",
+        "type": "select",
+        "default": "native_proxy",
+        "options": "use_proxy_url,native_proxy",
+        "options_translate": "使用代理地址,本地代理",
+        "required": true,
+        "help": ""
+      },
+      {
+        "name": "down_proxy_url",
+        "translate": "下载代理URL",
+        "type": "text",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "extract_folder",
+        "translate": "提取文件夹",
+        "type": "select",
+        "default": "",
+        "options": "front,back",
+        "options_translate": "提取到最前,提取到最后",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "enable_sign",
+        "translate": "启用签名",
+        "type": "bool",
+        "default": "false",
+        "options": "",
+        "required": true,
+        "help": ""
+      }
+    ],
+    "additional": [
+      {
+        "name": "root_folder_id",
+        "translate": "根文件夹ID",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "cookies",
+        "translate": "Cookies",
+        "type": "string",
+        "default": "",
+        "options": "",
+        "required": true,
+        "help": ""
+      },
+      {
+        "name": "order_by",
+        "translate": "排序",
+        "type": "select",
+        "default": "name",
+        "options": "name,size,updated_at",
+        "options_translate": "名称,大小,修改时间",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "order_direction",
+        "translate": "排序方向",
+        "type": "select",
+        "default": "asc",
+        "options": "asc,desc",
+        "options_translate": "升序,降序",
+        "required": false,
+        "help": ""
+      },
+      {
+        "name": "upload_thread",
+        "translate": "上传线程数",
+        "type": "string",
+        "default": "4",
+        "options": "",
+        "required": false,
+        "help": "4<=thread<=32"
+      }
+    ],
+    "config": {
+      "name": "WeiYun",
+      "local_sort": false,
+      "only_local": false,
+      "only_proxy": true,
+      "no_cache": false,
+      "no_upload": false,
+      "need_ms": false,
+      "default_root": "",
       "alert": ""
     }
   },
