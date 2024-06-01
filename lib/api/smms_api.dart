@@ -44,9 +44,28 @@ class SmmsImageUploadUtils {
         String formatedURL =
             Global.isCopyLink == true ? linkGenerateDict[Global.defaultLKformat]!(returnUrl, name) : returnUrl;
         return ["success", formatedURL, returnUrl, pictureKey];
-      } else {
-        return ["failed"];
+      } else if (response.data!['code'] == 'image_repeated' && response.data!['images'] is String) {
+        String returnUrl = response.data!['images'];
+        String pictureKey = "";
+        var uploadHistory = await dio.get(
+          '$_baseUrl/upload_history',
+        );
+        if (uploadHistory.statusCode == 200 && uploadHistory.data['success'] == true) {
+          List historyList = uploadHistory.data['data'];
+          for (var history in historyList) {
+            if (history['url'] == returnUrl) {
+              pictureKey = history['hash'];
+              break;
+            }
+          }
+          if (pictureKey.isNotEmpty) {
+            String formatedURL =
+                Global.isCopyLink == true ? linkGenerateDict[Global.defaultLKformat]!(returnUrl, name) : returnUrl;
+            return ["success", formatedURL, returnUrl, pictureKey];
+          }
+        }
       }
+      return ["failed"];
     } catch (e) {
       flogError(
           e,
@@ -75,7 +94,7 @@ class SmmsImageUploadUtils {
 
     try {
       var response = await dio.get(deleteUrl, queryParameters: formdata);
-      if (response.statusCode == 200 && response.data!['success'] == true) {
+      if (response.statusCode == 200) {
         return ["success"];
       }
       return ["failed"];
