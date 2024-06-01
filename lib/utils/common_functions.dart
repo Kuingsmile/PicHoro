@@ -393,28 +393,37 @@ renamePictureWithCustomFormat(File file) async {
   String customFormat = await Global.getCustomeRenameFormat();
   var path = file.path;
   var fileExtension = my_path.extension(path);
-  String yearFourDigit = DateTime.now().year.toString();
+
+  DateTime now = DateTime.now();
+  String yearFourDigit = now.year.toString();
   String yearTwoDigit = yearFourDigit.substring(2, 4);
-  String month = DateTime.now().month.toString();
-  String day = DateTime.now().day.toString();
-  String timestampMilliSecond = (DateTime.now().millisecondsSinceEpoch).floor().toString();
+  String month = now.month.toString().padLeft(2, '0');
+  String day = now.day.toString().padLeft(2, '0');
+  String hour = now.hour.toString().padLeft(2, '0');
+  String minute = now.minute.toString().padLeft(2, '0');
+  String second = now.second.toString().padLeft(2, '0');
+  String milliSecond = now.millisecond.toString().padLeft(3, '0');
+  String timestampMilliSecond = (now.millisecondsSinceEpoch).floor().toString();
+
   String uuidWithoutDash = const Uuid().v4().replaceAll('-', '');
   String randommd5 = md5.convert(utf8.encode(uuidWithoutDash)).toString();
   String randommd5Short = randommd5.substring(0, 16);
-  String tenRandomString = randomStringGenerator(10);
-  String twentyRandomString = randomStringGenerator(20);
+
   String oldFileName = my_path.basename(path).replaceAll(fileExtension, '');
   String newFileName = customFormat
       .replaceAll('{Y}', yearFourDigit)
       .replaceAll('{y}', yearTwoDigit)
       .replaceAll('{m}', month)
       .replaceAll('{d}', day)
+      .replaceAll('{h}', hour)
+      .replaceAll('{i}', minute)
+      .replaceAll('{s}', second)
+      .replaceAll('{ms}', milliSecond)
       .replaceAll('{timestamp}', timestampMilliSecond)
       .replaceAll('{uuid}', uuidWithoutDash)
       .replaceAll('{md5}', randommd5)
       .replaceAll('{md5-16}', randommd5Short)
-      .replaceAll('{str-10}', tenRandomString)
-      .replaceAll('{str-20}', twentyRandomString)
+      .replaceAllMapped(RegExp(r'\{str-(\d+)\}'), (match) => randomStringGenerator(int.parse(match.group(1) ?? '0')))
       .replaceAll('{filename}', oldFileName);
   newFileName = newFileName + fileExtension;
   return newFileName;

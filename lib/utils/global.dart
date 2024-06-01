@@ -23,10 +23,10 @@ class Global {
   static String defaultShowedPBhost = 'lskypro'; //默认显示的图床
   static bool isDeleteLocal = false; //是否删除本地图片
   static bool isDeleteCloud = false; //是否删除远程图片
-  static String customLinkFormat = r'[$fileName]($url)'; //自定义链接格式
+  static String customLinkFormat = r'![$fileName]($url)'; //自定义链接格式
   static String qrScanResult = ''; //扫码结果
   static bool iscustomRename = false; //是否自定义重命名
-  static String customRenameFormat = r'{Y}_{m}_{d}_{uuid}'; //自定义重命名格式
+  static String customRenameFormat = r'{Y}{m}{d}{h}{i}{ms}'; //自定义重命名格式
   static bool operateDone = false;
   static String todayAlistUpdate = '19700101';
   static bool isCompress = false;
