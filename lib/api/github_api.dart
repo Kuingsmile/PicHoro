@@ -14,9 +14,7 @@ class GithubImageUploadUtils {
     return Dio(options);
   }
 
-  static String _getTrimmedPath(String path) {
-    return path.trim().replaceAll(RegExp(r'^/+'), '').replaceAll(RegExp(r'/+$'), '');
-  }
+  static String _getTrimmedPath(String path) => path.trim().replaceAll(RegExp(r'^/+|/+$'), '');
 
   static String _getUrl(String username, String repo, String path, String name) {
     String trimmedPath = _getTrimmedPath(path);
@@ -44,13 +42,14 @@ class GithubImageUploadUtils {
       String trimedPath = _getTrimmedPath(configMap['storePath'].toString());
       String uploadUrl =
           _getUrl(configMap["githubusername"], configMap["repo"], configMap['storePath'].toString(), name);
-      var response = await dio.put(uploadUrl, data: jsonEncode(queryBody), onSendProgress: onSendProgress);
+      var response =
+          await dio.put<Map<String, dynamic>>(uploadUrl, data: jsonEncode(queryBody), onSendProgress: onSendProgress);
       if (response.statusCode != 200 && response.statusCode != 201) {
         return ["failed"];
       }
 
-      String returnUrl = response.data!['content']['html_url'];
       Map pictureKeyMap = Map.from(configMap);
+      String returnUrl = response.data!['content']['html_url'];
       pictureKeyMap['sha'] = response.data!['content']['sha'];
       String pictureKey = jsonEncode(pictureKeyMap);
       String downloadUrl = '';

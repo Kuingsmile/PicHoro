@@ -543,8 +543,7 @@ class Global {
 
   static getShowedPBhost() async {
     await SpUtil.getInstance();
-    String showedPBhost = SpUtil.getString('key_showedPBhost', defValue: 'lskypro')!;
-    return showedPBhost;
+    return SpUtil.getString('key_showedPBhost', defValue: 'lskypro')!;
   }
 
   static setDeleteLocal(bool isDeleteLocal) async {
@@ -555,8 +554,7 @@ class Global {
 
   static getDeleteLocal() async {
     await SpUtil.getInstance();
-    bool isDeleteLocal = SpUtil.getBool('key_isDeleteLocal', defValue: false)!;
-    return isDeleteLocal;
+    return SpUtil.getBool('key_isDeleteLocal', defValue: false)!;
   }
 
   static getBucketCustomUrl() async {

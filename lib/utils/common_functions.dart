@@ -10,7 +10,6 @@ import 'package:path/path.dart' as my_path;
 import 'package:uuid/uuid.dart';
 import "package:crypto/crypto.dart";
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:sqflite/sqflite.dart';
 import 'package:fluro/fluro.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flustars_flutter3/flustars_flutter3.dart';
@@ -99,8 +98,7 @@ generateBasicAuth(String username, String password) {
 }
 
 getToday(String format) {
-  String today = DateUtil.formatDate(DateTime.now(), format: format);
-  return today;
+  return DateUtil.formatDate(DateTime.now(), format: format);
 }
 
 supportedExtensions(String ext) {
@@ -562,15 +560,15 @@ flogErr(Object e, Map parameters, String className, String methodName) {
 Future<void> deleteApkFile() async {
   try {
     var directory = await getExternalStorageDirectory();
-    var path = directory!.path;
-    String apkFilePath = '$path/Download';
-    Directory apkFileDirectory = Directory(apkFilePath);
+    if (directory == null) return;
+    var apkFilePath = '${directory.path}/Download';
+    var apkFileDirectory = Directory(apkFilePath);
     if (await apkFileDirectory.exists()) {
-      apkFileDirectory.list().listen((file) {
+      await for (var file in apkFileDirectory.list()) {
         if (file.path.endsWith('.apk')) {
           file.delete();
         }
-      });
+      }
     }
   } catch (e) {
     return;
@@ -579,7 +577,7 @@ Future<void> deleteApkFile() async {
 
 //APPinit
 mainInit() async {
-  await Permissionutils.askPermission();
+  await Permissionutils.askPermissionStorage();
   await Permissionutils.askPermissionCamera();
   await Permissionutils.askPermissionGallery();
   await Permissionutils.askPermissionManageExternalStorage();
@@ -588,56 +586,34 @@ mainInit() async {
   String initUser = await Global.getUser();
   await Global.setUser(initUser);
   deleteApkFile();
-  String initPassword = await Global.getPassword();
-  await Global.setPassword(initPassword);
-  String initPShost = await Global.getPShost();
-  await Global.setPShost(initPShost);
+  await Global.setPassword(await Global.getPassword());
+  await Global.setPShost(await Global.getPShost());
   await ConfigureStoreFile().generateConfigureFile();
-  String initLKformat = await Global.getLKformat();
-  Global.setLKformat(initLKformat);
-  bool initIsTimeStamp = await Global.getTimeStamp();
-  Global.setTimeStamp(initIsTimeStamp);
-  bool initIsRandomName = await Global.getRandomName();
-  Global.setRandomName(initIsRandomName);
-  bool initIsCopyLink = await Global.getCopyLink();
-  Global.setCopyLink(initIsCopyLink);
-  bool initIsURLEncode = await Global.getIsURLEncode();
-  Global.setIsURLEncode(initIsURLEncode);
-  String initShowedPBhost = await Global.getShowedPBhost();
-  await Global.setShowedPBhost(initShowedPBhost);
-  bool isDeleteLocal = await Global.getDeleteLocal();
-  Global.setDeleteLocal(isDeleteLocal);
-  String initCustomLinkFormat = await Global.getCustomLinkFormat();
-  Global.setCustomLinkFormat(initCustomLinkFormat);
-  bool isDeleteCloud = await Global.getDeleteCloud();
-  Global.setDeleteCloud(isDeleteCloud);
-  bool iscustomRename = await Global.getCustomeRename();
-  Global.setCustomeRename(iscustomRename);
-  String initCustomRenameFormat = await Global.getCustomeRenameFormat();
-  Global.setCustomeRenameFormat(initCustomRenameFormat);
-  String todayAlistUpdate = await Global.getTodayAlistUpdate();
-  Global.setTodayAlistUpdate(todayAlistUpdate);
-  Map<String, String> bucketCustomUrl = await Global.getBucketCustomUrl();
-  Global.setBucketCustomUrl(bucketCustomUrl);
+  Global.setLKformat(await Global.getLKformat());
+  Global.setTimeStamp(await Global.getTimeStamp());
+  Global.setRandomName(await Global.getRandomName());
+  Global.setCopyLink(await Global.getCopyLink());
+  Global.setIsURLEncode(await Global.getIsURLEncode());
+  await Global.setShowedPBhost(await Global.getShowedPBhost());
+  Global.setDeleteLocal(await Global.getDeleteLocal());
+  Global.setCustomLinkFormat(await Global.getCustomLinkFormat());
+  Global.setDeleteCloud(await Global.getDeleteCloud());
+  Global.setCustomeRename(await Global.getCustomeRename());
+  Global.setCustomeRenameFormat(await Global.getCustomeRenameFormat());
+  Global.setTodayAlistUpdate(await Global.getTodayAlistUpdate());
+  Global.setBucketCustomUrl(await Global.getBucketCustomUrl());
 
   //初始化图片压缩选项
-  bool isCompress = await Global.getisCompress();
-  Global.setisCompress(isCompress);
-  int minWidth = await Global.getminWidth();
-  Global.setminWidth(minWidth);
-  int minHeight = await Global.getminHeight();
-  Global.setminHeight(minHeight);
-  int quality = await Global.getquality();
-  Global.setquality(quality);
-  String defaultCompressFormat = await Global.getdefaultCompressFormat();
-  Global.setdefaultCompressFormat(defaultCompressFormat);
+  Global.setisCompress(await Global.getisCompress());
+  Global.setminWidth(await Global.getminWidth());
+  Global.setminHeight(await Global.getminHeight());
+  Global.setquality(await Global.getquality());
+  Global.setdefaultCompressFormat(await Global.getdefaultCompressFormat());
 
   //初始化图床相册数据库
-  Database db = await Global.getDatabase();
-  await Global.setDatabase(db);
+  await Global.setDatabase(await Global.getDatabase());
   //初始化扩展图床相册数据库
-  Database dbExtend = await Global.getDatabaseExtend();
-  await Global.setDatabaseExtend(dbExtend);
+  await Global.setDatabaseExtend(await Global.getDatabaseExtend());
 
   //初始化路由
   FluroRouter router = FluroRouter();
@@ -659,56 +635,31 @@ mainInit() async {
   await Global.setpsHostHomePageOrder(psHostHomePageOrder);
 
   //初始化上传下载列表
-  List<String> tencentUploadList = await Global.getTencentUploadList();
-  Global.setTencentUploadList(tencentUploadList);
-  List<String> tencentDownloadList = await Global.getTencentDownloadList();
-  Global.setTencentDownloadList(tencentDownloadList);
-  List<String> aliyunUploadList = await Global.getAliyunUploadList();
-  Global.setAliyunUploadList(aliyunUploadList);
-  List<String> aliyunDownloadList = await Global.getAliyunDownloadList();
-  Global.setAliyunDownloadList(aliyunDownloadList);
-  List<String> qiniuUploadList = await Global.getQiniuUploadList();
-  Global.setQiniuUploadList(qiniuUploadList);
-  List<String> qiniuDownloadList = await Global.getQiniuDownloadList();
-  Global.setQiniuDownloadList(qiniuDownloadList);
-  List<String> upyunUploadList = await Global.getUpyunUploadList();
-  Global.setUpyunUploadList(upyunUploadList);
-  List<String> upyunDownloadList = await Global.getUpyunDownloadList();
-  Global.setUpyunDownloadList(upyunDownloadList);
-  List<String> smmsUploadList = await Global.getSmmsUploadList();
-  Global.setSmmsUploadList(smmsUploadList);
-  List<String> smmsDownloadList = await Global.getSmmsDownloadList();
-  Global.setSmmsDownloadList(smmsDownloadList);
-  List<String> smmsSavedNameList = await Global.getSmmsSavedNameList();
-  Global.setSmmsSavedNameList(smmsSavedNameList);
-  List<String> imgurUploadList = await Global.getImgurUploadList();
-  Global.setImgurUploadList(imgurUploadList);
-  List<String> imgurDownloadList = await Global.getImgurDownloadList();
-  Global.setImgurDownloadList(imgurDownloadList);
-  List<String> githubUploadList = await Global.getGithubUploadList();
-  Global.setGithubUploadList(githubUploadList);
-  List<String> githubDownloadList = await Global.getGithubDownloadList();
-  Global.setGithubDownloadList(githubDownloadList);
-  List<String> lskyproUploadList = await Global.getLskyproUploadList();
-  Global.setLskyproUploadList(lskyproUploadList);
-  List<String> lskyproDownloadList = await Global.getLskyproDownloadList();
-  Global.setLskyproDownloadList(lskyproDownloadList);
-  List<String> ftpUploadList = await Global.getFtpUploadList();
-  Global.setFtpUploadList(ftpUploadList);
-  List<String> ftpDownloadList = await Global.getFtpDownloadList();
-  Global.setFtpDownloadList(ftpDownloadList);
-  List<String> awsUploadList = await Global.getAwsUploadList();
-  Global.setAwsUploadList(awsUploadList);
-  List<String> awsDownloadList = await Global.getAwsDownloadList();
-  Global.setAwsDownloadList(awsDownloadList);
-  List<String> alistUploadList = await Global.getAlistUploadList();
-  Global.setAlistUploadList(alistUploadList);
-  List<String> alistDownloadList = await Global.getAlistDownloadList();
-  Global.setAlistDownloadList(alistDownloadList);
-  List<String> webdavUploadList = await Global.getWebdavUploadList();
-  Global.setWebdavUploadList(webdavUploadList);
-  List<String> webdavDownloadList = await Global.getWebdavDownloadList();
-  Global.setWebdavDownloadList(webdavDownloadList);
+  Global.setTencentUploadList(await Global.getTencentUploadList());
+  Global.setTencentDownloadList(await Global.getTencentDownloadList());
+  Global.setAliyunUploadList(await Global.getAliyunUploadList());
+  Global.setAliyunDownloadList(await Global.getAliyunDownloadList());
+  Global.setQiniuUploadList(await Global.getQiniuUploadList());
+  Global.setQiniuDownloadList(await Global.getQiniuDownloadList());
+  Global.setUpyunUploadList(await Global.getUpyunUploadList());
+  Global.setUpyunDownloadList(await Global.getUpyunDownloadList());
+  Global.setSmmsUploadList(await Global.getSmmsUploadList());
+  Global.setSmmsDownloadList(await Global.getSmmsDownloadList());
+  Global.setSmmsSavedNameList(await Global.getSmmsSavedNameList());
+  Global.setImgurUploadList(await Global.getImgurUploadList());
+  Global.setImgurDownloadList(await Global.getImgurDownloadList());
+  Global.setGithubUploadList(await Global.getGithubUploadList());
+  Global.setGithubDownloadList(await Global.getGithubDownloadList());
+  Global.setLskyproUploadList(await Global.getLskyproUploadList());
+  Global.setLskyproDownloadList(await Global.getLskyproDownloadList());
+  Global.setFtpUploadList(await Global.getFtpUploadList());
+  Global.setFtpDownloadList(await Global.getFtpDownloadList());
+  Global.setAwsUploadList(await Global.getAwsUploadList());
+  Global.setAwsDownloadList(await Global.getAwsDownloadList());
+  Global.setAlistUploadList(await Global.getAlistUploadList());
+  Global.setAlistDownloadList(await Global.getAlistDownloadList());
+  Global.setWebdavUploadList(await Global.getWebdavUploadList());
+  Global.setWebdavDownloadList(await Global.getWebdavDownloadList());
 }
 
 //获得小图标，图片预览

@@ -32,21 +32,16 @@ Future<File> get _localFile async {
 
 //读取图床配置文件
 Future<String> readPictureHostConfig() async {
-  final file = await _localFile;
-  String contents = await file.readAsString();
-  return contents;
+  return (await _localFile).readAsString();
 }
 
 uploaderentry({required String path, required String name}) async {
   String configData = await readPictureHostConfig();
-  if (configData == '') {
-    return ["failed"];
-  }
+  if (configData == '') return ["failed"];
   Map configMap = jsonDecode(configData);
   String defaultConfig = await Global.getPShost();
   try {
-    var result = await uploadFunc[defaultConfig]!(path: path, name: name, configMap: configMap);
-    return result;
+    return await uploadFunc[defaultConfig]!(path: path, name: name, configMap: configMap);
   } catch (e) {
     return ["failed"];
   }

@@ -71,8 +71,7 @@ deleterentry(Map deleteConfig) async {
 
   String defaultConfig = await Global.getShowedPBhost();
   try {
-    var result = await deleteFunc[defaultConfig]!(deleteMap: deleteConfig, configMap: configMap);
-    return result;
+    return await deleteFunc[defaultConfig]!(deleteMap: deleteConfig, configMap: configMap);
   } catch (e) {
     flogErr(
       e,

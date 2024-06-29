@@ -9,12 +9,11 @@ class SmmsImageUploadUtils {
   static const _deleteEndpoint = "/delete";
 
   static Dio _getDio(Map configMap) {
-    BaseOptions options = setBaseOptions();
-    options.headers = {
-      "Authorization": configMap["token"],
-      "Content-Type": "multipart/form-data",
-    };
-    return Dio(options);
+    return Dio(setBaseOptions()
+      ..headers = {
+        "Authorization": configMap["token"],
+        "Content-Type": "multipart/form-data",
+      });
   }
 
   //上传接口
@@ -32,33 +31,28 @@ class SmmsImageUploadUtils {
       });
 
       Dio dio = _getDio(configMap);
-      var response = await dio.post(
+      var response = await dio.post<Map>(
         "$_baseUrl$_uploadEndpoint",
         data: formdata,
         onSendProgress: onSendProgress,
         cancelToken: cancelToken,
       );
-      if (response.statusCode == 200 && response.data!['success'] == true) {
-        String returnUrl = response.data!['data']['url'];
-        String pictureKey = response.data!['data']['hash'];
+      if (response.statusCode == 200 && response.data?['success'] == true) {
+        var {'url': returnUrl as String, 'hash': pictureKey as String} = response.data?['data'];
         String formatedURL =
             Global.isCopyLink == true ? linkGenerateDict[Global.defaultLKformat]!(returnUrl, name) : returnUrl;
         return ["success", formatedURL, returnUrl, pictureKey];
-      } else if (response.data!['code'] == 'image_repeated' && response.data!['images'] is String) {
-        String returnUrl = response.data!['images'];
-        String pictureKey = "";
+      } else if (response.data?['code'] == 'image_repeated' && response.data?['images'] is String) {
+        String returnUrl = response.data?['images'];
         var uploadHistory = await dio.get(
           '$_baseUrl/upload_history',
         );
         if (uploadHistory.statusCode == 200 && uploadHistory.data['success'] == true) {
-          List historyList = uploadHistory.data['data'];
-          for (var history in historyList) {
-            if (history['url'] == returnUrl) {
-              pictureKey = history['hash'];
-              break;
-            }
-          }
-          if (pictureKey.isNotEmpty) {
+          var pictureKey = uploadHistory.data['data'].firstWhere(
+            (item) => item['url'] == returnUrl,
+            orElse: () => null,
+          )?['hash'];
+          if (pictureKey != null) {
             String formatedURL =
                 Global.isCopyLink == true ? linkGenerateDict[Global.defaultLKformat]!(returnUrl, name) : returnUrl;
             return ["success", formatedURL, returnUrl, pictureKey];
@@ -80,7 +74,7 @@ class SmmsImageUploadUtils {
   }
 
   static Future<List<String>> deleteApi({required Map deleteMap, required Map configMap}) async {
-    Map<String, dynamic> formdata = {
+    Map<String, String> formdata = {
       "hash": deleteMap["pictureKey"],
       "format": "json",
     };
@@ -94,10 +88,7 @@ class SmmsImageUploadUtils {
 
     try {
       var response = await dio.get(deleteUrl, queryParameters: formdata);
-      if (response.statusCode == 200) {
-        return ["success"];
-      }
-      return ["failed"];
+      return response.statusCode == 200 ? ["success"] : ["failed"];
     } catch (e) {
       flogError(e, {}, "SmmsImageUploadUtils", "deleteApi");
       return ["failed"];
