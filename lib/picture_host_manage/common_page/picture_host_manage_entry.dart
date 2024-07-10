@@ -540,15 +540,18 @@ class PsHostHomePageState extends State<PsHostHomePage> with AutomaticKeepAliveC
                           return;
                         }
                       }
-                      String today = getToday('yyyyMMdd');
+                      String? adminToken = configMap['adminToken'];
+                      if (adminToken == null || adminToken == 'None' || adminToken.trim().isNotEmpty) {
+                        String today = getToday('yyyyMMdd');
 
-                      var refreshToken = await AlistManageAPI.refreshToken();
-                      if (refreshToken[0] != 'success') {
-                        showToast('刷新Token失败');
-                        return;
-                      } else {
+                        var refreshToken = await AlistManageAPI.refreshToken();
+                        if (refreshToken[0] != 'success') {
+                          showToast('刷新Token失败');
+                          return;
+                        }
                         await Global.setTodayAlistUpdate(today);
                       }
+
                       var bucketListResponse = await AlistManageAPI.getBucketList();
                       if (bucketListResponse[0] != 'success') {
                         Map configMap = await AlistManageAPI.getConfigMap();

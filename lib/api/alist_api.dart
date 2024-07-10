@@ -8,6 +8,32 @@ import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/global.dart';
 
 class AlistImageUploadUtils {
+  static refreshToken({required Map configMap}) async {
+    String today = getToday('yyyyMMdd');
+    String alistToday = await Global.getTodayAlistUpdate();
+    if (alistToday != today && configMap['token'] != '') {
+      var res = await AlistManageAPI.getToken(configMap['host'], configMap['alistusername'], configMap['password']);
+      if (res[0] != 'success') {
+        return ['failed'];
+      }
+      configMap['token'] = res[1];
+      final alistConfig = AlistConfigModel(
+        configMap['host'],
+        'None',
+        configMap['alistusername'],
+        configMap['password'],
+        configMap['token'],
+        configMap['uploadPath'],
+        configMap['webPath'] ?? 'None',
+        configMap['customUrl'] ?? 'None',
+      );
+      final alistConfigJson = jsonEncode(alistConfig);
+      final alistConfigFile = await AlistManageAPI.localFile;
+      alistConfigFile.writeAsString(alistConfigJson);
+      await Global.setTodayAlistUpdate(today);
+    }
+  }
+
   //上传接口
   static uploadApi({
     required String path,
@@ -20,26 +46,25 @@ class AlistImageUploadUtils {
       FormData formdata = FormData.fromMap({
         "file": await MultipartFile.fromFile(path, filename: name),
       });
+      String host = configMap['host'];
       String uploadPath = configMap['uploadPath'];
-      String? webPath = configMap['webPath'];
-      webPath ??= 'None';
-      String token = configMap['token'];
-      String today = getToday('yyyyMMdd');
-      String alistToday = await Global.getTodayAlistUpdate();
-      if (alistToday != today && token != '') {
-        var res = await AlistManageAPI.getToken(configMap['host'], configMap['alistusername'], configMap['password']);
-        if (res[0] == 'success') {
-          token = res[1];
-          final alistConfig = AlistConfigModel(
-              configMap['host'], configMap['alistusername'], configMap['password'], token, uploadPath, webPath);
-          final alistConfigJson = jsonEncode(alistConfig);
-          final alistConfigFile = await AlistConfigState().localFile;
-          alistConfigFile.writeAsString(alistConfigJson);
-          await Global.setTodayAlistUpdate(today);
-        } else {
-          return ['failed'];
-        }
+      String webPath = configMap['webPath'] ?? 'None';
+      String? customUrl = configMap['customUrl'];
+      if (customUrl == null || customUrl == 'None' || customUrl.trim().isEmpty) {
+        customUrl = host;
       }
+      if (customUrl.endsWith('/')) {
+        customUrl = customUrl.substring(0, customUrl.length - 1);
+      }
+
+      String token = configMap['token'];
+      String? adminToken = configMap['adminToken'];
+      if (adminToken != null && adminToken != 'None' && adminToken.trim().isNotEmpty) {
+        token = adminToken;
+      } else {
+        AlistImageUploadUtils.refreshToken(configMap: configMap);
+      }
+
       if (uploadPath == 'None') {
         uploadPath = '/';
       } else {
@@ -60,22 +85,22 @@ class AlistImageUploadUtils {
       });
       options.headers = {
         "Authorization": token,
-        "Content-Type": Global.multipartString,
         "file-path": Uri.encodeComponent(filePath),
         "Content-Length": contentLength,
       };
       Dio dio = Dio(options);
-      String uploadUrl = configMap["host"] + "/api/fs/form";
+      String uploadUrl = "$host/api/fs/form";
+      String infoGetUrl = "$host/api/fs/get";
+      String refreshUrl = "$host/api/fs/list";
 
-      var response = await dio.put(uploadUrl, data: formdata, onSendProgress: onSendProgress);
-      if (response.statusCode != 200 || response.data!['message'] != 'success') {
+      var uploadResponse = await dio.put(uploadUrl, data: formdata, onSendProgress: onSendProgress);
+      if (uploadResponse.statusCode != 200 || uploadResponse.data!['message'] != 'success') {
         return ['failed'];
       }
-      String infoGetUrl = configMap["host"] + "/api/fs/get";
-      String refreshUrl = configMap["host"] + "/api/fs/list";
+
       BaseOptions getOptions = setBaseOptions();
       getOptions.headers = {
-        "Authorization": configMap["token"],
+        "Authorization": token,
         "Content-Type": "application/json",
       };
       Dio dioGet = Dio(getOptions);
@@ -104,20 +129,17 @@ class AlistImageUploadUtils {
       String pictureKey = jsonEncode(pictureKeyMap);
 
       if (webPath != 'None') {
-        webPath = '${webPath.replaceAll(RegExp(r'^/*'), '').replaceAll(RegExp(r'/*$'), '')}/$name';
+        webPath = '/${webPath.replaceAll(RegExp(r'^/*'), '').replaceAll(RegExp(r'/*$'), '')}/$name';
       }
 
-      String hostPicUrl = responseGet.data!['data']['sign'] == "" || responseGet.data!['data']['sign'] == null
-          ? returnUrl
-          : webPath != 'None'
-              ? configMap['host'] + '/d' + '/$webPath/' + '?sign=' + responseGet.data!['data']['sign']
-              : configMap['host'] + '/d' + filePath + '?sign=' + responseGet.data!['data']['sign'];
-
-      if (Global.isCopyLink == true) {
-        formatedURL = linkGenerateDict[Global.defaultLKformat]!(hostPicUrl, name);
-      } else {
-        formatedURL = hostPicUrl;
+      String hostPicUrl = '$customUrl/d${webPath != 'None' ? webPath : filePath}';
+      if (responseGet.data!['data']['sign'] != "" && responseGet.data!['data']['sign'] != null) {
+        hostPicUrl = '$hostPicUrl?sign=${responseGet.data!['data']['sign']}';
       }
+
+      formatedURL =
+          Global.isCopyLink == true ? linkGenerateDict[Global.defaultLKformat]!(hostPicUrl, name) : hostPicUrl;
+
       return ["success", formatedURL, returnUrl, pictureKey, displayUrl, hostPicUrl];
     } catch (e) {
       flogError(
@@ -138,34 +160,16 @@ class AlistImageUploadUtils {
       "dir": configMapFromPictureKey['uploadPath'],
       "names": [configMapFromPictureKey['filenames']]
     };
-    String uploadPath = configMap['uploadPath'];
-    String? webPath = configMap['webPath'];
-    webPath ??= 'None';
     String token = configMap['token'];
-    String today = getToday('yyyyMMdd');
-    String alistToday = await Global.getTodayAlistUpdate();
-    if (alistToday != today && token != '') {
-      var res = await AlistManageAPI.getToken(configMap['host'], configMap['alistusername'], configMap['password']);
-      if (res[0] != 'success') {
-        return ['failed'];
-      }
-      token = res[1];
-      final alistConfig = AlistConfigModel(
-        configMap['host'],
-        configMap['alistusername'],
-        configMap['password'],
-        token,
-        uploadPath,
-        webPath,
-      );
-      final alistConfigJson = jsonEncode(alistConfig);
-      final alistConfigFile = await AlistConfigState().localFile;
-      alistConfigFile.writeAsString(alistConfigJson);
-      await Global.setTodayAlistUpdate(today);
+    String? adminToken = configMap['adminToken'];
+    if (adminToken != null && adminToken != 'None' && adminToken.trim().isNotEmpty) {
+      token = adminToken;
+    } else {
+      AlistImageUploadUtils.refreshToken(configMap: configMap);
     }
     BaseOptions options = setBaseOptions();
     options.headers = {
-      "Authorization": configMap["token"],
+      "Authorization": token,
       "Content-Type": "application/json",
     };
     Dio dio = Dio(options);

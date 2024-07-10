@@ -36,11 +36,11 @@ Future<String> readPictureHostConfig() async {
 }
 
 uploaderentry({required String path, required String name}) async {
-  String configData = await readPictureHostConfig();
-  if (configData == '') return ["failed"];
-  Map configMap = jsonDecode(configData);
-  String defaultConfig = await Global.getPShost();
   try {
+    String configData = await readPictureHostConfig();
+    if (configData == '') return ["failed"];
+    Map configMap = jsonDecode(configData);
+    String defaultConfig = await Global.getPShost();
     return await uploadFunc[defaultConfig]!(path: path, name: name, configMap: configMap);
   } catch (e) {
     return ["failed"];

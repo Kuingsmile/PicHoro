@@ -22,7 +22,7 @@ class UpyunManageAPI {
   static String upyunBaseURL = 'v0.api.upyun.com';
   static String upyunManageURL = 'https://api.upyun.com/';
 
-  static Future<File> get _localFile async {
+  static Future<File> get localFile async {
     final path = await _localPath;
     String defaultUser = await Global.getUser();
     return ensureFileExists(File('$path/${defaultUser}_upyun_config.txt'));
@@ -35,7 +35,7 @@ class UpyunManageAPI {
 
   static Future<String> readUpyunConfig() async {
     try {
-      final file = await _localFile;
+      final file = await localFile;
       String contents = await file.readAsString();
       return contents;
     } catch (e) {
@@ -590,7 +590,7 @@ class UpyunManageAPI {
       final upyunConfig =
           UpyunConfigModel(bucket, operatorName, operatorPassword, url, options, path, antiLeechToken, antiLeechExpire);
       final upyunConfigJson = jsonEncode(upyunConfig);
-      final upyunConfigFile = await _localFile;
+      final upyunConfigFile = await localFile;
       await upyunConfigFile.writeAsString(upyunConfigJson);
       return ['success'];
     } catch (e) {
@@ -831,7 +831,7 @@ class UpyunManageAPI {
       final upyunConfig =
           UpyunConfigModel(bucket, operatorName, operatorPassword, url, options, path, antiLeechToken, antiLeechExpire);
       final upyunConfigJson = jsonEncode(upyunConfig);
-      final upyunConfigFile = await _localFile;
+      final upyunConfigFile = await localFile;
       await upyunConfigFile.writeAsString(upyunConfigJson);
       return ['success'];
     } catch (e) {

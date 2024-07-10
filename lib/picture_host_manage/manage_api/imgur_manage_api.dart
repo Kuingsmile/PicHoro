@@ -11,7 +11,7 @@ import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/dio_proxy_adapter.dart';
 
 class ImgurManageAPI {
-  static Future<File> get _localFile async {
+  static Future<File> get localFile async {
     final path = await _localPath;
     String defaultUser = await Global.getUser();
     return ensureFileExists(File('$path/${defaultUser}_imgur_config.txt'));
@@ -24,7 +24,7 @@ class ImgurManageAPI {
 
   static Future<String> readImgurConfig() async {
     try {
-      final file = await _localFile;
+      final file = await localFile;
       String contents = await file.readAsString();
       return contents;
     } catch (e) {

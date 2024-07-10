@@ -12,7 +12,7 @@ import 'package:horopic/utils/common_functions.dart';
 class SmmsManageAPI {
   static const String smmsAPIUrl = 'https://smms.app/api/v2/';
 
-  static Future<File> get _localFile async {
+  static Future<File> get localFile async {
     final path = await _localPath;
     String defaultUser = await Global.getUser();
     return ensureFileExists(File('$path/${defaultUser}_smms_config.txt'));
@@ -25,7 +25,7 @@ class SmmsManageAPI {
 
   static Future<String> readSmmsConfig() async {
     try {
-      final file = await _localFile;
+      final file = await localFile;
       String contents = await file.readAsString();
       return contents;
     } catch (e) {

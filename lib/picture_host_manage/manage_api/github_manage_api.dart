@@ -12,7 +12,7 @@ import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/picture_host_configure/configure_page/github_configure.dart';
 
 class GithubManageAPI {
-  static Future<File> get _localFile async {
+  static Future<File> get localFile async {
     final path = await _localPath;
     String defaultUser = await Global.getUser();
     return ensureFileExists(File('$path/${defaultUser}_github_config.txt'));
@@ -25,7 +25,7 @@ class GithubManageAPI {
 
   static Future<String> readGithubConfig() async {
     try {
-      final file = await _localFile;
+      final file = await localFile;
       String contents = await file.readAsString();
       return contents;
     } catch (e) {
@@ -510,7 +510,7 @@ class GithubManageAPI {
 
       final githubConfig = GithubConfigModel(githubusername, repo, token, storePath, branch, customDomain);
       final githubConfigJson = jsonEncode(githubConfig);
-      final githubConfigFile = await _localFile;
+      final githubConfigFile = await localFile;
       await githubConfigFile.writeAsString(githubConfigJson);
       return ['success'];
     } catch (e) {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:f_logs/f_logs.dart';
+import 'package:horopic/picture_host_configure/configure_page/alist_configure.dart';
 
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/picture_host_configure/configure_store/configure_store_file.dart';
@@ -24,10 +25,13 @@ class AlistConfigureStoreEditState extends State<AlistConfigureStoreEdit> {
 
   final _remarkNameController = TextEditingController();
   final _hostController = TextEditingController();
+  final _adminTokenController = TextEditingController();
   final _alistusernameController = TextEditingController();
   final _passwordController = TextEditingController();
   final _tokenController = TextEditingController();
   final _uploadPathController = TextEditingController();
+  final _webPathController = TextEditingController();
+  final _customUrlController = TextEditingController();
 
   @override
   void initState() {
@@ -36,22 +40,17 @@ class AlistConfigureStoreEditState extends State<AlistConfigureStoreEdit> {
   }
 
   _initConfig() {
-    List keys = [
-      'remarkName',
-      'host',
-      'alistusername',
-      'password',
-      'token',
-      'uploadPath',
-    ];
-    for (String element in keys) {
-      if (widget.psInfo[element] != ConfigureTemplate.placeholder) {
+    for (String element in AlistConfigModel.keysList) {
+      if (widget.psInfo[element] != ConfigureTemplate.placeholder && widget.psInfo[element] != null) {
         switch (element) {
           case 'remarkName':
             _remarkNameController.text = widget.psInfo[element];
             break;
           case 'host':
             _hostController.text = widget.psInfo[element];
+            break;
+          case 'adminToken':
+            _adminTokenController.text = widget.psInfo[element];
             break;
           case 'alistusername':
             _alistusernameController.text = widget.psInfo[element];
@@ -65,6 +64,12 @@ class AlistConfigureStoreEditState extends State<AlistConfigureStoreEdit> {
           case 'uploadPath':
             _uploadPathController.text = widget.psInfo[element];
             break;
+          case 'webPath':
+            _webPathController.text = widget.psInfo[element];
+            break;
+          case 'customUrl':
+            _customUrlController.text = widget.psInfo[element];
+            break;
         }
       }
     }
@@ -74,10 +79,13 @@ class AlistConfigureStoreEditState extends State<AlistConfigureStoreEdit> {
   void dispose() {
     _remarkNameController.dispose();
     _hostController.dispose();
+    _adminTokenController.dispose();
     _alistusernameController.dispose();
     _passwordController.dispose();
     _tokenController.dispose();
     _uploadPathController.dispose();
+    _webPathController.dispose();
+    _customUrlController.dispose();
     super.dispose();
   }
 
@@ -119,6 +127,14 @@ class AlistConfigureStoreEditState extends State<AlistConfigureStoreEdit> {
               },
             ),
             TextFormField(
+              controller: _adminTokenController,
+              decoration: const InputDecoration(
+                label: Center(child: Text('可选：管理员Token')),
+                hintText: '请输入管理员Token',
+              ),
+              textAlign: TextAlign.center,
+            ),
+            TextFormField(
               controller: _alistusernameController,
               decoration: const InputDecoration(
                 label: Center(child: Text('可选：用户名')),
@@ -128,7 +144,6 @@ class AlistConfigureStoreEditState extends State<AlistConfigureStoreEdit> {
             ),
             TextFormField(
               controller: _passwordController,
-              obscureText: true,
               decoration: const InputDecoration(
                 label: Center(child: Text('可选：密码')),
                 hintText: '输入密码',
@@ -149,6 +164,24 @@ class AlistConfigureStoreEditState extends State<AlistConfigureStoreEdit> {
                 contentPadding: EdgeInsets.zero,
                 label: Center(child: Text('可选：储存路径')),
                 hintText: '例如: /百度网盘/图床',
+              ),
+              textAlign: TextAlign.center,
+            ),
+            TextFormField(
+              controller: _webPathController,
+              decoration: const InputDecoration(
+                contentPadding: EdgeInsets.zero,
+                label: Center(child: Text('可选：拼接路径')),
+                hintText: '例如: /pic',
+              ),
+              textAlign: TextAlign.center,
+            ),
+            TextFormField(
+              controller: _customUrlController,
+              decoration: const InputDecoration(
+                contentPadding: EdgeInsets.zero,
+                label: Center(child: Text('可选：自定义URL')),
+                hintText: '例如: https://cdn.test.com',
               ),
               textAlign: TextAlign.center,
             ),
@@ -181,15 +214,23 @@ class AlistConfigureStoreEditState extends State<AlistConfigureStoreEdit> {
       Map configMap = await AlistManageAPI.getConfigMap();
       _hostController.text = configMap['host'];
       _tokenController.text = configMap['token'];
+      if (configMap['adminToken'] != 'None' && configMap['adminToken'] != null) {
+        _adminTokenController.text = configMap['adminToken'];
+      }
       if (configMap['alistusername'] != 'None') {
         _alistusernameController.text = configMap['alistusername'];
       }
       if (configMap['password'] != 'None') {
         _passwordController.text = configMap['password'];
       }
-
       if (configMap['uploadPath'] != 'None') {
         _uploadPathController.text = configMap['uploadPath'];
+      }
+      if (configMap['webPath'] != 'None' && configMap['webPath'] != null) {
+        _webPathController.text = configMap['webPath'];
+      }
+      if (configMap['customUrl'] != 'None' && configMap['customUrl'] != null) {
+        _customUrlController.text = configMap['customUrl'];
       }
       showToast('导入成功');
     } catch (e) {
@@ -201,10 +242,13 @@ class AlistConfigureStoreEditState extends State<AlistConfigureStoreEdit> {
     if (_formKey.currentState!.validate()) {
       String remarkName = _remarkNameController.text;
       String host = _hostController.text;
+      String adminToken = _adminTokenController.text;
       String alistusername = _alistusernameController.text;
       String password = _passwordController.text;
       String token = _tokenController.text;
       String uploadPath = _uploadPathController.text;
+      String webPath = _webPathController.text;
+      String customUrl = _customUrlController.text;
 
       if (host.endsWith('/')) {
         host = host.substring(0, host.length - 1);
@@ -213,13 +257,16 @@ class AlistConfigureStoreEditState extends State<AlistConfigureStoreEdit> {
         host = 'https://$host';
       }
 
-      if (remarkName.isEmpty || remarkName.trim().isEmpty) {
+      if (remarkName.trim().isEmpty) {
         remarkName = ConfigureTemplate.placeholder;
       }
-      if (alistusername.isEmpty || alistusername.trim().isEmpty) {
+      if (adminToken.trim().isEmpty) {
+        adminToken = ConfigureTemplate.placeholder;
+      }
+      if (alistusername.trim().isEmpty) {
         alistusername = ConfigureTemplate.placeholder;
       }
-      if (password.isEmpty || password.trim().isEmpty) {
+      if (password.trim().isEmpty) {
         password = ConfigureTemplate.placeholder;
       }
       if (uploadPath.isEmpty || uploadPath == '/' || uploadPath.trim() == '') {
@@ -232,14 +279,27 @@ class AlistConfigureStoreEditState extends State<AlistConfigureStoreEdit> {
           uploadPath = '$uploadPath/';
         }
       }
+      if (webPath.trim().isEmpty) {
+        webPath = ConfigureTemplate.placeholder;
+      } else {
+        if (!webPath.endsWith('/')) {
+          webPath = '$webPath/';
+        }
+      }
+      if (customUrl.trim().isEmpty) {
+        customUrl = ConfigureTemplate.placeholder;
+      }
 
       Map psInfo = {
         'remarkName': remarkName,
         'host': host,
+        'adminToken': adminToken,
         'alistusername': alistusername,
         'password': password,
         'token': token,
         'uploadPath': uploadPath,
+        'webPath': webPath,
+        'customUrl': customUrl,
       };
 
       try {

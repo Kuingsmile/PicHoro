@@ -75,20 +75,19 @@ class AlistManageAPI {
     'YandexDisk': 'Yandex网盘',
   };
 
-  static Future<File> get _localFile async {
+  static Future<File> get localFile async {
     final path = await _localPath;
     String defaultUser = await Global.getUser();
     return ensureFileExists(File('$path/${defaultUser}_alist_config.txt'));
   }
 
   static Future<String> get _localPath async {
-    final directory = await getApplicationDocumentsDirectory();
-    return directory.path;
+    return (await getApplicationDocumentsDirectory()).path;
   }
 
   static Future<String> readAlistConfig() async {
     try {
-      final file = await _localFile;
+      final file = await localFile;
       String contents = await file.readAsString();
       return contents;
     } catch (e) {
@@ -153,22 +152,22 @@ class AlistManageAPI {
   static refreshToken() async {
     Map configMap = await getConfigMap();
     String uploadPath = configMap['uploadPath'];
-    String? webPath = configMap['webPath'];
-    webPath ??= 'None';
     String token = configMap['token'];
     var res = await AlistManageAPI.getToken(configMap['host'], configMap['alistusername'], configMap['password']);
     if (res[0] == 'success') {
       token = res[1];
       final alistConfig = AlistConfigModel(
         configMap['host'],
+        'None',
         configMap['alistusername'],
         configMap['password'],
         token,
         uploadPath,
-        webPath,
+        configMap['webPath'] ?? 'None',
+        configMap['customUrl'] ?? 'None',
       );
       final alistConfigJson = jsonEncode(alistConfig);
-      final alistConfigFile = await AlistConfigState().localFile;
+      final alistConfigFile = await AlistManageAPI.localFile;
       alistConfigFile.writeAsString(alistConfigJson);
 
       return ['success', token];
@@ -177,11 +176,20 @@ class AlistManageAPI {
     }
   }
 
+  static getUsedToken(Map configMap) {
+    String token = configMap['token'];
+    String? adminToken = configMap['adminToken'];
+    if (adminToken != null && adminToken != 'None' && adminToken.trim().isNotEmpty) {
+      token = adminToken;
+    }
+    return token;
+  }
+
   static getBucketList() async {
     try {
       Map configMap = await getConfigMap();
       String host = configMap['host'];
-      String token = configMap['token'];
+      String token = getUsedToken(configMap);
       String url = '$host/api/admin/storage/list';
 
       BaseOptions baseoptions = setBaseOptions();
@@ -208,7 +216,7 @@ class AlistManageAPI {
     try {
       Map configMap = await getConfigMap();
       String host = configMap['host'];
-      String token = configMap['token'];
+      String token = getUsedToken(configMap);
       String enableUrl = '$host/api/admin/storage/enable';
       String disableUrl = '$host/api/admin/storage/disable';
 
@@ -248,7 +256,7 @@ class AlistManageAPI {
     try {
       Map configMap = await getConfigMap();
       String host = configMap['host'];
-      String token = configMap['token'];
+      String token = getUsedToken(configMap);
       String url = '$host/api/admin/storage/delete';
 
       BaseOptions baseoptions = setBaseOptions();
@@ -279,7 +287,7 @@ class AlistManageAPI {
     try {
       Map configMap = await getConfigMap();
       String host = configMap['host'];
-      String token = configMap['token'];
+      String token = getUsedToken(configMap);
       String url = '$host/api/admin/storage/create';
 
       BaseOptions baseoptions = setBaseOptions();
@@ -308,7 +316,7 @@ class AlistManageAPI {
     try {
       Map configMap = await getConfigMap();
       String host = configMap['host'];
-      String token = configMap['token'];
+      String token = getUsedToken(configMap);
       String url = '$host/api/admin/storage/update';
 
       BaseOptions baseoptions = setBaseOptions();
@@ -336,28 +344,23 @@ class AlistManageAPI {
   static setDefaultBucket(String path) async {
     try {
       Map configMap = await getConfigMap();
-      String host = configMap['host'];
-      String alistusername = configMap['alistusername'];
-      String password = configMap['password'];
-      String token = configMap['token'];
       String uploadPath = path;
-      String? webPath = configMap['webPath'];
-      webPath ??= 'None';
-
       if (uploadPath == '/' || uploadPath == '') {
         uploadPath = 'None';
       }
 
       final alistConfig = AlistConfigModel(
-        host,
-        alistusername,
-        password,
-        token,
+        configMap['host'],
+        configMap['adminToken'] ?? 'None',
+        configMap['alistusername'],
+        configMap['password'],
+        configMap['token'],
         uploadPath,
-        webPath,
+        configMap['webPath'] ?? 'None',
+        configMap['customUrl'] ?? 'None',
       );
       final alistConfigJson = jsonEncode(alistConfig);
-      final alistConfigFile = await _localFile;
+      final alistConfigFile = await localFile;
       await alistConfigFile.writeAsString(alistConfigJson);
       return ['success'];
     } catch (e) {
@@ -379,7 +382,7 @@ class AlistManageAPI {
     try {
       Map configMap = await getConfigMap();
       String host = configMap['host'];
-      String token = configMap['token'];
+      String token = getUsedToken(configMap);
       String url = '$host/api/fs/list';
 
       BaseOptions baseoptions = setBaseOptions();
@@ -418,7 +421,7 @@ class AlistManageAPI {
     try {
       Map configMap = await getConfigMap();
       String host = configMap['host'];
-      String token = configMap['token'];
+      String token = getUsedToken(configMap);
       String url = '$host/api/fs/list';
 
       BaseOptions baseoptions = setBaseOptions();
@@ -459,7 +462,7 @@ class AlistManageAPI {
     try {
       Map configMap = await getConfigMap();
       String host = configMap['host'];
-      String token = configMap['token'];
+      String token = getUsedToken(configMap);
       String url = '$host/api/fs/list';
 
       BaseOptions baseoptions = setBaseOptions();
@@ -520,7 +523,7 @@ class AlistManageAPI {
     try {
       Map configMap = await getConfigMap();
       String host = configMap['host'];
-      String token = configMap['token'];
+      String token = getUsedToken(configMap);
       String url = '$host/api/fs/get';
 
       BaseOptions baseoptions = setBaseOptions();
@@ -552,7 +555,7 @@ class AlistManageAPI {
     try {
       Map configMap = await getConfigMap();
       String host = configMap['host'];
-      String token = configMap['token'];
+      String token = getUsedToken(configMap);
       String url = '$host/api/fs/mkdir';
 
       BaseOptions baseoptions = setBaseOptions();
@@ -584,7 +587,7 @@ class AlistManageAPI {
     try {
       Map configMap = await getConfigMap();
       String host = configMap['host'];
-      String token = configMap['token'];
+      String token = getUsedToken(configMap);
       String url = '$host/api/fs/rename';
 
       BaseOptions baseoptions = setBaseOptions();
@@ -617,7 +620,7 @@ class AlistManageAPI {
     try {
       Map configMap = await getConfigMap();
       String host = configMap['host'];
-      String token = configMap['token'];
+      String token = getUsedToken(configMap);
       String url = '$host/api/fs/remove';
 
       BaseOptions baseoptions = setBaseOptions();
@@ -670,7 +673,7 @@ class AlistManageAPI {
 
       BaseOptions baseoptions = setBaseOptions();
       baseoptions.headers = {
-        "Authorization": configMap["token"],
+        "Authorization": getUsedToken(configMap),
         "Content-Type": Global.multipartString,
         "file-path": Uri.encodeComponent(filePath),
         "Content-Length": contentLength,

@@ -7,6 +7,7 @@ import 'package:f_logs/f_logs.dart';
 import 'package:horopic/picture_host_configure/configure_store/configure_store_file.dart';
 import 'package:horopic/picture_host_configure/configure_page/configure_export.dart';
 import 'package:horopic/picture_host_configure/configure_store/configure_template.dart';
+import 'package:horopic/picture_host_manage/manage_api/alist_manage_api.dart';
 
 import 'package:horopic/router/application.dart';
 import 'package:horopic/utils/common_functions.dart';
@@ -738,12 +739,14 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
                   }
                 } else if (widget.psHost == 'alist') {
                   try {
-                    String host = psInfo['host']!;
-                    String alistusername = psInfo['alistusername']!;
-                    String password = psInfo['password']!;
-                    String token = psInfo['token']!;
-                    String uploadPath = psInfo['uploadPath']!;
+                    String host = psInfo['host'];
+                    String? adminToken = psInfo['adminToken'];
+                    String alistusername = psInfo['alistusername'];
+                    String password = psInfo['password'];
+                    String token = psInfo['token'];
+                    String uploadPath = psInfo['uploadPath'];
                     String? webPath = psInfo['webPath'];
+                    String? customUrl = psInfo['customUrl'];
                     bool valid = validateUndetermined([
                       host,
                     ]);
@@ -751,29 +754,25 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
                       showToast('请先去设置参数');
                       return;
                     }
-                    if (uploadPath == ConfigureTemplate.placeholder) {
-                      uploadPath = 'None';
-                    }
-                    if (alistusername == ConfigureTemplate.placeholder) {
-                      alistusername = 'None';
-                    }
-                    if (password == ConfigureTemplate.placeholder) {
-                      password = 'None';
-                    }
-                    if (webPath == ConfigureTemplate.placeholder || webPath == null) {
-                      webPath = 'None';
-                    }
+                    uploadPath = checkPlaceholder(uploadPath);
+                    adminToken = checkPlaceholder(adminToken);
+                    alistusername = checkPlaceholder(alistusername);
+                    password = checkPlaceholder(password);
+                    webPath = checkPlaceholder(webPath);
+                    customUrl = checkPlaceholder(customUrl);
 
                     final alistConfig = AlistConfigModel(
                       host,
+                      adminToken,
                       alistusername,
                       password,
                       token,
                       uploadPath,
                       webPath,
+                      customUrl,
                     );
                     final alistConfigJson = jsonEncode(alistConfig);
-                    final alistConfigFile = await AlistConfigState().localFile;
+                    final alistConfigFile = await AlistManageAPI.localFile;
                     await alistConfigFile.writeAsString(alistConfigJson);
                     return showToast('设置成功');
                   } catch (e) {

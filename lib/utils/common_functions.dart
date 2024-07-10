@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:horopic/picture_host_configure/configure_store/configure_template.dart';
 
 import 'package:path/path.dart' as my_path;
 import 'package:uuid/uuid.dart';
@@ -65,9 +66,7 @@ flogError(Object e, Map parameters, String className, String methodName) {
 }
 
 Future<File> ensureFileExists(File file) async {
-  bool exists = await file.exists();
-
-  if (!exists) {
+  if (!(await file.exists())) {
     await file.create(recursive: true);
   }
 
@@ -681,4 +680,16 @@ Widget getImageIcon(String path) {
   } catch (e) {
     return Image.asset('assets/icons/unknown.png', width: 30, height: 30, fit: BoxFit.fill);
   }
+}
+
+void setControllerText(TextEditingController controller, String? value) {
+  if (value != 'None' && value != null) {
+    controller.text = value;
+  } else {
+    controller.clear();
+  }
+}
+
+String checkPlaceholder(String? value) {
+  return (value == ConfigureTemplate.placeholder || value == null) ? 'None' : value;
 }

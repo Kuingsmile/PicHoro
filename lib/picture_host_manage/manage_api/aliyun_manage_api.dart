@@ -47,7 +47,7 @@ class AliyunManageAPI {
     'oss-rg-china-mainland': '无地域属性'
   };
 
-  static Future<File> get _localFile async {
+  static Future<File> get localFile async {
     final path = await _localPath;
     String defaultUser = await Global.getUser();
     return ensureFileExists(File('$path/${defaultUser}_aliyun_config.txt'));
@@ -60,7 +60,7 @@ class AliyunManageAPI {
 
   static Future<String> readAliyunConfig() async {
     try {
-      final file = await _localFile;
+      final file = await localFile;
       String contents = await file.readAsString();
       return contents;
     } catch (e) {
@@ -387,7 +387,7 @@ class AliyunManageAPI {
 
       final aliyunConfig = AliyunConfigModel(accessKeyId, accessKeySecret, bucket, area, path, customUrl, options);
       final aliyunConfigJson = jsonEncode(aliyunConfig);
-      final aliyunConfigFile = await _localFile;
+      final aliyunConfigFile = await localFile;
       await aliyunConfigFile.writeAsString(aliyunConfigJson);
       return ['success'];
     } catch (e) {

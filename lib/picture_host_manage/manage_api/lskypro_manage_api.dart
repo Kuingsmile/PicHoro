@@ -10,7 +10,7 @@ import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/common_functions.dart';
 
 class LskyproManageAPI {
-  static Future<File> get _localFile async {
+  static Future<File> get localFile async {
     final path = await _localPath;
     String defaultUser = await Global.getUser();
     return ensureFileExists(File('$path/${defaultUser}_host_config.txt'));
@@ -23,7 +23,7 @@ class LskyproManageAPI {
 
   static Future<String> readLskyproConfig() async {
     try {
-      final file = await _localFile;
+      final file = await localFile;
       String contents = await file.readAsString();
       return contents;
     } catch (e) {

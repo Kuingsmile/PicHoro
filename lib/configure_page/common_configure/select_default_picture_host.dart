@@ -7,6 +7,15 @@ import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:fluro/fluro.dart';
 import 'package:f_logs/f_logs.dart';
+import 'package:horopic/picture_host_manage/manage_api/alist_manage_api.dart';
+import 'package:horopic/picture_host_manage/manage_api/aliyun_manage_api.dart';
+import 'package:horopic/picture_host_manage/manage_api/github_manage_api.dart';
+import 'package:horopic/picture_host_manage/manage_api/imgur_manage_api.dart';
+import 'package:horopic/picture_host_manage/manage_api/lskypro_manage_api.dart';
+import 'package:horopic/picture_host_manage/manage_api/qiniu_manage_api.dart';
+import 'package:horopic/picture_host_manage/manage_api/smms_manage_api.dart';
+import 'package:horopic/picture_host_manage/manage_api/tencent_manage_api.dart';
+import 'package:horopic/picture_host_manage/manage_api/upyun_manage_api.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'package:horopic/utils/global.dart';
@@ -66,62 +75,6 @@ class AllPShostState extends State<AllPShost> {
   static Future<String> get localPath async {
     final directory = await getApplicationDocumentsDirectory();
     return directory.path;
-  }
-
-  //smms配置
-  Future<File> get smmsFile async {
-    final path = await localPath;
-    String defaultUser = await Global.getUser();
-    return ensureFileExists(File('$path/${defaultUser}_smms_config.txt'));
-  }
-
-//lskypro配置
-  Future<File> get lskyFile async {
-    final path = await localPath;
-    String defaultUser = await Global.getUser();
-    return ensureFileExists(File('$path/${defaultUser}_host_config.txt'));
-  }
-
-//github配置
-  Future<File> get githubFile async {
-    final path = await localPath;
-    String defaultUser = await Global.getUser();
-    return ensureFileExists(File('$path/${defaultUser}_github_config.txt'));
-  }
-
-  //imgur配置
-  Future<File> get imgurFile async {
-    final path = await localPath;
-    String defaultUser = await Global.getUser();
-    return ensureFileExists(File('$path/${defaultUser}_imgur_config.txt'));
-  }
-
-  //qiniu配置
-  Future<File> get qiniuFile async {
-    final path = await localPath;
-    String defaultUser = await Global.getUser();
-    return ensureFileExists(File('$path/${defaultUser}_qiniu_config.txt'));
-  }
-
-  //tencent配置
-  Future<File> get tencentFile async {
-    final path = await localPath;
-    String defaultUser = await Global.getUser();
-    return ensureFileExists(File('$path/${defaultUser}_tencent_config.txt'));
-  }
-
-  //aliyun配置
-  Future<File> get aliyunFile async {
-    final path = await localPath;
-    String defaultUser = await Global.getUser();
-    return ensureFileExists(File('$path/${defaultUser}_aliyun_config.txt'));
-  }
-
-  //upyun配置
-  Future<File> get upyunFile async {
-    final path = await localPath;
-    String defaultUser = await Global.getUser();
-    return ensureFileExists(File('$path/${defaultUser}_upyun_config.txt'));
   }
 
   exportConfiguration(String pshost) async {
@@ -214,377 +167,465 @@ class AllPShostState extends State<AllPShost> {
   }
 
   processingQRCodeResult() async {
-    String result = Global.qrScanResult;
-    Global.qrScanResult = "";
-    if (!(result.contains('smms')) &&
-        !(result.contains('github')) &&
-        !(result.contains('lankong')) &&
-        !(result.contains('imgur')) &&
-        !(result.contains('qiniu')) &&
-        !(result.contains('tcyun')) &&
-        !(result.contains('aliyun')) &&
-        !(result.contains('upyun'))) {
-      return Fluttertoast.showToast(
-          msg: "不包含支持的图床配置信息", toastLength: Toast.LENGTH_SHORT, timeInSecForIosWeb: 2, fontSize: 16.0);
+    try {
+      String result = Global.qrScanResult;
+      Global.qrScanResult = "";
+      Map<String, dynamic> jsonResult = jsonDecode(result);
+      if (jsonResult['smms'] == null &&
+          jsonResult['alist'] == null &&
+          jsonResult['alistplist'] == null &&
+          jsonResult['github'] == null &&
+          jsonResult['lankong'] == null &&
+          jsonResult['lskyplist'] == null &&
+          jsonResult['imgur'] == null &&
+          jsonResult['qiniu'] == null &&
+          jsonResult['tcyun'] == null &&
+          jsonResult['aliyun'] == null &&
+          jsonResult['upyun'] == null) {
+        return Fluttertoast.showToast(
+            msg: "不包含支持的图床配置信息", toastLength: Toast.LENGTH_SHORT, timeInSecForIosWeb: 2, fontSize: 16.0);
+      }
+
+      if (jsonResult['smms'] != null) {
+        final smmsToken = jsonResult['smms']['token'] ?? '';
+        try {
+          final smmsConfig = SmmsConfigModel(smmsToken);
+          final smmsConfigJson = jsonEncode(smmsConfig);
+          final smmsConfigFile = await SmmsManageAPI.localFile;
+          await smmsConfigFile.writeAsString(smmsConfigJson);
+          showToast("sm.ms配置成功");
+        } catch (e) {
+          FLog.error(
+              className: 'AllPShostState',
+              methodName: 'processingQRCodeResult_smms_2',
+              text: formatErrorMessage({}, e.toString()),
+              dataLogType: DataLogType.ERRORS.toString());
+          showToast("sm.ms配置错误");
+        }
+      }
+
+      if (jsonResult['alist'] != null || jsonResult['alistplist'] != null) {
+        try {
+          String alistKeyName = jsonResult['alist'] == null ? 'alistplist' : 'alist';
+          String alistVersion = jsonResult['alist']?['version'] ?? '';
+          if (alistVersion == '2') {
+            showToast("不支持Alist V2");
+          } else {
+            String alistUrl = (jsonResult[alistKeyName]['url'] ?? '').trim();
+            String alistToken = (jsonResult[alistKeyName]['token'] ?? '').trim();
+            String alistUsername = (jsonResult[alistKeyName]['username'] ?? '').trim();
+            String alistPassword = (jsonResult[alistKeyName]['password'] ?? '').trim();
+            String alistUploadPath = (jsonResult[alistKeyName]['uploadPath'] ?? '').trim();
+            String alistWebPath =
+                (jsonResult[alistKeyName]['webPath'] ?? jsonResult[alistKeyName]['accessPath'] ?? '').trim();
+            String alistCustomUrl = (jsonResult[alistKeyName]['customUrl'] ?? '').trim();
+            alistUrl = alistUrl.replaceAll(RegExp(r'/+$'), '');
+            if (!alistUrl.startsWith('http') && !alistUrl.startsWith('https')) {
+              alistUrl = 'http://$alistUrl';
+            }
+            if (alistToken.isEmpty) {
+              alistToken = 'None';
+            }
+            if (alistUploadPath.isEmpty || alistUploadPath == '/') {
+              alistUploadPath = 'None';
+            }
+            if (alistWebPath.isEmpty) {
+              alistWebPath = 'None';
+            } else {
+              if (!alistWebPath.endsWith('/')) {
+                alistWebPath = '$alistWebPath/';
+              }
+            }
+            if (alistCustomUrl.isEmpty) {
+              alistCustomUrl = 'None';
+            } else {
+              if (!alistCustomUrl.endsWith('/')) {
+                alistCustomUrl = alistCustomUrl.replaceAll(RegExp(r'/+$'), '');
+              }
+            }
+            if (alistToken != 'None') {
+              final alistConfig = AlistConfigModel(alistUrl, alistToken, alistUsername, alistPassword, alistToken,
+                  alistUploadPath, alistWebPath, alistCustomUrl);
+              final alistConfigJson = jsonEncode(alistConfig);
+              final alistConfigFile = await AlistManageAPI.localFile;
+              await alistConfigFile.writeAsString(alistConfigJson);
+              showToast("Alist配置成功");
+            } else {
+              if (alistUsername.isNotEmpty && alistPassword.isNotEmpty) {
+                var res = await AlistManageAPI.getToken(alistUrl, alistUsername, alistPassword);
+                if (res[0] != 'success') {
+                  throw Exception('获取Token失败');
+                }
+                final alistConfig = AlistConfigModel(alistUrl, 'None', alistUsername, alistPassword, res[1],
+                    alistUploadPath, alistWebPath, alistCustomUrl);
+                final alistConfigJson = jsonEncode(alistConfig);
+                final alistConfigFile = await AlistManageAPI.localFile;
+                await alistConfigFile.writeAsString(alistConfigJson);
+                showToast("Alist配置成功");
+              }
+            }
+          }
+        } catch (e) {
+          FLog.error(
+              className: 'AllPShostState',
+              methodName: 'processingQRCodeResult_alist_2',
+              text: formatErrorMessage({}, e.toString()),
+              dataLogType: DataLogType.ERRORS.toString());
+          showToast("Alist配置错误");
+        }
+      }
+
+      if (jsonResult['github'] != null) {
+        try {
+          String token = jsonResult['github']['token'] ?? '';
+          String usernameRepo = jsonResult['github']['repo'] ?? '';
+          String githubusername = usernameRepo.substring(0, usernameRepo.indexOf('/'));
+          String repo = usernameRepo.substring(usernameRepo.indexOf('/') + 1);
+          String storePath = jsonResult['github']['path'] ?? '';
+          String branch = jsonResult['github']['branch'] ?? '';
+          String customDomain = jsonResult['github']['customUrl'] ?? '';
+          if (storePath.isEmpty || storePath == '/') {
+            storePath = 'None';
+          } else if (!storePath.endsWith('/')) {
+            storePath = '$storePath/';
+          }
+
+          if (branch.isEmpty) {
+            branch = 'main';
+          }
+
+          if (customDomain.isEmpty) {
+            customDomain = 'None';
+          }
+          if (customDomain != 'None') {
+            if (!customDomain.startsWith('http') && !customDomain.startsWith('https')) {
+              customDomain = 'http://$customDomain';
+            }
+            if (customDomain.endsWith('/')) {
+              customDomain = customDomain.substring(0, customDomain.length - 1);
+            }
+          }
+          token = token.startsWith('Bearer ') ? token : 'Bearer $token';
+
+          final githubConfig = GithubConfigModel(githubusername, repo, token, storePath, branch, customDomain);
+          final githubConfigJson = jsonEncode(githubConfig);
+          final githubConfigFile = await GithubManageAPI.localFile;
+          await githubConfigFile.writeAsString(githubConfigJson);
+          showToast("Github配置成功");
+        } catch (e) {
+          FLog.error(
+              className: 'AllPShostState',
+              methodName: 'processingQRCodeResult_github',
+              text: formatErrorMessage({}, e.toString()),
+              dataLogType: DataLogType.ERRORS.toString());
+          showToast("Github配置错误");
+        }
+      }
+
+      if (jsonResult['lankong'] != null || jsonResult['lskyplist'] != null) {
+        try {
+          String lankongKeyName = jsonResult['lankong'] == null ? 'lskyplist' : 'lankong';
+          String lankongVersion = jsonResult['lankong']?['lskyProVersion'] ?? jsonResult['lskyplist']['version'] ?? '';
+          if (lankongVersion == 'V1') {
+            showToast("不支持兰空V1");
+          } else {
+            String lankongHost = jsonResult[lankongKeyName]['server'] ?? jsonResult[lankongKeyName]['host'] ?? '';
+            if (lankongHost.endsWith('/')) {
+              lankongHost = lankongHost.substring(0, lankongHost.length - 1);
+            }
+            String lankongToken = jsonResult[lankongKeyName]['token'];
+            if (!lankongToken.startsWith('Bearer ')) {
+              lankongToken = 'Bearer $lankongToken';
+            }
+            String lanKongstrategyId = jsonResult[lankongKeyName]['strategyId'];
+            if (lanKongstrategyId.isEmpty) {
+              lanKongstrategyId = 'None';
+            }
+            String lanKongalbumId = jsonResult['lankong']['albumId'];
+            if (lanKongalbumId.isEmpty) {
+              lanKongalbumId = 'None';
+            }
+
+            HostConfigModel hostConfig = HostConfigModel(lankongHost, lankongToken, lanKongstrategyId, lanKongalbumId);
+            final hostConfigJson = jsonEncode(hostConfig);
+            final hostConfigFile = await LskyproManageAPI.localFile;
+            hostConfigFile.writeAsString(hostConfigJson);
+            showToast("兰空配置成功");
+          }
+        } catch (e) {
+          FLog.error(
+              className: 'AllPShostState',
+              methodName: 'processingQRCodeResult_lankong_3',
+              text: formatErrorMessage({}, e.toString()),
+              dataLogType: DataLogType.ERRORS.toString());
+          showToast("兰空配置错误");
+        }
+      }
+
+      if (jsonResult['imgur'] != null) {
+        try {
+          final imgurclientId = jsonResult['imgur']['clientId'] ?? '';
+          String imgurProxy = jsonResult['imgur']['proxy'] ?? '';
+          if (imgurProxy.isEmpty) {
+            imgurProxy = 'None';
+          }
+          final imgurConfig = ImgurConfigModel(imgurclientId, imgurProxy);
+          final imgurConfigJson = jsonEncode(imgurConfig);
+          final imgurConfigFile = await ImgurManageAPI.localFile;
+          await imgurConfigFile.writeAsString(imgurConfigJson);
+          showToast("Imgur配置成功");
+        } catch (e) {
+          FLog.error(
+              className: 'AllPShostState',
+              methodName: 'processingQRCodeResult_imgur_2',
+              text: formatErrorMessage({}, e.toString()),
+              dataLogType: DataLogType.ERRORS.toString());
+          showToast("Imgur配置错误");
+        }
+      }
+
+      if (jsonResult['qiniu'] != null) {
+        try {
+          String qiniuAccessKey = jsonResult['qiniu']['accessKey'] ?? '';
+          String qiniuSecretKey = jsonResult['qiniu']['secretKey'] ?? '';
+          String qiniuBucket = jsonResult['qiniu']['bucket'] ?? '';
+          String qiniuUrl = jsonResult['qiniu']['url'] ?? '';
+          String qiniuArea = jsonResult['qiniu']['area'] ?? '';
+          String qiniuOptions = jsonResult['qiniu']['options'] ?? '';
+          String qiniuPath = jsonResult['qiniu']['path'] ?? '';
+
+          if (!qiniuUrl.startsWith('http') && !qiniuUrl.startsWith('https')) {
+            qiniuUrl = 'http://$qiniuUrl';
+          }
+          if (qiniuUrl.endsWith('/')) {
+            qiniuUrl = qiniuUrl.substring(0, qiniuUrl.length - 1);
+          }
+
+          if (qiniuPath.isEmpty) {
+            qiniuPath = 'None';
+          } else {
+            if (qiniuPath.startsWith('/')) {
+              qiniuPath = qiniuPath.substring(1);
+            }
+            if (!qiniuPath.endsWith('/')) {
+              qiniuPath = '$qiniuPath/';
+            }
+          }
+
+          if (qiniuOptions.isEmpty) {
+            qiniuOptions = 'None';
+          } else if (!qiniuOptions.startsWith('?')) {
+            qiniuOptions = '?$qiniuOptions';
+          }
+
+          final qiniuConfig = QiniuConfigModel(
+              qiniuAccessKey, qiniuSecretKey, qiniuBucket, qiniuUrl, qiniuArea, qiniuOptions, qiniuPath);
+          final qiniuConfigJson = jsonEncode(qiniuConfig);
+          final qiniuConfigFile = await QiniuManageAPI.localFile;
+          await qiniuConfigFile.writeAsString(qiniuConfigJson);
+          showToast("七牛配置成功");
+        } catch (e) {
+          FLog.error(
+              className: 'AllPShostState',
+              methodName: 'processingQRCodeResult_qiniu_2',
+              text: formatErrorMessage({}, e.toString()),
+              dataLogType: DataLogType.ERRORS.toString());
+          showToast("七牛配置错误");
+        }
+      }
+
+      if (jsonResult['tcyun'] != null) {
+        try {
+          String tencentVersion = jsonResult['tcyun']['version'];
+          if (tencentVersion != 'v5') {
+            showToast("不支持腾讯V4");
+          } else {
+            String tencentSecretId = jsonResult['tcyun']['secretId'] ?? '';
+            String tencentSecretKey = jsonResult['tcyun']['secretKey'] ?? '';
+            String tencentBucket = jsonResult['tcyun']['bucket'] ?? '';
+            String tencentAppId = jsonResult['tcyun']['appId'] ?? '';
+            String tencentArea = jsonResult['tcyun']['area'] ?? '';
+            String tencentPath = jsonResult['tcyun']['path'] ?? '';
+            String tencentCustomUrl = jsonResult['tcyun']['customUrl'] ?? '';
+            String tencentOptions = jsonResult['tcyun']['options'] ?? '';
+
+            if (tencentCustomUrl.isNotEmpty) {
+              if (!tencentCustomUrl.startsWith('http') && !tencentCustomUrl.startsWith('https')) {
+                tencentCustomUrl = 'http://$tencentCustomUrl';
+              }
+              if (tencentCustomUrl.endsWith('/')) {
+                tencentCustomUrl = tencentCustomUrl.substring(0, tencentCustomUrl.length - 1);
+              }
+            } else {
+              tencentCustomUrl = 'None';
+            }
+
+            if (tencentPath.isEmpty || tencentPath == '/') {
+              tencentPath = 'None';
+            } else {
+              if (tencentPath.startsWith('/')) {
+                tencentPath = tencentPath.substring(1);
+              }
+              if (!tencentPath.endsWith('/')) {
+                tencentPath = '$tencentPath/';
+              }
+            }
+
+            if (tencentOptions.isEmpty) {
+              tencentOptions = 'None';
+            } else if (!tencentOptions.startsWith('?')) {
+              tencentOptions = '?$tencentOptions';
+            }
+
+            final tencentConfig = TencentConfigModel(
+              tencentSecretId,
+              tencentSecretKey,
+              tencentBucket,
+              tencentAppId,
+              tencentArea,
+              tencentPath,
+              tencentCustomUrl,
+              tencentOptions,
+            );
+            final tencentConfigJson = jsonEncode(tencentConfig);
+            final tencentConfigFile = await TencentManageAPI.localFile;
+            await tencentConfigFile.writeAsString(tencentConfigJson);
+            showToast("腾讯云配置成功");
+          }
+        } catch (e) {
+          FLog.error(
+              className: 'TencentConfigPage',
+              methodName: 'saveTencentConfig',
+              text: formatErrorMessage({}, e.toString()),
+              dataLogType: DataLogType.ERRORS.toString());
+          showToast("腾讯云配置错误");
+        }
+      }
+
+      if (jsonResult['aliyun'] != null) {
+        try {
+          String aliyunKeyId = jsonResult['aliyun']['accessKeyId'] ?? '';
+          String aliyunKeySecret = jsonResult['aliyun']['accessKeySecret'] ?? '';
+          String aliyunBucket = jsonResult['aliyun']['bucket'] ?? '';
+          String aliyunArea = jsonResult['aliyun']['area'] ?? '';
+          String aliyunPath = jsonResult['aliyun']['path'] ?? '';
+          String aliyunCustomUrl = jsonResult['aliyun']['customUrl'] ?? '';
+          String aliyunOptions = jsonResult['aliyun']['options'] ?? '';
+
+          if (aliyunCustomUrl.isNotEmpty) {
+            if (!aliyunCustomUrl.startsWith('http') && !aliyunCustomUrl.startsWith('https')) {
+              aliyunCustomUrl = 'http://$aliyunCustomUrl';
+            }
+            if (aliyunCustomUrl.endsWith('/')) {
+              aliyunCustomUrl = aliyunCustomUrl.substring(0, aliyunCustomUrl.length - 1);
+            }
+          } else {
+            aliyunCustomUrl = 'None';
+          }
+
+          if (aliyunPath.isEmpty || aliyunPath == '/') {
+            aliyunPath = 'None';
+          } else {
+            if (aliyunPath.startsWith('/')) {
+              aliyunPath = aliyunPath.substring(1);
+            }
+            if (!aliyunPath.endsWith('/')) {
+              aliyunPath = '$aliyunPath/';
+            }
+          }
+
+          if (aliyunOptions.isEmpty) {
+            aliyunOptions = 'None';
+          } else if (!aliyunOptions.startsWith('?')) {
+            aliyunOptions = '?$aliyunOptions';
+          }
+
+          final aliyunConfig = AliyunConfigModel(
+            aliyunKeyId,
+            aliyunKeySecret,
+            aliyunBucket,
+            aliyunArea,
+            aliyunPath,
+            aliyunCustomUrl,
+            aliyunOptions,
+          );
+          final aliyunConfigJson = jsonEncode(aliyunConfig);
+          final aliyunConfigFile = await AliyunManageAPI.localFile;
+          await aliyunConfigFile.writeAsString(aliyunConfigJson);
+          showToast("阿里云配置成功");
+        } catch (e) {
+          FLog.error(
+              className: 'AliyunConfigPage',
+              methodName: 'saveAliyunConfig',
+              text: formatErrorMessage({}, e.toString()),
+              dataLogType: DataLogType.ERRORS.toString());
+          showToast("阿里云配置错误");
+        }
+      }
+
+      if (jsonResult['upyun'] != null) {
+        try {
+          String upyunBucket = jsonResult['upyun']['bucket'] ?? '';
+          String upyunOperator = jsonResult['upyun']['operator'] ?? '';
+          String upyunPassword = jsonResult['upyun']['password'] ?? '';
+          String upyunUrl = jsonResult['upyun']['url'] ?? '';
+          String upyunOptions = jsonResult['upyun']['options'] ?? '';
+          String upyunPath = jsonResult['upyun']['path'] ?? '';
+          String upyunAntiLeechToken = jsonResult['upyun']['antiLeechToken'] ?? '';
+          String upyunAntiLeechExpiration = jsonResult['upyun']['antiLeechExpiration'] ?? '';
+
+          if (!upyunUrl.startsWith('http') && !upyunUrl.startsWith('https')) {
+            upyunUrl = 'http://$upyunUrl';
+          }
+
+          if (upyunUrl.endsWith('/')) {
+            upyunUrl = upyunUrl.substring(0, upyunUrl.length - 1);
+          }
+
+          if (upyunPath.isEmpty || upyunPath == '/') {
+            upyunPath = 'None';
+          } else {
+            if (upyunPath.startsWith('/')) {
+              upyunPath = upyunPath.substring(1);
+            }
+
+            if (!upyunPath.endsWith('/')) {
+              upyunPath = '$upyunPath/';
+            }
+          }
+
+          final upyunConfig = UpyunConfigModel(
+            upyunBucket,
+            upyunOperator,
+            upyunPassword,
+            upyunUrl,
+            upyunOptions,
+            upyunPath,
+            upyunAntiLeechToken,
+            upyunAntiLeechExpiration,
+          );
+          final upyunConfigJson = jsonEncode(upyunConfig);
+          final upyunConfigFile = await UpyunManageAPI.localFile;
+          await upyunConfigFile.writeAsString(upyunConfigJson);
+          showToast("又拍云配置成功");
+        } catch (e) {
+          FLog.error(
+              className: 'UpyunConfigPage',
+              methodName: 'upyunConfig',
+              text: formatErrorMessage({}, e.toString()),
+              dataLogType: DataLogType.ERRORS.toString());
+          showToast("又拍云配置错误");
+        }
+      }
+      return true;
+    } catch (e) {
+      FLog.error(
+          className: 'AllPShostState',
+          methodName: 'processingQRCodeResult',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
+      showToast("导入失败");
     }
-    Map<String, dynamic> jsonResult = jsonDecode(result);
-
-    if (jsonResult['smms'] != null) {
-      final smmsToken = jsonResult['smms']['token'] ?? '';
-      try {
-        final smmsConfig = SmmsConfigModel(smmsToken);
-        final smmsConfigJson = jsonEncode(smmsConfig);
-        final smmsConfigFile = await smmsFile;
-        await smmsConfigFile.writeAsString(smmsConfigJson);
-        showToast("sm.ms配置成功");
-      } catch (e) {
-        FLog.error(
-            className: 'AllPShostState',
-            methodName: 'processingQRCodeResult_smms_2',
-            text: formatErrorMessage({}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-        showToast("sm.ms配置错误");
-      }
-    }
-
-    if (jsonResult['github'] != null) {
-      try {
-        String token = jsonResult['github']['token'] ?? '';
-        String usernameRepo = jsonResult['github']['repo'] ?? '';
-        String githubusername = usernameRepo.substring(0, usernameRepo.indexOf('/'));
-        String repo = usernameRepo.substring(usernameRepo.indexOf('/') + 1);
-        String storePath = jsonResult['github']['path'] ?? '';
-        if (storePath == '' || storePath.isEmpty || storePath == '/') {
-          storePath = 'None';
-        } else if (!storePath.endsWith('/')) {
-          storePath = '$storePath/';
-        }
-        String branch = jsonResult['github']['branch'] ?? '';
-        if (branch == '' || branch.isEmpty) {
-          branch = 'main';
-        }
-        String customDomain = jsonResult['github']['customUrl'] ?? '';
-        if (customDomain == '' || customDomain.isEmpty) {
-          customDomain = 'None';
-        }
-        if (customDomain != 'None') {
-          if (!customDomain.startsWith('http') && !customDomain.startsWith('https')) {
-            customDomain = 'http://$customDomain';
-          }
-          if (customDomain.endsWith('/')) {
-            customDomain = customDomain.substring(0, customDomain.length - 1);
-          }
-        }
-        token = token.startsWith('Bearer ') ? token : 'Bearer $token';
-
-        final githubConfig = GithubConfigModel(githubusername, repo, token, storePath, branch, customDomain);
-        final githubConfigJson = jsonEncode(githubConfig);
-        final githubConfigFile = await githubFile;
-        await githubConfigFile.writeAsString(githubConfigJson);
-        showToast("Github配置成功");
-      } catch (e) {
-        FLog.error(
-            className: 'AllPShostState',
-            methodName: 'processingQRCodeResult_github',
-            text: formatErrorMessage({}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-        showToast("Github配置错误");
-      }
-    }
-
-    if (jsonResult['lankong'] != null) {
-      try {
-        String lankongVersion = jsonResult['lankong']['lskyProVersion'];
-        if (lankongVersion == 'V1') {
-          showToast("不支持兰空V1");
-        }
-        String lankongVtwoHost = jsonResult['lankong']['server'];
-        if (lankongVtwoHost.endsWith('/')) {
-          lankongVtwoHost = lankongVtwoHost.substring(0, lankongVtwoHost.length - 1);
-        }
-        String lankongToken = jsonResult['lankong']['token'];
-        if (lankongToken.startsWith('Bearer ')) {
-        } else {
-          lankongToken = 'Bearer $lankongToken';
-        }
-        String lanKongstrategyId = jsonResult['lankong']['strategyId'];
-        if (lanKongstrategyId == '' || lanKongstrategyId.isEmpty) {
-          lanKongstrategyId = 'None';
-        }
-        String lanKongalbumId = jsonResult['lankong']['albumId'];
-        if (lanKongalbumId == '' || lanKongalbumId.isEmpty) {
-          lanKongalbumId = 'None';
-        }
-
-        HostConfigModel hostConfig = HostConfigModel(lankongVtwoHost, lankongToken, lanKongstrategyId, lanKongalbumId);
-        final hostConfigJson = jsonEncode(hostConfig);
-        final hostConfigFile = await lskyFile;
-        hostConfigFile.writeAsString(hostConfigJson);
-        showToast("兰空配置成功");
-      } catch (e) {
-        FLog.error(
-            className: 'AllPShostState',
-            methodName: 'processingQRCodeResult_lankong_3',
-            text: formatErrorMessage({}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-        showToast("兰空配置错误");
-      }
-    }
-
-    if (jsonResult['imgur'] != null) {
-      final imgurclientId = jsonResult['imgur']['clientId'] ?? '';
-      String imgurProxy = jsonResult['imgur']['proxy'] ?? '';
-      if (imgurProxy.isEmpty) {
-        imgurProxy = 'None';
-      }
-      try {
-        final imgurConfig = ImgurConfigModel(imgurclientId, imgurProxy);
-        final imgurConfigJson = jsonEncode(imgurConfig);
-        final imgurConfigFile = await smmsFile;
-        await imgurConfigFile.writeAsString(imgurConfigJson);
-        showToast("Imgur配置成功");
-      } catch (e) {
-        FLog.error(
-            className: 'AllPShostState',
-            methodName: 'processingQRCodeResult_imgur_2',
-            text: formatErrorMessage({}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-        showToast("Imgur配置错误");
-      }
-    }
-
-    if (jsonResult['qiniu'] != null) {
-      String qiniuAccessKey = jsonResult['qiniu']['accessKey'] ?? '';
-      String qiniuSecretKey = jsonResult['qiniu']['secretKey'] ?? '';
-      String qiniuBucket = jsonResult['qiniu']['bucket'] ?? '';
-      String qiniuUrl = jsonResult['qiniu']['url'] ?? '';
-      String qiniuArea = jsonResult['qiniu']['area'] ?? '';
-      String qiniuOptions = jsonResult['qiniu']['options'] ?? '';
-      String qiniuPath = jsonResult['qiniu']['path'] ?? '';
-
-      try {
-        if (!qiniuUrl.startsWith('http') && !qiniuUrl.startsWith('https')) {
-          qiniuUrl = 'http://$qiniuUrl';
-        }
-        if (qiniuUrl.endsWith('/')) {
-          qiniuUrl = qiniuUrl.substring(0, qiniuUrl.length - 1);
-        }
-
-        if (qiniuPath.isEmpty) {
-          qiniuPath = 'None';
-        } else {
-          if (qiniuPath.startsWith('/')) {
-            qiniuPath = qiniuPath.substring(1);
-          }
-          if (!qiniuPath.endsWith('/')) {
-            qiniuPath = '$qiniuPath/';
-          }
-        }
-
-        if (qiniuOptions.isEmpty) {
-          qiniuOptions = 'None';
-        } else if (!qiniuOptions.startsWith('?')) {
-          qiniuOptions = '?$qiniuOptions';
-        }
-
-        final qiniuConfig =
-            QiniuConfigModel(qiniuAccessKey, qiniuSecretKey, qiniuBucket, qiniuUrl, qiniuArea, qiniuOptions, qiniuPath);
-        final qiniuConfigJson = jsonEncode(qiniuConfig);
-        final qiniuConfigFile = await qiniuFile;
-        await qiniuConfigFile.writeAsString(qiniuConfigJson);
-        showToast("七牛配置成功");
-      } catch (e) {
-        FLog.error(
-            className: 'AllPShostState',
-            methodName: 'processingQRCodeResult_qiniu_2',
-            text: formatErrorMessage({}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-        showToast("七牛配置错误");
-      }
-    }
-
-    if (jsonResult['tcyun'] != null) {
-      String tencentVersion = jsonResult['tcyun']['version'];
-      if (tencentVersion != 'v5') {
-        showToast("不支持腾讯V4");
-      }
-      String tencentSecretId = jsonResult['tcyun']['secretId'] ?? '';
-      String tencentSecretKey = jsonResult['tcyun']['secretKey'] ?? '';
-      String tencentBucket = jsonResult['tcyun']['bucket'] ?? '';
-      String tencentAppId = jsonResult['tcyun']['appId'] ?? '';
-      String tencentArea = jsonResult['tcyun']['area'] ?? '';
-      String tencentPath = jsonResult['tcyun']['path'] ?? '';
-      String tencentCustomUrl = jsonResult['tcyun']['customUrl'] ?? '';
-      String tencentOptions = jsonResult['tcyun']['options'] ?? '';
-
-      try {
-        if (tencentCustomUrl.isNotEmpty) {
-          if (!tencentCustomUrl.startsWith('http') && !tencentCustomUrl.startsWith('https')) {
-            tencentCustomUrl = 'http://$tencentCustomUrl';
-          }
-          if (tencentCustomUrl.endsWith('/')) {
-            tencentCustomUrl = tencentCustomUrl.substring(0, tencentCustomUrl.length - 1);
-          }
-        } else {
-          tencentCustomUrl = 'None';
-        }
-
-        if (tencentPath.isEmpty || tencentPath == '/') {
-          tencentPath = 'None';
-        } else {
-          if (tencentPath.startsWith('/')) {
-            tencentPath = tencentPath.substring(1);
-          }
-          if (!tencentPath.endsWith('/')) {
-            tencentPath = '$tencentPath/';
-          }
-        }
-
-        if (tencentOptions.isEmpty) {
-          tencentOptions = 'None';
-        } else if (!tencentOptions.startsWith('?')) {
-          tencentOptions = '?$tencentOptions';
-        }
-
-        final tencentConfig = TencentConfigModel(
-          tencentSecretId,
-          tencentSecretKey,
-          tencentBucket,
-          tencentAppId,
-          tencentArea,
-          tencentPath,
-          tencentCustomUrl,
-          tencentOptions,
-        );
-        final tencentConfigJson = jsonEncode(tencentConfig);
-        final tencentConfigFile = await tencentFile;
-        await tencentConfigFile.writeAsString(tencentConfigJson);
-        showToast("腾讯云配置成功");
-      } catch (e) {
-        FLog.error(
-            className: 'TencentConfigPage',
-            methodName: 'saveTencentConfig',
-            text: formatErrorMessage({}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-        showToast("腾讯云配置错误");
-      }
-    }
-
-    if (jsonResult['aliyun'] != null) {
-      String aliyunKeyId = jsonResult['aliyun']['accessKeyId'] ?? '';
-      String aliyunKeySecret = jsonResult['aliyun']['accessKeySecret'] ?? '';
-      String aliyunBucket = jsonResult['aliyun']['bucket'] ?? '';
-      String aliyunArea = jsonResult['aliyun']['area'] ?? '';
-      String aliyunPath = jsonResult['aliyun']['path'] ?? '';
-      String aliyunCustomUrl = jsonResult['aliyun']['customUrl'] ?? '';
-      String aliyunOptions = jsonResult['aliyun']['options'] ?? '';
-
-      try {
-        if (aliyunCustomUrl.isNotEmpty) {
-          if (!aliyunCustomUrl.startsWith('http') && !aliyunCustomUrl.startsWith('https')) {
-            aliyunCustomUrl = 'http://$aliyunCustomUrl';
-          }
-          if (aliyunCustomUrl.endsWith('/')) {
-            aliyunCustomUrl = aliyunCustomUrl.substring(0, aliyunCustomUrl.length - 1);
-          }
-        } else {
-          aliyunCustomUrl = 'None';
-        }
-
-        if (aliyunPath.isEmpty || aliyunPath == '/') {
-          aliyunPath = 'None';
-        } else {
-          if (aliyunPath.startsWith('/')) {
-            aliyunPath = aliyunPath.substring(1);
-          }
-          if (!aliyunPath.endsWith('/')) {
-            aliyunPath = '$aliyunPath/';
-          }
-        }
-
-        if (aliyunOptions.isEmpty) {
-          aliyunOptions = 'None';
-        } else if (!aliyunOptions.startsWith('?')) {
-          aliyunOptions = '?$aliyunOptions';
-        }
-
-        final aliyunConfig = AliyunConfigModel(
-          aliyunKeyId,
-          aliyunKeySecret,
-          aliyunBucket,
-          aliyunArea,
-          aliyunPath,
-          aliyunCustomUrl,
-          aliyunOptions,
-        );
-        final aliyunConfigJson = jsonEncode(aliyunConfig);
-        final aliyunConfigFile = await aliyunFile;
-        await aliyunConfigFile.writeAsString(aliyunConfigJson);
-        showToast("阿里云配置成功");
-      } catch (e) {
-        FLog.error(
-            className: 'AliyunConfigPage',
-            methodName: 'saveAliyunConfig',
-            text: formatErrorMessage({}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-        showToast("阿里云配置错误");
-      }
-    }
-
-    if (jsonResult['upyun'] != null) {
-      String upyunBucket = jsonResult['upyun']['bucket'] ?? '';
-      String upyunOperator = jsonResult['upyun']['operator'] ?? '';
-      String upyunPassword = jsonResult['upyun']['password'] ?? '';
-      String upyunUrl = jsonResult['upyun']['url'] ?? '';
-      String upyunOptions = jsonResult['upyun']['options'] ?? '';
-      String upyunPath = jsonResult['upyun']['path'] ?? '';
-      String upyunAntiLeechToken = jsonResult['upyun']['antiLeechToken'] ?? '';
-      String upyunAntiLeechExpiration = jsonResult['upyun']['antiLeechExpiration'] ?? '';
-      try {
-        if (!upyunUrl.startsWith('http') && !upyunUrl.startsWith('https')) {
-          upyunUrl = 'http://$upyunUrl';
-        }
-
-        if (upyunUrl.endsWith('/')) {
-          upyunUrl = upyunUrl.substring(0, upyunUrl.length - 1);
-        }
-
-        if (upyunPath.isEmpty || upyunPath == '/') {
-          upyunPath = 'None';
-        } else {
-          if (upyunPath.startsWith('/')) {
-            upyunPath = upyunPath.substring(1);
-          }
-
-          if (!upyunPath.endsWith('/')) {
-            upyunPath = '$upyunPath/';
-          }
-        }
-
-        final upyunConfig = UpyunConfigModel(
-          upyunBucket,
-          upyunOperator,
-          upyunPassword,
-          upyunUrl,
-          upyunOptions,
-          upyunPath,
-          upyunAntiLeechToken,
-          upyunAntiLeechExpiration,
-        );
-        final upyunConfigJson = jsonEncode(upyunConfig);
-        final upyunConfigFile = await upyunFile;
-        await upyunConfigFile.writeAsString(upyunConfigJson);
-        showToast("又拍云配置成功");
-      } catch (e) {
-        FLog.error(
-            className: 'UpyunConfigPage',
-            methodName: 'upyunConfig',
-            text: formatErrorMessage({}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-        showToast("又拍云配置错误");
-      }
-    }
-    return true;
   }
 
   SimpleDialogOption _buildSimpleDialogOption(BuildContext context, String text, String value) {

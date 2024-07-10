@@ -40,7 +40,7 @@ class TencentManageAPI {
     'eu-frankfurt': '法兰克福'
   };
 
-  static Future<File> get _localFile async {
+  static Future<File> get localFile async {
     final path = await _localPath;
     String defaultUser = await Global.getUser();
     return ensureFileExists(File('$path/${defaultUser}_tencent_config.txt'));
@@ -53,7 +53,7 @@ class TencentManageAPI {
 
   static Future<String> readTencentConfig() async {
     try {
-      final file = await _localFile;
+      final file = await localFile;
       String contents = await file.readAsString();
       return contents;
     } catch (e) {
@@ -377,7 +377,7 @@ class TencentManageAPI {
 
       final tencentConfig = TencentConfigModel(secretId, secretKey, bucket, appId, area, path, customUrl, options);
       final tencentConfigJson = jsonEncode(tencentConfig);
-      final tencentConfigFile = await _localFile;
+      final tencentConfigFile = await localFile;
       await tencentConfigFile.writeAsString(tencentConfigJson);
       return ['success'];
     } catch (e) {
