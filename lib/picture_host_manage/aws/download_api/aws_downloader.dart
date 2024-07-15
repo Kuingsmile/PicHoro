@@ -73,6 +73,13 @@ class DownloadManager {
         String accessKeyId = configMap['accessKeyId'];
         String secretAccessKey = configMap['secretAccessKey'];
         String endpoint = configMap['endpoint'];
+        int? port;
+        if (endpoint.contains(':')) {
+          List<String> endpointList = endpoint.split(':');
+          endpoint = endpointList[0];
+          port = int.parse(endpointList[1]);
+        }
+        bool isEnableSSL = configMap['isEnableSSL'] ?? true;
         if (endpoint.contains('amazonaws.com')) {
           if (!endpoint.contains(region)) {
             endpoint = 's3.$region.amazonaws.com';
@@ -83,14 +90,18 @@ class DownloadManager {
         if (region == 'None') {
           minio = Minio(
             endPoint: endpoint,
+            port: port,
             accessKey: accessKeyId,
             secretKey: secretAccessKey,
+            useSSL: isEnableSSL,
           );
         } else {
           minio = Minio(
             endPoint: endpoint,
+            port: port,
             accessKey: accessKeyId,
             secretKey: secretAccessKey,
+            useSSL: isEnableSSL,
             region: region,
           );
         }
@@ -117,6 +128,13 @@ class DownloadManager {
         String accessKeyId = configMap['accessKeyId'];
         String secretAccessKey = configMap['secretAccessKey'];
         String endpoint = configMap['endpoint'];
+        int? port;
+        if (endpoint.contains(':')) {
+          List<String> endpointList = endpoint.split(':');
+          endpoint = endpointList[0];
+          port = int.parse(endpointList[1]);
+        }
+        bool isEnableSSL = configMap['isEnableSSL'] ?? true;
         if (endpoint.contains('amazonaws.com')) {
           if (!endpoint.contains(region)) {
             endpoint = 's3.$region.amazonaws.com';
@@ -127,14 +145,18 @@ class DownloadManager {
         if (region == 'None') {
           minio = Minio(
             endPoint: endpoint,
+            port: port,
             accessKey: accessKeyId,
             secretKey: secretAccessKey,
+            useSSL: isEnableSSL,
           );
         } else {
           minio = Minio(
             endPoint: endpoint,
+            port: port,
             accessKey: accessKeyId,
             secretKey: secretAccessKey,
+            useSSL: isEnableSSL,
             region: region,
           );
         }

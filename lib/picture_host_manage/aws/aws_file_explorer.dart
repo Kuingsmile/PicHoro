@@ -761,15 +761,20 @@ class AwsFileExplorerState extends loading_state.BaseLoadingPageState<AwsFileExp
                         ? 'None'
                         : widget.element['customUrl'];
                     String endpoint = configMap['endpoint'];
+                    bool isS3PathStyle = configMap['isS3PathStyle'] ?? false;
+                    bool isEnableSSL = configMap['isEnableSSL'] ?? true;
                     String shareUrlPrefix = '';
                     if (customUrl != 'None') {
                       shareUrlPrefix = '$customUrl/'.replaceAll(RegExp(r'\/+$'), '/');
                     } else {
                       if (endpoint.contains('amazonaws.com')) {
-                        shareUrlPrefix =
-                            'https://${widget.element['name']}.s3.${widget.element['region']}.amazonaws.com/';
+                        shareUrlPrefix = isS3PathStyle
+                            ? 'https://s3.${widget.element['region']}.amazonaws.com/${widget.element['name']}/'
+                            : 'https://${widget.element['name']}.s3.${widget.element['region']}.amazonaws.com/';
                       } else {
-                        shareUrlPrefix = 'https://${widget.element['name']}.$endpoint/';
+                        shareUrlPrefix = isS3PathStyle
+                            ? '${isEnableSSL ? 'https' : 'http'}://$endpoint/${widget.element['name']}/'
+                            : '${isEnableSSL ? 'https' : 'http'}://${widget.element['name']}.$endpoint/';
                       }
                     }
                     List multiUrls = [];
@@ -785,7 +790,7 @@ class AwsFileExplorerState extends loading_state.BaseLoadingPageState<AwsFileExp
                           rawurl = shareUrlPrefix + allInfoList[i].key;
                           fileName = allInfoList[i].key.split('/').last;
                         }
-                        finalFormatedurl = linkGenerateDict[Global.defaultLKformat]!(rawurl, fileName);
+                        finalFormatedurl = linkGeneratorMap[Global.defaultLKformat]!(rawurl, fileName);
 
                         multiUrls.add(finalFormatedurl);
                       }
@@ -1157,6 +1162,8 @@ class AwsFileExplorerState extends loading_state.BaseLoadingPageState<AwsFileExp
                                         ? 'None'
                                         : widget.element['customUrl'];
                                 String endpoint = configMap['endpoint'];
+                                bool isS3PathStyle = configMap['isS3PathStyle'] ?? false;
+                                bool isEnableSSL = configMap['isEnableSSL'] ?? true;
                                 String shareUrl = '';
                                 if (customUrl != 'None') {
                                   if (customUrl.endsWith('/')) {
@@ -1166,10 +1173,13 @@ class AwsFileExplorerState extends loading_state.BaseLoadingPageState<AwsFileExp
                                   Share.share(shareUrl);
                                 } else {
                                   if (endpoint.contains('amazonaws.com')) {
-                                    shareUrl =
-                                        'https://${widget.element['name']}.s3.${widget.element['region']}.amazonaws.com/${allInfoList[index].key}';
+                                    shareUrl = isS3PathStyle
+                                        ? 'https://s3.${widget.element['region']}.amazonaws.com/${widget.element['name']}/${allInfoList[index].key}'
+                                        : 'https://${widget.element['name']}.s3.${widget.element['region']}.amazonaws.com/${allInfoList[index].key}';
                                   } else {
-                                    shareUrl = 'https://${widget.element['name']}.$endpoint/${allInfoList[index].key}';
+                                    shareUrl = isS3PathStyle
+                                        ? '${isEnableSSL ? 'https' : 'http'}://$endpoint/${widget.element['name']}/${allInfoList[index].key}'
+                                        : '${isEnableSSL ? 'https' : 'http'}://${widget.element['name']}.$endpoint/${allInfoList[index].key}';
                                     Share.share(shareUrl);
                                   }
                                 }
@@ -1275,15 +1285,20 @@ class AwsFileExplorerState extends loading_state.BaseLoadingPageState<AwsFileExp
                                         ? 'None'
                                         : widget.element['customUrl'];
                                 String endpoint = configMap['endpoint'];
+                                bool isS3PathStyle = configMap['isS3PathStyle'] ?? false;
+                                bool isEnableSSL = configMap['isEnableSSL'] ?? true;
                                 String shareUrlPrefix = '';
                                 if (customUrl != 'None') {
                                   shareUrlPrefix = '$customUrl/'.replaceAll(RegExp(r'\/+$'), '/');
                                 } else {
                                   if (endpoint.contains('amazonaws.com')) {
-                                    shareUrlPrefix =
-                                        'https://${widget.element['name']}.s3.${widget.element['region']}.amazonaws.com/';
+                                    shareUrlPrefix = isS3PathStyle
+                                        ? 'https://s3.${widget.element['region']}.amazonaws.com/${widget.element['name']}/'
+                                        : 'https://${widget.element['name']}.s3.${widget.element['region']}.amazonaws.com/';
                                   } else {
-                                    shareUrlPrefix = 'https://${widget.element['name']}.$endpoint/';
+                                    shareUrlPrefix = isS3PathStyle
+                                        ? '${isEnableSSL ? 'https' : 'http'}://$endpoint/${widget.element['name']}/'
+                                        : '${isEnableSSL ? 'https' : 'http'}://${widget.element['name']}.$endpoint/';
                                   }
                                 }
 
@@ -1499,20 +1514,26 @@ class AwsFileExplorerState extends loading_state.BaseLoadingPageState<AwsFileExp
                   ? 'None'
                   : widget.element['customUrl'];
               String endpoint = configMap['endpoint'];
+              bool isS3PathStyle = configMap['isS3PathStyle'] ?? false;
+              bool isEnableSSL = configMap['isEnableSSL'] ?? true;
               String shareUrlPrefix = '';
               if (customUrl != 'None') {
                 shareUrlPrefix = '$customUrl/'.replaceAll(RegExp(r'\/+$'), '/');
               } else {
                 if (endpoint.contains('amazonaws.com')) {
-                  shareUrlPrefix = 'https://${widget.element['name']}.s3.${widget.element['region']}.amazonaws.com/';
+                  shareUrlPrefix = isS3PathStyle
+                      ? 'https://s3.${widget.element['region']}.amazonaws.com/${widget.element['name']}/'
+                      : 'https://${widget.element['name']}.s3.${widget.element['region']}.amazonaws.com/';
                 } else {
-                  shareUrlPrefix = 'https://${widget.element['name']}.$endpoint/';
+                  shareUrlPrefix = isS3PathStyle
+                      ? '${isEnableSSL ? 'https' : 'http'}://$endpoint/${widget.element['name']}/'
+                      : '${isEnableSSL ? 'https' : 'http'}://${widget.element['name']}.$endpoint/';
                 }
               }
               String format = await Global.getLKformat();
               String shareUrl = shareUrlPrefix + allInfoList[index].key;
               String filename = my_path.basename(allInfoList[index].key.split('/').last);
-              String formatedLink = linkGenerateDict[format]!(shareUrl, filename);
+              String formatedLink = linkGeneratorMap[format]!(shareUrl, filename);
               await flutter_services.Clipboard.setData(flutter_services.ClipboardData(text: formatedLink));
               if (mounted) {
                 Navigator.pop(context);

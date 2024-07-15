@@ -32,17 +32,15 @@ class LogPageState extends loading_state.BaseLoadingPageState<LogPage> {
         state = loading_state.LoadState.EMPTY;
         setState(() {});
       } else {
-        if (logs.length > 150) {
-          logs = logs.sublist(logs.length - 150, logs.length);
-        }
+        logs = logs.length > 150 ? logs.sublist(logs.length - 150, logs.length) : logs;
         for (var i = logs.length - 1; i >= 0; i--) {
           var id = logs[i].id.toString();
-          showedLogMap[id] = {};
-          showedLogMap[id]['记录时间'] = logs[i].timestamp;
-          showedLogMap[id]['类名'] = logs[i].className;
-          showedLogMap[id]['方法名'] = logs[i].methodName;
-          showedLogMap[id]['日志级别'] = logs[i].logLevel.toString();
-          showedLogMap[id]['日志内容'] = logs[i].text;
+          showedLogMap[id] = {}
+            ..['记录时间'] = logs[i].timestamp
+            ..['类名'] = logs[i].className
+            ..['方法名'] = logs[i].methodName
+            ..['日志级别'] = logs[i].logLevel.toString()
+            ..['日志内容'] = logs[i].text;
         }
         setState(() {
           state = loading_state.LoadState.SUCCESS;
@@ -74,7 +72,7 @@ class LogPageState extends loading_state.BaseLoadingPageState<LogPage> {
     );
   }
 
-  buildLog(String index) {
+  buildLog(String id) {
     Widget table = Column(
       children: [
         DataTable(
@@ -94,7 +92,7 @@ class LogPageState extends loading_state.BaseLoadingPageState<LogPage> {
             DataColumn(
               label: Center(
                 child: SelectableText(
-                  showedLogMap[index]['记录时间'],
+                  showedLogMap[id]['记录时间'],
                   style: const TextStyle(
                     fontSize: 12,
                     color: Colors.blue,
@@ -122,7 +120,7 @@ class LogPageState extends loading_state.BaseLoadingPageState<LogPage> {
                 DataCell(
                   Center(
                     child: SelectableText(
-                      showedLogMap[index]['类名'],
+                      showedLogMap[id]['类名'],
                       style: const TextStyle(
                         fontSize: 14,
                         color: Colors.black,
@@ -150,7 +148,7 @@ class LogPageState extends loading_state.BaseLoadingPageState<LogPage> {
                 DataCell(
                   Center(
                     child: SelectableText(
-                      showedLogMap[index]['方法名'],
+                      showedLogMap[id]['方法名'],
                       style: const TextStyle(
                         fontSize: 14,
                         color: Colors.black,
@@ -178,7 +176,7 @@ class LogPageState extends loading_state.BaseLoadingPageState<LogPage> {
                 DataCell(
                   Center(
                     child: SelectableText(
-                      showedLogMap[index]['日志级别'],
+                      showedLogMap[id]['日志级别'],
                       style: const TextStyle(
                         fontSize: 14,
                         color: Colors.black,
@@ -204,7 +202,7 @@ class LogPageState extends loading_state.BaseLoadingPageState<LogPage> {
                 child: Scrollbar(
                   child: SingleChildScrollView(
                     child: SelectableText(
-                      showedLogMap[index.toString()]['日志内容'],
+                      showedLogMap[id.toString()]['日志内容'],
                       style: const TextStyle(
                         fontSize: 14,
                         color: Colors.black,
@@ -220,7 +218,6 @@ class LogPageState extends loading_state.BaseLoadingPageState<LogPage> {
 
   exportLogToFile(BuildContext context) async {
     try {
-      var buffer = StringBuffer();
       final logs = await FLog.getAllLogs();
       if (logs.isEmpty) {
         return showToast('暂无日志');
@@ -231,13 +228,14 @@ class LogPageState extends loading_state.BaseLoadingPageState<LogPage> {
       Map<String, dynamic> logMap = {};
       for (var i = logs.length - 1; i >= 0; i--) {
         var id = logs[i].id.toString();
-        logMap[id] = {};
-        logMap[id]['记录时间'] = logs[i].timestamp;
-        logMap[id]['类名'] = logs[i].className;
-        logMap[id]['方法名'] = logs[i].methodName;
-        logMap[id]['日志级别'] = logs[i].logLevel.toString();
-        logMap[id]['日志内容'] = logs[i].text;
+        logMap[id] = {}
+          ..['记录时间'] = logs[i].timestamp
+          ..['类名'] = logs[i].className
+          ..['方法名'] = logs[i].methodName
+          ..['日志级别'] = logs[i].logLevel.toString()
+          ..['日志内容'] = logs[i].text;
       }
+      var buffer = StringBuffer();
       logMap.forEach((key, value) {
         buffer.write('$key\n');
         value.forEach((key, value) {
@@ -245,8 +243,7 @@ class LogPageState extends loading_state.BaseLoadingPageState<LogPage> {
         });
         buffer.write('\n');
       });
-      var directory = await getExternalStorageDirectory();
-      var path = directory!.path;
+      var path = (await getExternalStorageDirectory())!.path;
       String filePath = '$path/log';
       await Directory(filePath).create(recursive: true);
       String currentTimestamp = DateTime.now().millisecondsSinceEpoch.toString();
@@ -257,7 +254,6 @@ class LogPageState extends loading_state.BaseLoadingPageState<LogPage> {
         return showCupertinoAlertDialog(
             context: context, title: '导出成功', content: '导出成功，日志已复制到剪切板\n文件路径：\n${file.path}');
       }
-      return;
     } catch (e) {
       FLog.error(
           className: 'LogPageState',
@@ -267,7 +263,6 @@ class LogPageState extends loading_state.BaseLoadingPageState<LogPage> {
       if (context.mounted) {
         return showToastWithContext(context, '导出失败');
       }
-      return;
     }
   }
 

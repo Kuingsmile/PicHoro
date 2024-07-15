@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:mime/mime.dart';
 import 'package:horopic/picture_host_configure/configure_store/configure_template.dart';
 
 import 'package:path/path.dart' as my_path;
@@ -73,7 +74,7 @@ Future<File> ensureFileExists(File file) async {
   return file;
 }
 
-//默认图床参数和配置文件名对应关系
+/// 默认图床参数和配置文件名对应关系
 String getpdconfig(String defaultConfig) {
   return defaultConfig == 'lsky.pro'
       ? 'host_config'
@@ -82,8 +83,8 @@ String getpdconfig(String defaultConfig) {
           : '${defaultConfig}_config';
 }
 
-//defaultLKformat和对应的转换函数
-Map<String, Function> linkGenerateDict = {
+/// defaultLKformat和对应的转换函数
+Map<String, Function> linkGeneratorMap = {
   'rawurl': generateUrl,
   'html': generateHtmlFormatedUrl,
   'markdown': generateMarkdownFormatedUrl,
@@ -91,6 +92,15 @@ Map<String, Function> linkGenerateDict = {
   'markdown_with_link': generateMarkdownWithLinkFormatedUrl,
   'custom': generateCustomFormatedUrl,
 };
+
+getFormatedUrl(String rawUrl, String fileName, [String? defaultLKformat]) {
+  defaultLKformat ??= Global.defaultLKformat;
+  if (linkGeneratorMap.containsKey(defaultLKformat)) {
+    return linkGeneratorMap[defaultLKformat]!(rawUrl, fileName);
+  } else {
+    return rawUrl;
+  }
+}
 
 generateBasicAuth(String username, String password) {
   return 'Basic ${base64Encode(utf8.encode('$username:$password'))}';
@@ -153,7 +163,7 @@ downloadTxtFile(String urlpath, String fileName, Map<String, dynamic>? headers) 
   }
 }
 
-//弹出对话框
+/// 弹出对话框
 showAlertDialog({
   bool? barrierDismissible,
   required BuildContext context,
@@ -211,7 +221,7 @@ showAlertDialog({
       });
 }
 
-//cupertino风格的alertDialog
+/// cupertino风格的alertDialog
 showCupertinoAlertDialog({
   bool? barrierDismissible,
   required BuildContext context,
@@ -260,7 +270,7 @@ showCupertinoAlertDialog({
       });
 }
 
-//cupertino风格的alertDialog Style 2
+/// cupertino风格的alertDialog Style 2
 showCupertinoAlertDialogWithConfirmFunc({
   required BuildContext context,
   required String title,
@@ -290,12 +300,12 @@ showCupertinoAlertDialogWithConfirmFunc({
       });
 }
 
-//弹出toast
+/// 弹出toast
 showToast(String msg) {
   Fluttertoast.showToast(msg: msg, toastLength: Toast.LENGTH_SHORT, timeInSecForIosWeb: 2, fontSize: 16.0);
 }
 
-//带context的toast
+/// 带context的toast
 showToastWithContext(BuildContext context, String msg) {
   Fluttertoast.showToast(
       msg: msg,
@@ -306,7 +316,7 @@ showToastWithContext(BuildContext context, String msg) {
       fontSize: 16.0);
 }
 
-//底部选择框
+/// 底部选择框
 void bottomPickerSheet(BuildContext context, Function imageFromCamera, Function imageFromGallery) {
   showModalBottomSheet(
       context: context,
@@ -335,7 +345,7 @@ void bottomPickerSheet(BuildContext context, Function imageFromCamera, Function 
       });
 }
 
-//title text
+/// title text
 Widget titleText(String title,
     {double? fontsize = 20, FontWeight fontWeight = FontWeight.bold, Color? color = Colors.white}) {
   return Text(
@@ -348,44 +358,36 @@ Widget titleText(String title,
   );
 }
 
-//random String Generator
+/// random String Generator
 String randomStringGenerator(int length) {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   final Random rnd = Random();
   return String.fromCharCodes(Iterable.generate(length, (_) => chars.codeUnitAt(rnd.nextInt(chars.length))));
 }
 
-//rename file with timestamp
+/// rename file with timestamp
 String renameFileWithTimestamp() {
-  var now = DateTime.now();
-  var timestamp = now.millisecondsSinceEpoch;
-  var newFileName = timestamp.toString();
-  return newFileName;
+  return DateTime.now().millisecondsSinceEpoch.toString();
 }
 
-//rename file with random string
+/// rename file with random string
 String renameFileWithRandomString(int length) {
-  String randomString = randomStringGenerator(length);
-  return randomString;
+  return randomStringGenerator(length);
 }
 
-//rename picture with timestamp
+/// rename picture with timestamp
 renamePictureWithTimestamp(File file) {
-  var path = file.path;
-  var fileExtension = my_path.extension(path);
-  var newFileName = renameFileWithTimestamp() + fileExtension;
-  return newFileName;
+  var fileExtension = my_path.extension(file.path);
+  return renameFileWithTimestamp() + fileExtension;
 }
 
-//rename picture with random string
+/// rename picture with random string
 renamePictureWithRandomString(File file) {
-  var path = file.path;
-  var fileExtension = my_path.extension(path);
-  var newFileName = renameFileWithRandomString(30) + fileExtension;
-  return newFileName;
+  var fileExtension = my_path.extension(file.path);
+  return renameFileWithRandomString(30) + fileExtension;
 }
 
-//rename picture with custom format
+/// rename picture with custom format
 renamePictureWithCustomFormat(File file) async {
   String customFormat = await Global.getCustomeRenameFormat();
   var path = file.path;
@@ -426,39 +428,33 @@ renamePictureWithCustomFormat(File file) async {
   return newFileName;
 }
 
-//generate url formated url by raw url
+/// generate url formated url by raw url
 String generateUrl(String rawUrl, String fileName) {
-  if (Global.isURLEncode) {
-    rawUrl = Uri.encodeFull(rawUrl);
-  }
-  return rawUrl;
+  return Global.isURLEncode ? Uri.encodeFull(rawUrl) : rawUrl;
 }
 
 String generateHtmlFormatedUrl(String rawUrl, String fileName) {
-  String encodedUrl = Global.isURLEncode ? Uri.encodeFull(rawUrl) : rawUrl;
+  String encodedUrl = generateUrl(rawUrl, fileName);
   return '<img src="$encodedUrl" alt="${my_path.basename(fileName)}" title="${my_path.basename(fileName)}" />';
 }
 
 String generateMarkdownFormatedUrl(String rawUrl, String fileName) {
-  String encodedUrl = Global.isURLEncode ? Uri.encodeFull(rawUrl) : rawUrl;
+  String encodedUrl = generateUrl(rawUrl, fileName);
   return '![${my_path.basename(fileName)}]($encodedUrl)';
 }
 
 String generateMarkdownWithLinkFormatedUrl(String rawUrl, String fileName) {
-  if (Global.isURLEncode) {
-    rawUrl = Uri.encodeFull(rawUrl);
-  }
-  String markdownWithLinkFormatedUrl = '[![${my_path.basename(fileName)}]($rawUrl)]($rawUrl)';
-  return markdownWithLinkFormatedUrl;
+  String encodedUrl = generateUrl(rawUrl, fileName);
+  return '[![${my_path.basename(fileName)}]($encodedUrl)]($encodedUrl)';
 }
 
-String generateBBcodeFormatedUrl(String url, String fileName) {
-  String encodedUrl = Global.isURLEncode ? Uri.encodeFull(url) : url;
+String generateBBcodeFormatedUrl(String rawUrl, String fileName) {
+  String encodedUrl = generateUrl(rawUrl, fileName);
   return '[img]$encodedUrl[/img]';
 }
 
-String generateCustomFormatedUrl(String url, String filename) {
-  String encodeUrl = Global.isURLEncode ? Uri.encodeFull(url) : url;
+String generateCustomFormatedUrl(String rawUrl, String filename) {
+  String encodeUrl = generateUrl(rawUrl, filename);
   return Global.customLinkFormat.replaceAll(r'$fileName', my_path.basename(filename)).replaceAll(r'$url', encodeUrl);
 }
 
@@ -472,7 +468,7 @@ String getFileSize(int fileSize) {
               : '${(fileSize / 1024 / 1024 / 1024).toStringAsFixed(2)}GB';
 }
 
-//选择文件图标
+/// 选择文件图标
 String selectIcon(String ext) {
   if (ext == '') {
     return 'assets/icons/unknown.png';
@@ -492,30 +488,19 @@ String selectIcon(String ext) {
   return iconPath;
 }
 
-//获得content-type
-String? getContentType(String ext) {
+/// 获得content-type
+String getContentType(String ext) {
   if (!ext.startsWith('.')) {
     ext = '.$ext';
   }
-  Map imageContentType = {
-    '.fax': 'image/fax',
-    '.gif': 'image/gif',
-    '.ico': 'image/x-icon',
-    '.jpg': 'image/jpeg',
-    '.jpeg': 'image/jpeg',
-    '.jpe': 'image/jpeg',
-    '.jfif': 'image/jpeg',
-    '.tif': 'image/tiff',
-    '.net': 'image/pnetvue',
-    '.png': 'image/png',
-    '.rp': 'image/vnd.rn-realpix',
-    '.tiff': 'image/tiff',
-    '.wbmp': 'image/vnd.wap.wbmp',
-  };
-  return imageContentType[ext];
+  try {
+    return lookupMimeType('file${ext.toLowerCase()}') ?? 'application/octet-stream';
+  } catch (e) {
+    return 'application/octet-stream';
+  }
 }
 
-//格式化错误信息
+/// 格式化错误信息
 formatErrorMessage(
   Map parameters,
   String error, {
@@ -544,7 +529,7 @@ formatErrorMessage(
   return formateTemplate;
 }
 
-//错误日志生成函数
+/// 错误日志生成函数
 flogErr(Object e, Map parameters, String className, String methodName) {
   FLog.error(
       className: className,
@@ -555,7 +540,7 @@ flogErr(Object e, Map parameters, String className, String methodName) {
       dataLogType: DataLogType.ERRORS.toString());
 }
 
-//清理下载的apk文件
+/// 清理下载的apk文件
 Future<void> deleteApkFile() async {
   try {
     var directory = await getExternalStorageDirectory();
@@ -574,7 +559,7 @@ Future<void> deleteApkFile() async {
   }
 }
 
-//APPinit
+/// APPinit
 mainInit() async {
   await Permissionutils.askPermissionStorage();
   await Permissionutils.askPermissionCamera();
@@ -589,25 +574,25 @@ mainInit() async {
   await Global.setPShost(await Global.getPShost());
   await ConfigureStoreFile().generateConfigureFile();
   Global.setLKformat(await Global.getLKformat());
-  Global.setTimeStamp(await Global.getTimeStamp());
-  Global.setRandomName(await Global.getRandomName());
-  Global.setCopyLink(await Global.getCopyLink());
+  Global.setIsTimeStamp(await Global.getIsTimeStamp());
+  Global.setIsRandomName(await Global.getIsRandomName());
+  Global.setIsCopyLink(await Global.getIsCopyLink());
   Global.setIsURLEncode(await Global.getIsURLEncode());
   await Global.setShowedPBhost(await Global.getShowedPBhost());
-  Global.setDeleteLocal(await Global.getDeleteLocal());
+  Global.setIsDeleteLocal(await Global.getIsDeleteLocal());
   Global.setCustomLinkFormat(await Global.getCustomLinkFormat());
-  Global.setDeleteCloud(await Global.getDeleteCloud());
-  Global.setCustomeRename(await Global.getCustomeRename());
+  Global.setIsDeleteCloud(await Global.getIsDeleteCloud());
+  Global.setIsCustomeRename(await Global.getIsCustomeRename());
   Global.setCustomeRenameFormat(await Global.getCustomeRenameFormat());
   Global.setTodayAlistUpdate(await Global.getTodayAlistUpdate());
   Global.setBucketCustomUrl(await Global.getBucketCustomUrl());
 
   //初始化图片压缩选项
-  Global.setisCompress(await Global.getisCompress());
+  Global.setIsCompress(await Global.getIsCompress());
   Global.setminWidth(await Global.getminWidth());
   Global.setminHeight(await Global.getminHeight());
-  Global.setquality(await Global.getquality());
-  Global.setdefaultCompressFormat(await Global.getdefaultCompressFormat());
+  Global.setQuality(await Global.getQuality());
+  Global.setDefaultCompressFormat(await Global.getDefaultCompressFormat());
 
   //初始化图床相册数据库
   await Global.setDatabase(await Global.getDatabase());

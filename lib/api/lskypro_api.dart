@@ -1,7 +1,6 @@
 import 'package:dio/dio.dart';
 import 'dart:convert';
 import 'package:horopic/utils/common_functions.dart';
-import 'package:horopic/utils/global.dart';
 import 'package:path/path.dart' as my_path;
 
 //兰空V2
@@ -15,7 +14,6 @@ class LskyproImageUploadUtils {
     CancelToken? cancelToken,
   }) async {
     try {
-      String formatedURL = '';
       FormData formdata;
       String albumId = configMap['album_id'] ?? 'None';
       String strategyId = configMap['strategy_id'] ?? 'None';
@@ -61,12 +59,8 @@ class LskyproImageUploadUtils {
         Map pictureKeyMap = Map.from(configMap);
         pictureKeyMap['deletekey'] = response.data!['data']['key'];
         String pictureKey = jsonEncode(pictureKeyMap);
+        String formatedURL = getFormatedUrl(returnUrl, name);
 
-        if (Global.isCopyLink == true) {
-          formatedURL = linkGenerateDict[Global.defaultLKformat]!(returnUrl, name);
-        } else {
-          formatedURL = returnUrl;
-        }
         return ["success", formatedURL, returnUrl, pictureKey, displayUrl];
       } else {
         return ["failed"];

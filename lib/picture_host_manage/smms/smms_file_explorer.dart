@@ -527,7 +527,7 @@ class SmmsFileExplorerState extends loading_state.BaseLoadingPageState<SmmsFileE
                         String fileName = '';
                         rawurl = allInfoList[i]['url'];
                         fileName = allInfoList[i]['filename'];
-                        finalFormatedurl = linkGenerateDict[Global.defaultLKformat]!(rawurl, fileName);
+                        finalFormatedurl = linkGeneratorMap[Global.defaultLKformat]!(rawurl, fileName);
                         multiUrls.add(finalFormatedurl);
                       }
                     }
@@ -939,7 +939,7 @@ class SmmsFileExplorerState extends loading_state.BaseLoadingPageState<SmmsFileE
               String format = await Global.getLKformat();
               String shareUrl = allInfoList[index]['url'];
               String filename = my_path.basename(allInfoList[index]['filename']);
-              String formatedLink = linkGenerateDict[format]!(shareUrl, filename);
+              String formatedLink = linkGeneratorMap[format]!(shareUrl, filename);
               await flutter_services.Clipboard.setData(flutter_services.ClipboardData(text: formatedLink));
               if (mounted) {
                 Navigator.pop(context);

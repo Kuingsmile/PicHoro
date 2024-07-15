@@ -1,11 +1,9 @@
-import 'dart:io';
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:f_logs/f_logs.dart';
 import 'package:fluro/fluro.dart';
-import 'package:path_provider/path_provider.dart';
 
 import 'package:horopic/router/application.dart';
 import 'package:horopic/utils/common_functions.dart';
@@ -48,12 +46,8 @@ class HostConfigState extends State<HostConfig> {
       Map configMap = await LskyproManageAPI.getConfigMap();
       _hostController.text = configMap['host'] ?? '';
       _strategyIdController.text = configMap['strategy_id'] ?? '';
-      if (configMap['album_id'] != 'None' && configMap['album_id'] != null) {
-        _albumIdController.text = configMap['album_id'];
-      } else {
-        _albumIdController.clear();
-      }
       _tokenController = configMap['token'] ?? '';
+      setControllerText(_albumIdController, configMap['album_id']);
       setState(() {});
     } catch (e) {
       FLog.error(
@@ -479,21 +473,20 @@ class HostConfigState extends State<HostConfig> {
   }
 
   Future _saveHostConfig() async {
-    final host = _hostController.text;
+    String host = _hostController.text.trim();
+    String username = _usernameController.text.trim();
+    String passwd = _passwdController.text.trim();
+    String albumID = _albumIdController.text.trim();
+    if (albumID.isEmpty) {
+      albumID = 'None';
+    }
+    String strategyId = _strategyIdController.text.trim();
     String token = 'Bearer ';
-    if (_tokenController.isEmpty && (_usernameController.text.isEmpty || _passwdController.text.isEmpty)) {
+    if (_tokenController.isEmpty && (username.isEmpty || passwd.isEmpty)) {
       showToast('用户名或密码为空');
       return;
     }
-    if (_usernameController.text.isNotEmpty && _passwdController.text.isNotEmpty) {
-      String albumID = 'None';
-      if (_albumIdController.text.isNotEmpty) {
-        albumID = _albumIdController.text;
-      }
-      final username = _usernameController.text;
-      final passwd = _passwdController.text;
-
-      final strategyId = _strategyIdController.text;
+    if (username.isNotEmpty && passwd.isNotEmpty) {
       BaseOptions options = setBaseOptions();
       options.headers = {
         "Accept": "application/json",
@@ -514,7 +507,7 @@ class HostConfigState extends State<HostConfig> {
           _tokenController = token;
           final hostConfig = HostConfigModel(host, token, strategyId.toString(), albumID.toString());
           final hostConfigJson = jsonEncode(hostConfig);
-          final hostConfigFile = await localFile;
+          final hostConfigFile = await LskyproManageAPI.localFile;
           hostConfigFile.writeAsString(hostConfigJson);
           setState(() {});
           if (context.mounted) {
@@ -548,11 +541,6 @@ class HostConfigState extends State<HostConfig> {
         return;
       }
     } else {
-      String albumID = 'None';
-      if (_albumIdController.text.isNotEmpty) {
-        albumID = _albumIdController.text;
-      }
-      final strategyId = _strategyIdController.text;
       BaseOptions options = setBaseOptions();
       options.headers = {
         "Accept": "application/json",
@@ -564,7 +552,7 @@ class HostConfigState extends State<HostConfig> {
         if (response.statusCode == 200 && response.data['status'] == true) {
           final hostConfig = HostConfigModel(host, _tokenController, strategyId.toString(), albumID.toString());
           final hostConfigJson = jsonEncode(hostConfig);
-          final hostConfigFile = await localFile;
+          final hostConfigFile = await LskyproManageAPI.localFile;
           hostConfigFile.writeAsString(hostConfigJson);
           if (context.mounted) {
             return showCupertinoAlertDialog(
@@ -591,14 +579,13 @@ class HostConfigState extends State<HostConfig> {
 
   checkHostConfig() async {
     try {
-      String configData = await readHostConfig();
-      if (configData == "") {
+      Map configMap = await LskyproManageAPI.getConfigMap();
+      if (configMap.isEmpty) {
         if (context.mounted) {
           return showCupertinoAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");
         }
         return;
       }
-      Map configMap = jsonDecode(configData);
       BaseOptions options = setBaseOptions();
       options.headers = {
         "Authorization": configMap["token"],
@@ -641,23 +628,6 @@ class HostConfigState extends State<HostConfig> {
         return showCupertinoAlertDialog(context: context, title: "检查失败!", content: e.toString());
       }
     }
-  }
-
-  Future<File> get localFile async {
-    final path = await _localPath;
-    String defaultUser = await Global.getUser();
-    return ensureFileExists(File('$path/${defaultUser}_host_config.txt'));
-  }
-
-  Future<String> get _localPath async {
-    final directory = await getApplicationDocumentsDirectory();
-    return directory.path;
-  }
-
-  Future<String> readHostConfig() async {
-    final file = await localFile;
-    String contents = await file.readAsString();
-    return contents;
   }
 
   _setdefault() async {

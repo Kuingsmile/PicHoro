@@ -45,31 +45,22 @@ class AlistConfigureStoreEditState extends State<AlistConfigureStoreEdit> {
         switch (element) {
           case 'remarkName':
             _remarkNameController.text = widget.psInfo[element];
-            break;
           case 'host':
             _hostController.text = widget.psInfo[element];
-            break;
           case 'adminToken':
             _adminTokenController.text = widget.psInfo[element];
-            break;
           case 'alistusername':
             _alistusernameController.text = widget.psInfo[element];
-            break;
           case 'password':
             _passwordController.text = widget.psInfo[element];
-            break;
           case 'token':
             _tokenController.text = widget.psInfo[element];
-            break;
           case 'uploadPath':
             _uploadPathController.text = widget.psInfo[element];
-            break;
           case 'webPath':
             _webPathController.text = widget.psInfo[element];
-            break;
           case 'customUrl':
             _customUrlController.text = widget.psInfo[element];
-            break;
         }
       }
     }

@@ -1,6 +1,5 @@
 import 'package:dio/dio.dart';
 import 'package:horopic/utils/common_functions.dart';
-import 'package:horopic/utils/global.dart';
 import 'package:path/path.dart' as my_path;
 
 class SmmsImageUploadUtils {
@@ -39,8 +38,7 @@ class SmmsImageUploadUtils {
       );
       if (response.statusCode == 200 && response.data?['success'] == true) {
         var {'url': returnUrl as String, 'hash': pictureKey as String} = response.data?['data'];
-        String formatedURL =
-            Global.isCopyLink == true ? linkGenerateDict[Global.defaultLKformat]!(returnUrl, name) : returnUrl;
+        String formatedURL = getFormatedUrl(returnUrl, name);
         return ["success", formatedURL, returnUrl, pictureKey];
       } else if (response.data?['code'] == 'image_repeated' && response.data?['images'] is String) {
         String returnUrl = response.data?['images'];
@@ -53,8 +51,7 @@ class SmmsImageUploadUtils {
             orElse: () => null,
           )?['hash'];
           if (pictureKey != null) {
-            String formatedURL =
-                Global.isCopyLink == true ? linkGenerateDict[Global.defaultLKformat]!(returnUrl, name) : returnUrl;
+            String formatedURL = getFormatedUrl(returnUrl, name);
             return ["success", formatedURL, returnUrl, pictureKey];
           }
         }

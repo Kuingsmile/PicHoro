@@ -55,7 +55,7 @@ class SmmsFileInformationState extends State<SmmsFileInformation> {
             subtitle: SelectableText(widget.fileMap['created_at']),
           ),
           ListTile(
-            title: const Text('文件url'),
+            title: const Text('文件链接'),
             subtitle: SelectableText(widget.fileMap['url']),
           ),
         ],

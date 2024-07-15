@@ -732,11 +732,15 @@ class AlistFileExplorerState extends loading_state.BaseLoadingPageState<AlistFil
                         shareUrl = res[1]['raw_url'];
                       } else {
                         shareUrl = '${configMap['host']}/d${widget.bucketPrefix}${downloadList[i]['name']}';
-                        shareUrl += '?sign=${res[1]['sign']}';
+                        if (res[1]['sign'] != null && res[1]['sign'].isNotEmpty) {
+                          shareUrl += '?sign=${res[1]['sign']}';
+                        }
                       }
                     } else {
                       shareUrl = '${configMap['host']}/d${widget.bucketPrefix}${downloadList[i]['name']}';
-                      shareUrl += '?sign=${downloadList[i]['sign']}';
+                      if (downloadList[i]['sign'] != null && downloadList[i]['sign'].isNotEmpty) {
+                        shareUrl += '?sign=${downloadList[i]['sign']}';
+                      }
                     }
                     Map downloadMap = Map.from(widget.element);
                     List downloadKeys = downloadList[i].keys.toList();
@@ -790,10 +794,12 @@ class AlistFileExplorerState extends loading_state.BaseLoadingPageState<AlistFil
                           fileName = allInfoList[i]['name'];
                         } else {
                           rawurl = '${configMap['host']}/d${widget.bucketPrefix}${allInfoList[i]['name']}';
-                          rawurl = '$rawurl?sign=${allInfoList[i]['sign']}';
+                          if (allInfoList[i]['sign'] != null && allInfoList[i]['sign'].isNotEmpty) {
+                            rawurl = '$rawurl?sign=${allInfoList[i]['sign']}';
+                          }
                           fileName = allInfoList[i]['name'];
                         }
-                        finalFormatedurl = linkGenerateDict[Global.defaultLKformat]!(rawurl, fileName);
+                        finalFormatedurl = getFormatedUrl(rawurl, fileName);
                         multiUrls.add(finalFormatedurl);
                       }
                     }
@@ -1125,26 +1131,12 @@ class AlistFileExplorerState extends loading_state.BaseLoadingPageState<AlistFil
                           children: [
                             SlidableAction(
                               onPressed: (BuildContext context) async {
-                                showToast('开始获取下载链接');
                                 String shareUrl = '';
                                 Map configMap = await AlistManageAPI.getConfigMap();
-                                var res = await AlistManageAPI.getFileInfo(
-                                  widget.bucketPrefix + allInfoList[index]['name'],
-                                );
-                                if (res[0] == 'success') {
-                                  if (res[1]['raw_url'] != "" && res[1]['raw_url'] != null) {
-                                    shareUrl = res[1]['raw_url'];
-                                  } else {
-                                    shareUrl =
-                                        '${configMap['host']}/d${widget.bucketPrefix}${allInfoList[index]['name']}';
-                                    shareUrl += '?sign=${res[1]['sign']}';
-                                  }
-                                } else {
-                                  shareUrl =
-                                      '${configMap['host']}/d${widget.bucketPrefix}${allInfoList[index]['name']}';
+                                shareUrl = '${configMap['host']}/d${widget.bucketPrefix}${allInfoList[index]['name']}';
+                                if (allInfoList[index]['sign'] != null && allInfoList[index]['sign'].isNotEmpty) {
                                   shareUrl += '?sign=${allInfoList[index]['sign']}';
                                 }
-
                                 Share.share(shareUrl);
                               },
                               autoClose: true,
@@ -1243,30 +1235,13 @@ class AlistFileExplorerState extends loading_state.BaseLoadingPageState<AlistFil
                                   String shareUrl = '';
                                   Map configMap = await AlistManageAPI.getConfigMap();
                                   int newImageIndex = index - dirAllInfoList.length;
-                                  /*var res = await AlistManageAPI.getFileInfo(
-                                    widget.bucketPrefix +
-                                        allInfoList[index]['name'],
-                                  );
-                                  if (res[0] == 'success') {
-                                    if (res[1]['raw_url'] != "" &&
-                                        res[1]['raw_url'] != null) {
-                                      shareUrl = res[1]['raw_url'];
-                                    } else {
-                                      shareUrl =
-                                          '${configMap['host']}/d${widget.bucketPrefix}${allInfoList[index]['name']}';
-                                      shareUrl += '?sign=${res[1]['sign']}';
-                                    }
-                                  } else {
-                                    shareUrl =
-                                        '${configMap['host']}/d${widget.bucketPrefix}${allInfoList[index]['name']}';
-                                    shareUrl +=
-                                        '?sign=${allInfoList[index]['sign']}';
-                                  }*/
                                   for (int i = dirAllInfoList.length; i < allInfoList.length; i++) {
                                     if (Global.imgExt.contains(allInfoList[i]['name'].split('.').last.toLowerCase())) {
                                       shareUrl =
                                           '${configMap['host']}/d${widget.bucketPrefix}${allInfoList[i]['name']}';
-                                      shareUrl += '?sign=${allInfoList[i]['sign']}';
+                                      if (allInfoList[i]['sign'] != null && allInfoList[i]['sign'].isNotEmpty) {
+                                        shareUrl += '?sign=${allInfoList[i]['sign']}';
+                                      }
                                       urlList += '$shareUrl,';
                                     } else if (i < index) {
                                       newImageIndex--;
@@ -1285,7 +1260,9 @@ class AlistFileExplorerState extends loading_state.BaseLoadingPageState<AlistFil
 
                                   shareUrl =
                                       '${configMap['host']}/d${widget.bucketPrefix}${allInfoList[index]['name']}';
-                                  shareUrl += '?sign=${allInfoList[index]['sign']}';
+                                  if (allInfoList[index]['sign'] != null && allInfoList[index]['sign'].isNotEmpty) {
+                                    shareUrl += '?sign=${allInfoList[index]['sign']}';
+                                  }
                                   Map<String, dynamic> headers = {};
                                   if (context.mounted) {
                                     Application.router.navigateTo(this.context,
@@ -1306,12 +1283,16 @@ class AlistFileExplorerState extends loading_state.BaseLoadingPageState<AlistFil
                                     } else {
                                       shareUrl =
                                           '${configMap['host']}/d${widget.bucketPrefix}${allInfoList[index]['name']}';
-                                      shareUrl += '?sign=${res[1]['sign']}';
+                                      if (res[1]['sign'] != null && res[1]['sign'].isNotEmpty) {
+                                        shareUrl += '?sign=${res[1]['sign']}';
+                                      }
                                     }
                                   } else {
                                     shareUrl =
                                         '${configMap['host']}/d${widget.bucketPrefix}${allInfoList[index]['name']}';
-                                    shareUrl += '?sign=${allInfoList[index]['sign']}';
+                                    if (allInfoList[index]['sign'] != null && allInfoList[index]['sign'].isNotEmpty) {
+                                      shareUrl += '?sign=${allInfoList[index]['sign']}';
+                                    }
                                   }
                                   showToast('开始获取文件');
                                   String filePath = await downloadTxtFile(shareUrl, allInfoList[index]['name'], null);
@@ -1337,7 +1318,10 @@ class AlistFileExplorerState extends loading_state.BaseLoadingPageState<AlistFil
                                         .contains(allInfoList[i]['name'].split('.').last.toLowerCase())) {
                                       shareUrl =
                                           '${configMap['host']}/d${widget.bucketPrefix}${allInfoList[i]['name']}';
-                                      shareUrl += '?sign=${allInfoList[i]['sign']}';
+                                      if (allInfoList[i]['sign'] != null && allInfoList[i]['sign'].isNotEmpty) {
+                                        shareUrl += '?sign=${allInfoList[i]['sign']}';
+                                      }
+
                                       videoList.add({"url": shareUrl, "name": allInfoList[i]['name']});
                                     } else if (i < index) {
                                       newImageIndex--;
@@ -1362,14 +1346,18 @@ class AlistFileExplorerState extends loading_state.BaseLoadingPageState<AlistFil
                                     if (Global.subtitleFileExt
                                         .contains(allInfoList[i]['name'].split('.').last.toLowerCase())) {
                                       subUrl = '${configMap['host']}/d${widget.bucketPrefix}${allInfoList[i]['name']}';
-                                      subUrl += '?sign=${allInfoList[i]['sign']}';
+                                      if (allInfoList[i]['sign'] != null && allInfoList[i]['sign'].isNotEmpty) {
+                                        subUrl += '?sign=${allInfoList[i]['sign']}';
+                                      }
                                       subtitleFileMap[allInfoList[i]['name'].split('.').first] = subUrl;
                                     }
                                     if (Global.vlcExt
                                         .contains(allInfoList[index]['name'].split('.').last.toLowerCase())) {
                                       shareUrl =
                                           '${configMap['host']}/d${widget.bucketPrefix}${allInfoList[i]['name']}';
-                                      shareUrl += '?sign=${allInfoList[i]['sign']}';
+                                      if (allInfoList[i]['sign'] != null && allInfoList[i]['sign'].isNotEmpty) {
+                                        shareUrl += '?sign=${allInfoList[i]['sign']}';
+                                      }
                                       videoList.add({
                                         "url": shareUrl,
                                         "name": allInfoList[i]['name'],
@@ -1494,26 +1482,16 @@ class AlistFileExplorerState extends loading_state.BaseLoadingPageState<AlistFil
             minLeadingWidth: 0,
             title: const Text('复制链接(设置中的默认格式)'),
             onTap: () async {
-              String format = await Global.getLKformat();
               String shareUrl = '';
               Map configMap = await AlistManageAPI.getConfigMap();
-              var res = await AlistManageAPI.getFileInfo(
-                widget.bucketPrefix + allInfoList[index]['name'],
-              );
-              if (res[0] == 'success') {
-                if (res[1]['raw_url'] != "" && res[1]['raw_url'] != null) {
-                  shareUrl = res[1]['raw_url'];
-                } else {
-                  shareUrl = '${configMap['host']}/d${widget.bucketPrefix}${allInfoList[index]['name']}';
-                  shareUrl += '?sign=${res[1]['sign']}';
-                }
-              } else {
-                shareUrl = '${configMap['host']}/d${widget.bucketPrefix}${allInfoList[index]['name']}';
+
+              shareUrl = '${configMap['host']}/d${widget.bucketPrefix}${allInfoList[index]['name']}';
+              if (allInfoList[index]['sign'] != null && allInfoList[index]['sign'].isNotEmpty) {
                 shareUrl += '?sign=${allInfoList[index]['sign']}';
               }
 
               String filename = my_path.basename(allInfoList[index]['name']);
-              String formatedLink = linkGenerateDict[format]!(shareUrl, filename);
+              String formatedLink = getFormatedUrl(shareUrl, filename);
               await flutter_services.Clipboard.setData(flutter_services.ClipboardData(text: formatedLink));
               if (mounted) {
                 Navigator.pop(context);

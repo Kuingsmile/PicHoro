@@ -1,10 +1,8 @@
-import 'dart:io';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:f_logs/f_logs.dart';
 import 'package:fluro/fluro.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:minio/minio.dart';
 
 import 'package:horopic/router/application.dart';
@@ -31,6 +29,8 @@ class AwsConfigState extends State<AwsConfig> {
   final _regionController = TextEditingController();
   final _uploadPathController = TextEditingController();
   final _customUrlController = TextEditingController();
+  bool isS3PathStyle = false;
+  bool isEnableSSL = true;
 
   @override
   void initState() {
@@ -45,24 +45,11 @@ class AwsConfigState extends State<AwsConfig> {
       _secretAccessKeyController.text = configMap['secretAccessKey'] ?? '';
       _bucketController.text = configMap['bucket'] ?? '';
       _endpointController.text = configMap['endpoint'] ?? '';
-
-      if (configMap['region'] != 'None' && configMap['region'] != null) {
-        _regionController.text = configMap['region'];
-      } else {
-        _regionController.clear();
-      }
-
-      if (configMap['uploadPath'] != 'None' && configMap['uploadPath'] != null) {
-        _uploadPathController.text = configMap['uploadPath'];
-      } else {
-        _uploadPathController.clear();
-      }
-
-      if (configMap['customUrl'] != 'None' && configMap['customUrl'] != null) {
-        _customUrlController.text = configMap['customUrl'];
-      } else {
-        _customUrlController.clear();
-      }
+      setControllerText(_regionController, configMap['region']);
+      setControllerText(_uploadPathController, configMap['uploadPath']);
+      setControllerText(_customUrlController, configMap['customUrl']);
+      isS3PathStyle = configMap['isS3PathStyle'] ?? false;
+      setState(() {});
     } catch (e) {
       FLog.error(
           className: 'AwsConfigState',
@@ -197,6 +184,28 @@ class AwsConfigState extends State<AwsConfig> {
               textAlign: TextAlign.center,
             ),
             ListTile(
+              title: const Text('是否使用S3路径风格'),
+              trailing: Switch(
+                value: isS3PathStyle,
+                onChanged: (value) {
+                  setState(() {
+                    isS3PathStyle = value;
+                  });
+                },
+              ),
+            ),
+            ListTile(
+              title: const Text('是否启用SSL连接'),
+              trailing: Switch(
+                value: isEnableSSL,
+                onChanged: (value) {
+                  setState(() {
+                    isEnableSSL = value;
+                  });
+                },
+              ),
+            ),
+            ListTile(
                 title: ElevatedButton(
               onPressed: () {
                 if (_formKey.currentState!.validate()) {
@@ -257,15 +266,15 @@ class AwsConfigState extends State<AwsConfig> {
 
   Future _saveAwsConfig() async {
     try {
-      String accessKeyID = _accessKeyIDController.text;
-      String secretAccessKey = _secretAccessKeyController.text;
-      String bucket = _bucketController.text;
-      String endpoint = _endpointController.text;
-      String region = _regionController.text;
-      String uploadPath = _uploadPathController.text;
-      String customUrl = _customUrlController.text;
+      String accessKeyID = _accessKeyIDController.text.trim();
+      String secretAccessKey = _secretAccessKeyController.text.trim();
+      String bucket = _bucketController.text.trim();
+      String endpoint = _endpointController.text.trim();
+      String region = _regionController.text.trim();
+      String uploadPath = _uploadPathController.text.trim();
+      String customUrl = _customUrlController.text.trim();
       //格式化路径为以/结尾，不以/开头
-      if (uploadPath.isEmpty || uploadPath.trim().isEmpty || uploadPath == '/') {
+      if (uploadPath.isEmpty || uploadPath == '/') {
         uploadPath = 'None';
       } else {
         if (!uploadPath.endsWith('/')) {
@@ -286,20 +295,13 @@ class AwsConfigState extends State<AwsConfig> {
         customUrl = customUrl.substring(0, customUrl.length - 1);
       }
 
-      if (region.isEmpty || region.trim().isEmpty) {
+      if (region.isEmpty) {
         region = 'None';
       }
       final awsConfig = AwsConfigModel(
-        accessKeyID,
-        secretAccessKey,
-        bucket,
-        endpoint,
-        region,
-        uploadPath,
-        customUrl,
-      );
+          accessKeyID, secretAccessKey, bucket, endpoint, region, uploadPath, customUrl, isS3PathStyle, isEnableSSL);
       final awsConfigJson = jsonEncode(awsConfig);
-      final awsConfigFile = await localFile;
+      final awsConfigFile = await AwsManageAPI.localFile;
       await awsConfigFile.writeAsString(awsConfigJson);
       showToast('保存成功');
     } catch (e) {
@@ -316,33 +318,43 @@ class AwsConfigState extends State<AwsConfig> {
 
   checkAwsConfig() async {
     try {
-      String configData = await readAwsConfig();
+      Map configMap = await AwsManageAPI.getConfigMap();
 
-      if (configData == "") {
+      if (configMap.isEmpty) {
         if (context.mounted) {
           return showCupertinoAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");
         }
         return;
       }
 
-      Map configMap = jsonDecode(configData);
       String accessKeyID = configMap['accessKeyId'];
       String secretAccessKey = configMap['secretAccessKey'];
       String bucket = configMap['bucket'];
       String endpoint = configMap['endpoint'];
+      int? port;
+      if (endpoint.contains(':')) {
+        List<String> endpointList = endpoint.split(':');
+        endpoint = endpointList[0];
+        port = int.parse(endpointList[1]);
+      }
       String region = configMap['region'];
+      bool isEnableSSL = configMap['isEnableSSL'] ?? true;
       Minio minio;
       if (region == 'None') {
         minio = Minio(
           endPoint: endpoint,
+          port: port,
           accessKey: accessKeyID,
+          useSSL: isEnableSSL,
           secretKey: secretAccessKey,
         );
       } else {
         minio = Minio(
           endPoint: endpoint,
+          port: port,
           accessKey: accessKeyID,
           secretKey: secretAccessKey,
+          useSSL: isEnableSSL,
           region: region,
         );
       }
@@ -353,7 +365,7 @@ class AwsConfigState extends State<AwsConfig> {
             context: context,
             title: '通知',
             content:
-                '检测通过，您的配置信息为:\nAccessKeyID:\n$accessKeyID\nSecretAccessKey:\n$secretAccessKey\nBucket:\n$bucket\nEndpoint:\n$endpoint\nRegion:\n$region\nUploadPath:\n${configMap['uploadPath']}\nCustomUrl:\n${configMap['customUrl']}');
+                '检测通过，您的配置信息为:\nAccessKeyID:\n$accessKeyID\nSecretAccessKey:\n$secretAccessKey\nBucket:\n$bucket\nEndpoint:\n$endpoint\nRegion:\n$region\nUploadPath:\n${configMap['uploadPath']}\nCustomUrl:\n${configMap['customUrl']}\n是否使用S3路径风格:\n${configMap['isS3PathStyle']}\n是否启用SSL连接:\n$isEnableSSL');
       }
     } catch (e) {
       FLog.error(
@@ -365,23 +377,6 @@ class AwsConfigState extends State<AwsConfig> {
         return showCupertinoAlertDialog(context: context, title: "检查失败!", content: e.toString());
       }
     }
-  }
-
-  Future<File> get localFile async {
-    final path = await _localPath;
-    String defaultUser = await Global.getUser();
-    return ensureFileExists(File('$path/${defaultUser}_aws_config.txt'));
-  }
-
-  Future<String> get _localPath async {
-    final directory = await getApplicationDocumentsDirectory();
-    return directory.path;
-  }
-
-  Future<String> readAwsConfig() async {
-    final file = await localFile;
-    String contents = await file.readAsString();
-    return contents;
   }
 
   _setdefault() async {
@@ -401,9 +396,11 @@ class AwsConfigModel {
   final String region;
   final String uploadPath;
   final String customUrl;
+  final bool isS3PathStyle;
+  final bool isEnableSSL;
 
-  AwsConfigModel(
-      this.accessKeyId, this.secretAccessKey, this.bucket, this.endpoint, this.region, this.uploadPath, this.customUrl);
+  AwsConfigModel(this.accessKeyId, this.secretAccessKey, this.bucket, this.endpoint, this.region, this.uploadPath,
+      this.customUrl, this.isS3PathStyle, this.isEnableSSL);
 
   Map<String, dynamic> toJson() => {
         'accessKeyId': accessKeyId,
@@ -413,6 +410,8 @@ class AwsConfigModel {
         'region': region,
         'uploadPath': uploadPath,
         'customUrl': customUrl,
+        'isS3PathStyle': isS3PathStyle,
+        'isEnableSSL': isEnableSSL,
       };
 
   static List keysList = [
@@ -424,5 +423,7 @@ class AwsConfigModel {
     'region',
     'uploadPath',
     'customUrl',
+    'isS3PathStyle',
+    'isEnableSSL',
   ];
 }

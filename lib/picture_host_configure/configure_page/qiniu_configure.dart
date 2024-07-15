@@ -48,16 +48,8 @@ class QiniuConfigState extends State<QiniuConfig> {
       _bucketController.text = configMap['bucket'] ?? '';
       _urlController.text = configMap['url'] ?? '';
       _areaController.text = configMap['area'] ?? '';
-      if (configMap['options'] != 'None' && configMap['options'] != null) {
-        _optionsController.text = configMap['options'];
-      } else {
-        _optionsController.clear();
-      }
-      if (configMap['path'] != 'None' && configMap['path'] != null) {
-        _pathController.text = configMap['path'];
-      } else {
-        _pathController.clear();
-      }
+      setControllerText(_optionsController, configMap['options']);
+      setControllerText(_pathController, configMap['path']);
     } catch (e) {
       FLog.error(
           className: 'QiniuConfigState',
@@ -256,19 +248,18 @@ class QiniuConfigState extends State<QiniuConfig> {
 
   Future _saveQiniuConfig() async {
     try {
-      String accessKey = _accessKeyController.text;
-      String secretKey = _secretKeyController.text;
-      String bucket = _bucketController.text;
-      String url = _urlController.text;
-      String area = _areaController.text;
-      String options = '';
+      String accessKey = _accessKeyController.text.trim();
+      String secretKey = _secretKeyController.text.trim();
+      String bucket = _bucketController.text.trim();
+      String url = _urlController.text.trim();
+      String area = _areaController.text.trim();
+      String options = _optionsController.text.trim();
+      String path = _pathController.text.trim();
 
-      if (_optionsController.text.isNotEmpty) {
-        options = _optionsController.text;
-        if (!options.startsWith('?')) {
-          options = '?$options';
-        }
-      } else {
+      if (options.isNotEmpty && !options.startsWith('?')) {
+        options = '?$options';
+      }
+      if (options.isEmpty) {
         options = 'None';
       }
 
@@ -279,24 +270,20 @@ class QiniuConfigState extends State<QiniuConfig> {
         url = url.substring(0, url.length - 1);
       }
 
-      String path = '';
-      if (_pathController.text.isNotEmpty &&
-          _pathController.text.replaceAll(' ', '').isNotEmpty &&
-          _pathController.text != '/') {
-        path = _pathController.text;
+      if (path.isEmpty) {
+        path = 'None';
+      } else if (path.isNotEmpty && path != '/') {
         if (path.startsWith('/')) {
           path = path.substring(1);
         }
         if (!path.endsWith('/')) {
           path = '$path/';
         }
-      } else {
-        path = 'None';
       }
 
       final qiniuConfig = QiniuConfigModel(accessKey, secretKey, bucket, url, area, options, path);
       final qiniuConfigJson = jsonEncode(qiniuConfig);
-      final qiniuConfigFile = await localFile;
+      final qiniuConfigFile = await QiniuManageAPI.localFile;
       await qiniuConfigFile.writeAsString(qiniuConfigJson);
       showToast('保存成功');
     } catch (e) {
@@ -313,16 +300,14 @@ class QiniuConfigState extends State<QiniuConfig> {
 
   checkQiniuConfig() async {
     try {
-      String configData = await readQiniuConfig();
+      Map configMap = await QiniuManageAPI.getConfigMap();
 
-      if (configData == "") {
+      if (configMap.isEmpty) {
         if (context.mounted) {
           return showCupertinoAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");
         }
         return;
       }
-
-      Map configMap = jsonDecode(configData);
 
       //save asset image to app dir
       String assetPath = 'assets/validateImage/PicHoroValidate.jpeg';
@@ -387,23 +372,6 @@ class QiniuConfigState extends State<QiniuConfig> {
         return showCupertinoAlertDialog(context: context, title: "检查失败!", content: e.toString());
       }
     }
-  }
-
-  Future<File> get localFile async {
-    final path = await _localPath;
-    String defaultUser = await Global.getUser();
-    return ensureFileExists(File('$path/${defaultUser}_qiniu_config.txt'));
-  }
-
-  Future<String> get _localPath async {
-    final directory = await getApplicationDocumentsDirectory();
-    return directory.path;
-  }
-
-  Future<String> readQiniuConfig() async {
-    final file = await localFile;
-    String contents = await file.readAsString();
-    return contents;
   }
 
   _setdefault() async {

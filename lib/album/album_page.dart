@@ -34,22 +34,37 @@ class UploadedImages extends StatefulWidget {
 }
 
 class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveClientMixin<UploadedImages> {
-  List showedImages = []; //全部图片
-  List showedImageUrl = []; //showedImages的url
-  List showedImagePaths = []; //showedImages的路径
-  List showedImageName = []; //showedImages的name
-  List showedImageId = []; //showedImages的id
-  List showedImagePictureKey = []; //showedImages的pictureKey
-  List showedImageDisplayAddressUrl = []; //showedImages的用来显示到相册里的url
+  /// 全部图片的url列表
+  List imageUrlList = [];
 
-  final int _perPageItemSize = 12;
-  List currentShowedImagesUrl = []; //当前显示的图片url,用来复制
-  List currentShowedImagesDisplayAddressUrl = []; //当前显示的图片用来显示到相册里的url
+  /// 全部图片的本地路径列表
+  List imageLocalPathList = [];
 
-  int _currentPage = 0;
+  /// 全部图片的文件名列表
+  List imageFileNameList = [];
+
+  /// 全部图片的id列表
+  List imageIdList = [];
+
+  /// 全部图片的pictureKey列表,用于删除
+  List imagePictureKeyList = [];
+
+  /// 全部图片的显示地址列表
+  List imageDisplayedUrlList = []; //showedImages的用来显示到相册里的url
+
+  int pageIndex = 0;
+  final int paginationSize = 12;
+
+  /// 当前显示的图片url列表
+  List currentVisibleImageUrlList = [];
+
+  /// 当前显示的图片的显示地址列表
+  List currentVisibleImageDisplayedUrlList = [];
+
   RefreshController refreshController = RefreshController(initialRefresh: false);
-  List selectedImages = [];
-  List<bool> selectedImagesBool = List.filled(12, false);
+  List selectedImagesList = [];
+  List<bool> selectedImagesBoolList = List.filled(12, false);
+
   Map<String, String> nameToPara = {
     'lskypro': '兰空',
     'smms': 'SM.MS',
@@ -64,6 +79,39 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
     'PBhostExtend3': 'Alist',
     'PBhostExtend4': 'WebDAV',
   };
+
+  List<Map<String, String>> switchPBOptions = [
+    {'text': 'Alist V3', 'host': 'PBhostExtend3'},
+    {'text': '阿里云', 'host': 'aliyun'},
+    {'text': 'FTP-SSH/SFTP', 'host': 'PBhostExtend1'},
+    {'text': 'Github', 'host': 'github'},
+    {'text': 'Imgur', 'host': 'imgur'},
+    {'text': '兰空图床', 'host': 'lskypro'},
+    {'text': '七牛云', 'host': 'qiniu'},
+    {'text': 'S3兼容平台', 'host': 'PBhostExtend2'},
+    {'text': 'SM.MS', 'host': 'smms'},
+    {'text': '腾讯云', 'host': 'tencent'},
+    {'text': '又拍云', 'host': 'upyun'},
+    {'text': 'WebDAV', 'host': 'PBhostExtend4'},
+  ];
+
+  List<String> pasteFormatsList = [
+    'rawurl',
+    'html',
+    'bbcode',
+    'markdown',
+    'markdown_with_link',
+    'custom',
+  ];
+
+  List<String> pasteFormatNamesList = [
+    'URL格式',
+    'HTML格式',
+    'BBcode格式',
+    'markdown格式',
+    'markdown格式(带链接)',
+    '自定义格式',
+  ];
 
   bool albumKeepAlive = true;
   // ignore: prefer_typing_uninitialized_variables
@@ -97,13 +145,37 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
     return [url, match![1]];
   }
 
+  List<Widget> buildFormatOptions(BuildContext context) {
+    return pasteFormatsList.asMap().entries.map((entry) {
+      int index = entry.key;
+      String format = entry.value;
+      return SimpleDialogOption(
+        child: Text(
+          Global.defaultLKformat == format ? '${pasteFormatNamesList[index]} \u2713' : pasteFormatNamesList[index],
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: Global.defaultLKformat == format ? Colors.blue : Colors.black,
+            fontWeight: Global.defaultLKformat == format ? FontWeight.bold : FontWeight.normal,
+          ),
+        ),
+        onPressed: () async {
+          await Global.setLKformat(format);
+          if (mounted) {
+            showToastWithContext(context, '已设置为${pasteFormatNamesList[index]}');
+            Navigator.pop(context);
+          }
+        },
+      );
+    }).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
     return Scaffold(
       appBar: AppBar(
           title: titleText(
-            '${nameToPara[Global.defaultShowedPBhost]}相册 - 第${_currentPage + 1}页',
+            '${nameToPara[Global.defaultShowedPBhost]}相册 - 第${pageIndex + 1}页',
           ),
           centerTitle: true,
           systemOverlayStyle: const SystemUiOverlayStyle(
@@ -131,113 +203,7 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
                           children: [
-                            SimpleDialogOption(
-                              child: Text(
-                                Global.defaultLKformat == 'rawurl' ? 'URL格式 \u2713' : 'URL格式',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: Global.defaultLKformat == 'rawurl' ? Colors.blue : Colors.black,
-                                  fontWeight: Global.defaultLKformat == 'rawurl' ? FontWeight.bold : FontWeight.normal,
-                                ),
-                              ),
-                              onPressed: () async {
-                                await Global.setLKformat('rawurl');
-                                if (mounted) {
-                                  showToastWithContext(context, '已设置为URL格式');
-                                  Navigator.pop(context);
-                                }
-                              },
-                            ),
-                            SimpleDialogOption(
-                              child: Text(
-                                Global.defaultLKformat == 'html' ? 'HTML格式 \u2713' : 'HTML格式',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: Global.defaultLKformat == 'html' ? Colors.blue : Colors.black,
-                                  fontWeight: Global.defaultLKformat == 'html' ? FontWeight.bold : FontWeight.normal,
-                                ),
-                              ),
-                              onPressed: () async {
-                                await Global.setLKformat('html');
-                                if (mounted) {
-                                  showToastWithContext(context, '已设置为HTML格式');
-                                  Navigator.pop(context);
-                                }
-                              },
-                            ),
-                            SimpleDialogOption(
-                              child: Text(
-                                Global.defaultLKformat == 'bbcode' ? 'BBcode格式 \u2713' : 'BBcode格式',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: Global.defaultLKformat == 'bbcode' ? Colors.blue : Colors.black,
-                                  fontWeight: Global.defaultLKformat == 'bbcode' ? FontWeight.bold : FontWeight.normal,
-                                ),
-                              ),
-                              onPressed: () async {
-                                await Global.setLKformat('bbcode');
-                                if (mounted) {
-                                  showToastWithContext(context, '已设置为BBcode格式');
-                                  Navigator.pop(context);
-                                }
-                              },
-                            ),
-                            SimpleDialogOption(
-                              child: Text(
-                                Global.defaultLKformat == 'markdown' ? 'markdown格式 \u2713' : 'markdown格式',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: Global.defaultLKformat == 'markdown' ? Colors.blue : Colors.black,
-                                  fontWeight:
-                                      Global.defaultLKformat == 'markdown' ? FontWeight.bold : FontWeight.normal,
-                                ),
-                              ),
-                              onPressed: () async {
-                                await Global.setLKformat('markdown');
-                                if (mounted) {
-                                  showToastWithContext(context, '已设置为markdown格式');
-                                  Navigator.pop(context);
-                                }
-                              },
-                            ),
-                            SimpleDialogOption(
-                              child: Text(
-                                Global.defaultLKformat == 'markdown_with_link'
-                                    ? 'markdown格式(带链接) \u2713'
-                                    : 'markdown格式(带链接)',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: Global.defaultLKformat == 'markdown_with_link' ? Colors.blue : Colors.black,
-                                  fontWeight: Global.defaultLKformat == 'markdown_with_link'
-                                      ? FontWeight.bold
-                                      : FontWeight.normal,
-                                ),
-                              ),
-                              onPressed: () async {
-                                await Global.setLKformat('markdown_with_link');
-                                if (mounted) {
-                                  showToastWithContext(context, '已设置为md_link格式');
-                                  Navigator.pop(context);
-                                }
-                              },
-                            ),
-                            SimpleDialogOption(
-                              child: Text(
-                                Global.defaultLKformat == 'custom' ? '自定义格式 \u2713' : '自定义格式',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: Global.defaultLKformat == 'custom' ? Colors.blue : Colors.black,
-                                  fontWeight: Global.defaultLKformat == 'custom' ? FontWeight.bold : FontWeight.normal,
-                                ),
-                              ),
-                              onPressed: () async {
-                                await Global.setLKformat('custom');
-                                if (mounted) {
-                                  showToastWithContext(context, '已设置为自定义格式');
-                                  Navigator.pop(context);
-                                }
-                              },
-                            ),
+                            ...buildFormatOptions(context),
                             SimpleDialogOption(
                               child: TextFormField(
                                 textAlign: TextAlign.center,
@@ -271,7 +237,7 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
                             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                             value: Global.isDeleteCloud,
                             onChanged: (value) async {
-                              await Global.setDeleteCloud(value);
+                              await Global.setIsDeleteCloud(value);
                               setState(() {});
                               if (mounted) {
                                 if (value == true) {
@@ -293,11 +259,11 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
                   ];
                 }),
             IconButton(
-              icon: selectedImagesBool.contains(true)
+              icon: selectedImagesBoolList.contains(true)
                   ? const Icon(Icons.delete, color: Color.fromARGB(255, 236, 127, 120), size: 40.0)
                   : const Icon(Icons.delete_outline, color: Colors.white, size: 40.0),
               onPressed: () async {
-                if (!selectedImagesBool.contains(true) || currentShowedImagesUrl.isEmpty) {
+                if (!selectedImagesBoolList.contains(true) || currentVisibleImageUrlList.isEmpty) {
                   showToastWithContext(context, '没有选择图片');
                   return;
                 }
@@ -308,14 +274,14 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
                   onConfirm: () async {
                     try {
                       List<int> toDelete = [];
-                      for (int i = 0; i < currentShowedImagesUrl.length; i++) {
-                        if (selectedImagesBool[i]) {
+                      for (int i = 0; i < currentVisibleImageUrlList.length; i++) {
+                        if (selectedImagesBoolList[i]) {
                           toDelete.add(i);
                         }
                       }
-                      selectedImagesBool = List.filled(_perPageItemSize, false);
+                      selectedImagesBoolList = List.filled(paginationSize, false);
                       Navigator.pop(context);
-                      await deleteImageAll(toDelete);
+                      await removeAllImages(toDelete);
                       showToast('删除完成');
                       return;
                     } catch (e) {
@@ -338,7 +304,7 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
           ]),
       body: SmartRefresher(
           enablePullDown: true,
-          enablePullUp: showedImageUrl.length > _perPageItemSize,
+          enablePullUp: imageUrlList.length > paginationSize,
           header: const ClassicHeader(
             refreshStyle: RefreshStyle.Follow,
             idleText: '下拉刷新',
@@ -361,85 +327,61 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
           child: GridView.builder(
             padding: const EdgeInsets.all(2),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3, childAspectRatio: 1),
-            itemCount: currentShowedImagesUrl.length,
+            itemCount: currentVisibleImageUrlList.length,
             itemBuilder: (context, index) {
               return GestureDetector(
                 onTap: () {
-                  if (Global.defaultShowedPBhost == 'lskypro' || Global.defaultShowedPBhost == 'smms') {
-                    String urlList = currentShowedImagesUrl.join(',');
-                    Application.router.navigateTo(
-                        context, '${Routes.albumImagePreview}?index=$index&images=${Uri.encodeComponent(urlList)}',
-                        transition: TransitionType.none);
-                  } else if (Global.defaultShowedPBhost == 'imgur' || Global.defaultShowedPBhost == 'github') {
-                    String urlList = '';
-                    for (int i = 0; i < currentShowedImagesDisplayAddressUrl.length; i++) {
-                      if (currentShowedImagesDisplayAddressUrl[i].contains('raw.githubusercontent.com')) {
-                        urlList += 'https://ghproxy.com/${currentShowedImagesDisplayAddressUrl[i]},';
-                      } else {
-                        urlList += currentShowedImagesUrl[i] + ',';
+                  switch (Global.defaultShowedPBhost) {
+                    case 'lskypro':
+                    case 'smms':
+                    case 'imgur':
+                    case 'qiniu':
+                    case 'tencent':
+                    case 'aliyun':
+                    case 'upyun':
+                    case 'PBhostExtend2':
+                    case 'PBhostExtend3':
+                      String urlList = currentVisibleImageUrlList.join(',');
+                      Application.router.navigateTo(
+                          context, '${Routes.albumImagePreview}?index=$index&images=${Uri.encodeComponent(urlList)}',
+                          transition: TransitionType.none);
+                    case 'github':
+                      String urlList = '';
+                      for (int i = 0; i < currentVisibleImageDisplayedUrlList.length; i++) {
+                        if (currentVisibleImageDisplayedUrlList[i].contains('raw.githubusercontent.com')) {
+                          urlList += 'https://ghproxy.com/${currentVisibleImageDisplayedUrlList[i]},';
+                        } else {
+                          urlList += currentVisibleImageUrlList[i] + ',';
+                        }
                       }
-                    }
-                    Application.router.navigateTo(
-                        context, '${Routes.albumImagePreview}?index=$index&images=${Uri.encodeComponent(urlList)}',
-                        transition: TransitionType.none);
-                  } else if (Global.defaultShowedPBhost == 'qiniu') {
-                    String urlList = currentShowedImagesUrl.join(',');
-                    Application.router.navigateTo(
-                        context, '${Routes.albumImagePreview}?index=$index&images=${Uri.encodeComponent(urlList)}',
-                        transition: TransitionType.none);
-                  } else if (Global.defaultShowedPBhost == 'tencent') {
-                    String urlList = currentShowedImagesUrl.join(',');
-                    Application.router.navigateTo(
-                        context, '${Routes.albumImagePreview}?index=$index&images=${Uri.encodeComponent(urlList)}',
-                        transition: TransitionType.none);
-                  } else if (Global.defaultShowedPBhost == 'aliyun') {
-                    String urlList = currentShowedImagesUrl.join(',');
-                    Application.router.navigateTo(
-                        context, '${Routes.albumImagePreview}?index=$index&images=${Uri.encodeComponent(urlList)}',
-                        transition: TransitionType.none);
-                  } else if (Global.defaultShowedPBhost == 'upyun') {
-                    String urlList = currentShowedImagesUrl.join(',');
-                    Application.router.navigateTo(
-                        context, '${Routes.albumImagePreview}?index=$index&images=${Uri.encodeComponent(urlList)}',
-                        transition: TransitionType.none);
-                  } else if (Global.defaultShowedPBhost == 'PBhostExtend1') {
-                    String urlList = currentShowedImagesDisplayAddressUrl.join(',');
-                    Application.router.navigateTo(
-                        context, '${Routes.localImagePreview}?index=$index&images=${Uri.encodeComponent(urlList)}',
-                        transition: TransitionType.none);
-                  } else if (Global.defaultShowedPBhost == 'PBhostExtend2') {
-                    String urlList = currentShowedImagesUrl.join(',');
-                    Application.router.navigateTo(
-                        context, '${Routes.albumImagePreview}?index=$index&images=${Uri.encodeComponent(urlList)}',
-                        transition: TransitionType.none);
-                  } else if (Global.defaultShowedPBhost == 'PBhostExtend3') {
-                    String urlList = currentShowedImagesUrl.join(',');
-                    Application.router.navigateTo(
-                        context, '${Routes.albumImagePreview}?index=$index&images=${Uri.encodeComponent(urlList)}',
-                        transition: TransitionType.none);
-                  } else if (Global.defaultShowedPBhost == 'PBhostExtend4') {
-                    List trueUrlList = [];
-                    List headersList = [];
-                    RegExp reg = RegExp(r'Basic (.*)');
-
-                    for (int i = 0; i < currentShowedImagesDisplayAddressUrl.length; i++) {
-                      String trueUrl = currentShowedImagesDisplayAddressUrl[i].replaceAll(reg, '');
-                      headersList.add({
-                        'Authorization': reg.firstMatch(currentShowedImagesDisplayAddressUrl[i])![0],
-                      });
-                      trueUrlList.add(trueUrl);
-                    }
-                    String urlList = trueUrlList.join(',');
-                    Application.router.navigateTo(context,
-                        '${Routes.webdavImagePreview}?index=$index&images=${Uri.encodeComponent(urlList)}&headersList=${Uri.encodeComponent(jsonEncode(headersList))}',
-                        transition: TransitionType.none);
+                      Application.router.navigateTo(
+                          context, '${Routes.albumImagePreview}?index=$index&images=${Uri.encodeComponent(urlList)}',
+                          transition: TransitionType.none);
+                    case 'PBhostExtend1':
+                      String urlList = currentVisibleImageDisplayedUrlList.join(',');
+                      Application.router.navigateTo(
+                          context, '${Routes.localImagePreview}?index=$index&images=${Uri.encodeComponent(urlList)}',
+                          transition: TransitionType.none);
+                    case 'PBhostExtend4':
+                      List trueUrlList = [];
+                      List headersList = [];
+                      RegExp reg = RegExp(r'Basic (.*)');
+                      for (int i = 0; i < currentVisibleImageDisplayedUrlList.length; i++) {
+                        String trueUrl = currentVisibleImageDisplayedUrlList[i].replaceAll(reg, '');
+                        headersList.add({
+                          'Authorization': reg.firstMatch(currentVisibleImageDisplayedUrlList[i])![0],
+                        });
+                        trueUrlList.add(trueUrl);
+                      }
+                      String urlList = trueUrlList.join(',');
+                      Application.router.navigateTo(context,
+                          '${Routes.webdavImagePreview}?index=$index&images=${Uri.encodeComponent(urlList)}&headersList=${Uri.encodeComponent(jsonEncode(headersList))}',
+                          transition: TransitionType.none);
                   }
                 },
                 onDoubleTap: () => copyFormatedLink(index, Global.defaultLKformat),
                 onLongPressStart: (LongPressStartDetails details) {
-                  double dx = details.globalPosition.dx;
-                  double dy = details.globalPosition.dy - 20;
-                  handleOnLongPress(context, dx, dy, index);
+                  handleOnLongPress(context, details.globalPosition.dx, details.globalPosition.dy - 20, index);
                 },
                 child: Stack(
                   fit: StackFit.expand,
@@ -460,39 +402,39 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
                                 Global.defaultShowedPBhost == 'PBhostExtend2' ||
                                 Global.defaultShowedPBhost == 'PBhostExtend3'
                             ? ExtendedImage.network(
-                                currentShowedImagesDisplayAddressUrl[index].contains('raw.githubusercontent.com')
+                                currentVisibleImageDisplayedUrlList[index].contains('raw.githubusercontent.com')
                                     ?
                                     // ignore: prefer_interpolation_to_compose_strings
-                                    'https://ghproxy.com/' + currentShowedImagesDisplayAddressUrl[index]
-                                    : currentShowedImagesDisplayAddressUrl[index],
+                                    'https://ghproxy.com/' + currentVisibleImageDisplayedUrlList[index]
+                                    : currentVisibleImageDisplayedUrlList[index],
                                 clearMemoryCacheIfFailed: true,
                                 retries: 5,
                                 height: 150,
                                 fit: BoxFit.fill,
                                 cache: true,
                                 border: Border.all(
-                                    color: selectedImagesBool[index] ? Colors.red : Colors.transparent, width: 2),
+                                    color: selectedImagesBoolList[index] ? Colors.red : Colors.transparent, width: 2),
                                 borderRadius: const BorderRadius.all(Radius.circular(8)),
                                 loadStateChanged: (state) => defaultLoadStateChanged(state, iconSize: 30),
                               )
                             : Global.defaultShowedPBhost == 'PBhostExtend1'
-                                ? File(currentShowedImagesDisplayAddressUrl[index]).existsSync()
+                                ? File(currentVisibleImageDisplayedUrlList[index]).existsSync()
                                     ? ExtendedImage.file(
-                                        File(currentShowedImagesDisplayAddressUrl[index]),
+                                        File(currentVisibleImageDisplayedUrlList[index]),
                                         fit: BoxFit.fill,
                                         clearMemoryCacheIfFailed: true,
                                         height: 150,
                                         border: Border.all(
-                                            color: selectedImagesBool[index] ? Colors.red : Colors.transparent,
+                                            color: selectedImagesBoolList[index] ? Colors.red : Colors.transparent,
                                             width: 2),
                                         borderRadius: const BorderRadius.all(Radius.circular(8)),
                                         loadStateChanged: (state) => defaultLoadStateChanged(state, iconSize: 30),
                                       )
                                     : const Icon(Icons.error, size: 30, color: Colors.red)
                                 : Global.defaultShowedPBhost == 'PBhostExtend4'
-                                    ? currentShowedImagesDisplayAddressUrl[index].contains('Basic')
+                                    ? currentVisibleImageDisplayedUrlList[index].contains('Basic')
                                         ? ExtendedImage.network(
-                                            currentShowedImagesDisplayAddressUrl[index]
+                                            currentVisibleImageDisplayedUrlList[index]
                                                 .replaceAll(RegExp(r'Basic (.*)'), ''),
                                             clearMemoryCacheIfFailed: true,
                                             retries: 5,
@@ -500,24 +442,24 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
                                             fit: BoxFit.fill,
                                             headers: {
                                               'Authorization': RegExp(r'Basic (.*)')
-                                                  .firstMatch(currentShowedImagesDisplayAddressUrl[index])![0]!
+                                                  .firstMatch(currentVisibleImageDisplayedUrlList[index])![0]!
                                             },
                                             cache: false,
                                             border: Border.all(
-                                                color: selectedImagesBool[index] ? Colors.red : Colors.transparent,
+                                                color: selectedImagesBoolList[index] ? Colors.red : Colors.transparent,
                                                 width: 2),
                                             borderRadius: const BorderRadius.all(Radius.circular(8)),
                                             loadStateChanged: (state) => defaultLoadStateChanged(state, iconSize: 30),
                                           )
                                         : ExtendedImage.network(
-                                            currentShowedImagesDisplayAddressUrl[index],
+                                            currentVisibleImageDisplayedUrlList[index],
                                             clearMemoryCacheIfFailed: true,
                                             retries: 5,
                                             height: 150,
                                             fit: BoxFit.fill,
                                             cache: true,
                                             border: Border.all(
-                                                color: selectedImagesBool[index] ? Colors.red : Colors.transparent,
+                                                color: selectedImagesBoolList[index] ? Colors.red : Colors.transparent,
                                                 width: 2),
                                             borderRadius: const BorderRadius.all(Radius.circular(8)),
                                             loadStateChanged: (state) => defaultLoadStateChanged(state, iconSize: 30),
@@ -536,15 +478,11 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
                           colorConfig: MSHColorConfig.fromCheckedUncheckedDisabled(
                               checkedColor: Colors.blue, uncheckedColor: Colors.blue, disabledColor: Colors.grey),
                           size: 20,
-                          value: selectedImagesBool[index],
+                          value: selectedImagesBoolList[index],
                           style: MSHCheckboxStyle.fillScaleCheck,
-                          onChanged: (selected) {
+                          onChanged: (bool selected) {
                             setState(() {
-                              if (selected) {
-                                selectedImagesBool[index] = true;
-                              } else {
-                                selectedImagesBool[index] = false;
-                              }
+                              selectedImagesBoolList[index] = selected;
                             });
                           },
                         ),
@@ -578,116 +516,17 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
                           textAlign: TextAlign.center,
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
-                        children: [
-                          SimpleDialogOption(
-                            child: const Text('Alist V3', textAlign: TextAlign.center),
+                        children: switchPBOptions.map((option) {
+                          return SimpleDialogOption(
+                            child: Text(option['text']!, textAlign: TextAlign.center),
                             onPressed: () {
-                              Global.setShowedPBhost('PBhostExtend3');
+                              Global.setShowedPBhost(option['host']!);
                               Navigator.pop(context);
-                              _currentPage = 0;
+                              pageIndex = 0;
                               _onRefresh();
                             },
-                          ),
-                          SimpleDialogOption(
-                            child: const Text('阿里云', textAlign: TextAlign.center),
-                            onPressed: () {
-                              Global.setShowedPBhost('aliyun');
-                              Navigator.pop(context);
-                              _currentPage = 0;
-                              _onRefresh();
-                            },
-                          ),
-                          SimpleDialogOption(
-                            child: const Text('FTP-SSH/SFTP', textAlign: TextAlign.center),
-                            onPressed: () {
-                              Global.setShowedPBhost('PBhostExtend1');
-                              Navigator.pop(context);
-                              _currentPage = 0;
-                              _onRefresh();
-                            },
-                          ),
-                          SimpleDialogOption(
-                            child: const Text('Github', textAlign: TextAlign.center),
-                            onPressed: () {
-                              Global.setShowedPBhost('github');
-                              Navigator.pop(context);
-                              _currentPage = 0;
-                              _onRefresh();
-                            },
-                          ),
-                          SimpleDialogOption(
-                            child: const Text('Imgur', textAlign: TextAlign.center),
-                            onPressed: () {
-                              Global.setShowedPBhost('imgur');
-                              Navigator.pop(context);
-                              _currentPage = 0;
-                              _onRefresh();
-                            },
-                          ),
-                          SimpleDialogOption(
-                            child: const Text('兰空图床', textAlign: TextAlign.center),
-                            onPressed: () {
-                              Global.setShowedPBhost('lskypro');
-                              Navigator.pop(context);
-                              _currentPage = 0;
-                              _onRefresh();
-                            },
-                          ),
-                          SimpleDialogOption(
-                            child: const Text('七牛云', textAlign: TextAlign.center),
-                            onPressed: () {
-                              Global.setShowedPBhost('qiniu');
-                              Navigator.pop(context);
-                              _currentPage = 0;
-                              _onRefresh();
-                            },
-                          ),
-                          SimpleDialogOption(
-                            child: const Text('S3兼容平台', textAlign: TextAlign.center),
-                            onPressed: () {
-                              Global.setShowedPBhost('PBhostExtend2');
-                              Navigator.pop(context);
-                              _currentPage = 0;
-                              _onRefresh();
-                            },
-                          ),
-                          SimpleDialogOption(
-                            child: const Text('SM.MS', textAlign: TextAlign.center),
-                            onPressed: () {
-                              Global.setShowedPBhost('smms');
-                              Navigator.pop(context);
-                              _currentPage = 0;
-                              _onRefresh();
-                            },
-                          ),
-                          SimpleDialogOption(
-                            child: const Text('腾讯云', textAlign: TextAlign.center),
-                            onPressed: () {
-                              Global.setShowedPBhost('tencent');
-                              Navigator.pop(context);
-                              _currentPage = 0;
-                              _onRefresh();
-                            },
-                          ),
-                          SimpleDialogOption(
-                            child: const Text('又拍云', textAlign: TextAlign.center),
-                            onPressed: () {
-                              Global.setShowedPBhost('upyun');
-                              Navigator.pop(context);
-                              _currentPage = 0;
-                              _onRefresh();
-                            },
-                          ),
-                          SimpleDialogOption(
-                            child: const Text('WebDAV', textAlign: TextAlign.center),
-                            onPressed: () {
-                              Global.setShowedPBhost('PBhostExtend4');
-                              Navigator.pop(context);
-                              _currentPage = 0;
-                              _onRefresh();
-                            },
-                          ),
-                        ],
+                          );
+                        }).toList(),
                       );
                     },
                   );
@@ -707,11 +546,11 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
                 backgroundColor: Colors.blue,
                 onPressed: () async {
                   setState(() {
-                    _currentPage = 0;
-                    currentShowedImagesUrl.clear();
-                    currentShowedImagesDisplayAddressUrl.clear();
-                    selectedImagesBool = List.filled(
-                      _perPageItemSize,
+                    pageIndex = 0;
+                    currentVisibleImageUrlList.clear();
+                    currentVisibleImageDisplayedUrlList.clear();
+                    selectedImagesBoolList = List.filled(
+                      paginationSize,
                       false,
                     );
                     refreshController.resetNoData();
@@ -730,11 +569,12 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
               width: 40,
               child: FloatingActionButton(
                 heroTag: 'copy',
-                backgroundColor:
-                    selectedImagesBool.contains(true) ? const Color.fromARGB(255, 232, 177, 241) : Colors.transparent,
+                backgroundColor: selectedImagesBoolList.contains(true)
+                    ? const Color.fromARGB(255, 232, 177, 241)
+                    : Colors.transparent,
                 elevation: 5,
                 onPressed: () async {
-                  if (!selectedImagesBool.contains(true)) {
+                  if (!selectedImagesBoolList.contains(true)) {
                     Fluttertoast.showToast(
                         msg: "请先选择图片",
                         toastLength: Toast.LENGTH_SHORT,
@@ -746,11 +586,11 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
                   } else {
                     List multiUrls = [];
 
-                    for (int i = 0; i < currentShowedImagesUrl.length; i++) {
-                      if (selectedImagesBool[i]) {
+                    for (int i = 0; i < currentVisibleImageUrlList.length; i++) {
+                      if (selectedImagesBoolList[i]) {
                         String finalFormatedurl = ' ';
-                        finalFormatedurl = linkGenerateDict[Global.defaultLKformat]!(
-                            currentShowedImagesUrl[i], showedImageName[i + _perPageItemSize * _currentPage]);
+                        finalFormatedurl = linkGeneratorMap[Global.defaultLKformat]!(
+                            currentVisibleImageUrlList[i], imageFileNameList[i + paginationSize * pageIndex]);
 
                         multiUrls.add(finalFormatedurl);
                       }
@@ -774,16 +614,16 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
                 backgroundColor: const Color.fromARGB(255, 248, 196, 237),
                 elevation: 5,
                 onPressed: () async {
-                  if (currentShowedImagesUrl.isEmpty) {
+                  if (currentVisibleImageUrlList.isEmpty) {
                     showToastWithContext(context, '相册为空');
                     return;
-                  } else if (selectedImagesBool.contains(true)) {
+                  } else if (selectedImagesBoolList.contains(true)) {
                     setState(() {
-                      selectedImagesBool = List.filled(selectedImagesBool.length, false, growable: false);
+                      selectedImagesBoolList = List.filled(selectedImagesBoolList.length, false, growable: false);
                     });
                   } else {
                     setState(() {
-                      selectedImagesBool = List.filled(selectedImagesBool.length, true, growable: false);
+                      selectedImagesBoolList = List.filled(selectedImagesBoolList.length, true, growable: false);
                     });
                   }
                 },
@@ -798,10 +638,10 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
   }
 
   copyFormatedLink(int index, String format) async {
-    String link = currentShowedImagesUrl[index];
-    String filename = showedImageName[index + _currentPage * _perPageItemSize];
+    String link = currentVisibleImageUrlList[index];
+    String filename = imageFileNameList[index + pageIndex * paginationSize];
     String formatedLink = '';
-    formatedLink = linkGenerateDict[format]!(link, filename);
+    formatedLink = linkGeneratorMap[format]!(link, filename);
     Clipboard.setData(ClipboardData(text: formatedLink));
     showToast('$format已复制');
   }
@@ -915,26 +755,19 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
       switch (value) {
         case 1:
           copyFormatedLink(index, 'rawurl');
-          break;
         case 2:
           copyFormatedLink(index, 'html');
-          break;
         case 3:
           copyFormatedLink(index, 'markdown');
-          break;
         case 4:
           copyFormatedLink(index, 'bbcode');
-          break;
         case 5:
           copyFormatedLink(index, 'markdown_with_link');
-          break;
         case 6:
           copyFormatedLink(index, 'custom');
-          break;
         case 7:
           try {
             await deleteImage(index);
-            break;
           } catch (e) {
             FLog.error(
                 className: 'ImagePage',
@@ -945,21 +778,23 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
               showToastWithContext(context, '删除失败');
             }
           }
+        default:
+          return;
       }
     });
   }
 
-  deleteImageAll(List imagesIndex) async {
-    bool deleteLocal = await Global.getDeleteLocal();
-    bool deleteCloud = await Global.getDeleteCloud();
+  removeAllImages(List imagesIndex) async {
+    bool isDeleteLocal = await Global.getIsDeleteLocal();
+    bool isDeleteCloud = await Global.getIsDeleteCloud();
     for (int i = 0; i < imagesIndex.length; i++) {
       try {
         Map deleteConfig = {
-          'pictureKey': showedImagePictureKey[imagesIndex[i] + (_currentPage * _perPageItemSize) - i],
-          "name": showedImageName[imagesIndex[i] + (_currentPage * _perPageItemSize) - i],
+          'pictureKey': imagePictureKeyList[imagesIndex[i] + (pageIndex * paginationSize) - i],
+          "name": imageFileNameList[imagesIndex[i] + (pageIndex * paginationSize) - i],
         };
 
-        if (deleteCloud) {
+        if (isDeleteCloud) {
           var result = await deleterentry(deleteConfig);
           if (result[0] != 'success') {
             showToast('云端删除失败');
@@ -968,9 +803,9 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
         }
         if (Global.defaultShowedPBhost == 'PBhostExtend1') {
           await AlbumSQL.deleteData(Global.imageDBExtend!, Global.defaultShowedPBhost,
-              showedImageId[imagesIndex[i] + (_currentPage * _perPageItemSize) - i]);
+              imageIdList[imagesIndex[i] + (pageIndex * paginationSize) - i]);
           try {
-            await File(showedImageDisplayAddressUrl[imagesIndex[i] + _currentPage * _perPageItemSize - i]).delete();
+            await File(imageDisplayedUrlList[imagesIndex[i] + pageIndex * paginationSize - i]).delete();
           } catch (e) {
             FLog.error(
                 className: 'ImagePage',
@@ -982,15 +817,15 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
             Global.defaultShowedPBhost == 'PBhostExtend3' ||
             Global.defaultShowedPBhost == 'PBhostExtend4') {
           await AlbumSQL.deleteData(Global.imageDBExtend!, Global.defaultShowedPBhost,
-              showedImageId[imagesIndex[i] + (_currentPage * _perPageItemSize) - i]);
+              imageIdList[imagesIndex[i] + (pageIndex * paginationSize) - i]);
         } else {
           await AlbumSQL.deleteData(Global.imageDB!, Global.defaultShowedPBhost,
-              showedImageId[imagesIndex[i] + (_currentPage * _perPageItemSize) - i]);
+              imageIdList[imagesIndex[i] + (pageIndex * paginationSize) - i]);
         }
 
-        if (deleteLocal) {
+        if (isDeleteLocal) {
           try {
-            await File(showedImagePaths[imagesIndex[i] + (_currentPage * _perPageItemSize) - i]).delete();
+            await File(imageLocalPathList[imagesIndex[i] + (pageIndex * paginationSize) - i]).delete();
           } catch (e) {
             FLog.error(
                 className: 'ImagePage',
@@ -999,23 +834,23 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
                 dataLogType: DataLogType.ERRORS.toString());
           }
         }
-        showedImageId.removeAt(imagesIndex[i] + (_currentPage * _perPageItemSize) - i);
-        showedImageUrl.removeAt(imagesIndex[i] + (_currentPage * _perPageItemSize) - i);
-        showedImageDisplayAddressUrl.removeAt(imagesIndex[i] + (_currentPage * _perPageItemSize) - i);
-        showedImagePaths.removeAt(imagesIndex[i] + (_currentPage * _perPageItemSize) - i);
-        showedImageName.removeAt(imagesIndex[i] + (_currentPage * _perPageItemSize) - i);
-        showedImagePictureKey.removeAt(imagesIndex[i] + (_currentPage * _perPageItemSize) - i);
+        imageIdList.removeAt(imagesIndex[i] + (pageIndex * paginationSize) - i);
+        imageUrlList.removeAt(imagesIndex[i] + (pageIndex * paginationSize) - i);
+        imageDisplayedUrlList.removeAt(imagesIndex[i] + (pageIndex * paginationSize) - i);
+        imageLocalPathList.removeAt(imagesIndex[i] + (pageIndex * paginationSize) - i);
+        imageFileNameList.removeAt(imagesIndex[i] + (pageIndex * paginationSize) - i);
+        imagePictureKeyList.removeAt(imagesIndex[i] + (pageIndex * paginationSize) - i);
         setState(() {
-          currentShowedImagesUrl = showedImageUrl.sublist(
-              _currentPage * _perPageItemSize,
-              (_currentPage + 1) * _perPageItemSize > showedImageUrl.length
-                  ? showedImageUrl.length
-                  : (_currentPage + 1) * _perPageItemSize);
-          currentShowedImagesDisplayAddressUrl = showedImageDisplayAddressUrl.sublist(
-              _currentPage * _perPageItemSize,
-              (_currentPage + 1) * _perPageItemSize > showedImageDisplayAddressUrl.length
-                  ? showedImageDisplayAddressUrl.length
-                  : (_currentPage + 1) * _perPageItemSize);
+          currentVisibleImageUrlList = imageUrlList.sublist(
+              pageIndex * paginationSize,
+              (pageIndex + 1) * paginationSize > imageUrlList.length
+                  ? imageUrlList.length
+                  : (pageIndex + 1) * paginationSize);
+          currentVisibleImageDisplayedUrlList = imageDisplayedUrlList.sublist(
+              pageIndex * paginationSize,
+              (pageIndex + 1) * paginationSize > imageDisplayedUrlList.length
+                  ? imageDisplayedUrlList.length
+                  : (pageIndex + 1) * paginationSize);
         });
       } catch (e) {
         FLog.error(
@@ -1030,14 +865,15 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
   }
 
   deleteImage(int index) async {
-    bool deleteLocal = await Global.getDeleteLocal();
-    bool deleteCloud = await Global.getDeleteCloud();
     try {
+      bool isDeleteLocal = await Global.getIsDeleteLocal();
+      bool isDeleteCloud = await Global.getIsDeleteCloud();
+
       Map deleteConfig = {
-        'pictureKey': showedImagePictureKey[index + (_currentPage * _perPageItemSize)],
-        "name": showedImageName[index + (_currentPage * _perPageItemSize)],
+        'pictureKey': imagePictureKeyList[index + (pageIndex * paginationSize)],
+        "name": imageFileNameList[index + (pageIndex * paginationSize)],
       };
-      if (deleteCloud) {
+      if (isDeleteCloud) {
         var result = await deleterentry(deleteConfig);
         if (result[0] != 'success') {
           showToast('云端删除失败');
@@ -1045,10 +881,10 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
         }
       }
       if (Global.defaultShowedPBhost == 'PBhostExtend1') {
-        await AlbumSQL.deleteData(Global.imageDBExtend!, Global.defaultShowedPBhost,
-            showedImageId[index + (_currentPage * _perPageItemSize)]);
+        await AlbumSQL.deleteData(
+            Global.imageDBExtend!, Global.defaultShowedPBhost, imageIdList[index + (pageIndex * paginationSize)]);
         try {
-          await File(showedImageDisplayAddressUrl[index + _currentPage * _perPageItemSize]).delete();
+          await File(imageDisplayedUrlList[index + pageIndex * paginationSize]).delete();
         } catch (e) {
           FLog.error(
               className: 'ImagePage',
@@ -1059,16 +895,16 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
       } else if (Global.defaultShowedPBhost == 'PBhostExtend2' ||
           Global.defaultShowedPBhost == 'PBhostExtend3' ||
           Global.defaultShowedPBhost == 'PBhostExtend4') {
-        await AlbumSQL.deleteData(Global.imageDBExtend!, Global.defaultShowedPBhost,
-            showedImageId[index + (_currentPage * _perPageItemSize)]);
+        await AlbumSQL.deleteData(
+            Global.imageDBExtend!, Global.defaultShowedPBhost, imageIdList[index + (pageIndex * paginationSize)]);
       } else {
         await AlbumSQL.deleteData(
-            Global.imageDB!, Global.defaultShowedPBhost, showedImageId[index + (_currentPage * _perPageItemSize)]);
+            Global.imageDB!, Global.defaultShowedPBhost, imageIdList[index + (pageIndex * paginationSize)]);
       }
 
-      if (deleteLocal) {
+      if (isDeleteLocal) {
         try {
-          await File(showedImagePaths[index + _currentPage * _perPageItemSize]).delete();
+          await File(imageLocalPathList[index + pageIndex * paginationSize]).delete();
         } catch (e) {
           FLog.error(
               className: 'ImagePage',
@@ -1078,33 +914,33 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
         }
       }
       setState(() {
-        showedImageId.removeAt(index + _perPageItemSize * _currentPage);
-        showedImageUrl.removeAt(index + _perPageItemSize * _currentPage);
-        showedImageDisplayAddressUrl.removeAt(index + _perPageItemSize * _currentPage);
-        showedImagePictureKey.removeAt(index + _perPageItemSize * _currentPage);
-        showedImageName.removeAt(index + _perPageItemSize * _currentPage);
-        showedImagePaths.removeAt(index + _perPageItemSize * _currentPage);
-        currentShowedImagesUrl.removeAt(index);
-        currentShowedImagesDisplayAddressUrl.removeAt(index);
-        selectedImagesBool = List.filled(_perPageItemSize, false);
-        if (currentShowedImagesUrl.isEmpty && _currentPage == 0) {
-          currentShowedImagesUrl = [];
-          currentShowedImagesDisplayAddressUrl = [];
-        } else if (currentShowedImagesUrl.isEmpty && _currentPage > 0) {
-          _currentPage--;
-          currentShowedImagesUrl =
-              showedImageUrl.sublist(_currentPage * _perPageItemSize, (_currentPage + 1) * _perPageItemSize);
-          currentShowedImagesDisplayAddressUrl = showedImageDisplayAddressUrl.sublist(
-              _currentPage * _perPageItemSize, (_currentPage + 1) * _perPageItemSize);
-        } else if (showedImageUrl.length >= (_currentPage + 1) * _perPageItemSize) {
-          currentShowedImagesUrl =
-              showedImageUrl.sublist(_currentPage * _perPageItemSize, (_currentPage + 1) * _perPageItemSize);
-          currentShowedImagesDisplayAddressUrl = showedImageDisplayAddressUrl.sublist(
-              _currentPage * _perPageItemSize, (_currentPage + 1) * _perPageItemSize);
-        } else if (showedImageUrl.length < (_currentPage + 1) * _perPageItemSize) {
-          currentShowedImagesUrl = showedImageUrl.sublist(_currentPage * _perPageItemSize, showedImageUrl.length);
-          currentShowedImagesDisplayAddressUrl = showedImageDisplayAddressUrl.sublist(
-              _currentPage * _perPageItemSize, showedImageDisplayAddressUrl.length);
+        imageIdList.removeAt(index + paginationSize * pageIndex);
+        imageUrlList.removeAt(index + paginationSize * pageIndex);
+        imageDisplayedUrlList.removeAt(index + paginationSize * pageIndex);
+        imagePictureKeyList.removeAt(index + paginationSize * pageIndex);
+        imageFileNameList.removeAt(index + paginationSize * pageIndex);
+        imageLocalPathList.removeAt(index + paginationSize * pageIndex);
+        currentVisibleImageUrlList.removeAt(index);
+        currentVisibleImageDisplayedUrlList.removeAt(index);
+        selectedImagesBoolList = List.filled(paginationSize, false);
+        if (currentVisibleImageUrlList.isEmpty && pageIndex == 0) {
+          currentVisibleImageUrlList = [];
+          currentVisibleImageDisplayedUrlList = [];
+        } else if (currentVisibleImageUrlList.isEmpty && pageIndex > 0) {
+          pageIndex--;
+          currentVisibleImageUrlList =
+              imageUrlList.sublist(pageIndex * paginationSize, (pageIndex + 1) * paginationSize);
+          currentVisibleImageDisplayedUrlList =
+              imageDisplayedUrlList.sublist(pageIndex * paginationSize, (pageIndex + 1) * paginationSize);
+        } else if (imageUrlList.length >= (pageIndex + 1) * paginationSize) {
+          currentVisibleImageUrlList =
+              imageUrlList.sublist(pageIndex * paginationSize, (pageIndex + 1) * paginationSize);
+          currentVisibleImageDisplayedUrlList =
+              imageDisplayedUrlList.sublist(pageIndex * paginationSize, (pageIndex + 1) * paginationSize);
+        } else if (imageUrlList.length < (pageIndex + 1) * paginationSize) {
+          currentVisibleImageUrlList = imageUrlList.sublist(pageIndex * paginationSize, imageUrlList.length);
+          currentVisibleImageDisplayedUrlList =
+              imageDisplayedUrlList.sublist(pageIndex * paginationSize, imageDisplayedUrlList.length);
         }
       });
     } catch (e) {
@@ -1119,13 +955,13 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
 
   /// 刷新或返回上一页
   _onRefresh() async {
-    if (_currentPage == 0 || _currentPage == 1) {
+    if (pageIndex == 0 || pageIndex == 1) {
       setState(() {
-        _currentPage = 0;
-        currentShowedImagesUrl.clear();
-        currentShowedImagesDisplayAddressUrl.clear();
-        selectedImagesBool = List.filled(
-          _perPageItemSize,
+        pageIndex = 0;
+        currentVisibleImageUrlList.clear();
+        currentVisibleImageDisplayedUrlList.clear();
+        selectedImagesBoolList = List.filled(
+          paginationSize,
           false,
         );
         refreshController.resetNoData();
@@ -1141,221 +977,90 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
     doLoadUploadedImages();
   }
 
+  void addImageDetails(
+      Map<String, dynamic> map, String urlKey, String displayedUrlKey, bool isFormatUrl, bool isFormatDisplayedUrl) {
+    String url = map[urlKey].toString();
+    String displayedUrl = map[displayedUrlKey].toString();
+
+    if (isFormatUrl && !url.startsWith('https://') && !url.startsWith('http://')) {
+      url = 'http://$url';
+    }
+    if (isFormatDisplayedUrl && !displayedUrl.startsWith('https://') && !displayedUrl.startsWith('http://')) {
+      displayedUrl = 'http://$displayedUrl';
+    }
+
+    imageUrlList.add(url);
+    imageDisplayedUrlList.add(displayedUrl);
+    imageFileNameList.add(map['name']);
+    imagePictureKeyList.add(map['pictureKey']);
+    imageLocalPathList.add(map['path']);
+  }
+
   void initLoadUploadedImages() async {
     //所有的图床的图片ID
-    Map<String, dynamic> imageList = await AlbumSQL.getAllTableData(Global.imageDB!, 'id');
+    Map<String, dynamic> dbIdList = await AlbumSQL.getAllTableData(Global.imageDB!, 'id');
     //扩展图床的图片ID
-    Map<String, dynamic> imageListExtend = await AlbumSQL.getAllTableDataExtend(
+    Map<String, dynamic> extendDbIdListExtend = await AlbumSQL.getAllTableDataExtend(
       Global.imageDBExtend!,
       'id',
     );
-    //默认图床的图片ID
     if (Global.defaultShowedPBhost == 'PBhostExtend1' ||
         Global.defaultShowedPBhost == 'PBhostExtend2' ||
         Global.defaultShowedPBhost == 'PBhostExtend3' ||
         Global.defaultShowedPBhost == 'PBhostExtend4') {
-      showedImageId = imageListExtend[Global.defaultShowedPBhost]!;
+      imageIdList = extendDbIdListExtend[Global.defaultShowedPBhost]!;
     } else {
-      showedImageId = imageList[Global.defaultShowedPBhost]!;
+      imageIdList = dbIdList[Global.defaultShowedPBhost]!;
     }
 
-    showedImageId = showedImageId.reversed.toList();
-    showedImageUrl.clear();
-    showedImageDisplayAddressUrl.clear();
-    showedImagePictureKey.clear();
-    showedImageName.clear();
-    showedImagePaths.clear();
-    for (int i = 0; i < showedImageId.length; i++) {
+    imageIdList = imageIdList.reversed.toList();
+    imageUrlList.clear();
+    imageDisplayedUrlList.clear();
+    imagePictureKeyList.clear();
+    imageFileNameList.clear();
+    imageLocalPathList.clear();
+
+    for (int i = 0; i < imageIdList.length; i++) {
       List<Map<String, dynamic>> maps;
       if (Global.defaultShowedPBhost == 'PBhostExtend1' ||
           Global.defaultShowedPBhost == 'PBhostExtend2' ||
           Global.defaultShowedPBhost == 'PBhostExtend3' ||
           Global.defaultShowedPBhost == 'PBhostExtend4') {
-        maps = await AlbumSQL.queryData(Global.imageDBExtend!, Global.defaultShowedPBhost, showedImageId[i]);
+        maps = await AlbumSQL.queryData(Global.imageDBExtend!, Global.defaultShowedPBhost, imageIdList[i]);
       } else {
-        maps = await AlbumSQL.queryData(Global.imageDB!, Global.defaultShowedPBhost, showedImageId[i]);
+        maps = await AlbumSQL.queryData(Global.imageDB!, Global.defaultShowedPBhost, imageIdList[i]);
       }
-      if (Global.defaultShowedPBhost == 'smms') {
-        showedImageUrl.add(maps[0]['url']); //smms的returnUrl就是用来复制和相册展示的url
-        showedImageDisplayAddressUrl.add(maps[0]['url']);
-        showedImageName.add(maps[0]['name']);
-        showedImagePictureKey.add(maps[0]['pictureKey']);
-        showedImagePaths.add(maps[0]['path']);
-      } else if (Global.defaultShowedPBhost == 'lskypro') {
-        showedImageUrl.add(maps[0]['url']); //用来复制的url
-        showedImageDisplayAddressUrl.add(maps[0]['hostSpecificArgA']); //用来相册展示的url
-        showedImageName.add(maps[0]['name']);
-        showedImagePictureKey.add(maps[0]['pictureKey']);
-        showedImagePaths.add(maps[0]['path']);
-      } else if (Global.defaultShowedPBhost == 'github') {
-        if (!maps[0]['hostSpecificArgA'].toString().startsWith('https://') &&
-            !maps[0]['hostSpecificArgA'].toString().startsWith('http://')) {
-          // ignore: prefer_interpolation_to_compose_strings
-          showedImageUrl.add('http://' + maps[0]['hostSpecificArgA']);
-        } else {
-          showedImageUrl.add(maps[0]['hostSpecificArgA']);
-        }
-        // showedImageUrl.add(maps[0]['hostSpecificArgA']); //用来复制的url
-        if (!maps[0]['hostSpecificArgA'].toString().startsWith('https://') &&
-            !maps[0]['hostSpecificArgA'].toString().startsWith('http://')) {
-          showedImageDisplayAddressUrl
-              // ignore: prefer_interpolation_to_compose_strings
-              .add('http://' + maps[0]['hostSpecificArgA']);
-        } else {
-          showedImageDisplayAddressUrl.add(maps[0]['hostSpecificArgA']);
-        }
-        showedImageName.add(maps[0]['name']);
-        showedImagePictureKey.add(maps[0]['pictureKey']);
-        showedImagePaths.add(maps[0]['path']);
-      } else if (Global.defaultShowedPBhost == 'imgur') {
-        showedImageUrl.add(maps[0]['url']); //用来复制的url
-        showedImageDisplayAddressUrl.add(maps[0]['hostSpecificArgA']); //用来显示的url
-        showedImageName.add(maps[0]['name']);
-        showedImagePictureKey.add(maps[0]['pictureKey']);
-        showedImagePaths.add(maps[0]['path']);
-      } else if (Global.defaultShowedPBhost == 'qiniu') {
-        if (!maps[0]['url'].toString().startsWith('https://') && !maps[0]['url'].toString().startsWith('http://')) {
-          // ignore: prefer_interpolation_to_compose_strings
-          showedImageUrl.add('http://' + maps[0]['url']);
-        } else {
-          showedImageUrl.add(maps[0]['url']);
-        }
-        if (!maps[0]['hostSpecificArgA'].toString().startsWith('https://') &&
-            !maps[0]['hostSpecificArgA'].toString().startsWith('http://')) {
-          showedImageDisplayAddressUrl
-              // ignore: prefer_interpolation_to_compose_strings
-              .add('http://' + maps[0]['hostSpecificArgA']);
-        } else {
-          showedImageDisplayAddressUrl.add(maps[0]['hostSpecificArgA']);
-        }
-        showedImageName.add(maps[0]['name']);
-        showedImagePictureKey.add(maps[0]['pictureKey']);
-        showedImagePaths.add(maps[0]['path']);
-      } else if (Global.defaultShowedPBhost == 'tencent') {
-        if (!maps[0]['url'].toString().startsWith('https://') && !maps[0]['url'].toString().startsWith('http://')) {
-          // ignore: prefer_interpolation_to_compose_strings
-          showedImageUrl.add('http://' + maps[0]['url']);
-        } else {
-          showedImageUrl.add(maps[0]['url']);
-        }
-        if (!maps[0]['hostSpecificArgA'].toString().startsWith('https://') &&
-            !maps[0]['hostSpecificArgA'].toString().startsWith('http://')) {
-          showedImageDisplayAddressUrl
-              // ignore: prefer_interpolation_to_compose_strings
-              .add('http://' + maps[0]['hostSpecificArgA']);
-        } else {
-          showedImageDisplayAddressUrl.add(maps[0]['hostSpecificArgA']);
-        }
-        showedImageName.add(maps[0]['name']);
-        showedImagePictureKey.add(maps[0]['pictureKey']);
-        showedImagePaths.add(maps[0]['path']);
-      } else if (Global.defaultShowedPBhost == 'aliyun') {
-        if (!maps[0]['url'].toString().startsWith('https://') && !maps[0]['url'].toString().startsWith('http://')) {
-          // ignore: prefer_interpolation_to_compose_strings
-          showedImageUrl.add('http://' + maps[0]['url']);
-        } else {
-          showedImageUrl.add(maps[0]['url']);
-        }
-        if (!maps[0]['hostSpecificArgA'].toString().startsWith('https://') &&
-            !maps[0]['hostSpecificArgA'].toString().startsWith('http://')) {
-          showedImageDisplayAddressUrl
-              // ignore: prefer_interpolation_to_compose_strings
-              .add('http://' + maps[0]['hostSpecificArgA']);
-        } else {
-          showedImageDisplayAddressUrl.add(maps[0]['hostSpecificArgA']);
-        }
-        showedImageName.add(maps[0]['name']);
-        showedImagePictureKey.add(maps[0]['pictureKey']);
-        showedImagePaths.add(maps[0]['path']);
-      } else if (Global.defaultShowedPBhost == 'upyun') {
-        if (!maps[0]['url'].toString().startsWith('https://') && !maps[0]['url'].toString().startsWith('http://')) {
-          // ignore: prefer_interpolation_to_compose_strings
-          showedImageUrl.add('http://' + maps[0]['url']);
-        } else {
-          showedImageUrl.add(maps[0]['url']);
-        }
-        if (!maps[0]['hostSpecificArgA'].toString().startsWith('https://') &&
-            !maps[0]['hostSpecificArgA'].toString().startsWith('http://')) {
-          showedImageDisplayAddressUrl
-              // ignore: prefer_interpolation_to_compose_strings
-              .add('http://' + maps[0]['hostSpecificArgA']);
-        } else {
-          showedImageDisplayAddressUrl.add(maps[0]['hostSpecificArgA']);
-        }
-        showedImageName.add(maps[0]['name']);
-        showedImagePictureKey.add(maps[0]['pictureKey']);
-        showedImagePaths.add(maps[0]['path']);
-      } else if (Global.defaultShowedPBhost == 'PBhostExtend1') {
-        showedImageUrl.add(maps[0]['url']); //用来复制的url
-        showedImageDisplayAddressUrl.add(maps[0]['hostSpecificArgI']); //缩略图文件地址
-        showedImageName.add(maps[0]['name']);
-        showedImagePictureKey.add(maps[0]['pictureKey']);
-        showedImagePaths.add(maps[0]['path']);
-      } else if (Global.defaultShowedPBhost == 'PBhostExtend2') {
-        if (!maps[0]['url'].toString().startsWith('https://') && !maps[0]['url'].toString().startsWith('http://')) {
-          // ignore: prefer_interpolation_to_compose_strings
-          showedImageUrl.add('http://' + maps[0]['url']);
-        } else {
-          showedImageUrl.add(maps[0]['url']);
-        }
-        if (!maps[0]['hostSpecificArgA'].toString().startsWith('https://') &&
-            !maps[0]['hostSpecificArgA'].toString().startsWith('http://')) {
-          showedImageDisplayAddressUrl
-              // ignore: prefer_interpolation_to_compose_strings
-              .add('http://' + maps[0]['hostSpecificArgA']);
-        } else {
-          showedImageDisplayAddressUrl.add(maps[0]['hostSpecificArgA']);
-        }
-        showedImageName.add(maps[0]['name']);
-        showedImagePictureKey.add(maps[0]['pictureKey']);
-        showedImagePaths.add(maps[0]['path']);
-      } else if (Global.defaultShowedPBhost == 'PBhostExtend3') {
-        if (!maps[0]['hostSpecificArgB'].toString().startsWith('https://') &&
-            !maps[0]['hostSpecificArgB'].toString().startsWith('http://')) {
-          // ignore: prefer_interpolation_to_compose_strings
-          showedImageUrl.add('http://' + maps[0]['hostSpecificArgB']);
-        } else {
-          showedImageUrl.add(maps[0]['hostSpecificArgB']);
-        }
-        if (!maps[0]['hostSpecificArgA'].toString().startsWith('https://') &&
-            !maps[0]['hostSpecificArgA'].toString().startsWith('http://')) {
-          showedImageDisplayAddressUrl
-              // ignore: prefer_interpolation_to_compose_strings
-              .add('http://' + maps[0]['hostSpecificArgA']);
-        } else {
-          showedImageDisplayAddressUrl.add(maps[0]['hostSpecificArgA']);
-        }
-        showedImageName.add(maps[0]['name']);
-        showedImagePictureKey.add(maps[0]['pictureKey']);
-        showedImagePaths.add(maps[0]['path']);
-      } else if (Global.defaultShowedPBhost == 'PBhostExtend4') {
-        if (!maps[0]['url'].toString().startsWith('https://') && !maps[0]['url'].toString().startsWith('http://')) {
-          // ignore: prefer_interpolation_to_compose_strings
-          showedImageUrl.add('http://' + maps[0]['url']);
-        } else {
-          showedImageUrl.add(maps[0]['url']);
-        }
-        if (!maps[0]['hostSpecificArgA'].toString().startsWith('https://') &&
-            !maps[0]['hostSpecificArgA'].toString().startsWith('http://')) {
-          showedImageDisplayAddressUrl
-              // ignore: prefer_interpolation_to_compose_strings
-              .add('http://' + maps[0]['hostSpecificArgA']);
-        } else {
-          showedImageDisplayAddressUrl.add(maps[0]['hostSpecificArgA']);
-        }
-        showedImageName.add(maps[0]['name']);
-        showedImagePictureKey.add(maps[0]['pictureKey']);
-        showedImagePaths.add(maps[0]['path']);
+
+      Map<String, dynamic> map = maps[0];
+      switch (Global.defaultShowedPBhost) {
+        case 'smms':
+          addImageDetails(map, 'url', 'url', false, false);
+        case 'lskypro':
+        case 'imgur':
+          addImageDetails(map, 'url', 'hostSpecificArgA', false, false);
+        case 'github':
+          addImageDetails(map, 'hostSpecificArgA', 'hostSpecificArgA', true, true);
+        case 'qiniu':
+        case 'tencent':
+        case 'aliyun':
+        case 'upyun':
+        case 'PBhostExtend2':
+        case 'PBhostExtend4':
+          addImageDetails(map, 'url', 'hostSpecificArgA', true, true);
+        case 'PBhostExtend1':
+          addImageDetails(map, 'url', 'hostSpecificArgI', false, false);
+        case 'PBhostExtend3':
+          addImageDetails(map, 'hostSpecificArgB', 'hostSpecificArgA', true, true);
+        default:
+          break;
       }
     }
 
-    currentShowedImagesUrl =
-        showedImageUrl.sublist(0, _perPageItemSize > showedImageUrl.length ? showedImageUrl.length : _perPageItemSize);
-    currentShowedImagesDisplayAddressUrl = showedImageDisplayAddressUrl.sublist(
-        0,
-        _perPageItemSize > showedImageDisplayAddressUrl.length
-            ? showedImageDisplayAddressUrl.length
-            : _perPageItemSize);
+    currentVisibleImageUrlList =
+        imageUrlList.sublist(0, paginationSize > imageUrlList.length ? imageUrlList.length : paginationSize);
+
+    currentVisibleImageDisplayedUrlList = imageDisplayedUrlList.sublist(
+        0, paginationSize > imageDisplayedUrlList.length ? imageDisplayedUrlList.length : paginationSize);
 
     setState(() {
       refreshController.refreshCompleted();
@@ -1363,33 +1068,33 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
   }
 
   void doLoadUploadedImages() async {
-    if (showedImageUrl.length < _perPageItemSize * (_currentPage + 1)) {
+    if (imageUrlList.length < paginationSize * (pageIndex + 1)) {
     } else {
-      _currentPage = _currentPage + 1;
-      currentShowedImagesUrl.clear();
-      currentShowedImagesUrl = showedImageUrl.sublist(
-          (_currentPage) * _perPageItemSize,
-          showedImageUrl.length > _perPageItemSize * (_currentPage + 1)
-              ? _perPageItemSize * (_currentPage + 1)
-              : showedImageUrl.length);
-      currentShowedImagesDisplayAddressUrl.clear();
-      currentShowedImagesDisplayAddressUrl = showedImageDisplayAddressUrl.sublist(
-          (_currentPage) * _perPageItemSize,
-          showedImageDisplayAddressUrl.length > _perPageItemSize * (_currentPage + 1)
-              ? _perPageItemSize * (_currentPage + 1)
-              : showedImageDisplayAddressUrl.length);
-      selectedImagesBool = List.filled(_perPageItemSize, false);
+      pageIndex = pageIndex + 1;
+      currentVisibleImageUrlList.clear();
+      currentVisibleImageUrlList = imageUrlList.sublist(
+          (pageIndex) * paginationSize,
+          imageUrlList.length > paginationSize * (pageIndex + 1)
+              ? paginationSize * (pageIndex + 1)
+              : imageUrlList.length);
+      currentVisibleImageDisplayedUrlList.clear();
+      currentVisibleImageDisplayedUrlList = imageDisplayedUrlList.sublist(
+          (pageIndex) * paginationSize,
+          imageDisplayedUrlList.length > paginationSize * (pageIndex + 1)
+              ? paginationSize * (pageIndex + 1)
+              : imageDisplayedUrlList.length);
+      selectedImagesBoolList = List.filled(paginationSize, false);
     }
     loadUploadedImages();
   }
 
   void loadUploadedImages() async {
     setState(() {
-      if (currentShowedImagesUrl.isEmpty || showedImageUrl.isEmpty) {
+      if (currentVisibleImageUrlList.isEmpty || imageUrlList.isEmpty) {
         refreshController.loadNoData();
-      } else if (_currentPage == 0) {
+      } else if (pageIndex == 0) {
         refreshController.refreshCompleted();
-      } else if (showedImageUrl.length < _perPageItemSize * (_currentPage + 1)) {
+      } else if (imageUrlList.length < paginationSize * (pageIndex + 1)) {
         refreshController.loadNoData();
       } else {
         refreshController.loadComplete();
@@ -1398,14 +1103,13 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
   }
 
   void doBackUploadedImages() async {
-    _currentPage = _currentPage - 1;
-    currentShowedImagesUrl.clear();
-    currentShowedImagesDisplayAddressUrl.clear();
-    currentShowedImagesUrl =
-        showedImageUrl.sublist((_currentPage) * _perPageItemSize, _perPageItemSize * (_currentPage + 1));
-    currentShowedImagesDisplayAddressUrl =
-        showedImageDisplayAddressUrl.sublist((_currentPage) * _perPageItemSize, _perPageItemSize * (_currentPage + 1));
-    selectedImagesBool = List.filled(_perPageItemSize, false);
+    pageIndex = pageIndex - 1;
+    currentVisibleImageUrlList.clear();
+    currentVisibleImageDisplayedUrlList.clear();
+    currentVisibleImageUrlList = imageUrlList.sublist((pageIndex) * paginationSize, paginationSize * (pageIndex + 1));
+    currentVisibleImageDisplayedUrlList =
+        imageDisplayedUrlList.sublist((pageIndex) * paginationSize, paginationSize * (pageIndex + 1));
+    selectedImagesBoolList = List.filled(paginationSize, false);
     backUploadedImages();
   }
 

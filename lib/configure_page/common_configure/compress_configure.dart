@@ -11,11 +11,6 @@ class CompressConfigure extends StatefulWidget {
 
 class CompressConfigureState extends State<CompressConfigure> {
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -93,7 +88,7 @@ class CompressConfigureState extends State<CompressConfigure> {
                     showToast('范围为0-100');
                     return;
                   }
-                  await Global.setquality(quality);
+                  await Global.setQuality(quality);
                 },
               ),
               ListTile(
@@ -111,7 +106,7 @@ class CompressConfigureState extends State<CompressConfigure> {
                     );
                   }).toList(),
                   onChanged: (String? value) async {
-                    await Global.setdefaultCompressFormat(value!);
+                    await Global.setDefaultCompressFormat(value!);
                     setState(() {});
                   },
                 ),

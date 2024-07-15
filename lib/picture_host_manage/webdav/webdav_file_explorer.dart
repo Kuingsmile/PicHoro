@@ -783,7 +783,7 @@ class WebdavFileExplorerState extends loading_state.BaseLoadingPageState<WebdavF
                           rawurl = host + allInfoList[i]['path'];
                         }
 
-                        finalFormatedurl = linkGenerateDict[Global.defaultLKformat]!(rawurl, fileName);
+                        finalFormatedurl = linkGeneratorMap[Global.defaultLKformat]!(rawurl, fileName);
 
                         multiUrls.add(finalFormatedurl);
                       }
@@ -1408,7 +1408,7 @@ class WebdavFileExplorerState extends loading_state.BaseLoadingPageState<WebdavF
                 shareUrl = '$host${allInfoList[index]['path']}';
               }
               String filename = my_path.basename(allInfoList[index]['name']);
-              String formatedLink = linkGenerateDict[format]!(shareUrl, filename);
+              String formatedLink = linkGeneratorMap[format]!(shareUrl, filename);
               await flutter_services.Clipboard.setData(flutter_services.ClipboardData(text: formatedLink));
               if (mounted) {
                 Navigator.pop(context);

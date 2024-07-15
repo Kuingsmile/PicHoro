@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:horopic/utils/common_functions.dart';
-import 'package:horopic/utils/global.dart';
 
 class GithubImageUploadUtils {
   static Dio _getDio(Map configMap) {
@@ -66,7 +65,7 @@ class GithubImageUploadUtils {
         downloadUrl = 'http://$downloadUrl';
       }
       //复制的链接地址应该是downloadUrl
-      formatedURL = Global.isCopyLink ? linkGenerateDict[Global.defaultLKformat]!(downloadUrl, name) : downloadUrl;
+      formatedURL = getFormatedUrl(downloadUrl, name);
       return ["success", formatedURL, returnUrl, pictureKey, downloadUrl];
     } catch (e) {
       flogError(

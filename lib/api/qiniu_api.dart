@@ -5,7 +5,6 @@ import 'package:dio/dio.dart';
 import 'package:path/path.dart' as my_path;
 
 import 'package:horopic/utils/common_functions.dart';
-import 'package:horopic/utils/global.dart';
 
 class QiniuImageUploadUtils {
   static Map<String, String> areaHostMap = {
@@ -150,12 +149,7 @@ class QiniuImageUploadUtils {
           returnUrl = '$url/${response.data['key']}$options';
           displayUrl = '$url/${response.data['key']}$options';
         }
-        String formatedURL = '';
-        if (Global.isCopyLink == true) {
-          formatedURL = linkGenerateDict[Global.defaultLKformat]!(returnUrl, name);
-        } else {
-          formatedURL = returnUrl;
-        }
+        String formatedURL = getFormatedUrl(returnUrl, name);
         Map pictureKeyMap = Map.from(configMap);
         String pictureKey = jsonEncode(pictureKeyMap);
         return ["success", formatedURL, returnUrl, pictureKey, displayUrl];

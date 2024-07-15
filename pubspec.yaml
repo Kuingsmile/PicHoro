@@ -87,6 +87,7 @@ dependencies:
   url_launcher: ^6.1.12
   syncfusion_flutter_pdfviewer:
     path: ../flutterdep/syncfusion_flutter_pdfviewer-22.2.10
+  mime: 1.0.4
 
 
   # The following adds the Cupertino Icons font to your application.

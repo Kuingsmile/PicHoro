@@ -1,11 +1,9 @@
-import 'dart:io';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 
 import 'package:dio/dio.dart';
 import 'package:f_logs/f_logs.dart';
 import 'package:fluro/fluro.dart';
-import 'package:path_provider/path_provider.dart';
 
 import 'package:horopic/router/application.dart';
 import 'package:horopic/pages/loading.dart';
@@ -37,11 +35,7 @@ class ImgurConfigState extends State<ImgurConfig> {
     try {
       Map configMap = await ImgurManageAPI.getConfigMap();
       _clientIdController.text = configMap['clientId'] ?? '';
-      if (configMap['proxy'] != 'None' && configMap['proxy'] != null) {
-        _proxyController.text = configMap['proxy'];
-      } else {
-        _proxyController.clear();
-      }
+      setControllerText(_proxyController, configMap['proxy']);
       setState(() {});
     } catch (e) {
       FLog.error(
@@ -165,22 +159,18 @@ class ImgurConfigState extends State<ImgurConfig> {
 
   Future _saveImgurConfig() async {
     try {
-      String clientId = '';
-      if (_clientIdController.text.startsWith('Client-ID ')) {
-        clientId = _clientIdController.text.substring(10);
-      } else {
-        clientId = _clientIdController.text;
+      String clientId = _clientIdController.text.trim();
+      String proxy = _proxyController.text.trim();
+      if (clientId.startsWith('Client-ID ')) {
+        clientId = clientId.substring(10);
       }
-      String proxy = '';
-      if (_proxyController.text == '' || _proxyController.text.isEmpty) {
+      if (proxy.isEmpty) {
         proxy = 'None';
-      } else {
-        proxy = _proxyController.text;
       }
 
       final imgurConfig = ImgurConfigModel(clientId, proxy);
       final imgurConfigJson = jsonEncode(imgurConfig);
-      final imgurConfigFile = await localFile;
+      final imgurConfigFile = await ImgurManageAPI.localFile;
       await imgurConfigFile.writeAsString(imgurConfigJson);
       showToast('保存成功');
       return;
@@ -198,14 +188,13 @@ class ImgurConfigState extends State<ImgurConfig> {
 
   checkImgurConfig() async {
     try {
-      String configData = await readHostConfig();
-      if (configData == "") {
+      Map configMap = await ImgurManageAPI.getConfigMap();
+      if (configMap.isEmpty) {
         if (context.mounted) {
           return showCupertinoAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");
         }
         return;
       }
-      Map configMap = jsonDecode(configData);
 
       BaseOptions options = setBaseOptions();
       options.headers = {
@@ -252,23 +241,6 @@ class ImgurConfigState extends State<ImgurConfig> {
         return showCupertinoAlertDialog(context: context, title: "检查失败!", content: e.toString());
       }
     }
-  }
-
-  Future<File> get localFile async {
-    final path = await _localPath;
-    String defaultUser = await Global.getUser();
-    return ensureFileExists(File('$path/${defaultUser}_imgur_config.txt'));
-  }
-
-  Future<String> get _localPath async {
-    final directory = await getApplicationDocumentsDirectory();
-    return directory.path;
-  }
-
-  Future<String> readHostConfig() async {
-    final file = await localFile;
-    String contents = await file.readAsString();
-    return contents;
   }
 
   _setdefault() async {

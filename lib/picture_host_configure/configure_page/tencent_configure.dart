@@ -49,21 +49,9 @@ class TencentConfigState extends State<TencentConfig> {
       _bucketController.text = configMap['bucket'] ?? '';
       _appIdController.text = configMap['appId'] ?? '';
       _areaController.text = configMap['area'] ?? '';
-      if (configMap['path'] != 'None' && configMap['path'] != null) {
-        _pathController.text = configMap['path'];
-      } else {
-        _pathController.clear();
-      }
-      if (configMap['customUrl'] != 'None' && configMap['customUrl'] != null) {
-        _customUrlController.text = configMap['customUrl'];
-      } else {
-        _customUrlController.clear();
-      }
-      if (configMap['options'] != 'None' && configMap['options'] != null) {
-        _optionsController.text = configMap['options'];
-      } else {
-        _optionsController.clear();
-      }
+      setControllerText(_pathController, configMap['path']);
+      setControllerText(_customUrlController, configMap['customUrl']);
+      setControllerText(_optionsController, configMap['options']);
     } catch (e) {
       FLog.error(
           className: 'TencentConfigState',
@@ -273,16 +261,16 @@ class TencentConfigState extends State<TencentConfig> {
 
   Future _saveTencentConfig() async {
     try {
-      String secretId = _secretIdController.text;
-      String secretKey = _secretKeyController.text;
-      String bucket = _bucketController.text;
-      String appId = _appIdController.text;
-      String area = _areaController.text;
-      String path = _pathController.text;
-      String customUrl = _customUrlController.text;
-      String options = _optionsController.text;
+      String secretId = _secretIdController.text.trim();
+      String secretKey = _secretKeyController.text.trim();
+      String bucket = _bucketController.text.trim();
+      String appId = _appIdController.text.trim();
+      String area = _areaController.text.trim();
+      String path = _pathController.text.trim();
+      String customUrl = _customUrlController.text.trim();
+      String options = _optionsController.text.trim();
       //格式化路径为以/结尾，不以/开头
-      if (path.isEmpty || path.replaceAll(' ', '').isEmpty || path == '/') {
+      if (path.isEmpty || path == '/') {
         path = 'None';
       } else {
         if (!path.endsWith('/')) {
@@ -314,7 +302,7 @@ class TencentConfigState extends State<TencentConfig> {
 
       final tencentConfig = TencentConfigModel(secretId, secretKey, bucket, appId, area, path, customUrl, options);
       final tencentConfigJson = jsonEncode(tencentConfig);
-      final tencentConfigFile = await localFile;
+      final tencentConfigFile = await TencentManageAPI.localFile;
       await tencentConfigFile.writeAsString(tencentConfigJson);
       showToast('保存成功');
     } catch (e) {
@@ -331,16 +319,14 @@ class TencentConfigState extends State<TencentConfig> {
 
   checkTencentConfig() async {
     try {
-      String configData = await readTencentConfig();
+      Map configMap = await TencentManageAPI.getConfigMap();
 
-      if (configData == "") {
+      if (configMap.isEmpty) {
         if (context.mounted) {
           return showCupertinoAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");
         }
         return;
       }
-
-      Map configMap = jsonDecode(configData);
 
       //save asset image to app dir
       String assetPath = 'assets/validateImage/PicHoroValidate.jpeg';
@@ -445,23 +431,6 @@ ${configMap['options']}
         return showCupertinoAlertDialog(context: context, title: "检查失败!", content: e.toString());
       }
     }
-  }
-
-  Future<File> get localFile async {
-    final path = await _localPath;
-    String defaultUser = await Global.getUser();
-    return ensureFileExists(File('$path/${defaultUser}_tencent_config.txt'));
-  }
-
-  Future<String> get _localPath async {
-    final directory = await getApplicationDocumentsDirectory();
-    return directory.path;
-  }
-
-  Future<String> readTencentConfig() async {
-    final file = await localFile;
-    String contents = await file.readAsString();
-    return contents;
   }
 
   _setdefault() async {

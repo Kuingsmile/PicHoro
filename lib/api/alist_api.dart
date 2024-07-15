@@ -42,24 +42,26 @@ class AlistImageUploadUtils {
     Function(int, int)? onSendProgress,
   }) async {
     try {
-      String formatedURL = '';
       FormData formdata = FormData.fromMap({
         "file": await MultipartFile.fromFile(path, filename: name),
       });
       String host = configMap['host'];
-      String uploadPath = configMap['uploadPath'];
+      String uploadPath = configMap['uploadPath'] ?? 'None';
       String webPath = configMap['webPath'] ?? 'None';
-      String? customUrl = configMap['customUrl'];
-      if (customUrl == null || customUrl == 'None' || customUrl.trim().isEmpty) {
-        customUrl = host;
+      String customUrl = configMap['customUrl'] ?? 'None';
+      if (host.endsWith('/')) {
+        host = host.substring(0, host.length - 1);
+      }
+      if (customUrl.trim().isEmpty) {
+        customUrl = 'None';
       }
       if (customUrl.endsWith('/')) {
         customUrl = customUrl.substring(0, customUrl.length - 1);
       }
 
       String token = configMap['token'];
-      String? adminToken = configMap['adminToken'];
-      if (adminToken != null && adminToken != 'None' && adminToken.trim().isNotEmpty) {
+      String adminToken = configMap['adminToken'] ?? 'None';
+      if (adminToken != 'None' && adminToken.trim().isNotEmpty) {
         token = adminToken;
       } else {
         AlistImageUploadUtils.refreshToken(configMap: configMap);
@@ -131,14 +133,17 @@ class AlistImageUploadUtils {
       if (webPath != 'None') {
         webPath = '/${webPath.replaceAll(RegExp(r'^/*'), '').replaceAll(RegExp(r'/*$'), '')}/$name';
       }
-
-      String hostPicUrl = '$customUrl/d${webPath != 'None' ? webPath : filePath}';
-      if (responseGet.data!['data']['sign'] != "" && responseGet.data!['data']['sign'] != null) {
-        hostPicUrl = '$hostPicUrl?sign=${responseGet.data!['data']['sign']}';
+      String hostPicUrl = '';
+      if (customUrl != 'None') {
+        hostPicUrl = '$customUrl${webPath != 'None' ? webPath : filePath}';
+      } else {
+        hostPicUrl = '$host/d${webPath != 'None' ? webPath : filePath}';
+        if (responseGet.data!['data']['sign'] != "" && responseGet.data!['data']['sign'] != null) {
+          hostPicUrl = '$hostPicUrl?sign=${responseGet.data!['data']['sign']}';
+        }
       }
 
-      formatedURL =
-          Global.isCopyLink == true ? linkGenerateDict[Global.defaultLKformat]!(hostPicUrl, name) : hostPicUrl;
+      String formatedURL = getFormatedUrl(hostPicUrl, name);
 
       return ["success", formatedURL, returnUrl, pictureKey, displayUrl, hostPicUrl];
     } catch (e) {

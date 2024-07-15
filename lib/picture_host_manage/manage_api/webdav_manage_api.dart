@@ -12,7 +12,7 @@ import 'package:horopic/picture_host_configure/configure_page/webdav_configure.d
 import 'package:webdav_client/webdav_client.dart' as webdav;
 
 class WebdavManageAPI {
-  static Future<io.File> get _localFile async {
+  static Future<io.File> get localFile async {
     final path = await _localPath;
     String defaultUser = await Global.getUser();
     return ensureFileExists(io.File('$path/${defaultUser}_webdav_config.txt'));
@@ -25,7 +25,7 @@ class WebdavManageAPI {
 
   static Future<String> readWebdavConfig() async {
     try {
-      final file = await _localFile;
+      final file = await localFile;
       String contents = await file.readAsString();
       return contents;
     } catch (e) {
@@ -147,7 +147,7 @@ class WebdavManageAPI {
 
       final webdavConfig = WebdavConfigModel(host, webdavusername, password, uploadPath, customUrl, webPath);
       final webdavConfigJson = jsonEncode(webdavConfig);
-      final webdavConfigFile = await _localFile;
+      final webdavConfigFile = await localFile;
       await webdavConfigFile.writeAsString(webdavConfigJson);
       return ['success'];
     } catch (e) {

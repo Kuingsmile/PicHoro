@@ -46,26 +46,10 @@ class UpyunConfigState extends State<UpyunConfig> {
       _operatorController.text = configMap['operator'] ?? '';
       _passwordController.text = configMap['password'] ?? '';
       _urlController.text = configMap['url'] ?? '';
-      if (configMap['options'] != 'None' || configMap['options'].trim() != '') {
-        _optionsController.text = configMap['options'] ?? '';
-      } else {
-        _optionsController.clear();
-      }
-      if (configMap['path'] != 'None') {
-        _pathController.text = configMap['path'] ?? '';
-      } else {
-        _pathController.clear();
-      }
-      if (configMap['antiLeechToken'] != 'None') {
-        _antiLeechTokenController.text = configMap['antiLeechToken'] ?? '';
-      } else {
-        _antiLeechTokenController.clear();
-      }
-      if (configMap['antiLeechExpiration'] != 'None') {
-        _antiLeechExpirationController.text = configMap['antiLeechExpiration'] ?? '';
-      } else {
-        _antiLeechExpirationController.clear();
-      }
+      setControllerText(_optionsController, configMap['options']);
+      setControllerText(_pathController, configMap['path']);
+      setControllerText(_antiLeechTokenController, configMap['antiLeechToken']);
+      setControllerText(_antiLeechExpirationController, configMap['antiLeechExpiration']);
     } catch (e) {
       FLog.error(
           className: 'UpyunConfigState',
@@ -269,17 +253,17 @@ class UpyunConfigState extends State<UpyunConfig> {
 
   Future _saveUpyunConfig() async {
     try {
-      String bucket = _bucketController.text;
-      String upyunOperator = _operatorController.text;
-      String password = _passwordController.text;
-      String url = _urlController.text;
-      String options = _optionsController.text;
-      String path = _pathController.text;
-      String antiLeechToken = _antiLeechTokenController.text;
-      String antiLeechExpiration = _antiLeechExpirationController.text;
+      String bucket = _bucketController.text.trim();
+      String upyunOperator = _operatorController.text.trim();
+      String password = _passwordController.text.trim();
+      String url = _urlController.text.trim();
+      String options = _optionsController.text.trim();
+      String path = _pathController.text.trim();
+      String antiLeechToken = _antiLeechTokenController.text.trim();
+      String antiLeechExpiration = _antiLeechExpirationController.text.trim();
 
       //格式化路径为以/结尾，不以/开头
-      if (path.isEmpty || path.replaceAll(' ', '').isEmpty || path == '/') {
+      if (path.isEmpty || path == '/') {
         path = 'None';
       } else {
         if (!path.endsWith('/')) {
@@ -300,7 +284,7 @@ class UpyunConfigState extends State<UpyunConfig> {
       final upyunConfig =
           UpyunConfigModel(bucket, upyunOperator, password, url, options, path, antiLeechToken, antiLeechExpiration);
       final upyunConfigJson = jsonEncode(upyunConfig);
-      final upyunConfigFile = await localFile;
+      final upyunConfigFile = await UpyunManageAPI.localFile;
       await upyunConfigFile.writeAsString(upyunConfigJson);
       showToast('保存成功');
     } catch (e) {
@@ -317,17 +301,14 @@ class UpyunConfigState extends State<UpyunConfig> {
 
   checkUpyunConfig() async {
     try {
-      final configData = await readUpyunConfig();
+      Map configMap = await UpyunManageAPI.getConfigMap();
 
-      if (configData == '') {
+      if (configMap.isEmpty) {
         if (context.mounted) {
           return showCupertinoAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");
         }
         return;
       }
-
-      Map configMap = jsonDecode(configData);
-
       //save asset image to app dir
       String assetPath = 'assets/validateImage/PicHoroValidate.jpeg';
       String appDir = await getApplicationDocumentsDirectory().then((value) {
@@ -379,23 +360,6 @@ ${configMap['antiLeechExpiration']}
         return showCupertinoAlertDialog(context: context, title: "检查失败!", content: e.toString());
       }
     }
-  }
-
-  Future<String> get _localPath async {
-    final directory = await getApplicationDocumentsDirectory();
-    return directory.path;
-  }
-
-  Future<File> get localFile async {
-    final path = await _localPath;
-    String defaultUser = await Global.getUser();
-    return ensureFileExists(File('$path/${defaultUser}_upyun_config.txt'));
-  }
-
-  Future<String> readUpyunConfig() async {
-    final file = await localFile;
-    String contents = await file.readAsString();
-    return contents;
   }
 
   _setdefault() async {

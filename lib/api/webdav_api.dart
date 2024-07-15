@@ -2,22 +2,16 @@ import 'dart:convert';
 import 'package:webdav_client/webdav_client.dart' as webdav;
 
 import 'package:horopic/utils/common_functions.dart';
-import 'package:horopic/utils/global.dart';
 import 'package:horopic/picture_host_manage/manage_api/webdav_manage_api.dart';
 
 class WebdavImageUploadUtils {
   //上传接口
   static uploadApi({required String path, required String name, required Map configMap}) async {
     try {
-      String formatedURL = '';
       webdav.Client client = await WebdavManageAPI.getWebdavClient();
       String uploadPath = configMap['uploadPath'];
-      String? customUrl = configMap['customUrl'];
-      String? webPath = configMap['webPath'];
-
-      customUrl ??= 'None';
-      webPath ??= 'None';
-
+      String customUrl = configMap['customUrl'] ?? 'None';
+      String webPath = configMap['webPath'] ?? 'None';
       if (uploadPath == 'None') {
         uploadPath = '/';
       } else {
@@ -48,11 +42,8 @@ class WebdavImageUploadUtils {
         returnUrl = configMap['host'] + filePath;
         displayUrl = returnUrl + generateBasicAuth(configMap['webdavusername'], configMap['password']);
       }
-      if (Global.isCopyLink == true) {
-        formatedURL = linkGenerateDict[Global.defaultLKformat]!(returnUrl, name);
-      } else {
-        formatedURL = returnUrl;
-      }
+
+      String formatedURL = getFormatedUrl(returnUrl, name);
       Map pictureKeyMap = Map.from(configMap);
       pictureKeyMap['pictureKey'] = filePath;
       String pictureKey = jsonEncode(pictureKeyMap);

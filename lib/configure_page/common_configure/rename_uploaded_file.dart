@@ -27,11 +27,6 @@ class RenameFileState extends State<RenameFile> {
     '{filename}': "原始文件名",
   };
 
-  @override
-  void initState() {
-    super.initState();
-  }
-
   TableRow _buildTableRow(String key, String value) {
     return TableRow(
       children: [
@@ -88,7 +83,7 @@ class RenameFileState extends State<RenameFile> {
           trailing: Switch(
             value: Global.isTimeStamp,
             onChanged: (value) async {
-              await Global.setTimeStamp(value);
+              await Global.setIsTimeStamp(value);
               setState(() {});
             },
           ),
@@ -99,7 +94,7 @@ class RenameFileState extends State<RenameFile> {
           trailing: Switch(
             value: Global.isRandomName,
             onChanged: (value) async {
-              await Global.setRandomName(value);
+              await Global.setIsRandomName(value);
               setState(() {});
             },
           ),
@@ -109,7 +104,7 @@ class RenameFileState extends State<RenameFile> {
           trailing: Switch(
             value: Global.iscustomRename,
             onChanged: (value) async {
-              await Global.setCustomeRename(value);
+              await Global.setIsCustomeRename(value);
               setState(() {});
             },
           ),

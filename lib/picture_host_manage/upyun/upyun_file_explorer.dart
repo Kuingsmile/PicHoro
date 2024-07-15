@@ -773,7 +773,7 @@ class UpyunFileExplorerState extends loading_state.BaseLoadingPageState<UpyunFil
                         String fileName = '';
                         rawurl = '$hostPrefix${widget.bucketPrefix}${allInfoList[i]['name']}';
                         fileName = allInfoList[i]['name'];
-                        finalFormatedurl = linkGenerateDict[Global.defaultLKformat]!(rawurl, fileName);
+                        finalFormatedurl = linkGeneratorMap[Global.defaultLKformat]!(rawurl, fileName);
                         multiUrls.add(finalFormatedurl);
                       }
                     }
@@ -1429,7 +1429,7 @@ class UpyunFileExplorerState extends loading_state.BaseLoadingPageState<UpyunFil
               String fileName = '';
               rawurl = '$hostPrefix${widget.bucketPrefix}${allInfoList[index]['name']}';
               fileName = allInfoList[index]['name'];
-              String formatedLink = linkGenerateDict[format]!(rawurl, fileName);
+              String formatedLink = linkGeneratorMap[format]!(rawurl, fileName);
               await flutter_services.Clipboard.setData(flutter_services.ClipboardData(text: formatedLink));
               if (mounted) {
                 Navigator.pop(context);

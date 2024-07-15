@@ -4,7 +4,7 @@ import 'package:path/path.dart';
 import 'dart:io';
 import 'package:external_path/external_path.dart';
 
-//所有的数据库的图床表名
+/// 所有的数据库的图床表名
 List<String> allPBhost = [
   'lskypro', //兰空图床
   'smms', //sm.ms图床
@@ -21,61 +21,10 @@ List<String> allPBhost = [
   'PBhost3', //自定义图床3
 ];
 
-//扩展数据库的图床表名
-List<String> allPBhostExtend = [
-  'PBhostExtend1', //ftp
-  'PBhostExtend2', //aws
-  'PBhostExtend3', //alist
-  'PBhostExtend4', //webdav
-  'PBhostExtend5', //扩展图床5
-  'PBhostExtend6', //扩展图床6
-  'PBhostExtend7', //扩展图床7
-  'PBhostExtend8', //扩展图床8
-  'PBhostExtend9', //扩展图床9
-  'PBhostExtend10', //扩展图床10
-  'PBhostExtend11', //扩展图床11
-  'PBhostExtend12', //扩展图床12
-  'PBhostExtend13', //扩展图床13
-  'PBhostExtend14', //扩展图床14
-  'PBhostExtend15', //扩展图床15
-  'PBhostExtend16', //扩展图床16
-  'PBhostExtend17', //扩展图床17
-  'PBhostExtend18', //扩展图床18
-  'PBhostExtend19', //扩展图床19
-  'PBhostExtend20', //扩展图床20
-  'PBhostExtend21', //扩展图床21
-  'PBhostExtend22', //扩展图床22
-  'PBhostExtend23', //扩展图床23
-  'PBhostExtend24', //扩展图床24
-  'PBhostExtend25', //扩展图床25
-  'PBhostExtend26', //扩展图床26
-  'PBhostExtend27', //扩展图床27
-  'PBhostExtend28', //扩展图床28
-  'PBhostExtend29', //扩展图床29
-  'PBhostExtend30', //扩展图床30
-  'PBhostExtend31', //扩展图床31
-  'PBhostExtend32', //扩展图床32
-  'PBhostExtend33', //扩展图床33
-  'PBhostExtend34', //扩展图床34
-  'PBhostExtend35', //扩展图床35
-  'PBhostExtend36', //扩展图床36
-  'PBhostExtend37', //扩展图床37
-  'PBhostExtend38', //扩展图床38
-  'PBhostExtend39', //扩展图床39
-  'PBhostExtend40', //扩展图床40
-  'PBhostExtend41', //扩展图床41
-  'PBhostExtend42', //扩展图床42
-  'PBhostExtend43', //扩展图床43
-  'PBhostExtend44', //扩展图床44
-  'PBhostExtend45', //扩展图床45
-  'PBhostExtend46', //扩展图床46
-  'PBhostExtend47', //扩展图床47
-  'PBhostExtend48', //扩展图床48
-  'PBhostExtend49', //扩展图床49
-  'PBhostExtend50', //扩展图床50
-];
+/// 扩展数据库的图床表名
+List<String> allPBhostExtend = [for (int i = 1; i <= 50; i++) 'PBhostExtend$i'];
 
-// XXX 重要，默认上传图床名和数据库表名对应关系
+/// 重要，默认上传图床名和数据库表名对应关系
 Map<String, String> pBhostToTableName = {
   "lsky.pro": "lskypro",
   "sm.ms": "smms",
@@ -97,39 +46,13 @@ List<String> tableKeysList = [
   'url',
   'PBhost',
   'pictureKey',
-  'hostSpecificArgA',
-  'hostSpecificArgB',
-  'hostSpecificArgC',
-  'hostSpecificArgD',
-  'hostSpecificArgE',
-  'hostSpecificArgF',
-  'hostSpecificArgG',
-  'hostSpecificArgH',
-  'hostSpecificArgI',
-  'hostSpecificArgJ',
-  'hostSpecificArgK',
-  'hostSpecificArgL',
-  'hostSpecificArgM',
-  'hostSpecificArgN',
-  'hostSpecificArgO',
-  'hostSpecificArgP',
-  'hostSpecificArgQ',
-  'hostSpecificArgR',
-  'hostSpecificArgS',
-  'hostSpecificArgT',
-  'hostSpecificArgU',
-  'hostSpecificArgV',
-  'hostSpecificArgW',
-  'hostSpecificArgX',
-  'hostSpecificArgY',
-  'hostSpecificArgZ',
+  for (int i = 0; i < 26; i++) 'hostSpecificArg${String.fromCharCode(65 + i)}',
 ];
 
 class AlbumSQL {
-  static getDatabase() async {
+  static Future<Database> getDatabase() async {
     String currentUserName = await Global.getUser();
-    Database db = await initDB(currentUserName);
-    return db;
+    return await initDB(currentUserName);
   }
 
   static initDB(String username) async {
@@ -168,10 +91,9 @@ class AlbumSQL {
     return newdb;
   }
 
-  static getExtendDatabase() async {
+  static Future<Database> getExtendDatabase() async {
     String currentUserName = await Global.getUser();
-    Database db = await initExtendDB(currentUserName);
-    return db;
+    return await initExtendDB(currentUserName);
   }
 
   static initExtendDB(String username) async {
@@ -242,23 +164,19 @@ class AlbumSQL {
   }
 
   static insertData(Database db, String tableName, Map<String, dynamic> data) async {
-    int id = await db.insert(tableName, data, conflictAlgorithm: ConflictAlgorithm.replace);
-    return id;
+    return await db.insert(tableName, data, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   static deleteData(Database db, String tableName, int id) async {
-    int count = await db.delete(tableName, where: 'id = ?', whereArgs: [id]);
-    return count;
+    return await db.delete(tableName, where: 'id = ?', whereArgs: [id]);
   }
 
-  static queryData(Database db, String tableName, int id) async {
-    List<Map<String, dynamic>> maps = await db.query(tableName, where: 'id = ?', whereArgs: [id]);
-    return maps;
+  static Future<List<Map<String, dynamic>>> queryData(Database db, String tableName, int id) async {
+    return await db.query(tableName, where: 'id = ?', whereArgs: [id]);
   }
 
-  static queryTableData(Database db, String tableName) async {
-    List<Map<String, dynamic>> maps = await db.query(tableName);
-    return maps;
+  static Future<List<Map<String, dynamic>>> queryTableData(Database db, String tableName) async {
+    return await db.query(tableName);
   }
 
   static queryDataByLimit(

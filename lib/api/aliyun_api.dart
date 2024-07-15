@@ -5,7 +5,6 @@ import 'package:dio/dio.dart';
 import 'package:path/path.dart' as my_path;
 
 import 'package:horopic/utils/common_functions.dart';
-import 'package:horopic/utils/global.dart';
 
 class AliyunImageUploadUtils {
   static uploadApi({
@@ -20,19 +19,18 @@ class AliyunImageUploadUtils {
       String keySecret = configMap['keySecret'] ?? '';
       String bucket = configMap['bucket'] ?? '';
       String area = configMap['area'] ?? '';
-      String aliyunpath = configMap['path'] ?? '';
-      String customUrl = configMap['customUrl'] ?? '';
-      String options = configMap['options'] ?? '';
-      //格式化
-      if (customUrl != "None") {
-        if (!customUrl.startsWith(RegExp(r'http(s)?://'))) {
-          customUrl = 'http://$customUrl';
-        }
+      String aliyunpath = configMap['path'] ?? 'None';
+      String customUrl = configMap['customUrl'] ?? 'None';
+      String options = configMap['options'] ?? 'None';
+
+      if (customUrl != "None" && !customUrl.startsWith(RegExp(r'http(s)?://'))) {
+        customUrl = 'http://$customUrl';
       }
-      //格式化
+
       if (aliyunpath != 'None') {
-        aliyunpath = '${aliyunpath.replaceAll(RegExp(r'^/*'), '').replaceAll(RegExp(r'/*$'), '')}/';
+        aliyunpath = '${aliyunpath.replaceAll(RegExp(r'^/*|/*$'), '')}/';
       }
+
       String host = '$bucket.$area.aliyuncs.com';
       //云存储的路径 阿里云不能以/开头
       String urlpath = aliyunpath != 'None' ? '$aliyunpath$name' : name;
@@ -54,9 +52,8 @@ class AliyunImageUploadUtils {
         'Signature': singature,
         'file': await MultipartFile.fromFile(path, filename: my_path.basename(name)),
       };
-      if (getContentType(my_path.extension(path)) != null) {
-        formMap['x-oss-content-type'] = getContentType(my_path.extension(path));
-      }
+      formMap['x-oss-content-type'] = getContentType(my_path.extension(path));
+
       FormData formData = FormData.fromMap(formMap);
       BaseOptions baseoptions = setBaseOptions();
       File uploadFile = File(path);
@@ -65,7 +62,6 @@ class AliyunImageUploadUtils {
       });
       baseoptions.headers = {
         'Host': host,
-        'Content-Type': Global.multipartString,
         'Content-Length': contentLength,
       };
       Dio dio = Dio(baseoptions);
@@ -77,41 +73,36 @@ class AliyunImageUploadUtils {
         cancelToken: cancelToken,
       );
 
-      if (response.statusCode == 204) {
-        String returnUrl = '';
-        String displayUrl = '';
-
-        if (customUrl != 'None') {
-          customUrl = customUrl.replaceAll(RegExp(r'/$'), '');
-          returnUrl = '$customUrl/$urlpath';
-          displayUrl = returnUrl;
-        } else {
-          returnUrl = 'https://$host/$urlpath';
-          displayUrl = returnUrl;
-        }
-
-        if (options == 'None') {
-          displayUrl = "$displayUrl?x-oss-process=image/resize,m_lfit,h_500,w_500";
-        } else {
-          //网站后缀以?开头
-          if (!options.startsWith('?')) {
-            options = '?$options';
-          }
-          returnUrl = '$returnUrl$options';
-          displayUrl = '$displayUrl$options';
-        }
-
-        String formatedURL = '';
-        if (Global.isCopyLink == true) {
-          formatedURL = linkGenerateDict[Global.defaultLKformat]!(returnUrl, name);
-        } else {
-          formatedURL = returnUrl;
-        }
-        String pictureKey = jsonEncode(configMap);
-        return ["success", formatedURL, returnUrl, pictureKey, displayUrl];
-      } else {
+      if (response.statusCode != 204) {
         return ['failed'];
       }
+
+      String returnUrl = '';
+      String displayUrl = '';
+
+      if (customUrl != 'None') {
+        customUrl = customUrl.replaceAll(RegExp(r'/*$'), '');
+        returnUrl = '$customUrl/$urlpath';
+        displayUrl = returnUrl;
+      } else {
+        returnUrl = 'https://$host/$urlpath';
+        displayUrl = returnUrl;
+      }
+
+      if (options == 'None') {
+        displayUrl = "$displayUrl?x-oss-process=image/resize,m_lfit,h_500,w_500";
+      } else {
+        //网站后缀以?开头
+        if (!options.startsWith('?')) {
+          options = '?$options';
+        }
+        returnUrl = '$returnUrl$options';
+        displayUrl = '$displayUrl$options';
+      }
+
+      String formatedURL = getFormatedUrl(returnUrl, name);
+      String pictureKey = jsonEncode(configMap);
+      return ["success", formatedURL, returnUrl, pictureKey, displayUrl];
     } catch (e) {
       flogError(
           e,
@@ -171,10 +162,7 @@ class AliyunImageUploadUtils {
       var response = await dio.delete(
         deleteHost,
       );
-      if (response.statusCode != 204) {
-        return ["failed"];
-      }
-      return ["success"];
+      return response.statusCode == 204 ? ["success"] : ["failed"];
     } catch (e) {
       flogError(e, {}, "AliyunImageUploadUtils", "deleteApi");
       return ["failed"];

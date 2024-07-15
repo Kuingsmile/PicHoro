@@ -49,21 +49,9 @@ class AliyunConfigState extends State<AliyunConfig> {
       _keySecretController.text = configMap['keySecret'] ?? '';
       _bucketController.text = configMap['bucket'] ?? '';
       _areaController.text = configMap['area'] ?? '';
-      if (configMap['path'] != 'None' && configMap['path'] != null) {
-        _pathController.text = configMap['path'];
-      } else {
-        _pathController.clear();
-      }
-      if (configMap['customUrl'] != 'None' && configMap['customUrl'] != null) {
-        _customUrlController.text = configMap['customUrl'];
-      } else {
-        _customUrlController.clear();
-      }
-      if (configMap['options'] != 'None' && configMap['options'] != null) {
-        _optionsController.text = configMap['options'];
-      } else {
-        _optionsController.clear();
-      }
+      setControllerText(_pathController, configMap['path']);
+      setControllerText(_customUrlController, configMap['customUrl']);
+      setControllerText(_optionsController, configMap['options']);
       setState(() {});
     } catch (e) {
       FLog.error(
@@ -260,15 +248,15 @@ class AliyunConfigState extends State<AliyunConfig> {
 
   Future _saveAliyunConfig() async {
     try {
-      String keyId = _keyIdController.text;
-      String keySecret = _keySecretController.text;
-      String bucket = _bucketController.text;
-      String area = _areaController.text;
-      String path = _pathController.text;
-      String customUrl = _customUrlController.text;
-      String options = _optionsController.text;
+      String keyId = _keyIdController.text.trim();
+      String keySecret = _keySecretController.text.trim();
+      String bucket = _bucketController.text.trim();
+      String area = _areaController.text.trim();
+      String path = _pathController.text.trim();
+      String customUrl = _customUrlController.text.trim();
+      String options = _optionsController.text.trim();
       //格式化路径为以/结尾，不以/开头
-      if (path.isEmpty || path.replaceAll(' ', '').isEmpty || path == '/') {
+      if (path.isEmpty || path == '/') {
         path = 'None';
       } else {
         if (!path.endsWith('/')) {
@@ -299,7 +287,7 @@ class AliyunConfigState extends State<AliyunConfig> {
 
       final aliyunConfig = AliyunConfigModel(keyId, keySecret, bucket, area, path, customUrl, options);
       final aliyunConfigJson = jsonEncode(aliyunConfig);
-      final aliyunConfigFile = await localFile;
+      final aliyunConfigFile = await AliyunManageAPI.localFile;
       await aliyunConfigFile.writeAsString(aliyunConfigJson);
       showToast('保存成功');
     } catch (e) {
@@ -316,16 +304,14 @@ class AliyunConfigState extends State<AliyunConfig> {
 
   checkAliyunConfig() async {
     try {
-      String configData = await readAliyunConfig();
+      Map configMap = await AliyunManageAPI.getConfigMap();
 
-      if (configData == "") {
+      if (configMap.isEmpty) {
         if (context.mounted) {
           showCupertinoAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");
         }
         return;
       }
-
-      Map configMap = jsonDecode(configData);
 
       //save asset image to app dir
       String assetPath = 'assets/validateImage/PicHoroValidate.jpeg';
@@ -375,7 +361,6 @@ class AliyunConfigState extends State<AliyunConfig> {
       });
       baseoptions.headers = {
         'Host': host,
-        'Content-Type': Global.multipartString,
         'Content-Length': contentLength,
       };
       Dio dio = Dio(baseoptions);
@@ -409,23 +394,6 @@ class AliyunConfigState extends State<AliyunConfig> {
         return showCupertinoAlertDialog(context: context, title: "检查失败!", content: e.toString());
       }
     }
-  }
-
-  Future<File> get localFile async {
-    final path = await _localPath;
-    String defaultUser = await Global.getUser();
-    return ensureFileExists(File('$path/${defaultUser}_aliyun_config.txt'));
-  }
-
-  Future<String> get _localPath async {
-    final directory = await getApplicationDocumentsDirectory();
-    return directory.path;
-  }
-
-  Future<String> readAliyunConfig() async {
-    final file = await localFile;
-    String contents = await file.readAsString();
-    return contents;
   }
 
   _setdefault() async {

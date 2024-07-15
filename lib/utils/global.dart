@@ -9,32 +9,84 @@ class Global {
   static File? imageOriginalFile;
   static List<String> imagesList = [];
   static List<File> imagesFileList = [];
-  static String defaultPShost = 'lsky.pro'; //默认图床选择
-  static String defaultUser = ' '; //默认用户名
-  static String defaultPassword = ' '; //默认密码
+
+  /// 默认上传图床
+  static String defaultPShost = 'lsky.pro';
+
+  /// 默认用户名
+  static String defaultUser = ' ';
+
+  /// 默认密码
+  static String defaultPassword = ' ';
   static String multiUpload = 'fail';
-  static String defaultLKformat = 'rawurl'; //默认链接格式
-  static bool isTimeStamp = false; //是否使用时间戳重命名
-  static bool isRandomName = false; //是否使用随机字符串重命名
-  static bool isCopyLink = true; //是否复制链接
-  static bool isURLEncode = false; //是否URL编码
-  static Database? imageDB; //默认相册数据库
-  static Database? imageDBExtend; //扩展相册数据库
-  static String defaultShowedPBhost = 'lskypro'; //默认显示的图床
-  static bool isDeleteLocal = false; //是否删除本地图片
-  static bool isDeleteCloud = false; //是否删除远程图片
-  static String customLinkFormat = r'![$fileName]($url)'; //自定义链接格式
-  static String qrScanResult = ''; //扫码结果
-  static bool iscustomRename = false; //是否自定义重命名
-  static String customRenameFormat = r'{Y}{m}{d}{h}{i}{ms}'; //自定义重命名格式
+
+  /// 是否复制链接
+  static bool isCopyLink = true;
+
+  /// 复制时是否URL编码
+  static bool isURLEncode = false;
+
+  /// 默认复制链接格式
+  static String defaultLKformat = 'rawurl';
+
+  /// 自定义链接格式
+  static String customLinkFormat = r'![$fileName]($url)';
+
+  /// 是否使用时间戳重命名
+  static bool isTimeStamp = false;
+
+  /// 是否使用随机字符串重命名
+  static bool isRandomName = false;
+
+  /// 是否自定义重命名
+  static bool iscustomRename = false;
+
+  /// 自定义重命名格式
+  static String customRenameFormat = r'{Y}{m}{d}{h}{i}{ms}';
+
+  /// 默认相册数据库
+  static Database? imageDB;
+
+  /// 扩展相册数据库
+  static Database? imageDBExtend;
+
+  /// 相册默认显示的图床
+  static String defaultShowedPBhost = 'lskypro';
+
+  /// 是否删除本地图片
+  static bool isDeleteLocal = false;
+
+  /// 是否删除远程图片
+  static bool isDeleteCloud = false;
+
+  /// 导入扫码结果
+  static String qrScanResult = '';
+
+  /// 是否操作完成
   static bool operateDone = false;
+
+  /// AList更新token时间
   static String todayAlistUpdate = '19700101';
+
+  /// 是否压缩图片
   static bool isCompress = false;
+
+  /// 图片压缩最小宽度
   static int minWidth = 1920;
+
+  /// 图片压缩最小高度
   static int minHeight = 1080;
+
+  /// 图片压缩质量
   static int quality = 80;
+
+  /// 图片压缩格式
   static String defaultCompressFormat = 'webp';
+
+  /// 默认网络请求超时时间
   static int defaultOutTime = 30000;
+
+  /// 默认multipart/form-data
   static String multipartString = "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW";
   static Map<String, String> bucketCustomUrl = {};
   static List psHostHomePageOrder = [
@@ -409,22 +461,9 @@ class Global {
     'srt',
   ];
 
-  static getPShost() async {
+  static Future<String> getPShost() async {
     await SpUtil.getInstance();
-    String pshost = SpUtil.getString('key_pshost', defValue: 'lsky.pro')!;
-    return pshost;
-  }
-
-  static getUser() async {
-    await SpUtil.getInstance();
-    String user = SpUtil.getString('key_user', defValue: ' ')!;
-    return user;
-  }
-
-  static getPassword() async {
-    await SpUtil.getInstance();
-    String password = SpUtil.getString('key_password', defValue: ' ')!;
-    return password;
+    return SpUtil.getString('key_pshost', defValue: 'lsky.pro')!;
   }
 
   static setPShost(String pshost) async {
@@ -433,10 +472,20 @@ class Global {
     defaultPShost = pshost;
   }
 
+  static Future<String> getUser() async {
+    await SpUtil.getInstance();
+    return SpUtil.getString('key_user', defValue: ' ')!;
+  }
+
   static setUser(String user) async {
     await SpUtil.getInstance();
     SpUtil.putString('key_user', user);
     defaultUser = user;
+  }
+
+  static Future<String> getPassword() async {
+    await SpUtil.getInstance();
+    return SpUtil.getString('key_password', defValue: ' ')!;
   }
 
   static setPassword(String password) async {
@@ -445,64 +494,64 @@ class Global {
     defaultPassword = password;
   }
 
+  static Future<String> getLKformat() async {
+    await SpUtil.getInstance();
+    return SpUtil.getString('key_lkformat', defValue: 'rawurl')!;
+  }
+
   static setLKformat(String lkformat) async {
     await SpUtil.getInstance();
     SpUtil.putString('key_lkformat', lkformat);
     defaultLKformat = lkformat;
   }
 
-  static getLKformat() async {
+  static Future<bool> getIsTimeStamp() async {
     await SpUtil.getInstance();
-    String lkformat = SpUtil.getString('key_lkformat', defValue: 'rawurl')!;
-    return lkformat;
+    return SpUtil.getBool('key_isTimeStamp', defValue: false)!;
   }
 
-  static setTimeStamp(bool isTimeStamp) async {
+  static setIsTimeStamp(bool isTimeStamp) async {
     await SpUtil.getInstance();
     SpUtil.putBool('key_isTimeStamp', isTimeStamp);
     Global.isTimeStamp = isTimeStamp;
   }
 
-  static getTimeStamp() async {
+  static Future<bool> getIsRandomName() async {
     await SpUtil.getInstance();
-    bool isTimeStamp = SpUtil.getBool('key_isTimeStamp', defValue: false)!;
-    return isTimeStamp;
+    return SpUtil.getBool('key_isRandomName', defValue: false)!;
   }
 
-  static setRandomName(bool isRandomName) async {
+  static setIsRandomName(bool isRandomName) async {
     await SpUtil.getInstance();
     SpUtil.putBool('key_isRandomName', isRandomName);
     Global.isRandomName = isRandomName;
   }
 
-  static getRandomName() async {
+  static Future<bool> getIsCustomeRename() async {
     await SpUtil.getInstance();
-    bool isRandomName = SpUtil.getBool('key_isRandomName', defValue: false)!;
-    return isRandomName;
+    return SpUtil.getBool('key_iscustomRename', defValue: false)!;
   }
 
-  static setCustomeRename(bool iscustomRename) async {
+  static setIsCustomeRename(bool iscustomRename) async {
     await SpUtil.getInstance();
     SpUtil.putBool('key_iscustomRename', iscustomRename);
     Global.iscustomRename = iscustomRename;
   }
 
-  static getCustomeRename() async {
+  static Future<bool> getIsCopyLink() async {
     await SpUtil.getInstance();
-    bool iscustomRename = SpUtil.getBool('key_iscustomRename', defValue: false)!;
-    return iscustomRename;
+    return SpUtil.getBool('key_isCopyLink', defValue: true)!;
   }
 
-  static setCopyLink(bool isCopyLink) async {
+  static setIsCopyLink(bool isCopyLink) async {
     await SpUtil.getInstance();
     SpUtil.putBool('key_isCopyLink', isCopyLink);
     Global.isCopyLink = isCopyLink;
   }
 
-  static getCopyLink() async {
+  static Future<bool> getIsURLEncode() async {
     await SpUtil.getInstance();
-    bool isCopyLink = SpUtil.getBool('key_isCopyLink', defValue: true)!;
-    return isCopyLink;
+    return SpUtil.getBool('key_isURLEncode', defValue: false)!;
   }
 
   static setIsURLEncode(bool isURLEncode) async {
@@ -511,15 +560,8 @@ class Global {
     Global.isURLEncode = isURLEncode;
   }
 
-  static getIsURLEncode() async {
-    await SpUtil.getInstance();
-    bool isURLEncode = SpUtil.getBool('key_isURLEncode', defValue: false)!;
-    return isURLEncode;
-  }
-
   static getDatabase() async {
-    imageDB = await AlbumSQL.getDatabase();
-    return imageDB;
+    return await AlbumSQL.getDatabase();
   }
 
   static setDatabase(Database db) async {
@@ -527,12 +569,16 @@ class Global {
   }
 
   static getDatabaseExtend() async {
-    imageDBExtend = await AlbumSQL.getExtendDatabase();
-    return imageDBExtend;
+    return await AlbumSQL.getExtendDatabase();
   }
 
   static setDatabaseExtend(Database db) async {
     imageDBExtend = db;
+  }
+
+  static Future<String> getShowedPBhost() async {
+    await SpUtil.getInstance();
+    return SpUtil.getString('key_showedPBhost', defValue: 'lskypro')!;
   }
 
   static setShowedPBhost(String showedPBhost) async {
@@ -541,27 +587,20 @@ class Global {
     defaultShowedPBhost = showedPBhost;
   }
 
-  static getShowedPBhost() async {
+  static Future<bool> getIsDeleteLocal() async {
     await SpUtil.getInstance();
-    return SpUtil.getString('key_showedPBhost', defValue: 'lskypro')!;
+    return SpUtil.getBool('key_isDeleteLocal', defValue: false)!;
   }
 
-  static setDeleteLocal(bool isDeleteLocal) async {
+  static setIsDeleteLocal(bool isDeleteLocal) async {
     await SpUtil.getInstance();
     SpUtil.putBool('key_isDeleteLocal', isDeleteLocal);
     Global.isDeleteLocal = isDeleteLocal;
   }
 
-  static getDeleteLocal() async {
+  static Future<Map<String, String>> getBucketCustomUrl() async {
     await SpUtil.getInstance();
-    return SpUtil.getBool('key_isDeleteLocal', defValue: false)!;
-  }
-
-  static getBucketCustomUrl() async {
-    await SpUtil.getInstance();
-    Map<String, String> bucketCustomUrl =
-        SpUtil.getObj('key_bucketCustomUrl', (v) => Map<String, String>.from(v), defValue: {})!;
-    return bucketCustomUrl;
+    return SpUtil.getObj('key_bucketCustomUrl', (v) => Map<String, String>.from(v), defValue: {})!;
   }
 
   static setBucketCustomUrl(Map<String, String> bucketCustomUrl) async {
@@ -570,16 +609,20 @@ class Global {
     Global.bucketCustomUrl = bucketCustomUrl;
   }
 
+  static Future<String> getCustomLinkFormat() async {
+    await SpUtil.getInstance();
+    return SpUtil.getString('key_customLinkFormat', defValue: r'[$fileName]($url)')!;
+  }
+
   static setCustomLinkFormat(String customLinkFormat) async {
     await SpUtil.getInstance();
     SpUtil.putString('key_customLinkFormat', customLinkFormat);
     Global.customLinkFormat = customLinkFormat;
   }
 
-  static getCustomLinkFormat() async {
+  static Future<String> getCustomeRenameFormat() async {
     await SpUtil.getInstance();
-    String customLinkFormat = SpUtil.getString('key_customLinkFormat', defValue: r'[$fileName]($url)')!;
-    return customLinkFormat;
+    return SpUtil.getString('key_customRenameFormat', defValue: r'{filename}')!;
   }
 
   static setCustomeRenameFormat(String customRenameFormat) async {
@@ -588,22 +631,20 @@ class Global {
     Global.customRenameFormat = customRenameFormat;
   }
 
-  static getCustomeRenameFormat() async {
+  static Future<bool> getIsDeleteCloud() async {
     await SpUtil.getInstance();
-    String customRenameFormat = SpUtil.getString('key_customRenameFormat', defValue: r'{filename}')!;
-    return customRenameFormat;
+    return SpUtil.getBool('key_isDeleteCloud', defValue: false)!;
   }
 
-  static setDeleteCloud(bool isDeleteCloud) async {
+  static setIsDeleteCloud(bool isDeleteCloud) async {
     await SpUtil.getInstance();
     SpUtil.putBool('key_isDeleteCloud', isDeleteCloud);
     Global.isDeleteCloud = isDeleteCloud;
   }
 
-  static getDeleteCloud() async {
+  static Future<bool> getOperateDone() async {
     await SpUtil.getInstance();
-    bool isDeleteCloud = SpUtil.getBool('key_isDeleteCloud', defValue: false)!;
-    return isDeleteCloud;
+    return SpUtil.getBool('key_operateDone', defValue: false)!;
   }
 
   static setOperateDone(bool operateDone) async {
@@ -612,28 +653,20 @@ class Global {
     Global.operateDone = operateDone;
   }
 
-  static getOperateDone() async {
+  static Future<bool> getIsCompress() async {
     await SpUtil.getInstance();
-    bool operateDone = SpUtil.getBool('key_operateDone', defValue: false)!;
-    return operateDone;
+    return SpUtil.getBool('key_isCompress', defValue: false)!;
   }
 
-  static getisCompress() async {
-    await SpUtil.getInstance();
-    bool isCompress = SpUtil.getBool('key_isCompress', defValue: false)!;
-    return isCompress;
-  }
-
-  static setisCompress(bool isCompress) async {
+  static setIsCompress(bool isCompress) async {
     await SpUtil.getInstance();
     SpUtil.putBool('key_isCompress', isCompress);
     Global.isCompress = isCompress;
   }
 
-  static getminWidth() async {
+  static Future<int> getminWidth() async {
     await SpUtil.getInstance();
-    int minWidth = SpUtil.getInt('key_minWidth', defValue: 1920)!;
-    return minWidth;
+    return SpUtil.getInt('key_minWidth', defValue: 1920)!;
   }
 
   static setminWidth(int minWidth) async {
@@ -642,10 +675,9 @@ class Global {
     Global.minWidth = minWidth;
   }
 
-  static getminHeight() async {
+  static Future<int> getminHeight() async {
     await SpUtil.getInstance();
-    int minHeight = SpUtil.getInt('key_minHeight', defValue: 1080)!;
-    return minHeight;
+    return SpUtil.getInt('key_minHeight', defValue: 1080)!;
   }
 
   static setminHeight(int minHeight) async {
@@ -654,25 +686,23 @@ class Global {
     Global.minHeight = minHeight;
   }
 
-  static getquality() async {
+  static Future<int> getQuality() async {
     await SpUtil.getInstance();
-    int quality = SpUtil.getInt('key_quality', defValue: 80)!;
-    return quality;
+    return SpUtil.getInt('key_quality', defValue: 80)!;
   }
 
-  static setquality(int quality) async {
+  static setQuality(int quality) async {
     await SpUtil.getInstance();
     SpUtil.putInt('key_quality', quality);
     Global.quality = quality;
   }
 
-  static getdefaultCompressFormat() async {
+  static Future<String> getDefaultCompressFormat() async {
     await SpUtil.getInstance();
-    String defaultCompressFormat = SpUtil.getString('key_defaultCompressFormat', defValue: 'webp')!;
-    return defaultCompressFormat;
+    return SpUtil.getString('key_defaultCompressFormat', defValue: 'webp')!;
   }
 
-  static setdefaultCompressFormat(String defaultCompressFormat) async {
+  static setDefaultCompressFormat(String defaultCompressFormat) async {
     await SpUtil.getInstance();
     SpUtil.putString('key_defaultCompressFormat', defaultCompressFormat);
     Global.defaultCompressFormat = defaultCompressFormat;
@@ -684,9 +714,9 @@ class Global {
     Global.psHostHomePageOrder = psHostHomePageOrder;
   }
 
-  static getpsHostHomePageOrder() async {
+  static Future<List<String>> getpsHostHomePageOrder() async {
     await SpUtil.getInstance();
-    List psHostHomePageOrder = SpUtil.getStringList('key_psHostHomePageOrder', defValue: [
+    return SpUtil.getStringList('key_psHostHomePageOrder', defValue: [
       '0',
       '1',
       '2',
@@ -710,7 +740,6 @@ class Global {
       '20',
       '21',
     ])!;
-    return psHostHomePageOrder;
   }
 
   static setTencentUploadList(List<String> tencentUploadList) async {

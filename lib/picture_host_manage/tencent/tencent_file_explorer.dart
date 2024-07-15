@@ -778,7 +778,7 @@ class TencentFileExplorerState extends loading_state.BaseLoadingPageState<Tencen
                           rawurl = '$shareUrlPrefix${allInfoList[i]['Key']}';
                           fileName = allInfoList[i]['Key'].substring(allInfoList[i]['Key'].lastIndexOf('/') + 1);
                         }
-                        finalFormatedurl = linkGenerateDict[Global.defaultLKformat]!(rawurl, fileName);
+                        finalFormatedurl = linkGeneratorMap[Global.defaultLKformat]!(rawurl, fileName);
                         multiUrls.add(finalFormatedurl);
                       }
                     }
@@ -1499,7 +1499,7 @@ class TencentFileExplorerState extends loading_state.BaseLoadingPageState<Tencen
               }
               String shareUrl = '$shareUrlPrefix${allInfoList[index]['Key']}';
               String filename = my_path.basename(allInfoList[index]['Key']);
-              String formatedLink = linkGenerateDict[format]!(shareUrl, filename);
+              String formatedLink = linkGeneratorMap[format]!(shareUrl, filename);
               await flutter_services.Clipboard.setData(flutter_services.ClipboardData(text: formatedLink));
               if (mounted) {
                 Navigator.pop(context);

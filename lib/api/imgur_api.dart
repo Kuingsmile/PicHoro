@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 
 import 'package:horopic/utils/common_functions.dart';
-import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/dio_proxy_adapter.dart';
 
 class ImgurImageUploadUtils {
@@ -16,9 +15,7 @@ class ImgurImageUploadUtils {
     CancelToken? cancelToken,
   }) async {
     try {
-      String formatedURL = '';
       String base64Image = base64Encode(File(path).readAsBytesSync());
-
       FormData formdata = FormData.fromMap({
         "image": base64Image,
       });
@@ -53,12 +50,7 @@ class ImgurImageUploadUtils {
         'deletehash': response.data!['data']['deletehash'],
       };
       String pictureKey = jsonEncode(pictureKeyMap);
-      if (Global.isCopyLink == true) {
-        formatedURL = linkGenerateDict[Global.defaultLKformat]!(returnUrl, name);
-      } else {
-        formatedURL = returnUrl;
-      }
-
+      String formatedURL = getFormatedUrl(returnUrl, name);
       String cdnUrl = returnUrl;
       return ["success", formatedURL, returnUrl, pictureKey, cdnUrl];
     } catch (e) {

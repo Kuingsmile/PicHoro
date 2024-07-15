@@ -8,6 +8,17 @@ import 'package:horopic/picture_host_configure/configure_store/configure_store_f
 import 'package:horopic/picture_host_configure/configure_page/configure_export.dart';
 import 'package:horopic/picture_host_configure/configure_store/configure_template.dart';
 import 'package:horopic/picture_host_manage/manage_api/alist_manage_api.dart';
+import 'package:horopic/picture_host_manage/manage_api/aliyun_manage_api.dart';
+import 'package:horopic/picture_host_manage/manage_api/aws_manage_api.dart';
+import 'package:horopic/picture_host_manage/manage_api/ftp_manage_api.dart';
+import 'package:horopic/picture_host_manage/manage_api/github_manage_api.dart';
+import 'package:horopic/picture_host_manage/manage_api/imgur_manage_api.dart';
+import 'package:horopic/picture_host_manage/manage_api/lskypro_manage_api.dart';
+import 'package:horopic/picture_host_manage/manage_api/qiniu_manage_api.dart';
+import 'package:horopic/picture_host_manage/manage_api/smms_manage_api.dart';
+import 'package:horopic/picture_host_manage/manage_api/tencent_manage_api.dart';
+import 'package:horopic/picture_host_manage/manage_api/upyun_manage_api.dart';
+import 'package:horopic/picture_host_manage/manage_api/webdav_manage_api.dart';
 
 import 'package:horopic/router/application.dart';
 import 'package:horopic/utils/common_functions.dart';
@@ -346,7 +357,7 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
 
                     final aliyunConfig = AliyunConfigModel(keyId, keySecret, bucket, area, path, customUrl, options);
                     final aliyunConfigJson = jsonEncode(aliyunConfig);
-                    final aliyunConfigFile = await AliyunConfigState().localFile;
+                    final aliyunConfigFile = await AliyunManageAPI.localFile;
                     await aliyunConfigFile.writeAsString(aliyunConfigJson);
                     return showToast('设置成功');
                   } catch (e) {
@@ -366,6 +377,8 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
                     String region = psInfo['region']!;
                     String uploadPath = psInfo['uploadPath']!;
                     String customUrl = psInfo['customUrl']!;
+                    bool isS3PathStyle = psInfo['isS3PathStyle'] ?? false;
+                    bool isEnableSSL = psInfo['isEnableSSL'] ?? true;
                     bool valid = validateUndetermined([
                       accessKeyId,
                       secretAccessKey,
@@ -386,17 +399,10 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
                       region = 'None';
                     }
 
-                    final awsConfig = AwsConfigModel(
-                      accessKeyId,
-                      secretAccessKey,
-                      bucket,
-                      endpoint,
-                      region,
-                      uploadPath,
-                      customUrl,
-                    );
+                    final awsConfig = AwsConfigModel(accessKeyId, secretAccessKey, bucket, endpoint, region, uploadPath,
+                        customUrl, isS3PathStyle, isEnableSSL);
                     final awsConfigJson = jsonEncode(awsConfig);
-                    final awsConfigFile = await AwsConfigState().localFile;
+                    final awsConfigFile = await AwsManageAPI.localFile;
                     await awsConfigFile.writeAsString(awsConfigJson);
                     return showToast('设置成功');
                   } catch (e) {
@@ -461,7 +467,7 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
                       ftpWebPath,
                     );
                     final ftpConfigJson = jsonEncode(ftpConfig);
-                    final ftpConfigFile = await FTPConfigState().localFile;
+                    final ftpConfigFile = await FTPManageAPI.localFile;
                     await ftpConfigFile.writeAsString(ftpConfigJson);
                     return showToast('设置成功');
                   } catch (e) {
@@ -501,7 +507,7 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
                       customDomain,
                     );
                     final githubConfigJson = jsonEncode(githubConfig);
-                    final githubConfigFile = await GithubConfigState().localFile;
+                    final githubConfigFile = await GithubManageAPI.localFile;
                     await githubConfigFile.writeAsString(githubConfigJson);
                     return showToast('设置成功');
                   } catch (e) {
@@ -531,7 +537,7 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
                       proxy,
                     );
                     final imgurConfigJson = jsonEncode(imgurConfig);
-                    final imgurConfigFile = await ImgurConfigState().localFile;
+                    final imgurConfigFile = await ImgurManageAPI.localFile;
                     await imgurConfigFile.writeAsString(imgurConfigJson);
                     return showToast('设置成功');
                   } catch (e) {
@@ -568,7 +574,7 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
                       albumId,
                     );
                     final lskyproConfigJson = jsonEncode(lskyproConfig);
-                    final lskyproConfigFile = await HostConfigState().localFile;
+                    final lskyproConfigFile = await LskyproManageAPI.localFile;
                     await lskyproConfigFile.writeAsString(lskyproConfigJson);
                     return showToast('设置成功');
                   } catch (e) {
@@ -616,7 +622,7 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
                       path,
                     );
                     final qiniuConfigJson = jsonEncode(qiniuConfig);
-                    final qiniuConfigFile = await QiniuConfigState().localFile;
+                    final qiniuConfigFile = await QiniuManageAPI.localFile;
                     await qiniuConfigFile.writeAsString(qiniuConfigJson);
                     return showToast('设置成功');
                   } catch (e) {
@@ -642,7 +648,7 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
                       token,
                     );
                     final smmsConfigJson = jsonEncode(smmsConfig);
-                    final smmsConfigFile = await SmmsConfigState().localFile;
+                    final smmsConfigFile = await SmmsManageAPI.localFile;
                     await smmsConfigFile.writeAsString(smmsConfigJson);
                     return showToast('设置成功');
                   } catch (e) {
@@ -687,7 +693,7 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
                     final tencentConfig =
                         TencentConfigModel(secretId, secretKey, bucket, appId, area, path, customUrl, options);
                     final tencentConfigJson = jsonEncode(tencentConfig);
-                    final tencentConfigFile = await TencentConfigState().localFile;
+                    final tencentConfigFile = await TencentManageAPI.localFile;
                     await tencentConfigFile.writeAsString(tencentConfigJson);
                     return showToast('设置成功');
                   } catch (e) {
@@ -726,7 +732,7 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
                     final upyunConfig =
                         UpyunConfigModel(bucket, operator, password, url, options, path, antiLeechToken, antiLeechType);
                     final upyunConfigJson = jsonEncode(upyunConfig);
-                    final upyunConfigFile = await UpyunConfigState().localFile;
+                    final upyunConfigFile = await UpyunManageAPI.localFile;
                     await upyunConfigFile.writeAsString(upyunConfigJson);
                     return showToast('设置成功');
                   } catch (e) {
@@ -819,7 +825,7 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
                       webPath,
                     );
                     final webdavConfigJson = jsonEncode(webdavConfig);
-                    final webdavConfigFile = await WebdavConfigState().localFile;
+                    final webdavConfigFile = await WebdavManageAPI.localFile;
                     await webdavConfigFile.writeAsString(webdavConfigJson);
                     return showToast('设置成功');
                   } catch (e) {

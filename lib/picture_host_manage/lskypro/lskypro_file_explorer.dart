@@ -735,7 +735,7 @@ class LskyproFileExplorerState extends loading_state.BaseLoadingPageState<Lskypr
                         String fileName = '';
                         rawurl = allInfoList[i]['links']['url'];
                         fileName = allInfoList[i]['name'];
-                        finalFormatedurl = linkGenerateDict[Global.defaultLKformat]!(rawurl, fileName);
+                        finalFormatedurl = linkGeneratorMap[Global.defaultLKformat]!(rawurl, fileName);
                         multiUrls.add(finalFormatedurl);
                       }
                     }
@@ -1264,7 +1264,7 @@ class LskyproFileExplorerState extends loading_state.BaseLoadingPageState<Lskypr
               String format = await Global.getLKformat();
               String shareUrl = allInfoList[index]['links']['url'];
               String filename = my_path.basename(allInfoList[index]['name']);
-              String formatedLink = linkGenerateDict[format]!(shareUrl, filename);
+              String formatedLink = linkGeneratorMap[format]!(shareUrl, filename);
               await flutter_services.Clipboard.setData(flutter_services.ClipboardData(text: formatedLink));
               if (mounted) {
                 Navigator.pop(context);

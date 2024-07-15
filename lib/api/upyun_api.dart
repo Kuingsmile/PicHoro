@@ -118,12 +118,7 @@ class UpyunImageUploadUtils {
         }
       }
       displayUrl = returnUrl;
-      String formatedURL = '';
-      if (Global.isCopyLink == true) {
-        formatedURL = linkGenerateDict[Global.defaultLKformat]!(returnUrl, my_path.basename(path));
-      } else {
-        formatedURL = returnUrl;
-      }
+      String formatedURL = getFormatedUrl(returnUrl, my_path.basename(path));
       Map pictureKeyMap = Map.from(configMap);
       String pictureKey = jsonEncode(pictureKeyMap);
       return ["success", formatedURL, returnUrl, pictureKey, displayUrl];

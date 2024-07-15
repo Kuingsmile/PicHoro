@@ -1121,7 +1121,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
                                 trailing: Switch(
                                   value: Global.isTimeStamp,
                                   onChanged: (value) async {
-                                    await Global.setTimeStamp(value);
+                                    await Global.setIsTimeStamp(value);
                                     if (mounted) {
                                       if (value) {
                                         showToastWithContext(context, '已开启时间戳重命名');
@@ -1141,7 +1141,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
                                 trailing: Switch(
                                   value: Global.isRandomName,
                                   onChanged: (value) async {
-                                    await Global.setRandomName(value);
+                                    await Global.setIsRandomName(value);
                                     if (mounted) {
                                       if (value) {
                                         showToastWithContext(context, '已开启随机字符串重命名');
@@ -1160,7 +1160,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
                                 trailing: Switch(
                                   value: Global.iscustomRename,
                                   onChanged: (value) async {
-                                    await Global.setCustomeRename(value);
+                                    await Global.setIsCustomeRename(value);
                                     if (mounted) {
                                       if (value) {
                                         showToastWithContext(context, '已开启自定义重命名');
@@ -1260,7 +1260,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
                               } else {
                                 showToastWithContext(context, '关闭链接复制');
                               }
-                              await Global.setCopyLink(value);
+                              await Global.setIsCopyLink(value);
                               setState(() {});
                               if (mounted) {
                                 Navigator.pop(context);

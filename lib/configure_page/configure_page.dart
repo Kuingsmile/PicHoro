@@ -142,7 +142,7 @@ class ConfigurePageState extends State<ConfigurePage> with AutomaticKeepAliveCli
             trailing: const Icon(Icons.arrow_forward_ios),
           ),
           ListTile(
-            title: const Text('微信交流群'),
+            title: const Text('交流群'),
             onTap: () async {
               Application.router
                   .navigateTo(this.context, Routes.authorInformation, transition: TransitionType.cupertino);

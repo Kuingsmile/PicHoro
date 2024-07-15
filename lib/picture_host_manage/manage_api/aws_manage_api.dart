@@ -15,7 +15,7 @@ import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/picture_host_configure/configure_page/aws_configure.dart';
 
 class AwsManageAPI {
-  static Future<File> get _localFile async {
+  static Future<File> get localFile async {
     final path = await _localPath;
     String defaultUser = await Global.getUser();
     return ensureFileExists(File('$path/${defaultUser}_aws_config.txt'));
@@ -28,7 +28,7 @@ class AwsManageAPI {
 
   static Future<String> readAwsConfig() async {
     try {
-      final file = await _localFile;
+      final file = await localFile;
       String contents = await file.readAsString();
       return contents;
     } catch (e) {
@@ -93,20 +93,31 @@ class AwsManageAPI {
       String accessKeyId = configMap['accessKeyId'];
       String secretAccessKey = configMap['secretAccessKey'];
       String endpoint = configMap['endpoint'];
+      int? port;
+      if (endpoint.contains(':')) {
+        List<String> endpointList = endpoint.split(':');
+        endpoint = endpointList[0];
+        port = int.parse(endpointList[1]);
+      }
       String region = configMap['region'];
+      bool isEnableSSL = configMap['isEnableSSL'] ?? true;
 
       Minio minio;
       if (region == 'None') {
         minio = Minio(
           endPoint: endpoint,
+          port: port,
           accessKey: accessKeyId,
           secretKey: secretAccessKey,
+          useSSL: isEnableSSL,
         );
       } else {
         minio = Minio(
           endPoint: endpoint,
+          port: port,
           accessKey: accessKeyId,
           secretKey: secretAccessKey,
+          useSSL: isEnableSSL,
           region: region,
         );
       }
@@ -130,6 +141,13 @@ class AwsManageAPI {
       String accessKeyId = configMap['accessKeyId'];
       String secretAccessKey = configMap['secretAccessKey'];
       String endpoint = configMap['endpoint'];
+      int? port;
+      if (endpoint.contains(':')) {
+        List<String> endpointList = endpoint.split(':');
+        endpoint = endpointList[0];
+        port = int.parse(endpointList[1]);
+      }
+      bool isEnableSSL = configMap['isEnableSSL'] ?? true;
 
       if (endpoint.contains('amazonaws.com')) {
         endpoint = 's3.us-east-1.amazonaws.com';
@@ -138,8 +156,10 @@ class AwsManageAPI {
 
       minio = Minio(
         endPoint: endpoint,
+        port: port,
         accessKey: accessKeyId,
         secretKey: secretAccessKey,
+        useSSL: isEnableSSL,
       );
 
       var response = await minio.getBucketRegion(bucket);
@@ -164,7 +184,14 @@ class AwsManageAPI {
       String secretAccessKey = configMap['secretAccessKey'];
       String bucket = newBucketConfigMap['bucketName'];
       String endpoint = configMap['endpoint'];
+      int? port;
+      if (endpoint.contains(':')) {
+        List<String> endpointList = endpoint.split(':');
+        endpoint = endpointList[0];
+        port = int.parse(endpointList[1]);
+      }
       String region = newBucketConfigMap['region'];
+      bool isEnableSSL = configMap['isEnableSSL'] ?? true;
 
       if (endpoint.contains('amazonaws.com')) {
         if (!endpoint.contains(region)) {
@@ -176,14 +203,18 @@ class AwsManageAPI {
       if (region == 'None') {
         minio = Minio(
           endPoint: endpoint,
+          port: port,
           accessKey: accessKeyId,
           secretKey: secretAccessKey,
+          useSSL: isEnableSSL,
         );
       } else {
         minio = Minio(
           endPoint: endpoint,
+          port: port,
           accessKey: accessKeyId,
           secretKey: secretAccessKey,
+          useSSL: isEnableSSL,
           region: region,
         );
       }
@@ -212,7 +243,14 @@ class AwsManageAPI {
       String secretAccessKey = configMap['secretAccessKey'];
       String bucket = element['name'];
       String endpoint = configMap['endpoint'];
+      int? port;
+      if (endpoint.contains(':')) {
+        List<String> endpointList = endpoint.split(':');
+        endpoint = endpointList[0];
+        port = int.parse(endpointList[1]);
+      }
       String region = element['region'];
+      bool isEnableSSL = configMap['isEnableSSL'] ?? true;
 
       if (endpoint.contains('amazonaws.com')) {
         if (!endpoint.contains(region)) {
@@ -223,14 +261,18 @@ class AwsManageAPI {
       if (region == 'None') {
         minio = Minio(
           endPoint: endpoint,
+          port: port,
           accessKey: accessKeyId,
           secretKey: secretAccessKey,
+          useSSL: isEnableSSL,
         );
       } else {
         minio = Minio(
           endPoint: endpoint,
+          port: port,
           accessKey: accessKeyId,
           secretKey: secretAccessKey,
+          useSSL: isEnableSSL,
           region: region,
         );
       }
@@ -260,6 +302,8 @@ class AwsManageAPI {
       String region = element['region'];
       String uploadPath = '';
       String customUrl = configMap['customUrl'];
+      bool isS3PathStyle = configMap['isS3PathStyle'] ?? false;
+      bool isEnableSSL = configMap['isEnableSSL'] ?? true;
 
       if (endpoint.contains('amazonaws.com')) {
         if (!endpoint.contains(region)) {
@@ -274,16 +318,9 @@ class AwsManageAPI {
       }
 
       final awsConfig = AwsConfigModel(
-        accessKeyId,
-        secretAccessKey,
-        bucket,
-        endpoint,
-        region,
-        uploadPath,
-        customUrl,
-      );
+          accessKeyId, secretAccessKey, bucket, endpoint, region, uploadPath, customUrl, isS3PathStyle, isEnableSSL);
       final awsConfigJson = jsonEncode(awsConfig);
-      final awsConfigFile = await _localFile;
+      final awsConfigFile = await localFile;
       await awsConfigFile.writeAsString(awsConfigJson);
       return ['success'];
     } catch (e) {
@@ -304,8 +341,14 @@ class AwsManageAPI {
       String secretAccessKey = configMap['secretAccessKey'];
       String bucket = element['name'];
       String endpoint = configMap['endpoint'];
-
+      int? port;
+      if (endpoint.contains(':')) {
+        List<String> endpointList = endpoint.split(':');
+        endpoint = endpointList[0];
+        port = int.parse(endpointList[1]);
+      }
       String region = element['region'];
+      bool isEnableSSL = configMap['isEnableSSL'] ?? true;
 
       if (endpoint.contains('amazonaws.com')) {
         if (!endpoint.contains(region)) {
@@ -317,14 +360,18 @@ class AwsManageAPI {
       if (region == 'None') {
         minio = Minio(
           endPoint: endpoint,
+          port: port,
           accessKey: accessKeyId,
           secretKey: secretAccessKey,
+          useSSL: isEnableSSL,
         );
       } else {
         minio = Minio(
           endPoint: endpoint,
+          port: port,
           accessKey: accessKeyId,
           secretKey: secretAccessKey,
+          useSSL: isEnableSSL,
           region: region,
         );
       }
@@ -360,7 +407,14 @@ class AwsManageAPI {
       String secretAccessKey = configMap['secretAccessKey'];
       String bucket = element['name'];
       String endpoint = configMap['endpoint'];
+      int? port;
+      if (endpoint.contains(':')) {
+        List<String> endpointList = endpoint.split(':');
+        endpoint = endpointList[0];
+        port = int.parse(endpointList[1]);
+      }
       String region = element['region'];
+      bool isEnableSSL = configMap['isEnableSSL'] ?? true;
 
       if (endpoint.contains('amazonaws.com')) {
         if (!endpoint.contains(region)) {
@@ -372,14 +426,18 @@ class AwsManageAPI {
       if (region == 'None') {
         minio = Minio(
           endPoint: endpoint,
+          port: port,
           accessKey: accessKeyId,
           secretKey: secretAccessKey,
+          useSSL: isEnableSSL,
         );
       } else {
         minio = Minio(
           endPoint: endpoint,
+          port: port,
           accessKey: accessKeyId,
           secretKey: secretAccessKey,
+          useSSL: isEnableSSL,
           region: region,
         );
       }
@@ -450,7 +508,14 @@ class AwsManageAPI {
       String secretAccessKey = configMap['secretAccessKey'];
       String bucket = element['name'];
       String endpoint = configMap['endpoint'];
+      int? port;
+      if (endpoint.contains(':')) {
+        List<String> endpointList = endpoint.split(':');
+        endpoint = endpointList[0];
+        port = int.parse(endpointList[1]);
+      }
       String region = element['region'];
+      bool isEnableSSL = configMap['isEnableSSL'] ?? true;
       if (endpoint.contains('amazonaws.com')) {
         if (!endpoint.contains(region)) {
           endpoint = 's3.$region.amazonaws.com';
@@ -460,14 +525,18 @@ class AwsManageAPI {
       if (region == 'None') {
         minio = Minio(
           endPoint: endpoint,
+          port: port,
           accessKey: accessKeyId,
           secretKey: secretAccessKey,
+          useSSL: isEnableSSL,
         );
       } else {
         minio = Minio(
           endPoint: endpoint,
+          port: port,
           accessKey: accessKeyId,
           secretKey: secretAccessKey,
+          useSSL: isEnableSSL,
           region: region,
         );
       }
@@ -539,7 +608,14 @@ class AwsManageAPI {
       String secretAccessKey = configMap['secretAccessKey'];
       String bucket = element['name'];
       String endpoint = configMap['endpoint'];
+      int? port;
+      if (endpoint.contains(':')) {
+        List<String> endpointList = endpoint.split(':');
+        endpoint = endpointList[0];
+        port = int.parse(endpointList[1]);
+      }
       String region = element['region'];
+      bool isEnableSSL = configMap['isEnableSSL'] ?? true;
       if (endpoint.contains('amazonaws.com')) {
         if (!endpoint.contains(region)) {
           endpoint = 's3.$region.amazonaws.com';
@@ -549,14 +625,18 @@ class AwsManageAPI {
       if (region == 'None') {
         minio = Minio(
           endPoint: endpoint,
+          port: port,
           accessKey: accessKeyId,
           secretKey: secretAccessKey,
+          useSSL: isEnableSSL,
         );
       } else {
         minio = Minio(
           endPoint: endpoint,
+          port: port,
           accessKey: accessKeyId,
           secretKey: secretAccessKey,
+          useSSL: isEnableSSL,
           region: region,
         );
       }
@@ -587,7 +667,14 @@ class AwsManageAPI {
       String secretAccessKey = configMap['secretAccessKey'];
       String bucket = element['name'];
       String endpoint = configMap['endpoint'];
+      int? port;
+      if (endpoint.contains(':')) {
+        List<String> endpointList = endpoint.split(':');
+        endpoint = endpointList[0];
+        port = int.parse(endpointList[1]);
+      }
       String region = element['region'];
+      bool isEnableSSL = configMap['isEnableSSL'] ?? true;
       String uploadPath = prefix;
       if (endpoint.contains('amazonaws.com')) {
         if (!endpoint.contains(region)) {
@@ -606,14 +693,18 @@ class AwsManageAPI {
       if (region == 'None') {
         minio = Minio(
           endPoint: endpoint,
+          port: port,
           accessKey: accessKeyId,
           secretKey: secretAccessKey,
+          useSSL: isEnableSSL,
         );
       } else {
         minio = Minio(
           endPoint: endpoint,
+          port: port,
           accessKey: accessKeyId,
           secretKey: secretAccessKey,
+          useSSL: isEnableSSL,
           region: region,
         );
       }

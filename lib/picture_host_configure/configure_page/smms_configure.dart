@@ -1,9 +1,7 @@
-import 'dart:io';
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:fluro/fluro.dart';
 import 'package:f_logs/f_logs.dart';
 
@@ -81,7 +79,7 @@ class SmmsConfigState extends State<SmmsConfig> {
               ),
               textAlign: TextAlign.center,
               validator: (value) {
-                if (value == null || value.isEmpty) {
+                if (value == null || value.trim().isEmpty) {
                   return '请输入token';
                 }
                 return null;
@@ -148,11 +146,11 @@ class SmmsConfigState extends State<SmmsConfig> {
 
   Future _saveSmmsConfig() async {
     try {
-      final token = _tokenController.text;
+      final token = _tokenController.text.trim();
 
       final smmsConfig = SmmsConfigModel(token);
       final smmsConfigJson = jsonEncode(smmsConfig);
-      final smmsConfigFile = await localFile;
+      final smmsConfigFile = await SmmsManageAPI.localFile;
       await smmsConfigFile.writeAsString(smmsConfigJson);
       showToast('保存成功');
     } catch (e) {
@@ -169,14 +167,14 @@ class SmmsConfigState extends State<SmmsConfig> {
 
   checkSmmsConfig() async {
     try {
-      String configData = await readHostConfig();
-      if (configData == "") {
+      Map configMap = await SmmsManageAPI.getConfigMap();
+      if (configMap.isEmpty) {
         if (context.mounted) {
           return showCupertinoAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");
         }
         return;
       }
-      Map configMap = jsonDecode(configData);
+
       BaseOptions options = setBaseOptions();
       options.headers = {
         "Authorization": configMap["token"],
@@ -210,23 +208,6 @@ class SmmsConfigState extends State<SmmsConfig> {
         return showCupertinoAlertDialog(context: context, title: "检查失败!", content: e.toString());
       }
     }
-  }
-
-  Future<File> get localFile async {
-    final path = await _localPath;
-    String defaultUser = await Global.getUser();
-    return ensureFileExists(File('$path/${defaultUser}_smms_config.txt'));
-  }
-
-  Future<String> get _localPath async {
-    final directory = await getApplicationDocumentsDirectory();
-    return directory.path;
-  }
-
-  Future<String> readHostConfig() async {
-    final file = await localFile;
-    String contents = await file.readAsString();
-    return contents;
   }
 
   _setdefault() async {

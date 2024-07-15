@@ -803,7 +803,7 @@ class SFTPFileExplorerState extends loading_state.BaseLoadingPageState<SFTPFileE
                               'ftp://${widget.element['ftpUser']}@${widget.element['ftpPassword']}@${widget.element['ftpHost']}:${widget.element['ftpPort']}${widget.bucketPrefix}${allInfoList[i]['name']}';
                         }
                         fileName = allInfoList[i]['name'];
-                        finalFormatedurl = linkGenerateDict[Global.defaultLKformat]!(rawurl, fileName);
+                        finalFormatedurl = linkGeneratorMap[Global.defaultLKformat]!(rawurl, fileName);
                         multiUrls.add(finalFormatedurl);
                       }
                     }
@@ -1369,7 +1369,7 @@ class SFTPFileExplorerState extends loading_state.BaseLoadingPageState<SFTPFileE
               }
 
               String filename = allInfoList[index]['name'];
-              String formatedLink = linkGenerateDict[format]!(shareUrl, filename);
+              String formatedLink = linkGeneratorMap[format]!(shareUrl, filename);
               await flutter_services.Clipboard.setData(flutter_services.ClipboardData(text: formatedLink));
               if (mounted) {
                 Navigator.pop(context);

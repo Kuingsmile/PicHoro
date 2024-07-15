@@ -93,9 +93,7 @@ class UploadManager {
         'Signature': singature,
         'file': await MultipartFile.fromFile(path, filename: fileName),
       };
-      if (getContentType(my_path.extension(path)) != null) {
-        formMap['x-oss-content-type'] = getContentType(my_path.extension(path));
-      }
+      formMap['x-oss-content-type'] = getContentType(my_path.extension(path));
       FormData formData = FormData.fromMap(formMap);
       BaseOptions baseoptions = setBaseOptions();
       File uploadFile = File(path);

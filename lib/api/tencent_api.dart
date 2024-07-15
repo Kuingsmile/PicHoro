@@ -161,12 +161,7 @@ class TencentImageUploadUtils {
         displayUrl = '$displayUrl$options';
       }
 
-      String formatedURL = '';
-      if (Global.isCopyLink == true) {
-        formatedURL = linkGenerateDict[Global.defaultLKformat]!(returnUrl, name);
-      } else {
-        formatedURL = returnUrl;
-      }
+      String formatedURL = getFormatedUrl(returnUrl, name);
       Map pictureKeyMap = Map.from(configMap);
       String pictureKey = jsonEncode(pictureKeyMap);
       return ["success", formatedURL, returnUrl, pictureKey, displayUrl];

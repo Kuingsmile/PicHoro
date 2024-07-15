@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
-import 'dart:io';
 // ignore: depend_on_referenced_packages
 import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
@@ -9,11 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:f_logs/f_logs.dart';
 import 'package:horopic/api/api.dart';
-import 'package:ftpconnect/ftpconnect.dart';
-import 'package:dartssh2/dartssh2.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:flutter_image_compress/flutter_image_compress.dart';
-import 'package:minio/minio.dart';
 
 import 'package:horopic/pages/upload_pages/upload_request.dart';
 import 'package:horopic/pages/upload_pages/upload_status.dart';
@@ -61,28 +55,25 @@ class UploadManager {
       String configData = await readPictureHostConfig();
       Map configMap = jsonDecode(configData);
       String defaultPH = await Global.getPShost();
-      if (defaultPH == 'tencent') {
-        var tencentUploadResult = await TencentImageUploadUtils.uploadApi(
-            path: path,
-            name: fileName,
-            configMap: configMap,
-            onSendProgress: createCallback(path, fileName),
-            cancelToken: canceltoken);
+      switch (defaultPH) {
+        case 'tencent':
+          List<String> tencentUploadResult = await TencentImageUploadUtils.uploadApi(
+              path: path,
+              name: fileName,
+              configMap: configMap,
+              onSendProgress: createCallback(path, fileName),
+              cancelToken: canceltoken);
 
-        if (tencentUploadResult[0] == 'success') {
+          if (tencentUploadResult[0] != 'success') {
+            throw Exception('上传失败');
+          }
           eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
           Map<String, dynamic> maps = {};
-          String formatedURL = tencentUploadResult[1];
-          String returnUrl = tencentUploadResult[2];
-          String pictureKey = tencentUploadResult[3];
-          String displayUrl = tencentUploadResult[4];
+          var [_, formatedURL, returnUrl, pictureKey, displayUrl] = tencentUploadResult;
 
           if (Global.isCopyLink == true) {
-            formatedURL = linkGenerateDict[Global.defaultLKformat]!(returnUrl, fileName);
-          } else {
-            formatedURL = returnUrl;
+            await Clipboard.setData(ClipboardData(text: formatedURL));
           }
-          await Clipboard.setData(ClipboardData(text: formatedURL));
 
           maps = {
             'path': path,
@@ -98,27 +89,23 @@ class UploadManager {
           };
           await AlbumSQL.insertData(Global.imageDB!, pBhostToTableName[Global.defaultPShost]!, maps);
           setStatus(task, UploadStatus.completed);
-        } else {
-          throw Exception('上传失败');
-        }
-      } else if (defaultPH == 'aliyun') {
-        var aliUploadResult = await AliyunImageUploadUtils.uploadApi(
-            path: path,
-            name: fileName,
-            configMap: configMap,
-            onSendProgress: createCallback(path, fileName),
-            cancelToken: canceltoken);
-        if (aliUploadResult[0] == 'success') {
+        case 'aliyun':
+          var aliUploadResult = await AliyunImageUploadUtils.uploadApi(
+              path: path,
+              name: fileName,
+              configMap: configMap,
+              onSendProgress: createCallback(path, fileName),
+              cancelToken: canceltoken);
+          if (aliUploadResult[0] != 'success') {
+            throw Exception('上传失败');
+          }
           eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-          Map<String, dynamic> maps = {};
-          String formatedURL = aliUploadResult[1];
-          String returnUrl = aliUploadResult[2];
-          String pictureKey = aliUploadResult[3];
-          String displayUrl = aliUploadResult[4];
+          var [_, formatedURL, returnUrl, pictureKey, displayUrl] = aliUploadResult;
+          if (Global.isCopyLink == true) {
+            await Clipboard.setData(ClipboardData(text: formatedURL));
+          }
 
-          await Clipboard.setData(ClipboardData(text: formatedURL));
-
-          maps = {
+          Map<String, dynamic> maps = {
             'path': path,
             'name': fileName,
             'url': returnUrl, //aliyun文件原始地址
@@ -132,28 +119,24 @@ class UploadManager {
           };
           await AlbumSQL.insertData(Global.imageDB!, pBhostToTableName[Global.defaultPShost]!, maps);
           setStatus(task, UploadStatus.completed);
-        } else {
-          throw Exception('上传失败');
-        }
-      } else if (defaultPH == 'qiniu') {
-        var qiniuUploadResult = await QiniuImageUploadUtils.uploadApi(
-            path: path,
-            name: fileName,
-            configMap: configMap,
-            onSendProgress: createCallback(path, fileName),
-            cancelToken: canceltoken);
+        case 'qiniu':
+          var qiniuUploadResult = await QiniuImageUploadUtils.uploadApi(
+              path: path,
+              name: fileName,
+              configMap: configMap,
+              onSendProgress: createCallback(path, fileName),
+              cancelToken: canceltoken);
 
-        if (qiniuUploadResult[0] == 'success') {
+          if (qiniuUploadResult[0] != 'success') {
+            throw Exception('上传失败');
+          }
           eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-          Map<String, dynamic> maps = {};
-          String formatedURL = qiniuUploadResult[1];
-          String returnUrl = qiniuUploadResult[2];
-          String pictureKey = qiniuUploadResult[3];
-          String displayUrl = qiniuUploadResult[4];
+          var [_, formatedURL, returnUrl, pictureKey, displayUrl] = qiniuUploadResult;
+          if (Global.isCopyLink == true) {
+            await Clipboard.setData(ClipboardData(text: formatedURL));
+          }
 
-          await Clipboard.setData(ClipboardData(text: formatedURL));
-
-          maps = {
+          Map<String, dynamic> maps = {
             'path': path,
             'name': fileName,
             'url': returnUrl, //qiniu文件原始地址
@@ -167,27 +150,23 @@ class UploadManager {
           };
           await AlbumSQL.insertData(Global.imageDB!, pBhostToTableName[Global.defaultPShost]!, maps);
           setStatus(task, UploadStatus.completed);
-        } else {
-          throw Exception('上传失败');
-        }
-      } else if (defaultPH == 'upyun') {
-        var upyunUploadResult = await UpyunImageUploadUtils.uploadApi(
-            path: path,
-            name: fileName,
-            configMap: configMap,
-            onSendProgress: createCallback(path, fileName),
-            cancelToken: canceltoken);
+        case 'upyun':
+          var upyunUploadResult = await UpyunImageUploadUtils.uploadApi(
+              path: path,
+              name: fileName,
+              configMap: configMap,
+              onSendProgress: createCallback(path, fileName),
+              cancelToken: canceltoken);
 
-        if (upyunUploadResult[0] == 'success') {
+          if (upyunUploadResult[0] != 'success') {
+            throw Exception('上传失败');
+          }
           eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-          Map<String, dynamic> maps = {};
-          String formatedURL = upyunUploadResult[1];
-          String returnUrl = upyunUploadResult[2];
-          String pictureKey = upyunUploadResult[3];
-          String displayUrl = upyunUploadResult[4];
-
-          await Clipboard.setData(ClipboardData(text: formatedURL));
-          maps = {
+          var [_, formatedURL, returnUrl, pictureKey, displayUrl] = upyunUploadResult;
+          if (Global.isCopyLink == true) {
+            await Clipboard.setData(ClipboardData(text: formatedURL));
+          }
+          Map<String, dynamic> maps = {
             'path': path,
             'name': fileName,
             'url': returnUrl, //upyun文件原始地址
@@ -201,28 +180,24 @@ class UploadManager {
           };
           await AlbumSQL.insertData(Global.imageDB!, pBhostToTableName[Global.defaultPShost]!, maps);
           setStatus(task, UploadStatus.completed);
-        } else {
-          throw Exception('上传失败');
-        }
-      } else if (defaultPH == 'lsky.pro') {
-        var lskyproUploadResult = await LskyproImageUploadUtils.uploadApi(
-            path: path,
-            name: fileName,
-            configMap: configMap,
-            onSendProgress: createCallback(path, fileName),
-            cancelToken: canceltoken);
+        case 'lsky.pro':
+          var lskyproUploadResult = await LskyproImageUploadUtils.uploadApi(
+              path: path,
+              name: fileName,
+              configMap: configMap,
+              onSendProgress: createCallback(path, fileName),
+              cancelToken: canceltoken);
 
-        if (lskyproUploadResult[0] == 'success') {
+          if (lskyproUploadResult[0] != 'success') {
+            throw Exception('上传失败');
+          }
           eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-          Map<String, dynamic> maps = {};
-          String formatedURL = lskyproUploadResult[1];
-          String returnUrl = lskyproUploadResult[2];
-          String pictureKey = lskyproUploadResult[3];
-          String displayUrl = lskyproUploadResult[4];
+          var [_, formatedURL, returnUrl, pictureKey, displayUrl] = lskyproUploadResult;
+          if (Global.isCopyLink == true) {
+            await Clipboard.setData(ClipboardData(text: formatedURL));
+          }
 
-          await Clipboard.setData(ClipboardData(text: formatedURL));
-
-          maps = {
+          Map<String, dynamic> maps = {
             'path': path,
             'name': fileName,
             'url': returnUrl, //原图地址
@@ -236,26 +211,23 @@ class UploadManager {
           };
           await AlbumSQL.insertData(Global.imageDB!, pBhostToTableName[Global.defaultPShost]!, maps);
           setStatus(task, UploadStatus.completed);
-        } else {
-          throw Exception('上传失败');
-        }
-      } else if (defaultPH == 'sm.ms') {
-        var smmsUploadResult = await SmmsImageUploadUtils.uploadApi(
-            path: path,
-            name: fileName,
-            configMap: configMap,
-            onSendProgress: createCallback(path, fileName),
-            cancelToken: canceltoken);
+        case 'sm.ms':
+          List<String> smmsUploadResult = await SmmsImageUploadUtils.uploadApi(
+              path: path,
+              name: fileName,
+              configMap: configMap,
+              onSendProgress: createCallback(path, fileName),
+              cancelToken: canceltoken);
 
-        if (smmsUploadResult[0] == 'success') {
+          if (smmsUploadResult[0] != 'success') {
+            throw Exception('上传失败');
+          }
           eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-          Map<String, dynamic> maps = {};
-          String formatedURL = smmsUploadResult[1];
-          String returnUrl = smmsUploadResult[2];
-          String pictureKey = smmsUploadResult[3];
-
-          await Clipboard.setData(ClipboardData(text: formatedURL));
-          maps = {
+          var [_, formatedURL, returnUrl, pictureKey] = smmsUploadResult;
+          if (Global.isCopyLink) {
+            await Clipboard.setData(ClipboardData(text: formatedURL));
+          }
+          Map<String, dynamic> maps = {
             'path': path,
             'name': fileName,
             'url': returnUrl,
@@ -269,27 +241,23 @@ class UploadManager {
           };
           await AlbumSQL.insertData(Global.imageDB!, pBhostToTableName[Global.defaultPShost]!, maps);
           setStatus(task, UploadStatus.completed);
-        } else {
-          throw Exception('上传失败');
-        }
-      } else if (defaultPH == 'github') {
-        maxConcurrentTasks = 1;
-        var githubUploadResult = await GithubImageUploadUtils.uploadApi(
-          path: path,
-          name: fileName,
-          configMap: configMap,
-          onSendProgress: createCallback(path, fileName),
-        );
-        if (githubUploadResult[0] == 'success') {
+        case 'github':
+          maxConcurrentTasks = 1;
+          var githubUploadResult = await GithubImageUploadUtils.uploadApi(
+            path: path,
+            name: fileName,
+            configMap: configMap,
+            onSendProgress: createCallback(path, fileName),
+          );
+          if (githubUploadResult[0] != 'success') {
+            throw Exception('上传失败');
+          }
           eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-          Map<String, dynamic> maps = {};
-          String formatedURL = githubUploadResult[1];
-          String returnUrl = githubUploadResult[2];
-          String pictureKey = githubUploadResult[3];
-          String downloadUrl = githubUploadResult[4];
-
-          await Clipboard.setData(ClipboardData(text: formatedURL));
-          maps = {
+          var [_, formatedURL, returnUrl, pictureKey, downloadUrl] = githubUploadResult;
+          if (Global.isCopyLink) {
+            await Clipboard.setData(ClipboardData(text: formatedURL));
+          }
+          Map<String, dynamic> maps = {
             'path': path,
             'name': fileName,
             'url': returnUrl,
@@ -303,26 +271,23 @@ class UploadManager {
           };
           await AlbumSQL.insertData(Global.imageDB!, pBhostToTableName[Global.defaultPShost]!, maps);
           setStatus(task, UploadStatus.completed);
-        } else {
-          throw Exception('上传失败');
-        }
-      } else if (defaultPH == 'imgur') {
-        var imgurUploadResult = await ImgurImageUploadUtils.uploadApi(
-            path: path,
-            name: fileName,
-            configMap: configMap,
-            onSendProgress: createCallback(path, fileName),
-            cancelToken: canceltoken);
+        case 'imgur':
+          var imgurUploadResult = await ImgurImageUploadUtils.uploadApi(
+              path: path,
+              name: fileName,
+              configMap: configMap,
+              onSendProgress: createCallback(path, fileName),
+              cancelToken: canceltoken);
 
-        if (imgurUploadResult[0] == 'success') {
+          if (imgurUploadResult[0] != 'success') {
+            throw Exception('上传失败');
+          }
           eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-          Map<String, dynamic> maps = {};
-          String formatedURL = imgurUploadResult[1];
-          String returnUrl = imgurUploadResult[2];
-          String pictureKey = imgurUploadResult[3];
-          String cdnUrl = imgurUploadResult[4];
-          await Clipboard.setData(ClipboardData(text: formatedURL));
-          maps = {
+          var [_, formatedURL, returnUrl, pictureKey, cdnUrl] = imgurUploadResult;
+          if (Global.isCopyLink == true) {
+            await Clipboard.setData(ClipboardData(text: formatedURL));
+          }
+          Map<String, dynamic> maps = {
             'path': path,
             'name': fileName,
             'url': returnUrl, //imgur文件原始地址
@@ -336,100 +301,35 @@ class UploadManager {
           };
           await AlbumSQL.insertData(Global.imageDB!, pBhostToTableName[Global.defaultPShost]!, maps);
           setStatus(task, UploadStatus.completed);
-        } else {
-          throw Exception('上传失败');
-        }
-      } else if (defaultPH == 'ftp') {
-        String ftpHost = configMap["ftpHost"];
-        String ftpPort = configMap["ftpPort"];
-        String ftpUser = configMap["ftpUser"];
-        String ftpPassword = configMap["ftpPassword"];
-        String ftpType = configMap["ftpType"];
-        String isAnonymous = configMap["isAnonymous"].toString();
-        String uploadPath = configMap["uploadPath"];
-        String? ftpCustomUrl = configMap["ftpCustomUrl"];
-        String? ftpWebPath = configMap["ftpWebPath"];
-
-        if (ftpType == 'SFTP') {
-          final socket = await SSHSocket.connect(ftpHost, int.parse(ftpPort.toString()));
-          final client = SSHClient(
-            socket,
-            username: ftpUser,
-            onPasswordRequest: () {
-              return ftpPassword;
-            },
+        case 'ftp':
+          var ftpUploadResult = await FTPImageUploadUtils.uploadApi(
+            path: path,
+            name: fileName,
+            configMap: configMap,
           );
-          final sftp = await client.sftp();
-          if (uploadPath == 'None') {
-            uploadPath = '/';
+          if (ftpUploadResult[0] != 'success') {
+            throw Exception('上传失败');
           }
-          if (!uploadPath.startsWith('/')) {
-            uploadPath = '/$uploadPath';
-          }
-          if (!uploadPath.endsWith('/')) {
-            uploadPath = '$uploadPath/';
-          }
-          String urlPath = uploadPath + fileName;
-          var file = await sftp.open(urlPath, mode: SftpFileOpenMode.create | SftpFileOpenMode.write);
-          int fileSize = File(path).lengthSync();
-          bool operateDone = false;
-          file.write(File(path).openRead().cast(), onProgress: (int sent) {
-            getUpload(fileName)?.progress.value = sent / fileSize;
-            if (sent == fileSize) {
-              operateDone = true;
-            }
-          });
-          while (!operateDone) {
-            await Future.delayed(const Duration(milliseconds: 100));
-          }
-          client.close();
-          String returnUrl = '';
-          String displayUrl = '';
-          if (ftpCustomUrl != null && ftpCustomUrl != 'None') {
-            ftpCustomUrl = ftpCustomUrl.replaceAll(RegExp(r'/$'), '');
-            if (ftpWebPath != null && ftpWebPath != 'None') {
-              ftpWebPath = ftpWebPath.replaceAll(RegExp(r'^/*'), '').replaceAll(RegExp(r'/*$'), '');
-              returnUrl = '$ftpCustomUrl/$ftpWebPath/$fileName';
-            } else {
-              urlPath = urlPath.replaceAll(RegExp(r'^/*'), '');
-              returnUrl = '$ftpCustomUrl/$urlPath';
-            }
-            displayUrl = returnUrl;
-          } else {
-            returnUrl = 'ftp://$ftpUser:$ftpPassword@$ftpHost:$ftpPort$urlPath';
-            displayUrl = returnUrl;
-          }
-          String pictureKey = jsonEncode(configMap);
-
           eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-          Map<String, dynamic> maps = {};
-          String formatedURL = '';
+          var [
+            _,
+            formatedURL,
+            returnUrl,
+            pictureKey,
+            displayUrl,
+            ftpHost,
+            ftpPort,
+            ftpUser,
+            ftpPassword,
+            ftpType,
+            isAnonymous,
+            uploadPath,
+            thumbnail
+          ] = ftpUploadResult;
           if (Global.isCopyLink == true) {
-            formatedURL = linkGenerateDict[Global.defaultLKformat]!(returnUrl, fileName);
-          } else {
-            formatedURL = returnUrl;
+            await Clipboard.setData(ClipboardData(text: formatedURL));
           }
-          var externalCacheDir = await getExternalCacheDirectories();
-          String cachePath = externalCacheDir![0].path;
-          String ftpCachePath = '$cachePath/ftp';
-          if (!await Directory(ftpCachePath).exists()) {
-            await Directory(ftpCachePath).create(recursive: true);
-          }
-          String randomString = randomStringGenerator(5);
-          String thumbnailFileName = 'FTP_${randomString}_$fileName';
-          var result = await FlutterImageCompress.compressAndGetFile(
-            path,
-            '$ftpCachePath/$thumbnailFileName',
-            quality: 50,
-            minWidth: 500,
-            minHeight: 500,
-          );
-          if (result == null) {
-            //copy raw file
-            await File(path).copy('$ftpCachePath/$thumbnailFileName');
-          }
-          await Clipboard.setData(ClipboardData(text: formatedURL));
-          maps = {
+          Map<String, dynamic> maps = {
             'path': path,
             'name': fileName,
             'url': returnUrl, //ftp文件原始地址
@@ -443,7 +343,7 @@ class UploadManager {
             'hostSpecificArgF': ftpType, //ftp类型
             'hostSpecificArgG': isAnonymous, //ftp是否匿名
             'hostSpecificArgH': uploadPath, //ftp路径
-            'hostSpecificArgI': '$ftpCachePath/$thumbnailFileName', //缩略图路径
+            'hostSpecificArgI': thumbnail, //缩略图路径
           };
           List letter = 'JKLMNOPQRSTUVWXYZ'.split('');
           for (int i = 0; i < letter.length; i++) {
@@ -451,231 +351,51 @@ class UploadManager {
           }
           await AlbumSQL.insertData(Global.imageDBExtend!, pBhostToTableName[Global.defaultPShost]!, maps);
           setStatus(task, UploadStatus.completed);
-        } else if (ftpType == 'FTP') {
-          FTPConnect ftpConnect;
-          if (isAnonymous == 'true') {
-            ftpConnect = FTPConnect(ftpHost, port: int.parse(ftpPort), securityType: SecurityType.FTP);
-          } else {
-            ftpConnect = FTPConnect(ftpHost,
-                port: int.parse(ftpPort), user: ftpUser, pass: ftpPassword, securityType: SecurityType.FTP);
-          }
-          var connectResult = await ftpConnect.connect();
-          if (connectResult == true) {
-            if (uploadPath == 'None') {
-              uploadPath = '/';
-            }
-            if (!uploadPath.startsWith('/')) {
-              uploadPath = '/$uploadPath';
-            }
-            if (!uploadPath.endsWith('/')) {
-              uploadPath = '$uploadPath/';
-            }
-            String urlPath = uploadPath + fileName;
-            File fileToUpload = File(path);
-            await ftpConnect.sendCustomCommand('TYPE I');
-            await ftpConnect.changeDirectory(uploadPath);
-            bool res = await ftpConnect.uploadFile(
-              fileToUpload,
-              sRemoteName: fileName,
-            );
-            if (res == true) {
-              String returnUrl = '';
-              String displayUrl = '';
-              if (ftpCustomUrl != null && ftpCustomUrl != 'None') {
-                ftpCustomUrl = ftpCustomUrl.replaceAll(RegExp(r'/$'), '');
-                if (ftpWebPath != null && ftpWebPath != 'None') {
-                  ftpWebPath = ftpWebPath.replaceAll(RegExp(r'^/*'), '').replaceAll(RegExp(r'/*$'), '');
-                  returnUrl = '$ftpCustomUrl/$ftpWebPath/$fileName';
-                } else {
-                  urlPath = urlPath.replaceAll(RegExp(r'^/*'), '');
-                  returnUrl = '$ftpCustomUrl/$urlPath';
-                }
-                displayUrl = returnUrl;
-              } else {
-                if (isAnonymous == 'true') {
-                  returnUrl = 'ftp://$ftpHost:$ftpPort$urlPath';
-                } else if (ftpPassword == 'None') {
-                  returnUrl = 'ftp://$ftpUser@$ftpHost:$ftpPort$urlPath';
-                } else {
-                  returnUrl = 'ftp://$ftpUser:$ftpPassword@$ftpHost:$ftpPort$urlPath';
-                }
-                displayUrl = returnUrl;
-              }
-              String pictureKey = jsonEncode(configMap);
-              eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-              Map<String, dynamic> maps = {};
-              String formatedURL = '';
-              if (Global.isCopyLink == true) {
-                formatedURL = linkGenerateDict[Global.defaultLKformat]!(returnUrl, fileName);
-              } else {
-                formatedURL = returnUrl;
-              }
-              ftpConnect.disconnect();
-              var externalCacheDir = await getExternalCacheDirectories();
-              String cachePath = externalCacheDir![0].path;
-              String ftpCachePath = '$cachePath/ftp';
-              if (!await Directory(ftpCachePath).exists()) {
-                await Directory(ftpCachePath).create(recursive: true);
-              }
-              String randomString = randomStringGenerator(5);
-              String thumbnailFileName = 'FTP_${randomString}_$fileName';
-              var result = await FlutterImageCompress.compressAndGetFile(
-                path,
-                '$ftpCachePath/$thumbnailFileName',
-                quality: 50,
-                minWidth: 500,
-                minHeight: 500,
-              );
-              if (result == null) {
-                await File(path).copy('$ftpCachePath/$thumbnailFileName');
-              }
-              await Clipboard.setData(ClipboardData(text: formatedURL));
-              maps = {
-                'path': path,
-                'name': fileName,
-                'url': returnUrl, //ftp文件原始地址
-                'PBhost': Global.defaultPShost,
-                'pictureKey': pictureKey,
-                'hostSpecificArgA': displayUrl, //实际展示的是displayUrl
-                'hostSpecificArgB': ftpHost, //ftp自定义域名
-                'hostSpecificArgC': ftpPort, //ftp端口
-                'hostSpecificArgD': ftpUser, //ftp用户名
-                'hostSpecificArgE': ftpPassword, //ftp密码
-                'hostSpecificArgF': ftpType, //ftp类型
-                'hostSpecificArgG': isAnonymous, //ftp是否匿名
-                'hostSpecificArgH': uploadPath, //ftp路径
-                'hostSpecificArgI': '$ftpCachePath/$thumbnailFileName', //缩略图路径
-              };
-
-              List letter = 'JKLMNOPQRSTUVWXYZ'.split('');
-              for (int i = 0; i < letter.length; i++) {
-                maps['hostSpecificArg${letter[i]}'] = 'test';
-              }
-              await AlbumSQL.insertData(Global.imageDBExtend!, pBhostToTableName[Global.defaultPShost]!, maps);
-              setStatus(task, UploadStatus.completed);
-            }
-          }
-        }
-      } else if (defaultPH == 'aws') {
-        String accessKeyId = configMap['accessKeyId'];
-        String secretAccessKey = configMap['secretAccessKey'];
-        String bucket = configMap['bucket'];
-        String endpoint = configMap['endpoint'];
-        String region = configMap['region'];
-        String uploadPath = configMap['uploadPath'];
-        String customUrl = configMap['customUrl'];
-        if (customUrl != "None") {
-          if (!customUrl.startsWith('http') && !customUrl.startsWith('https')) {
-            customUrl = 'http://$customUrl';
-          }
-        }
-
-        if (uploadPath != 'None') {
-          if (uploadPath.startsWith('/')) {
-            uploadPath = uploadPath.substring(1);
-          }
-          if (!uploadPath.endsWith('/')) {
-            uploadPath = '$uploadPath/';
-          }
-        }
-        //云存储的路径
-        String urlpath = '';
-        if (uploadPath != 'None') {
-          urlpath = '$uploadPath$fileName';
-        } else {
-          urlpath = fileName;
-        }
-
-        Minio minio;
-        if (region == 'None') {
-          minio = Minio(
-            endPoint: endpoint,
-            accessKey: accessKeyId,
-            secretKey: secretAccessKey,
+        case 'aws':
+          var awsUploadResult = await AwsImageUploadUtils.uploadApi(
+            path: path,
+            name: fileName,
+            configMap: configMap,
           );
-        } else {
-          minio = Minio(
-            endPoint: endpoint,
-            accessKey: accessKeyId,
-            secretKey: secretAccessKey,
-            region: region,
-          );
-        }
-        int fileSize = File(path).lengthSync();
-        Stream<Uint8List> stream = File(path).openRead().cast();
-
-        await minio.putObject(bucket, urlpath, stream, onProgress: (int sent) {
-          getUpload(fileName)?.progress.value = sent / fileSize;
-        });
-
-        eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-        Map<String, dynamic> maps = {};
-        String returnUrl = '';
-        String displayUrl = '';
-
-        if (customUrl != 'None') {
-          if (!customUrl.endsWith('/')) {
-            returnUrl = '$customUrl/$urlpath';
-            displayUrl = '$customUrl/$urlpath';
-          } else {
-            returnUrl = '$customUrl$urlpath';
-            displayUrl = '$customUrl$urlpath';
+          if (awsUploadResult[0] != 'success') {
+            throw Exception('上传失败');
           }
-        } else {
-          if (endpoint.contains('amazonaws.com')) {
-            returnUrl = 'https://$bucket.s3.$region.amazonaws.com/$urlpath';
-            displayUrl = 'https://$bucket.s3.$region.amazonaws.com/$urlpath';
-          } else {
-            returnUrl = 'https://$bucket.$endpoint/$urlpath';
-            displayUrl = 'https://$bucket.$endpoint/$urlpath';
-          }
-        }
-
-        String formatedURL = '';
-        if (Global.isCopyLink == true) {
-          formatedURL = linkGenerateDict[Global.defaultLKformat]!(returnUrl, fileName);
-        } else {
-          formatedURL = returnUrl;
-        }
-        await Clipboard.setData(ClipboardData(text: formatedURL));
-
-        Map pictureKeyMap = Map.from(configMap);
-        String pictureKey = jsonEncode(pictureKeyMap);
-        maps = {
-          'path': path,
-          'name': fileName,
-          'url': returnUrl,
-          'PBhost': Global.defaultPShost,
-          'pictureKey': pictureKey,
-          'hostSpecificArgA': displayUrl,
-        };
-        List letter = 'BCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-        for (int i = 0; i < letter.length; i++) {
-          maps['hostSpecificArg${letter[i]}'] = 'test';
-        }
-        await AlbumSQL.insertData(Global.imageDBExtend!, pBhostToTableName[Global.defaultPShost]!, maps);
-        setStatus(task, UploadStatus.completed);
-      } else if (defaultPH == 'alist') {
-        var alistUploadResult = await AlistImageUploadUtils.uploadApi(
-          path: path,
-          name: fileName,
-          configMap: configMap,
-          onSendProgress: createCallback(path, fileName),
-        );
-
-        if (alistUploadResult[0] == 'success') {
           eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-          Map<String, dynamic> maps = {};
-          String formatedURL = alistUploadResult[1];
-          String returnUrl = alistUploadResult[2];
-          String pictureKey = alistUploadResult[3];
-          //返回缩略图地址用来在相册显示
-          String displayUrl = alistUploadResult[4];
-          String hostPicUrl = alistUploadResult[5];
+          var [_, formatedURL, returnUrl, pictureKey, displayUrl] = awsUploadResult;
+          if (Global.isCopyLink == true) {
+            await Clipboard.setData(ClipboardData(text: formatedURL));
+          }
+          Map<String, dynamic> maps = {
+            'path': path,
+            'name': fileName,
+            'url': returnUrl,
+            'PBhost': Global.defaultPShost,
+            'pictureKey': pictureKey,
+            'hostSpecificArgA': displayUrl,
+          };
+          List letter = 'BCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+          for (int i = 0; i < letter.length; i++) {
+            maps['hostSpecificArg${letter[i]}'] = 'test';
+          }
+          await AlbumSQL.insertData(Global.imageDBExtend!, pBhostToTableName[Global.defaultPShost]!, maps);
+          setStatus(task, UploadStatus.completed);
+        case 'alist':
+          var alistUploadResult = await AlistImageUploadUtils.uploadApi(
+            path: path,
+            name: fileName,
+            configMap: configMap,
+            onSendProgress: createCallback(path, fileName),
+          );
 
-          await Clipboard.setData(ClipboardData(text: formatedURL));
-
-          maps = {
+          if (alistUploadResult[0] != 'success') {
+            throw Exception('上传失败');
+          }
+          eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
+          var [_, formatedURL, returnUrl, pictureKey, displayUrl, hostPicUrl] = alistUploadResult;
+          if (Global.isCopyLink == true) {
+            await Clipboard.setData(ClipboardData(text: formatedURL));
+          }
+          Map<String, dynamic> maps = {
             'path': path,
             'name': fileName,
             'url': returnUrl,
@@ -690,24 +410,18 @@ class UploadManager {
           }
           await AlbumSQL.insertData(Global.imageDBExtend!, pBhostToTableName[Global.defaultPShost]!, maps);
           setStatus(task, UploadStatus.completed);
-        } else {
-          throw Exception('上传失败');
-        }
-      } else if (defaultPH == 'webdav') {
-        var webdavUploadResult =
-            await WebdavImageUploadUtils.uploadApi(path: path, name: fileName, configMap: configMap);
-        if (webdavUploadResult[0] == 'success') {
-          String formatedURL = webdavUploadResult[1];
-          String returnUrl = webdavUploadResult[2];
-          String pictureKey = webdavUploadResult[3];
-          String displayUrl = webdavUploadResult[4];
-
+        case 'webdav':
+          var webdavUploadResult =
+              await WebdavImageUploadUtils.uploadApi(path: path, name: fileName, configMap: configMap);
+          if (webdavUploadResult[0] != 'success') {
+            throw Exception('上传失败');
+          }
+          var [_, formatedURL, returnUrl, pictureKey, displayUrl] = webdavUploadResult;
           eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-          Map<String, dynamic> maps = {};
-
-          await Clipboard.setData(ClipboardData(text: formatedURL));
-
-          maps = {
+          if (Global.isCopyLink == true) {
+            await Clipboard.setData(ClipboardData(text: formatedURL));
+          }
+          Map<String, dynamic> maps = {
             'path': path,
             'name': fileName,
             'url': returnUrl,
@@ -721,9 +435,8 @@ class UploadManager {
           }
           await AlbumSQL.insertData(Global.imageDBExtend!, pBhostToTableName[Global.defaultPShost]!, maps);
           setStatus(task, UploadStatus.completed);
-        } else {
-          throw 'webdavUploadError';
-        }
+        default:
+          break;
       }
     } catch (e) {
       FLog.error(

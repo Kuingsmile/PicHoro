@@ -783,9 +783,7 @@ class AliyunManageAPI {
         'Signature': singature,
         'file': await MultipartFile.fromFile(filepath, filename: filename),
       };
-      if (getContentType(my_path.extension(filepath)) != null) {
-        formMap['x-oss-content-type'] = getContentType(my_path.extension(filepath));
-      }
+      formMap['x-oss-content-type'] = getContentType(my_path.extension(filepath));
       FormData formData = FormData.fromMap(formMap);
 
       BaseOptions baseoptions = setBaseOptions();

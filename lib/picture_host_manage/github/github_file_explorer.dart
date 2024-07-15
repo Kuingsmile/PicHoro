@@ -863,7 +863,7 @@ class GithubFileExplorerState extends loading_state.BaseLoadingPageState<GithubF
                           rawurl =
                               'https://raw.githubusercontent.com/${widget.element['showedUsername']}/${widget.element['name']}/${widget.element['default_branch']}/${widget.bucketPrefix}${allInfoList[i]['path']}';
                           fileName = allInfoList[i]['path'];
-                          finalFormatedurl = linkGenerateDict[Global.defaultLKformat]!(rawurl, fileName);
+                          finalFormatedurl = linkGeneratorMap[Global.defaultLKformat]!(rawurl, fileName);
 
                           multiUrls.add(finalFormatedurl);
                         }
@@ -899,7 +899,7 @@ class GithubFileExplorerState extends loading_state.BaseLoadingPageState<GithubF
                             failCount++;
                           }
                           fileName = allInfoList[i]['path'];
-                          finalFormatedurl = linkGenerateDict[Global.defaultLKformat]!(rawurl, fileName);
+                          finalFormatedurl = linkGeneratorMap[Global.defaultLKformat]!(rawurl, fileName);
                           multiUrls.add(finalFormatedurl);
                         }
                       }
@@ -1584,7 +1584,7 @@ class GithubFileExplorerState extends loading_state.BaseLoadingPageState<GithubF
                 String shareUrl =
                     'https://raw.githubusercontent.com/${widget.element['showedUsername']}/${widget.element['name']}/${widget.element['default_branch']}/${widget.bucketPrefix}${allInfoList[index]['path']}';
                 String filename = my_path.basename(allInfoList[index]['path']);
-                String formatedLink = linkGenerateDict[format]!(shareUrl, filename);
+                String formatedLink = linkGeneratorMap[format]!(shareUrl, filename);
                 await flutter_services.Clipboard.setData(flutter_services.ClipboardData(text: formatedLink));
                 if (mounted) {
                   Navigator.pop(context);
@@ -1601,7 +1601,7 @@ class GithubFileExplorerState extends loading_state.BaseLoadingPageState<GithubF
                   String format = await Global.getLKformat();
                   String shareUrl = result[1]['download_url'];
                   String filename = my_path.basename(allInfoList[index]['path']);
-                  String formatedLink = linkGenerateDict[format]!(shareUrl, filename);
+                  String formatedLink = linkGeneratorMap[format]!(shareUrl, filename);
                   await flutter_services.Clipboard.setData(flutter_services.ClipboardData(text: formatedLink));
                   if (mounted) {
                     Navigator.pop(context);

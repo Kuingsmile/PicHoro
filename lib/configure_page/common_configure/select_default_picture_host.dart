@@ -9,6 +9,7 @@ import 'package:fluro/fluro.dart';
 import 'package:f_logs/f_logs.dart';
 import 'package:horopic/picture_host_manage/manage_api/alist_manage_api.dart';
 import 'package:horopic/picture_host_manage/manage_api/aliyun_manage_api.dart';
+import 'package:horopic/picture_host_manage/manage_api/aws_manage_api.dart';
 import 'package:horopic/picture_host_manage/manage_api/github_manage_api.dart';
 import 'package:horopic/picture_host_manage/manage_api/imgur_manage_api.dart';
 import 'package:horopic/picture_host_manage/manage_api/lskypro_manage_api.dart';
@@ -174,6 +175,8 @@ class AllPShostState extends State<AllPShost> {
       if (jsonResult['smms'] == null &&
           jsonResult['alist'] == null &&
           jsonResult['alistplist'] == null &&
+          jsonResult['aws-s3-plist'] == null &&
+          jsonResult['aws-s3'] == null &&
           jsonResult['github'] == null &&
           jsonResult['lankong'] == null &&
           jsonResult['lskyplist'] == null &&
@@ -201,6 +204,68 @@ class AllPShostState extends State<AllPShost> {
               text: formatErrorMessage({}, e.toString()),
               dataLogType: DataLogType.ERRORS.toString());
           showToast("sm.ms配置错误");
+        }
+      }
+
+      if (jsonResult['aws-s3-plist'] != null || jsonResult['aws-s3'] != null) {
+        try {
+          String awsKeyName = jsonResult['aws-s3'] == null ? 'aws-s3-plist' : 'aws-s3';
+          String awsAccessKeyId = (jsonResult[awsKeyName]['accessKeyID'] ?? '').trim();
+          String awsSecretAccessKey = (jsonResult[awsKeyName]['secretAccessKey'] ?? '').trim();
+          String awsBucket = (jsonResult[awsKeyName]['bucketName'] ?? '').trim();
+          String awsEndpoint = (jsonResult[awsKeyName]['endpoint'] ?? '').trim();
+          String awsRegion = (jsonResult[awsKeyName]['region'] ?? '').trim();
+          String awsUploadPath = (jsonResult[awsKeyName]['uploadPath'] ?? '').trim();
+          String awsCustomUrl = (jsonResult[awsKeyName]['urlPrefix'] ?? '').trim();
+          var awsUsePathStyle = jsonResult[awsKeyName]['pathStyleAccess'] ?? false;
+          if (awsUploadPath.isEmpty || awsUploadPath == '/') {
+            awsUploadPath = 'None';
+          } else {
+            if (!awsUploadPath.endsWith('/')) {
+              awsUploadPath = '$awsUploadPath/';
+            }
+            if (awsUploadPath.startsWith('/')) {
+              awsUploadPath = awsUploadPath.substring(1);
+            }
+          }
+          if (awsCustomUrl.isEmpty) {
+            awsCustomUrl = 'None';
+          } else {
+            if (!awsCustomUrl.startsWith('http') && !awsCustomUrl.startsWith('https')) {
+              awsCustomUrl = 'http://$awsCustomUrl';
+            }
+            if (awsCustomUrl.endsWith('/')) {
+              awsCustomUrl = awsCustomUrl.substring(0, awsCustomUrl.length - 1);
+            }
+          }
+          bool isEnableSSL = awsEndpoint.startsWith('https');
+          if (awsEndpoint.startsWith('http')) {
+            awsEndpoint = awsEndpoint.substring(awsEndpoint.indexOf('://') + 3);
+          } else if (awsEndpoint.startsWith('https')) {
+            awsEndpoint = awsEndpoint.substring(awsEndpoint.indexOf('s://') + 3);
+          }
+          if (awsRegion.isEmpty) {
+            awsRegion = 'None';
+          }
+          if (awsUsePathStyle is String) {
+            awsUsePathStyle = awsUsePathStyle.toLowerCase() == 'true';
+          }
+          if (awsUsePathStyle is! bool) {
+            awsUsePathStyle = false;
+          }
+          final awsConfig = AwsConfigModel(awsAccessKeyId, awsSecretAccessKey, awsBucket, awsEndpoint, awsRegion,
+              awsUploadPath, awsCustomUrl, awsUsePathStyle, isEnableSSL);
+          final awsConfigJson = jsonEncode(awsConfig);
+          final awsConfigFile = await AwsManageAPI.localFile;
+          await awsConfigFile.writeAsString(awsConfigJson);
+          showToast("AWS S3配置成功");
+        } catch (e) {
+          FLog.error(
+              className: 'AllPShostState',
+              methodName: 'processingQRCodeResult_aws_2',
+              text: formatErrorMessage({}, e.toString()),
+              dataLogType: DataLogType.ERRORS.toString());
+          showToast("AWS S3配置错误");
         }
       }
 

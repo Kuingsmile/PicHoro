@@ -30,6 +30,8 @@ class AwsConfigureStoreEditState extends State<AwsConfigureStoreEdit> {
   final _regionController = TextEditingController();
   final _uploadPathController = TextEditingController();
   final _customUrlController = TextEditingController();
+  bool isS3PathStyle = false;
+  bool isEnableSSL = true;
 
   @override
   void initState() {
@@ -46,35 +48,33 @@ class AwsConfigureStoreEditState extends State<AwsConfigureStoreEdit> {
       'endpoint',
       'region',
       'uploadPath',
-      'customUrl'
+      'customUrl',
+      'isS3PathStyle',
+      'isEnableSSL',
     ];
     for (String element in keys) {
-      if (widget.psInfo[element] != ConfigureTemplate.placeholder) {
+      if (widget.psInfo[element] != ConfigureTemplate.placeholder && widget.psInfo[element] != null) {
         switch (element) {
           case 'remarkName':
             _remarkNameController.text = widget.psInfo[element];
-            break;
           case 'accessKeyId':
             _accessKeyIDController.text = widget.psInfo[element];
-            break;
           case 'secretAccessKey':
             _secretAccessKeyController.text = widget.psInfo[element];
-            break;
           case 'bucket':
             _bucketController.text = widget.psInfo[element];
-            break;
           case 'endpoint':
             _endpointController.text = widget.psInfo[element];
-            break;
           case 'region':
             _regionController.text = widget.psInfo[element];
-            break;
           case 'uploadPath':
             _uploadPathController.text = widget.psInfo[element];
-            break;
           case 'customUrl':
             _customUrlController.text = widget.psInfo[element];
-            break;
+          case 'isS3PathStyle':
+            isS3PathStyle = widget.psInfo[element];
+          case 'isEnableSSL':
+            isEnableSSL = widget.psInfo[element];
         }
       }
     }
@@ -167,8 +167,7 @@ class AwsConfigureStoreEditState extends State<AwsConfigureStoreEdit> {
                 if (value == null || value.isEmpty) {
                   return '请输入endpoint';
                 }
-                if (value.startsWith('http://') ||
-                    value.startsWith('https://')) {
+                if (value.startsWith('http://') || value.startsWith('https://')) {
                   return 'endpoint不包含http://或https://';
                 }
                 return null;
@@ -204,12 +203,34 @@ class AwsConfigureStoreEditState extends State<AwsConfigureStoreEdit> {
               textAlign: TextAlign.center,
             ),
             ListTile(
+              title: const Text('是否使用S3路径风格'),
+              trailing: Switch(
+                value: isS3PathStyle,
+                onChanged: (value) {
+                  setState(() {
+                    isS3PathStyle = value;
+                  });
+                },
+              ),
+            ),
+            ListTile(
+              title: const Text('是否启用SSL连接'),
+              trailing: Switch(
+                value: isEnableSSL,
+                onChanged: (value) {
+                  setState(() {
+                    isEnableSSL = value;
+                  });
+                },
+              ),
+            ),
+            ListTile(
                 title: ElevatedButton(
               onPressed: () {
                 _importConfig();
                 setState(() {});
               },
-              child: titleText('导入当前图床配置',fontsize: null),
+              child: titleText('导入当前图床配置', fontsize: null),
             )),
             ListTile(
                 title: ElevatedButton(
@@ -219,7 +240,7 @@ class AwsConfigureStoreEditState extends State<AwsConfigureStoreEdit> {
                   Navigator.pop(context, true);
                 }
               },
-              child: titleText('保存配置',fontsize: null),
+              child: titleText('保存配置', fontsize: null),
             )),
           ],
         ),
@@ -243,6 +264,12 @@ class AwsConfigureStoreEditState extends State<AwsConfigureStoreEdit> {
       if (configMap['customUrl'] != 'None') {
         _customUrlController.text = configMap['customUrl'];
       }
+      if (configMap['isS3PathStyle'] != null && configMap['isS3PathStyle'] is bool) {
+        isS3PathStyle = configMap['isS3PathStyle'];
+      }
+      if (configMap['isEnableSSL'] != null && configMap['isEnableSSL'] is bool) {
+        isEnableSSL = configMap['isEnableSSL'];
+      }
       showToast('导入成功');
     } catch (e) {
       showToast('导入失败');
@@ -260,11 +287,11 @@ class AwsConfigureStoreEditState extends State<AwsConfigureStoreEdit> {
       String uploadPath = _uploadPathController.text;
       String customUrl = _customUrlController.text;
 
-      if (remarkName.isEmpty || remarkName.trim().isEmpty) {
+      if (remarkName.trim().isEmpty) {
         remarkName = ConfigureTemplate.placeholder;
       }
 
-      if (uploadPath.isEmpty || uploadPath.trim().isEmpty) {
+      if (uploadPath.trim().isEmpty) {
         uploadPath = ConfigureTemplate.placeholder;
       } else {
         if (!uploadPath.endsWith('/')) {
@@ -275,10 +302,9 @@ class AwsConfigureStoreEditState extends State<AwsConfigureStoreEdit> {
         }
       }
 
-      if (customUrl.isEmpty || customUrl.trim().isEmpty) {
+      if (customUrl.trim().isEmpty) {
         customUrl = ConfigureTemplate.placeholder;
-      } else if (!customUrl.startsWith('http') &&
-          !customUrl.startsWith('https')) {
+      } else if (!customUrl.startsWith('http') && !customUrl.startsWith('https')) {
         customUrl = 'http://$customUrl';
       }
 
@@ -286,7 +312,7 @@ class AwsConfigureStoreEditState extends State<AwsConfigureStoreEdit> {
         customUrl = customUrl.substring(0, customUrl.length - 1);
       }
 
-      if (region.isEmpty || region.trim().isEmpty) {
+      if (region.trim().isEmpty) {
         region = ConfigureTemplate.placeholder;
       }
 
@@ -299,6 +325,8 @@ class AwsConfigureStoreEditState extends State<AwsConfigureStoreEdit> {
         'region': region,
         'uploadPath': uploadPath,
         'customUrl': customUrl,
+        'isS3PathStyle': isS3PathStyle,
+        'isEnableSSL': isEnableSSL,
       };
 
       try {

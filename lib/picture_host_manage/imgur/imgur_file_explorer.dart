@@ -818,7 +818,7 @@ class ImgurFileExplorerState extends loading_state.BaseLoadingPageState<ImgurFil
                         fileName = i <= dirAllInfoList.length - 1
                             ? 'Directory'
                             : '${allInfoList[i]['id'].toString()}.${allInfoList[i]['link'].split('.').last}';
-                        finalFormatedurl = linkGenerateDict[Global.defaultLKformat]!(rawurl, fileName);
+                        finalFormatedurl = linkGeneratorMap[Global.defaultLKformat]!(rawurl, fileName);
                         multiUrls.add(finalFormatedurl);
                       }
                     }
@@ -1402,7 +1402,7 @@ class ImgurFileExplorerState extends loading_state.BaseLoadingPageState<ImgurFil
               String filename = allInfoList[index]['id'] == null
                   ? 'None'
                   : '${allInfoList[index]['id'].toString()}.${allInfoList[index]['link'].split('.').last}';
-              String formatedLink = linkGenerateDict[format]!(shareUrl, filename);
+              String formatedLink = linkGeneratorMap[format]!(shareUrl, filename);
               await flutter_services.Clipboard.setData(flutter_services.ClipboardData(text: formatedLink));
               if (mounted) {
                 Navigator.pop(context);

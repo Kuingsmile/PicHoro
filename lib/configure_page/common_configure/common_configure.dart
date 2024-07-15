@@ -16,11 +16,6 @@ class CommonConfig extends StatefulWidget {
 
 class CommonConfigState extends State<CommonConfig> {
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -44,7 +39,7 @@ class CommonConfigState extends State<CommonConfig> {
             trailing: Switch(
               value: Global.isCopyLink,
               onChanged: (value) async {
-                await Global.setCopyLink(value);
+                await Global.setIsCopyLink(value);
                 setState(() {});
               },
             ),
@@ -75,7 +70,7 @@ class CommonConfigState extends State<CommonConfig> {
             trailing: Switch(
               value: Global.isCompress,
               onChanged: (value) async {
-                await Global.setisCompress(value);
+                await Global.setIsCompress(value);
                 setState(() {});
               },
             ),
@@ -94,7 +89,7 @@ class CommonConfigState extends State<CommonConfig> {
             trailing: Switch(
               value: Global.isDeleteLocal,
               onChanged: (value) async {
-                await Global.setDeleteLocal(value);
+                await Global.setIsDeleteLocal(value);
                 setState(() {});
               },
             ),
@@ -105,7 +100,7 @@ class CommonConfigState extends State<CommonConfig> {
             trailing: Switch(
               value: Global.isDeleteCloud,
               onChanged: (value) async {
-                await Global.setDeleteCloud(value);
+                await Global.setIsDeleteCloud(value);
                 setState(() {});
               },
             ),

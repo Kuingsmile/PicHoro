@@ -10,11 +10,6 @@ class LinkFormatSelect extends StatefulWidget {
 }
 
 class LinkFormatSelectState extends State<LinkFormatSelect> {
-  @override
-  void initState() {
-    super.initState();
-  }
-
   ListTile _buildListTile(String title, String value) {
     return ListTile(
       title: Text(title),

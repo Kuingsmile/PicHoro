@@ -1,9 +1,7 @@
-import 'dart:io';
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:f_logs/f_logs.dart';
 import 'package:fluro/fluro.dart';
 
@@ -43,17 +41,9 @@ class GithubConfigState extends State<GithubConfig> {
       _githubusernameController.text = configMap['githubusername'] ?? '';
       _repoController.text = configMap['repo'] ?? '';
       _tokenController.text = configMap['token'] ?? '';
-      if (configMap['storePath'] != 'None' && configMap['storePath'] != null) {
-        _storePathController.text = configMap['storePath'];
-      } else {
-        _storePathController.clear();
-      }
       _branchController.text = configMap['branch'] ?? '';
-      if (configMap['customDomain'] != 'None' && configMap['customDomain'] != null) {
-        _customDomainController.text = configMap['customDomain'];
-      } else {
-        _customDomainController.clear();
-      }
+      setControllerText(_storePathController, configMap['storePath']);
+      setControllerText(_customDomainController, configMap['customDomain']);
       setState(() {});
     } catch (e) {
       FLog.error(
@@ -229,32 +219,24 @@ class GithubConfigState extends State<GithubConfig> {
 
   Future _saveGithubConfig() async {
     try {
-      String token = 'Bearer ';
-      final String githubusername = _githubusernameController.text;
-      final String repo = _repoController.text;
-      String storePath = '';
-      if (_storePathController.text.isEmpty ||
-          _storePathController.text.trim().isEmpty ||
-          _storePathController.text == '/') {
+      String token = _tokenController.text.trim();
+      String githubusername = _githubusernameController.text.trim();
+      String repo = _repoController.text.trim();
+      String storePath = _storePathController.text.trim();
+      String branch = _branchController.text.trim();
+      String customDomain = _customDomainController.text.trim();
+      if (storePath.isEmpty || _storePathController.text == '/') {
         storePath = 'None';
-      } else {
-        storePath = _storePathController.text;
-        if (!storePath.endsWith('/')) {
-          storePath = '$storePath/';
-        }
+      } else if (!storePath.endsWith('/')) {
+        storePath = '$storePath/';
       }
 
-      String branch = '';
-      if (_branchController.text.isEmpty || _branchController.text.trim().isEmpty) {
+      if (branch.isEmpty) {
         branch = 'main';
-      } else {
-        branch = _branchController.text;
       }
-      String customDomain = '';
-      if (_customDomainController.text.isEmpty || _customDomainController.text.trim().isEmpty) {
+      if (customDomain.isEmpty) {
         customDomain = 'None';
       } else {
-        customDomain = _customDomainController.text;
         if (!customDomain.startsWith('http') && !customDomain.startsWith('https')) {
           customDomain = 'http://$customDomain';
         }
@@ -263,15 +245,13 @@ class GithubConfigState extends State<GithubConfig> {
         }
       }
 
-      if (_tokenController.text.startsWith('Bearer ')) {
-        token = _tokenController.text;
-      } else {
-        token = token + _tokenController.text;
+      if (!token.startsWith('Bearer ')) {
+        token = 'Bearer $token';
       }
 
       final githubConfig = GithubConfigModel(githubusername, repo, token, storePath, branch, customDomain);
       final githubConfigJson = jsonEncode(githubConfig);
-      final githubConfigFile = await localFile;
+      final githubConfigFile = await GithubManageAPI.localFile;
       await githubConfigFile.writeAsString(githubConfigJson);
       showToast('保存成功');
     } catch (e) {
@@ -288,16 +268,15 @@ class GithubConfigState extends State<GithubConfig> {
 
   checkGithubConfig() async {
     try {
-      String configData = await readGithubConfig();
+      Map configMap = await GithubManageAPI.getConfigMap();
 
-      if (configData == "") {
+      if (configMap.isEmpty) {
         if (context.mounted) {
           return showCupertinoAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");
         }
         return;
       }
 
-      Map configMap = jsonDecode(configData);
       BaseOptions options = setBaseOptions();
       options.headers = {
         "Authorization": configMap["token"],
@@ -332,23 +311,6 @@ class GithubConfigState extends State<GithubConfig> {
         return showCupertinoAlertDialog(context: context, title: "检查失败!", content: e.toString());
       }
     }
-  }
-
-  Future<File> get localFile async {
-    final path = await _localPath;
-    String defaultUser = await Global.getUser();
-    return ensureFileExists(File('$path/${defaultUser}_github_config.txt'));
-  }
-
-  Future<String> get _localPath async {
-    final directory = await getApplicationDocumentsDirectory();
-    return directory.path;
-  }
-
-  Future<String> readGithubConfig() async {
-    final file = await localFile;
-    String contents = await file.readAsString();
-    return contents;
   }
 
   _setdefault() async {

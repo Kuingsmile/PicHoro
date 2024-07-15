@@ -1,8 +1,6 @@
-import 'dart:io';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:f_logs/f_logs.dart';
 import 'package:ftpconnect/ftpconnect.dart';
 import 'package:dartssh2/dartssh2.dart';
@@ -61,39 +59,14 @@ class FTPConfigState extends State<FTPConfig> {
       Map configMap = await FTPManageAPI.getConfigMap();
       _ftpHostController.text = configMap['ftpHost'] ?? '';
       _ftpPortController.text = configMap['ftpPort'] ?? '';
-      _ftpConfigMap['ftpType'] = configMap['ftpType'] ?? '';
-      _ftpConfigMap['isAnonymous'] = configMap['isAnonymous']?.toString() ?? '';
-
-      if (configMap['ftpUser'] != 'None' && configMap['ftpUser'] != null) {
-        _ftpUserController.text = configMap['ftpUser'];
-      } else {
-        _ftpUserController.clear();
-      }
-      if (configMap['ftpPassword'] != 'None' && configMap['ftpPassword'] != null) {
-        _ftpPasswordController.text = configMap['ftpPassword'];
-      } else {
-        _ftpPasswordController.clear();
-      }
-      if (configMap['uploadPath'] != 'None' && configMap['uploadPath'] != null) {
-        _ftpUploadPathController.text = configMap['uploadPath'];
-      } else {
-        _ftpUploadPathController.clear();
-      }
-      if (configMap['ftpHomeDir'] != 'None' && configMap['ftpHomeDir'] != null) {
-        _ftpHomeDirController.text = configMap['ftpHomeDir'];
-      } else {
-        _ftpHomeDirController.clear();
-      }
-      if (configMap['ftpCustomUrl'] != null && configMap['ftpCustomUrl'] != 'None') {
-        _ftpCustomUrlController.text = configMap['ftpCustomUrl'];
-      } else {
-        _ftpCustomUrlController.clear();
-      }
-      if (configMap['ftpWebPath'] != null && configMap['ftpWebPath'] != 'None') {
-        _ftpWebPathController.text = configMap['ftpWebPath'];
-      } else {
-        _ftpWebPathController.clear();
-      }
+      _ftpConfigMap['ftpType'] = configMap['ftpType'] ?? 'FTP';
+      _ftpConfigMap['isAnonymous'] = configMap['isAnonymous']?.toString() ?? 'false';
+      setControllerText(_ftpUserController, configMap['ftpUser']);
+      setControllerText(_ftpPasswordController, configMap['ftpPassword']);
+      setControllerText(_ftpUploadPathController, configMap['uploadPath']);
+      setControllerText(_ftpHomeDirController, configMap['ftpHomeDir']);
+      setControllerText(_ftpCustomUrlController, configMap['ftpCustomUrl']);
+      setControllerText(_ftpWebPathController, configMap['ftpWebPath']);
       setState(() {});
     } catch (e) {
       FLog.error(
@@ -248,7 +221,9 @@ class FTPConfigState extends State<FTPConfig> {
                 value: _ftpConfigMap['ftpType'],
                 onChanged: (String? newValue) {
                   setState(() {
-                    _ftpConfigMap['ftpType'] = newValue!;
+                    if (newValue != null) {
+                      _ftpConfigMap['ftpType'] = newValue;
+                    }
                   });
                 },
                 items: <String>['FTP', 'SFTP'].map<DropdownMenuItem<String>>((String value) {
@@ -359,63 +334,47 @@ class FTPConfigState extends State<FTPConfig> {
   }
 
   Future _saveFTPConfig() async {
-    final String ftpHost = _ftpHostController.text;
-    final String ftpPort = _ftpPortController.text;
-    String ftpUser = '';
-    if (_ftpUserController.text.isEmpty || _ftpUserController.text == '') {
+    String ftpHost = _ftpHostController.text.trim();
+    String ftpPort = _ftpPortController.text.trim();
+    String ftpUser = _ftpUserController.text.trim();
+    String ftpPassword = _ftpPasswordController.text.trim();
+    String ftpUploadPath = _ftpUploadPathController.text.trim();
+    String ftpHomeDir = _ftpHomeDirController.text.trim();
+    String ftpCustomUrl = _ftpCustomUrlController.text.trim();
+    String ftpWebPath = _ftpWebPathController.text.trim();
+    if (ftpUser.isEmpty) {
       ftpUser = 'None';
-    } else {
-      ftpUser = _ftpUserController.text;
     }
-    String ftpPassword = '';
-    if (_ftpPasswordController.text.isEmpty || _ftpPasswordController.text == '') {
+    if (ftpPassword.isEmpty) {
       ftpPassword = 'None';
-    } else {
-      ftpPassword = _ftpPasswordController.text;
     }
-    String ftpUploadPath = '';
-    if (_ftpUploadPathController.text.isEmpty ||
-        _ftpUploadPathController.text == '' ||
-        _ftpUploadPathController.text == '/') {
+
+    if (ftpUploadPath.isEmpty || ftpUploadPath == '/') {
       ftpUploadPath = 'None';
-    } else {
-      ftpUploadPath = _ftpUploadPathController.text;
-      if (!ftpUploadPath.endsWith('/')) {
-        ftpUploadPath = '$ftpUploadPath/';
-      }
+    } else if (!ftpUploadPath.endsWith('/')) {
+      ftpUploadPath = '$ftpUploadPath/';
     }
-    String ftpHomeDir = '';
-    if (_ftpHomeDirController.text.isEmpty || _ftpHomeDirController.text == '' || _ftpHomeDirController.text == '/') {
+    if (ftpHomeDir.isEmpty || ftpHomeDir == '/') {
       ftpHomeDir = 'None';
-    } else {
-      ftpHomeDir = _ftpHomeDirController.text;
-      if (!ftpHomeDir.endsWith('/')) {
-        ftpHomeDir = '$ftpHomeDir/';
-      }
+    } else if (!ftpHomeDir.endsWith('/')) {
+      ftpHomeDir = '$ftpHomeDir/';
     }
-    String ftpCustomUrl = '';
-    if (_ftpCustomUrlController.text.isEmpty || _ftpCustomUrlController.text == '') {
+    if (ftpCustomUrl.isEmpty) {
       ftpCustomUrl = 'None';
-    } else {
-      ftpCustomUrl = _ftpCustomUrlController.text;
     }
-    String ftpWebPath = '';
-    if (_ftpWebPathController.text.isEmpty || _ftpWebPathController.text == '' || _ftpWebPathController.text == '/') {
+    if (ftpWebPath.isEmpty || ftpWebPath == '/') {
       ftpWebPath = 'None';
-    } else {
-      ftpWebPath = _ftpWebPathController.text;
-      if (!ftpWebPath.endsWith('/')) {
-        ftpWebPath = '$ftpWebPath/';
-      }
+    } else if (!ftpWebPath.endsWith('/')) {
+      ftpWebPath = '$ftpWebPath/';
     }
-    final String isAnonymous = _ftpConfigMap['isAnonymous'].toString();
-    final String ftpType = _ftpConfigMap['ftpType'];
+    String isAnonymous = _ftpConfigMap['isAnonymous'].toString();
+    String ftpType = _ftpConfigMap['ftpType'];
 
     try {
       final ftpConfig = FTPConfigModel(ftpHost, ftpPort, ftpUser, ftpPassword, ftpType, isAnonymous, ftpUploadPath,
           ftpHomeDir, ftpCustomUrl, ftpWebPath);
       final ftpConfigJson = jsonEncode(ftpConfig);
-      final ftpConfigFile = await localFile;
+      final ftpConfigFile = await FTPManageAPI.localFile;
       await ftpConfigFile.writeAsString(ftpConfigJson);
       showToast('保存成功');
     } catch (e) {
@@ -432,16 +391,15 @@ class FTPConfigState extends State<FTPConfig> {
 
   checkFTPConfig() async {
     try {
-      String configData = await readFTPConfig();
+      Map configMap = await FTPManageAPI.getConfigMap();
 
-      if (configData == "") {
+      if (configMap.isEmpty) {
         if (context.mounted) {
           return showCupertinoAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");
         }
         return;
       }
 
-      Map configMap = jsonDecode(configData);
       String ftpHost = configMap['ftpHost'];
       String ftpPort = configMap['ftpPort'];
       String ftpUser = configMap['ftpUser'];
@@ -504,23 +462,6 @@ class FTPConfigState extends State<FTPConfig> {
         return showCupertinoAlertDialog(context: context, title: "检查失败!", content: e.toString());
       }
     }
-  }
-
-  Future<File> get localFile async {
-    final path = await _localPath;
-    String defaultUser = await Global.getUser();
-    return ensureFileExists(File('$path/${defaultUser}_ftp_config.txt'));
-  }
-
-  Future<String> get _localPath async {
-    final directory = await getApplicationDocumentsDirectory();
-    return directory.path;
-  }
-
-  Future<String> readFTPConfig() async {
-    final file = await localFile;
-    String contents = await file.readAsString();
-    return contents;
   }
 
   _setdefault() async {

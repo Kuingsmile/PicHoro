@@ -88,16 +88,16 @@ class EmptyDatabaseState extends State<EmptyDatabase> {
           );
         });
     ListTile alistEmpty = ListTile(
-        title: const Center(child: Text('Alist V3')),
+        title: const Center(child: Text('AList V3')),
         onTap: () async {
           showCupertinoAlertDialogWithConfirmFunc(
             title: '通知',
-            content: '是否确定清空Alist数据库？',
+            content: '是否确定清空AList数据库？',
             context: context,
             onConfirm: () async {
               Navigator.pop(context);
               await AlbumSQL.deleteTable(Global.imageDBExtend!, 'PBhostExtend3');
-              showToast('已清空Alist数据库');
+              showToast('已清空AList数据库');
               eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
             },
           );

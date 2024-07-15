@@ -805,7 +805,7 @@ class QiniuFileExplorerState extends loading_state.BaseLoadingPageState<QiniuFil
                           rawurl = '$domain/${allInfoList[i]['key']}';
                           fileName = allInfoList[i]['key'].substring(allInfoList[i]['key'].lastIndexOf('/') + 1);
                         }
-                        finalFormatedurl = linkGenerateDict[Global.defaultLKformat]!(rawurl, fileName);
+                        finalFormatedurl = linkGeneratorMap[Global.defaultLKformat]!(rawurl, fileName);
 
                         multiUrls.add(finalFormatedurl);
                       }
@@ -1514,7 +1514,7 @@ class QiniuFileExplorerState extends loading_state.BaseLoadingPageState<QiniuFil
               String shareUrl = '$domain/${allInfoList[index]['key']}';
 
               String filename = my_path.basename(allInfoList[index]['key']);
-              String formatedLink = linkGenerateDict[format]!(shareUrl, filename);
+              String formatedLink = linkGeneratorMap[format]!(shareUrl, filename);
               await flutter_services.Clipboard.setData(flutter_services.ClipboardData(text: formatedLink));
               if (mounted) {
                 Navigator.pop(context);

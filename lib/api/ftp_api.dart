@@ -7,7 +7,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 
 import 'package:horopic/utils/common_functions.dart';
-import 'package:horopic/utils/global.dart';
 
 class FTPImageUploadUtils {
   //上传接口
@@ -18,188 +17,194 @@ class FTPImageUploadUtils {
       String ftpPort = configMap["ftpPort"] ?? '';
       String ftpUser = configMap["ftpUser"] ?? '';
       String ftpPassword = configMap["ftpPassword"] ?? '';
-      String ftpType = configMap["ftpType"] ?? '';
-      String isAnonymous = configMap["isAnonymous"].toString();
-      String uploadPath = configMap["uploadPath"] ?? '';
-      String? ftpCustomUrl = configMap["ftpCustomUrl"] ?? '';
-      String? ftpWebPath = configMap["ftpWebPath"] ?? '';
-      if (ftpType == 'SFTP') {
-        final socket = await SSHSocket.connect(ftpHost, int.parse(ftpPort.toString()));
-        final client = SSHClient(
-          socket,
-          username: ftpUser,
-          onPasswordRequest: () {
-            return ftpPassword;
-          },
-        );
-        final sftp = await client.sftp();
-        if (uploadPath == 'None') {
-          uploadPath = '/';
-        }
-        uploadPath = '/${uploadPath.replaceAll(RegExp(r'^/*'), '').replaceAll(RegExp(r'/*$'), '')}/';
-        String urlPath = uploadPath + name;
-        var file = await sftp.open(urlPath, mode: SftpFileOpenMode.create | SftpFileOpenMode.write);
-        int fileSize = File(path).lengthSync();
-        bool operateDone = false;
-        file.write(File(path).openRead().cast(), onProgress: (int sent) {
-          if (sent == fileSize) {
-            operateDone = true;
-          }
-        });
-        while (!operateDone) {
-          await Future.delayed(const Duration(milliseconds: 100));
-        }
-        client.close();
-        String returnUrl = '';
-        String displayUrl = '';
-        if (ftpCustomUrl != null && ftpCustomUrl != 'None') {
-          ftpCustomUrl = ftpCustomUrl.replaceAll(RegExp(r'/$'), '');
-          if (ftpWebPath != null && ftpWebPath != 'None') {
-            ftpWebPath = ftpWebPath.replaceAll(RegExp(r'^/*'), '').replaceAll(RegExp(r'/*$'), '');
-            returnUrl = '$ftpCustomUrl/$ftpWebPath/$name';
-          } else {
-            urlPath = urlPath.replaceAll(RegExp(r'^/*'), '');
-            returnUrl = '$ftpCustomUrl/$urlPath';
-          }
-          displayUrl = returnUrl;
-        } else {
-          returnUrl = 'ftp://$ftpUser:$ftpPassword@$ftpHost:$ftpPort$urlPath';
-          displayUrl = returnUrl;
-        }
-        String pictureKey = jsonEncode(configMap);
-        if (Global.isCopyLink == true) {
-          formatedURL = linkGenerateDict[Global.defaultLKformat]!(displayUrl, name);
-        } else {
-          formatedURL = displayUrl;
-        }
-        var externalCacheDir = await getExternalCacheDirectories();
-        String cachePath = externalCacheDir![0].path;
-        String ftpCachePath = '$cachePath/ftp';
-        if (!await Directory(ftpCachePath).exists()) {
-          await Directory(ftpCachePath).create(recursive: true);
-        }
-        String randomString = randomStringGenerator(5);
-        String thumbnailFileName = 'FTP_${randomString}_$name';
-        var result = await FlutterImageCompress.compressAndGetFile(
-          path,
-          '$ftpCachePath/$thumbnailFileName',
-          quality: 50,
-          minWidth: 500,
-          minHeight: 500,
-        );
-        if (result == null) {
-          await File(path).copy('$ftpCachePath/$thumbnailFileName');
-        }
-
-        return [
-          'success',
-          formatedURL,
-          returnUrl,
-          pictureKey,
-          displayUrl,
-          ftpHost,
-          ftpPort,
-          ftpUser,
-          ftpPassword,
-          ftpType,
-          isAnonymous,
-          uploadPath,
-          '$ftpCachePath/$thumbnailFileName'
-        ];
-      } else if (ftpType == 'FTP') {
-        FTPConnect ftpConnect;
-        if (isAnonymous == 'true') {
-          ftpConnect = FTPConnect(ftpHost, port: int.parse(ftpPort), securityType: SecurityType.FTP);
-        } else {
-          ftpConnect = FTPConnect(ftpHost,
-              port: int.parse(ftpPort), user: ftpUser, pass: ftpPassword, securityType: SecurityType.FTP);
-        }
-
-        var connectResult = await ftpConnect.connect();
-        if (connectResult == true) {
+      String ftpType = configMap["ftpType"] ?? 'FTP';
+      String isAnonymous = (configMap["isAnonymous"] ?? 'false').toString();
+      String uploadPath = configMap["uploadPath"] ?? 'None';
+      String ftpCustomUrl = configMap["ftpCustomUrl"] ?? 'None';
+      String ftpWebPath = configMap["ftpWebPath"] ?? 'None';
+      switch (ftpType) {
+        case 'SFTP':
+          var socket = await SSHSocket.connect(ftpHost, int.parse(ftpPort.toString()));
+          var client = SSHClient(
+            socket,
+            username: ftpUser,
+            onPasswordRequest: () {
+              return ftpPassword;
+            },
+          );
+          var sftp = await client.sftp();
           if (uploadPath == 'None') {
             uploadPath = '/';
           }
-          if (!uploadPath.startsWith('/')) {
-            uploadPath = '/$uploadPath';
-          }
-          if (!uploadPath.endsWith('/')) {
-            uploadPath = '$uploadPath/';
-          }
+          uploadPath = '/${uploadPath.replaceAll(RegExp(r'^/*|/*$'), '')}/';
           String urlPath = uploadPath + name;
-          File fileToUpload = File(path);
-          await ftpConnect.sendCustomCommand('TYPE I');
-          await ftpConnect.changeDirectory(uploadPath);
-          bool res = await ftpConnect.uploadFile(
-            fileToUpload,
-            sRemoteName: name,
+          var file = await sftp.open(urlPath, mode: SftpFileOpenMode.create | SftpFileOpenMode.write);
+          int fileSize = File(path).lengthSync();
+          bool operateDone = false;
+          file.write(File(path).openRead().cast(), onProgress: (int sent) {
+            if (sent == fileSize) {
+              operateDone = true;
+            }
+          });
+          while (!operateDone) {
+            await Future.delayed(const Duration(milliseconds: 100));
+          }
+          client.close();
+          String returnUrl = '';
+          String displayUrl = '';
+          if (ftpCustomUrl != 'None') {
+            ftpCustomUrl = ftpCustomUrl.replaceAll(RegExp(r'/$'), '');
+            if (ftpWebPath != 'None') {
+              ftpWebPath = ftpWebPath.replaceAll(RegExp(r'^/*'), '').replaceAll(RegExp(r'/*$'), '');
+              returnUrl = '$ftpCustomUrl/$ftpWebPath/$name';
+            } else {
+              urlPath = urlPath.replaceAll(RegExp(r'^/*'), '');
+              returnUrl = '$ftpCustomUrl/$urlPath';
+            }
+            displayUrl = returnUrl;
+          } else {
+            returnUrl = 'ftp://$ftpUser:$ftpPassword@$ftpHost:$ftpPort$urlPath';
+            displayUrl = returnUrl;
+          }
+          String pictureKey = jsonEncode(configMap);
+          formatedURL = getFormatedUrl(displayUrl, name);
+
+          var externalCacheDir = await getExternalCacheDirectories();
+          String cachePath = externalCacheDir![0].path;
+          String ftpCachePath = '$cachePath/ftp';
+          if (!await Directory(ftpCachePath).exists()) {
+            await Directory(ftpCachePath).create(recursive: true);
+          }
+          String randomString = randomStringGenerator(5);
+          String thumbnailFileName = 'FTP_${randomString}_$name';
+          var result = await FlutterImageCompress.compressAndGetFile(
+            path,
+            '$ftpCachePath/$thumbnailFileName',
+            quality: 50,
+            minWidth: 500,
+            minHeight: 500,
           );
-          if (res == true) {
-            String returnUrl = '';
-            String displayUrl = '';
-            if (ftpCustomUrl != null && ftpCustomUrl != 'None') {
-              ftpCustomUrl = ftpCustomUrl.replaceAll(RegExp(r'/$'), '');
-              if (ftpWebPath != null && ftpWebPath != 'None') {
-                ftpWebPath = ftpWebPath.replaceAll(RegExp(r'^/*'), '').replaceAll(RegExp(r'/*$'), '');
-                returnUrl = '$ftpCustomUrl/$ftpWebPath/$name';
-              } else {
-                urlPath = urlPath.replaceAll(RegExp(r'^/*'), '');
-                returnUrl = '$ftpCustomUrl/$urlPath';
-              }
-              displayUrl = returnUrl;
-            } else {
-              if (isAnonymous == 'true') {
-                returnUrl = 'ftp://$ftpHost:$ftpPort$urlPath';
-              } else if (ftpPassword == 'None') {
-                returnUrl = 'ftp://$ftpUser@$ftpHost:$ftpPort$urlPath';
-              } else {
-                returnUrl = 'ftp://$ftpUser:$ftpPassword@$ftpHost:$ftpPort$urlPath';
-              }
-              displayUrl = returnUrl;
-            }
+          if (result == null) {
+            await File(path).copy('$ftpCachePath/$thumbnailFileName');
+          }
 
-            String pictureKey = jsonEncode(configMap);
-            if (Global.isCopyLink == true) {
-              formatedURL = linkGenerateDict[Global.defaultLKformat]!(displayUrl, name);
-            } else {
-              formatedURL = displayUrl;
+          return [
+            'success',
+            formatedURL,
+            returnUrl,
+            pictureKey,
+            displayUrl,
+            ftpHost,
+            ftpPort,
+            ftpUser,
+            ftpPassword,
+            ftpType,
+            isAnonymous,
+            uploadPath,
+            '$ftpCachePath/$thumbnailFileName'
+          ];
+        case 'FTP':
+          FTPConnect ftpConnect;
+          if (isAnonymous == 'true') {
+            ftpConnect = FTPConnect(ftpHost, port: int.parse(ftpPort), securityType: SecurityType.FTP);
+          } else {
+            ftpConnect = FTPConnect(ftpHost,
+                port: int.parse(ftpPort), user: ftpUser, pass: ftpPassword, securityType: SecurityType.FTP);
+          }
+
+          var connectResult = await ftpConnect.connect();
+          if (connectResult == true) {
+            if (uploadPath == 'None') {
+              uploadPath = '/';
             }
-            ftpConnect.disconnect();
-            var externalCacheDir = await getExternalCacheDirectories();
-            String cachePath = externalCacheDir![0].path;
-            String ftpCachePath = '$cachePath/ftp';
-            if (!await Directory(ftpCachePath).exists()) {
-              await Directory(ftpCachePath).create(recursive: true);
+            if (!uploadPath.startsWith('/')) {
+              uploadPath = '/$uploadPath';
             }
-            String randomString = randomStringGenerator(5);
-            String thumbnailFileName = 'FTP_${randomString}_$name';
-            var result = await FlutterImageCompress.compressAndGetFile(
-              path,
-              '$ftpCachePath/$thumbnailFileName',
-              quality: 50,
-              minWidth: 500,
-              minHeight: 500,
+            if (!uploadPath.endsWith('/')) {
+              uploadPath = '$uploadPath/';
+            }
+            String urlPath = uploadPath + name;
+            File fileToUpload = File(path);
+            await ftpConnect.sendCustomCommand('TYPE I');
+            await ftpConnect.changeDirectory(uploadPath);
+            bool res = await ftpConnect.uploadFile(
+              fileToUpload,
+              sRemoteName: name,
             );
-            if (result == null) {
-              //copy raw file
-              await File(path).copy('$ftpCachePath/$thumbnailFileName');
-            }
+            if (res == true) {
+              String returnUrl = '';
+              String displayUrl = '';
+              if (ftpCustomUrl != 'None') {
+                ftpCustomUrl = ftpCustomUrl.replaceAll(RegExp(r'/$'), '');
+                if (ftpWebPath != 'None') {
+                  ftpWebPath = ftpWebPath.replaceAll(RegExp(r'^/*|/*$'), '');
+                  returnUrl = '$ftpCustomUrl/$ftpWebPath/$name';
+                } else {
+                  urlPath = urlPath.replaceAll(RegExp(r'^/*'), '');
+                  returnUrl = '$ftpCustomUrl/$urlPath';
+                }
+                displayUrl = returnUrl;
+              } else {
+                if (isAnonymous == 'true') {
+                  returnUrl = 'ftp://$ftpHost:$ftpPort$urlPath';
+                } else if (ftpPassword == 'None') {
+                  returnUrl = 'ftp://$ftpUser@$ftpHost:$ftpPort$urlPath';
+                } else {
+                  returnUrl = 'ftp://$ftpUser:$ftpPassword@$ftpHost:$ftpPort$urlPath';
+                }
+                displayUrl = returnUrl;
+              }
 
-            return [
-              'success',
-              formatedURL,
-              returnUrl,
-              pictureKey,
-              displayUrl,
-              ftpHost,
-              ftpPort,
-              ftpUser,
-              ftpPassword,
-              ftpType,
-              isAnonymous,
-              uploadPath,
-              '$ftpCachePath/$thumbnailFileName'
-            ];
+              String pictureKey = jsonEncode(configMap);
+              formatedURL = getFormatedUrl(displayUrl, name);
+
+              ftpConnect.disconnect();
+              var externalCacheDir = await getExternalCacheDirectories();
+              String cachePath = externalCacheDir![0].path;
+              String ftpCachePath = '$cachePath/ftp';
+              if (!await Directory(ftpCachePath).exists()) {
+                await Directory(ftpCachePath).create(recursive: true);
+              }
+              String randomString = randomStringGenerator(5);
+              String thumbnailFileName = 'FTP_${randomString}_$name';
+              var result = await FlutterImageCompress.compressAndGetFile(
+                path,
+                '$ftpCachePath/$thumbnailFileName',
+                quality: 50,
+                minWidth: 500,
+                minHeight: 500,
+              );
+              if (result == null) {
+                //copy raw file
+                await File(path).copy('$ftpCachePath/$thumbnailFileName');
+              }
+
+              return [
+                'success',
+                formatedURL,
+                returnUrl,
+                pictureKey,
+                displayUrl,
+                ftpHost,
+                ftpPort,
+                ftpUser,
+                ftpPassword,
+                ftpType,
+                isAnonymous,
+                uploadPath,
+                '$ftpCachePath/$thumbnailFileName'
+              ];
+            } else {
+              FLog.error(
+                  className: "FTPImageUploadUtils",
+                  methodName: "uploadApiFTP",
+                  text: formatErrorMessage({
+                    'path': path,
+                    'name': name,
+                  }, 'upload failed'),
+                  dataLogType: DataLogType.ERRORS.toString());
+              return ['failed'];
+            }
           } else {
             FLog.error(
                 className: "FTPImageUploadUtils",
@@ -207,21 +212,10 @@ class FTPImageUploadUtils {
                 text: formatErrorMessage({
                   'path': path,
                   'name': name,
-                }, 'upload failed'),
+                }, 'connect failed'),
                 dataLogType: DataLogType.ERRORS.toString());
             return ['failed'];
           }
-        } else {
-          FLog.error(
-              className: "FTPImageUploadUtils",
-              methodName: "uploadApiFTP",
-              text: formatErrorMessage({
-                'path': path,
-                'name': name,
-              }, 'connect failed'),
-              dataLogType: DataLogType.ERRORS.toString());
-          return ['failed'];
-        }
       }
     } catch (e) {
       FLog.error(
