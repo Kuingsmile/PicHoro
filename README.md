@@ -6,7 +6,7 @@
   </a>
 </div>
 
-&emsp;&emsp;一款基于flutter的手机端云存储平台/图床管理和文件上传/下载工具，最新版本**V2.3.0**，与PicGo配置互通，可直接扫码导入，主要功能包括云存储/图床/云服务器平台,以及网盘管理（通过[Alist](https://alist.nn.ci/zh/))，文件上传和下载管理，以及各种格式的链接分享。
+&emsp;&emsp;一款基于flutter的手机端云存储平台/图床管理和文件上传/下载工具，最新版本**V2.4.0**，与PicGo配置互通，可直接扫码导入，主要功能包括云存储/图床/云服务器平台,以及网盘管理（通过[Alist](https://alist.nn.ci/zh/))，文件上传和下载管理，以及各种格式的链接分享。
 
 &emsp;&emsp;支持多种图片/PDF/文本文件/音视频的在线预览和播放，具体支持的格式请查看[支持的格式列表](https://github.com/Kuingsmile/PicHoro/blob/main/supported_format.md "支持的格式列表")
 
@@ -72,7 +72,7 @@
 
 Github下载地址 [Github release](https://github.com/Kuingsmile/PicHoro/releases)
 
-我的个人网站提供的最新版本下载地址 [https://pichoro.msq.pub/PicHoro_V2.3.0.apk](https://pichoro.msq.pub/PicHoro_V2.3.0.apk)
+我的个人网站提供的最新版本下载地址 [https://pichoro.msq.pub/PicHoro_V2.4.0.apk](https://pichoro.msq.pub/PicHoro_V2.4.0.apk)
 
 ### IOS
 
@@ -109,6 +109,29 @@ Github下载地址 [Github release](https://github.com/Kuingsmile/PicHoro/releas
 
   详细更新日志请查看[更新日志](https://github.com/Kuingsmile/PicHoro/blob/main/Version_update_log.md "更新日志")
 
+## 2024-07-19 **V2.4.0**
+
+- 新增：与AList 3.35版本保持同步
+- 新增：`alist`图床现在支持设置管理员token
+- 新增：`sm.ms`图床上传重复图片时，后上传的图片现在不会判定为失败
+- 新增：S3兼容平台现在支持带端口号的endpoint
+- 新增：S3兼容平台现在支持设置是否启用SSL连接和S3 path style
+- 新增：优化了图床导入，现在支持导入PicList内置AList、兰空图床、ftp图床、WebDAV图床，以及alist图床插件配置
+- 新增：优化了对文件mime类型的判断，现在兼容更多文件类型同时默认使用`application/octet-stream`
+- 新增：现在重命名占位符`{m}`和`{d}`固定为两位数字，如`01`,`02`
+- 新增：现在重命名占位符支持`{h}`(小时),`{i}`(分钟),`{s}`(秒),`{ms}`(毫秒),`{str-num}`,其中num为任意数字
+- 新增：默认自定义重命名格式修改为`{Y}{m}{d}{h}{i}{ms}`，与PicGo时间戳重命名格式一致
+- 新增：默认自定义链接格式修改为`![$fileName]($url)`
+- 新增：设置图床配置时现在会自动去除开头和结尾多余的空格
+
+- 修复：alist备用设置中无法设置网址路径的问题
+- 修复：alist设置了网址路径时返回的地址多了一个'/'的问题
+- 修复：alist返回的链接是平台直链而不是alist专用网址的问题
+- 修复：特定情况下`ftp`图床返回链接错误的问题
+- 修复：ftp图床设置页面打开错误的问题
+- 修复：导入`imgur`配置时错误保存到`smms`的问题
+- 修复：关闭自动复制链接后仍然会复制到剪贴板的问题
+
 ## 2024-04-13 **V2.3.0**
 
 - 新增：优化了smms图床的配置检查速度
@@ -116,12 +139,6 @@ Github下载地址 [Github release](https://github.com/Kuingsmile/PicHoro/releas
 - 新增：现在允许s3图床桶名含有大写字母
 - 修复：修复了github图床自定义域名以多个`/`结尾时，返回路径错误的问题
 - 修复：修复了图片链接格式设置为BBcode时上传报错的问题
-
-## 2024-02-21 **V2.2.4**
-
-- 新增：七牛云新增 `亚太-河内`区域支持
-- 新增：优化了github用户名的判断逻辑
-- 修复：修复了七牛云检查配置时，即使配置正确也会提示错误的问题
 
 ## 开发交流
 
