@@ -48,9 +48,8 @@ Future<File> get _localFile async {
 //读取图床配置文件
 Future<String> readHostConfig() async {
   try {
-    final file = await _localFile;
-    String contents = await file.readAsString();
-    return contents;
+    File file = await _localFile;
+    return await file.readAsString();
   } catch (e) {
     flogErr(
       e,
@@ -63,14 +62,13 @@ Future<String> readHostConfig() async {
 }
 
 deleterentry(Map deleteConfig) async {
-  String configData = await readHostConfig();
-  if (configData == 'Error') {
-    return ["Error"];
-  }
-  Map configMap = jsonDecode(configData);
-
-  String defaultConfig = await Global.getShowedPBhost();
   try {
+    String configData = await readHostConfig();
+    if (configData == 'Error') {
+      return ["Error"];
+    }
+    Map configMap = jsonDecode(configData);
+    String defaultConfig = await Global.getShowedPBhost();
     return await deleteFunc[defaultConfig]!(deleteMap: deleteConfig, configMap: configMap);
   } catch (e) {
     flogErr(

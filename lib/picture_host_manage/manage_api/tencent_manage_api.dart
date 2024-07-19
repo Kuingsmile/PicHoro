@@ -41,7 +41,7 @@ class TencentManageAPI {
   };
 
   static Future<File> get localFile async {
-    final path = await _localPath;
+    String path = await _localPath;
     String defaultUser = await Global.getUser();
     return ensureFileExists(File('$path/${defaultUser}_tencent_config.txt'));
   }
@@ -54,8 +54,7 @@ class TencentManageAPI {
   static Future<String> readTencentConfig() async {
     try {
       final file = await localFile;
-      String contents = await file.readAsString();
-      return contents;
+      return await file.readAsString();
     } catch (e) {
       FLog.error(
           className: "TencentManageAPI",

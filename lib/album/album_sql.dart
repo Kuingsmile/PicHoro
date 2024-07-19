@@ -25,7 +25,7 @@ List<String> allPBhost = [
 List<String> allPBhostExtend = [for (int i = 1; i <= 50; i++) 'PBhostExtend$i'];
 
 /// 重要，默认上传图床名和数据库表名对应关系
-Map<String, String> pBhostToTableName = {
+Map<String, String> hostToTableNameMap = {
   "lsky.pro": "lskypro",
   "sm.ms": "smms",
   'github': 'github',

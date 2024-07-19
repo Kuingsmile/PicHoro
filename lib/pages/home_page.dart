@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:image_picker/image_picker.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 import 'package:flutter/services.dart' as flutter_services;
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
@@ -47,7 +46,11 @@ class HomePage extends StatefulWidget {
 
 class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<HomePage> {
   final ImagePicker _picker = ImagePicker();
+
+  /// 剪贴板图片链接
   List clipboardList = [];
+
+  /// 上传列表
   List uploadList = [];
   List<String> uploadPathList = [];
   List<String> uploadFileNameList = [];
@@ -96,7 +99,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
         File imageFile = await toFile(imageList[i]);
         String imagePath = imageFile.path;
         if (imagePath.isNotEmpty) {
-          if (Global.iscustomRename == true) {
+          if (Global.isCustomRename == true) {
             Global.imageFile = await renamePictureWithCustomFormat(imageFile);
           } else if (Global.isTimeStamp == true) {
             Global.imageFile = await renamePictureWithTimestamp(imageFile);
@@ -173,10 +176,8 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
               switch (task.status.value) {
                 case UploadStatus.uploading:
                   await uploadManager.pauseUpload(path, fileName);
-                  break;
                 case UploadStatus.paused:
                   await uploadManager.resumeUpload(path, fileName);
-                  break;
                 default:
                   break;
               }
@@ -261,7 +262,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
     Global.imagesFileList.clear();
 
     //图片重命名
-    if (Global.iscustomRename == true) {
+    if (Global.isCustomRename == true) {
       Global.imageFile = await renamePictureWithCustomFormat(fileImage);
     } else if (Global.isTimeStamp == true) {
       Global.imageFile = renamePictureWithTimestamp(fileImage);
@@ -312,7 +313,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
           Global.imageFile = file.path;
 
           //图片重命名
-          if (Global.iscustomRename == true) {
+          if (Global.isCustomRename == true) {
             Global.imageFile = await renamePictureWithCustomFormat(file);
           } else if (Global.isTimeStamp == true) {
             Global.imageFile = await renamePictureWithTimestamp(file);
@@ -362,12 +363,12 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
     }
   }
 
-  _cameraAndBack() async {
+  _captureAndGoBack() async {
     XFile? pickedImage = await _picker.pickImage(source: ImageSource.camera, imageQuality: 100);
     if (pickedImage == null) {
       if (Global.isCopyLink == true) {
         if (clipboardList.isEmpty) {
-          return showToast('未选择图片');
+          return showToast('未拍摄图片');
         }
         if (clipboardList.length == 1) {
           await flutter_services.Clipboard.setData(flutter_services.ClipboardData(text: clipboardList[0]));
@@ -381,12 +382,12 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
         }
         clipboardList.clear();
       }
-      return showToast('链接已复制');
+      return showToast('上传完成');
     }
 
     File fileImage = File(pickedImage.path);
 
-    if (Global.iscustomRename == true) {
+    if (Global.isCustomRename == true) {
       Global.imageFile = await renamePictureWithCustomFormat(fileImage);
     } else if (Global.isTimeStamp == true) {
       Global.imageFile = await renamePictureWithTimestamp(fileImage);
@@ -397,7 +398,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
     }
     Global.imageOriginalFile = fileImage;
 
-    _uploadAndBackToCamera();
+    _processUploadAndReturnToCamera();
     if (Global.multiUpload == 'fail') {
       if (Global.isCopyLink == true) {
         if (clipboardList.length == 1) {
@@ -414,31 +415,13 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
       }
       return true;
     }
-    _cameraAndBack();
+    _captureAndGoBack();
   }
 
-  _uploadAndBackToCamera() async {
-    File compressedFile;
-    if (Global.isCompress == true) {
-      ImageCompress imageCompress = ImageCompress();
-      compressedFile = await imageCompress.compressAndGetFile(
-          Global.imageOriginalFile!.path, my_path.basename(Global.imageFile!), Global.defaultCompressFormat,
-          minHeight: Global.minHeight, minWidth: Global.minWidth, quality: Global.quality);
-    } else {
-      compressedFile = Global.imageOriginalFile!;
-    }
-    Global.imageOriginalFile = compressedFile;
-    String path = Global.imageOriginalFile!.path;
-    String fullName = Global.imageFile!;
-    Global.imageFile = null;
-    Global.imageOriginalFile = null;
-
-    var uploadResult = await uploaderentry(path: path, name: fullName);
-
-    if (uploadResult[0] == "success") {
-      eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-      Map<String, dynamic> maps = {};
-      if (Global.defaultPShost == 'sm.ms') {
+  Map<String, dynamic> getUploadResultMap(String path, String fullName, List uploadResult) {
+    Map<String, dynamic> maps = {};
+    switch (Global.defaultPShost) {
+      case 'sm.ms':
         //["success", formatedURL, returnUrl, pictureKey]
         maps = {
           'path': path,
@@ -452,63 +435,13 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
           'hostSpecificArgD': 'test',
           'hostSpecificArgE': 'test',
         };
-      } else if (Global.defaultPShost == 'lsky.pro') {
-        //["success", formatedURL, returnUrl, pictureKey, displayUrl]
-        maps = {
-          'path': path,
-          'name': fullName,
-          'url': uploadResult[2], //原图地址
-          'PBhost': Global.defaultPShost,
-          'pictureKey': uploadResult[3],
-          'hostSpecificArgA': uploadResult[4], //实际展示的是缩略图
-          'hostSpecificArgB': 'test',
-          'hostSpecificArgC': 'test',
-          'hostSpecificArgD': 'test',
-          'hostSpecificArgE': 'test',
-        };
-      } else if (Global.defaultPShost == 'github') {
-        //["success", formatedURL, returnUrl, pictureKey, downloadUrl]
-        maps = {
-          'path': path,
-          'name': fullName,
-          'url': uploadResult[2], //github文件原始地址
-          'PBhost': Global.defaultPShost,
-          'pictureKey': uploadResult[3],
-          'hostSpecificArgA': uploadResult[4], //实际展示的是github download url或者自定义域名+路径
-          'hostSpecificArgB': 'test',
-          'hostSpecificArgC': 'test',
-          'hostSpecificArgD': 'test',
-          'hostSpecificArgE': 'test',
-        };
-      } else if (Global.defaultPShost == 'imgur') {
-        // ["success", formatedURL, returnUrl, pictureKey,cdnUrl]
-        maps = {
-          'path': path,
-          'name': fullName,
-          'url': uploadResult[2], //imgur文件原始地址
-          'PBhost': Global.defaultPShost,
-          'pictureKey': uploadResult[3],
-          'hostSpecificArgA': uploadResult[4], //实际展示的是imgur cdn url
-          'hostSpecificArgB': 'test',
-          'hostSpecificArgC': 'test',
-          'hostSpecificArgD': 'test',
-          'hostSpecificArgE': 'test',
-        };
-      } else if (Global.defaultPShost == 'qiniu') {
-        // ["success", formatedURL, returnUrl, pictureKey,displayUrl]
-        maps = {
-          'path': path,
-          'name': fullName,
-          'url': uploadResult[2], //qiniu文件原始地址
-          'PBhost': Global.defaultPShost,
-          'pictureKey': uploadResult[3],
-          'hostSpecificArgA': uploadResult[4], //实际展示的是displayUrl
-          'hostSpecificArgB': 'test',
-          'hostSpecificArgC': 'test',
-          'hostSpecificArgD': 'test',
-          'hostSpecificArgE': 'test',
-        };
-      } else if (Global.defaultPShost == 'tencent') {
+      case 'lsky.pro':
+      case 'github':
+      case 'imgur':
+      case 'qiniu':
+      case 'tencent':
+      case 'aliyun':
+      case 'upyun':
         // ["success", formatedURL, returnUrl, pictureKey,displayUrl]
         maps = {
           'path': path,
@@ -522,35 +455,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
           'hostSpecificArgD': 'test',
           'hostSpecificArgE': 'test',
         };
-      } else if (Global.defaultPShost == 'aliyun') {
-        // ["success", formatedURL, returnUrl, pictureKey,displayUrl]
-        maps = {
-          'path': path,
-          'name': fullName,
-          'url': uploadResult[2], //aliyun文件原始地址
-          'PBhost': Global.defaultPShost,
-          'pictureKey': uploadResult[3],
-          'hostSpecificArgA': uploadResult[4], //实际展示的是displayUrl
-          'hostSpecificArgB': 'test',
-          'hostSpecificArgC': 'test',
-          'hostSpecificArgD': 'test',
-          'hostSpecificArgE': 'test',
-        };
-      } else if (Global.defaultPShost == 'upyun') {
-        // ["success", formatedURL, returnUrl, pictureKey,displayUrl]
-        maps = {
-          'path': path,
-          'name': fullName,
-          'url': uploadResult[2], //upyun文件原始地址
-          'PBhost': Global.defaultPShost,
-          'pictureKey': uploadResult[3],
-          'hostSpecificArgA': uploadResult[4], //实际展示的是displayUrl
-          'hostSpecificArgB': 'test',
-          'hostSpecificArgC': 'test',
-          'hostSpecificArgD': 'test',
-          'hostSpecificArgE': 'test',
-        };
-      } else if (Global.defaultPShost == 'ftp') {
+      case 'ftp':
         // ["success", formatedURL, returnUrl, pictureKey,displayUrl]
         maps = {
           'path': path,
@@ -572,7 +477,8 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
         for (int i = 0; i < letter.length; i++) {
           maps['hostSpecificArg${letter[i]}'] = 'test';
         }
-      } else if (Global.defaultPShost == 'aws') {
+      case 'aws':
+      case 'webdav':
         // ["success", formatedURL, returnUrl, pictureKey,displayUrl]
         maps = {
           'path': path,
@@ -586,7 +492,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
         for (int i = 0; i < letter.length; i++) {
           maps['hostSpecificArg${letter[i]}'] = 'test';
         }
-      } else if (Global.defaultPShost == 'alist') {
+      case 'alist':
         // ["success", formatedURL, returnUrl, pictureKey, displayUrl,hostPicUrl]
         maps = {
           'path': path,
@@ -601,34 +507,42 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
         for (int i = 0; i < letter.length; i++) {
           maps['hostSpecificArg${letter[i]}'] = 'test';
         }
-      } else if (Global.defaultPShost == 'webdav') {
-        // ["success", formatedURL, returnUrl, pictureKey, displayUrl]
-        maps = {
-          'path': path,
-          'name': fullName,
-          'url': uploadResult[2], //alist文件原始地址
-          'PBhost': Global.defaultPShost,
-          'pictureKey': uploadResult[3],
-          'hostSpecificArgA': uploadResult[4], //实际展示的是displayUrl
-        };
-        List letter = 'BCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-        for (int i = 0; i < letter.length; i++) {
-          maps['hostSpecificArg${letter[i]}'] = 'test';
-        }
-      }
+    }
+    return maps;
+  }
 
+  _processUploadAndReturnToCamera() async {
+    File compressedFile;
+    if (Global.isCompress == true) {
+      ImageCompress imageCompress = ImageCompress();
+      compressedFile = await imageCompress.compressAndGetFile(
+          Global.imageOriginalFile!.path, my_path.basename(Global.imageFile!), Global.defaultCompressFormat,
+          minHeight: Global.minHeight, minWidth: Global.minWidth, quality: Global.quality);
+    } else {
+      compressedFile = Global.imageOriginalFile!;
+    }
+    String path = compressedFile.path;
+    String fullName = Global.imageFile!;
+    Global.imageFile = null;
+    Global.imageOriginalFile = null;
+
+    var uploadResult = await uploaderentry(path: path, name: fullName);
+
+    if (uploadResult[0] == "success") {
+      eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
+      Map<String, dynamic> maps = getUploadResultMap(path, fullName, uploadResult);
       if (Global.defaultPShost == 'ftp' ||
           Global.defaultPShost == 'aws' ||
           Global.defaultPShost == 'alist' ||
           Global.defaultPShost == 'webdav') {
-        await AlbumSQL.insertData(Global.imageDBExtend!, pBhostToTableName[Global.defaultPShost]!, maps);
+        await AlbumSQL.insertData(Global.imageDBExtend!, hostToTableNameMap[Global.defaultPShost]!, maps);
       } else {
-        await AlbumSQL.insertData(Global.imageDB!, pBhostToTableName[Global.defaultPShost]!, maps);
+        await AlbumSQL.insertData(Global.imageDB!, hostToTableNameMap[Global.defaultPShost]!, maps);
       }
 
-      clipboardList.add(uploadResult[1]); //这里是formatedURL,应该是可以直接访问的地址
+      clipboardList.add(uploadResult[1]); //这里是formatedURL, 用来复制到剪贴板
       Global.multiUpload = 'success';
-      return true;
+      return;
     } else {
       Global.multiUpload = 'fail';
       if (context.mounted) {
@@ -653,7 +567,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
     for (var i = 0; i < pickedImage.length; i++) {
       File? fileImage = await pickedImage[i].originFile;
 
-      if (Global.iscustomRename == true) {
+      if (Global.isCustomRename == true) {
         Global.imageFile = await renamePictureWithCustomFormat(fileImage!);
       } else if (Global.isTimeStamp == true) {
         Global.imageFile = await renamePictureWithTimestamp(fileImage!);
@@ -694,190 +608,14 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
       if (uploadResult[0] == "success") {
         successCount++;
         successList.add(Global.imagesList[i]);
-        Map<String, dynamic> maps = {};
-        if (Global.defaultPShost == 'sm.ms') {
-          maps = {
-            'path': path,
-            'name': Global.imagesList[i],
-            'url': uploadResult[2],
-            'PBhost': Global.defaultPShost,
-            'pictureKey': uploadResult[3],
-            'hostSpecificArgA': 'test',
-            'hostSpecificArgB': 'test',
-            'hostSpecificArgC': 'test',
-            'hostSpecificArgD': 'test',
-            'hostSpecificArgE': 'test',
-          };
-        } else if (Global.defaultPShost == 'lsky.pro') {
-          //["success", formatedURL, returnUrl, pictureKey, displayUrl]
-          maps = {
-            'path': path,
-            'name': Global.imagesList[i],
-            'url': uploadResult[2], //原图地址
-            'PBhost': Global.defaultPShost,
-            'pictureKey': uploadResult[3],
-            'hostSpecificArgA': uploadResult[4], //实际展示的是缩略图
-            'hostSpecificArgB': 'test',
-            'hostSpecificArgC': 'test',
-            'hostSpecificArgD': 'test',
-            'hostSpecificArgE': 'test',
-          };
-        } else if (Global.defaultPShost == 'github') {
-          maps = {
-            'path': path,
-            'name': Global.imagesList[i],
-            'url': uploadResult[2],
-            'PBhost': Global.defaultPShost,
-            'pictureKey': uploadResult[3],
-            'hostSpecificArgA': uploadResult[4], //github download url或者自定义域名+路径
-            'hostSpecificArgB': 'test',
-            'hostSpecificArgC': 'test',
-            'hostSpecificArgD': 'test',
-            'hostSpecificArgE': 'test',
-          };
-        } else if (Global.defaultPShost == 'imgur') {
-          // ["success", formatedURL, returnUrl, pictureKey,cdnUrl]
-          maps = {
-            'path': path,
-            'name': Global.imagesList[i],
-            'url': uploadResult[2], //imgur文件原始地址
-            'PBhost': Global.defaultPShost,
-            'pictureKey': uploadResult[3],
-            'hostSpecificArgA': uploadResult[4], //实际展示的是imgur cdn url
-            'hostSpecificArgB': 'test',
-            'hostSpecificArgC': 'test',
-            'hostSpecificArgD': 'test',
-            'hostSpecificArgE': 'test',
-          };
-        } else if (Global.defaultPShost == 'qiniu') {
-          // ["success", formatedURL, returnUrl, pictureKey,displayUrl]
-          maps = {
-            'path': path,
-            'name': Global.imagesList[i],
-            'url': uploadResult[2], //qiniu文件原始地址
-            'PBhost': Global.defaultPShost,
-            'pictureKey': uploadResult[3],
-            'hostSpecificArgA': uploadResult[4], //实际展示的是displayUrl
-            'hostSpecificArgB': 'test',
-            'hostSpecificArgC': 'test',
-            'hostSpecificArgD': 'test',
-            'hostSpecificArgE': 'test',
-          };
-        } else if (Global.defaultPShost == 'tencent') {
-          // ["success", formatedURL, returnUrl, pictureKey,displayUrl]
-          maps = {
-            'path': path,
-            'name': Global.imagesList[i],
-            'url': uploadResult[2], //tencent文件原始地址
-            'PBhost': Global.defaultPShost,
-            'pictureKey': uploadResult[3],
-            'hostSpecificArgA': uploadResult[4], //实际展示的是displayUrl
-            'hostSpecificArgB': 'test',
-            'hostSpecificArgC': 'test',
-            'hostSpecificArgD': 'test',
-            'hostSpecificArgE': 'test',
-          };
-        } else if (Global.defaultPShost == 'aliyun') {
-          // ["success", formatedURL, returnUrl, pictureKey,displayUrl]
-          maps = {
-            'path': path,
-            'name': Global.imagesList[i],
-            'url': uploadResult[2], //aliyun文件原始地址
-            'PBhost': Global.defaultPShost,
-            'pictureKey': uploadResult[3],
-            'hostSpecificArgA': uploadResult[4], //实际展示的是displayUrl
-            'hostSpecificArgB': 'test',
-            'hostSpecificArgC': 'test',
-            'hostSpecificArgD': 'test',
-            'hostSpecificArgE': 'test',
-          };
-        } else if (Global.defaultPShost == 'upyun') {
-          // ["success", formatedURL, returnUrl, pictureKey,displayUrl]
-          maps = {
-            'path': path,
-            'name': Global.imagesList[i],
-            'url': uploadResult[2], //upyun文件原始地址
-            'PBhost': Global.defaultPShost,
-            'pictureKey': uploadResult[3],
-            'hostSpecificArgA': uploadResult[4], //实际展示的是displayUrl
-            'hostSpecificArgB': 'test',
-            'hostSpecificArgC': 'test',
-            'hostSpecificArgD': 'test',
-            'hostSpecificArgE': 'test',
-          };
-        } else if (Global.defaultPShost == 'ftp') {
-          maps = {
-            'path': path,
-            'name': Global.imagesList[i],
-            'url': uploadResult[2], //ftp文件原始地址
-            'PBhost': Global.defaultPShost,
-            'pictureKey': uploadResult[3],
-            'hostSpecificArgA': uploadResult[4], //实际展示的是displayUrl
-            'hostSpecificArgB': uploadResult[5], //ftp自定义域名
-            'hostSpecificArgC': uploadResult[6], //ftp端口
-            'hostSpecificArgD': uploadResult[7], //ftp用户名
-            'hostSpecificArgE': uploadResult[8], //ftp密码
-            'hostSpecificArgF': uploadResult[9], //ftp类型
-            'hostSpecificArgG': uploadResult[10], //ftp是否匿名
-            'hostSpecificArgH': uploadResult[11], //ftp路径
-            'hostSpecificArgI': uploadResult[12], //缩略图路径
-          };
-          List letter = 'JKLMNOPQRSTUVWXYZ'.split('');
-          for (int i = 0; i < letter.length; i++) {
-            maps['hostSpecificArg${letter[i]}'] = 'test';
-          }
-        } else if (Global.defaultPShost == 'aws') {
-          // ["success", formatedURL, returnUrl, pictureKey,displayUrl]
-          maps = {
-            'path': path,
-            'name': Global.imagesList[i],
-            'url': uploadResult[2], //aws文件原始地址
-            'PBhost': Global.defaultPShost,
-            'pictureKey': uploadResult[3],
-            'hostSpecificArgA': uploadResult[4], //实际展示的是displayUrl
-          };
-          List letter = 'BCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-          for (int i = 0; i < letter.length; i++) {
-            maps['hostSpecificArg${letter[i]}'] = 'test';
-          }
-        } else if (Global.defaultPShost == 'alist') {
-          // ["success", formatedURL, returnUrl, pictureKey, displayUrl,hostPicUrl]
-          maps = {
-            'path': path,
-            'name': Global.imagesList[i],
-            'url': uploadResult[2], //alist文件原始地址
-            'PBhost': Global.defaultPShost,
-            'pictureKey': uploadResult[3],
-            'hostSpecificArgA': uploadResult[4], //实际展示的是displayUrl
-            'hostSpecificArgB': uploadResult[5], //源站地址，访问后会302跳转到returnUrl
-          };
-          List letter = 'CDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-          for (int i = 0; i < letter.length; i++) {
-            maps['hostSpecificArg${letter[i]}'] = 'test';
-          }
-        } else if (Global.defaultPShost == 'webdav') {
-          // ["success", formatedURL, returnUrl, pictureKey, displayUrl]
-          maps = {
-            'path': path,
-            'name': Global.imagesList[i],
-            'url': uploadResult[2], //alist文件原始地址
-            'PBhost': Global.defaultPShost,
-            'pictureKey': uploadResult[3],
-            'hostSpecificArgA': uploadResult[4], //实际展示的是displayUrl
-          };
-          List letter = 'BCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-          for (int i = 0; i < letter.length; i++) {
-            maps['hostSpecificArg${letter[i]}'] = 'test';
-          }
-        }
-
+        Map<String, dynamic> maps = getUploadResultMap(path, Global.imagesList[i], uploadResult);
         if (Global.defaultPShost == 'ftp' ||
             Global.defaultPShost == 'aws' ||
             Global.defaultPShost == 'alist' ||
             Global.defaultPShost == 'webdav') {
-          await AlbumSQL.insertData(Global.imageDBExtend!, pBhostToTableName[Global.defaultPShost]!, maps);
+          await AlbumSQL.insertData(Global.imageDBExtend!, hostToTableNameMap[Global.defaultPShost]!, maps);
         } else {
-          await AlbumSQL.insertData(Global.imageDB!, pBhostToTableName[Global.defaultPShost]!, maps);
+          await AlbumSQL.insertData(Global.imageDB!, hostToTableNameMap[Global.defaultPShost]!, maps);
         }
 
         clipboardList.add(uploadResult[1]);
@@ -918,7 +656,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
         content += "$successImage\n";
       }
       if (successList.length == 1) {
-        return Fluttertoast.showToast(msg: '上传成功');
+        return showToast('上传成功');
       } else {
         if (context.mounted) {
           return showCupertinoAlertDialog(barrierDismissible: true, context: context, title: "上传成功!", content: content);
@@ -1158,7 +896,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
                               child: ListTile(
                                 title: const Text('使用自定义重命名'),
                                 trailing: Switch(
-                                  value: Global.iscustomRename,
+                                  value: Global.isCustomRename,
                                   onChanged: (value) async {
                                     await Global.setIsCustomeRename(value);
                                     if (mounted) {
@@ -1403,7 +1141,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
                 heroTag: 'multi',
                 backgroundColor: const Color.fromARGB(255, 237, 201, 241),
                 onPressed: () {
-                  _cameraAndBack();
+                  _captureAndGoBack();
                 },
                 child: const Icon(
                   Icons.camera,

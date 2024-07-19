@@ -13,21 +13,20 @@ class SmmsManageAPI {
   static const String smmsAPIUrl = 'https://smms.app/api/v2/';
 
   static Future<File> get localFile async {
-    final path = await _localPath;
+    String path = await _localPath;
     String defaultUser = await Global.getUser();
     return ensureFileExists(File('$path/${defaultUser}_smms_config.txt'));
   }
 
   static Future<String> get _localPath async {
-    final directory = await getApplicationDocumentsDirectory();
+    Directory directory = await getApplicationDocumentsDirectory();
     return directory.path;
   }
 
   static Future<String> readSmmsConfig() async {
     try {
       final file = await localFile;
-      String contents = await file.readAsString();
-      return contents;
+      return await file.readAsString();
     } catch (e) {
       FLog.error(
           className: 'SmmsManageAPI',
@@ -173,19 +172,18 @@ class SmmsManageAPI {
       String saveFilePath = '$savePath/$filename';
       Dio dio = Dio();
       Response response = await dio.download(fileLink, saveFilePath);
-      if (response.statusCode == 200) {
-        var uploadResult = await uploadFile(
-          filename,
-          saveFilePath,
-        );
-        if (uploadResult[0] == "success") {
-          return ['success'];
-        } else {
-          return ['failed'];
-        }
-      } else {
+      if (response.statusCode != 200) {
         return ['failed'];
       }
+
+      var uploadResult = await uploadFile(
+        filename,
+        saveFilePath,
+      );
+      if (uploadResult[0] != "success") {
+        return ['failed'];
+      }
+      return ['success'];
     } catch (e) {
       flogError(e, {'fileLink': fileLink}, "SmmsManageAPI", "uploadNetworkFile");
       return ['failed'];

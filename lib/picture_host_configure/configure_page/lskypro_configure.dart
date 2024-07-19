@@ -235,7 +235,10 @@ class HostConfigState extends State<HostConfig> {
   }
 
   void _getStrategyId() async {
-    if (_tokenController.isEmpty && (_usernameController.text.isEmpty || _passwdController.text.isEmpty)) {
+    String username = _usernameController.text.trim();
+    String passwd = _passwdController.text.trim();
+    String host = _hostController.text.trim();
+    if (_tokenController.isEmpty && (username.isEmpty || passwd.isEmpty)) {
       showDialog(
           context: context,
           builder: (context) {
@@ -246,11 +249,8 @@ class HostConfigState extends State<HostConfig> {
           });
       return;
     }
-    if (_usernameController.text.isNotEmpty && _passwdController.text.isNotEmpty) {
-      final host = _hostController.text;
+    if (username.isNotEmpty && passwd.isNotEmpty) {
       String token = 'Bearer ';
-      final username = _usernameController.text;
-      final passwd = _passwdController.text;
       BaseOptions options = setBaseOptions();
       options.headers = {
         "Accept": "application/json",
@@ -316,7 +316,6 @@ class HostConfigState extends State<HostConfig> {
       }
     } else {
       try {
-        String host = _hostController.text;
         String strategiesUrl = '$host/api/v1/strategies';
         BaseOptions strategiesOptions = setBaseOptions();
         strategiesOptions.headers = {
@@ -366,10 +365,10 @@ class HostConfigState extends State<HostConfig> {
       return;
     }
     if (_usernameController.text.isNotEmpty && _passwdController.text.isNotEmpty) {
-      final host = _hostController.text;
+      String host = _hostController.text.trim();
       String token = 'Bearer ';
-      final username = _usernameController.text;
-      final passwd = _passwdController.text;
+      String username = _usernameController.text.trim();
+      String passwd = _passwdController.text.trim();
       BaseOptions options = setBaseOptions();
       options.headers = {
         "Accept": "application/json",

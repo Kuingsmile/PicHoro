@@ -31,7 +31,7 @@ class ConfigureStoreFile {
   }
 
   Future<void> generateConfigureFile() async {
-    List allPBhost = pBhostToTableName.keys.toList();
+    List allPBhost = hostToTableNameMap.keys.toList();
     for (var i = 0; i < allPBhost.length; i++) {
       String configureFilePath = await localConfigureFilePath(allPBhost[i]);
       if (!File(configureFilePath).existsSync()) {

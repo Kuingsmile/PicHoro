@@ -105,8 +105,6 @@ class AllPShostState extends State<AllPShost> {
       Map configMapWithPshost = {pshost: configMap};
       String configJson = jsonEncode(configMapWithPshost);
       configJson = configJson.replaceAll('None', '');
-      configJson = configJson.replaceAll('keyId', 'accessKeyId');
-      configJson = configJson.replaceAll('keySecret', 'accessKeySecret');
       await Clipboard.setData(ClipboardData(text: configJson));
       showToast("$pshost配置已复制到剪贴板");
     } catch (e) {
@@ -153,8 +151,6 @@ class AllPShostState extends State<AllPShost> {
       }
       String configJson = jsonEncode(configMap);
       configJson = configJson.replaceAll('None', '');
-      configJson = configJson.replaceAll('keyId', 'accessKeyId');
-      configJson = configJson.replaceAll('keySecret', 'accessKeySecret');
       await Clipboard.setData(ClipboardData(text: configJson));
       showToast("配置已复制到剪贴板");
     } catch (e) {
@@ -714,7 +710,7 @@ class AllPShostState extends State<AllPShost> {
       ),
     ];
     Map temp = {
-      "Alist V3": 'alist',
+      "AList V3": 'alist',
       '阿里云': 'aliyun',
       'FTP-SSH/SFTP': 'ftp',
       'Github': 'github',
@@ -780,7 +776,7 @@ class AllPShostState extends State<AllPShost> {
           trailing: const Icon(Icons.arrow_forward_ios),
         ),
         ListTile(
-          title: const Text('Alist V3'),
+          title: const Text('AList V3'),
           onTap: () {
             Application.router.navigateTo(context, Routes.alistPShostSelect, transition: TransitionType.cupertino);
           },

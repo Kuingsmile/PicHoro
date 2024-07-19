@@ -102,7 +102,7 @@ class RenameFileState extends State<RenameFile> {
         ListTile(
           title: const Text('是否使用自定义重命名'),
           trailing: Switch(
-            value: Global.iscustomRename,
+            value: Global.isCustomRename,
             onChanged: (value) async {
               await Global.setIsCustomeRename(value);
               setState(() {});

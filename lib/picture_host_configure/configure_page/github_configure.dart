@@ -144,7 +144,7 @@ class GithubConfigState extends State<GithubConfig> {
               decoration: const InputDecoration(
                 contentPadding: EdgeInsets.zero,
                 label: Center(child: Text('可选：分支')),
-                hintText: '例如: main(默认为main)',
+                hintText: '默认为main',
               ),
               textAlign: TextAlign.center,
             ),
@@ -225,6 +225,7 @@ class GithubConfigState extends State<GithubConfig> {
       String storePath = _storePathController.text.trim();
       String branch = _branchController.text.trim();
       String customDomain = _customDomainController.text.trim();
+
       if (storePath.isEmpty || _storePathController.text == '/') {
         storePath = 'None';
       } else if (!storePath.endsWith('/')) {

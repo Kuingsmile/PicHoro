@@ -87,7 +87,7 @@ class UploadManager {
             'hostSpecificArgD': 'test',
             'hostSpecificArgE': 'test',
           };
-          await AlbumSQL.insertData(Global.imageDB!, pBhostToTableName[Global.defaultPShost]!, maps);
+          await AlbumSQL.insertData(Global.imageDB!, hostToTableNameMap[Global.defaultPShost]!, maps);
           setStatus(task, UploadStatus.completed);
         case 'aliyun':
           var aliUploadResult = await AliyunImageUploadUtils.uploadApi(
@@ -117,7 +117,7 @@ class UploadManager {
             'hostSpecificArgD': 'test',
             'hostSpecificArgE': 'test',
           };
-          await AlbumSQL.insertData(Global.imageDB!, pBhostToTableName[Global.defaultPShost]!, maps);
+          await AlbumSQL.insertData(Global.imageDB!, hostToTableNameMap[Global.defaultPShost]!, maps);
           setStatus(task, UploadStatus.completed);
         case 'qiniu':
           var qiniuUploadResult = await QiniuImageUploadUtils.uploadApi(
@@ -148,7 +148,7 @@ class UploadManager {
             'hostSpecificArgD': 'test',
             'hostSpecificArgE': 'test',
           };
-          await AlbumSQL.insertData(Global.imageDB!, pBhostToTableName[Global.defaultPShost]!, maps);
+          await AlbumSQL.insertData(Global.imageDB!, hostToTableNameMap[Global.defaultPShost]!, maps);
           setStatus(task, UploadStatus.completed);
         case 'upyun':
           var upyunUploadResult = await UpyunImageUploadUtils.uploadApi(
@@ -178,7 +178,7 @@ class UploadManager {
             'hostSpecificArgD': 'test',
             'hostSpecificArgE': 'test',
           };
-          await AlbumSQL.insertData(Global.imageDB!, pBhostToTableName[Global.defaultPShost]!, maps);
+          await AlbumSQL.insertData(Global.imageDB!, hostToTableNameMap[Global.defaultPShost]!, maps);
           setStatus(task, UploadStatus.completed);
         case 'lsky.pro':
           var lskyproUploadResult = await LskyproImageUploadUtils.uploadApi(
@@ -209,7 +209,7 @@ class UploadManager {
             'hostSpecificArgD': 'test',
             'hostSpecificArgE': 'test',
           };
-          await AlbumSQL.insertData(Global.imageDB!, pBhostToTableName[Global.defaultPShost]!, maps);
+          await AlbumSQL.insertData(Global.imageDB!, hostToTableNameMap[Global.defaultPShost]!, maps);
           setStatus(task, UploadStatus.completed);
         case 'sm.ms':
           List<String> smmsUploadResult = await SmmsImageUploadUtils.uploadApi(
@@ -239,7 +239,7 @@ class UploadManager {
             'hostSpecificArgD': 'test',
             'hostSpecificArgE': 'test',
           };
-          await AlbumSQL.insertData(Global.imageDB!, pBhostToTableName[Global.defaultPShost]!, maps);
+          await AlbumSQL.insertData(Global.imageDB!, hostToTableNameMap[Global.defaultPShost]!, maps);
           setStatus(task, UploadStatus.completed);
         case 'github':
           maxConcurrentTasks = 1;
@@ -269,7 +269,7 @@ class UploadManager {
             'hostSpecificArgD': 'test',
             'hostSpecificArgE': 'test',
           };
-          await AlbumSQL.insertData(Global.imageDB!, pBhostToTableName[Global.defaultPShost]!, maps);
+          await AlbumSQL.insertData(Global.imageDB!, hostToTableNameMap[Global.defaultPShost]!, maps);
           setStatus(task, UploadStatus.completed);
         case 'imgur':
           var imgurUploadResult = await ImgurImageUploadUtils.uploadApi(
@@ -299,7 +299,7 @@ class UploadManager {
             'hostSpecificArgD': 'test',
             'hostSpecificArgE': 'test',
           };
-          await AlbumSQL.insertData(Global.imageDB!, pBhostToTableName[Global.defaultPShost]!, maps);
+          await AlbumSQL.insertData(Global.imageDB!, hostToTableNameMap[Global.defaultPShost]!, maps);
           setStatus(task, UploadStatus.completed);
         case 'ftp':
           var ftpUploadResult = await FTPImageUploadUtils.uploadApi(
@@ -349,7 +349,7 @@ class UploadManager {
           for (int i = 0; i < letter.length; i++) {
             maps['hostSpecificArg${letter[i]}'] = 'test';
           }
-          await AlbumSQL.insertData(Global.imageDBExtend!, pBhostToTableName[Global.defaultPShost]!, maps);
+          await AlbumSQL.insertData(Global.imageDBExtend!, hostToTableNameMap[Global.defaultPShost]!, maps);
           setStatus(task, UploadStatus.completed);
         case 'aws':
           var awsUploadResult = await AwsImageUploadUtils.uploadApi(
@@ -377,7 +377,7 @@ class UploadManager {
           for (int i = 0; i < letter.length; i++) {
             maps['hostSpecificArg${letter[i]}'] = 'test';
           }
-          await AlbumSQL.insertData(Global.imageDBExtend!, pBhostToTableName[Global.defaultPShost]!, maps);
+          await AlbumSQL.insertData(Global.imageDBExtend!, hostToTableNameMap[Global.defaultPShost]!, maps);
           setStatus(task, UploadStatus.completed);
         case 'alist':
           var alistUploadResult = await AlistImageUploadUtils.uploadApi(
@@ -408,7 +408,7 @@ class UploadManager {
           for (int i = 0; i < letter.length; i++) {
             maps['hostSpecificArg${letter[i]}'] = 'test';
           }
-          await AlbumSQL.insertData(Global.imageDBExtend!, pBhostToTableName[Global.defaultPShost]!, maps);
+          await AlbumSQL.insertData(Global.imageDBExtend!, hostToTableNameMap[Global.defaultPShost]!, maps);
           setStatus(task, UploadStatus.completed);
         case 'webdav':
           var webdavUploadResult =
@@ -433,7 +433,7 @@ class UploadManager {
           for (int i = 0; i < letter.length; i++) {
             maps['hostSpecificArg${letter[i]}'] = 'test';
           }
-          await AlbumSQL.insertData(Global.imageDBExtend!, pBhostToTableName[Global.defaultPShost]!, maps);
+          await AlbumSQL.insertData(Global.imageDBExtend!, hostToTableNameMap[Global.defaultPShost]!, maps);
           setStatus(task, UploadStatus.completed);
         default:
           break;

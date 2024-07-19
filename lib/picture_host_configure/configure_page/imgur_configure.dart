@@ -93,7 +93,7 @@ class ImgurConfigState extends State<ImgurConfig> {
             TextFormField(
               controller: _proxyController,
               decoration: const InputDecoration(
-                label: Center(child: Text('可选:设定代理,需要配合手机FQ软件使用')),
+                label: Center(child: Text('可选:设定代理,需要配合手机VPN软件使用')),
                 hintText: '例如127.0.0.1:7890',
               ),
               textAlign: TextAlign.center,
@@ -161,6 +161,7 @@ class ImgurConfigState extends State<ImgurConfig> {
     try {
       String clientId = _clientIdController.text.trim();
       String proxy = _proxyController.text.trim();
+
       if (clientId.startsWith('Client-ID ')) {
         clientId = clientId.substring(10);
       }

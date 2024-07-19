@@ -16,8 +16,7 @@ class CacheUtil {
 
   static Future<int> _reduce(final FileSystemEntity file) async {
     if (file is File) {
-      int length = await file.length();
-      return length;
+      return await file.length();
     }
 
     if (file is Directory) {

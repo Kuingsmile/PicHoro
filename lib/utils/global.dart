@@ -5,9 +5,16 @@ import 'package:sqflite/sqflite.dart';
 import 'package:horopic/album/album_sql.dart';
 
 class Global {
+  /// 上传图片的文件名
   static String? imageFile;
+
+  /// 原始图片文件
   static File? imageOriginalFile;
+
+  /// 上传图片的文件名列表
   static List<String> imagesList = [];
+
+  /// 上传图片的文件列表
   static List<File> imagesFileList = [];
 
   /// 默认上传图床
@@ -39,7 +46,7 @@ class Global {
   static bool isRandomName = false;
 
   /// 是否自定义重命名
-  static bool iscustomRename = false;
+  static bool isCustomRename = false;
 
   /// 自定义重命名格式
   static String customRenameFormat = r'{Y}{m}{d}{h}{i}{ms}';
@@ -535,7 +542,7 @@ class Global {
   static setIsCustomeRename(bool iscustomRename) async {
     await SpUtil.getInstance();
     SpUtil.putBool('key_iscustomRename', iscustomRename);
-    Global.iscustomRename = iscustomRename;
+    Global.isCustomRename = iscustomRename;
   }
 
   static Future<bool> getIsCopyLink() async {

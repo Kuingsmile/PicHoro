@@ -29,18 +29,19 @@ String getUpyunUploadAuthHeader(
 
 String getUpyunAntiLeechParam(
     {required String saveKey, required String antiLeechToken, required String antiLeechExpiration}) {
+  if (antiLeechToken == '') {
+    return '';
+  }
+
   String key = '';
   if (saveKey.startsWith('/')) {
     key = saveKey;
   } else {
     key = '/$saveKey';
   }
-  if (antiLeechToken == '') {
-    return '';
-  }
+
   int dateNowInSecond = (DateTime.now().millisecondsSinceEpoch / 1000).floor();
   int expire = antiLeechExpiration == '' ? dateNowInSecond + 3600 : dateNowInSecond + int.parse(antiLeechExpiration);
   String sign = md5.convert(utf8.encode('$antiLeechToken&$expire&$key')).toString();
-  String upt = '_upt=${sign.substring(12, 20)}$expire';
-  return upt;
+  return '_upt=${sign.substring(12, 20)}$expire';
 }

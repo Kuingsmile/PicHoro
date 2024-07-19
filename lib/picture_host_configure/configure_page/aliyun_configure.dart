@@ -262,9 +262,7 @@ class AliyunConfigState extends State<AliyunConfig> {
         if (!path.endsWith('/')) {
           path = '$path/';
         }
-        if (path.startsWith('/')) {
-          path = path.substring(1);
-        }
+        path = path.replaceAll(RegExp(r'^/+'), '');
       }
       //格式化自定义域名，不以/结尾，以http(s)://开头
       if (customUrl.isEmpty) {
@@ -272,17 +270,12 @@ class AliyunConfigState extends State<AliyunConfig> {
       } else if (!customUrl.startsWith('http') && !customUrl.startsWith('https')) {
         customUrl = 'http://$customUrl';
       }
-      if (customUrl.endsWith('/')) {
-        customUrl = customUrl.substring(0, customUrl.length - 1);
-      }
+      customUrl = customUrl.replaceAll(RegExp(r'/+$'), '');
       //格式化网站后缀，以?开头
-      if (_optionsController.text.isNotEmpty) {
-        options = _optionsController.text;
-        if (!options.startsWith('?')) {
-          options = '?$options';
-        }
-      } else {
+      if (options.isEmpty) {
         options = 'None';
+      } else if (!options.startsWith('?')) {
+        options = '?$options';
       }
 
       final aliyunConfig = AliyunConfigModel(keyId, keySecret, bucket, area, path, customUrl, options);
@@ -377,12 +370,10 @@ class AliyunConfigState extends State<AliyunConfig> {
               content:
                   '检测通过，您的配置信息为:\n\nAccessKeyId:\n${configMap['keyId']}\nAccessKeySecret:\n${configMap['keySecret']}\nBucket:\n${configMap['bucket']}\nArea:\n${configMap['area']}\nPath:\n${configMap['path']}\nCustomUrl:\n${configMap['customUrl']}\nOptions:\n${configMap['options']}');
         }
-        return;
       } else {
         if (context.mounted) {
           return showCupertinoAlertDialog(context: context, title: '错误', content: '检查失败，请检查配置信息');
         }
-        return;
       }
     } catch (e) {
       FLog.error(

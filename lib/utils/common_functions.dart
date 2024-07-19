@@ -34,7 +34,7 @@ Map<String, String> psNameTranslate = {
   'sm.ms': 'SM.MS',
   'imgur': 'Imgur',
   'lsky.pro': '兰空图床',
-  'alist': 'Alist V3',
+  'alist': 'AList V3',
   'webdav': 'WebDAV',
 };
 
@@ -76,11 +76,12 @@ Future<File> ensureFileExists(File file) async {
 
 /// 默认图床参数和配置文件名对应关系
 String getpdconfig(String defaultConfig) {
-  return defaultConfig == 'lsky.pro'
-      ? 'host_config'
-      : defaultConfig == 'sm.ms'
-          ? 'smms_config'
-          : '${defaultConfig}_config';
+  const configMap = {
+    'lsky.pro': 'host_config',
+    'sm.ms': 'smms_config',
+  };
+
+  return configMap[defaultConfig] ?? '${defaultConfig}_config';
 }
 
 /// defaultLKformat和对应的转换函数
@@ -97,9 +98,8 @@ getFormatedUrl(String rawUrl, String fileName, [String? defaultLKformat]) {
   defaultLKformat ??= Global.defaultLKformat;
   if (linkGeneratorMap.containsKey(defaultLKformat)) {
     return linkGeneratorMap[defaultLKformat]!(rawUrl, fileName);
-  } else {
-    return rawUrl;
   }
+  return rawUrl;
 }
 
 generateBasicAuth(String username, String password) {
@@ -112,33 +112,30 @@ getToday(String format) {
 
 supportedExtensions(String ext) {
   String extLowerCase = ext.toLowerCase();
-
-  if (!Global.imgExt.contains(extLowerCase) &&
-      !Global.textExt.contains(extLowerCase) &&
-      !Global.chewieExt.contains(extLowerCase) &&
-      !Global.vlcExt.contains(extLowerCase) &&
-      extLowerCase != 'pdf') {
-    return false;
-  } else {
-    return true;
+  if (extLowerCase.startsWith('.')) {
+    extLowerCase = extLowerCase.substring(1);
   }
+  return Global.imgExt.contains(extLowerCase) ||
+      Global.textExt.contains(extLowerCase) ||
+      Global.chewieExt.contains(extLowerCase) ||
+      Global.vlcExt.contains(extLowerCase) ||
+      extLowerCase == 'pdf';
 }
 
 BaseOptions setBaseOptions() {
-  BaseOptions baseOptions = BaseOptions(
+  return BaseOptions(
     sendTimeout: Duration(milliseconds: Global.defaultOutTime),
     receiveTimeout: Duration(milliseconds: Global.defaultOutTime),
     connectTimeout: Duration(milliseconds: Global.defaultOutTime),
   );
-  return baseOptions;
 }
 
 downloadTxtFile(String urlpath, String fileName, Map<String, dynamic>? headers) async {
-  BaseOptions baseOptions = setBaseOptions();
-  Dio dio = Dio(baseOptions);
-  String tempDir = (await getTemporaryDirectory()).path;
-  var tempfile = File('$tempDir/$fileName');
   try {
+    BaseOptions baseOptions = setBaseOptions();
+    Dio dio = Dio(baseOptions);
+    String tempDir = (await getTemporaryDirectory()).path;
+    var tempfile = File('$tempDir/$fileName');
     var response = await dio.download(
       urlpath,
       tempfile.path,
@@ -149,9 +146,8 @@ downloadTxtFile(String urlpath, String fileName, Map<String, dynamic>? headers) 
     );
     if (response.statusCode == 200) {
       return tempfile.path;
-    } else {
-      return 'error';
     }
+    return 'error';
   } catch (e) {
     flogErr(
       e,
@@ -361,7 +357,7 @@ Widget titleText(String title,
 /// random String Generator
 String randomStringGenerator(int length) {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  final Random rnd = Random();
+  Random rnd = Random();
   return String.fromCharCodes(Iterable.generate(length, (_) => chars.codeUnitAt(rnd.nextInt(chars.length))));
 }
 

@@ -640,10 +640,9 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
   copyFormatedLink(int index, String format) async {
     String link = currentVisibleImageUrlList[index];
     String filename = imageFileNameList[index + pageIndex * paginationSize];
-    String formatedLink = '';
-    formatedLink = linkGeneratorMap[format]!(link, filename);
+    String formatedLink = linkGeneratorMap[format]!(link, filename);
     Clipboard.setData(ClipboardData(text: formatedLink));
-    showToast('$format已复制');
+    showToast('链接已复制');
   }
 
   handleOnLongPress(BuildContext context, double dx, double dy, int index) {
