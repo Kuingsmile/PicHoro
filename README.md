@@ -1,53 +1,62 @@
 <div align="center">
-  <img src="http://imgx.horosama.com/admin_uploads/2022/10/2022_10_05_633d79e401694.png" alt="">
+  <img src="https://github.com/user-attachments/assets/8593a0f0-89c5-467c-a88c-fa6f50cf067f" alt="PicHoro Logo">
   <h1>PicHoro</h1>
   <a href="https://github.com/Kuingsmile/PicHoro/releases/latest">
-    <img src="https://img.shields.io/github/release/Kuingsmile/PicHoro.svg?style=flat-square" alt="">
+    <img src="https://img.shields.io/github/release/Kuingsmile/PicHoro.svg?style=flat-square" alt="Release Version">
   </a>
 </div>
 
-&emsp;&emsp;一款基于flutter的手机端云存储平台/图床管理和文件上传/下载工具，最新版本**V2.4.0**，与PicGo配置互通，可直接扫码导入，主要功能包括云存储/图床/云服务器平台,以及网盘管理（通过[Alist](https://alist.nn.ci/zh/))，文件上传和下载管理，以及各种格式的链接分享。
+## 简介
 
-&emsp;&emsp;支持多种图片/PDF/文本文件/音视频的在线预览和播放，具体支持的格式请查看[支持的格式列表](https://github.com/Kuingsmile/PicHoro/blob/main/supported_format.md "支持的格式列表")
+PicHoro 是一款基于 Flutter 的手机端云存储平台/图床管理和文件上传/下载工具，最新版本 **V2.4.0**。
 
-桌面端如果也希望进行图床管理，推荐使用我的另一个项目 `PicList`，[https://github.com/Kuingsmile/PicList](https://github.com/Kuingsmile/PicList)
+- 与 PicGo/PicList 配置互通，可直接扫码导入
+- 支持云存储/图床/云服务器平台和网盘管理（通过 [Alist](https://alist.nn.ci/zh/)）
+- 提供文件上传、下载管理及多格式链接分享功能
 
-&emsp;&emsp;项目介绍和配置手册网址:
+支持多种图片/PDF/文本文件/音视频的在线预览和播放，具体支持的格式请查看[支持的格式列表](https://github.com/Kuingsmile/PicHoro/blob/main/supported_format.md)。
 
-&emsp;&emsp;[https://pichoro.horosama.com](https://pichoro.horosama.com)
+> **桌面端推荐**：如果您需要桌面端图床管理，推荐使用 [PicList](https://github.com/Kuingsmile/PicList)
 
-&emsp;&emsp;目前已支持如下图床：
+📘 [项目介绍和配置手册](https://pichoro.horosama.com)
 
-- [X] 兰空图床V2 (上传/相册-**V1.00**，文件管理-**V1.87**)
-- [X] SM.MS (上传/相册-**V1.41**，文件管理-**V1.81**)
-- [X] Github (上传/相册-**V1.55**，文件管理-**V1.89**)
-- [X] Imgur (上传/相册-**V1.60**，文件管理-**V1.90**)
-- [X] 七牛云存储 (上传/相册-**V1.65**，文件管理-**V1.86**)
-- [X] 腾讯云COS V5 (上传/相册-**V1.70**，文件管理-**V1.80**)
-- [X] 阿里云OSS (上传/相册-**V1.75**，文件管理-**V1.84**)
-- [X] 又拍云存储 (上传/相册-**V1.75**，文件管理-**V1.85**)
-- [X] FTP-SSH/SFTP (上传/相册-**V1.90**，文件管理-**V1.90**)
-- [X] 兼容S3 API接口的平台 (上传/相册-**V1.91**，文件管理-**V1.91**)
-- [X] Alist V3 (上传/相册-**V1.96**，文件管理-**V1.96**)
-- [X] WebDav (上传/相册-**V1.97**，文件管理-**V1.97**)
+## 支持的图床/存储平台
+
+- [x] 兰空图床V2
+- [x] SM.MS
+- [x] Github
+- [x] Imgur
+- [x] 七牛云存储
+- [x] 腾讯云COS V5
+- [x] 阿里云OSS
+- [x] 又拍云存储
+- [x] FTP-SSH/SFTP
+- [x] 兼容S3 API接口的平台
+- [x] Alist V3
+- [x] WebDav
 
 ## 特色功能
 
-- **支持直接管理云存储/图床，包括新建/删除/修改存储桶，创建/删除目录和文件，上传和下载文件和照片等**
-- **可通过Alist V3或WebDav管理多种网盘**
-- **支持图片压缩功能，可压缩为webp/jpg/png格式**
-- **支持预览多种格式的文件，包括图片/PDF/文本文件/音视频等**
-- **支持SSH/SFTP，可视化管理文件，内置SSH终端可直接管理云服务器**
-- **支持扫描二维码将PicGo(v2.3.0-beta.2以上版本)配置文件直接导入PicHoro**
-- 每种图床支持保存最多26个备用配置，可快速切换备用配置为主配置
-- 连续上传模式，相机拍照后自动上传然后返回拍照页面，可连续拍照上传
-- 可导入剪贴板中的网络图片链接，同时使用换行符分割多个链接可批量导入
-- 上传图片后自动复制链接到剪贴板，多图上传时全部复制
-- 支持自定义复制到剪贴板的链接格式，占位符与Picgo一致
-- 上传时可对文件重命名，目前有时间戳，随机字符串和自定义重命名三种方式，自定义重命名可使用多种占位符，如uuid，时间戳，md5等
+### 核心特性
+
+- **云存储/图床管理** - 新建/删除/修改存储桶，创建/删除目录和文件，上传和下载文件和照片等
+- **网盘管理** - 通过 Alist V3 或 WebDav 管理多种网盘
+- **图片压缩** - 支持压缩为 webp/jpg/png 格式
+- **多格式文件预览** - 包括图片/PDF/文本文件/音视频等
+- **SSH/SFTP支持** - 可视化管理文件，内置 SSH 终端可直接管理云服务器
+- **PicGo兼容性** - 支持扫描二维码将 PicGo(v2.3.0-beta.2 以上版本)配置文件直接导入 PicHoro
+
+### 其他功能
+
+- 每种图床最多支持 26 个备用配置，可快速切换
+- 连续上传模式，相机拍照后自动上传并返回拍照页面
+- 支持导入剪贴板中的网络图片链接，换行符分割可批量导入
+- 上传图片后自动复制链接到剪贴板
+- 自定义复制到剪贴板的链接格式，占位符与 PicGo 一致
+- 多种文件重命名方式（时间戳、随机字符串和自定义重命名）
 - 相册分图床显示，支持多选管理，复制多张图片链接或删除
-- 支持将PicHoro的配置导出至剪贴板，导出格式与PicGo配置文件相同，可直接导入PicGo
-- 可查看和导出软件日志，快捷查找问题和报告bug
+- 支持导出配置至剪贴板（与 PicGo 配置文件格式相同）
+- 查看和导出软件日志，快捷查找问题和报告 bug
 
 ## 文件预览支持
 
@@ -70,139 +79,131 @@
 
 ### 安卓
 
-Github下载地址 [Github release](https://github.com/Kuingsmile/PicHoro/releases)
+- **Github 下载**: [Github release](https://github.com/Kuingsmile/PicHoro/releases)
+- **官网下载**: [最新版本 V2.4.0](https://pichoro.msq.pub/PicHoro_V2.4.0.apk)
 
-我的个人网站提供的最新版本下载地址 [https://pichoro.msq.pub/PicHoro_V2.4.0.apk](https://pichoro.msq.pub/PicHoro_V2.4.0.apk)
+### iOS
 
-### IOS
+目前暂无 iOS 版本。如果您有兴趣帮助开发 iOS 版本，请联系我们提供技术支持。
 
-由于个人没有Mac，无法提供IOS版本，如果有人愿意帮忙开发IOS版本，可以联系我，我会提供相关的技术支持。
-
-## 应用截图
+## 应用展示
 
 <div><video controls src="https://user-images.githubusercontent.com/96409857/205264099-a3a5d040-df75-4ae2-9773-f4d61fe3fb0a.mp4" muted="false"></video></div>
 
 <table rules="none">
   <tr>
-    <td><img src="https://user-images.githubusercontent.com/96409857/203718727-ceac86b4-8cb5-49c5-8ee3-bcfce51710cb.jpg" width="200" height="400" alt=""/></td>
-    <td><img src="https://user-images.githubusercontent.com/96409857/203718378-fd4cf22f-b801-4356-9a8b-9d51a0db0e54.jpg" width="200" height="400" alt=""/></td>
-    <td><img src="https://user-images.githubusercontent.com/96409857/211286619-63e406aa-0736-4581-bd9e-adde92209dba.png" width="200" height="400" alt=""/></td>
+    <td><img src="https://user-images.githubusercontent.com/96409857/203718727-ceac86b4-8cb5-49c5-8ee3-bcfce51710cb.jpg" width="200" height="400" alt="主页面"/></td>
+    <td><img src="https://user-images.githubusercontent.com/96409857/203718378-fd4cf22f-b801-4356-9a8b-9d51a0db0e54.jpg" width="200" height="400" alt="相册页面"/></td>
+    <td><img src="https://user-images.githubusercontent.com/96409857/211286619-63e406aa-0736-4581-bd9e-adde92209dba.png" width="200" height="400" alt="文件管理"/></td>
   </tr>
    <tr>
-    <td><img src="https://user-images.githubusercontent.com/96409857/211286730-2e0c05b3-5093-4738-8378-7d2c273a694b.png" width="200" height="400" alt=""/></td>
-    <td><img src="https://user-images.githubusercontent.com/96409857/203719066-b6e45be8-eb8f-49da-bea2-78f3d4379591.jpg" width="200" height="400" alt=""/></td>
-    <td><img src="https://user-images.githubusercontent.com/96409857/203719617-b54a49bb-d9f9-4917-a68a-b4a46f951ee0.png" width="200" height="400" alt=""/></td>
+    <td><img src="https://user-images.githubusercontent.com/96409857/211286730-2e0c05b3-5093-4738-8378-7d2c273a694b.png" width="200" height="400" alt="设置页面"/></td>
+    <td><img src="https://user-images.githubusercontent.com/96409857/203719066-b6e45be8-eb8f-49da-bea2-78f3d4379591.jpg" width="200" height="400" alt="图床配置"/></td>
+    <td><img src="https://user-images.githubusercontent.com/96409857/203719617-b54a49bb-d9f9-4917-a68a-b4a46f951ee0.png" width="200" height="400" alt="文件上传"/></td>
   </tr>
    <tr>
-    <td><img src="https://user-images.githubusercontent.com/96409857/203719608-34170e4c-2d6f-4e3a-990a-f61c610417e9.png" width="200" height="400" alt=""/></td>
-    <td><img src="https://user-images.githubusercontent.com/96409857/203720199-38266fae-e0fa-4aad-8315-f272bc8b6add.jpg" width="200" height="400" alt=""/></td>
-    <td><img src="https://user-images.githubusercontent.com/96409857/203720359-26717390-1789-4750-97dd-27836da322da.jpg" width="200" height="400" alt=""/></td>
+    <td><img src="https://user-images.githubusercontent.com/96409857/203719608-34170e4c-2d6f-4e3a-990a-f61c610417e9.png" width="200" height="400" alt="预览功能"/></td>
+    <td><img src="https://user-images.githubusercontent.com/96409857/203720199-38266fae-e0fa-4aad-8315-f272bc8b6add.jpg" width="200" height="400" alt="自定义链接"/></td>
+    <td><img src="https://user-images.githubusercontent.com/96409857/203720359-26717390-1789-4750-97dd-27836da322da.jpg" width="200" height="400" alt="文件管理"/></td>
   </tr>
   <tr>
-    <td><img src="https://user-images.githubusercontent.com/96409857/203720473-577368a7-ed29-461b-b8f2-4077dd02ca84.jpg" width="200" height="400" alt=""/></td>
-    <td><img src="https://user-images.githubusercontent.com/96409857/203720565-4d4008a5-198f-451d-b0cc-b1780291f2b7.png" width="200" height="400" alt=""/></td>
-    <td><img src="https://user-images.githubusercontent.com/96409857/203720614-4bfd6e0c-ea16-4ed1-945d-c5c5524c89a6.png" width="200" height="400" alt=""/></td>
+    <td><img src="https://user-images.githubusercontent.com/96409857/203720473-577368a7-ed29-461b-b8f2-4077dd02ca84.jpg" width="200" height="400" alt="上传历史"/></td>
+    <td><img src="https://user-images.githubusercontent.com/96409857/203720565-4d4008a5-198f-451d-b0cc-b1780291f2b7.png" width="200" height="400" alt="SSH终端"/></td>
+    <td><img src="https://user-images.githubusercontent.com/96409857/203720614-4bfd6e0c-ea16-4ed1-945d-c5c5524c89a6.png" width="200" height="400" alt="配置导出"/></td>
   </tr>
 </table>
 
 ## 最近更新
 
-  详细更新日志请查看[更新日志](https://github.com/Kuingsmile/PicHoro/blob/main/Version_update_log.md "更新日志")
+详细更新日志请查看[更新日志](https://github.com/Kuingsmile/PicHoro/blob/main/Version_update_log.md)
 
-## 2024-07-19 **V2.4.0**
+### 2024-07-19 **V2.4.0**
 
-- 新增：与AList 3.35版本保持同步
-- 新增：`alist`图床现在支持设置管理员token
-- 新增：`sm.ms`图床上传重复图片时，后上传的图片现在不会判定为失败
-- 新增：S3兼容平台现在支持带端口号的endpoint
-- 新增：S3兼容平台现在支持设置是否启用SSL连接和S3 path style
-- 新增：优化了图床导入，现在支持导入PicList内置AList、兰空图床、ftp图床、WebDAV图床，以及alist图床插件配置
-- 新增：优化了对文件mime类型的判断，现在兼容更多文件类型同时默认使用`application/octet-stream`
-- 新增：现在重命名占位符`{m}`和`{d}`固定为两位数字，如`01`,`02`
-- 新增：现在重命名占位符支持`{h}`(小时),`{i}`(分钟),`{s}`(秒),`{ms}`(毫秒),`{str-num}`,其中num为任意数字
-- 新增：默认自定义重命名格式修改为`{Y}{m}{d}{h}{i}{ms}`，与PicGo时间戳重命名格式一致
-- 新增：默认自定义链接格式修改为`![$fileName]($url)`
-- 新增：设置图床配置时现在会自动去除开头和结尾多余的空格
+#### 新增功能:
 
-- 修复：alist备用设置中无法设置网址路径的问题
-- 修复：alist设置了网址路径时返回的地址多了一个'/'的问题
-- 修复：alist返回的链接是平台直链而不是alist专用网址的问题
-- 修复：特定情况下`ftp`图床返回链接错误的问题
-- 修复：ftp图床设置页面打开错误的问题
-- 修复：导入`imgur`配置时错误保存到`smms`的问题
-- 修复：关闭自动复制链接后仍然会复制到剪贴板的问题
+- 与 AList 3.35 版本保持同步
+- `alist` 图床现在支持设置管理员 token
+- `sm.ms` 图床上传重复图片时不再判定为失败
+- S3 兼容平台支持带端口号的 endpoint
+- S3 兼容平台支持设置是否启用 SSL 连接和 S3 path style
+- 优化图床导入，支持 PicList 内置 AList、兰空图床、ftp 图床、WebDAV 图床及 alist 图床插件配置
+- 优化文件 mime 类型判断，兼容更多文件类型并默认使用 `application/octet-stream`
+- 重命名占位符 `{m}` 和 `{d}` 固定为两位数字，如 `01`、`02`
+- 新增重命名占位符: `{h}`(小时)、`{i}`(分钟)、`{s}`(秒)、`{ms}`(毫秒)、`{str-num}`
+- 默认自定义重命名格式修改为 `{Y}{m}{d}{h}{i}{ms}`，与 PicGo 一致
+- 默认自定义链接格式修改为 `![$fileName]($url)`
+- 设置图床配置时自动去除开头和结尾多余空格
 
-## 2024-04-13 **V2.3.0**
+#### 修复问题:
 
-- 新增：优化了smms图床的配置检查速度
-- 新增：阿里云新增了对`oss-cn-wuhan`地域的支持
-- 新增：现在允许s3图床桶名含有大写字母
-- 修复：修复了github图床自定义域名以多个`/`结尾时，返回路径错误的问题
-- 修复：修复了图片链接格式设置为BBcode时上传报错的问题
+- alist 备用设置中无法设置网址路径的问题
+- alist 设置了网址路径时返回地址多了一个 '/' 的问题
+- alist 返回链接是平台直链而非 alist 专用网址的问题
+- 特定情况下 `ftp` 图床返回链接错误的问题
+- ftp 图床设置页面打开错误的问题
+- 导入 `imgur` 配置时错误保存到 `smms` 的问题
+- 关闭自动复制链接后仍然会复制到剪贴板的问题
 
-## 开发交流
+## 开发与交流
 
-开发进度可以查看 [Projects](https://github.com/Kuingsmile/PicHoro/projects)，会同步更新开发进度。
+- **开发进度**: 查看 [Projects](https://github.com/Kuingsmile/PicHoro/projects)
+- **讨论交流**: 加入 [Github 讨论区](https://github.com/Kuingsmile/PicHoro/discussions)
+- **问题反馈**: 在 [Github Issues](https://github.com/Kuingsmile/PicHoro/issues) 提出
 
-欢迎加入 [Github讨论区](https://github.com/Kuingsmile/PicHoro/discussions) 与我交流。
+**Telegram 交流群:**
 
-遇到Bug或有好的建议可以在 [Github Issues](https://github.com/Kuingsmile/PicHoro/issues) 中提出。
-
-Telegram交流群：
-
-![wechat](https://pichoro.msq.pub/wechat.png)
+![Telegram Group](https://pichoro.msq.pub/wechat.png)
 
 ## 开发说明
 
 ### 依赖项目
 
-请在clone本项目后，将以下项目clone到本地，放在同级目录下，否则无法正常运行。
+克隆本项目后，请同时克隆以下项目到同级目录:
 
-`https://github.com/Kuingsmile/flutterdep`
-
-### 软件修改
-
-如果你想要修改或自行构建 PicHoro，可以依照下面的指示：
-
-1. 你需要有 Android Studio和 Android SDK 21+ 的环境，并安装了Flutter 3.13版本。flutter环境配置可以参考 [Flutter 官方文档](https://flutter.dev/docs/get-started/install)。
-2. `git clone https://github.com/Kuingsmile/PicHoro.git` 并进入项目。
-3. Windows 推荐使用VScode编辑和调试代码。
-
-### 图床修改
-
-兰空图床的相册ID参数，限于以下两种情况下才会生效：
-    1. 基于付费企业版兰空图床搭建
-    2. 开源免费版需要自己或者联系管理员修改源代码文件，修改方式为打开 **/app/Services/ImageService.php**文件，修改第139行，原文件为
-
-```php
-            if ($albumId = $user->configs->get(UserConfigKey::DefaultAlbum)) {
-                if ($user->albums()->where('id', $albumId)->exists()) {
-                    $image->album_id = $albumId;
-                }
-            }
+```bash
+git clone https://github.com/Kuingsmile/flutterdep
 ```
 
-修改为
+### 软件修改步骤
+
+1. 准备环境: 安装 Android Studio、Android SDK 21+ 和 Flutter 3.13
+2. 克隆仓库: `git clone https://github.com/Kuingsmile/PicHoro.git`
+3. Windows 用户推荐使用 VSCode 编辑和调试代码
+
+### 图床修改说明
+
+兰空图床相册 ID 参数生效条件:
+
+1. 基于付费企业版兰空图床搭建
+2. 开源免费版需修改源代码文件 `/app/Services/ImageService.php`:
 
 ```php
-           if ($request->has('album_id')) {
-                $image->album_id = $request->input('album_id');
-            } else {
-            if ($albumId = $user->configs->get(UserConfigKey::DefaultAlbum)) {
-                if ($user->albums()->where('id', $albumId)->exists()) {
-                    $image->album_id = $albumId;
-                }
-            }
+// 原代码
+if ($albumId = $user->configs->get(UserConfigKey::DefaultAlbum)) {
+    if ($user->albums()->where('id', $albumId)->exists()) {
+        $image->album_id = $albumId;
+    }
+}
+
+// 修改后
+if ($request->has('album_id')) {
+    $image->album_id = $request->input('album_id');
+} else {
+    if ($albumId = $user->configs->get(UserConfigKey::DefaultAlbum)) {
+        if ($user->albums()->where('id', $albumId)->exists()) {
+            $image->album_id = $albumId;
         }
+    }
+}
 ```
 
 ### 依赖包修改
 
-本APP使用的部分依赖包需要手动修改源代码才可使用，需要修改的依赖包如下：
+本 APP 使用的部分依赖包需要手动修改:
 
-#### minio_new
+#### 1. minio_new
 
-该依赖已经包含在了 `https://github.com/Kuingsmile/flutterdep`中，无需手动修改。
+包含在 `https://github.com/Kuingsmile/flutterdep` 中，无需手动修改。
 
 1. `queries['maxKeys']`修改为 `queries['max-keys']`
 2. 添加导入 `import 'package:xml2json/xml2json.dart';`
@@ -241,33 +242,38 @@ Telegram交流群：
   }
 ```
 
-#### chewie
+#### 2. chewie
 
 文件路径示例: `"D:\flutter\.pub-cache\hosted\pub.flutter-io.cn\chewie-1.3.6\lib\src\player_with_controls.dart"`
 
-第86行开始修改为
+修改第 86 行:
 
 ```dart
-  return Container(
-      color:Colors.black,
-      child:Center(
-      child: SizedBox(
-        height: MediaQuery.of(context).size.height,
-        width: MediaQuery.of(context).size.width,
-        child: AspectRatio(
-          aspectRatio: calculateAspectRatio(context),
-          child: buildPlayerWithControls(chewieController, context),
-        ),
-      )),
-    );
+return Container(
+    color:Colors.black,
+    child:Center(
+    child: SizedBox(
+      height: MediaQuery.of(context).size.height,
+      width: MediaQuery.of(context).size.width,
+      child: AspectRatio(
+        aspectRatio: calculateAspectRatio(context),
+        child: buildPlayerWithControls(chewieController, context),
+      ),
+    )),
+  );
 ```
 
 ### 软件打包
 
-如果你需要自行构建，可以使用 `flutter build apk --release`命令构建。
-构建成功后，会在 `build\app\outputs\flutter-apk\release` 目录下生成 `app-release.apk` 文件。
+使用以下命令构建:
 
-请设置 `minifyEnabled false`和 `shrinkResources false`，否则打包release版本后可能会出现闪退。
+```bash
+flutter build apk --release
+```
+
+构建成功后，在 `build\app\outputs\flutter-apk\release` 生成 `app-release.apk` 文件。
+
+> **注意**: 请设置 `minifyEnabled false` 和 `shrinkResources false`，否则打包后可能闪退。
 
 ## License
 
@@ -275,6 +281,6 @@ Telegram交流群：
 
 Copyright (c) 2022-present, Kuingsmile
 
-## Github star
+## Github Star 趋势
 
 [![Stargazers over time](https://starchart.cc/Kuingsmile/PicHoro.svg)](https://starchart.cc/Kuingsmile/PicHoro)
