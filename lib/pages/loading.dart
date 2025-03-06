@@ -14,12 +14,11 @@ class NetLoadingDialog extends StatefulWidget {
   Future<dynamic> requestCallBack;
 
   NetLoadingDialog(
-      {Key? key,
+      {super.key,
       this.loadingText = "loading...",
       this.outsideDismiss = false,
       required this.loading,
-      required this.requestCallBack})
-      : super(key: key);
+      required this.requestCallBack});
 
   @override
   State<NetLoadingDialog> createState() => _LoadingDialog();
@@ -31,15 +30,15 @@ class _LoadingDialog extends State<NetLoadingDialog> {
     super.initState();
     // ignore: unnecessary_null_comparison
     if (widget.requestCallBack != null) {
-      widget.requestCallBack.then((_) {
-        _;
+      widget.requestCallBack.then((err) {
+        err;
         Global.operateDone = true;
         Navigator.pop(context);
-      }).catchError((_) {
+      }).catchError((err) {
         FLog.error(
             className: 'NetLoadingDialog',
             methodName: 'initState',
-            text: formatErrorMessage({}, _.toString()),
+            text: formatErrorMessage({}, err.toString()),
             dataLogType: DataLogType.ERRORS.toString());
         Navigator.pop(context);
       });

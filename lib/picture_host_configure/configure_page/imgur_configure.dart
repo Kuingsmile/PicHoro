@@ -14,7 +14,7 @@ import 'package:horopic/picture_host_manage/manage_api/imgur_manage_api.dart';
 import 'package:horopic/utils/event_bus_utils.dart';
 
 class ImgurConfig extends StatefulWidget {
-  const ImgurConfig({Key? key}) : super(key: key);
+  const ImgurConfig({super.key});
 
   @override
   ImgurConfigState createState() => ImgurConfigState();

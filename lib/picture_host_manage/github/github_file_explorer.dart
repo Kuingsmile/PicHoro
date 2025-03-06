@@ -31,7 +31,7 @@ import 'package:horopic/picture_host_manage/aws/aws_file_explorer.dart' show New
 class GithubFileExplorer extends StatefulWidget {
   final Map element;
   final String bucketPrefix;
-  const GithubFileExplorer({Key? key, required this.element, required this.bucketPrefix}) : super(key: key);
+  const GithubFileExplorer({super.key, required this.element, required this.bucketPrefix});
 
   @override
   GithubFileExplorerState createState() => GithubFileExplorerState();
@@ -494,7 +494,7 @@ class GithubFileExplorerState extends loading_state.BaseLoadingPageState<GithubF
                                 }
                                 await Global.setGithubUploadList(Global.githubUploadList);
                                 String downloadPath = await ExternalPath.getExternalStoragePublicDirectory(
-                                    ExternalPath.DIRECTORY_DOWNLOADS);
+                                    ExternalPath.DIRECTORY_DOWNLOAD);
                                 if (mounted) {
                                   Application.router
                                       .navigateTo(context,
@@ -559,7 +559,7 @@ class GithubFileExplorerState extends loading_state.BaseLoadingPageState<GithubF
                                 }
                                 await Global.setGithubUploadList(Global.githubUploadList);
                                 String downloadPath = await ExternalPath.getExternalStoragePublicDirectory(
-                                    ExternalPath.DIRECTORY_DOWNLOADS);
+                                    ExternalPath.DIRECTORY_DOWNLOAD);
                                 if (mounted) {
                                   Application.router
                                       .navigateTo(context,
@@ -681,7 +681,7 @@ class GithubFileExplorerState extends loading_state.BaseLoadingPageState<GithubF
           IconButton(
               onPressed: () async {
                 String downloadPath =
-                    await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOADS);
+                    await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
                 // ignore: use_build_context_synchronously
                 int index = 1;
                 if (Global.githubDownloadList.isEmpty) {
@@ -795,7 +795,7 @@ class GithubFileExplorerState extends loading_state.BaseLoadingPageState<GithubF
                     Global.githubDownloadList.addAll(urlList);
                     await Global.setGithubDownloadList(Global.githubDownloadList);
                     String downloadPath =
-                        await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOADS);
+                        await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
                     // ignore: use_build_context_synchronously
                     Application.router.navigateTo(context,
                         '/baseUpDownloadManagePage?userName=${Uri.encodeComponent(widget.element['showedUsername'])}&repoName=${Uri.encodeComponent(widget.element['name'])}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=1&currentListIndex=4',
@@ -826,7 +826,7 @@ class GithubFileExplorerState extends loading_state.BaseLoadingPageState<GithubF
                     Global.githubDownloadList.addAll(urlList);
                     await Global.setGithubDownloadList(Global.githubDownloadList);
                     String downloadPath =
-                        await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOADS);
+                        await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
                     // ignore: use_build_context_synchronously
                     Application.router.navigateTo(context,
                         '/baseUpDownloadManagePage?userName=${Uri.encodeComponent(widget.element['showedUsername'])}&repoName=${Uri.encodeComponent(widget.element['name'])}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=1&currentListIndex=4',
@@ -1034,7 +1034,7 @@ class GithubFileExplorerState extends loading_state.BaseLoadingPageState<GithubF
           const Text('加载失败,请检查网络', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))),
           ElevatedButton(
             style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.all(Colors.blue),
+              backgroundColor: WidgetStateProperty.all(Colors.blue),
             ),
             onPressed: () {
               setState(() {
@@ -1354,8 +1354,7 @@ class GithubFileExplorerState extends loading_state.BaseLoadingPageState<GithubF
                               title: Text(
                                   allInfoList[index]['path'].length > 20
                                       ? allInfoList[index]['path'].substring(0, 10) +
-                                          '...' +
-                                          allInfoList[index]['path'].substring(allInfoList[index]['path'].length - 10)
+                                          '...${allInfoList[index]['path'].substring(allInfoList[index]['path'].length - 10)}'
                                       : allInfoList[index]['path'],
                                   style: const TextStyle(fontSize: 14)),
                               subtitle:
@@ -1535,8 +1534,7 @@ class GithubFileExplorerState extends loading_state.BaseLoadingPageState<GithubF
             title: Text(
                 allInfoList[index]['path'].length > 20
                     ? allInfoList[index]['path'].substring(0, 10) +
-                        '...' +
-                        allInfoList[index]['path'].substring(allInfoList[index]['path'].length - 10)
+                        '...${allInfoList[index]['path'].substring(allInfoList[index]['path'].length - 10)}'
                     : allInfoList[index]['path'],
                 style: const TextStyle(fontSize: 14)),
             subtitle: Text(getFileSize(allInfoList[index]['size']), style: const TextStyle(fontSize: 12)),

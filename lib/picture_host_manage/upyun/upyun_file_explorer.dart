@@ -32,7 +32,7 @@ bool isCoverFile = false;
 class UpyunFileExplorer extends StatefulWidget {
   final Map element;
   final String bucketPrefix;
-  const UpyunFileExplorer({Key? key, required this.element, required this.bucketPrefix}) : super(key: key);
+  const UpyunFileExplorer({super.key, required this.element, required this.bucketPrefix});
 
   @override
   UpyunFileExplorerState createState() => UpyunFileExplorerState();
@@ -451,7 +451,7 @@ class UpyunFileExplorerState extends loading_state.BaseLoadingPageState<UpyunFil
                                 }
                                 await Global.setUpyunUploadList(Global.upyunUploadList);
                                 String downloadPath = await ExternalPath.getExternalStoragePublicDirectory(
-                                    ExternalPath.DIRECTORY_DOWNLOADS);
+                                    ExternalPath.DIRECTORY_DOWNLOAD);
                                 if (mounted) {
                                   Application.router
                                       .navigateTo(context,
@@ -511,7 +511,7 @@ class UpyunFileExplorerState extends loading_state.BaseLoadingPageState<UpyunFil
                                 }
                                 await Global.setUpyunUploadList(Global.upyunUploadList);
                                 String downloadPath = await ExternalPath.getExternalStoragePublicDirectory(
-                                    ExternalPath.DIRECTORY_DOWNLOADS);
+                                    ExternalPath.DIRECTORY_DOWNLOAD);
                                 if (mounted) {
                                   Application.router
                                       .navigateTo(context,
@@ -621,7 +621,7 @@ class UpyunFileExplorerState extends loading_state.BaseLoadingPageState<UpyunFil
           IconButton(
               onPressed: () async {
                 String downloadPath =
-                    await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOADS);
+                    await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
                 // ignore: use_build_context_synchronously
                 int index = 1;
                 if (Global.upyunDownloadList.isEmpty) {
@@ -735,7 +735,7 @@ class UpyunFileExplorerState extends loading_state.BaseLoadingPageState<UpyunFil
                   Global.upyunDownloadList.addAll(urlList);
                   await Global.setUpyunDownloadList(Global.upyunDownloadList);
                   String downloadPath =
-                      await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOADS);
+                      await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
                   // ignore: use_build_context_synchronously
                   Application.router.navigateTo(context,
                       '/baseUpDownloadManagePage?bucketName=${widget.element['bucket']}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=1&currentListIndex=10',
@@ -892,7 +892,7 @@ class UpyunFileExplorerState extends loading_state.BaseLoadingPageState<UpyunFil
           const Text('加载失败,请检查网络', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))),
           ElevatedButton(
             style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.all(Colors.blue),
+              backgroundColor: WidgetStateProperty.all(Colors.blue),
             ),
             onPressed: () {
               setState(() {
@@ -1203,11 +1203,7 @@ class UpyunFileExplorerState extends loading_state.BaseLoadingPageState<UpyunFil
                               title: Text(
                                   allInfoList[index]['name'].split('/').last.length > 20
                                       ? allInfoList[index]['name'].split('/').last.substring(0, 10) +
-                                          '...' +
-                                          allInfoList[index]['name']
-                                              .split('/')
-                                              .last
-                                              .substring(allInfoList[index]['name'].split('/').last.length - 10)
+                                          '...${allInfoList[index]['name'].split('/').last.substring(allInfoList[index]['name'].split('/').last.length - 10)}'
                                       : allInfoList[index]['name'].split('/').last,
                                   style: const TextStyle(fontSize: 14)),
                               subtitle: Text(
@@ -1385,8 +1381,7 @@ class UpyunFileExplorerState extends loading_state.BaseLoadingPageState<UpyunFil
             title: Text(
                 allInfoList[index]['name'].length > 20
                     ? allInfoList[index]['name'].substring(0, 10) +
-                        '...' +
-                        allInfoList[index]['name'].substring(allInfoList[index]['name'].length - 10)
+                        '...${allInfoList[index]['name'].substring(allInfoList[index]['name'].length - 10)}'
                     : allInfoList[index]['name'],
                 style: const TextStyle(fontSize: 14)),
             subtitle: Text(allInfoList[index]['last_modified'].toString(), style: const TextStyle(fontSize: 12)),

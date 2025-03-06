@@ -8,7 +8,7 @@ import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/picture_host_manage/manage_api/alist_manage_api.dart';
 
 class AlistNewBucketRouter extends StatefulWidget {
-  const AlistNewBucketRouter({Key? key}) : super(key: key);
+  const AlistNewBucketRouter({super.key});
 
   @override
   AlistNewBucketRouterState createState() => AlistNewBucketRouterState();

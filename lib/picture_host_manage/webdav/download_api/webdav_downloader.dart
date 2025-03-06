@@ -15,8 +15,8 @@ import 'package:horopic/utils/common_functions.dart';
 
 class DownloadManager {
   final Map<String, DownloadTask> _cache = <String, DownloadTask>{};
-  final Queue<DownloadRequest> _queue = Queue();
-  var dio = Dio();
+  final Queue<dynamic> _queue = Queue();
+  Dio dio = Dio();
   static const partialExtension = ".partial";
   static const tempExtension = ".temp";
 

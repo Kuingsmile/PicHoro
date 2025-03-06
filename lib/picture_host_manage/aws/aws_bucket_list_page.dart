@@ -15,7 +15,7 @@ import 'package:horopic/utils/global.dart';
 import 'package:horopic/picture_host_manage/alist/alist_file_explorer.dart' show RenameDialog, RenameDialogContent;
 
 class AwsBucketList extends StatefulWidget {
-  const AwsBucketList({Key? key}) : super(key: key);
+  const AwsBucketList({super.key});
 
   @override
   AwsBucketListState createState() => AwsBucketListState();
@@ -178,7 +178,7 @@ class AwsBucketListState extends loading_state.BaseLoadingPageState<AwsBucketLis
           const Text('加载失败', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))),
           ElevatedButton(
             style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.all(Colors.blue),
+              backgroundColor: WidgetStateProperty.all(Colors.blue),
             ),
             onPressed: () {
               setState(() {

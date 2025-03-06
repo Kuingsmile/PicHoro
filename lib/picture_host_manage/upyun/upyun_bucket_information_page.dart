@@ -4,7 +4,7 @@ import 'package:horopic/utils/common_functions.dart';
 
 class UpyunBucketInformation extends StatefulWidget {
   final Map bucketMap;
-  const UpyunBucketInformation({Key? key, required this.bucketMap}) : super(key: key);
+  const UpyunBucketInformation({super.key, required this.bucketMap});
 
   @override
   UpyunBucketInformationState createState() => UpyunBucketInformationState();

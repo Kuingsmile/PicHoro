@@ -3,7 +3,7 @@ import 'package:horopic/utils/common_functions.dart';
 
 class AwsFileInformation extends StatefulWidget {
   final Map fileMap;
-  const AwsFileInformation({Key? key, required this.fileMap}) : super(key: key);
+  const AwsFileInformation({super.key, required this.fileMap});
 
   @override
   AwsFileInformationState createState() => AwsFileInformationState();

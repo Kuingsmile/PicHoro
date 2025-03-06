@@ -7,7 +7,7 @@ import 'package:horopic/utils/common_functions.dart';
 class AlistBucketInformation extends StatefulWidget {
   final Map bucketMap;
 
-  const AlistBucketInformation({Key? key, required this.bucketMap}) : super(key: key);
+  const AlistBucketInformation({super.key, required this.bucketMap});
 
   @override
   AlistBucketInformationState createState() => AlistBucketInformationState();

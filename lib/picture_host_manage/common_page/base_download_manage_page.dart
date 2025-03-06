@@ -51,7 +51,7 @@ class BaseUpDownloadManagePage extends StatefulWidget {
   final String tabIndex;
   final int currentListIndex;
   const BaseUpDownloadManagePage({
-    Key? key,
+    super.key,
     required this.userName,
     required this.repoName,
     required this.albumName,
@@ -60,7 +60,7 @@ class BaseUpDownloadManagePage extends StatefulWidget {
     required this.downloadPath,
     required this.tabIndex,
     required this.currentListIndex,
-  }) : super(key: key);
+  });
 
   @override
   BaseUpDownloadManagePageState createState() => BaseUpDownloadManagePageState();
@@ -420,7 +420,7 @@ class BaseUpDownloadManagePageState extends State<BaseUpDownloadManagePage> {
           padding: const EdgeInsets.all(10),
           onPressed: () async {
             String externalStorageDirectory =
-                await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOADS);
+                await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
             switch (currentPShost) {
               case 'lsky.pro':
                 externalStorageDirectory = '$externalStorageDirectory/PicHoro/Download/lskypro';

@@ -8,8 +8,7 @@ class WebdavImagePreview extends StatefulWidget {
   final List images;
   final List headersList;
 
-  const WebdavImagePreview({Key? key, required this.index, required this.images, required this.headersList})
-      : super(key: key);
+  const WebdavImagePreview({super.key, required this.index, required this.images, required this.headersList});
 
   @override
   WebdavImagePreviewState createState() => WebdavImagePreviewState();

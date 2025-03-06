@@ -5,7 +5,7 @@ import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/picture_host_manage/manage_api/upyun_manage_api.dart';
 
 class UpyunTokenManage extends StatefulWidget {
-  const UpyunTokenManage({Key? key}) : super(key: key);
+  const UpyunTokenManage({super.key});
 
   @override
   UpyunTokenManageState createState() => UpyunTokenManageState();

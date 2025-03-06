@@ -3,7 +3,7 @@ import 'package:horopic/utils/common_functions.dart';
 
 class TencentFileInformation extends StatefulWidget {
   final Map fileMap;
-  const TencentFileInformation({Key? key, required this.fileMap}) : super(key: key);
+  const TencentFileInformation({super.key, required this.fileMap});
 
   @override
   TencentFileInformationState createState() => TencentFileInformationState();

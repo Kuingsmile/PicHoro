@@ -11,10 +11,10 @@ class AlistConfigureStoreEdit extends StatefulWidget {
   final String storeKey;
   final Map psInfo;
   const AlistConfigureStoreEdit({
-    Key? key,
+    super.key,
     required this.storeKey,
     required this.psInfo,
-  }) : super(key: key);
+  });
 
   @override
   AlistConfigureStoreEditState createState() => AlistConfigureStoreEditState();

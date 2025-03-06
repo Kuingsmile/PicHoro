@@ -3,7 +3,7 @@ import 'package:horopic/utils/common_functions.dart';
 
 class UpyunFileInformation extends StatefulWidget {
   final Map fileMap;
-  const UpyunFileInformation({Key? key, required this.fileMap}) : super(key: key);
+  const UpyunFileInformation({super.key, required this.fileMap});
 
   @override
   UpyunFileInformationState createState() => UpyunFileInformationState();

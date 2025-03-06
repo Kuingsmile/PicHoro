@@ -31,11 +31,11 @@ class ImgurFileExplorer extends StatefulWidget {
   final Map albumInfo;
   final List allImages;
   const ImgurFileExplorer({
-    Key? key,
+    super.key,
     required this.userProfile,
     required this.albumInfo,
     required this.allImages,
-  }) : super(key: key);
+  });
 
   @override
   ImgurFileExplorerState createState() => ImgurFileExplorerState();
@@ -501,8 +501,8 @@ class ImgurFileExplorerState extends loading_state.BaseLoadingPageState<ImgurFil
                                 Global.imgurUploadList.add(uploadListStr);
                               }
                               await Global.setImgurUploadList(Global.imgurUploadList);
-                              String downloadPath = await ExternalPath.getExternalStoragePublicDirectory(
-                                  ExternalPath.DIRECTORY_DOWNLOADS);
+                              String downloadPath =
+                                  await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
                               if (mounted) {
                                 String albumName = '';
                                 if (widget.albumInfo.isEmpty) {
@@ -622,7 +622,7 @@ class ImgurFileExplorerState extends loading_state.BaseLoadingPageState<ImgurFil
           IconButton(
               onPressed: () async {
                 String downloadPath =
-                    await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOADS);
+                    await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
                 int index = 1;
                 if (Global.imgurDownloadList.isEmpty) {
                   index = 0;
@@ -775,7 +775,7 @@ class ImgurFileExplorerState extends loading_state.BaseLoadingPageState<ImgurFil
                     Global.imgurDownloadList.add('${downloadList[i]['link']}');
                   }
                   String downloadPath =
-                      await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOADS);
+                      await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
                   String albumName = '';
                   if (widget.albumInfo.isEmpty) {
                     albumName = '其它';
@@ -925,7 +925,7 @@ class ImgurFileExplorerState extends loading_state.BaseLoadingPageState<ImgurFil
           const Text('加载失败,请检查网络', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))),
           ElevatedButton(
             style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.all(Colors.blue),
+              backgroundColor: WidgetStateProperty.all(Colors.blue),
             ),
             onPressed: () {
               setState(() {
@@ -1185,12 +1185,7 @@ class ImgurFileExplorerState extends loading_state.BaseLoadingPageState<ImgurFil
                                   allInfoList[index]['id'].length > 20
                                       // ignore: prefer_interpolation_to_compose_strings
                                       ? allInfoList[index]['id'].toString().substring(0, 10) +
-                                          '...' +
-                                          allInfoList[index]['id']
-                                              .toString()
-                                              .substring(allInfoList[index]['id'].toString().length - 10) +
-                                          '.' +
-                                          allInfoList[index]['link'].split('.').last
+                                          '...${allInfoList[index]['id'].toString().substring(allInfoList[index]['id'].toString().length - 10)}.${allInfoList[index]['link'].split('.').last}'
                                       // ignore: prefer_interpolation_to_compose_strings
                                       : allInfoList[index]['id'].toString() +
                                           '.' +
@@ -1236,7 +1231,7 @@ class ImgurFileExplorerState extends loading_state.BaseLoadingPageState<ImgurFil
                                       shareUrl = allInfoList[i]['link'];
                                       videoList.add({
                                         "url": shareUrl,
-                                        "name": allInfoList[i]['id'] + '.' + allInfoList[i]['link'].split('.').last,
+                                        "name": '${allInfoList[i]['id']}.${allInfoList[i]['link'].split('.').last}',
                                       });
                                     } else if (i < index) {
                                       newImageIndex--;
@@ -1265,7 +1260,7 @@ class ImgurFileExplorerState extends loading_state.BaseLoadingPageState<ImgurFil
                                       shareUrl = allInfoList[i]['link'].toString();
                                       videoList.add({
                                         "url": shareUrl,
-                                        "name": allInfoList[i]['id'] + '.' + allInfoList[i]['link'].split('.').last,
+                                        "name": '${allInfoList[i]['id']}.${allInfoList[i]['link'].split('.').last}',
                                         "subtitlePath": '',
                                       });
                                     } else if (i < index) {

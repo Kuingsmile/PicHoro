@@ -24,8 +24,7 @@ class AlistUpDownloadManagePage extends StatefulWidget {
   final String downloadPath;
   final String tabIndex;
   const AlistUpDownloadManagePage(
-      {Key? key, required this.bucketName, required this.downloadPath, required this.tabIndex})
-      : super(key: key);
+      {super.key, required this.bucketName, required this.downloadPath, required this.tabIndex});
 
   @override
   AlistUpDownloadManagePageState createState() => AlistUpDownloadManagePageState();
@@ -238,7 +237,7 @@ class AlistUpDownloadManagePageState extends State<AlistUpDownloadManagePage> {
           padding: const EdgeInsets.all(10),
           onPressed: () async {
             String externalStorageDirectory =
-                await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOADS);
+                await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
             externalStorageDirectory = '$externalStorageDirectory/PicHoro/Download/alist';
             // ignore: use_build_context_synchronously
             Application.router.navigateTo(context,
@@ -376,14 +375,13 @@ class ListItem extends StatefulWidget {
   final String fileName;
   final Map<String, dynamic> configMap;
   const ListItem(
-      {Key? key,
+      {super.key,
       required this.onDownloadPlayPausedPressed,
       required this.onDelete,
       required this.url,
       required this.fileName,
       required this.configMap,
-      this.downloadTask})
-      : super(key: key);
+      this.downloadTask});
 
   @override
   ListItemState createState() => ListItemState();
@@ -518,14 +516,13 @@ class UploadListItem extends StatefulWidget {
   final String fileName;
   final Map<String, dynamic> configMap;
   const UploadListItem(
-      {Key? key,
+      {super.key,
       required this.onUploadPlayPausedPressed,
       required this.onDelete,
       required this.path,
       required this.fileName,
       required this.configMap,
-      this.uploadTask})
-      : super(key: key);
+      this.uploadTask});
 
   @override
   UploadListItemState createState() => UploadListItemState();

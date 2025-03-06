@@ -30,10 +30,10 @@ class LskyproFileExplorer extends StatefulWidget {
   final Map userProfile;
   final Map albumInfo;
   const LskyproFileExplorer({
-    Key? key,
+    super.key,
     required this.userProfile,
     required this.albumInfo,
-  }) : super(key: key);
+  });
 
   @override
   LskyproFileExplorerState createState() => LskyproFileExplorerState();
@@ -472,8 +472,8 @@ class LskyproFileExplorerState extends loading_state.BaseLoadingPageState<Lskypr
                                 Global.lskyproUploadList.add(uploadListStr);
                               }
                               await Global.setLskyproUploadList(Global.lskyproUploadList);
-                              String downloadPath = await ExternalPath.getExternalStoragePublicDirectory(
-                                  ExternalPath.DIRECTORY_DOWNLOADS);
+                              String downloadPath =
+                                  await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
                               if (mounted) {
                                 String albumName = '';
                                 if (widget.albumInfo.isEmpty) {
@@ -553,7 +553,7 @@ class LskyproFileExplorerState extends loading_state.BaseLoadingPageState<Lskypr
           IconButton(
               onPressed: () async {
                 String downloadPath =
-                    await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOADS);
+                    await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
                 int index = 1;
                 if (Global.lskyproDownloadList.isEmpty) {
                   index = 0;
@@ -694,7 +694,7 @@ class LskyproFileExplorerState extends loading_state.BaseLoadingPageState<Lskypr
                     Global.lskyproDownloadList.add(downloadList[i]['links']['url']);
                   }
                   String downloadPath =
-                      await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOADS);
+                      await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
                   String albumName = '';
                   if (widget.albumInfo.isEmpty) {
                     albumName = '其它';
@@ -842,7 +842,7 @@ class LskyproFileExplorerState extends loading_state.BaseLoadingPageState<Lskypr
           const Text('加载失败,请检查网络', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))),
           ElevatedButton(
             style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.all(Colors.blue),
+              backgroundColor: WidgetStateProperty.all(Colors.blue),
             ),
             onPressed: () {
               setState(() {
@@ -1094,11 +1094,7 @@ class LskyproFileExplorerState extends loading_state.BaseLoadingPageState<Lskypr
                               title: Text(
                                   allInfoList[index]['name'].split('/').last.length > 20
                                       ? allInfoList[index]['name'].split('/').last.substring(0, 10) +
-                                          '...' +
-                                          allInfoList[index]['name']
-                                              .split('/')
-                                              .last
-                                              .substring(allInfoList[index]['name'].split('/').last.length - 10)
+                                          '...${allInfoList[index]['name'].split('/').last.substring(allInfoList[index]['name'].split('/').last.length - 10)}'
                                       : allInfoList[index]['name'].split('/').last,
                                   style: const TextStyle(fontSize: 14)),
                               subtitle: Text(
@@ -1221,8 +1217,7 @@ class LskyproFileExplorerState extends loading_state.BaseLoadingPageState<Lskypr
             title: Text(
                 allInfoList[index]['name'].length > 20
                     ? allInfoList[index]['name'].substring(0, 10) +
-                        '...' +
-                        allInfoList[index]['name'].substring(allInfoList[index]['name'].length - 10)
+                        '...${allInfoList[index]['name'].substring(allInfoList[index]['name'].length - 10)}'
                     : allInfoList[index]['name'],
                 style: const TextStyle(fontSize: 14)),
             subtitle: Text(

@@ -13,7 +13,7 @@ import 'package:horopic/utils/event_bus_utils.dart';
 import 'package:horopic/picture_host_manage/manage_api/smms_manage_api.dart';
 
 class SmmsConfig extends StatefulWidget {
-  const SmmsConfig({Key? key}) : super(key: key);
+  const SmmsConfig({super.key});
 
   @override
   SmmsConfigState createState() => SmmsConfigState();

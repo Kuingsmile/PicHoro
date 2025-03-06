@@ -32,7 +32,7 @@ bool isCoverFile = false;
 class SFTPFileExplorer extends StatefulWidget {
   final Map element;
   final String bucketPrefix;
-  const SFTPFileExplorer({Key? key, required this.element, required this.bucketPrefix}) : super(key: key);
+  const SFTPFileExplorer({super.key, required this.element, required this.bucketPrefix});
 
   @override
   SFTPFileExplorerState createState() => SFTPFileExplorerState();
@@ -477,7 +477,7 @@ class SFTPFileExplorerState extends loading_state.BaseLoadingPageState<SFTPFileE
                                 }
                                 await Global.setFtpUploadList(Global.ftpUploadList);
                                 String downloadPath = await ExternalPath.getExternalStoragePublicDirectory(
-                                    ExternalPath.DIRECTORY_DOWNLOADS);
+                                    ExternalPath.DIRECTORY_DOWNLOAD);
                                 if (mounted) {
                                   Application.router
                                       .navigateTo(context,
@@ -533,7 +533,7 @@ class SFTPFileExplorerState extends loading_state.BaseLoadingPageState<SFTPFileE
                                 }
                                 await Global.setFtpUploadList(Global.ftpUploadList);
                                 String downloadPath = await ExternalPath.getExternalStoragePublicDirectory(
-                                    ExternalPath.DIRECTORY_DOWNLOADS);
+                                    ExternalPath.DIRECTORY_DOWNLOAD);
                                 if (mounted) {
                                   Application.router
                                       .navigateTo(context,
@@ -648,7 +648,7 @@ class SFTPFileExplorerState extends loading_state.BaseLoadingPageState<SFTPFileE
           IconButton(
               onPressed: () async {
                 String downloadPath =
-                    await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOADS);
+                    await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
                 // ignore: use_build_context_synchronously
                 int index = 1;
                 if (Global.ftpDownloadList.isEmpty) {
@@ -760,7 +760,7 @@ class SFTPFileExplorerState extends loading_state.BaseLoadingPageState<SFTPFileE
                   Global.ftpDownloadList.addAll(urlList);
                   await Global.setFtpDownloadList(Global.ftpDownloadList);
                   String downloadPath =
-                      await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOADS);
+                      await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
 // ignore: use_build_context_synchronously
                   Application.router.navigateTo(context,
                       '/baseUpDownloadManagePage?ftpHost=${widget.element['ftpHost']}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=1&currentListIndex=3',
@@ -921,7 +921,7 @@ class SFTPFileExplorerState extends loading_state.BaseLoadingPageState<SFTPFileE
           const Text('加载失败,请检查网络', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))),
           ElevatedButton(
             style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.all(Colors.blue),
+              backgroundColor: WidgetStateProperty.all(Colors.blue),
             ),
             onPressed: () {
               setState(() {
@@ -1206,8 +1206,7 @@ class SFTPFileExplorerState extends loading_state.BaseLoadingPageState<SFTPFileE
                               title: Text(
                                   allInfoList[index]['name'].length > 20
                                       ? allInfoList[index]['name'].substring(0, 10) +
-                                          '...' +
-                                          allInfoList[index]['name'].substring(allInfoList[index]['name'].length - 10)
+                                          '...${allInfoList[index]['name'].substring(allInfoList[index]['name'].length - 10)}'
                                       : allInfoList[index]['name'],
                                   style: const TextStyle(fontSize: 14)),
                               subtitle: Text(
@@ -1318,8 +1317,7 @@ class SFTPFileExplorerState extends loading_state.BaseLoadingPageState<SFTPFileE
             title: Text(
                 allInfoList[index]['name'].length > 20
                     ? allInfoList[index]['name'].substring(0, 10) +
-                        '...' +
-                        allInfoList[index]['name'].substring(allInfoList[index]['name'].length - 10)
+                        '...${allInfoList[index]['name'].substring(allInfoList[index]['name'].length - 10)}'
                     : allInfoList[index]['name'],
                 style: const TextStyle(fontSize: 14)),
             subtitle: Text(

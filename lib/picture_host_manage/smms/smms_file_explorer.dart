@@ -30,8 +30,8 @@ import 'package:horopic/utils/image_compress.dart';
 
 class SmmsFileExplorer extends StatefulWidget {
   const SmmsFileExplorer({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   SmmsFileExplorerState createState() => SmmsFileExplorerState();
@@ -286,8 +286,8 @@ class SmmsFileExplorerState extends loading_state.BaseLoadingPageState<SmmsFileE
                                 Global.smmsUploadList.add(uploadListStr);
                               }
                               await Global.setSmmsUploadList(Global.smmsUploadList);
-                              String downloadPath = await ExternalPath.getExternalStoragePublicDirectory(
-                                  ExternalPath.DIRECTORY_DOWNLOADS);
+                              String downloadPath =
+                                  await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
                               if (mounted) {
                                 Application.router
                                     .navigateTo(context,
@@ -361,7 +361,7 @@ class SmmsFileExplorerState extends loading_state.BaseLoadingPageState<SmmsFileE
           IconButton(
               onPressed: () async {
                 String downloadPath =
-                    await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOADS);
+                    await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
                 int index = 1;
                 if (Global.smmsDownloadList.isEmpty) {
                   index = 0;
@@ -492,7 +492,7 @@ class SmmsFileExplorerState extends loading_state.BaseLoadingPageState<SmmsFileE
                     Global.smmsSavedNameList.add(downloadList[i]['filename']);
                   }
                   String downloadPath =
-                      await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOADS);
+                      await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
                   if (mounted) {
                     Application.router.navigateTo(context,
                         '/smmsUpDownloadManagePage?downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=1',
@@ -634,7 +634,7 @@ class SmmsFileExplorerState extends loading_state.BaseLoadingPageState<SmmsFileE
           const Text('加载失败,请检查网络', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))),
           ElevatedButton(
             style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.all(Colors.blue),
+              backgroundColor: WidgetStateProperty.all(Colors.blue),
             ),
             onPressed: () {
               setState(() {
@@ -771,13 +771,11 @@ class SmmsFileExplorerState extends loading_state.BaseLoadingPageState<SmmsFileE
                             title: Text(
                                 allInfoList[index]['filename'].length > 20
                                     ? allInfoList[index]['filename'].substring(0, 10) +
-                                        '...' +
-                                        allInfoList[index]['filename']
-                                            .substring(allInfoList[index]['filename'].length - 10)
+                                        '...${allInfoList[index]['filename'].substring(allInfoList[index]['filename'].length - 10)}'
                                     : allInfoList[index]['filename'],
                                 style: const TextStyle(fontSize: 14)),
                             subtitle: Text(
-                              allInfoList[index]['created_at'] + '   ' + getFileSize(allInfoList[index]['size']),
+                              '${allInfoList[index]['created_at']}   ${getFileSize(allInfoList[index]['size'])}',
                               style: const TextStyle(fontSize: 12),
                             ),
                             trailing: IconButton(
@@ -898,12 +896,11 @@ class SmmsFileExplorerState extends loading_state.BaseLoadingPageState<SmmsFileE
             title: Text(
                 allInfoList[index]['filename'].length > 20
                     ? allInfoList[index]['filename'].substring(0, 10) +
-                        '...' +
-                        allInfoList[index]['filename'].substring(allInfoList[index]['filename'].length - 10)
+                        '...${allInfoList[index]['filename'].substring(allInfoList[index]['filename'].length - 10)}'
                     : allInfoList[index]['filename'],
                 style: const TextStyle(fontSize: 14)),
             subtitle: Text(
-              allInfoList[index]['created_at'] + '   ' + getFileSize(allInfoList[index]['size']),
+              '${allInfoList[index]['created_at']}   ${getFileSize(allInfoList[index]['size'])}',
               style: const TextStyle(fontSize: 12),
             ),
           ),

@@ -13,7 +13,7 @@ import 'package:horopic/utils/event_bus_utils.dart';
 import 'package:horopic/picture_host_manage/manage_api/aws_manage_api.dart';
 
 class AwsConfig extends StatefulWidget {
-  const AwsConfig({Key? key}) : super(key: key);
+  const AwsConfig({super.key});
 
   @override
   AwsConfigState createState() => AwsConfigState();

@@ -8,7 +8,7 @@ import 'package:horopic/router/routers.dart';
 import 'package:horopic/utils/common_functions.dart';
 
 class CommonConfig extends StatefulWidget {
-  const CommonConfig({Key? key}) : super(key: key);
+  const CommonConfig({super.key});
 
   @override
   CommonConfigState createState() => CommonConfigState();

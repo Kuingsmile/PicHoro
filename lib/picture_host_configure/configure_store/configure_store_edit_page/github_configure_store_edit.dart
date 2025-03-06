@@ -10,10 +10,10 @@ class GithubConfigureStoreEdit extends StatefulWidget {
   final String storeKey;
   final Map psInfo;
   const GithubConfigureStoreEdit({
-    Key? key,
+    super.key,
     required this.storeKey,
     required this.psInfo,
-  }) : super(key: key);
+  });
 
   @override
   GithubConfigureStoreEditState createState() => GithubConfigureStoreEditState();

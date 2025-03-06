@@ -6,7 +6,7 @@ import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/global.dart';
 
 class DefaultPShostSelect extends StatefulWidget {
-  const DefaultPShostSelect({Key? key}) : super(key: key);
+  const DefaultPShostSelect({super.key});
 
   @override
   DefaultPShostSelectState createState() => DefaultPShostSelectState();

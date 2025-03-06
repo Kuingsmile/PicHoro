@@ -10,10 +10,10 @@ class QiniuConfigureStoreEdit extends StatefulWidget {
   final String storeKey;
   final Map psInfo;
   const QiniuConfigureStoreEdit({
-    Key? key,
+    super.key,
     required this.storeKey,
     required this.psInfo,
-  }) : super(key: key);
+  });
 
   @override
   QiniuConfigureStoreEditState createState() => QiniuConfigureStoreEditState();

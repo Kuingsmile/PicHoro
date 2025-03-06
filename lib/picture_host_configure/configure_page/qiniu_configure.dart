@@ -17,7 +17,7 @@ import 'package:horopic/api/qiniu_api.dart';
 import 'package:horopic/picture_host_manage/manage_api/qiniu_manage_api.dart';
 
 class QiniuConfig extends StatefulWidget {
-  const QiniuConfig({Key? key}) : super(key: key);
+  const QiniuConfig({super.key});
 
   @override
   QiniuConfigState createState() => QiniuConfigState();

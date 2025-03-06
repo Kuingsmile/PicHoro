@@ -13,7 +13,7 @@ import 'package:horopic/picture_host_manage/manage_api/webdav_manage_api.dart';
 import 'package:webdav_client/webdav_client.dart' as webdav;
 
 class WebdavConfig extends StatefulWidget {
-  const WebdavConfig({Key? key}) : super(key: key);
+  const WebdavConfig({super.key});
 
   @override
   WebdavConfigState createState() => WebdavConfigState();

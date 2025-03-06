@@ -10,10 +10,10 @@ class AwsConfigureStoreEdit extends StatefulWidget {
   final String storeKey;
   final Map psInfo;
   const AwsConfigureStoreEdit({
-    Key? key,
+    super.key,
     required this.storeKey,
     required this.psInfo,
-  }) : super(key: key);
+  });
 
   @override
   AwsConfigureStoreEditState createState() => AwsConfigureStoreEditState();

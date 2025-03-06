@@ -727,7 +727,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
                               ),
                               onPressed: () async {
                                 await Global.setLKformat('rawurl');
-                                if (mounted) {
+                                if (context.mounted) {
                                   showToastWithContext(context, '已设置为URL格式');
                                   Navigator.pop(context);
                                 }
@@ -800,7 +800,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
                               ),
                               onPressed: () async {
                                 await Global.setLKformat('markdown_with_link');
-                                if (mounted) {
+                                if (context.mounted) {
                                   showToastWithContext(context, '已设置为md_link格式');
                                   Navigator.pop(context);
                                 }
@@ -817,7 +817,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
                               ),
                               onPressed: () async {
                                 await Global.setLKformat('custom');
-                                if (mounted) {
+                                if (context.mounted) {
                                   showToastWithContext(context, '已设置为自定义格式');
                                   Navigator.pop(context);
                                 }
@@ -860,7 +860,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
                                   value: Global.isTimeStamp,
                                   onChanged: (value) async {
                                     await Global.setIsTimeStamp(value);
-                                    if (mounted) {
+                                    if (context.mounted) {
                                       if (value) {
                                         showToastWithContext(context, '已开启时间戳重命名');
                                       } else {
@@ -880,7 +880,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
                                   value: Global.isRandomName,
                                   onChanged: (value) async {
                                     await Global.setIsRandomName(value);
-                                    if (mounted) {
+                                    if (context.mounted) {
                                       if (value) {
                                         showToastWithContext(context, '已开启随机字符串重命名');
                                       } else {
@@ -899,7 +899,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
                                   value: Global.isCustomRename,
                                   onChanged: (value) async {
                                     await Global.setIsCustomeRename(value);
-                                    if (mounted) {
+                                    if (context.mounted) {
                                       if (value) {
                                         showToastWithContext(context, '已开启自定义重命名');
                                       } else {
@@ -1000,7 +1000,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
                               }
                               await Global.setIsCopyLink(value);
                               setState(() {});
-                              if (mounted) {
+                              if (context.mounted) {
                                 Navigator.pop(context);
                               }
                             },
@@ -1438,13 +1438,12 @@ class ListItem extends StatefulWidget {
   final String path;
   final String fileName;
   const ListItem(
-      {Key? key,
+      {super.key,
       required this.onUploadPlayPausedPressed,
       required this.onDelete,
       required this.path,
       required this.fileName,
-      this.uploadTask})
-      : super(key: key);
+      this.uploadTask});
 
   @override
   ListItemState createState() => ListItemState();

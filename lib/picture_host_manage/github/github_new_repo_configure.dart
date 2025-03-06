@@ -6,8 +6,8 @@ import 'package:horopic/pages/loading.dart';
 
 class GithubNewRepoConfig extends StatefulWidget {
   const GithubNewRepoConfig({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   GithubNewRepoConfigState createState() => GithubNewRepoConfigState();

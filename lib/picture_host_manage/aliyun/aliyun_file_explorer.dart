@@ -32,7 +32,7 @@ bool isCoverFile = false;
 class AliyunFileExplorer extends StatefulWidget {
   final Map element;
   final String bucketPrefix;
-  const AliyunFileExplorer({Key? key, required this.element, required this.bucketPrefix}) : super(key: key);
+  const AliyunFileExplorer({super.key, required this.element, required this.bucketPrefix});
 
   @override
   AliyunFileExplorerState createState() => AliyunFileExplorerState();
@@ -448,7 +448,7 @@ class AliyunFileExplorerState extends loading_state.BaseLoadingPageState<AliyunF
                                 }
                                 await Global.setAliyunUploadList(Global.aliyunUploadList);
                                 String downloadPath = await ExternalPath.getExternalStoragePublicDirectory(
-                                    ExternalPath.DIRECTORY_DOWNLOADS);
+                                    ExternalPath.DIRECTORY_DOWNLOAD);
                                 if (mounted) {
                                   Application.router
                                       .navigateTo(context,
@@ -507,7 +507,7 @@ class AliyunFileExplorerState extends loading_state.BaseLoadingPageState<AliyunF
                                 }
                                 await Global.setAliyunUploadList(Global.aliyunUploadList);
                                 String downloadPath = await ExternalPath.getExternalStoragePublicDirectory(
-                                    ExternalPath.DIRECTORY_DOWNLOADS);
+                                    ExternalPath.DIRECTORY_DOWNLOAD);
                                 if (mounted) {
                                   Application.router
                                       .navigateTo(context,
@@ -622,7 +622,7 @@ class AliyunFileExplorerState extends loading_state.BaseLoadingPageState<AliyunF
           IconButton(
               onPressed: () async {
                 String downloadPath =
-                    await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOADS);
+                    await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
                 // ignore: use_build_context_synchronously
                 int index = 1;
                 if (Global.aliyunDownloadList.isEmpty) {
@@ -734,7 +734,7 @@ class AliyunFileExplorerState extends loading_state.BaseLoadingPageState<AliyunF
                   Global.aliyunDownloadList.addAll(urlList);
                   await Global.setAliyunDownloadList(Global.aliyunDownloadList);
                   String downloadPath =
-                      await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOADS);
+                      await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
                   // ignore: use_build_context_synchronously
                   Application.router.navigateTo(context,
                       '/baseUpDownloadManagePage?bucketName=${widget.element['name']}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=1&currentListIndex=1',
@@ -900,7 +900,7 @@ class AliyunFileExplorerState extends loading_state.BaseLoadingPageState<AliyunF
           const Text('加载失败,请检查网络', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))),
           ElevatedButton(
             style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.all(Colors.blue),
+              backgroundColor: WidgetStateProperty.all(Colors.blue),
             ),
             onPressed: () {
               setState(() {
@@ -1233,11 +1233,7 @@ class AliyunFileExplorerState extends loading_state.BaseLoadingPageState<AliyunF
                               title: Text(
                                   allInfoList[index]['Key'].split('/').last.length > 20
                                       ? allInfoList[index]['Key'].split('/').last.substring(0, 10) +
-                                          '...' +
-                                          allInfoList[index]['Key']
-                                              .split('/')
-                                              .last
-                                              .substring(allInfoList[index]['Key'].split('/').last.length - 10)
+                                          '...${allInfoList[index]['Key'].split('/').last.substring(allInfoList[index]['Key'].split('/').last.length - 10)}'
                                       : allInfoList[index]['Key'].split('/').last,
                                   style: const TextStyle(fontSize: 14)),
                               subtitle: Text(
@@ -1440,11 +1436,7 @@ class AliyunFileExplorerState extends loading_state.BaseLoadingPageState<AliyunF
             title: Text(
                 allInfoList[index]['Key'].split('/').last.length > 20
                     ? allInfoList[index]['Key'].split('/').last.substring(0, 10) +
-                        '...' +
-                        allInfoList[index]['Key']
-                            .split('/')
-                            .last
-                            .substring(allInfoList[index]['Key'].split('/').last.length - 10)
+                        '...${allInfoList[index]['Key'].split('/').last.substring(allInfoList[index]['Key'].split('/').last.length - 10)}'
                     : allInfoList[index]['Key'].split('/').last,
                 style: const TextStyle(fontSize: 14)),
             subtitle: Text(

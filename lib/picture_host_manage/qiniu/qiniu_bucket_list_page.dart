@@ -14,7 +14,7 @@ import 'package:horopic/picture_host_manage/manage_api/qiniu_manage_api.dart';
 import 'package:horopic/utils/common_functions.dart';
 
 class QiniuBucketList extends StatefulWidget {
-  const QiniuBucketList({Key? key}) : super(key: key);
+  const QiniuBucketList({super.key});
 
   @override
   QiniuBucketListState createState() => QiniuBucketListState();
@@ -183,7 +183,7 @@ class QiniuBucketListState extends loading_state.BaseLoadingPageState<QiniuBucke
           const Text('加载失败', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))),
           ElevatedButton(
             style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.all(Colors.blue),
+              backgroundColor: WidgetStateProperty.all(Colors.blue),
             ),
             onPressed: () {
               setState(() {

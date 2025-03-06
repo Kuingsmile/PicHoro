@@ -5,7 +5,7 @@ import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/picture_host_manage/manage_api/imgur_manage_api.dart';
 
 class ImgurTokenManage extends StatefulWidget {
-  const ImgurTokenManage({Key? key}) : super(key: key);
+  const ImgurTokenManage({super.key});
 
   @override
   ImgurTokenManageState createState() => ImgurTokenManageState();
@@ -52,35 +52,29 @@ class ImgurTokenManageState extends State<ImgurTokenManage> {
           children: [
             const ListTile(
               dense: true,
-              title: Center(
-                  child: Text('imgur用户名', style: TextStyle(fontSize: 20))),
+              title: Center(child: Text('imgur用户名', style: TextStyle(fontSize: 20))),
             ),
             ListTile(
               title: Center(
-                child: SelectableText(imgurUser,
-                    style: const TextStyle(color: Colors.blue)),
+                child: SelectableText(imgurUser, style: const TextStyle(color: Colors.blue)),
               ),
             ),
             const ListTile(
               dense: true,
-              title: Center(
-                  child: Text('Client ID', style: TextStyle(fontSize: 20))),
+              title: Center(child: Text('Client ID', style: TextStyle(fontSize: 20))),
             ),
             ListTile(
               title: Center(
-                child: SelectableText(clientID,
-                    style: const TextStyle(color: Colors.blue)),
+                child: SelectableText(clientID, style: const TextStyle(color: Colors.blue)),
               ),
             ),
             const ListTile(
               dense: true,
-              title: Center(
-                  child: Text('Access Token', style: TextStyle(fontSize: 20))),
+              title: Center(child: Text('Access Token', style: TextStyle(fontSize: 20))),
             ),
             ListTile(
               title: Center(
-                child: SelectableText(accessToken,
-                    style: const TextStyle(color: Colors.blue)),
+                child: SelectableText(accessToken, style: const TextStyle(color: Colors.blue)),
               ),
             ),
             const ListTile(
@@ -89,8 +83,7 @@ class ImgurTokenManageState extends State<ImgurTokenManage> {
             ),
             ListTile(
               title: Center(
-                child: SelectableText(proxy,
-                    style: const TextStyle(color: Colors.blue)),
+                child: SelectableText(proxy, style: const TextStyle(color: Colors.blue)),
               ),
             ),
             const SizedBox(height: 20),
@@ -102,16 +95,14 @@ class ImgurTokenManageState extends State<ImgurTokenManage> {
                   context: context,
                   onConfirm: () async {
                     Navigator.pop(context);
-                    var queryResult =
-                        await ImgurManageAPI.readImgurManageConfig();
+                    var queryResult = await ImgurManageAPI.readImgurManageConfig();
                     if (queryResult != 'Error') {
                       var jsonResult = jsonDecode(queryResult);
                       String imgurUser = jsonResult['imguruser'];
                       String clientID = jsonResult['clientid'];
                       String accessToken = 'None';
                       String proxy = 'None';
-                      await ImgurManageAPI.saveImgurManageConfig(
-                          imgurUser, clientID, accessToken, proxy);
+                      await ImgurManageAPI.saveImgurManageConfig(imgurUser, clientID, accessToken, proxy);
                       showToast('注销成功');
                       if (mounted) {
                         Navigator.pop(context);

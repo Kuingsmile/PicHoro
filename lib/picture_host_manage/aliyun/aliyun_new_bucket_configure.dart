@@ -5,8 +5,8 @@ import 'package:horopic/utils/common_functions.dart';
 
 class AliyunNewBucketConfig extends StatefulWidget {
   const AliyunNewBucketConfig({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   AliyunNewBucketConfigState createState() => AliyunNewBucketConfigState();

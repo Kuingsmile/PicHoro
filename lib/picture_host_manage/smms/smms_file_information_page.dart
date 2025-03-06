@@ -3,7 +3,7 @@ import 'package:horopic/utils/common_functions.dart';
 
 class SmmsFileInformation extends StatefulWidget {
   final Map fileMap;
-  const SmmsFileInformation({Key? key, required this.fileMap}) : super(key: key);
+  const SmmsFileInformation({super.key, required this.fileMap});
 
   @override
   SmmsFileInformationState createState() => SmmsFileInformationState();

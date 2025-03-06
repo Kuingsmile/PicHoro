@@ -16,7 +16,7 @@ import 'package:horopic/picture_host_manage/manage_api/ftp_manage_api.dart';
 
 class DownloadManager {
   final Map<String, DownloadTask> _cache = <String, DownloadTask>{};
-  final Queue<DownloadRequest> _queue = Queue();
+  final Queue<dynamic> _queue = Queue();
   var dio = Dio();
   static const partialExtension = ".partial";
   static const tempExtension = ".temp";

@@ -11,7 +11,7 @@ import 'package:horopic/router/application.dart';
 import 'package:horopic/router/routers.dart';
 
 class UpyunLogIn extends StatefulWidget {
-  const UpyunLogIn({Key? key}) : super(key: key);
+  const UpyunLogIn({super.key});
 
   @override
   UpyunLogInState createState() => UpyunLogInState();

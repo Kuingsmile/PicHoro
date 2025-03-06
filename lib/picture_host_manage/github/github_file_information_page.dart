@@ -4,7 +4,7 @@ import 'package:horopic/picture_host_manage/manage_api/github_manage_api.dart';
 
 class GithubFileInformation extends StatefulWidget {
   final Map fileMap;
-  const GithubFileInformation({Key? key, required this.fileMap}) : super(key: key);
+  const GithubFileInformation({super.key, required this.fileMap});
 
   @override
   GithubFileInformationState createState() => GithubFileInformationState();

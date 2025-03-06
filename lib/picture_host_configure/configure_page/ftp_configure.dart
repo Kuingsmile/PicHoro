@@ -15,7 +15,7 @@ import 'package:horopic/utils/global.dart';
 import 'package:horopic/picture_host_manage/manage_api/ftp_manage_api.dart';
 
 class FTPConfig extends StatefulWidget {
-  const FTPConfig({Key? key}) : super(key: key);
+  const FTPConfig({super.key});
 
   @override
   FTPConfigState createState() => FTPConfigState();

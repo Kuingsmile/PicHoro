@@ -3,7 +3,7 @@ import 'package:horopic/utils/common_functions.dart';
 
 class SFTPFileInformation extends StatefulWidget {
   final Map fileMap;
-  const SFTPFileInformation({Key? key, required this.fileMap}) : super(key: key);
+  const SFTPFileInformation({super.key, required this.fileMap});
 
   @override
   SFTPFileInformationState createState() => SFTPFileInformationState();

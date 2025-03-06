@@ -31,7 +31,7 @@ bool isCoverFile = false;
 class AwsFileExplorer extends StatefulWidget {
   final Map element;
   final String bucketPrefix;
-  const AwsFileExplorer({Key? key, required this.element, required this.bucketPrefix}) : super(key: key);
+  const AwsFileExplorer({super.key, required this.element, required this.bucketPrefix});
 
   @override
   AwsFileExplorerState createState() => AwsFileExplorerState();
@@ -441,7 +441,7 @@ class AwsFileExplorerState extends loading_state.BaseLoadingPageState<AwsFileExp
                                 }
                                 await Global.setAwsUploadList(Global.awsUploadList);
                                 String downloadPath = await ExternalPath.getExternalStoragePublicDirectory(
-                                    ExternalPath.DIRECTORY_DOWNLOADS);
+                                    ExternalPath.DIRECTORY_DOWNLOAD);
                                 if (mounted) {
                                   Application.router
                                       .navigateTo(context,
@@ -500,7 +500,7 @@ class AwsFileExplorerState extends loading_state.BaseLoadingPageState<AwsFileExp
                                 }
                                 await Global.setAwsUploadList(Global.awsUploadList);
                                 String downloadPath = await ExternalPath.getExternalStoragePublicDirectory(
-                                    ExternalPath.DIRECTORY_DOWNLOADS);
+                                    ExternalPath.DIRECTORY_DOWNLOAD);
                                 if (mounted) {
                                   Application.router
                                       .navigateTo(context,
@@ -612,7 +612,7 @@ class AwsFileExplorerState extends loading_state.BaseLoadingPageState<AwsFileExp
           IconButton(
               onPressed: () async {
                 String downloadPath =
-                    await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOADS);
+                    await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
                 // ignore: use_build_context_synchronously
                 int index = 1;
                 if (Global.awsDownloadList.isEmpty) {
@@ -730,7 +730,7 @@ class AwsFileExplorerState extends loading_state.BaseLoadingPageState<AwsFileExp
                   Global.awsDownloadList.addAll(urlList);
                   await Global.setAwsDownloadList(Global.awsDownloadList);
                   String downloadPath =
-                      await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOADS);
+                      await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
                   // ignore: use_build_context_synchronously
                   Application.router.navigateTo(context,
                       '/baseUpDownloadManagePage?bucketName=${widget.element['name']}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=1&currentListIndex=2',
@@ -909,7 +909,7 @@ class AwsFileExplorerState extends loading_state.BaseLoadingPageState<AwsFileExp
           const Text('加载失败,请检查网络', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))),
           ElevatedButton(
             style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.all(Colors.blue),
+              backgroundColor: WidgetStateProperty.all(Colors.blue),
             ),
             onPressed: () {
               setState(() {
@@ -1249,12 +1249,7 @@ class AwsFileExplorerState extends loading_state.BaseLoadingPageState<AwsFileExp
                               title: Text(
                                   allInfoList[index].key.split('/').last.length > 20
                                       ? allInfoList[index].key.split('/').last.substring(0, 10) +
-                                          '...' +
-                                          allInfoList[index]
-                                              .key
-                                              .split('/')
-                                              .last
-                                              .substring(allInfoList[index].key.split('/').last.length - 10)
+                                          '...${allInfoList[index].key.split('/').last.substring(allInfoList[index].key.split('/').last.length - 10)}'
                                       : allInfoList[index].key.split('/').last,
                                   style: const TextStyle(fontSize: 14)),
                               subtitle: Text(
@@ -1462,12 +1457,7 @@ class AwsFileExplorerState extends loading_state.BaseLoadingPageState<AwsFileExp
             title: Text(
                 allInfoList[index].key.split('/').last.length > 20
                     ? allInfoList[index].key.split('/').last.substring(0, 10) +
-                        '...' +
-                        allInfoList[index]
-                            .key
-                            .split('/')
-                            .last
-                            .substring(allInfoList[index].key.split('/').last.length - 10)
+                        '...${allInfoList[index].key.split('/').last.substring(allInfoList[index].key.split('/').last.length - 10)}'
                     : allInfoList[index].key.split('/').last,
                 style: const TextStyle(fontSize: 14)),
             subtitle:

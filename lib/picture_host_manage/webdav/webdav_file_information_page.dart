@@ -3,7 +3,7 @@ import 'package:horopic/utils/common_functions.dart';
 
 class WebdavFileInformation extends StatefulWidget {
   final Map fileMap;
-  const WebdavFileInformation({Key? key, required this.fileMap}) : super(key: key);
+  const WebdavFileInformation({super.key, required this.fileMap});
 
   @override
   WebdavFileInformationState createState() => WebdavFileInformationState();

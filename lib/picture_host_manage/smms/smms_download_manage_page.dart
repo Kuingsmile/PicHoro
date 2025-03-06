@@ -21,7 +21,7 @@ import 'package:horopic/utils/global.dart';
 class SmmsUpDownloadManagePage extends StatefulWidget {
   final String downloadPath;
   final String tabIndex;
-  const SmmsUpDownloadManagePage({Key? key, required this.downloadPath, required this.tabIndex}) : super(key: key);
+  const SmmsUpDownloadManagePage({super.key, required this.downloadPath, required this.tabIndex});
 
   @override
   SmmsUpDownloadManagePageState createState() => SmmsUpDownloadManagePageState();
@@ -232,7 +232,7 @@ class SmmsUpDownloadManagePageState extends State<SmmsUpDownloadManagePage> {
           padding: const EdgeInsets.all(10),
           onPressed: () async {
             String externalStorageDirectory =
-                await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOADS);
+                await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
             externalStorageDirectory = '$externalStorageDirectory/PicHoro/Download/smms';
             // ignore: use_build_context_synchronously
             Application.router.navigateTo(context,
@@ -270,7 +270,7 @@ class SmmsUpDownloadManagePageState extends State<SmmsUpDownloadManagePage> {
           TextButton(
               onPressed: () async {
                 String externalStorageDirectory =
-                    await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOADS);
+                    await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
                 externalStorageDirectory = '$externalStorageDirectory/PicHoro/Download/smms';
                 List savedDirList = [];
                 for (var i = 0; i < Global.smmsSavedNameList.length; i++) {
@@ -377,14 +377,13 @@ class ListItem extends StatefulWidget {
   final int index;
   final String url;
   const ListItem(
-      {Key? key,
+      {super.key,
       required this.onDownloadPlayPausedPressed,
       required this.onDelete,
       required this.savedFileNameList,
       required this.index,
       required this.url,
-      this.downloadTask})
-      : super(key: key);
+      this.downloadTask});
 
   @override
   ListItemState createState() => ListItemState();
@@ -516,14 +515,13 @@ class UploadListItem extends StatefulWidget {
   final String fileName;
   final Map<String, dynamic> configMap;
   const UploadListItem(
-      {Key? key,
+      {super.key,
       required this.onUploadPlayPausedPressed,
       required this.onDelete,
       required this.path,
       required this.fileName,
       required this.configMap,
-      this.uploadTask})
-      : super(key: key);
+      this.uploadTask});
 
   @override
   UploadListItemState createState() => UploadListItemState();

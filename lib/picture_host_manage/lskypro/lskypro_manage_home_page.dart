@@ -10,7 +10,7 @@ import 'package:horopic/picture_host_manage/manage_api/lskypro_manage_api.dart';
 import 'package:horopic/utils/common_functions.dart';
 
 class LskyproManageHomePage extends StatefulWidget {
-  const LskyproManageHomePage({Key? key}) : super(key: key);
+  const LskyproManageHomePage({super.key});
 
   @override
   LskyproManageHomePageState createState() => LskyproManageHomePageState();
@@ -86,7 +86,7 @@ class LskyproManageHomePageState extends loading_state.BaseLoadingPageState<Lsky
           const Text('加载失败', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))),
           ElevatedButton(
             style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.all(Colors.blue),
+              backgroundColor: WidgetStateProperty.all(Colors.blue),
             ),
             onPressed: () {
               setState(() {

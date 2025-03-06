@@ -32,7 +32,7 @@ bool isCoverFile = false;
 class QiniuFileExplorer extends StatefulWidget {
   final Map element;
   final String bucketPrefix;
-  const QiniuFileExplorer({Key? key, required this.element, required this.bucketPrefix}) : super(key: key);
+  const QiniuFileExplorer({super.key, required this.element, required this.bucketPrefix});
 
   @override
   QiniuFileExplorerState createState() => QiniuFileExplorerState();
@@ -454,7 +454,7 @@ class QiniuFileExplorerState extends loading_state.BaseLoadingPageState<QiniuFil
                                 }
                                 await Global.setQiniuUploadList(Global.qiniuUploadList);
                                 String downloadPath = await ExternalPath.getExternalStoragePublicDirectory(
-                                    ExternalPath.DIRECTORY_DOWNLOADS);
+                                    ExternalPath.DIRECTORY_DOWNLOAD);
                                 if (mounted) {
                                   Application.router
                                       .navigateTo(context,
@@ -515,7 +515,7 @@ class QiniuFileExplorerState extends loading_state.BaseLoadingPageState<QiniuFil
                                 }
                                 await Global.setQiniuUploadList(Global.qiniuUploadList);
                                 String downloadPath = await ExternalPath.getExternalStoragePublicDirectory(
-                                    ExternalPath.DIRECTORY_DOWNLOADS);
+                                    ExternalPath.DIRECTORY_DOWNLOAD);
                                 if (mounted) {
                                   Application.router
                                       .navigateTo(context,
@@ -637,7 +637,7 @@ class QiniuFileExplorerState extends loading_state.BaseLoadingPageState<QiniuFil
           IconButton(
               onPressed: () async {
                 String downloadPath =
-                    await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOADS);
+                    await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
                 // ignore: use_build_context_synchronously
                 int index = 1;
                 if (Global.qiniuDownloadList.isEmpty) {
@@ -755,7 +755,7 @@ class QiniuFileExplorerState extends loading_state.BaseLoadingPageState<QiniuFil
                   Global.qiniuDownloadList.addAll(urlList);
                   await Global.setQiniuDownloadList(Global.qiniuDownloadList);
                   String downloadPath =
-                      await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOADS);
+                      await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
                   // ignore: use_build_context_synchronously
                   Application.router.navigateTo(context,
                       '/baseUpDownloadManagePage?bucketName=${widget.element['name']}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=1&currentListIndex=7',
@@ -924,7 +924,7 @@ class QiniuFileExplorerState extends loading_state.BaseLoadingPageState<QiniuFil
           const Text('加载失败,请检查网络', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))),
           ElevatedButton(
             style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.all(Colors.blue),
+              backgroundColor: WidgetStateProperty.all(Colors.blue),
             ),
             onPressed: () {
               setState(() {
@@ -1267,11 +1267,7 @@ class QiniuFileExplorerState extends loading_state.BaseLoadingPageState<QiniuFil
                               title: Text(
                                   allInfoList[index]['key'].split('/').last.length > 20
                                       ? allInfoList[index]['key'].split('/').last.substring(0, 10) +
-                                          '...' +
-                                          allInfoList[index]['key']
-                                              .split('/')
-                                              .last
-                                              .substring(allInfoList[index]['key'].split('/').last.length - 10)
+                                          '...${allInfoList[index]['key'].split('/').last.substring(allInfoList[index]['key'].split('/').last.length - 10)}'
                                       : allInfoList[index]['key'].split('/').last,
                                   style: const TextStyle(fontSize: 14)),
                               subtitle: Text(
@@ -1412,7 +1408,9 @@ class QiniuFileExplorerState extends loading_state.BaseLoadingPageState<QiniuFil
                                 colorConfig: MSHColorConfig.fromCheckedUncheckedDisabled(
                                     checkedColor: Colors.blue,
                                     uncheckedColor: Colors.blue,
-                                    disabledColor: Colors.blue.withOpacity(0.5)),
+                                    disabledColor: Colors.blue.withValues(
+                                      alpha: 0.5,
+                                    )),
                                 size: 17,
                                 value: selectedFilesBool[index],
                                 style: MSHCheckboxStyle.fillScaleCheck,
@@ -1459,11 +1457,7 @@ class QiniuFileExplorerState extends loading_state.BaseLoadingPageState<QiniuFil
             title: Text(
                 allInfoList[index]['key'].split('/').last.length > 20
                     ? allInfoList[index]['key'].split('/').last.substring(0, 10) +
-                        '...' +
-                        allInfoList[index]['key']
-                            .split('/')
-                            .last
-                            .substring(allInfoList[index]['key'].split('/').last.length - 10)
+                        '...${allInfoList[index]['key'].split('/').last.substring(allInfoList[index]['key'].split('/').last.length - 10)}'
                     : allInfoList[index]['key'].split('/').last,
                 style: const TextStyle(fontSize: 14)),
             subtitle: Text(

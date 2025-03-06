@@ -4,7 +4,7 @@ import 'package:horopic/utils/common_functions.dart';
 
 class AliyunBucketInformation extends StatefulWidget {
   final Map bucketMap;
-  const AliyunBucketInformation({Key? key, required this.bucketMap}) : super(key: key);
+  const AliyunBucketInformation({super.key, required this.bucketMap});
 
   @override
   AliyunBucketInformationState createState() => AliyunBucketInformationState();

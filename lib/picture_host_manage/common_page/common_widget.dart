@@ -17,14 +17,13 @@ class UploadListItem extends StatefulWidget {
   String fileName;
   Map<String, dynamic> configMap;
   UploadListItem(
-      {Key? key,
+      {super.key,
       required this.onUploadPlayPausedPressed,
       required this.onDelete,
       required this.path,
       required this.fileName,
       required this.configMap,
-      this.uploadTask})
-      : super(key: key);
+      this.uploadTask});
 
   @override
   UploadListItemState createState() => UploadListItemState();
@@ -144,12 +143,11 @@ class ListItem extends StatefulWidget {
   final DownloadTask? downloadTask;
   final String url;
   const ListItem(
-      {Key? key,
+      {super.key,
       required this.onDownloadPlayPausedPressed,
       required this.onDelete,
       required this.url,
-      this.downloadTask})
-      : super(key: key);
+      this.downloadTask});
 
   @override
   ListItemState createState() => ListItemState();

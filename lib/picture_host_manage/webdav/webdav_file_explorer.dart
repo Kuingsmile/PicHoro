@@ -28,7 +28,7 @@ import 'package:horopic/utils/image_compress.dart';
 class WebdavFileExplorer extends StatefulWidget {
   final Map element;
   final String bucketPrefix;
-  const WebdavFileExplorer({Key? key, required this.element, required this.bucketPrefix}) : super(key: key);
+  const WebdavFileExplorer({super.key, required this.element, required this.bucketPrefix});
 
   @override
   WebdavFileExplorerState createState() => WebdavFileExplorerState();
@@ -431,7 +431,7 @@ class WebdavFileExplorerState extends loading_state.BaseLoadingPageState<WebdavF
                                 }
                                 await Global.setWebdavUploadList(Global.webdavUploadList);
                                 String downloadPath = await ExternalPath.getExternalStoragePublicDirectory(
-                                    ExternalPath.DIRECTORY_DOWNLOADS);
+                                    ExternalPath.DIRECTORY_DOWNLOAD);
                                 String bucketName = widget.bucketPrefix == '/'
                                     ? '根目录'
                                     : widget.bucketPrefix.endsWith('/')
@@ -493,7 +493,7 @@ class WebdavFileExplorerState extends loading_state.BaseLoadingPageState<WebdavF
                                 }
                                 await Global.setWebdavUploadList(Global.webdavUploadList);
                                 String downloadPath = await ExternalPath.getExternalStoragePublicDirectory(
-                                    ExternalPath.DIRECTORY_DOWNLOADS);
+                                    ExternalPath.DIRECTORY_DOWNLOAD);
                                 String bucketName = widget.bucketPrefix == '/'
                                     ? '根目录'
                                     : widget.bucketPrefix.endsWith('/')
@@ -613,7 +613,7 @@ class WebdavFileExplorerState extends loading_state.BaseLoadingPageState<WebdavF
           IconButton(
               onPressed: () async {
                 String downloadPath =
-                    await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOADS);
+                    await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
                 // ignore: use_build_context_synchronously
                 int index = 1;
                 if (Global.webdavDownloadList.isEmpty) {
@@ -733,7 +733,7 @@ class WebdavFileExplorerState extends loading_state.BaseLoadingPageState<WebdavF
                   Global.webdavDownloadList.addAll(urlList);
                   await Global.setWebdavDownloadList(Global.webdavDownloadList);
                   String downloadPath =
-                      await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOADS);
+                      await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
                   String bucketName = widget.bucketPrefix == '/'
                       ? '根目录'
                       : widget.bucketPrefix.endsWith('/')
@@ -902,7 +902,7 @@ class WebdavFileExplorerState extends loading_state.BaseLoadingPageState<WebdavF
           const Text('加载失败,请检查网络', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))),
           ElevatedButton(
             style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.all(Colors.blue),
+              backgroundColor: WidgetStateProperty.all(Colors.blue),
             ),
             onPressed: () {
               setState(() {
@@ -1032,8 +1032,7 @@ class WebdavFileExplorerState extends loading_state.BaseLoadingPageState<WebdavF
                               title: Text(
                                   allInfoList[index]['name'].length > 15
                                       ? allInfoList[index]['name'].substring(0, 7) +
-                                          '...' +
-                                          allInfoList[index]['name'].substring(allInfoList[index]['name'].length - 7)
+                                          '...${allInfoList[index]['name'].substring(allInfoList[index]['name'].length - 7)}'
                                       : allInfoList[index]['name'],
                                   style: const TextStyle(fontSize: 16)),
                               trailing: IconButton(
@@ -1185,8 +1184,7 @@ class WebdavFileExplorerState extends loading_state.BaseLoadingPageState<WebdavF
                               title: Text(
                                   allInfoList[index]['name'].length > 20
                                       ? allInfoList[index]['name'].substring(0, 10) +
-                                          '...' +
-                                          allInfoList[index]['name'].substring(allInfoList[index]['name'].length - 10)
+                                          '...${allInfoList[index]['name'].substring(allInfoList[index]['name'].length - 10)}'
                                       : allInfoList[index]['name'],
                                   style: const TextStyle(fontSize: 14)),
                               subtitle: Text(
@@ -1349,8 +1347,7 @@ class WebdavFileExplorerState extends loading_state.BaseLoadingPageState<WebdavF
             title: Text(
                 allInfoList[index]['name'].length > 20
                     ? allInfoList[index]['name'].substring(0, 10) +
-                        '...' +
-                        allInfoList[index]['name'].substring(allInfoList[index]['name'].length - 10)
+                        '...${allInfoList[index]['name'].substring(allInfoList[index]['name'].length - 10)}'
                     : allInfoList[index]['name'],
                 style: const TextStyle(fontSize: 14)),
             subtitle: Text(

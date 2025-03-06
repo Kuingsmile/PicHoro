@@ -31,7 +31,7 @@ import 'package:horopic/router/routers.dart';
 
 //a configure page for user to show configure entry
 class AllPShost extends StatefulWidget {
-  const AllPShost({Key? key}) : super(key: key);
+  const AllPShost({super.key});
 
   @override
   AllPShostState createState() => AllPShostState();

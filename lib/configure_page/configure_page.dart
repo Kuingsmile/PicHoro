@@ -11,7 +11,7 @@ import 'package:horopic/utils/common_functions.dart';
 import 'package:dio/dio.dart';
 
 class ConfigurePage extends StatefulWidget {
-  const ConfigurePage({Key? key}) : super(key: key);
+  const ConfigurePage({super.key});
 
   @override
   ConfigurePageState createState() => ConfigurePageState();

@@ -10,10 +10,10 @@ class FtpConfigureStoreEdit extends StatefulWidget {
   final String storeKey;
   final Map psInfo;
   const FtpConfigureStoreEdit({
-    Key? key,
+    super.key,
     required this.storeKey,
     required this.psInfo,
-  }) : super(key: key);
+  });
 
   @override
   FtpConfigureStoreEditState createState() => FtpConfigureStoreEditState();

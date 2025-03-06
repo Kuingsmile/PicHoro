@@ -25,7 +25,7 @@ import 'package:horopic/utils/common_functions.dart';
 
 class ConfigureStorePage extends StatefulWidget {
   final String psHost;
-  const ConfigureStorePage({Key? key, required this.psHost}) : super(key: key);
+  const ConfigureStorePage({super.key, required this.psHost});
 
   @override
   ConfigureStorePageState createState() => ConfigureStorePageState();

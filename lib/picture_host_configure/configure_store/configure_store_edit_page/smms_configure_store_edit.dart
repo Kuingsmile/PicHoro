@@ -10,10 +10,10 @@ class SmmsConfigureStoreEdit extends StatefulWidget {
   final String storeKey;
   final Map psInfo;
   const SmmsConfigureStoreEdit({
-    Key? key,
+    super.key,
     required this.storeKey,
     required this.psInfo,
-  }) : super(key: key);
+  });
 
   @override
   SmmsConfigureStoreEditState createState() => SmmsConfigureStoreEditState();

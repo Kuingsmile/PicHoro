@@ -15,9 +15,9 @@ import 'package:horopic/utils/common_functions.dart';
 class GithubReposList extends StatefulWidget {
   final String showedUsername;
   const GithubReposList({
-    Key? key,
+    super.key,
     required this.showedUsername,
-  }) : super(key: key);
+  });
 
   @override
   GithubReposListState createState() => GithubReposListState();
@@ -179,7 +179,7 @@ class GithubReposListState extends loading_state.BaseLoadingPageState<GithubRepo
           const Text('加载失败', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))),
           ElevatedButton(
             style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.all(Colors.blue),
+              backgroundColor: WidgetStateProperty.all(Colors.blue),
             ),
             onPressed: () {
               setState(() {

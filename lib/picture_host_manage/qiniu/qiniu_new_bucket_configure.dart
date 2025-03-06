@@ -5,8 +5,8 @@ import 'package:horopic/utils/common_functions.dart';
 
 class QiniuNewBucketConfig extends StatefulWidget {
   const QiniuNewBucketConfig({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   QiniuNewBucketConfigState createState() => QiniuNewBucketConfigState();

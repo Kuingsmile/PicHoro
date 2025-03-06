@@ -3,7 +3,7 @@ import 'package:horopic/utils/common_functions.dart';
 
 class GithubRepoInformation extends StatefulWidget {
   final Map repoMap;
-  const GithubRepoInformation({Key? key, required this.repoMap}) : super(key: key);
+  const GithubRepoInformation({super.key, required this.repoMap});
 
   @override
   GithubRepoInformationState createState() => GithubRepoInformationState();

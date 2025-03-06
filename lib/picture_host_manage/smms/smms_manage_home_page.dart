@@ -9,7 +9,7 @@ import 'package:horopic/picture_host_manage/manage_api/smms_manage_api.dart';
 import 'package:horopic/utils/common_functions.dart';
 
 class SmmsManageHomePage extends StatefulWidget {
-  const SmmsManageHomePage({Key? key}) : super(key: key);
+  const SmmsManageHomePage({super.key});
 
   @override
   SmmsManageHomePageState createState() => SmmsManageHomePageState();
@@ -84,7 +84,7 @@ class SmmsManageHomePageState extends loading_state.BaseLoadingPageState<SmmsMan
           const Text('加载失败', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))),
           ElevatedButton(
             style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.all(Colors.blue),
+              backgroundColor: WidgetStateProperty.all(Colors.blue),
             ),
             onPressed: () {
               setState(() {

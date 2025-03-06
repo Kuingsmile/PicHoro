@@ -8,7 +8,7 @@ import 'package:horopic/album/load_state_change.dart';
 import 'package:horopic/utils/common_functions.dart';
 
 class UpdateLog extends StatefulWidget {
-  const UpdateLog({Key? key}) : super(key: key);
+  const UpdateLog({super.key});
 
   @override
   UpdateLogState createState() => UpdateLogState();

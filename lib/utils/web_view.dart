@@ -8,7 +8,7 @@ class WebViewPage extends StatefulWidget {
   final String title;
   final bool enableJs;
 
-  const WebViewPage({Key? key, required this.url, required this.title, this.enableJs = false}) : super(key: key);
+  const WebViewPage({super.key, required this.url, required this.title, this.enableJs = false});
 
   @override
   WebViewPageState createState() => WebViewPageState();

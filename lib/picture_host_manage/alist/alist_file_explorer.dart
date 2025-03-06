@@ -32,8 +32,7 @@ class AlistFileExplorer extends StatefulWidget {
   final Map element;
   final String bucketPrefix;
   final String refresh;
-  const AlistFileExplorer({Key? key, required this.element, required this.bucketPrefix, required this.refresh})
-      : super(key: key);
+  const AlistFileExplorer({super.key, required this.element, required this.bucketPrefix, required this.refresh});
 
   @override
   AlistFileExplorerState createState() => AlistFileExplorerState();
@@ -444,7 +443,7 @@ class AlistFileExplorerState extends loading_state.BaseLoadingPageState<AlistFil
                                 }
                                 await Global.setAlistUploadList(Global.alistUploadList);
                                 String downloadPath = await ExternalPath.getExternalStoragePublicDirectory(
-                                    ExternalPath.DIRECTORY_DOWNLOADS);
+                                    ExternalPath.DIRECTORY_DOWNLOAD);
                                 if (mounted) {
                                   Application.router
                                       .navigateTo(context,
@@ -501,7 +500,7 @@ class AlistFileExplorerState extends loading_state.BaseLoadingPageState<AlistFil
                                 }
                                 await Global.setAlistUploadList(Global.alistUploadList);
                                 String downloadPath = await ExternalPath.getExternalStoragePublicDirectory(
-                                    ExternalPath.DIRECTORY_DOWNLOADS);
+                                    ExternalPath.DIRECTORY_DOWNLOAD);
                                 if (mounted) {
                                   Application.router
                                       .navigateTo(context,
@@ -615,7 +614,7 @@ class AlistFileExplorerState extends loading_state.BaseLoadingPageState<AlistFil
           IconButton(
               onPressed: () async {
                 String downloadPath =
-                    await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOADS);
+                    await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
                 // ignore: use_build_context_synchronously
                 int index = 1;
                 if (Global.alistDownloadList.isEmpty) {
@@ -756,7 +755,7 @@ class AlistFileExplorerState extends loading_state.BaseLoadingPageState<AlistFil
                   Global.alistDownloadList.addAll(urlList);
                   await Global.setAlistDownloadList(Global.alistDownloadList);
                   String downloadPath =
-                      await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOADS);
+                      await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
                   // ignore: use_build_context_synchronously
                   Application.router.navigateTo(context,
                       '/alistUpDownloadManagePage?bucketName=${Uri.encodeComponent('Alist_${widget.element['mount_path'].split('/').last}')}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=1',
@@ -917,7 +916,7 @@ class AlistFileExplorerState extends loading_state.BaseLoadingPageState<AlistFil
           const Text('加载失败,请检查网络', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))),
           ElevatedButton(
             style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.all(Colors.blue),
+              backgroundColor: WidgetStateProperty.all(Colors.blue),
             ),
             onPressed: () {
               setState(() {
@@ -1048,8 +1047,7 @@ class AlistFileExplorerState extends loading_state.BaseLoadingPageState<AlistFil
                               title: Text(
                                   allInfoList[index]['name'].length > 15
                                       ? allInfoList[index]['name'].substring(0, 7) +
-                                          '...' +
-                                          allInfoList[index]['name'].substring(allInfoList[index]['name'].length - 7)
+                                          '...${allInfoList[index]['name'].substring(allInfoList[index]['name'].length - 7)}'
                                       : allInfoList[index]['name'],
                                   style: const TextStyle(fontSize: 16)),
                               trailing: IconButton(
@@ -1204,8 +1202,7 @@ class AlistFileExplorerState extends loading_state.BaseLoadingPageState<AlistFil
                               title: Text(
                                   allInfoList[index]['name'].length > 20
                                       ? allInfoList[index]['name'].substring(0, 10) +
-                                          '...' +
-                                          allInfoList[index]['name'].substring(allInfoList[index]['name'].length - 10)
+                                          '...${allInfoList[index]['name'].substring(allInfoList[index]['name'].length - 10)}'
                                       : allInfoList[index]['name'],
                                   style: const TextStyle(fontSize: 14)),
                               subtitle: Text(
@@ -1441,8 +1438,7 @@ class AlistFileExplorerState extends loading_state.BaseLoadingPageState<AlistFil
             title: Text(
                 allInfoList[index]['name'].length > 20
                     ? allInfoList[index]['name'].substring(0, 10) +
-                        '...' +
-                        allInfoList[index]['name'].substring(allInfoList[index]['name'].length - 10)
+                        '...${allInfoList[index]['name'].substring(allInfoList[index]['name'].length - 10)}'
                     : allInfoList[index]['name'],
                 style: const TextStyle(fontSize: 14)),
             subtitle: Text(

@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:dartssh2/dartssh2.dart';
 import 'package:flutter/material.dart';
@@ -10,9 +9,9 @@ import 'package:xterm/xterm.dart';
 class SSHTermimal extends StatefulWidget {
   final Map configMap;
   const SSHTermimal({
-    Key? key,
+    super.key,
     required this.configMap,
-  }) : super(key: key);
+  });
 
   @override
   SSHTermimalState createState() => SSHTermimalState();
@@ -62,7 +61,7 @@ class SSHTermimalState extends State<SSHTermimal> {
     };
 
     terminal.onOutput = (data) {
-      session.write(utf8.encode(data) as Uint8List);
+      session.write(utf8.encode(data));
     };
 
     session.stdout.cast<List<int>>().transform(const Utf8Decoder()).listen(terminal.write);

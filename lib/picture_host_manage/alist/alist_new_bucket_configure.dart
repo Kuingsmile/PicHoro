@@ -9,11 +9,11 @@ class AlistNewBucketConfig extends StatefulWidget {
   final String update;
   final Map bucketMap;
   const AlistNewBucketConfig({
-    Key? key,
+    super.key,
     required this.driver,
     required this.update,
     required this.bucketMap,
-  }) : super(key: key);
+  });
 
   @override
   AlistNewBucketConfigState createState() => AlistNewBucketConfigState();

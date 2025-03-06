@@ -11,7 +11,7 @@ class LocalImagePreview extends StatefulWidget {
   final int index;
   final List images;
 
-  const LocalImagePreview({Key? key, required this.index, required this.images}) : super(key: key);
+  const LocalImagePreview({super.key, required this.index, required this.images});
 
   @override
   LocalImagePreviewState createState() => LocalImagePreviewState();

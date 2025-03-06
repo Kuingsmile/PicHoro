@@ -350,7 +350,7 @@ class LogPageState extends loading_state.BaseLoadingPageState<LogPage> {
           const Text('加载失败,请重试', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))),
           ElevatedButton(
             style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.all(Colors.blue),
+              backgroundColor: WidgetStateProperty.all(Colors.blue),
             ),
             onPressed: () {
               setState(() {

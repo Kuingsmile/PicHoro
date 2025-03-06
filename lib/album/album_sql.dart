@@ -56,7 +56,7 @@ class AlbumSQL {
   }
 
   static initDB(String username) async {
-    var externalDirectoryPath = await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOADS);
+    var externalDirectoryPath = await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
     var persistPath = '$externalDirectoryPath/PicHoro/Database';
     if (!await Directory(persistPath).exists()) {
       await Directory(persistPath).create(recursive: true);
@@ -97,7 +97,7 @@ class AlbumSQL {
   }
 
   static initExtendDB(String username) async {
-    var externalDirectoryPath = await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOADS);
+    var externalDirectoryPath = await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
     var persistPath = '$externalDirectoryPath/PicHoro/Database';
     if (!await Directory(persistPath).exists()) {
       await Directory(persistPath).create(recursive: true);

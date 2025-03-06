@@ -17,7 +17,7 @@ import 'package:horopic/utils/event_bus_utils.dart';
 import 'package:horopic/picture_host_manage/manage_api/tencent_manage_api.dart';
 
 class TencentConfig extends StatefulWidget {
-  const TencentConfig({Key? key}) : super(key: key);
+  const TencentConfig({super.key});
 
   @override
   TencentConfigState createState() => TencentConfigState();

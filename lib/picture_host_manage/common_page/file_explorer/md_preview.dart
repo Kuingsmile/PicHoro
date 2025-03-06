@@ -13,10 +13,10 @@ class MarkDownPreview extends StatefulWidget {
   final String filePath;
   final String fileName;
   const MarkDownPreview({
-    Key? key,
+    super.key,
     required this.filePath,
     required this.fileName,
-  }) : super(key: key);
+  });
 
   @override
   MarkDownPreviewState createState() => MarkDownPreviewState();

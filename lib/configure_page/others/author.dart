@@ -6,7 +6,7 @@ import 'package:horopic/album/load_state_change.dart';
 import 'package:horopic/utils/common_functions.dart';
 
 class AuthorInformation extends StatelessWidget {
-  const AuthorInformation({Key? key}) : super(key: key);
+  const AuthorInformation({super.key});
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -30,9 +30,7 @@ class AuthorInformation extends StatelessWidget {
                       content: '是否保存到相册？',
                       onConfirm: () async {
                         Navigator.pop(context);
-                        var path = await ExternalPath
-                            .getExternalStoragePublicDirectory(
-                                ExternalPath.DIRECTORY_DCIM);
+                        var path = await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DCIM);
                         String fileurl = 'https://pichoro.msq.pub/wechat.png';
                         try {
                           await Dio().download(fileurl, '$path/wechat.png');
@@ -48,8 +46,7 @@ class AuthorInformation extends StatelessWidget {
                     fit: BoxFit.contain,
                     mode: ExtendedImageMode.gesture,
                     cache: false,
-                    loadStateChanged: (state) =>
-                        defaultLoadStateChanged(state, iconSize: 60),
+                    loadStateChanged: (state) => defaultLoadStateChanged(state, iconSize: 60),
                     initGestureConfigHandler: (state) {
                       return GestureConfig(
                           minScale: 0.9,

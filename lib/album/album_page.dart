@@ -160,7 +160,7 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
         ),
         onPressed: () async {
           await Global.setLKformat(format);
-          if (mounted) {
+          if (context.mounted) {
             showToastWithContext(context, '已设置为${pasteFormatNamesList[index]}');
             Navigator.pop(context);
           }
@@ -239,7 +239,7 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
                             onChanged: (value) async {
                               await Global.setIsDeleteCloud(value);
                               setState(() {});
-                              if (mounted) {
+                              if (context.mounted) {
                                 if (value == true) {
                                   showToastWithContext(context, '已开启云端删除');
                                 } else {

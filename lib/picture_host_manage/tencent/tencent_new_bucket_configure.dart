@@ -5,8 +5,8 @@ import 'package:horopic/utils/common_functions.dart';
 
 class NewBucketConfig extends StatefulWidget {
   const NewBucketConfig({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   NewBucketConfigState createState() => NewBucketConfigState();

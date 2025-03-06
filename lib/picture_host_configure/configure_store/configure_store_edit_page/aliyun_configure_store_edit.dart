@@ -10,14 +10,13 @@ class AliyunConfigureStoreEdit extends StatefulWidget {
   final String storeKey;
   final Map psInfo;
   const AliyunConfigureStoreEdit({
-    Key? key,
+    super.key,
     required this.storeKey,
     required this.psInfo,
-  }) : super(key: key);
+  });
 
   @override
-  AliyunConfigureStoreEditState createState() =>
-      AliyunConfigureStoreEditState();
+  AliyunConfigureStoreEditState createState() => AliyunConfigureStoreEditState();
 }
 
 class AliyunConfigureStoreEditState extends State<AliyunConfigureStoreEdit> {
@@ -39,16 +38,7 @@ class AliyunConfigureStoreEditState extends State<AliyunConfigureStoreEdit> {
   }
 
   _initConfig() {
-    List keys = [
-      'remarkName',
-      'keyId',
-      'keySecret',
-      'bucket',
-      'area',
-      'path',
-      'customUrl',
-      'options'
-    ];
+    List keys = ['remarkName', 'keyId', 'keySecret', 'bucket', 'area', 'path', 'customUrl', 'options'];
     for (String element in keys) {
       if (widget.psInfo[element] != ConfigureTemplate.placeholder) {
         switch (element) {
@@ -207,7 +197,7 @@ class AliyunConfigureStoreEditState extends State<AliyunConfigureStoreEdit> {
                 _importConfig();
                 setState(() {});
               },
-              child: titleText('导入当前图床配置',fontsize: null),
+              child: titleText('导入当前图床配置', fontsize: null),
             )),
             ListTile(
                 title: ElevatedButton(
@@ -217,7 +207,7 @@ class AliyunConfigureStoreEditState extends State<AliyunConfigureStoreEdit> {
                   Navigator.pop(context, true);
                 }
               },
-              child: titleText('保存配置',fontsize: null),
+              child: titleText('保存配置', fontsize: null),
             )),
           ],
         ),
@@ -275,8 +265,7 @@ class AliyunConfigureStoreEditState extends State<AliyunConfigureStoreEdit> {
 
       if (customUrl.isEmpty || customUrl.trim().isEmpty) {
         customUrl = ConfigureTemplate.placeholder;
-      } else if (!customUrl.startsWith('http') &&
-          !customUrl.startsWith('https')) {
+      } else if (!customUrl.startsWith('http') && !customUrl.startsWith('https')) {
         customUrl = 'http://$customUrl';
       }
 

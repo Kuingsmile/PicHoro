@@ -9,7 +9,7 @@ import 'package:horopic/picture_host_manage/manage_api/github_manage_api.dart';
 import 'package:horopic/utils/common_functions.dart';
 
 class GithubManageHomePage extends StatefulWidget {
-  const GithubManageHomePage({Key? key}) : super(key: key);
+  const GithubManageHomePage({super.key});
 
   @override
   GithubManageHomePageState createState() => GithubManageHomePageState();
@@ -92,7 +92,7 @@ class GithubManageHomePageState extends loading_state.BaseLoadingPageState<Githu
           const Text('加载失败', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))),
           ElevatedButton(
             style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.all(Colors.blue),
+              backgroundColor: WidgetStateProperty.all(Colors.blue),
             ),
             onPressed: () {
               setState(() {

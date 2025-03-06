@@ -15,7 +15,7 @@ import 'package:horopic/utils/global.dart';
 import 'package:horopic/picture_host_manage/alist/alist_file_explorer.dart' show RenameDialog, RenameDialogContent;
 
 class AliyunBucketList extends StatefulWidget {
-  const AliyunBucketList({Key? key}) : super(key: key);
+  const AliyunBucketList({super.key});
 
   @override
   AliyunBucketListState createState() => AliyunBucketListState();
@@ -176,7 +176,7 @@ class AliyunBucketListState extends loading_state.BaseLoadingPageState<AliyunBuc
           const Text('加载失败', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))),
           ElevatedButton(
             style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.all(Colors.blue),
+              backgroundColor: WidgetStateProperty.all(Colors.blue),
             ),
             onPressed: () {
               setState(() {

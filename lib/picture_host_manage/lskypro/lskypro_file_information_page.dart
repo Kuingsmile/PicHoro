@@ -3,8 +3,7 @@ import 'package:horopic/utils/common_functions.dart';
 
 class LskyproFileInformation extends StatefulWidget {
   final Map fileMap;
-  const LskyproFileInformation({Key? key, required this.fileMap})
-      : super(key: key);
+  const LskyproFileInformation({super.key, required this.fileMap});
 
   @override
   LskyproFileInformationState createState() => LskyproFileInformationState();
@@ -36,9 +35,7 @@ class LskyproFileInformationState extends State<LskyproFileInformation> {
           ),
           ListTile(
             title: const Text('文件大小'),
-            subtitle: SelectableText(getFileSize(
-                int.parse(widget.fileMap['size'].toString().split('.')[0]) *
-                    1024)),
+            subtitle: SelectableText(getFileSize(int.parse(widget.fileMap['size'].toString().split('.')[0]) * 1024)),
           ),
           ListTile(
             title: const Text('mime类型'),

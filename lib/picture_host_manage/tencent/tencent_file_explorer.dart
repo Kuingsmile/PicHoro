@@ -32,7 +32,7 @@ bool isCoverFile = false;
 class TencentFileExplorer extends StatefulWidget {
   final Map element;
   final String bucketPrefix;
-  const TencentFileExplorer({Key? key, required this.element, required this.bucketPrefix}) : super(key: key);
+  const TencentFileExplorer({super.key, required this.element, required this.bucketPrefix});
 
   @override
   TencentFileExplorerState createState() => TencentFileExplorerState();
@@ -448,7 +448,7 @@ class TencentFileExplorerState extends loading_state.BaseLoadingPageState<Tencen
                                 }
                                 await Global.setTencentUploadList(Global.tencentUploadList);
                                 String downloadPath = await ExternalPath.getExternalStoragePublicDirectory(
-                                    ExternalPath.DIRECTORY_DOWNLOADS);
+                                    ExternalPath.DIRECTORY_DOWNLOAD);
                                 if (mounted) {
                                   Application.router
                                       .navigateTo(context,
@@ -507,7 +507,7 @@ class TencentFileExplorerState extends loading_state.BaseLoadingPageState<Tencen
                                 }
                                 await Global.setTencentUploadList(Global.tencentUploadList);
                                 String downloadPath = await ExternalPath.getExternalStoragePublicDirectory(
-                                    ExternalPath.DIRECTORY_DOWNLOADS);
+                                    ExternalPath.DIRECTORY_DOWNLOAD);
                                 if (mounted) {
                                   Application.router
                                       .navigateTo(context,
@@ -616,7 +616,7 @@ class TencentFileExplorerState extends loading_state.BaseLoadingPageState<Tencen
           IconButton(
               onPressed: () async {
                 String downloadPath =
-                    await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOADS);
+                    await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
                 // ignore: use_build_context_synchronously
                 int index = 1;
                 if (Global.tencentDownloadList.isEmpty) {
@@ -729,7 +729,7 @@ class TencentFileExplorerState extends loading_state.BaseLoadingPageState<Tencen
                   Global.tencentDownloadList.addAll(urlList);
                   await Global.setTencentDownloadList(Global.tencentDownloadList);
                   String downloadPath =
-                      await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOADS);
+                      await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
                   // ignore: use_build_context_synchronously
                   Application.router.navigateTo(context,
                       '/baseUpDownloadManagePage?bucketName=${widget.element['name']}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=1&currentListIndex=9',
@@ -896,7 +896,7 @@ class TencentFileExplorerState extends loading_state.BaseLoadingPageState<Tencen
           const Text('加载失败,请检查网络', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))),
           ElevatedButton(
             style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.all(Colors.blue),
+              backgroundColor: WidgetStateProperty.all(Colors.blue),
             ),
             onPressed: () {
               setState(() {
@@ -1227,11 +1227,7 @@ class TencentFileExplorerState extends loading_state.BaseLoadingPageState<Tencen
                               title: Text(
                                   allInfoList[index]['Key'].split('/').last.length > 20
                                       ? allInfoList[index]['Key'].split('/').last.substring(0, 10) +
-                                          '...' +
-                                          allInfoList[index]['Key']
-                                              .split('/')
-                                              .last
-                                              .substring(allInfoList[index]['Key'].split('/').last.length - 10)
+                                          '...${allInfoList[index]['Key'].split('/').last.substring(allInfoList[index]['Key'].split('/').last.length - 10)}'
                                       : allInfoList[index]['Key'].split('/').last,
                                   style: const TextStyle(fontSize: 14)),
                               subtitle: Text(
@@ -1444,11 +1440,7 @@ class TencentFileExplorerState extends loading_state.BaseLoadingPageState<Tencen
             title: Text(
                 allInfoList[index]['Key'].split('/').last.length > 20
                     ? allInfoList[index]['Key'].split('/').last.substring(0, 10) +
-                        '...' +
-                        allInfoList[index]['Key']
-                            .split('/')
-                            .last
-                            .substring(allInfoList[index]['Key'].split('/').last.length - 10)
+                        '...${allInfoList[index]['Key'].split('/').last.substring(allInfoList[index]['Key'].split('/').last.length - 10)}'
                     : allInfoList[index]['Key'].split('/').last,
                 style: const TextStyle(fontSize: 14)),
             subtitle: Text(

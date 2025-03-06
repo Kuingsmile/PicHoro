@@ -15,12 +15,12 @@ class NetVideoPlayer extends StatefulWidget {
   final Map<String, String> headers;
 
   const NetVideoPlayer({
-    Key? key,
+    super.key,
     required this.videoList,
     required this.index,
     required this.type,
     required this.headers,
-  }) : super(key: key);
+  });
 
   @override
   State<StatefulWidget> createState() {
@@ -181,11 +181,11 @@ class _NetVideoPlayerState extends State<NetVideoPlayer> {
         ),
       ]);
     } else {
-      return WillPopScope(
-        onWillPop: () async {
+      return PopScope(
+        canPop: true,
+        onPopInvokedWithResult: (bool didpop, dynamic) {
           AutoOrientation.portraitUpMode();
           SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: SystemUiOverlay.values);
-          return true;
         },
         child: Center(
           child: centerBuild(),
@@ -418,9 +418,9 @@ class _NetVideoPlayerState extends State<NetVideoPlayer> {
         padding: const EdgeInsets.only(left: 5, right: 5),
         child: ElevatedButton(
           style: ButtonStyle(
-              shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(5))),
-              elevation: MaterialStateProperty.all(0),
-              backgroundColor: MaterialStateProperty.all(activeIndex == _currActiveIdx ? Colors.red : Colors.blue)),
+              shape: WidgetStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(5))),
+              elevation: WidgetStateProperty.all(0),
+              backgroundColor: WidgetStateProperty.all(activeIndex == _currActiveIdx ? Colors.red : Colors.blue)),
           onPressed: () async {
             setState(() {
               _currActiveIdx = activeIndex;

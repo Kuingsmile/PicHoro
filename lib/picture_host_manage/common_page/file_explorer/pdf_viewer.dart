@@ -13,11 +13,11 @@ class PdfViewer extends StatefulWidget {
   final Map<String, String>? headers;
 
   const PdfViewer({
-    Key? key,
+    super.key,
     required this.url,
     required this.fileName,
     required this.headers,
-  }) : super(key: key);
+  });
 
   @override
   PdfViewerState createState() => PdfViewerState();

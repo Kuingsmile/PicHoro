@@ -4,7 +4,7 @@ import 'package:horopic/picture_host_manage/manage_api/alist_manage_api.dart';
 
 class AlistFileInformation extends StatefulWidget {
   final Map fileMap;
-  const AlistFileInformation({Key? key, required this.fileMap}) : super(key: key);
+  const AlistFileInformation({super.key, required this.fileMap});
 
   @override
   AlistFileInformationState createState() => AlistFileInformationState();

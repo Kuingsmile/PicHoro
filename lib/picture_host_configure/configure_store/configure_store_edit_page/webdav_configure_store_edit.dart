@@ -10,10 +10,10 @@ class WebdavConfigureStoreEdit extends StatefulWidget {
   final String storeKey;
   final Map psInfo;
   const WebdavConfigureStoreEdit({
-    Key? key,
+    super.key,
     required this.storeKey,
     required this.psInfo,
-  }) : super(key: key);
+  });
 
   @override
   WebdavConfigureStoreEditState createState() => WebdavConfigureStoreEditState();

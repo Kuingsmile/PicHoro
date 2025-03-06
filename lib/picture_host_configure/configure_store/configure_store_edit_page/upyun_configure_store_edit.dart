@@ -10,10 +10,10 @@ class UpyunConfigureStoreEdit extends StatefulWidget {
   final String storeKey;
   final Map psInfo;
   const UpyunConfigureStoreEdit({
-    Key? key,
+    super.key,
     required this.storeKey,
     required this.psInfo,
-  }) : super(key: key);
+  });
 
   @override
   UpyunConfigureStoreEditState createState() => UpyunConfigureStoreEditState();

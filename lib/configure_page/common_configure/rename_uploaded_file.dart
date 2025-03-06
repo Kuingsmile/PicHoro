@@ -3,7 +3,7 @@ import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/common_functions.dart';
 
 class RenameFile extends StatefulWidget {
-  const RenameFile({Key? key}) : super(key: key);
+  const RenameFile({super.key});
 
   @override
   RenameFileState createState() => RenameFileState();

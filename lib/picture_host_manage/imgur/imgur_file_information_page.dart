@@ -3,7 +3,7 @@ import 'package:horopic/utils/common_functions.dart';
 
 class ImgurFileInformation extends StatefulWidget {
   final Map fileMap;
-  const ImgurFileInformation({Key? key, required this.fileMap}) : super(key: key);
+  const ImgurFileInformation({super.key, required this.fileMap});
 
   @override
   ImgurFileInformationState createState() => ImgurFileInformationState();

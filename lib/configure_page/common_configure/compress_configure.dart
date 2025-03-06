@@ -3,7 +3,7 @@ import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/common_functions.dart';
 
 class CompressConfigure extends StatefulWidget {
-  const CompressConfigure({Key? key}) : super(key: key);
+  const CompressConfigure({super.key});
 
   @override
   CompressConfigureState createState() => CompressConfigureState();

@@ -10,10 +10,10 @@ class LskyproConfigureStoreEdit extends StatefulWidget {
   final String storeKey;
   final Map psInfo;
   const LskyproConfigureStoreEdit({
-    Key? key,
+    super.key,
     required this.storeKey,
     required this.psInfo,
-  }) : super(key: key);
+  });
 
   @override
   LskyproConfigureStoreEditState createState() => LskyproConfigureStoreEditState();

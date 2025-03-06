@@ -16,7 +16,7 @@ import 'package:horopic/utils/global.dart';
 
 class UploadManager {
   final Map<String, UploadTask> _cache = <String, UploadTask>{};
-  final Queue<UploadRequest> _queue = Queue();
+  final Queue<dynamic> _queue = Queue();
   Dio dio = Dio();
 
   int maxConcurrentTasks = 2;

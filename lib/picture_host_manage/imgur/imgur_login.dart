@@ -9,7 +9,7 @@ import 'package:horopic/router/application.dart';
 import 'package:horopic/router/routers.dart';
 
 class ImgurLogIn extends StatefulWidget {
-  const ImgurLogIn({Key? key}) : super(key: key);
+  const ImgurLogIn({super.key});
 
   @override
   ImgurLogInState createState() => ImgurLogInState();

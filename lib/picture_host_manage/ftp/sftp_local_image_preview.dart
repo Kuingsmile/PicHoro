@@ -11,7 +11,7 @@ class SFTPLocalImagePreview extends StatefulWidget {
   final Map configMap;
   final String image;
 
-  const SFTPLocalImagePreview({Key? key, required this.configMap, required this.image}) : super(key: key);
+  const SFTPLocalImagePreview({super.key, required this.configMap, required this.image});
 
   @override
   SFTPLocalImagePreviewState createState() => SFTPLocalImagePreviewState();

@@ -13,7 +13,7 @@ import 'package:horopic/utils/event_bus_utils.dart';
 import 'package:horopic/picture_host_manage/manage_api/alist_manage_api.dart';
 
 class AlistConfig extends StatefulWidget {
-  const AlistConfig({Key? key}) : super(key: key);
+  const AlistConfig({super.key});
 
   @override
   AlistConfigState createState() => AlistConfigState();

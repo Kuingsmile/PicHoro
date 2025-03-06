@@ -3,7 +3,7 @@ import 'package:horopic/utils/common_functions.dart';
 
 class QiniuFileInformation extends StatefulWidget {
   final Map fileMap;
-  const QiniuFileInformation({Key? key, required this.fileMap}) : super(key: key);
+  const QiniuFileInformation({super.key, required this.fileMap});
 
   @override
   QiniuFileInformationState createState() => QiniuFileInformationState();

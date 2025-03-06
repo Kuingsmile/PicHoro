@@ -9,9 +9,9 @@ import 'package:horopic/utils/common_functions.dart';
 class QiniuBucketDomainAreaConfig extends StatefulWidget {
   final Map element;
   const QiniuBucketDomainAreaConfig({
-    Key? key,
+    super.key,
     required this.element,
-  }) : super(key: key);
+  });
 
   @override
   QiniuBucketDomainAreaConfigState createState() => QiniuBucketDomainAreaConfigState();

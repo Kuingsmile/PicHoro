@@ -20,7 +20,7 @@ const Map<String, String> statusMsgMap = {
 };
 
 class HostConfig extends StatefulWidget {
-  const HostConfig({Key? key}) : super(key: key);
+  const HostConfig({super.key});
 
   @override
   HostConfigState createState() => HostConfigState();

@@ -3,7 +3,7 @@ import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/common_functions.dart';
 
 class LinkFormatSelect extends StatefulWidget {
-  const LinkFormatSelect({Key? key}) : super(key: key);
+  const LinkFormatSelect({super.key});
 
   @override
   LinkFormatSelectState createState() => LinkFormatSelectState();

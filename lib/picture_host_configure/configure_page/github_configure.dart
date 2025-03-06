@@ -13,7 +13,7 @@ import 'package:horopic/picture_host_manage/manage_api/github_manage_api.dart';
 import 'package:horopic/utils/event_bus_utils.dart';
 
 class GithubConfig extends StatefulWidget {
-  const GithubConfig({Key? key}) : super(key: key);
+  const GithubConfig({super.key});
 
   @override
   GithubConfigState createState() => GithubConfigState();

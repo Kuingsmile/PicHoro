@@ -19,7 +19,7 @@ import 'package:horopic/picture_host_manage/manage_api/aliyun_manage_api.dart';
 import 'package:horopic/pages/loading.dart';
 
 class AliyunConfig extends StatefulWidget {
-  const AliyunConfig({Key? key}) : super(key: key);
+  const AliyunConfig({super.key});
 
   @override
   AliyunConfigState createState() => AliyunConfigState();

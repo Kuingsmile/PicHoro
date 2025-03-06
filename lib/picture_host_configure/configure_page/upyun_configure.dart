@@ -15,7 +15,7 @@ import 'package:horopic/utils/event_bus_utils.dart';
 import 'package:horopic/picture_host_manage/manage_api/upyun_manage_api.dart';
 
 class UpyunConfig extends StatefulWidget {
-  const UpyunConfig({Key? key}) : super(key: key);
+  const UpyunConfig({super.key});
 
   @override
   UpyunConfigState createState() => UpyunConfigState();

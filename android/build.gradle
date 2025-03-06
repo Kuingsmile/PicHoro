@@ -1,20 +1,3 @@
-buildscript {
-    ext.kotlin_version = '1.9.10'
-    repositories {
-        //google()
-        //mavenCentral()
-      maven { url 'https://maven.aliyun.com/repository/google' }
-      maven { url 'https://maven.aliyun.com/repository/jcenter' }
-      maven { url 'https://maven.aliyun.com/nexus/content/groups/public' }
-    }
-
-    dependencies {
-        classpath 'com.android.tools.build:gradle:7.4.2'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        
-    }
-}
-
 allprojects {
         gradle.projectsEvaluated {
         tasks.withType(JavaCompile) {
@@ -23,12 +6,37 @@ allprojects {
     }
 
     repositories {
-        //google()
-        //mavenCentral()
-        maven { url 'https://maven.aliyun.com/repository/google' }
-      maven { url 'https://maven.aliyun.com/repository/jcenter' }
-      maven { url 'https://maven.aliyun.com/nexus/content/groups/public' }
+        google()
+        mavenCentral()
+        jcenter()
+        //maven { url 'https://maven.aliyun.com/repository/google' }
+       //maven { url 'https://maven.aliyun.com/repository/jcenter' }
+      // maven { url 'https://maven.aliyun.com/nexus/content/groups/public' }
     }
+    
+    subprojects {
+        afterEvaluate { project ->
+            if (project.hasProperty('android')) {
+                project.android {
+                    if (namespace == null) {
+                        namespace project.group
+                    }
+                }
+            }
+            if (project.plugins.hasPlugin("com.android.application") || project.plugins.hasPlugin("com.android.library")) {
+            tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach { kotlinTask ->
+                def sourceCompatibility = project.android.compileOptions.sourceCompatibility?.toString() ?: "1.8"
+                def jvmTarget = kotlinTask.kotlinOptions.jvmTarget ?: ""
+                if (sourceCompatibility != jvmTarget) {
+                    kotlinTask.kotlinOptions.jvmTarget = sourceCompatibility
+                    println "INFO: Updated jvmTarget for ${project.name} to ${sourceCompatibility}"
+                }
+            }
+        }
+        }
+    }
+    // 修复由于高版本导致namespace检测为空的问题，没遇到可不添加
+
 }
 
 rootProject.buildDir = '../build'

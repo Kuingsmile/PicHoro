@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
 
 class ControlsOverlay extends StatelessWidget {
-  const ControlsOverlay({Key? key, required this.controller}) : super(key: key);
+  const ControlsOverlay({super.key, required this.controller});
 
   final VlcPlayerController controller;
 

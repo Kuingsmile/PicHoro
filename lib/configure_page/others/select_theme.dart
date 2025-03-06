@@ -4,7 +4,7 @@ import 'package:horopic/utils/theme_provider.dart';
 import 'package:horopic/utils/common_functions.dart';
 
 class ChangeTheme extends StatefulWidget {
-  const ChangeTheme({Key? key}) : super(key: key);
+  const ChangeTheme({super.key});
 
   @override
   ChangeThemeState createState() => ChangeThemeState();

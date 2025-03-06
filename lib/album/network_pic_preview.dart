@@ -7,7 +7,7 @@ class ImagePreview extends StatefulWidget {
   final int index;
   final List images;
 
-  const ImagePreview({Key? key, required this.index, required this.images}) : super(key: key);
+  const ImagePreview({super.key, required this.index, required this.images});
 
   @override
   ImagePreviewState createState() => ImagePreviewState();

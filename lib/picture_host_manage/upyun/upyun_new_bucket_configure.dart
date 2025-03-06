@@ -7,8 +7,8 @@ import 'package:horopic/utils/common_functions.dart';
 
 class UpyunNewBucketConfig extends StatefulWidget {
   const UpyunNewBucketConfig({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   UpyunNewBucketConfigState createState() => UpyunNewBucketConfigState();

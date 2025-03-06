@@ -14,7 +14,7 @@ import 'package:horopic/picture_host_manage/manage_api/upyun_manage_api.dart';
 import 'package:horopic/utils/common_functions.dart';
 
 class UpyunBucketList extends StatefulWidget {
-  const UpyunBucketList({Key? key}) : super(key: key);
+  const UpyunBucketList({super.key});
 
   @override
   UpyunBucketListState createState() => UpyunBucketListState();
@@ -203,7 +203,7 @@ class UpyunBucketListState extends loading_state.BaseLoadingPageState<UpyunBucke
           const Text('加载失败', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))),
           ElevatedButton(
             style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.all(Colors.blue),
+              backgroundColor: WidgetStateProperty.all(Colors.blue),
             ),
             onPressed: () {
               setState(() {
