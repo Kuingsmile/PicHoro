@@ -25,6 +25,10 @@ class AppInfoProvider with ChangeNotifier {
     _initAsync();
   }
 
+  bool isDarkMode() {
+    return _themeColor == 'dark';
+  }
+
   Future<void> _initAsync() async {
     await SpUtil.getInstance();
     String colorset = SpUtil.getString('key_theme_color', defValue: 'light')!;

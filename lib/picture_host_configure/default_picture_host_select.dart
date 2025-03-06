@@ -33,6 +33,65 @@ class DefaultPShostSelectState extends State<DefaultPShostSelect> {
     'webdav',
   ];
 
+  Widget _buildSettingCard({required String title, required List<Widget> children}) {
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+            child: Text(
+              title,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          ...children,
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHostItem({
+    required String title,
+    required String id,
+    required IconData icon,
+  }) {
+    final bool isSelected = Global.defaultPShost == id;
+
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 2.0),
+      leading: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: isSelected ? Theme.of(context).primaryColor.withOpacity(0.2) : Colors.grey.withOpacity(0.2),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Icon(
+          icon,
+          color: isSelected ? Theme.of(context).primaryColor : Colors.grey,
+        ),
+      ),
+      title: Text(title),
+      trailing: isSelected
+          ? Icon(Icons.check_circle, color: Theme.of(context).primaryColor)
+          : const Icon(Icons.circle_outlined, color: Colors.grey),
+      onTap: () async {
+        await setdefaultPShostRemoteAndLocal(id);
+        eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
+        eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
+        setState(() {});
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -40,41 +99,108 @@ class DefaultPShostSelectState extends State<DefaultPShostSelect> {
         elevation: 0,
         centerTitle: true,
         title: titleText('默认图床选择'),
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withValues(alpha: 0.8)],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
+        ),
       ),
       body: ListView(
-        children: _buildHostTiles(),
+        physics: const BouncingScrollPhysics(),
+        children: [
+          const SizedBox(height: 8),
+          _buildSettingCard(
+            title: '云存储图床',
+            children: [
+              _buildHostItem(
+                title: '七牛云',
+                id: 'qiniu',
+                icon: Icons.cloud_upload,
+              ),
+              const Divider(height: 1, indent: 56),
+              _buildHostItem(
+                title: '腾讯云',
+                id: 'tencent',
+                icon: Icons.cloud,
+              ),
+              const Divider(height: 1, indent: 56),
+              _buildHostItem(
+                title: '阿里云',
+                id: 'aliyun',
+                icon: Icons.cloud_circle,
+              ),
+              const Divider(height: 1, indent: 56),
+              _buildHostItem(
+                title: '又拍云',
+                id: 'upyun',
+                icon: Icons.cloud_queue,
+              ),
+              const Divider(height: 1, indent: 56),
+              _buildHostItem(
+                title: 'S3兼容平台',
+                id: 'aws',
+                icon: Icons.all_inbox,
+              ),
+            ],
+          ),
+          _buildSettingCard(
+            title: '公共图床',
+            children: [
+              _buildHostItem(
+                title: '兰空图床',
+                id: 'lsky.pro',
+                icon: Icons.photo_album,
+              ),
+              const Divider(height: 1, indent: 56),
+              _buildHostItem(
+                title: 'SM.MS',
+                id: 'sm.ms',
+                icon: Icons.photo_library,
+              ),
+              const Divider(height: 1, indent: 56),
+              _buildHostItem(
+                title: 'Github图床',
+                id: 'github',
+                icon: Icons.code,
+              ),
+              const Divider(height: 1, indent: 56),
+              _buildHostItem(
+                title: 'Imgur图床',
+                id: 'imgur',
+                icon: Icons.image,
+              ),
+            ],
+          ),
+          _buildSettingCard(
+            title: '自建图床/网盘',
+            children: [
+              _buildHostItem(
+                title: 'Alist V3',
+                id: 'alist',
+                icon: Icons.folder_shared,
+              ),
+              const Divider(height: 1, indent: 56),
+              _buildHostItem(
+                title: 'FTP-SSH/SFTP',
+                id: 'ftp',
+                icon: Icons.storage,
+              ),
+              const Divider(height: 1, indent: 56),
+              _buildHostItem(
+                title: 'WebDAV',
+                id: 'webdav',
+                icon: Icons.web,
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+        ],
       ),
     );
-  }
-
-  List<Widget> _buildHostTiles() {
-    final hosts = [
-      {'name': 'Alist V3', 'id': 'alist'},
-      {'name': '阿里云', 'id': 'aliyun'},
-      {'name': 'FTP-SSH/SFTP', 'id': 'ftp'},
-      {'name': 'Github图床', 'id': 'github'},
-      {'name': 'Imgur图床', 'id': 'imgur'},
-      {'name': '兰空图床', 'id': 'lsky.pro'},
-      {'name': '七牛云', 'id': 'qiniu'},
-      {'name': 'S3兼容平台', 'id': 'aws'},
-      {'name': 'SM.MS', 'id': 'sm.ms'},
-      {'name': '腾讯云', 'id': 'tencent'},
-      {'name': '又拍云', 'id': 'upyun'},
-      {'name': 'WebDAV', 'id': 'webdav'},
-    ];
-
-    return hosts.map((host) {
-      return ListTile(
-        title: Text(host['name']!),
-        trailing: Global.defaultPShost == host['id'] ? const Icon(Icons.check) : null,
-        onTap: () async {
-          await setdefaultPShostRemoteAndLocal(host['id']!);
-          eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-          eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
-          setState(() {});
-        },
-      );
-    }).toList();
   }
 }
 

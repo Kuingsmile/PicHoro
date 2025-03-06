@@ -689,6 +689,55 @@ class AllPShostState extends State<AllPShost> {
     }
   }
 
+  Widget _buildSettingCard({required String title, required List<Widget> children}) {
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+            child: Text(
+              title,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          ...children,
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSettingItem({
+    required String title,
+    required IconData icon,
+    required VoidCallback onTap,
+    Widget? trailing,
+    Color? iconColor,
+  }) {
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 2.0),
+      leading: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: iconColor ?? Theme.of(context).primaryColor.withValues(alpha: 0.2),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Icon(icon, color: iconColor ?? Theme.of(context).primaryColor),
+      ),
+      title: Text(title),
+      onTap: onTap,
+      trailing: trailing ?? const Icon(Icons.arrow_forward_ios, size: 16),
+    );
+  }
+
   SimpleDialogOption _buildSimpleDialogOption(BuildContext context, String text, String value) {
     return SimpleDialogOption(
       child: Text(text, textAlign: TextAlign.center),
@@ -735,159 +784,197 @@ class AllPShostState extends State<AllPShost> {
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
-        title: titleText(
-          '图床设置',
+        title: titleText('图床设置'),
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withValues(alpha: 0.8)],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
         ),
       ),
-      body: ListView(children: [
-        ListTile(
-          leading: const Icon(
-            Icons.camera_alt_outlined,
-          ),
-          minLeadingWidth: 0,
-          title: const Text('二维码扫描导入PicGo配置'),
-          onTap: () async {
-            await _scan();
-            if (context.mounted) {
-              showDialog(
-                  context: this.context,
-                  barrierDismissible: false,
-                  builder: (context) {
-                    return NetLoadingDialog(
-                      outsideDismiss: false,
-                      loading: true,
-                      loadingText: "配置中...",
-                      requestCallBack: processingQRCodeResult(),
-                    );
-                  });
-            }
-          },
-          trailing: const Icon(Icons.arrow_forward_ios),
-        ),
-        const Divider(
-          height: 1,
-          color: Colors.grey,
-        ),
-        ListTile(
-          title: const Text('默认图床选择'),
-          onTap: () {
-            Application.router.navigateTo(context, Routes.defaultPShostSelect, transition: TransitionType.cupertino);
-          },
-          trailing: const Icon(Icons.arrow_forward_ios),
-        ),
-        ListTile(
-          title: const Text('AList V3'),
-          onTap: () {
-            Application.router.navigateTo(context, Routes.alistPShostSelect, transition: TransitionType.cupertino);
-          },
-          trailing: const Icon(Icons.arrow_forward_ios),
-        ),
-        ListTile(
-          title: const Text('阿里云OSS'),
-          onTap: () {
-            Application.router.navigateTo(context, Routes.aliyunPShostSelect, transition: TransitionType.cupertino);
-          },
-          trailing: const Icon(Icons.arrow_forward_ios),
-        ),
-        ListTile(
-          title: const Text('FTP-SSH/SFTP'),
-          onTap: () {
-            Application.router.navigateTo(context, Routes.ftpPShostSelect, transition: TransitionType.cupertino);
-          },
-          trailing: const Icon(Icons.arrow_forward_ios),
-        ),
-        ListTile(
-          title: const Text('Github图床'),
-          onTap: () {
-            Application.router.navigateTo(context, Routes.githubPShostSelect, transition: TransitionType.cupertino);
-          },
-          trailing: const Icon(Icons.arrow_forward_ios),
-        ),
-        ListTile(
-          title: const Text('Imgur图床'),
-          onTap: () {
-            Application.router.navigateTo(context, Routes.imgurPShostSelect, transition: TransitionType.cupertino);
-          },
-          trailing: const Icon(Icons.arrow_forward_ios),
-        ),
-        ListTile(
-          title: const Text('兰空图床V2'),
-          onTap: () {
-            Application.router.navigateTo(context, Routes.lskyproPShostSelect, transition: TransitionType.cupertino);
-          },
-          trailing: const Icon(Icons.arrow_forward_ios),
-        ),
-        ListTile(
-          title: const Text('七牛云存储'),
-          onTap: () {
-            Application.router.navigateTo(context, Routes.qiniuPShostSelect, transition: TransitionType.cupertino);
-          },
-          trailing: const Icon(Icons.arrow_forward_ios),
-        ),
-        ListTile(
-          title: const Text('S3兼容平台'),
-          onTap: () {
-            Application.router.navigateTo(context, Routes.awsPShostSelect, transition: TransitionType.cupertino);
-          },
-          trailing: const Icon(Icons.arrow_forward_ios),
-        ),
-        ListTile(
-          title: const Text('SM.MS图床'),
-          onTap: () {
-            Application.router.navigateTo(context, Routes.smmsPShostSelect, transition: TransitionType.cupertino);
-          },
-          trailing: const Icon(Icons.arrow_forward_ios),
-        ),
-        ListTile(
-          title: const Text('腾讯云COS V5'),
-          onTap: () {
-            Application.router.navigateTo(context, Routes.tencentPShostSelect, transition: TransitionType.cupertino);
-          },
-          trailing: const Icon(Icons.arrow_forward_ios),
-        ),
-        ListTile(
-          title: const Text('又拍云存储'),
-          onTap: () {
-            Application.router.navigateTo(context, Routes.upyunPShostSelect, transition: TransitionType.cupertino);
-          },
-          trailing: const Icon(Icons.arrow_forward_ios),
-        ),
-        ListTile(
-          title: const Text('WebDAV'),
-          onTap: () {
-            Application.router.navigateTo(context, Routes.webdavPShostSelect, transition: TransitionType.cupertino);
-          },
-          trailing: const Icon(Icons.arrow_forward_ios),
-        ),
-      ]),
-      floatingActionButton: SizedBox(
-          height: 40,
-          width: 40,
-          child: FloatingActionButton(
-            heroTag: 'copyConfig',
-            backgroundColor: const Color.fromARGB(255, 198, 135, 235),
-            onPressed: () async {
-              await showDialog(
-                barrierDismissible: true,
-                context: context,
-                builder: (context) {
-                  return SimpleDialog(
-                    title: const Text(
-                      '选择要复制配置的图床',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    children: _buildSimpleDialogOptions(context),
-                  );
+      body: ListView(
+        physics: const BouncingScrollPhysics(),
+        children: [
+          const SizedBox(height: 8),
+          _buildSettingCard(
+            title: '导入导出',
+            children: [
+              _buildSettingItem(
+                title: '二维码扫描导入PicGo配置',
+                icon: Icons.qr_code_scanner,
+                onTap: () async {
+                  await _scan();
+                  if (context.mounted) {
+                    showDialog(
+                        context: this.context,
+                        barrierDismissible: false,
+                        builder: (context) {
+                          return NetLoadingDialog(
+                            outsideDismiss: false,
+                            loading: true,
+                            loadingText: "配置中...",
+                            requestCallBack: processingQRCodeResult(),
+                          );
+                        });
+                  }
                 },
-              );
-            },
-            child: const Icon(
-              Icons.outbox_outlined,
-              color: Colors.white,
-              size: 30,
-            ),
-          )),
+              ),
+            ],
+          ),
+          _buildSettingCard(
+            title: '图床配置',
+            children: [
+              _buildSettingItem(
+                title: '默认图床选择',
+                icon: Icons.photo_library,
+                onTap: () {
+                  Application.router
+                      .navigateTo(context, Routes.defaultPShostSelect, transition: TransitionType.cupertino);
+                },
+              ),
+              const Divider(height: 1, indent: 56),
+              _buildSettingItem(
+                title: 'AList V3',
+                icon: Icons.folder_shared,
+                onTap: () {
+                  Application.router
+                      .navigateTo(context, Routes.alistPShostSelect, transition: TransitionType.cupertino);
+                },
+              ),
+              const Divider(height: 1, indent: 56),
+              _buildSettingItem(
+                title: '阿里云OSS',
+                icon: Icons.cloud_upload,
+                onTap: () {
+                  Application.router
+                      .navigateTo(context, Routes.aliyunPShostSelect, transition: TransitionType.cupertino);
+                },
+              ),
+              const Divider(height: 1, indent: 56),
+              _buildSettingItem(
+                title: 'FTP-SSH/SFTP',
+                icon: Icons.storage,
+                onTap: () {
+                  Application.router.navigateTo(context, Routes.ftpPShostSelect, transition: TransitionType.cupertino);
+                },
+              ),
+              const Divider(height: 1, indent: 56),
+              _buildSettingItem(
+                title: 'Github图床',
+                icon: Icons.code,
+                onTap: () {
+                  Application.router
+                      .navigateTo(context, Routes.githubPShostSelect, transition: TransitionType.cupertino);
+                },
+              ),
+              const Divider(height: 1, indent: 56),
+              _buildSettingItem(
+                title: 'Imgur图床',
+                icon: Icons.image,
+                onTap: () {
+                  Application.router
+                      .navigateTo(context, Routes.imgurPShostSelect, transition: TransitionType.cupertino);
+                },
+              ),
+              const Divider(height: 1, indent: 56),
+              _buildSettingItem(
+                title: '兰空图床V2',
+                icon: Icons.cloud,
+                onTap: () {
+                  Application.router
+                      .navigateTo(context, Routes.lskyproPShostSelect, transition: TransitionType.cupertino);
+                },
+              ),
+              const Divider(height: 1, indent: 56),
+              _buildSettingItem(
+                title: '七牛云存储',
+                icon: Icons.cloud_circle,
+                onTap: () {
+                  Application.router
+                      .navigateTo(context, Routes.qiniuPShostSelect, transition: TransitionType.cupertino);
+                },
+              ),
+              const Divider(height: 1, indent: 56),
+              _buildSettingItem(
+                title: 'S3兼容平台',
+                icon: Icons.storage_rounded,
+                onTap: () {
+                  Application.router.navigateTo(context, Routes.awsPShostSelect, transition: TransitionType.cupertino);
+                },
+              ),
+              const Divider(height: 1, indent: 56),
+              _buildSettingItem(
+                title: 'SM.MS图床',
+                icon: Icons.camera,
+                onTap: () {
+                  Application.router.navigateTo(context, Routes.smmsPShostSelect, transition: TransitionType.cupertino);
+                },
+              ),
+              const Divider(height: 1, indent: 56),
+              _buildSettingItem(
+                title: '腾讯云COS V5',
+                icon: Icons.cloud_queue,
+                onTap: () {
+                  Application.router
+                      .navigateTo(context, Routes.tencentPShostSelect, transition: TransitionType.cupertino);
+                },
+              ),
+              const Divider(height: 1, indent: 56),
+              _buildSettingItem(
+                title: '又拍云存储',
+                icon: Icons.cloud_done,
+                onTap: () {
+                  Application.router
+                      .navigateTo(context, Routes.upyunPShostSelect, transition: TransitionType.cupertino);
+                },
+              ),
+              const Divider(height: 1, indent: 56),
+              _buildSettingItem(
+                title: 'WebDAV',
+                icon: Icons.web,
+                onTap: () {
+                  Application.router
+                      .navigateTo(context, Routes.webdavPShostSelect, transition: TransitionType.cupertino);
+                },
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+        ],
+      ),
+      floatingActionButton: SizedBox(
+        height: 50,
+        width: 50,
+        child: FloatingActionButton(
+          heroTag: 'copyConfig',
+          elevation: 3,
+          backgroundColor: Theme.of(context).primaryColor,
+          onPressed: () async {
+            await showDialog(
+              barrierDismissible: true,
+              context: context,
+              builder: (context) {
+                return SimpleDialog(
+                  title: const Text(
+                    '选择要复制配置的图床',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  children: _buildSimpleDialogOptions(context),
+                );
+              },
+            );
+          },
+          child: const Icon(
+            Icons.outbox_outlined,
+            color: Colors.white,
+            size: 30,
+          ),
+        ),
+      ),
     );
   }
 }

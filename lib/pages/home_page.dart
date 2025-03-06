@@ -78,7 +78,6 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
 
   Future<void> _initIntent() async {
     final receivedIntent = await ic_intent.ReceiveIntent.getInitialIntent();
-
     if (!mounted) return;
 
     setState(() {
@@ -701,6 +700,15 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
           ),
           shadowColor: Colors.transparent,
           elevation: 0,
+          flexibleSpace: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withValues(alpha: 0.8)],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
+            ),
+          ),
           actions: [
             PopupMenuButton(
                 onSelected: (value) {

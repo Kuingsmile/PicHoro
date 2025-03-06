@@ -673,6 +673,15 @@ class PsHostHomePageState extends State<PsHostHomePage> with AutomaticKeepAliveC
         title: titleText(
           '图床管理-长按拖动',
         ),
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withValues(alpha: 0.8)],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.restart_alt_rounded, color: Colors.white, size: 30),
