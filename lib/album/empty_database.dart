@@ -71,7 +71,7 @@ class EmptyDatabaseState extends State<EmptyDatabase> {
         flexibleSpace: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withOpacity(0.8)],
+              colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withValues(alpha: .8)],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
             ),
@@ -122,7 +122,7 @@ class EmptyDatabaseState extends State<EmptyDatabase> {
                     leading: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Theme.of(context).primaryColor.withOpacity(0.2),
+                        color: Theme.of(context).primaryColor.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Icon(

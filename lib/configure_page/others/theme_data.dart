@@ -44,7 +44,7 @@ ThemeData generateThemeData(AppThemeData themeData) {
       seedColor: Color(themeData.primaryValue),
       brightness: themeData.brightness,
     ),
-    fontFamily: "iconfont",
+    fontFamily: 'SystemFont',
     appBarTheme: AppBarTheme(
       backgroundColor: Color(themeData.primaryValue),
     ),

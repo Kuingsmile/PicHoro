@@ -1,6 +1,7 @@
 import 'package:f_logs/f_logs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:horopic/utils/system_font_provider.dart';
 import 'package:provider/provider.dart';
 
 import 'package:horopic/router/application.dart';
@@ -37,6 +38,7 @@ class MyAppState extends State<MyApp> {
         ChangeNotifierProvider.value(value: AppInfoProvider()),
       ],
       child: Consumer<AppInfoProvider>(builder: (context, appInfo, child) {
+        NativeFeatures.loadSystemFont();
         return MaterialApp(
           title: 'PicHoro',
           debugShowCheckedModeBanner: false,
