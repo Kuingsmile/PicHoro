@@ -13,136 +13,52 @@ class EmptyDatabase extends StatefulWidget {
 }
 
 class EmptyDatabaseState extends State<EmptyDatabase> {
-  final _psHostNameList = [
-    '兰空',
-    'SM.MS',
-    'Github',
-    'Imgur',
-    '七牛云',
-    '腾讯云',
-    '阿里云',
-    '又拍云',
-  ];
-  final _tableNameList = [
-    'lskypro',
-    'smms',
-    'github',
-    'imgur',
-    'qiniu',
-    'tencent',
-    'aliyun',
-    'upyun',
+  // Database structure definition
+  final List<Map<String, dynamic>> _databaseGroups = [
+    {
+      'title': '主要图床',
+      'options': [
+        {'name': '兰空', 'table': 'lskypro', 'icon': Icons.delete_outline},
+        {'name': 'SM.MS', 'table': 'smms', 'icon': Icons.delete_outline},
+        {'name': 'Github', 'table': 'github', 'icon': Icons.delete_outline},
+        {'name': 'Imgur', 'table': 'imgur', 'icon': Icons.delete_outline},
+        {'name': '七牛云', 'table': 'qiniu', 'icon': Icons.delete_outline},
+        {'name': '腾讯云', 'table': 'tencent', 'icon': Icons.delete_outline},
+        {'name': '阿里云', 'table': 'aliyun', 'icon': Icons.delete_outline},
+        {'name': '又拍云', 'table': 'upyun', 'icon': Icons.delete_outline},
+      ],
+      'isExtended': false,
+    },
+    {
+      'title': '扩展存储',
+      'options': [
+        {'name': 'FTP', 'table': 'PBhostExtend1', 'icon': Icons.storage},
+        {'name': 'S3兼容平台', 'table': 'PBhostExtend2', 'icon': Icons.cloud_outlined},
+        {'name': 'AList V3', 'table': 'PBhostExtend3', 'icon': Icons.view_list_outlined},
+        {'name': 'WebDAV', 'table': 'PBhostExtend4', 'icon': Icons.web_outlined},
+      ],
+      'isExtended': true,
+    },
+    {
+      'title': '全部数据',
+      'options': [
+        {'name': '清空所有数据库', 'table': 'all', 'icon': Icons.delete_forever},
+      ],
+      'isExtended': false,
+    },
   ];
 
-  Widget getListTile(BuildContext context, int index) {
-    return ListTile(
-        title: Center(child: Text(_psHostNameList[index])),
-        onTap: () async {
-          showCupertinoAlertDialogWithConfirmFunc(
-            title: '通知',
-            content: '是否确定清空${_psHostNameList[index]}数据库？',
-            context: context,
-            onConfirm: () async {
-              Navigator.pop(context);
-              await AlbumSQL.deleteTable(Global.imageDB!, _tableNameList[index]);
-              showToast('已清空${_psHostNameList[index]}数据库');
-              eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-            },
-          );
-        });
-  }
-
-  List<Widget> getListTiles(BuildContext context) {
-    List<Widget> listTiles = [];
-    for (int i = 0; i < _psHostNameList.length; i++) {
-      listTiles.add(getListTile(context, i));
+  // Clear a specific table
+  Future<void> _clearTable(String table, String name, bool isExtended) async {
+    Navigator.pop(context);
+    if (table == 'all') {
+      await AlbumSQL.emptyAllTable(Global.imageDB!);
+      await AlbumSQL.emptyAllTableExtend(Global.imageDBExtend!);
+    } else {
+      await AlbumSQL.deleteTable(isExtended ? Global.imageDBExtend! : Global.imageDB!, table);
     }
-    ListTile ftpEmpty = ListTile(
-        title: const Center(child: Text('FTP')),
-        onTap: () async {
-          showCupertinoAlertDialogWithConfirmFunc(
-            title: '通知',
-            content: '是否确定清空FTP数据库？',
-            context: context,
-            onConfirm: () async {
-              Navigator.pop(context);
-              await AlbumSQL.deleteTable(Global.imageDBExtend!, 'PBhostExtend1');
-              showToast('已清空FTP数据库');
-              eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-            },
-          );
-        });
-    ListTile awsEmpty = ListTile(
-        title: const Center(child: Text('S3兼容平台')),
-        onTap: () async {
-          showCupertinoAlertDialogWithConfirmFunc(
-            title: '通知',
-            content: '是否确定清空S3兼容平台数据库？',
-            context: context,
-            onConfirm: () async {
-              Navigator.pop(context);
-              await AlbumSQL.deleteTable(Global.imageDBExtend!, 'PBhostExtend2');
-              showToast('已清空S3兼容平台数据库');
-              eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-            },
-          );
-        });
-    ListTile alistEmpty = ListTile(
-        title: const Center(child: Text('AList V3')),
-        onTap: () async {
-          showCupertinoAlertDialogWithConfirmFunc(
-            title: '通知',
-            content: '是否确定清空AList数据库？',
-            context: context,
-            onConfirm: () async {
-              Navigator.pop(context);
-              await AlbumSQL.deleteTable(Global.imageDBExtend!, 'PBhostExtend3');
-              showToast('已清空AList数据库');
-              eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-            },
-          );
-        });
-    ListTile webdavEmpty = ListTile(
-        title: const Center(child: Text('WebDAV')),
-        onTap: () async {
-          showCupertinoAlertDialogWithConfirmFunc(
-            title: '通知',
-            content: '是否确定清空WebDAV数据库？',
-            context: context,
-            onConfirm: () async {
-              Navigator.pop(context);
-              await AlbumSQL.deleteTable(Global.imageDBExtend!, 'PBhostExtend4');
-              showToast('已清空WebDAV数据库');
-              eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-            },
-          );
-        });
-    ListTile allEmpty = ListTile(
-        title: const Center(child: Text('所有数据库')),
-        onTap: () async {
-          showCupertinoAlertDialogWithConfirmFunc(
-            title: '通知',
-            content: '是否确定清空全部数据库?',
-            context: context,
-            onConfirm: () async {
-              Navigator.pop(context);
-              await AlbumSQL.emptyAllTable(
-                Global.imageDB!,
-              );
-              await AlbumSQL.emptyAllTableExtend(
-                Global.imageDBExtend!,
-              );
-              showToast('已清空所有数据库');
-              eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-            },
-          );
-        });
-    listTiles.add(ftpEmpty);
-    listTiles.add(awsEmpty);
-    listTiles.add(alistEmpty);
-    listTiles.add(webdavEmpty);
-    listTiles.add(allEmpty);
-    return listTiles;
+    showToast('已清空${name == '清空所有数据库' ? '所有' : name}数据库');
+    eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
   }
 
   @override
@@ -152,9 +68,83 @@ class EmptyDatabaseState extends State<EmptyDatabase> {
         elevation: 0,
         centerTitle: true,
         title: titleText('选择需要清空的数据库'),
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withOpacity(0.8)],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
+        ),
       ),
-      body: ListView(
-        children: getListTiles(context),
+      body: ListView.builder(
+        physics: const BouncingScrollPhysics(),
+        itemCount: _databaseGroups.length + 1, // +1 for bottom padding
+        itemBuilder: (context, index) {
+          if (index == _databaseGroups.length) {
+            return const SizedBox(height: 24);
+          }
+
+          final group = _databaseGroups[index];
+          final options = group['options'] as List<Map<String, dynamic>>;
+          final bool isExtended = group['isExtended'] as bool;
+
+          return Card(
+            margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            elevation: 2,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                  child: Text(
+                    group['title'],
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                ...List.generate(options.length * 2 - 1, (i) {
+                  // For dividers
+                  if (i.isOdd) return const Divider(height: 1, indent: 56);
+
+                  // For list tiles
+                  final optionIndex = i ~/ 2;
+                  final option = options[optionIndex];
+
+                  return ListTile(
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 2.0),
+                    leading: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).primaryColor.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(
+                        option['icon'],
+                        color: Theme.of(context).primaryColor,
+                      ),
+                    ),
+                    title: Text(option['name']),
+                    onTap: () {
+                      showCupertinoAlertDialogWithConfirmFunc(
+                        title: '通知',
+                        content: '是否确定清空${option['name']}数据库？',
+                        context: context,
+                        onConfirm: () => _clearTable(option['table'], option['name'], isExtended),
+                      );
+                    },
+                  );
+                }),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
