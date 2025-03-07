@@ -433,9 +433,9 @@ ${configMap['options']}
     }
   }
 
-  _setdefault() async {
-    await Global.setPShost('tencent');
-    await Global.setShowedPBhost('tencent');
+  _setdefault() {
+    Global.setPShost('tencent');
+    Global.setShowedPBhost('tencent');
     eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
     eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
     showToast('已设置腾讯云为默认图床');

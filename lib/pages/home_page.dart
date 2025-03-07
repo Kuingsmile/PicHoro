@@ -734,7 +734,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
                                 ),
                               ),
                               onPressed: () async {
-                                await Global.setLKformat('rawurl');
+                                Global.setLKformat('rawurl');
                                 if (context.mounted) {
                                   showToastWithContext(context, '已设置为URL格式');
                                   Navigator.pop(context);
@@ -751,7 +751,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
                                 ),
                               ),
                               onPressed: () async {
-                                await Global.setLKformat('html');
+                                Global.setLKformat('html');
                                 if (mounted) {
                                   showToastWithContext(context, '已设置为HTML格式');
                                   Navigator.pop(context);
@@ -768,7 +768,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
                                 ),
                               ),
                               onPressed: () async {
-                                await Global.setLKformat('bbcode');
+                                Global.setLKformat('bbcode');
                                 if (mounted) {
                                   showToastWithContext(context, '已设置为BBcode格式');
                                   Navigator.pop(context);
@@ -786,7 +786,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
                                 ),
                               ),
                               onPressed: () async {
-                                await Global.setLKformat('markdown');
+                                Global.setLKformat('markdown');
                                 if (mounted) {
                                   showToastWithContext(context, '已设置为markdown格式');
                                   Navigator.pop(context);
@@ -807,7 +807,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
                                 ),
                               ),
                               onPressed: () async {
-                                await Global.setLKformat('markdown_with_link');
+                                Global.setLKformat('markdown_with_link');
                                 if (context.mounted) {
                                   showToastWithContext(context, '已设置为md_link格式');
                                   Navigator.pop(context);
@@ -824,7 +824,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
                                 ),
                               ),
                               onPressed: () async {
-                                await Global.setLKformat('custom');
+                                Global.setLKformat('custom');
                                 if (context.mounted) {
                                   showToastWithContext(context, '已设置为自定义格式');
                                   Navigator.pop(context);
@@ -838,8 +838,8 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
                                 decoration: const InputDecoration(
                                   hintText: r'使用$url和$fileName作为占位符',
                                 ),
-                                onChanged: (String value) async {
-                                  await Global.setCustomLinkFormat(value);
+                                onChanged: (String value) {
+                                  Global.setCustomLinkFormat(value);
                                 },
                               ),
                             ),
@@ -867,7 +867,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
                                 trailing: Switch(
                                   value: Global.isTimeStamp,
                                   onChanged: (value) async {
-                                    await Global.setIsTimeStamp(value);
+                                    Global.setIsTimeStamp(value);
                                     if (context.mounted) {
                                       if (value) {
                                         showToastWithContext(context, '已开启时间戳重命名');
@@ -887,7 +887,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
                                 trailing: Switch(
                                   value: Global.isRandomName,
                                   onChanged: (value) async {
-                                    await Global.setIsRandomName(value);
+                                    Global.setIsRandomName(value);
                                     if (context.mounted) {
                                       if (value) {
                                         showToastWithContext(context, '已开启随机字符串重命名');
@@ -906,7 +906,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
                                 trailing: Switch(
                                   value: Global.isCustomRename,
                                   onChanged: (value) async {
-                                    await Global.setIsCustomeRename(value);
+                                    Global.setIsCustomeRename(value);
                                     if (context.mounted) {
                                       if (value) {
                                         showToastWithContext(context, '已开启自定义重命名');
@@ -927,8 +927,8 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
                                   label: Center(child: Text('自定义重命名格式')),
                                   hintText: r'规则参考表格，可随意组合其它字符',
                                 ),
-                                onChanged: (String value) async {
-                                  await Global.setCustomeRenameFormat(value);
+                                onChanged: (String value) {
+                                  Global.setCustomeRenameFormat(value);
                                 },
                               ),
                             ),
@@ -1006,7 +1006,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
                               } else {
                                 showToastWithContext(context, '关闭链接复制');
                               }
-                              await Global.setIsCopyLink(value);
+                              Global.setIsCopyLink(value);
                               setState(() {});
                               if (context.mounted) {
                                 Navigator.pop(context);

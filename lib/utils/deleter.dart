@@ -25,8 +25,8 @@ Map<String, Function> deleteFunc = {
 //获取图床配置文件
 Future<File> get _localFile async {
   final directory = await getApplicationDocumentsDirectory();
-  String defaultConfig = await Global.getShowedPBhost();
-  String defaultUser = await Global.getUser();
+  String defaultConfig = Global.getShowedPBhost();
+  String defaultUser = Global.getUser();
   switch (defaultConfig) {
     case 'lskypro':
       return File('${directory.path}/${defaultUser}_${getpdconfig('lsky.pro')}.txt');
@@ -68,7 +68,7 @@ deleterentry(Map deleteConfig) async {
       return ["Error"];
     }
     Map configMap = jsonDecode(configData);
-    String defaultConfig = await Global.getShowedPBhost();
+    String defaultConfig = Global.getShowedPBhost();
     return await deleteFunc[defaultConfig]!(deleteMap: deleteConfig, configMap: configMap);
   } catch (e) {
     flogErr(

@@ -285,7 +285,7 @@ class SmmsFileExplorerState extends loading_state.BaseLoadingPageState<SmmsFileE
                                 String uploadListStr = jsonEncode(uploadList);
                                 Global.smmsUploadList.add(uploadListStr);
                               }
-                              await Global.setSmmsUploadList(Global.smmsUploadList);
+                              Global.setSmmsUploadList(Global.smmsUploadList);
                               String downloadPath =
                                   await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
                               if (mounted) {
@@ -933,7 +933,7 @@ class SmmsFileExplorerState extends loading_state.BaseLoadingPageState<SmmsFileE
             minLeadingWidth: 0,
             title: const Text('复制链接(设置中的默认格式)'),
             onTap: () async {
-              String format = await Global.getLKformat();
+              String format = Global.getLKformat();
               String shareUrl = allInfoList[index]['url'];
               String filename = my_path.basename(allInfoList[index]['filename']);
               String formatedLink = linkGeneratorMap[format]!(shareUrl, filename);

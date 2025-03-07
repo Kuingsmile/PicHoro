@@ -379,9 +379,9 @@ class AwsConfigState extends State<AwsConfig> {
     }
   }
 
-  _setdefault() async {
-    await Global.setPShost('aws');
-    await Global.setShowedPBhost('PBhostExtend2');
+  _setdefault() {
+    Global.setPShost('aws');
+    Global.setShowedPBhost('PBhostExtend2');
     eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
     eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
     showToast('已设置S3兼容平台为默认图床');

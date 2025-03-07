@@ -25,9 +25,7 @@ class AppInfoProvider with ChangeNotifier {
     _initAsync();
   }
 
-  bool isDarkMode() {
-    return _themeColor == 'dark';
-  }
+  bool isDarkMode() => _themeColor == 'dark';
 
   Future<void> _initAsync() async {
     await SpUtil.getInstance();
@@ -36,19 +34,14 @@ class AppInfoProvider with ChangeNotifier {
     setTheme(colorset);
   }
 
-  setTheme(String themeColor) async {
-    if (themeColor == 'auto') {
-      if (DateTime.now().hour >= 8 && DateTime.now().hour <= 22) {
-        _themeColor = 'light';
-      } else {
-        _themeColor = 'dark';
-      }
-    } else {
-      _themeColor = themeColor;
-    }
+  Future<void> setTheme(String themeColor) async {
+    _themeColor =
+        themeColor == 'auto' ? (DateTime.now().hour >= 8 && DateTime.now().hour <= 22 ? 'light' : 'dark') : themeColor;
+
+    _keyThemeColor = _themeColor;
+
     notifyListeners();
     await SpUtil.getInstance();
     SpUtil.putString('key_theme_color', _themeColor);
-    _keyThemeColor = _themeColor;
   }
 }

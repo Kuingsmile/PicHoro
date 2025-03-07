@@ -51,7 +51,7 @@ List<String> tableKeysList = [
 
 class AlbumSQL {
   static Future<Database> getDatabase() async {
-    String currentUserName = await Global.getUser();
+    String currentUserName = Global.getUser();
     return await initDB(currentUserName);
   }
 
@@ -92,7 +92,7 @@ class AlbumSQL {
   }
 
   static Future<Database> getExtendDatabase() async {
-    String currentUserName = await Global.getUser();
+    String currentUserName = Global.getUser();
     return await initExtendDB(currentUserName);
   }
 

@@ -471,7 +471,7 @@ class LskyproFileExplorerState extends loading_state.BaseLoadingPageState<Lskypr
                                 String uploadListStr = jsonEncode(uploadList);
                                 Global.lskyproUploadList.add(uploadListStr);
                               }
-                              await Global.setLskyproUploadList(Global.lskyproUploadList);
+                              Global.setLskyproUploadList(Global.lskyproUploadList);
                               String downloadPath =
                                   await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
                               if (mounted) {
@@ -1256,7 +1256,7 @@ class LskyproFileExplorerState extends loading_state.BaseLoadingPageState<Lskypr
             minLeadingWidth: 0,
             title: const Text('复制链接(设置中的默认格式)'),
             onTap: () async {
-              String format = await Global.getLKformat();
+              String format = Global.getLKformat();
               String shareUrl = allInfoList[index]['links']['url'];
               String filename = my_path.basename(allInfoList[index]['name']);
               String formatedLink = linkGeneratorMap[format]!(shareUrl, filename);

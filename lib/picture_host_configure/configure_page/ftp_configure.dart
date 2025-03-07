@@ -464,9 +464,9 @@ class FTPConfigState extends State<FTPConfig> {
     }
   }
 
-  _setdefault() async {
-    await Global.setPShost('ftp');
-    await Global.setShowedPBhost('PBhostExtend1');
+  _setdefault() {
+    Global.setPShost('ftp');
+    Global.setShowedPBhost('PBhostExtend1');
     eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
     eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
     showToast('已设置FTP为默认图床');

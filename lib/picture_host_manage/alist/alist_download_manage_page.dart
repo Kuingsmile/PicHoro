@@ -79,7 +79,7 @@ class AlistUpDownloadManagePageState extends State<AlistUpDownloadManagePage> {
                 onConfirm: () async {
                   Navigator.pop(context);
                   Global.alistUploadList.remove(Global.alistUploadList[i]);
-                  await Global.setAlistUploadList(Global.alistUploadList);
+                  Global.setAlistUploadList(Global.alistUploadList);
                   setState(() {});
                 });
           },
@@ -138,8 +138,8 @@ class AlistUpDownloadManagePageState extends State<AlistUpDownloadManagePage> {
                 style: TextStyle(color: Colors.blue, fontSize: 16, fontWeight: FontWeight.bold),
               )),
           TextButton(
-              onPressed: () async {
-                await Global.setAlistUploadList([]);
+              onPressed: () {
+                Global.setAlistUploadList([]);
                 setState(() {});
               },
               child: const Text(
@@ -178,7 +178,7 @@ class AlistUpDownloadManagePageState extends State<AlistUpDownloadManagePage> {
                 onConfirm: () async {
                   Navigator.pop(context);
                   Global.alistDownloadList.remove(Global.alistDownloadList[i]);
-                  await Global.setAlistDownloadList(Global.alistDownloadList);
+                  Global.setAlistDownloadList(Global.alistDownloadList);
                   setState(() {});
                 });
           },
@@ -253,8 +253,8 @@ class AlistUpDownloadManagePageState extends State<AlistUpDownloadManagePage> {
         CupertinoButton(
           color: const Color.fromARGB(255, 78, 163, 233),
           padding: const EdgeInsets.all(10),
-          onPressed: () async {
-            await Global.setAlistDownloadList([]);
+          onPressed: () {
+            Global.setAlistDownloadList([]);
             setState(() {});
           },
           child: const Row(

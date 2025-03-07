@@ -446,7 +446,7 @@ class AliyunFileExplorerState extends loading_state.BaseLoadingPageState<AliyunF
                                   String uploadListStr = jsonEncode(uploadList);
                                   Global.aliyunUploadList.add(uploadListStr);
                                 }
-                                await Global.setAliyunUploadList(Global.aliyunUploadList);
+                                Global.setAliyunUploadList(Global.aliyunUploadList);
                                 String downloadPath = await ExternalPath.getExternalStoragePublicDirectory(
                                     ExternalPath.DIRECTORY_DOWNLOAD);
                                 if (mounted) {
@@ -505,7 +505,7 @@ class AliyunFileExplorerState extends loading_state.BaseLoadingPageState<AliyunF
                                   String uploadListStr = jsonEncode(uploadList);
                                   Global.aliyunUploadList.add(uploadListStr);
                                 }
-                                await Global.setAliyunUploadList(Global.aliyunUploadList);
+                                Global.setAliyunUploadList(Global.aliyunUploadList);
                                 String downloadPath = await ExternalPath.getExternalStoragePublicDirectory(
                                     ExternalPath.DIRECTORY_DOWNLOAD);
                                 if (mounted) {
@@ -732,7 +732,7 @@ class AliyunFileExplorerState extends loading_state.BaseLoadingPageState<AliyunF
                     urlList.add(hostPrefix + downloadList[i]['Key']);
                   }
                   Global.aliyunDownloadList.addAll(urlList);
-                  await Global.setAliyunDownloadList(Global.aliyunDownloadList);
+                  Global.setAliyunDownloadList(Global.aliyunDownloadList);
                   String downloadPath =
                       await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
                   // ignore: use_build_context_synchronously
@@ -1475,7 +1475,7 @@ class AliyunFileExplorerState extends loading_state.BaseLoadingPageState<AliyunF
             minLeadingWidth: 0,
             title: const Text('复制链接(设置中的默认格式)'),
             onTap: () async {
-              String format = await Global.getLKformat();
+              String format = Global.getLKformat();
               String shareUrlPrefix = '';
               String customUrl = widget.element['customUrl'] == null || widget.element['customUrl'] == ''
                   ? 'None'

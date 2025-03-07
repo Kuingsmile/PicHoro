@@ -64,7 +64,7 @@ class SmmsUpDownloadManagePageState extends State<SmmsUpDownloadManagePage> {
                 onConfirm: () async {
                   Navigator.pop(context);
                   Global.smmsUploadList.remove(Global.smmsUploadList[i]);
-                  await Global.setSmmsUploadList(Global.smmsUploadList);
+                  Global.setSmmsUploadList(Global.smmsUploadList);
                   uploadPathList.removeAt(i);
                   uploadFileNameList.removeAt(i);
                   uploadConfigMapList.removeAt(i);
@@ -127,7 +127,7 @@ class SmmsUpDownloadManagePageState extends State<SmmsUpDownloadManagePage> {
               )),
           TextButton(
               onPressed: () async {
-                await Global.setSmmsUploadList([]);
+                Global.setSmmsUploadList([]);
                 uploadPathList.clear();
                 uploadFileNameList.clear();
                 uploadConfigMapList.clear();
@@ -169,9 +169,9 @@ class SmmsUpDownloadManagePageState extends State<SmmsUpDownloadManagePage> {
                 onConfirm: () async {
                   Navigator.pop(context);
                   Global.smmsDownloadList.remove(Global.smmsDownloadList[i]);
-                  await Global.setSmmsDownloadList(Global.smmsDownloadList);
+                  Global.setSmmsDownloadList(Global.smmsDownloadList);
                   Global.smmsSavedNameList.remove(Global.smmsSavedNameList[i]);
-                  await Global.setSmmsSavedNameList(Global.smmsSavedNameList);
+                  Global.setSmmsSavedNameList(Global.smmsSavedNameList);
                   setState(() {});
                 });
           },
@@ -248,9 +248,9 @@ class SmmsUpDownloadManagePageState extends State<SmmsUpDownloadManagePage> {
         CupertinoButton(
           color: const Color.fromARGB(255, 78, 163, 233),
           padding: const EdgeInsets.all(10),
-          onPressed: () async {
-            await Global.setSmmsDownloadList([]);
-            await Global.setSmmsSavedNameList([]);
+          onPressed: () {
+            Global.setSmmsDownloadList([]);
+            Global.setSmmsSavedNameList([]);
             setState(() {});
           },
           child: const Row(

@@ -32,6 +32,15 @@ class UpdateLogState extends State<UpdateLog> {
         title: titleText(
           '更新日志',
         ),
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withValues(alpha: 0.8)],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
+        ),
       ),
       body: FutureBuilder(
         future: _future,

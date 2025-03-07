@@ -549,7 +549,7 @@ class PsHostHomePageState extends State<PsHostHomePage> with AutomaticKeepAliveC
                           showToast('刷新Token失败');
                           return;
                         }
-                        await Global.setTodayAlistUpdate(today);
+                        Global.setTodayAlistUpdate(today);
                       }
 
                       var bucketListResponse = await AlistManageAPI.getBucketList();
@@ -690,7 +690,7 @@ class PsHostHomePageState extends State<PsHostHomePage> with AutomaticKeepAliveC
               for (int i = 0; i < 22; i++) {
                 order.add(i.toString());
               }
-              await Global.setpsHostHomePageOrder(order);
+              Global.setpsHostHomePageOrder(order);
               setState(() {
                 initOrder();
               });
@@ -712,7 +712,7 @@ class PsHostHomePageState extends State<PsHostHomePage> with AutomaticKeepAliveC
           for (int i = 0; i < list.length; i++) {
             newOrder.add(listOfDraggableGridItem.indexOf(list[i]).toString());
           }
-          await Global.setpsHostHomePageOrder(newOrder);
+          Global.setpsHostHomePageOrder(newOrder);
         },
         dragFeedback: (List<DraggableGridItem> list, int index) {
           return SizedBox(

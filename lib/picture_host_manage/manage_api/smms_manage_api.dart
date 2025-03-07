@@ -14,7 +14,7 @@ class SmmsManageAPI {
 
   static Future<File> get localFile async {
     String path = await _localPath;
-    String defaultUser = await Global.getUser();
+    String defaultUser = Global.getUser();
     return ensureFileExists(File('$path/${defaultUser}_smms_config.txt'));
   }
 

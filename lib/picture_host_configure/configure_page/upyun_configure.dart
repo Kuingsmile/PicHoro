@@ -362,9 +362,9 @@ ${configMap['antiLeechExpiration']}
     }
   }
 
-  _setdefault() async {
-    await Global.setPShost('upyun');
-    await Global.setShowedPBhost('upyun');
+  _setdefault() {
+    Global.setPShost('upyun');
+    Global.setShowedPBhost('upyun');
     eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
     eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
     showToast('已设置又拍云为默认图床');

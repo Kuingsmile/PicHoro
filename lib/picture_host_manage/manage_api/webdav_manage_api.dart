@@ -14,7 +14,7 @@ import 'package:webdav_client/webdav_client.dart' as webdav;
 class WebdavManageAPI {
   static Future<io.File> get localFile async {
     final path = await _localPath;
-    String defaultUser = await Global.getUser();
+    String defaultUser = Global.getUser();
     return ensureFileExists(io.File('$path/${defaultUser}_webdav_config.txt'));
   }
 

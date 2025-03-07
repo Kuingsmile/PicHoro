@@ -210,9 +210,9 @@ class SmmsConfigState extends State<SmmsConfig> {
     }
   }
 
-  _setdefault() async {
-    await Global.setPShost('sm.ms');
-    await Global.setShowedPBhost('smms');
+  _setdefault() {
+    Global.setPShost('sm.ms');
+    Global.setShowedPBhost('smms');
     eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
     eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
     showToast("已设置sm.ms为默认图床");

@@ -439,7 +439,7 @@ class AwsFileExplorerState extends loading_state.BaseLoadingPageState<AwsFileExp
                                   String uploadListStr = jsonEncode(uploadList);
                                   Global.awsUploadList.add(uploadListStr);
                                 }
-                                await Global.setAwsUploadList(Global.awsUploadList);
+                                Global.setAwsUploadList(Global.awsUploadList);
                                 String downloadPath = await ExternalPath.getExternalStoragePublicDirectory(
                                     ExternalPath.DIRECTORY_DOWNLOAD);
                                 if (mounted) {
@@ -498,7 +498,7 @@ class AwsFileExplorerState extends loading_state.BaseLoadingPageState<AwsFileExp
                                   String uploadListStr = jsonEncode(uploadList);
                                   Global.awsUploadList.add(uploadListStr);
                                 }
-                                await Global.setAwsUploadList(Global.awsUploadList);
+                                Global.setAwsUploadList(Global.awsUploadList);
                                 String downloadPath = await ExternalPath.getExternalStoragePublicDirectory(
                                     ExternalPath.DIRECTORY_DOWNLOAD);
                                 if (mounted) {
@@ -728,7 +728,7 @@ class AwsFileExplorerState extends loading_state.BaseLoadingPageState<AwsFileExp
                     urlList.add(urlStr);
                   }
                   Global.awsDownloadList.addAll(urlList);
-                  await Global.setAwsDownloadList(Global.awsDownloadList);
+                  Global.setAwsDownloadList(Global.awsDownloadList);
                   String downloadPath =
                       await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
                   // ignore: use_build_context_synchronously
@@ -1520,7 +1520,7 @@ class AwsFileExplorerState extends loading_state.BaseLoadingPageState<AwsFileExp
                       : '${isEnableSSL ? 'https' : 'http'}://${widget.element['name']}.$endpoint/';
                 }
               }
-              String format = await Global.getLKformat();
+              String format = Global.getLKformat();
               String shareUrl = shareUrlPrefix + allInfoList[index].key;
               String filename = my_path.basename(allInfoList[index].key.split('/').last);
               String formatedLink = linkGeneratorMap[format]!(shareUrl, filename);

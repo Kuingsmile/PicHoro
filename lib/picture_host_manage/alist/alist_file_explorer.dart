@@ -441,7 +441,7 @@ class AlistFileExplorerState extends loading_state.BaseLoadingPageState<AlistFil
                                   String uploadListStr = jsonEncode(uploadList);
                                   Global.alistUploadList.add(uploadListStr);
                                 }
-                                await Global.setAlistUploadList(Global.alistUploadList);
+                                Global.setAlistUploadList(Global.alistUploadList);
                                 String downloadPath = await ExternalPath.getExternalStoragePublicDirectory(
                                     ExternalPath.DIRECTORY_DOWNLOAD);
                                 if (mounted) {
@@ -498,7 +498,7 @@ class AlistFileExplorerState extends loading_state.BaseLoadingPageState<AlistFil
                                   String uploadListStr = jsonEncode(uploadList);
                                   Global.alistUploadList.add(uploadListStr);
                                 }
-                                await Global.setAlistUploadList(Global.alistUploadList);
+                                Global.setAlistUploadList(Global.alistUploadList);
                                 String downloadPath = await ExternalPath.getExternalStoragePublicDirectory(
                                     ExternalPath.DIRECTORY_DOWNLOAD);
                                 if (mounted) {
@@ -753,7 +753,7 @@ class AlistFileExplorerState extends loading_state.BaseLoadingPageState<AlistFil
                     ]));
                   }
                   Global.alistDownloadList.addAll(urlList);
-                  await Global.setAlistDownloadList(Global.alistDownloadList);
+                  Global.setAlistDownloadList(Global.alistDownloadList);
                   String downloadPath =
                       await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
                   // ignore: use_build_context_synchronously

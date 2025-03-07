@@ -17,7 +17,7 @@ import 'package:horopic/picture_host_configure/configure_page/aws_configure.dart
 class AwsManageAPI {
   static Future<File> get localFile async {
     final path = await _localPath;
-    String defaultUser = await Global.getUser();
+    String defaultUser = Global.getUser();
     return ensureFileExists(File('$path/${defaultUser}_aws_config.txt'));
   }
 

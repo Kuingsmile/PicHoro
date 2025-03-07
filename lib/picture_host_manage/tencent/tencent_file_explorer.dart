@@ -446,7 +446,7 @@ class TencentFileExplorerState extends loading_state.BaseLoadingPageState<Tencen
                                   String uploadListStr = jsonEncode(uploadList);
                                   Global.tencentUploadList.add(uploadListStr);
                                 }
-                                await Global.setTencentUploadList(Global.tencentUploadList);
+                                Global.setTencentUploadList(Global.tencentUploadList);
                                 String downloadPath = await ExternalPath.getExternalStoragePublicDirectory(
                                     ExternalPath.DIRECTORY_DOWNLOAD);
                                 if (mounted) {
@@ -505,7 +505,7 @@ class TencentFileExplorerState extends loading_state.BaseLoadingPageState<Tencen
                                   String uploadListStr = jsonEncode(uploadList);
                                   Global.tencentUploadList.add(uploadListStr);
                                 }
-                                await Global.setTencentUploadList(Global.tencentUploadList);
+                                Global.setTencentUploadList(Global.tencentUploadList);
                                 String downloadPath = await ExternalPath.getExternalStoragePublicDirectory(
                                     ExternalPath.DIRECTORY_DOWNLOAD);
                                 if (mounted) {
@@ -727,7 +727,7 @@ class TencentFileExplorerState extends loading_state.BaseLoadingPageState<Tencen
                     urlList.add(hostPrefix + downloadList[i]['Key']);
                   }
                   Global.tencentDownloadList.addAll(urlList);
-                  await Global.setTencentDownloadList(Global.tencentDownloadList);
+                  Global.setTencentDownloadList(Global.tencentDownloadList);
                   String downloadPath =
                       await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
                   // ignore: use_build_context_synchronously
@@ -1479,7 +1479,7 @@ class TencentFileExplorerState extends loading_state.BaseLoadingPageState<Tencen
             minLeadingWidth: 0,
             title: const Text('复制链接(设置中的默认格式)'),
             onTap: () async {
-              String format = await Global.getLKformat();
+              String format = Global.getLKformat();
               String shareUrlPrefix = '';
               String customUrl = widget.element['customUrl'] == null || widget.element['customUrl'] == ''
                   ? 'None'

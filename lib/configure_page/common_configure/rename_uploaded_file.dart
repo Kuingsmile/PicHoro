@@ -274,7 +274,7 @@ class RenameFileState extends State<RenameFile> {
                   child: Switch(
                     value: Global.isTimeStamp,
                     onChanged: (value) async {
-                      await Global.setIsTimeStamp(value);
+                      Global.setIsTimeStamp(value);
                       setState(() {});
                     },
                   ),
@@ -287,7 +287,7 @@ class RenameFileState extends State<RenameFile> {
                   child: Switch(
                     value: Global.isRandomName,
                     onChanged: (value) async {
-                      await Global.setIsRandomName(value);
+                      Global.setIsRandomName(value);
                       setState(() {});
                     },
                   ),
@@ -299,7 +299,7 @@ class RenameFileState extends State<RenameFile> {
                   child: Switch(
                     value: Global.isCustomRename,
                     onChanged: (value) async {
-                      await Global.setIsCustomeRename(value);
+                      Global.setIsCustomeRename(value);
                       setState(() {});
                     },
                   ),
@@ -334,8 +334,8 @@ class RenameFileState extends State<RenameFile> {
                       ),
                       contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
                     ),
-                    onChanged: (String value) async {
-                      await Global.setCustomeRenameFormat(value);
+                    onChanged: (String value) {
+                      Global.setCustomeRenameFormat(value);
                     },
                   ),
                 ),

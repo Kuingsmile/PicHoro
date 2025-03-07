@@ -449,7 +449,7 @@ class UpyunFileExplorerState extends loading_state.BaseLoadingPageState<UpyunFil
                                   String uploadListStr = jsonEncode(uploadList);
                                   Global.upyunUploadList.add(uploadListStr);
                                 }
-                                await Global.setUpyunUploadList(Global.upyunUploadList);
+                                Global.setUpyunUploadList(Global.upyunUploadList);
                                 String downloadPath = await ExternalPath.getExternalStoragePublicDirectory(
                                     ExternalPath.DIRECTORY_DOWNLOAD);
                                 if (mounted) {
@@ -509,7 +509,7 @@ class UpyunFileExplorerState extends loading_state.BaseLoadingPageState<UpyunFil
                                   String uploadListStr = jsonEncode(uploadList);
                                   Global.upyunUploadList.add(uploadListStr);
                                 }
-                                await Global.setUpyunUploadList(Global.upyunUploadList);
+                                Global.setUpyunUploadList(Global.upyunUploadList);
                                 String downloadPath = await ExternalPath.getExternalStoragePublicDirectory(
                                     ExternalPath.DIRECTORY_DOWNLOAD);
                                 if (mounted) {
@@ -733,7 +733,7 @@ class UpyunFileExplorerState extends loading_state.BaseLoadingPageState<UpyunFil
                     urlList.add(hostPrefix + bucketPrefix + downloadList[i]['name']);
                   }
                   Global.upyunDownloadList.addAll(urlList);
-                  await Global.setUpyunDownloadList(Global.upyunDownloadList);
+                  Global.setUpyunDownloadList(Global.upyunDownloadList);
                   String downloadPath =
                       await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
                   // ignore: use_build_context_synchronously
@@ -1415,7 +1415,7 @@ class UpyunFileExplorerState extends loading_state.BaseLoadingPageState<UpyunFil
             minLeadingWidth: 0,
             title: const Text('复制链接(设置中的默认格式)'),
             onTap: () async {
-              String format = await Global.getLKformat();
+              String format = Global.getLKformat();
               String hostPrefix = widget.element['url'];
               if (hostPrefix.endsWith('/')) {
                 hostPrefix = hostPrefix.substring(0, hostPrefix.length - 1);

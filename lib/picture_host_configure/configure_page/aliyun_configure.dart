@@ -387,9 +387,9 @@ class AliyunConfigState extends State<AliyunConfig> {
     }
   }
 
-  _setdefault() async {
-    await Global.setPShost('aliyun');
-    await Global.setShowedPBhost('aliyun');
+  _setdefault() {
+    Global.setPShost('aliyun');
+    Global.setShowedPBhost('aliyun');
     showToast('已设置阿里云为默认图床');
     eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
   }

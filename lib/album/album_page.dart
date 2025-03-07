@@ -159,7 +159,7 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
           ),
         ),
         onPressed: () async {
-          await Global.setLKformat(format);
+          Global.setLKformat(format);
           if (context.mounted) {
             showToastWithContext(context, '已设置为${pasteFormatNamesList[index]}');
             Navigator.pop(context);
@@ -221,7 +221,7 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
                                   hintText: r'使用$url和$fileName作为占位符',
                                 ),
                                 onChanged: (String value) async {
-                                  await Global.setCustomLinkFormat(value);
+                                  Global.setCustomLinkFormat(value);
                                 },
                               ),
                             ),
@@ -246,7 +246,7 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
                             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                             value: Global.isDeleteCloud,
                             onChanged: (value) async {
-                              await Global.setIsDeleteCloud(value);
+                              Global.setIsDeleteCloud(value);
                               setState(() {});
                               if (context.mounted) {
                                 if (value == true) {
@@ -793,8 +793,8 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
   }
 
   removeAllImages(List imagesIndex) async {
-    bool isDeleteLocal = await Global.getIsDeleteLocal();
-    bool isDeleteCloud = await Global.getIsDeleteCloud();
+    bool isDeleteLocal = Global.getIsDeleteLocal();
+    bool isDeleteCloud = Global.getIsDeleteCloud();
     for (int i = 0; i < imagesIndex.length; i++) {
       try {
         Map deleteConfig = {
@@ -874,8 +874,8 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
 
   deleteImage(int index) async {
     try {
-      bool isDeleteLocal = await Global.getIsDeleteLocal();
-      bool isDeleteCloud = await Global.getIsDeleteCloud();
+      bool isDeleteLocal = Global.getIsDeleteLocal();
+      bool isDeleteCloud = Global.getIsDeleteCloud();
 
       Map deleteConfig = {
         'pictureKey': imagePictureKeyList[index + (pageIndex * paginationSize)],

@@ -24,8 +24,8 @@ Map<String, Function> uploadFunc = {
 //获取图床配置文件
 Future<File> get _localFile async {
   final directory = await getApplicationDocumentsDirectory();
-  String defaultConfig = await Global.getPShost();
-  String defaultUser = await Global.getUser();
+  String defaultConfig = Global.getPShost();
+  String defaultUser = Global.getUser();
 
   return ensureFileExists(File('${directory.path}/${defaultUser}_${getpdconfig(defaultConfig)}.txt'));
 }
@@ -40,7 +40,7 @@ uploaderentry({required String path, required String name}) async {
     String configData = await readPictureHostConfig();
     if (configData == '') return ["failed"];
     Map configMap = jsonDecode(configData);
-    String defaultConfig = await Global.getPShost();
+    String defaultConfig = Global.getPShost();
     return await uploadFunc[defaultConfig]!(path: path, name: name, configMap: configMap);
   } catch (e) {
     return ["failed"];

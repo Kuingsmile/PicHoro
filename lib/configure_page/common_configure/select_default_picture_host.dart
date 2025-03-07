@@ -81,7 +81,7 @@ class AllPShostState extends State<AllPShost> {
   exportConfiguration(String pshost) async {
     try {
       String configPath = await localPath;
-      String defaultUser = await Global.getUser();
+      String defaultUser = Global.getUser();
       Map<String, dynamic> configFilePath = {
         "smms": "$configPath/${defaultUser}_smms_config.txt",
         "lankong": "$configPath/${defaultUser}_host_config.txt",
@@ -122,7 +122,7 @@ class AllPShostState extends State<AllPShost> {
   exportAllConfiguration() async {
     try {
       String configPath = await localPath;
-      String defaultUser = await Global.getUser();
+      String defaultUser = Global.getUser();
       Map<String, dynamic> configFilePath = {
         "smms": "$configPath/${defaultUser}_smms_config.txt",
         "lankong": "$configPath/${defaultUser}_host_config.txt",

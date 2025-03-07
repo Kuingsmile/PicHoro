@@ -109,7 +109,7 @@ class CommonConfigState extends State<CommonConfig> {
                 trailing: Switch(
                   value: Global.isCopyLink,
                   onChanged: (value) async {
-                    await Global.setIsCopyLink(value);
+                    Global.setIsCopyLink(value);
                     setState(() {});
                   },
                 ),
@@ -132,7 +132,7 @@ class CommonConfigState extends State<CommonConfig> {
                 trailing: Switch(
                   value: Global.isURLEncode,
                   onChanged: (value) async {
-                    await Global.setIsURLEncode(value);
+                    Global.setIsURLEncode(value);
                     setState(() {});
                   },
                 ),
@@ -150,7 +150,7 @@ class CommonConfigState extends State<CommonConfig> {
                 trailing: Switch(
                   value: Global.isCompress,
                   onChanged: (value) async {
-                    await Global.setIsCompress(value);
+                    Global.setIsCompress(value);
                     setState(() {});
                   },
                 ),
@@ -177,7 +177,7 @@ class CommonConfigState extends State<CommonConfig> {
                 trailing: Switch(
                   value: Global.isDeleteLocal,
                   onChanged: (value) async {
-                    await Global.setIsDeleteLocal(value);
+                    Global.setIsDeleteLocal(value);
                     setState(() {});
                   },
                 ),
@@ -191,7 +191,7 @@ class CommonConfigState extends State<CommonConfig> {
                 trailing: Switch(
                   value: Global.isDeleteCloud,
                   onChanged: (value) async {
-                    await Global.setIsDeleteCloud(value);
+                    Global.setIsDeleteCloud(value);
                     setState(() {});
                   },
                 ),

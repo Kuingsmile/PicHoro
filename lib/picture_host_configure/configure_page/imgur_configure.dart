@@ -244,9 +244,9 @@ class ImgurConfigState extends State<ImgurConfig> {
     }
   }
 
-  _setdefault() async {
-    await Global.setPShost('imgur');
-    await Global.setShowedPBhost('imgur');
+  _setdefault() {
+    Global.setPShost('imgur');
+    Global.setShowedPBhost('imgur');
     eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
     eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
     showToast('已设置Imgur为默认图床');

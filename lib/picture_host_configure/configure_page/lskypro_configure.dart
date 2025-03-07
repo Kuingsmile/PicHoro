@@ -629,9 +629,9 @@ class HostConfigState extends State<HostConfig> {
     }
   }
 
-  _setdefault() async {
-    await Global.setPShost('lsky.pro');
-    await Global.setShowedPBhost('lskypro');
+  _setdefault() {
+    Global.setPShost('lsky.pro');
+    Global.setShowedPBhost('lskypro');
     eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
     eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
     showToast('已设置兰空图床为默认图床');

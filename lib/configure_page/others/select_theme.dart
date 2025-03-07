@@ -84,7 +84,20 @@ class ChangeThemeState extends State<ChangeTheme> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(elevation: 0, centerTitle: true, title: titleText('主题设置')),
+        appBar: AppBar(
+          elevation: 0,
+          centerTitle: true,
+          title: titleText('主题设置'),
+          flexibleSpace: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withValues(alpha: 0.8)],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
+            ),
+          ),
+        ),
         body: Consumer<AppInfoProvider>(builder: (context, appinfo, child) {
           return SingleChildScrollView(
             physics: const BouncingScrollPhysics(),

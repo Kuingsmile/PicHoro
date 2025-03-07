@@ -23,7 +23,7 @@ class ConfigureStoreFile {
   }
 
   Future<String> localConfigureFilePath(String psHost) async {
-    String defaultUser = await Global.getUser();
+    String defaultUser = Global.getUser();
     String configureFileName = '${defaultUser}_${psHost}_configure_store.json';
     String appDocDir = (await getApplicationDocumentsDirectory()).path;
     String configureFilePath = '$appDocDir/$configureFileName';

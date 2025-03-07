@@ -468,101 +468,83 @@ class Global {
     'srt',
   ];
 
-  static Future<String> getPShost() async {
-    await SpUtil.getInstance();
+  static String getPShost() {
     return SpUtil.getString('key_pshost', defValue: 'lsky.pro')!;
   }
 
-  static setPShost(String pshost) async {
-    await SpUtil.getInstance();
+  static void setPShost(String pshost) {
     SpUtil.putString('key_pshost', pshost);
     defaultPShost = pshost;
   }
 
-  static Future<String> getUser() async {
-    await SpUtil.getInstance();
+  static String getUser() {
     return SpUtil.getString('key_user', defValue: ' ')!;
   }
 
-  static setUser(String user) async {
-    await SpUtil.getInstance();
+  static void setUser(String user) {
     SpUtil.putString('key_user', user);
     defaultUser = user;
   }
 
-  static Future<String> getPassword() async {
-    await SpUtil.getInstance();
+  static String getPassword() {
     return SpUtil.getString('key_password', defValue: ' ')!;
   }
 
-  static setPassword(String password) async {
-    await SpUtil.getInstance();
+  static void setPassword(String password) {
     SpUtil.putString('key_password', password);
     defaultPassword = password;
   }
 
-  static Future<String> getLKformat() async {
-    await SpUtil.getInstance();
+  static String getLKformat() {
     return SpUtil.getString('key_lkformat', defValue: 'rawurl')!;
   }
 
-  static setLKformat(String lkformat) async {
-    await SpUtil.getInstance();
+  static void setLKformat(String lkformat) {
     SpUtil.putString('key_lkformat', lkformat);
     defaultLKformat = lkformat;
   }
 
-  static Future<bool> getIsTimeStamp() async {
-    await SpUtil.getInstance();
+  static bool getIsTimeStamp() {
     return SpUtil.getBool('key_isTimeStamp', defValue: false)!;
   }
 
-  static setIsTimeStamp(bool isTimeStamp) async {
-    await SpUtil.getInstance();
+  static void setIsTimeStamp(bool isTimeStamp) {
     SpUtil.putBool('key_isTimeStamp', isTimeStamp);
     Global.isTimeStamp = isTimeStamp;
   }
 
-  static Future<bool> getIsRandomName() async {
-    await SpUtil.getInstance();
+  static bool getIsRandomName() {
     return SpUtil.getBool('key_isRandomName', defValue: false)!;
   }
 
-  static setIsRandomName(bool isRandomName) async {
-    await SpUtil.getInstance();
+  static void setIsRandomName(bool isRandomName) {
     SpUtil.putBool('key_isRandomName', isRandomName);
     Global.isRandomName = isRandomName;
   }
 
-  static Future<bool> getIsCustomeRename() async {
-    await SpUtil.getInstance();
+  static bool getIsCustomeRename() {
     return SpUtil.getBool('key_iscustomRename', defValue: false)!;
   }
 
-  static setIsCustomeRename(bool iscustomRename) async {
-    await SpUtil.getInstance();
+  static void setIsCustomeRename(bool iscustomRename) {
     SpUtil.putBool('key_iscustomRename', iscustomRename);
     Global.isCustomRename = iscustomRename;
   }
 
-  static Future<bool> getIsCopyLink() async {
-    await SpUtil.getInstance();
+  static bool getIsCopyLink() {
     return SpUtil.getBool('key_isCopyLink', defValue: true)!;
   }
 
-  static setIsCopyLink(bool isCopyLink) async {
-    await SpUtil.getInstance();
+  static void setIsCopyLink(bool isCopyLink) {
     SpUtil.putBool('key_isCopyLink', isCopyLink);
     Global.isCopyLink = isCopyLink;
   }
 
-  static Future<bool> getIsURLEncode() async {
-    await SpUtil.getInstance();
+  static bool getIsURLEncode() {
     return SpUtil.getBool('key_isURLEncode', defValue: false)!;
   }
 
-  static setIsURLEncode(bool isURLEncode) async {
-    await SpUtil.getInstance();
+  static void setIsURLEncode(bool isURLEncode) {
     SpUtil.putBool('key_isURLEncode', isURLEncode);
     Global.isURLEncode = isURLEncode;
   }
@@ -583,146 +565,120 @@ class Global {
     imageDBExtend = db;
   }
 
-  static Future<String> getShowedPBhost() async {
-    await SpUtil.getInstance();
+  static String getShowedPBhost() {
     return SpUtil.getString('key_showedPBhost', defValue: 'lskypro')!;
   }
 
-  static setShowedPBhost(String showedPBhost) async {
-    await SpUtil.getInstance();
+  static void setShowedPBhost(String showedPBhost) {
     SpUtil.putString('key_showedPBhost', showedPBhost);
     defaultShowedPBhost = showedPBhost;
   }
 
-  static Future<bool> getIsDeleteLocal() async {
-    await SpUtil.getInstance();
+  static bool getIsDeleteLocal() {
     return SpUtil.getBool('key_isDeleteLocal', defValue: false)!;
   }
 
-  static setIsDeleteLocal(bool isDeleteLocal) async {
-    await SpUtil.getInstance();
+  static void setIsDeleteLocal(bool isDeleteLocal) {
     SpUtil.putBool('key_isDeleteLocal', isDeleteLocal);
     Global.isDeleteLocal = isDeleteLocal;
   }
 
-  static Future<Map<String, String>> getBucketCustomUrl() async {
-    await SpUtil.getInstance();
+  static Map<String, String> getBucketCustomUrl() {
     return SpUtil.getObj('key_bucketCustomUrl', (v) => Map<String, String>.from(v), defValue: {})!;
   }
 
-  static setBucketCustomUrl(Map<String, String> bucketCustomUrl) async {
-    await SpUtil.getInstance();
+  static void setBucketCustomUrl(Map<String, String> bucketCustomUrl) {
     SpUtil.putObject('key_bucketCustomUrl', bucketCustomUrl);
     Global.bucketCustomUrl = bucketCustomUrl;
   }
 
-  static Future<String> getCustomLinkFormat() async {
-    await SpUtil.getInstance();
+  static String getCustomLinkFormat() {
     return SpUtil.getString('key_customLinkFormat', defValue: r'[$fileName]($url)')!;
   }
 
-  static setCustomLinkFormat(String customLinkFormat) async {
-    await SpUtil.getInstance();
+  static void setCustomLinkFormat(String customLinkFormat) {
     SpUtil.putString('key_customLinkFormat', customLinkFormat);
     Global.customLinkFormat = customLinkFormat;
   }
 
-  static Future<String> getCustomeRenameFormat() async {
-    await SpUtil.getInstance();
+  static String getCustomeRenameFormat() {
     return SpUtil.getString('key_customRenameFormat', defValue: r'{filename}')!;
   }
 
-  static setCustomeRenameFormat(String customRenameFormat) async {
-    await SpUtil.getInstance();
+  static void setCustomeRenameFormat(String customRenameFormat) {
     SpUtil.putString('key_customRenameFormat', customRenameFormat);
     Global.customRenameFormat = customRenameFormat;
   }
 
-  static Future<bool> getIsDeleteCloud() async {
-    await SpUtil.getInstance();
+  static bool getIsDeleteCloud() {
     return SpUtil.getBool('key_isDeleteCloud', defValue: false)!;
   }
 
-  static setIsDeleteCloud(bool isDeleteCloud) async {
-    await SpUtil.getInstance();
+  static void setIsDeleteCloud(bool isDeleteCloud) {
     SpUtil.putBool('key_isDeleteCloud', isDeleteCloud);
     Global.isDeleteCloud = isDeleteCloud;
   }
 
-  static Future<bool> getOperateDone() async {
-    await SpUtil.getInstance();
+  static bool getOperateDone() {
     return SpUtil.getBool('key_operateDone', defValue: false)!;
   }
 
-  static setOperateDone(bool operateDone) async {
-    await SpUtil.getInstance();
+  static void setOperateDone(bool operateDone) {
     SpUtil.putBool('key_operateDone', operateDone);
     Global.operateDone = operateDone;
   }
 
-  static Future<bool> getIsCompress() async {
-    await SpUtil.getInstance();
+  static bool getIsCompress() {
     return SpUtil.getBool('key_isCompress', defValue: false)!;
   }
 
-  static setIsCompress(bool isCompress) async {
-    await SpUtil.getInstance();
+  static void setIsCompress(bool isCompress) {
     SpUtil.putBool('key_isCompress', isCompress);
     Global.isCompress = isCompress;
   }
 
-  static Future<int> getminWidth() async {
-    await SpUtil.getInstance();
+  static int getminWidth() {
     return SpUtil.getInt('key_minWidth', defValue: 1920)!;
   }
 
-  static setminWidth(int minWidth) async {
-    await SpUtil.getInstance();
+  static void setminWidth(int minWidth) {
     SpUtil.putInt('key_minWidth', minWidth);
     Global.minWidth = minWidth;
   }
 
-  static Future<int> getminHeight() async {
-    await SpUtil.getInstance();
+  static int getminHeight() {
     return SpUtil.getInt('key_minHeight', defValue: 1080)!;
   }
 
-  static setminHeight(int minHeight) async {
-    await SpUtil.getInstance();
+  static void setminHeight(int minHeight) {
     SpUtil.putInt('key_minHeight', minHeight);
     Global.minHeight = minHeight;
   }
 
-  static Future<int> getQuality() async {
-    await SpUtil.getInstance();
+  static int getQuality() {
     return SpUtil.getInt('key_quality', defValue: 80)!;
   }
 
-  static setQuality(int quality) async {
-    await SpUtil.getInstance();
+  static void setQuality(int quality) {
     SpUtil.putInt('key_quality', quality);
     Global.quality = quality;
   }
 
-  static Future<String> getDefaultCompressFormat() async {
-    await SpUtil.getInstance();
+  static String getDefaultCompressFormat() {
     return SpUtil.getString('key_defaultCompressFormat', defValue: 'webp')!;
   }
 
-  static setDefaultCompressFormat(String defaultCompressFormat) async {
-    await SpUtil.getInstance();
+  static void setDefaultCompressFormat(String defaultCompressFormat) {
     SpUtil.putString('key_defaultCompressFormat', defaultCompressFormat);
     Global.defaultCompressFormat = defaultCompressFormat;
   }
 
-  static setpsHostHomePageOrder(List<String> psHostHomePageOrder) async {
-    await SpUtil.getInstance();
+  static void setpsHostHomePageOrder(List<String> psHostHomePageOrder) {
     SpUtil.putStringList('key_psHostHomePageOrder', psHostHomePageOrder);
     Global.psHostHomePageOrder = psHostHomePageOrder;
   }
 
-  static Future<List<String>> getpsHostHomePageOrder() async {
-    await SpUtil.getInstance();
+  static List<String> getpsHostHomePageOrder() {
     return SpUtil.getStringList('key_psHostHomePageOrder', defValue: [
       '0',
       '1',
@@ -749,315 +705,237 @@ class Global {
     ])!;
   }
 
-  static setTencentUploadList(List<String> tencentUploadList) async {
-    await SpUtil.getInstance();
+  static void setTencentUploadList(List<String> tencentUploadList) {
     SpUtil.putStringList('key_tencentUploadList', tencentUploadList);
     Global.tencentUploadList = tencentUploadList;
   }
 
-  static getTencentUploadList() async {
-    await SpUtil.getInstance();
-    List tencentUploadList = SpUtil.getStringList('key_tencentUploadList', defValue: [])!;
-    return tencentUploadList;
+  static List<String> getTencentUploadList() {
+    return SpUtil.getStringList('key_tencentUploadList', defValue: [])!;
   }
 
-  static setTencentDownloadList(List<String> tencentDownloadList) async {
-    await SpUtil.getInstance();
+  static void setTencentDownloadList(List<String> tencentDownloadList) {
     SpUtil.putStringList('key_tencentDownloadList', tencentDownloadList);
     Global.tencentDownloadList = tencentDownloadList;
   }
 
-  static getTencentDownloadList() async {
-    await SpUtil.getInstance();
-    List tencentDownloadList = SpUtil.getStringList('key_tencentDownloadList', defValue: [])!;
-    return tencentDownloadList;
+  static List<String> getTencentDownloadList() {
+    return SpUtil.getStringList('key_tencentDownloadList', defValue: [])!;
   }
 
-  static setAliyunUploadList(List<String> aliyunUploadList) async {
-    await SpUtil.getInstance();
+  static void setAliyunUploadList(List<String> aliyunUploadList) {
     SpUtil.putStringList('key_aliyunUploadList', aliyunUploadList);
     Global.aliyunUploadList = aliyunUploadList;
   }
 
-  static getAliyunUploadList() async {
-    await SpUtil.getInstance();
-    List aliyunUploadList = SpUtil.getStringList('key_aliyunUploadList', defValue: [])!;
-    return aliyunUploadList;
+  static List<String> getAliyunUploadList() {
+    return SpUtil.getStringList('key_aliyunUploadList', defValue: [])!;
   }
 
-  static setAliyunDownloadList(List<String> aliyunDownloadList) async {
-    await SpUtil.getInstance();
+  static void setAliyunDownloadList(List<String> aliyunDownloadList) {
     SpUtil.putStringList('key_aliyunDownloadList', aliyunDownloadList);
     Global.aliyunDownloadList = aliyunDownloadList;
   }
 
-  static getAliyunDownloadList() async {
-    await SpUtil.getInstance();
-    List aliyunDownloadList = SpUtil.getStringList('key_aliyunDownloadList', defValue: [])!;
-    return aliyunDownloadList;
+  static List<String> getAliyunDownloadList() {
+    return SpUtil.getStringList('key_aliyunDownloadList', defValue: [])!;
   }
 
-  static setUpyunUploadList(List<String> upyunUploadList) async {
-    await SpUtil.getInstance();
+  static void setUpyunUploadList(List<String> upyunUploadList) {
     SpUtil.putStringList('key_upyunUploadList', upyunUploadList);
     Global.upyunUploadList = upyunUploadList;
   }
 
-  static getUpyunUploadList() async {
-    await SpUtil.getInstance();
-    List upyunUploadList = SpUtil.getStringList('key_upyunUploadList', defValue: [])!;
-    return upyunUploadList;
+  static List<String> getUpyunUploadList() {
+    return SpUtil.getStringList('key_upyunUploadList', defValue: [])!;
   }
 
-  static setUpyunDownloadList(List<String> upyunDownloadList) async {
-    await SpUtil.getInstance();
+  static void setUpyunDownloadList(List<String> upyunDownloadList) {
     SpUtil.putStringList('key_upyunDownloadList', upyunDownloadList);
     Global.upyunDownloadList = upyunDownloadList;
   }
 
-  static getUpyunDownloadList() async {
-    await SpUtil.getInstance();
-    List upyunDownloadList = SpUtil.getStringList('key_upyunDownloadList', defValue: [])!;
-    return upyunDownloadList;
+  static List<String> getUpyunDownloadList() {
+    return SpUtil.getStringList('key_upyunDownloadList', defValue: [])!;
   }
 
-  static setQiniuUploadList(List<String> qiniuUploadList) async {
-    await SpUtil.getInstance();
+  static void setQiniuUploadList(List<String> qiniuUploadList) {
     SpUtil.putStringList('key_qiniuUploadList', qiniuUploadList);
     Global.qiniuUploadList = qiniuUploadList;
   }
 
-  static getQiniuUploadList() async {
-    await SpUtil.getInstance();
-    List qiniuUploadList = SpUtil.getStringList('key_qiniuUploadList', defValue: [])!;
-    return qiniuUploadList;
+  static List<String> getQiniuUploadList() {
+    return SpUtil.getStringList('key_qiniuUploadList', defValue: [])!;
   }
 
-  static setQiniuDownloadList(List<String> qiniuDownloadList) async {
-    await SpUtil.getInstance();
+  static void setQiniuDownloadList(List<String> qiniuDownloadList) {
     SpUtil.putStringList('key_qiniuDownloadList', qiniuDownloadList);
     Global.qiniuDownloadList = qiniuDownloadList;
   }
 
-  static getQiniuDownloadList() async {
-    await SpUtil.getInstance();
-    List qiniuDownloadList = SpUtil.getStringList('key_qiniuDownloadList', defValue: [])!;
-    return qiniuDownloadList;
+  static List<String> getQiniuDownloadList() {
+    return SpUtil.getStringList('key_qiniuDownloadList', defValue: [])!;
   }
 
-  static setImgurUploadList(List<String> imgurUploadList) async {
-    await SpUtil.getInstance();
+  static void setImgurUploadList(List<String> imgurUploadList) {
     SpUtil.putStringList('key_imgurUploadList', imgurUploadList);
     Global.imgurUploadList = imgurUploadList;
   }
 
-  static getImgurUploadList() async {
-    await SpUtil.getInstance();
-    List imgurUploadList = SpUtil.getStringList('key_imgurUploadList', defValue: [])!;
-    return imgurUploadList;
+  static List<String> getImgurUploadList() {
+    return SpUtil.getStringList('key_imgurUploadList', defValue: [])!;
   }
 
-  static setImgurDownloadList(List<String> imgurDownloadList) async {
-    await SpUtil.getInstance();
+  static void setImgurDownloadList(List<String> imgurDownloadList) {
     SpUtil.putStringList('key_imgurDownloadList', imgurDownloadList);
     Global.imgurDownloadList = imgurDownloadList;
   }
 
-  static getImgurDownloadList() async {
-    await SpUtil.getInstance();
-    List imgurDownloadList = SpUtil.getStringList('key_imgurDownloadList', defValue: [])!;
-    return imgurDownloadList;
+  static List<String> getImgurDownloadList() {
+    return SpUtil.getStringList('key_imgurDownloadList', defValue: [])!;
   }
 
-  static setSmmsUploadList(List<String> smmsUploadList) async {
-    await SpUtil.getInstance();
+  static void setSmmsUploadList(List<String> smmsUploadList) {
     SpUtil.putStringList('key_smmsUploadList', smmsUploadList);
     Global.smmsUploadList = smmsUploadList;
   }
 
-  static getSmmsUploadList() async {
-    await SpUtil.getInstance();
-    List smmsUploadList = SpUtil.getStringList('key_smmsUploadList', defValue: [])!;
-    return smmsUploadList;
+  static List<String> getSmmsUploadList() {
+    return SpUtil.getStringList('key_smmsUploadList', defValue: [])!;
   }
 
-  static setSmmsDownloadList(List<String> smmsDownloadList) async {
-    await SpUtil.getInstance();
+  static void setSmmsDownloadList(List<String> smmsDownloadList) {
     SpUtil.putStringList('key_smmsDownloadList', smmsDownloadList);
     Global.smmsDownloadList = smmsDownloadList;
   }
 
-  static getSmmsDownloadList() async {
-    await SpUtil.getInstance();
-    List smmsDownloadList = SpUtil.getStringList('key_smmsDownloadList', defValue: [])!;
-    return smmsDownloadList;
+  static List<String> getSmmsDownloadList() {
+    return SpUtil.getStringList('key_smmsDownloadList', defValue: [])!;
   }
 
-  static setSmmsSavedNameList(List<String> smmsSavedNameList) async {
-    await SpUtil.getInstance();
+  static void setSmmsSavedNameList(List<String> smmsSavedNameList) {
     SpUtil.putStringList('key_smmsSavedNameList', smmsSavedNameList);
     Global.smmsSavedNameList = smmsSavedNameList;
   }
 
-  static getSmmsSavedNameList() async {
-    await SpUtil.getInstance();
-    List smmsSavedNameList = SpUtil.getStringList('key_smmsSavedNameList', defValue: [])!;
-    return smmsSavedNameList;
+  static List<String> getSmmsSavedNameList() {
+    return SpUtil.getStringList('key_smmsSavedNameList', defValue: [])!;
   }
 
-  static setGithubUploadList(List<String> githubUploadList) async {
-    await SpUtil.getInstance();
+  static void setGithubUploadList(List<String> githubUploadList) {
     SpUtil.putStringList('key_githubUploadList', githubUploadList);
     Global.githubUploadList = githubUploadList;
   }
 
-  static getGithubUploadList() async {
-    await SpUtil.getInstance();
-    List githubUploadList = SpUtil.getStringList('key_githubUploadList', defValue: [])!;
-    return githubUploadList;
+  static List<String> getGithubUploadList() {
+    return SpUtil.getStringList('key_githubUploadList', defValue: [])!;
   }
 
-  static setGithubDownloadList(List<String> githubDownloadList) async {
-    await SpUtil.getInstance();
+  static void setGithubDownloadList(List<String> githubDownloadList) {
     SpUtil.putStringList('key_githubDownloadList', githubDownloadList);
     Global.githubDownloadList = githubDownloadList;
   }
 
-  static getGithubDownloadList() async {
-    await SpUtil.getInstance();
-    List githubDownloadList = SpUtil.getStringList('key_githubDownloadList', defValue: [])!;
-    return githubDownloadList;
+  static List<String> getGithubDownloadList() {
+    return SpUtil.getStringList('key_githubDownloadList', defValue: [])!;
   }
 
-  static setLskyproUploadList(List<String> lskyproUploadList) async {
-    await SpUtil.getInstance();
+  static void setLskyproUploadList(List<String> lskyproUploadList) {
     SpUtil.putStringList('key_lskyproUploadList', lskyproUploadList);
     Global.lskyproUploadList = lskyproUploadList;
   }
 
-  static getLskyproUploadList() async {
-    await SpUtil.getInstance();
-    List lskyproUploadList = SpUtil.getStringList('key_lskyproUploadList', defValue: [])!;
-    return lskyproUploadList;
+  static List<String> getLskyproUploadList() {
+    return SpUtil.getStringList('key_lskyproUploadList', defValue: [])!;
   }
 
-  static setLskyproDownloadList(List<String> lskyproDownloadList) async {
-    await SpUtil.getInstance();
+  static void setLskyproDownloadList(List<String> lskyproDownloadList) {
     SpUtil.putStringList('key_lskyproDownloadList', lskyproDownloadList);
     Global.lskyproDownloadList = lskyproDownloadList;
   }
 
-  static getLskyproDownloadList() async {
-    await SpUtil.getInstance();
-    List lskyproDownloadList = SpUtil.getStringList('key_lskyproDownloadList', defValue: [])!;
-    return lskyproDownloadList;
+  static List<String> getLskyproDownloadList() {
+    return SpUtil.getStringList('key_lskyproDownloadList', defValue: [])!;
   }
 
-  static setFtpUploadList(List<String> ftpUploadList) async {
-    await SpUtil.getInstance();
+  static void setFtpUploadList(List<String> ftpUploadList) {
     SpUtil.putStringList('key_ftpUploadList', ftpUploadList);
     Global.ftpUploadList = ftpUploadList;
   }
 
-  static getFtpUploadList() async {
-    await SpUtil.getInstance();
-    List ftpUploadList = SpUtil.getStringList('key_ftpUploadList', defValue: [])!;
-    return ftpUploadList;
+  static List<String> getFtpUploadList() {
+    return SpUtil.getStringList('key_ftpUploadList', defValue: [])!;
   }
 
-  static setFtpDownloadList(List<String> ftpDownloadList) async {
-    await SpUtil.getInstance();
+  static void setFtpDownloadList(List<String> ftpDownloadList) {
     SpUtil.putStringList('key_ftpDownloadList', ftpDownloadList);
     Global.ftpDownloadList = ftpDownloadList;
   }
 
-  static getFtpDownloadList() async {
-    await SpUtil.getInstance();
-    List ftpDownloadList = SpUtil.getStringList('key_ftpDownloadList', defValue: [])!;
-    return ftpDownloadList;
+  static List<String> getFtpDownloadList() {
+    return SpUtil.getStringList('key_ftpDownloadList', defValue: [])!;
   }
 
-  static setAwsUploadList(List<String> awsUploadList) async {
-    await SpUtil.getInstance();
+  static void setAwsUploadList(List<String> awsUploadList) {
     SpUtil.putStringList('key_awsUploadList', awsUploadList);
     Global.awsUploadList = awsUploadList;
   }
 
-  static getAwsUploadList() async {
-    await SpUtil.getInstance();
-    List awsUploadList = SpUtil.getStringList('key_awsUploadList', defValue: [])!;
-    return awsUploadList;
+  static List<String> getAwsUploadList() {
+    return SpUtil.getStringList('key_awsUploadList', defValue: [])!;
   }
 
-  static setAwsDownloadList(List<String> awsDownloadList) async {
-    await SpUtil.getInstance();
+  static void setAwsDownloadList(List<String> awsDownloadList) {
     SpUtil.putStringList('key_awsDownloadList', awsDownloadList);
     Global.awsDownloadList = awsDownloadList;
   }
 
-  static getAwsDownloadList() async {
-    await SpUtil.getInstance();
-    List awsDownloadList = SpUtil.getStringList('key_awsDownloadList', defValue: [])!;
-    return awsDownloadList;
+  static List<String> getAwsDownloadList() {
+    return SpUtil.getStringList('key_awsDownloadList', defValue: [])!;
   }
 
-  static setAlistUploadList(List<String> alistUploadList) async {
-    await SpUtil.getInstance();
+  static void setAlistUploadList(List<String> alistUploadList) {
     SpUtil.putStringList('key_alistUploadList', alistUploadList);
     Global.alistUploadList = alistUploadList;
   }
 
-  static getAlistUploadList() async {
-    await SpUtil.getInstance();
-    List alistUploadList = SpUtil.getStringList('key_alistUploadList', defValue: [])!;
-    return alistUploadList;
+  static List<String> getAlistUploadList() {
+    return SpUtil.getStringList('key_alistUploadList', defValue: [])!;
   }
 
-  static setAlistDownloadList(List<String> alistDownloadList) async {
-    await SpUtil.getInstance();
+  static void setAlistDownloadList(List<String> alistDownloadList) {
     SpUtil.putStringList('key_alistDownloadList', alistDownloadList);
     Global.alistDownloadList = alistDownloadList;
   }
 
-  static getAlistDownloadList() async {
-    await SpUtil.getInstance();
-    List alistDownloadList = SpUtil.getStringList('key_alistDownloadList', defValue: [])!;
-    return alistDownloadList;
+  static List<String> getAlistDownloadList() {
+    return SpUtil.getStringList('key_alistDownloadList', defValue: [])!;
   }
 
-  static setWebdavUploadList(List<String> webdavUploadList) async {
-    await SpUtil.getInstance();
+  static void setWebdavUploadList(List<String> webdavUploadList) {
     SpUtil.putStringList('key_webdavUploadList', webdavUploadList);
     Global.webdavUploadList = webdavUploadList;
   }
 
-  static getWebdavUploadList() async {
-    await SpUtil.getInstance();
-    List webdavUploadList = SpUtil.getStringList('key_webdavUploadList', defValue: [])!;
-    return webdavUploadList;
+  static List<String> getWebdavUploadList() {
+    return SpUtil.getStringList('key_webdavUploadList', defValue: [])!;
   }
 
-  static setWebdavDownloadList(List<String> webdavDownloadList) async {
-    await SpUtil.getInstance();
+  static void setWebdavDownloadList(List<String> webdavDownloadList) {
     SpUtil.putStringList('key_webdavDownloadList', webdavDownloadList);
     Global.webdavDownloadList = webdavDownloadList;
   }
 
-  static getWebdavDownloadList() async {
-    await SpUtil.getInstance();
-    List webdavDownloadList = SpUtil.getStringList('key_webdavDownloadList', defValue: [])!;
-    return webdavDownloadList;
+  static List<String> getWebdavDownloadList() {
+    return SpUtil.getStringList('key_webdavDownloadList', defValue: [])!;
   }
 
-  static setTodayAlistUpdate(String todayAlistUpdate) async {
-    await SpUtil.getInstance();
+  static String getTodayAlistUpdate() {
+    return SpUtil.getString('key_todayAlistUpdate', defValue: '19700101')!;
+  }
+
+  static void setTodayAlistUpdate(String todayAlistUpdate) {
     SpUtil.putString('key_todayAlistUpdate', todayAlistUpdate);
     Global.todayAlistUpdate = todayAlistUpdate;
-  }
-
-  static getTodayAlistUpdate() async {
-    await SpUtil.getInstance();
-    String todayAlistUpdate = SpUtil.getString('key_todayAlistUpdate', defValue: '19700101')!;
-    return todayAlistUpdate;
   }
 }

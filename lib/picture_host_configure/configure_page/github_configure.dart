@@ -314,9 +314,9 @@ class GithubConfigState extends State<GithubConfig> {
     }
   }
 
-  _setdefault() async {
-    await Global.setPShost('github');
-    await Global.setShowedPBhost('github');
+  _setdefault() {
+    Global.setPShost('github');
+    Global.setShowedPBhost('github');
     eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
     eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
     showToast('已设置Github为默认图床');

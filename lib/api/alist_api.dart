@@ -10,7 +10,7 @@ import 'package:horopic/utils/global.dart';
 class AlistImageUploadUtils {
   static refreshToken({required Map configMap}) async {
     String today = getToday('yyyyMMdd');
-    String alistToday = await Global.getTodayAlistUpdate();
+    String alistToday = Global.getTodayAlistUpdate();
     if (alistToday != today && configMap['token'] != '') {
       var res = await AlistManageAPI.getToken(configMap['host'], configMap['alistusername'], configMap['password']);
       if (res[0] != 'success') {
@@ -30,7 +30,7 @@ class AlistImageUploadUtils {
       final alistConfigJson = jsonEncode(alistConfig);
       final alistConfigFile = await AlistManageAPI.localFile;
       alistConfigFile.writeAsString(alistConfigJson);
-      await Global.setTodayAlistUpdate(today);
+      Global.setTodayAlistUpdate(today);
     }
   }
 

@@ -429,7 +429,7 @@ class WebdavFileExplorerState extends loading_state.BaseLoadingPageState<WebdavF
                                   String uploadListStr = jsonEncode(uploadList);
                                   Global.webdavUploadList.add(uploadListStr);
                                 }
-                                await Global.setWebdavUploadList(Global.webdavUploadList);
+                                Global.setWebdavUploadList(Global.webdavUploadList);
                                 String downloadPath = await ExternalPath.getExternalStoragePublicDirectory(
                                     ExternalPath.DIRECTORY_DOWNLOAD);
                                 String bucketName = widget.bucketPrefix == '/'
@@ -491,7 +491,7 @@ class WebdavFileExplorerState extends loading_state.BaseLoadingPageState<WebdavF
                                   String uploadListStr = jsonEncode(uploadList);
                                   Global.webdavUploadList.add(uploadListStr);
                                 }
-                                await Global.setWebdavUploadList(Global.webdavUploadList);
+                                Global.setWebdavUploadList(Global.webdavUploadList);
                                 String downloadPath = await ExternalPath.getExternalStoragePublicDirectory(
                                     ExternalPath.DIRECTORY_DOWNLOAD);
                                 String bucketName = widget.bucketPrefix == '/'
@@ -731,7 +731,7 @@ class WebdavFileExplorerState extends loading_state.BaseLoadingPageState<WebdavF
                     urlList.add(host + downloadList[i]['path']);
                   }
                   Global.webdavDownloadList.addAll(urlList);
-                  await Global.setWebdavDownloadList(Global.webdavDownloadList);
+                   Global.setWebdavDownloadList(Global.webdavDownloadList);
                   String downloadPath =
                       await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
                   String bucketName = widget.bucketPrefix == '/'
@@ -1391,7 +1391,7 @@ class WebdavFileExplorerState extends loading_state.BaseLoadingPageState<WebdavF
             minLeadingWidth: 0,
             title: const Text('复制链接(设置中的默认格式)'),
             onTap: () async {
-              String format = await Global.getLKformat();
+              String format = Global.getLKformat();
               String host = widget.element['host'].endsWith('/')
                   ? widget.element['host'].substring(0, widget.element['host'].length - 1)
                   : widget.element['host'];

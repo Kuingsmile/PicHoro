@@ -53,7 +53,7 @@ class LinkFormatSelectState extends State<LinkFormatSelect> {
       title: Text(title),
       trailing: Global.defaultLKformat == value ? Icon(Icons.check, color: Theme.of(context).primaryColor) : null,
       onTap: () async {
-        await Global.setLKformat(value);
+        Global.setLKformat(value);
         setState(() {});
       },
     );
@@ -116,7 +116,7 @@ class LinkFormatSelectState extends State<LinkFormatSelect> {
                     ? Icon(Icons.check, color: Theme.of(context).primaryColor)
                     : null,
                 onTap: () async {
-                  await Global.setLKformat('custom');
+                  Global.setLKformat('custom');
                   setState(() {});
                 },
               ),
@@ -164,8 +164,8 @@ class LinkFormatSelectState extends State<LinkFormatSelect> {
                     filled: true,
                     fillColor: Theme.of(context).cardColor,
                   ),
-                  onChanged: (String value) async {
-                    await Global.setCustomLinkFormat(value);
+                  onChanged: (String value) {
+                    Global.setCustomLinkFormat(value);
                   },
                 ),
               ),

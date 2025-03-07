@@ -452,7 +452,7 @@ class QiniuFileExplorerState extends loading_state.BaseLoadingPageState<QiniuFil
                                   String uploadListStr = jsonEncode(uploadList);
                                   Global.qiniuUploadList.add(uploadListStr);
                                 }
-                                await Global.setQiniuUploadList(Global.qiniuUploadList);
+                                Global.setQiniuUploadList(Global.qiniuUploadList);
                                 String downloadPath = await ExternalPath.getExternalStoragePublicDirectory(
                                     ExternalPath.DIRECTORY_DOWNLOAD);
                                 if (mounted) {
@@ -513,7 +513,7 @@ class QiniuFileExplorerState extends loading_state.BaseLoadingPageState<QiniuFil
                                   String uploadListStr = jsonEncode(uploadList);
                                   Global.qiniuUploadList.add(uploadListStr);
                                 }
-                                await Global.setQiniuUploadList(Global.qiniuUploadList);
+                                Global.setQiniuUploadList(Global.qiniuUploadList);
                                 String downloadPath = await ExternalPath.getExternalStoragePublicDirectory(
                                     ExternalPath.DIRECTORY_DOWNLOAD);
                                 if (mounted) {
@@ -753,7 +753,7 @@ class QiniuFileExplorerState extends loading_state.BaseLoadingPageState<QiniuFil
                     urlList.add(hostPrefix + downloadList[i]['key']);
                   }
                   Global.qiniuDownloadList.addAll(urlList);
-                  await Global.setQiniuDownloadList(Global.qiniuDownloadList);
+                  Global.setQiniuDownloadList(Global.qiniuDownloadList);
                   String downloadPath =
                       await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
                   // ignore: use_build_context_synchronously
@@ -1493,7 +1493,7 @@ class QiniuFileExplorerState extends loading_state.BaseLoadingPageState<QiniuFil
             minLeadingWidth: 0,
             title: const Text('复制链接(设置中的默认格式)'),
             onTap: () async {
-              String format = await Global.getLKformat();
+              String format = Global.getLKformat();
               String domain = widget.element['domain'];
               if (domain == 'None') {
                 showToast('域名为空');

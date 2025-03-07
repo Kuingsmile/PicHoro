@@ -492,7 +492,7 @@ class GithubFileExplorerState extends loading_state.BaseLoadingPageState<GithubF
                                   String uploadListStr = jsonEncode(uploadList);
                                   Global.githubUploadList.add(uploadListStr);
                                 }
-                                await Global.setGithubUploadList(Global.githubUploadList);
+                                Global.setGithubUploadList(Global.githubUploadList);
                                 String downloadPath = await ExternalPath.getExternalStoragePublicDirectory(
                                     ExternalPath.DIRECTORY_DOWNLOAD);
                                 if (mounted) {
@@ -557,7 +557,7 @@ class GithubFileExplorerState extends loading_state.BaseLoadingPageState<GithubF
                                   String uploadListStr = jsonEncode(uploadList);
                                   Global.githubUploadList.add(uploadListStr);
                                 }
-                                await Global.setGithubUploadList(Global.githubUploadList);
+                                Global.setGithubUploadList(Global.githubUploadList);
                                 String downloadPath = await ExternalPath.getExternalStoragePublicDirectory(
                                     ExternalPath.DIRECTORY_DOWNLOAD);
                                 if (mounted) {
@@ -793,7 +793,7 @@ class GithubFileExplorerState extends loading_state.BaseLoadingPageState<GithubF
                       urlList.add(hostPrefix + downloadList[i]['path']);
                     }
                     Global.githubDownloadList.addAll(urlList);
-                    await Global.setGithubDownloadList(Global.githubDownloadList);
+                    Global.setGithubDownloadList(Global.githubDownloadList);
                     String downloadPath =
                         await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
                     // ignore: use_build_context_synchronously
@@ -824,7 +824,7 @@ class GithubFileExplorerState extends loading_state.BaseLoadingPageState<GithubF
                       }
                     }
                     Global.githubDownloadList.addAll(urlList);
-                    await Global.setGithubDownloadList(Global.githubDownloadList);
+                    Global.setGithubDownloadList(Global.githubDownloadList);
                     String downloadPath =
                         await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
                     // ignore: use_build_context_synchronously
@@ -1578,7 +1578,7 @@ class GithubFileExplorerState extends loading_state.BaseLoadingPageState<GithubF
             title: const Text('复制链接(设置中的默认格式)'),
             onTap: () async {
               if (widget.element['showedUsername'] != adminUserName || widget.element['private'] == false) {
-                String format = await Global.getLKformat();
+                String format = Global.getLKformat();
                 String shareUrl =
                     'https://raw.githubusercontent.com/${widget.element['showedUsername']}/${widget.element['name']}/${widget.element['default_branch']}/${widget.bucketPrefix}${allInfoList[index]['path']}';
                 String filename = my_path.basename(allInfoList[index]['path']);
@@ -1596,7 +1596,7 @@ class GithubFileExplorerState extends loading_state.BaseLoadingPageState<GithubF
                   widget.bucketPrefix + allInfoList[index]['path'],
                 );
                 if (result[0] == 'success') {
-                  String format = await Global.getLKformat();
+                  String format = Global.getLKformat();
                   String shareUrl = result[1]['download_url'];
                   String filename = my_path.basename(allInfoList[index]['path']);
                   String formatedLink = linkGeneratorMap[format]!(shareUrl, filename);

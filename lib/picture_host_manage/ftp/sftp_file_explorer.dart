@@ -475,7 +475,7 @@ class SFTPFileExplorerState extends loading_state.BaseLoadingPageState<SFTPFileE
                                   String uploadListStr = jsonEncode(uploadList);
                                   Global.ftpUploadList.add(uploadListStr);
                                 }
-                                await Global.setFtpUploadList(Global.ftpUploadList);
+                                Global.setFtpUploadList(Global.ftpUploadList);
                                 String downloadPath = await ExternalPath.getExternalStoragePublicDirectory(
                                     ExternalPath.DIRECTORY_DOWNLOAD);
                                 if (mounted) {
@@ -531,7 +531,7 @@ class SFTPFileExplorerState extends loading_state.BaseLoadingPageState<SFTPFileE
                                   String uploadListStr = jsonEncode(uploadList);
                                   Global.ftpUploadList.add(uploadListStr);
                                 }
-                                await Global.setFtpUploadList(Global.ftpUploadList);
+                                Global.setFtpUploadList(Global.ftpUploadList);
                                 String downloadPath = await ExternalPath.getExternalStoragePublicDirectory(
                                     ExternalPath.DIRECTORY_DOWNLOAD);
                                 if (mounted) {
@@ -758,7 +758,7 @@ class SFTPFileExplorerState extends loading_state.BaseLoadingPageState<SFTPFileE
                     urlList.add(widget.bucketPrefix + downloadList[i]['name']);
                   }
                   Global.ftpDownloadList.addAll(urlList);
-                  await Global.setFtpDownloadList(Global.ftpDownloadList);
+                  Global.setFtpDownloadList(Global.ftpDownloadList);
                   String downloadPath =
                       await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
 // ignore: use_build_context_synchronously
@@ -1354,7 +1354,7 @@ class SFTPFileExplorerState extends loading_state.BaseLoadingPageState<SFTPFileE
             minLeadingWidth: 0,
             title: const Text('复制链接(设置中的默认格式)'),
             onTap: () async {
-              String format = await Global.getLKformat();
+              String format = Global.getLKformat();
               String shareUrl = '';
               String customUrl = widget.element['ftpCustomUrl'] == null || widget.element['ftpCustomUrl'] == ''
                   ? 'None'

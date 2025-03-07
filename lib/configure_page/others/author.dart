@@ -50,6 +50,15 @@ class AuthorInformation extends StatelessWidget {
         elevation: 0,
         centerTitle: true,
         title: titleText('交流群-长按保存二维码'),
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withValues(alpha: 0.8)],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
+        ),
       ),
       body: Center(
           child: ListView(

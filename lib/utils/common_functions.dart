@@ -385,7 +385,7 @@ renamePictureWithRandomString(File file) {
 
 /// rename picture with custom format
 renamePictureWithCustomFormat(File file) async {
-  String customFormat = await Global.getCustomeRenameFormat();
+  String customFormat = Global.getCustomeRenameFormat();
   var path = file.path;
   var fileExtension = my_path.extension(path);
 
@@ -557,38 +557,38 @@ Future<void> deleteApkFile() async {
 
 /// APPinit
 mainInit() async {
+  await SpUtil.getInstance();
   await Permissionutils.askPermissionStorage();
   await Permissionutils.askPermissionCamera();
   await Permissionutils.askPermissionGallery();
   await Permissionutils.askPermissionManageExternalStorage();
   await Permissionutils.askPermissionMediaLibrary();
   await Permissionutils.askPermissionRequestInstallPackage();
-  String initUser = await Global.getUser();
-  await Global.setUser(initUser);
+  Global.setUser(Global.getUser());
   deleteApkFile();
-  await Global.setPassword(await Global.getPassword());
-  await Global.setPShost(await Global.getPShost());
+  Global.setPassword(Global.getPassword());
+  Global.setPShost(Global.getPShost());
   await ConfigureStoreFile().generateConfigureFile();
-  Global.setLKformat(await Global.getLKformat());
-  Global.setIsTimeStamp(await Global.getIsTimeStamp());
-  Global.setIsRandomName(await Global.getIsRandomName());
-  Global.setIsCopyLink(await Global.getIsCopyLink());
-  Global.setIsURLEncode(await Global.getIsURLEncode());
-  await Global.setShowedPBhost(await Global.getShowedPBhost());
-  Global.setIsDeleteLocal(await Global.getIsDeleteLocal());
-  Global.setCustomLinkFormat(await Global.getCustomLinkFormat());
-  Global.setIsDeleteCloud(await Global.getIsDeleteCloud());
-  Global.setIsCustomeRename(await Global.getIsCustomeRename());
-  Global.setCustomeRenameFormat(await Global.getCustomeRenameFormat());
-  Global.setTodayAlistUpdate(await Global.getTodayAlistUpdate());
-  Global.setBucketCustomUrl(await Global.getBucketCustomUrl());
+  Global.setLKformat(Global.getLKformat());
+  Global.setIsTimeStamp(Global.getIsTimeStamp());
+  Global.setIsRandomName(Global.getIsRandomName());
+  Global.setIsCopyLink(Global.getIsCopyLink());
+  Global.setIsURLEncode(Global.getIsURLEncode());
+  Global.setShowedPBhost(Global.getShowedPBhost());
+  Global.setIsDeleteLocal(Global.getIsDeleteLocal());
+  Global.setCustomLinkFormat(Global.getCustomLinkFormat());
+  Global.setIsDeleteCloud(Global.getIsDeleteCloud());
+  Global.setIsCustomeRename(Global.getIsCustomeRename());
+  Global.setCustomeRenameFormat(Global.getCustomeRenameFormat());
+  Global.setTodayAlistUpdate(Global.getTodayAlistUpdate());
+  Global.setBucketCustomUrl(Global.getBucketCustomUrl());
 
   //初始化图片压缩选项
-  Global.setIsCompress(await Global.getIsCompress());
-  Global.setminWidth(await Global.getminWidth());
-  Global.setminHeight(await Global.getminHeight());
-  Global.setQuality(await Global.getQuality());
-  Global.setDefaultCompressFormat(await Global.getDefaultCompressFormat());
+  Global.setIsCompress(Global.getIsCompress());
+  Global.setminWidth(Global.getminWidth());
+  Global.setminHeight(Global.getminHeight());
+  Global.setQuality(Global.getQuality());
+  Global.setDefaultCompressFormat(Global.getDefaultCompressFormat());
 
   //初始化图床相册数据库
   await Global.setDatabase(await Global.getDatabase());
@@ -600,7 +600,7 @@ mainInit() async {
   Application.router = router;
   Routes.configureRoutes(router);
   //初始化图床管理页面排列顺序
-  List<String> psHostHomePageOrder = await Global.getpsHostHomePageOrder();
+  List<String> psHostHomePageOrder = Global.getpsHostHomePageOrder();
   if (psHostHomePageOrder.length <= 22) {
     int length = psHostHomePageOrder.length;
     for (int i = length; i < 22; i++) {
@@ -612,34 +612,34 @@ mainInit() async {
       psHostHomePageOrder.add(i.toString());
     }
   }
-  await Global.setpsHostHomePageOrder(psHostHomePageOrder);
+  Global.setpsHostHomePageOrder(psHostHomePageOrder);
 
   //初始化上传下载列表
-  Global.setTencentUploadList(await Global.getTencentUploadList());
-  Global.setTencentDownloadList(await Global.getTencentDownloadList());
-  Global.setAliyunUploadList(await Global.getAliyunUploadList());
-  Global.setAliyunDownloadList(await Global.getAliyunDownloadList());
-  Global.setQiniuUploadList(await Global.getQiniuUploadList());
-  Global.setQiniuDownloadList(await Global.getQiniuDownloadList());
-  Global.setUpyunUploadList(await Global.getUpyunUploadList());
-  Global.setUpyunDownloadList(await Global.getUpyunDownloadList());
-  Global.setSmmsUploadList(await Global.getSmmsUploadList());
-  Global.setSmmsDownloadList(await Global.getSmmsDownloadList());
-  Global.setSmmsSavedNameList(await Global.getSmmsSavedNameList());
-  Global.setImgurUploadList(await Global.getImgurUploadList());
-  Global.setImgurDownloadList(await Global.getImgurDownloadList());
-  Global.setGithubUploadList(await Global.getGithubUploadList());
-  Global.setGithubDownloadList(await Global.getGithubDownloadList());
-  Global.setLskyproUploadList(await Global.getLskyproUploadList());
-  Global.setLskyproDownloadList(await Global.getLskyproDownloadList());
-  Global.setFtpUploadList(await Global.getFtpUploadList());
-  Global.setFtpDownloadList(await Global.getFtpDownloadList());
-  Global.setAwsUploadList(await Global.getAwsUploadList());
-  Global.setAwsDownloadList(await Global.getAwsDownloadList());
-  Global.setAlistUploadList(await Global.getAlistUploadList());
-  Global.setAlistDownloadList(await Global.getAlistDownloadList());
-  Global.setWebdavUploadList(await Global.getWebdavUploadList());
-  Global.setWebdavDownloadList(await Global.getWebdavDownloadList());
+  Global.setTencentUploadList(Global.getTencentUploadList());
+  Global.setTencentDownloadList(Global.getTencentDownloadList());
+  Global.setAliyunUploadList(Global.getAliyunUploadList());
+  Global.setAliyunDownloadList(Global.getAliyunDownloadList());
+  Global.setQiniuUploadList(Global.getQiniuUploadList());
+  Global.setQiniuDownloadList(Global.getQiniuDownloadList());
+  Global.setUpyunUploadList(Global.getUpyunUploadList());
+  Global.setUpyunDownloadList(Global.getUpyunDownloadList());
+  Global.setSmmsUploadList(Global.getSmmsUploadList());
+  Global.setSmmsDownloadList(Global.getSmmsDownloadList());
+  Global.setSmmsSavedNameList(Global.getSmmsSavedNameList());
+  Global.setImgurUploadList(Global.getImgurUploadList());
+  Global.setImgurDownloadList(Global.getImgurDownloadList());
+  Global.setGithubUploadList(Global.getGithubUploadList());
+  Global.setGithubDownloadList(Global.getGithubDownloadList());
+  Global.setLskyproUploadList(Global.getLskyproUploadList());
+  Global.setLskyproDownloadList(Global.getLskyproDownloadList());
+  Global.setFtpUploadList(Global.getFtpUploadList());
+  Global.setFtpDownloadList(Global.getFtpDownloadList());
+  Global.setAwsUploadList(Global.getAwsUploadList());
+  Global.setAwsDownloadList(Global.getAwsDownloadList());
+  Global.setAlistUploadList(Global.getAlistUploadList());
+  Global.setAlistDownloadList(Global.getAlistDownloadList());
+  Global.setWebdavUploadList(Global.getWebdavUploadList());
+  Global.setWebdavDownloadList(Global.getWebdavDownloadList());
 }
 
 //获得小图标，图片预览

@@ -320,9 +320,9 @@ ${configMap["webPath"]}
     }
   }
 
-  _setdefault() async {
-    await Global.setPShost('webdav');
-    await Global.setShowedPBhost('PBhostExtend4');
+  _setdefault() {
+    Global.setPShost('webdav');
+    Global.setShowedPBhost('PBhostExtend4');
     eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
     eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
     showToast('已设置Webdav为默认图床');

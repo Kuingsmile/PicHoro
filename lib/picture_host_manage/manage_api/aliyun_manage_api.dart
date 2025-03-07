@@ -49,7 +49,7 @@ class AliyunManageAPI {
 
   static Future<File> get localFile async {
     final path = await _localPath;
-    String defaultUser = await Global.getUser();
+    String defaultUser = Global.getUser();
     return ensureFileExists(File('$path/${defaultUser}_aliyun_config.txt'));
   }
 

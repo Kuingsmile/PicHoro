@@ -500,7 +500,7 @@ class ImgurFileExplorerState extends loading_state.BaseLoadingPageState<ImgurFil
                                 String uploadListStr = jsonEncode(uploadList);
                                 Global.imgurUploadList.add(uploadListStr);
                               }
-                              await Global.setImgurUploadList(Global.imgurUploadList);
+                              Global.setImgurUploadList(Global.imgurUploadList);
                               String downloadPath =
                                   await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
                               if (mounted) {
@@ -1392,7 +1392,7 @@ class ImgurFileExplorerState extends loading_state.BaseLoadingPageState<ImgurFil
             minLeadingWidth: 0,
             title: const Text('复制链接(设置中的默认格式)'),
             onTap: () async {
-              String format = await Global.getLKformat();
+              String format = Global.getLKformat();
               String shareUrl = allInfoList[index]['link'];
               String filename = allInfoList[index]['id'] == null
                   ? 'None'

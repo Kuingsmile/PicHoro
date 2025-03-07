@@ -137,7 +137,7 @@ class CompressConfigureState extends State<CompressConfigure> {
                     int width;
                     try {
                       width = int.parse(value);
-                      await Global.setminWidth(width);
+                      Global.setminWidth(width);
                     } catch (e) {
                       showToast('格式错误');
                     }
@@ -158,10 +158,8 @@ class CompressConfigureState extends State<CompressConfigure> {
                   ),
                   keyboardType: TextInputType.number,
                   onChanged: (String value) async {
-                    int height;
                     try {
-                      height = int.parse(value);
-                      await Global.setminHeight(height);
+                      Global.setminHeight(int.parse(value));
                     } catch (e) {
                       showToast('格式错误');
                     }
@@ -193,7 +191,7 @@ class CompressConfigureState extends State<CompressConfigure> {
                         showToast('范围为0-100');
                         return;
                       }
-                      await Global.setQuality(quality);
+                      Global.setQuality(quality);
                     } catch (e) {
                       showToast('格式错误');
                     }
@@ -220,7 +218,7 @@ class CompressConfigureState extends State<CompressConfigure> {
                   }).toList(),
                   onChanged: (String? value) async {
                     if (value != null) {
-                      await Global.setDefaultCompressFormat(value);
+                      Global.setDefaultCompressFormat(value);
                       setState(() {});
                     }
                   },

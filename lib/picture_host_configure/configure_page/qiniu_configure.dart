@@ -374,9 +374,9 @@ class QiniuConfigState extends State<QiniuConfig> {
     }
   }
 
-  _setdefault() async {
-    await Global.setPShost('qiniu');
-    await Global.setShowedPBhost('qiniu');
+  _setdefault() {
+    Global.setPShost('qiniu');
+    Global.setShowedPBhost('qiniu');
     eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
     eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
     showToast('已设置七牛云为默认图床');

@@ -71,7 +71,8 @@ class DefaultPShostSelectState extends State<DefaultPShostSelect> {
       leading: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: isSelected ? Theme.of(context).primaryColor.withOpacity(0.2) : Colors.grey.withOpacity(0.2),
+          color:
+              isSelected ? Theme.of(context).primaryColor.withValues(alpha: 0.2) : Colors.grey.withValues(alpha: 0.2),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Icon(
@@ -206,7 +207,7 @@ class DefaultPShostSelectState extends State<DefaultPShostSelect> {
 
 setdefaultPShostRemoteAndLocal(String psHost) async {
   try {
-    await Global.setPShost(psHost);
+    Global.setPShost(psHost);
 
     Map<String, String> hostMapping = {
       'lsky.pro': 'lskypro',
@@ -224,7 +225,7 @@ setdefaultPShostRemoteAndLocal(String psHost) async {
     };
 
     if (hostMapping.containsKey(psHost)) {
-      await Global.setShowedPBhost(hostMapping[psHost]!);
+      Global.setShowedPBhost(hostMapping[psHost]!);
     }
 
     showToast('已设置$psHost为默认图床');

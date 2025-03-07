@@ -54,7 +54,7 @@ class UploadManager {
 
       String configData = await readPictureHostConfig();
       Map configMap = jsonDecode(configData);
-      String defaultPH = await Global.getPShost();
+      String defaultPH = Global.getPShost();
       switch (defaultPH) {
         case 'tencent':
           List<String> tencentUploadResult = await TencentImageUploadUtils.uploadApi(

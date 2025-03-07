@@ -465,9 +465,9 @@ class AlistConfigState extends State<AlistConfig> {
     }
   }
 
-  _setdefault() async {
-    await Global.setPShost('alist');
-    await Global.setShowedPBhost('PBhostExtend3');
+  _setdefault() {
+    Global.setPShost('alist');
+    Global.setShowedPBhost('PBhostExtend3');
     eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
     eventBus.fire(HomePhotoRefreshEvent(homePhotoKeepAlive: false));
     showToast('已设置Alist为默认图床');
