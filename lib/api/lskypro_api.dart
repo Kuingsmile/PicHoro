@@ -66,7 +66,7 @@ class LskyproImageUploadUtils {
         return ["failed"];
       }
     } catch (e) {
-      flogError(
+      flogErr(
           e,
           {
             'path': path,
@@ -97,7 +97,7 @@ class LskyproImageUploadUtils {
       }
       return ["failed"];
     } catch (e) {
-      flogError(e, {}, "LskyproImageUploadUtils", "deleteApi");
+      flogErr(e, {}, "LskyproImageUploadUtils", "deleteApi");
       return ["failed"];
     }
   }

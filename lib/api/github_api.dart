@@ -68,7 +68,7 @@ class GithubImageUploadUtils {
       formatedURL = getFormatedUrl(downloadUrl, name);
       return ["success", formatedURL, returnUrl, pictureKey, downloadUrl];
     } catch (e) {
-      flogError(
+      flogErr(
           e,
           {
             'path': path,
@@ -98,7 +98,7 @@ class GithubImageUploadUtils {
       }
       return ["success"];
     } catch (e) {
-      flogError(
+      flogErr(
           e,
           {
             'path': deleteMap['path'],

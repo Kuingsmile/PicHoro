@@ -58,7 +58,7 @@ class SmmsImageUploadUtils {
       }
       return ["failed"];
     } catch (e) {
-      flogError(
+      flogErr(
           e,
           {
             'path': path,
@@ -87,7 +87,7 @@ class SmmsImageUploadUtils {
       var response = await dio.get(deleteUrl, queryParameters: formdata);
       return response.statusCode == 200 ? ["success"] : ["failed"];
     } catch (e) {
-      flogError(e, {}, "SmmsImageUploadUtils", "deleteApi");
+      flogErr(e, {}, "SmmsImageUploadUtils", "deleteApi");
       return ["failed"];
     }
   }

@@ -248,7 +248,7 @@ class UpyunManageAPI {
       }
       return ['success', response.data];
     } catch (e) {
-      flogError(e, {}, 'UpyunManageAPI', 'getToken');
+      flogErr(e, {}, 'UpyunManageAPI', 'getToken');
       return ['failed'];
     }
   }
@@ -268,7 +268,7 @@ class UpyunManageAPI {
       }
       return ['success'];
     } catch (e) {
-      flogError(e, {}, 'UpyunManageAPI', 'checkToken');
+      flogErr(e, {}, 'UpyunManageAPI', 'checkToken');
       return ['failed'];
     }
   }
@@ -293,7 +293,7 @@ class UpyunManageAPI {
       }
       return ['success'];
     } catch (e) {
-      flogError(e, {}, 'UpyunManageAPI', 'deleteToken');
+      flogErr(e, {}, 'UpyunManageAPI', 'deleteToken');
       return ['failed'];
     }
   }
@@ -350,7 +350,7 @@ class UpyunManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      flogError(e, {}, 'UpyunManageAPI', 'getBucketList');
+      flogErr(e, {}, 'UpyunManageAPI', 'getBucketList');
       return [e.toString()];
     }
   }
@@ -382,7 +382,7 @@ class UpyunManageAPI {
       }
       return ['success', response.data];
     } catch (e) {
-      flogError(e, {}, 'UpyunManageAPI', 'getBucketInfo');
+      flogErr(e, {}, 'UpyunManageAPI', 'getBucketInfo');
       return [e.toString()];
     }
   }
@@ -415,7 +415,7 @@ class UpyunManageAPI {
       }
       return ['success'];
     } catch (e) {
-      flogError(e, {}, 'UpyunManageAPI', 'deleteBucket');
+      flogErr(e, {}, 'UpyunManageAPI', 'deleteBucket');
       return [e.toString()];
     }
   }
@@ -447,7 +447,7 @@ class UpyunManageAPI {
       }
       return ['success'];
     } catch (e) {
-      flogError(e, {}, 'UpyunManageAPI', 'putBucket');
+      flogErr(e, {}, 'UpyunManageAPI', 'putBucket');
       return [e.toString()];
     }
   }
@@ -478,7 +478,7 @@ class UpyunManageAPI {
       }
       return ['success', response.data['operators']];
     } catch (e) {
-      flogError(e, {}, 'UpyunManageAPI', 'getOperator');
+      flogErr(e, {}, 'UpyunManageAPI', 'getOperator');
       return [e.toString()];
     }
   }
@@ -510,7 +510,7 @@ class UpyunManageAPI {
       }
       return ['success'];
     } catch (e) {
-      flogError(e, {}, 'UpyunManageAPI', 'addOperator');
+      flogErr(e, {}, 'UpyunManageAPI', 'addOperator');
       return [e.toString()];
     }
   }
@@ -542,7 +542,7 @@ class UpyunManageAPI {
       }
       return ['success'];
     } catch (e) {
-      flogError(e, {}, 'UpyunManageAPI', 'deleteOperator');
+      flogErr(e, {}, 'UpyunManageAPI', 'deleteOperator');
       return [e.toString()];
     }
   }
@@ -650,7 +650,7 @@ class UpyunManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      flogError(e, {'prefix': prefix}, 'UpyunManageAPI', 'queryBucketFiles');
+      flogErr(e, {'prefix': prefix}, 'UpyunManageAPI', 'queryBucketFiles');
       return [e.toString()];
     }
   }
@@ -701,7 +701,7 @@ class UpyunManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      flogError(
+      flogErr(
           e,
           {
             'prefix': prefix,
@@ -742,7 +742,7 @@ class UpyunManageAPI {
       }
       return ['success'];
     } catch (e) {
-      flogError(
+      flogErr(
           e,
           {
             'prefix': prefix,
@@ -795,7 +795,7 @@ class UpyunManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      flogError(e, {'prefix': prefix}, 'UpyunManageAPI', 'deleteFolder');
+      flogErr(e, {'prefix': prefix}, 'UpyunManageAPI', 'deleteFolder');
       return ['failed'];
     }
   }
@@ -879,7 +879,7 @@ class UpyunManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      flogError(e, {'prefix': prefix, 'key': key, 'newKey': newKey}, 'UpyunManageAPI', 'renameFile');
+      flogErr(e, {'prefix': prefix, 'key': key, 'newKey': newKey}, 'UpyunManageAPI', 'renameFile');
       return [e.toString()];
     }
   }
@@ -970,7 +970,7 @@ class UpyunManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      flogError(e, {'filename': filename, 'filepath': filepath, 'prefix': prefix}, 'UpyunManageAPI', 'uploadFile');
+      flogErr(e, {'filename': filename, 'filepath': filepath, 'prefix': prefix}, 'UpyunManageAPI', 'uploadFile');
       return ['error'];
     }
   }
@@ -1002,7 +1002,7 @@ class UpyunManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      flogError(e, {'fileLink': fileLink, 'prefix': prefix}, 'UpyunManageAPI', 'uploadNetworkFile');
+      flogErr(e, {'fileLink': fileLink, 'prefix': prefix}, 'UpyunManageAPI', 'uploadNetworkFile');
       return ['failed'];
     }
   }

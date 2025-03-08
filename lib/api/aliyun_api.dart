@@ -104,7 +104,7 @@ class AliyunImageUploadUtils {
       String pictureKey = jsonEncode(configMap);
       return ["success", formatedURL, returnUrl, pictureKey, displayUrl];
     } catch (e) {
-      flogError(
+      flogErr(
           e,
           {
             'path': path,
@@ -164,7 +164,7 @@ class AliyunImageUploadUtils {
       );
       return response.statusCode == 204 ? ["success"] : ["failed"];
     } catch (e) {
-      flogError(e, {}, "AliyunImageUploadUtils", "deleteApi");
+      flogErr(e, {}, "AliyunImageUploadUtils", "deleteApi");
       return ["failed"];
     }
   }

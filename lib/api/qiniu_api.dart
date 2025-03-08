@@ -157,7 +157,7 @@ class QiniuImageUploadUtils {
         return ['failed'];
       }
     } catch (e) {
-      flogError(
+      flogErr(
           e,
           {
             'path': path,
@@ -211,7 +211,7 @@ class QiniuImageUploadUtils {
       }
       return ["success"];
     } catch (e) {
-      flogError(
+      flogErr(
           e,
           {
             'fileName': fileName,

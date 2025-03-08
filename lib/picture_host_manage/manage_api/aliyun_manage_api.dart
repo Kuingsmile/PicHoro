@@ -183,7 +183,7 @@ class AliyunManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      flogError(e, {}, "AliyunManageAPI", "getBucketList");
+      flogErr(e, {}, "AliyunManageAPI", "getBucketList");
       return [e.toString()];
     }
   }
@@ -243,7 +243,7 @@ class AliyunManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      flogError(
+      flogErr(
           e,
           {
             'newBucketConfigMap': newBucketConfigMap,
@@ -282,7 +282,7 @@ class AliyunManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      flogError(e, {'element': element}, "AliyunManageAPI", "queryACLPolicy");
+      flogErr(e, {'element': element}, "AliyunManageAPI", "queryACLPolicy");
       return [e.toString()];
     }
   }
@@ -315,7 +315,7 @@ class AliyunManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      flogError(
+      flogErr(
           e,
           {
             'element': element,
@@ -355,7 +355,7 @@ class AliyunManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      flogError(
+      flogErr(
           e,
           {
             'element': element,
@@ -491,7 +491,7 @@ class AliyunManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      flogError(
+      flogErr(
           e,
           {
             'element': element,
@@ -554,7 +554,7 @@ class AliyunManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      flogError(
+      flogErr(
           e,
           {
             'element': element,
@@ -596,7 +596,7 @@ class AliyunManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      flogError(
+      flogErr(
           e,
           {
             'element': element,
@@ -734,7 +734,7 @@ class AliyunManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      flogError(
+      flogErr(
           e,
           {
             'element': element,
@@ -808,7 +808,7 @@ class AliyunManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      flogError(
+      flogErr(
           e,
           {
             'element': element,
@@ -886,8 +886,7 @@ class AliyunManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      flogError(
-          e, {'fileLink': fileLink, 'element': element, 'prefix': prefix}, "AliyunManageAPI", "uploadNetworkFile");
+      flogErr(e, {'fileLink': fileLink, 'element': element, 'prefix': prefix}, "AliyunManageAPI", "uploadNetworkFile");
       return ['failed'];
     }
   }

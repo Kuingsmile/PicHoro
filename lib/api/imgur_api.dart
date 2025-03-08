@@ -54,7 +54,7 @@ class ImgurImageUploadUtils {
       String cdnUrl = returnUrl;
       return ["success", formatedURL, returnUrl, pictureKey, cdnUrl];
     } catch (e) {
-      flogError(
+      flogErr(
           e,
           {
             'path': path,
@@ -94,7 +94,7 @@ class ImgurImageUploadUtils {
       }
       return ["success"];
     } catch (e) {
-      flogError(e, {}, "ImgurImageUploadUtils", "deleteApi");
+      flogErr(e, {}, "ImgurImageUploadUtils", "deleteApi");
       return ["failed"];
     }
   }

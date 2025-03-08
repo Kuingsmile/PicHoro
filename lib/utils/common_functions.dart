@@ -56,16 +56,6 @@ Map uploadStatus = {
   'UploadStatus.paused': "暂停",
 };
 
-flogError(Object e, Map parameters, String className, String methodName) {
-  FLog.error(
-      className: className,
-      methodName: methodName,
-      text: e is DioException
-          ? formatErrorMessage(parameters, e.toString(), isDioError: true, dioErrorMessage: e)
-          : formatErrorMessage(parameters, e.toString()),
-      dataLogType: DataLogType.ERRORS.toString());
-}
-
 Future<File> ensureFileExists(File file) async {
   if (!(await file.exists())) {
     await file.create(recursive: true);
@@ -497,46 +487,62 @@ String getContentType(String ext) {
 }
 
 /// 格式化错误信息
-formatErrorMessage(
+String formatErrorMessage(
   Map parameters,
   String error, {
   bool isDioError = false,
   DioException? dioErrorMessage,
 }) {
-  String formatedParameters = '';
-  String formatedError = '';
-  String? formatedDioError = '';
+  StringBuffer formattedLog = StringBuffer();
 
   if (parameters.isNotEmpty) {
+    formattedLog.writeln('参数:');
     parameters.forEach((key, value) {
-      formatedParameters += '$key: $value\n';
+      formattedLog.writeln('$key: $value');
     });
+    formattedLog.writeln();
   }
+
   if (error.isNotEmpty) {
-    formatedError = error;
+    formattedLog.writeln('错误信息:');
+    formattedLog.writeln(error);
+    formattedLog.writeln();
   }
-  if (dioErrorMessage != null) {
-    formatedDioError = dioErrorMessage.response != null
-        ? '${dioErrorMessage.message}\n${dioErrorMessage.response!.data}'
-        : dioErrorMessage.message;
+
+  // Format DioException details if available
+  if (isDioError && dioErrorMessage != null) {
+    formattedLog.writeln('DIO错误详情:');
+    formattedLog.writeln('类型: ${dioErrorMessage.type}');
+    formattedLog.writeln('消息: ${dioErrorMessage.message}');
+
+    if (dioErrorMessage.response != null) {
+      formattedLog.writeln('状态码: ${dioErrorMessage.response!.statusCode}');
+      if (dioErrorMessage.response!.data != null) {
+        formattedLog.writeln('响应数据: ${dioErrorMessage.response!.data}');
+      }
+    }
+
+    formattedLog.writeln('请求路径: ${dioErrorMessage.requestOptions.path}');
+    formattedLog.writeln('请求方法: ${dioErrorMessage.requestOptions.method}');
   }
-  String formateTemplate =
-      '参数:\n\n$formatedParameters\n错误信息:\n$formatedError\n\n是否DIO错误:\n$isDioError\n\nDIO报错信息:\n$formatedDioError';
-  return formateTemplate;
+
+  return formattedLog.toString();
 }
 
 /// 错误日志生成函数
-flogErr(Object e, Map parameters, String className, String methodName) {
+void flogErr(Object e, Map parameters, String className, String methodName) {
+  final errorMessage = e is DioException
+      ? formatErrorMessage(parameters, e.toString(), isDioError: true, dioErrorMessage: e)
+      : formatErrorMessage(parameters, e.toString());
+
   FLog.error(
-      className: className,
-      methodName: methodName,
-      text: e is DioException
-          ? formatErrorMessage(parameters, e.toString(), isDioError: true, dioErrorMessage: e)
-          : formatErrorMessage(parameters, e.toString()),
-      dataLogType: DataLogType.ERRORS.toString());
+    className: className,
+    methodName: methodName,
+    text: errorMessage,
+    dataLogType: DataLogType.ERRORS.toString(),
+  );
 }
 
-/// 清理下载的apk文件
 Future<void> deleteApkFile() async {
   try {
     var directory = await getExternalStorageDirectory();

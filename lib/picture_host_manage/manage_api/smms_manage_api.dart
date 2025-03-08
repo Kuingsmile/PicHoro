@@ -67,7 +67,7 @@ class SmmsManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      flogError(e, {}, "SmmsManageAPI", "getUserProfile");
+      flogErr(e, {}, "SmmsManageAPI", "getUserProfile");
       return [e.toString()];
     }
   }
@@ -95,7 +95,7 @@ class SmmsManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      flogError(e, {'page': page}, "SmmsManageAPI", "getFileList");
+      flogErr(e, {'page': page}, "SmmsManageAPI", "getFileList");
       return [e.toString()];
     }
   }
@@ -121,7 +121,7 @@ class SmmsManageAPI {
         return ["failed"];
       }
     } catch (e) {
-      flogError(e, {'filename': filename, 'path': path}, "SmmsManageAPI", "uploadFile");
+      flogErr(e, {'filename': filename, 'path': path}, "SmmsManageAPI", "uploadFile");
       return ['error'];
     }
   }
@@ -185,7 +185,7 @@ class SmmsManageAPI {
       }
       return ['success'];
     } catch (e) {
-      flogError(e, {'fileLink': fileLink}, "SmmsManageAPI", "uploadNetworkFile");
+      flogErr(e, {'fileLink': fileLink}, "SmmsManageAPI", "uploadNetworkFile");
       return ['failed'];
     }
   }
@@ -241,7 +241,7 @@ class SmmsManageAPI {
         return ["failed"];
       }
     } catch (e) {
-      flogError(e, {'hash': hash}, "SmmsManageAPI", "deleteFile");
+      flogErr(e, {'hash': hash}, "SmmsManageAPI", "deleteFile");
       return [e.toString()];
     }
   }

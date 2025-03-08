@@ -131,7 +131,7 @@ class DownloadManager {
         }
       }
     } catch (e) {
-      flogError(
+      flogErr(
           e,
           {
             'url': url,

@@ -64,6 +64,7 @@ dependencies:
   grouped_list: ^6.0.0
   http: ^1.1.0
   image_picker: ^1.0.2
+  intl: ^0.17.0
   mime: 1.0.4
   msh_checkbox: ^2.0.1
   open_filex: ^4.3.2

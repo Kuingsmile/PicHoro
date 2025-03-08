@@ -91,7 +91,7 @@ class WebdavManageAPI {
       }
       return ['success', fileList];
     } catch (e) {
-      flogError(e, {}, "WebdavManageAPI", "getFileList");
+      flogErr(e, {}, "WebdavManageAPI", "getFileList");
       return [e.toString()];
     }
   }
@@ -102,7 +102,7 @@ class WebdavManageAPI {
       await client.mkdirAll(path);
       return ['success'];
     } catch (e) {
-      flogError(e, {}, "WebdavManageAPI", "createDir");
+      flogErr(e, {}, "WebdavManageAPI", "createDir");
       return [e.toString()];
     }
   }
@@ -113,7 +113,7 @@ class WebdavManageAPI {
       await client.remove(path);
       return ['success'];
     } catch (e) {
-      flogError(e, {}, "WebdavManageAPI", "deleteFile");
+      flogErr(e, {}, "WebdavManageAPI", "deleteFile");
       return [e.toString()];
     }
   }
@@ -127,7 +127,7 @@ class WebdavManageAPI {
       await client.rename(path, newName, true);
       return ['success'];
     } catch (e) {
-      flogError(e, {}, "WebdavManageAPI", "renameFile");
+      flogErr(e, {}, "WebdavManageAPI", "renameFile");
       return [e.toString()];
     }
   }
@@ -171,7 +171,7 @@ class WebdavManageAPI {
       await client.writeFromFile(filepath, prefix + filename);
       return ['success'];
     } catch (e) {
-      flogError(e, {'filename': filename, 'filepath': filepath, 'prefix': prefix}, "WebdavManageAPI", "uploadFile");
+      flogErr(e, {'filename': filename, 'filepath': filepath, 'prefix': prefix}, "WebdavManageAPI", "uploadFile");
       return ['error'];
     }
   }
@@ -202,7 +202,7 @@ class WebdavManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      flogError(e, {'fileLink': fileLink, 'prefix': prefix}, "WebdavManageAPI", "uploadNetworkFile");
+      flogErr(e, {'fileLink': fileLink, 'prefix': prefix}, "WebdavManageAPI", "uploadNetworkFile");
       return ['failed'];
     }
   }

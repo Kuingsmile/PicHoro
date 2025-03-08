@@ -147,7 +147,7 @@ class AlistImageUploadUtils {
 
       return ["success", formatedURL, returnUrl, pictureKey, displayUrl, hostPicUrl];
     } catch (e) {
-      flogError(
+      flogErr(
           e,
           {
             'path': path,
@@ -186,7 +186,7 @@ class AlistImageUploadUtils {
       }
       return ["success"];
     } catch (e) {
-      flogError(
+      flogErr(
           e,
           {
             'deleteMap': deleteMap,

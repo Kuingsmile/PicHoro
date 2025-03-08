@@ -792,7 +792,7 @@ class AwsManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      flogError(e, {'fileLink': fileLink, 'element': element, 'prefix': prefix}, "AwsManageAPI", "uploadNetworkFile");
+      flogErr(e, {'fileLink': fileLink, 'element': element, 'prefix': prefix}, "AwsManageAPI", "uploadNetworkFile");
       return ['failed'];
     }
   }

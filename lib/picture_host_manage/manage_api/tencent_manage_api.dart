@@ -171,7 +171,7 @@ class TencentManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      flogError(e, {}, "TencentManageAPI", "getBucketList");
+      flogErr(e, {}, "TencentManageAPI", "getBucketList");
       return [e.toString()];
     }
   }
@@ -236,7 +236,7 @@ class TencentManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      flogError(e, {'newBucketConfigMap': newBucketConfigMap}, "TencentManageAPI", "createBucket");
+      flogErr(e, {'newBucketConfigMap': newBucketConfigMap}, "TencentManageAPI", "createBucket");
       return [e.toString()];
     }
   }
@@ -271,7 +271,7 @@ class TencentManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      flogError(
+      flogErr(
         e,
         {'element': element},
         "TencentManageAPI",
@@ -315,7 +315,7 @@ class TencentManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      flogError(e, {'element': element}, "TencentManageAPI", "queryACLPolicy");
+      flogErr(e, {'element': element}, "TencentManageAPI", "queryACLPolicy");
       return [e.toString()];
     }
   }
@@ -350,7 +350,7 @@ class TencentManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      flogError(e, {'element': element, 'newACL': newACL}, "TencentManageAPI", "changeACLPolicy");
+      flogErr(e, {'element': element, 'newACL': newACL}, "TencentManageAPI", "changeACLPolicy");
       return [e.toString()];
     }
   }
@@ -472,7 +472,7 @@ class TencentManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      flogError(e, {'element': element, 'query': query}, "TencentManageAPI", "queryBucketFiles");
+      flogErr(e, {'element': element, 'query': query}, "TencentManageAPI", "queryBucketFiles");
       return [e.toString()];
     }
   }
@@ -521,7 +521,7 @@ class TencentManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      flogError(e, {'element': element, 'key': key}, "TencentManageAPI", "deleteFile");
+      flogErr(e, {'element': element, 'key': key}, "TencentManageAPI", "deleteFile");
       return [e.toString()];
     }
   }
@@ -609,7 +609,7 @@ class TencentManageAPI {
       }
       return ['success'];
     } catch (e) {
-      flogError(
+      flogErr(
         e,
         {'element': element, 'key': key, 'newKey': newKey},
         "TencentManageAPI",
@@ -693,7 +693,7 @@ class TencentManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      flogError(
+      flogErr(
         e,
         {'element': element, 'key': key, 'path': path},
         "TencentManageAPI",
@@ -738,7 +738,7 @@ class TencentManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      flogError(e, {'element': element, 'prefix': prefix, 'newfolder': newfolder}, "TencentManageAPI", "createFolder");
+      flogErr(e, {'element': element, 'prefix': prefix, 'newfolder': newfolder}, "TencentManageAPI", "createFolder");
       return [e.toString()];
     }
   }
@@ -811,8 +811,8 @@ class TencentManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      flogError(e, {'element': element, 'filename': filename, 'filepath': filepath, 'prefix': prefix},
-          "TencentManageAPI", "uploadFile");
+      flogErr(e, {'element': element, 'filename': filename, 'filepath': filepath, 'prefix': prefix}, "TencentManageAPI",
+          "uploadFile");
       return ['error'];
     }
   }
@@ -881,8 +881,7 @@ class TencentManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      flogError(
-          e, {'fileLink': fileLink, 'element': element, 'prefix': prefix}, "TencentManageAPI", "uploadNetworkFile");
+      flogErr(e, {'fileLink': fileLink, 'element': element, 'prefix': prefix}, "TencentManageAPI", "uploadNetworkFile");
       return ['failed'];
     }
   }

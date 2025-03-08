@@ -253,7 +253,7 @@ signingStr=signingStr+<body>
         return ['failed'];
       }
     } catch (e) {
-      flogError(e, {}, "QiniuManageAPI", "getBucketList");
+      flogErr(e, {}, "QiniuManageAPI", "getBucketList");
       return [e.toString()];
     }
   }
@@ -293,7 +293,7 @@ signingStr=signingStr+<body>
         return ['failed'];
       }
     } catch (e) {
-      flogError(e, {'newBucketConfigMap': newBucketConfigMap}, "QiniuManageAPI", "createBucket");
+      flogErr(e, {'newBucketConfigMap': newBucketConfigMap}, "QiniuManageAPI", "createBucket");
       return [e.toString()];
     }
   }
@@ -325,7 +325,7 @@ signingStr=signingStr+<body>
         return ['failed'];
       }
     } catch (e) {
-      flogError(e, {'element': element}, "QiniuManageAPI", "getBucketACL");
+      flogErr(e, {'element': element}, "QiniuManageAPI", "getBucketACL");
       return [e.toString()];
     }
   }
@@ -361,7 +361,7 @@ signingStr=signingStr+<body>
         return ['failed'];
       }
     } catch (e) {
-      flogError(e, {'element': element}, "QiniuManageAPI", "deleteBucket");
+      flogErr(e, {'element': element}, "QiniuManageAPI", "deleteBucket");
       return [e.toString()];
     }
   }
@@ -404,7 +404,7 @@ signingStr=signingStr+<body>
         return ['failed'];
       }
     } catch (e) {
-      flogError(e, {'element': element}, "QiniuManageAPI", "queryDomains");
+      flogErr(e, {'element': element}, "QiniuManageAPI", "queryDomains");
       return [e.toString()];
     }
   }
@@ -448,7 +448,7 @@ signingStr=signingStr+<body>
         return ['failed'];
       }
     } catch (e) {
-      flogError(e, {'element': element}, "QiniuManageAPI", "setACL");
+      flogErr(e, {'element': element}, "QiniuManageAPI", "setACL");
       return [e.toString()];
     }
   }
@@ -611,7 +611,7 @@ signingStr=signingStr+<body>
         return ['failed'];
       }
     } catch (e) {
-      flogError(e, {'element': element, 'query': query}, "QiniuManageAPI", "queryBucketFiles");
+      flogErr(e, {'element': element, 'query': query}, "QiniuManageAPI", "queryBucketFiles");
       return [e.toString()];
     }
   }
@@ -675,7 +675,7 @@ signingStr=signingStr+<body>
         return ['failed'];
       }
     } catch (e) {
-      flogError(e, {'element': element, 'prefix': prefix, 'newfolder': newfolder}, "QiniuManageAPI", "createFolder");
+      flogErr(e, {'element': element, 'prefix': prefix, 'newfolder': newfolder}, "QiniuManageAPI", "createFolder");
       return [e.toString()];
     }
   }
@@ -716,7 +716,7 @@ signingStr=signingStr+<body>
         return ['failed'];
       }
     } catch (e) {
-      flogError(e, {'element': element, 'key': key}, "QiniuManageAPI", "deleteFile");
+      flogErr(e, {'element': element, 'key': key}, "QiniuManageAPI", "deleteFile");
       return [e.toString()];
     }
   }
@@ -810,7 +810,7 @@ signingStr=signingStr+<body>
         return ['failed'];
       }
     } catch (e) {
-      flogError(e, {'element': element, 'key': key, 'newKey': newKey}, "QiniuManageAPI", "copyFile");
+      flogErr(e, {'element': element, 'key': key, 'newKey': newKey}, "QiniuManageAPI", "copyFile");
       if (e.toString().contains('614')) {
         return ['existed'];
       } else {
@@ -866,7 +866,7 @@ signingStr=signingStr+<body>
         return ['failed'];
       }
     } catch (e) {
-      flogError(e, {'element': element, 'bucketPrefix': bucketPrefix, 'link': link}, "QiniuManageAPI", "sisyphusFetch");
+      flogErr(e, {'element': element, 'bucketPrefix': bucketPrefix, 'link': link}, "QiniuManageAPI", "sisyphusFetch");
       return [e.toString()];
     }
   }

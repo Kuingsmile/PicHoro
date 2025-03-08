@@ -56,7 +56,7 @@ class WebdavImageUploadUtils {
         displayUrl,
       ];
     } catch (e) {
-      flogError(
+      flogErr(
           e,
           {
             'path': path,
@@ -90,7 +90,7 @@ class WebdavImageUploadUtils {
 
       return ["success"];
     } catch (e) {
-      flogError(e, {}, "WebdavImageUploadUtils", "deleteApi");
+      flogErr(e, {}, "WebdavImageUploadUtils", "deleteApi");
       return ["failed"];
     }
   }

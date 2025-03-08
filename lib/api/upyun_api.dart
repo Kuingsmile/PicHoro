@@ -123,7 +123,7 @@ class UpyunImageUploadUtils {
       String pictureKey = jsonEncode(pictureKeyMap);
       return ["success", formatedURL, returnUrl, pictureKey, displayUrl];
     } catch (e) {
-      flogError(
+      flogErr(
           e,
           {
             'path': path,
@@ -184,7 +184,7 @@ class UpyunImageUploadUtils {
       }
       return ["success"];
     } catch (e) {
-      flogError(
+      flogErr(
           e,
           {
             'fileName': fileName,

@@ -77,7 +77,7 @@ class GithubManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      flogError(e, {}, "GithubManageAPI", "getUserInfo");
+      flogErr(e, {}, "GithubManageAPI", "getUserInfo");
       return [e.toString()];
     }
   }
@@ -124,7 +124,7 @@ class GithubManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      flogError(e, {}, "GithubManageAPI", "getReposList");
+      flogErr(e, {}, "GithubManageAPI", "getReposList");
       return [e.toString()];
     }
   }
@@ -172,7 +172,7 @@ class GithubManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      flogError(e, {}, "GithubManageAPI", "getOtherReposList");
+      flogErr(e, {}, "GithubManageAPI", "getOtherReposList");
       return [e.toString()];
     }
   }
@@ -199,7 +199,7 @@ class GithubManageAPI {
         return showToast('创建失败');
       }
     } catch (e) {
-      flogError(
+      flogErr(
           e,
           {
             'newRepoInfo': newRepoInfo,
@@ -234,7 +234,7 @@ class GithubManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      flogError(
+      flogErr(
           e,
           {
             'username': username,
@@ -269,7 +269,7 @@ class GithubManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      flogError(
+      flogErr(
           e,
           {
             'username': username,

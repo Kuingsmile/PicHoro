@@ -371,7 +371,7 @@ class FTPManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      flogError(
+      flogErr(
           e,
           {
             'fileLink': fileLink,

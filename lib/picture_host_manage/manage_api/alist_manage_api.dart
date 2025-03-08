@@ -138,7 +138,7 @@ class AlistManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      flogError(
+      flogErr(
           e,
           {
             'host': host,
@@ -207,7 +207,7 @@ class AlistManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      flogError(e, {}, "AlistManageAPI", "getBucketList");
+      flogErr(e, {}, "AlistManageAPI", "getBucketList");
       return [e.toString()];
     }
   }
@@ -247,7 +247,7 @@ class AlistManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      flogError(e, {}, "AlistManageAPI", "changeBucketState");
+      flogErr(e, {}, "AlistManageAPI", "changeBucketState");
       return [e.toString()];
     }
   }
@@ -278,7 +278,7 @@ class AlistManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      flogError(e, {}, "AlistManageAPI", "deleteBucket");
+      flogErr(e, {}, "AlistManageAPI", "deleteBucket");
       return [e.toString()];
     }
   }
@@ -307,7 +307,7 @@ class AlistManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      flogError(e, {}, "AlistManageAPI", "createBucket");
+      flogErr(e, {}, "AlistManageAPI", "createBucket");
       return [e.toString()];
     }
   }
@@ -336,7 +336,7 @@ class AlistManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      flogError(e, {}, "AlistManageAPI", "updateBucket");
+      flogErr(e, {}, "AlistManageAPI", "updateBucket");
       return [e.toString()];
     }
   }
@@ -412,7 +412,7 @@ class AlistManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      flogError(e, {}, "AlistManageAPI", "getTotalPage");
+      flogErr(e, {}, "AlistManageAPI", "getTotalPage");
       return [e.toString()];
     }
   }
@@ -453,7 +453,7 @@ class AlistManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      flogError(e, {}, "AlistManageAPI", "listFolderByPage");
+      flogErr(e, {}, "AlistManageAPI", "listFolderByPage");
       return [e.toString()];
     }
   }
@@ -514,7 +514,7 @@ class AlistManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      flogError(e, {}, "AlistManageAPI", "listFolder");
+      flogErr(e, {}, "AlistManageAPI", "listFolder");
       return [e.toString()];
     }
   }
@@ -546,7 +546,7 @@ class AlistManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      flogError(e, {}, "AlistManageAPI", "getFileInfo");
+      flogErr(e, {}, "AlistManageAPI", "getFileInfo");
       return [e.toString()];
     }
   }
@@ -578,7 +578,7 @@ class AlistManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      flogError(e, {}, "AlistManageAPI", "mkDir");
+      flogErr(e, {}, "AlistManageAPI", "mkDir");
       return [e.toString()];
     }
   }
@@ -611,7 +611,7 @@ class AlistManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      flogError(e, {}, "AlistManageAPI", "rename");
+      flogErr(e, {}, "AlistManageAPI", "rename");
       return [e.toString()];
     }
   }
@@ -644,7 +644,7 @@ class AlistManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      flogError(e, {}, "AlistManageAPI", "remove");
+      flogErr(e, {}, "AlistManageAPI", "remove");
       return [e.toString()];
     }
   }
@@ -691,7 +691,7 @@ class AlistManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      flogError(e, {}, "AlistManageAPI", "uploadFile");
+      flogErr(e, {}, "AlistManageAPI", "uploadFile");
       return [e.toString()];
     }
   }
@@ -722,7 +722,7 @@ class AlistManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      flogError(e, {'fileLink': fileLink, 'uploadPath': uploadPath}, "AlistManageAPI", "uploadNetworkFile");
+      flogErr(e, {'fileLink': fileLink, 'uploadPath': uploadPath}, "AlistManageAPI", "uploadNetworkFile");
       return ['failed'];
     }
   }
