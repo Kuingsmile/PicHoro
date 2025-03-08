@@ -49,6 +49,28 @@ class UpdateLogState extends State<UpdateLog> {
             return Markdown(
               data: snapshot.data!,
               selectable: true,
+              padding: const EdgeInsets.all(16.0),
+              styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
+                h1: Theme.of(context).textTheme.headlineMedium,
+                h2: Theme.of(context).textTheme.titleLarge,
+                h3: Theme.of(context).textTheme.titleMedium,
+                p: Theme.of(context).textTheme.bodyMedium,
+                blockquote: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Theme.of(context).textTheme.bodySmall?.color,
+                      fontStyle: FontStyle.italic,
+                    ),
+                code: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                      fontFamily: 'monospace',
+                    ),
+                codeblockDecoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(4.0),
+                ),
+              ),
+              softLineBreak: true,
+              shrinkWrap: true,
+              physics: const ClampingScrollPhysics(),
               imageBuilder: (uri, title, alt) {
                 return ExtendedImage.network(
                   uri.toString(),
@@ -71,7 +93,7 @@ class UpdateLogState extends State<UpdateLog> {
               },
               onTapLink: (text, href, title) async {
                 Uri url = Uri.parse(href!);
-                await launchUrl(url);
+                await launchUrl(url, mode: LaunchMode.externalApplication);
               },
             );
           } else {
