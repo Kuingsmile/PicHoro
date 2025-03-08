@@ -1,16 +1,10 @@
-/* 
-Copyright 2020 Mr.Yang All Rights Reserved
-Modified under MIT license
-See file LICENSE of original project at https://github.com/PicGo/flutter-picgo
-*/
-
+import 'package:horopic/album/action_button.dart';
 import 'package:universal_io/io.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 
 import 'package:extended_image/extended_image.dart';
 import 'package:fluro/fluro.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:f_logs/f_logs.dart';
 import 'package:flutter/services.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -52,18 +46,25 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
   /// 全部图片的显示地址列表
   List imageDisplayedUrlList = []; //showedImages的用来显示到相册里的url
 
-  int pageIndex = 0;
-  final int paginationSize = 12;
+  // 新增：当前已加载的图片数量
+  int _loadedImagesCount = 0;
 
-  /// 当前显示的图片url列表
-  List currentVisibleImageUrlList = [];
+  // 每次加载的图片数量
+  final int _loadBatchSize = 12;
 
-  /// 当前显示的图片的显示地址列表
-  List currentVisibleImageDisplayedUrlList = [];
+  // 是否正在加载更多图片
+  bool _isLoading = false;
+
+  // 是否已加载所有图片
+  bool _hasLoadedAll = false;
+
+  // 用于选择的列表
+  List<bool> selectedImagesBoolList = [];
+
+  // 滚动控制器
+  final ScrollController _scrollController = ScrollController();
 
   RefreshController refreshController = RefreshController(initialRefresh: false);
-  List selectedImagesList = [];
-  List<bool> selectedImagesBoolList = List.filled(12, false);
 
   Map<String, String> nameToPara = {
     'lskypro': '兰空',
@@ -129,11 +130,26 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
       },
     );
     super.initState();
+    _initScrollListener();
+    setState(() {
+      _isLoading = true;
+    });
     _onRefresh();
+  }
+
+  void _initScrollListener() {
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels > _scrollController.position.maxScrollExtent - 800 &&
+          !_isLoading &&
+          !_hasLoadedAll) {
+        _loadMoreImages();
+      }
+    });
   }
 
   @override
   void dispose() {
+    _scrollController.dispose();
     actionEventBus.cancel();
     super.dispose();
   }
@@ -175,7 +191,7 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
     return Scaffold(
       appBar: AppBar(
           title: titleText(
-            '${nameToPara[Global.defaultShowedPBhost]}相册 - 第${pageIndex + 1}页',
+            '${nameToPara[Global.defaultShowedPBhost]}相册',
           ),
           centerTitle: true,
           systemOverlayStyle: const SystemUiOverlayStyle(
@@ -235,35 +251,62 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
                 itemBuilder: (BuildContext context) {
                   return [
                     PopupMenuItem(
+                      height: 56.0,
                       padding: EdgeInsets.zero,
-                      child: Row(
-                        children: [
-                          const SizedBox(
-                            width: 10,
-                          ),
-                          const Text('同步删除云端'),
-                          Switch(
-                            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                            value: Global.isDeleteCloud,
-                            onChanged: (value) async {
-                              Global.setIsDeleteCloud(value);
-                              setState(() {});
-                              if (context.mounted) {
-                                if (value == true) {
-                                  showToastWithContext(context, '已开启云端删除');
-                                } else {
-                                  showToastWithContext(context, '已关闭云端删除');
-                                }
-                                Navigator.pop(context);
-                              }
-                            },
-                          ),
-                        ],
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(4.0),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.cloud_off_outlined,
+                                  size: 20,
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                                const SizedBox(width: 12),
+                                Text(
+                                  '同步删除云端',
+                                  style: TextStyle(
+                                    color: Theme.of(context).colorScheme.onSurface,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Tooltip(
+                              message: '删除本地图片的同时也从云端删除',
+                              child: Switch(
+                                activeColor: Theme.of(context).colorScheme.primary,
+                                value: Global.isDeleteCloud,
+                                onChanged: (value) async {
+                                  Global.setIsDeleteCloud(value);
+                                  setState(() {});
+                                  if (context.mounted) {
+                                    showToastWithContext(context, value ? '已开启云端删除' : '已关闭云端删除');
+                                    Navigator.pop(context);
+                                  }
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                     const PopupMenuItem(
                       value: 1,
-                      child: Text('选择默认链接格式'),
+                      child: Row(
+                        children: [
+                          Icon(Icons.link, size: 20),
+                          SizedBox(width: 12),
+                          Text('选择默认链接格式'),
+                        ],
+                      ),
                     ),
                   ];
                 }),
@@ -272,7 +315,7 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
                   ? const Icon(Icons.delete, color: Color.fromARGB(255, 236, 127, 120), size: 40.0)
                   : const Icon(Icons.delete_outline, color: Colors.white, size: 40.0),
               onPressed: () async {
-                if (!selectedImagesBoolList.contains(true) || currentVisibleImageUrlList.isEmpty) {
+                if (!selectedImagesBoolList.contains(true) || imageUrlList.isEmpty) {
                   showToastWithContext(context, '没有选择图片');
                   return;
                 }
@@ -283,12 +326,12 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
                   onConfirm: () async {
                     try {
                       List<int> toDelete = [];
-                      for (int i = 0; i < currentVisibleImageUrlList.length; i++) {
+                      for (int i = 0; i < _loadedImagesCount; i++) {
                         if (selectedImagesBoolList[i]) {
                           toDelete.add(i);
                         }
                       }
-                      selectedImagesBoolList = List.filled(paginationSize, false);
+                      selectedImagesBoolList = List.filled(_loadBatchSize, false);
                       Navigator.pop(context);
                       await removeAllImages(toDelete);
                       showToast('删除完成');
@@ -311,334 +354,221 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
               },
             ),
           ]),
-      body: SmartRefresher(
-          enablePullDown: true,
-          enablePullUp: imageUrlList.length > paginationSize,
-          header: const ClassicHeader(
-            refreshStyle: RefreshStyle.Follow,
-            idleText: '下拉刷新',
-            refreshingText: '正在刷新',
-            completeText: '刷新完成',
-            failedText: '刷新失败',
-            releaseText: '释放刷新',
-          ),
-          footer: const ClassicFooter(
-            loadStyle: LoadStyle.ShowWhenLoading,
-            idleText: '上拉加载',
-            loadingText: '正在加载',
-            noDataText: '没有更多图片啦',
-            failedText: '没有更多图片啦',
-            canLoadingText: '释放加载',
-          ),
-          controller: refreshController,
-          onRefresh: _onRefresh,
-          onLoading: _onLoading,
-          child: GridView.builder(
-            padding: const EdgeInsets.all(2),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3, childAspectRatio: 1),
-            itemCount: currentVisibleImageUrlList.length,
-            itemBuilder: (context, index) {
-              return GestureDetector(
-                onTap: () {
-                  switch (Global.defaultShowedPBhost) {
-                    case 'lskypro':
-                    case 'smms':
-                    case 'imgur':
-                    case 'qiniu':
-                    case 'tencent':
-                    case 'aliyun':
-                    case 'upyun':
-                    case 'PBhostExtend2':
-                    case 'PBhostExtend3':
-                      String urlList = currentVisibleImageUrlList.join(',');
-                      Application.router.navigateTo(
-                          context, '${Routes.albumImagePreview}?index=$index&images=${Uri.encodeComponent(urlList)}',
-                          transition: TransitionType.none);
-                    case 'github':
-                      String urlList = '';
-                      for (int i = 0; i < currentVisibleImageDisplayedUrlList.length; i++) {
-                        if (currentVisibleImageDisplayedUrlList[i].contains('raw.githubusercontent.com')) {
-                          urlList += 'https://ghproxy.com/${currentVisibleImageDisplayedUrlList[i]},';
-                        } else {
-                          urlList += currentVisibleImageUrlList[i] + ',';
-                        }
-                      }
-                      Application.router.navigateTo(
-                          context, '${Routes.albumImagePreview}?index=$index&images=${Uri.encodeComponent(urlList)}',
-                          transition: TransitionType.none);
-                    case 'PBhostExtend1':
-                      String urlList = currentVisibleImageDisplayedUrlList.join(',');
-                      Application.router.navigateTo(
-                          context, '${Routes.localImagePreview}?index=$index&images=${Uri.encodeComponent(urlList)}',
-                          transition: TransitionType.none);
-                    case 'PBhostExtend4':
-                      List trueUrlList = [];
-                      List headersList = [];
-                      RegExp reg = RegExp(r'Basic (.*)');
-                      for (int i = 0; i < currentVisibleImageDisplayedUrlList.length; i++) {
-                        String trueUrl = currentVisibleImageDisplayedUrlList[i].replaceAll(reg, '');
-                        headersList.add({
-                          'Authorization': reg.firstMatch(currentVisibleImageDisplayedUrlList[i])![0],
-                        });
-                        trueUrlList.add(trueUrl);
-                      }
-                      String urlList = trueUrlList.join(',');
-                      Application.router.navigateTo(context,
-                          '${Routes.webdavImagePreview}?index=$index&images=${Uri.encodeComponent(urlList)}&headersList=${Uri.encodeComponent(jsonEncode(headersList))}',
-                          transition: TransitionType.none);
-                  }
-                },
-                onDoubleTap: () => copyFormatedLink(index, Global.defaultLKformat),
-                onLongPressStart: (LongPressStartDetails details) {
-                  handleOnLongPress(context, details.globalPosition.dx, details.globalPosition.dy - 20, index);
-                },
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    SizedBox(
-                      height: 150,
-                      child: Card(
-                        clipBehavior: Clip.antiAlias,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadiusDirectional.circular(8)),
-                        child: Global.defaultShowedPBhost == 'github' ||
-                                Global.defaultShowedPBhost == 'imgur' ||
-                                Global.defaultShowedPBhost == 'upyun' ||
-                                Global.defaultShowedPBhost == 'aliyun' ||
-                                Global.defaultShowedPBhost == 'qiniu' ||
-                                Global.defaultShowedPBhost == 'tencent' ||
-                                Global.defaultShowedPBhost == 'smms' ||
-                                Global.defaultShowedPBhost == 'lskypro' ||
-                                Global.defaultShowedPBhost == 'PBhostExtend2' ||
-                                Global.defaultShowedPBhost == 'PBhostExtend3'
-                            ? ExtendedImage.network(
-                                currentVisibleImageDisplayedUrlList[index].contains('raw.githubusercontent.com')
-                                    ?
-                                    // ignore: prefer_interpolation_to_compose_strings
-                                    'https://ghproxy.com/' + currentVisibleImageDisplayedUrlList[index]
-                                    : currentVisibleImageDisplayedUrlList[index],
-                                clearMemoryCacheIfFailed: true,
-                                retries: 5,
-                                height: 150,
-                                fit: BoxFit.fill,
-                                cache: true,
-                                border: Border.all(
-                                    color: selectedImagesBoolList[index] ? Colors.red : Colors.transparent, width: 2),
-                                borderRadius: const BorderRadius.all(Radius.circular(8)),
-                                loadStateChanged: (state) => defaultLoadStateChanged(state, iconSize: 30),
-                              )
-                            : Global.defaultShowedPBhost == 'PBhostExtend1'
-                                ? File(currentVisibleImageDisplayedUrlList[index]).existsSync()
-                                    ? ExtendedImage.file(
-                                        File(currentVisibleImageDisplayedUrlList[index]),
-                                        fit: BoxFit.fill,
-                                        clearMemoryCacheIfFailed: true,
-                                        height: 150,
-                                        border: Border.all(
-                                            color: selectedImagesBoolList[index] ? Colors.red : Colors.transparent,
-                                            width: 2),
-                                        borderRadius: const BorderRadius.all(Radius.circular(8)),
-                                        loadStateChanged: (state) => defaultLoadStateChanged(state, iconSize: 30),
-                                      )
-                                    : const Icon(Icons.error, size: 30, color: Colors.red)
-                                : Global.defaultShowedPBhost == 'PBhostExtend4'
-                                    ? currentVisibleImageDisplayedUrlList[index].contains('Basic')
-                                        ? ExtendedImage.network(
-                                            currentVisibleImageDisplayedUrlList[index]
-                                                .replaceAll(RegExp(r'Basic (.*)'), ''),
-                                            clearMemoryCacheIfFailed: true,
-                                            retries: 5,
-                                            height: 150,
-                                            fit: BoxFit.fill,
-                                            headers: {
-                                              'Authorization': RegExp(r'Basic (.*)')
-                                                  .firstMatch(currentVisibleImageDisplayedUrlList[index])![0]!
-                                            },
-                                            cache: false,
-                                            border: Border.all(
-                                                color: selectedImagesBoolList[index] ? Colors.red : Colors.transparent,
-                                                width: 2),
-                                            borderRadius: const BorderRadius.all(Radius.circular(8)),
-                                            loadStateChanged: (state) => defaultLoadStateChanged(state, iconSize: 30),
-                                          )
-                                        : ExtendedImage.network(
-                                            currentVisibleImageDisplayedUrlList[index],
-                                            clearMemoryCacheIfFailed: true,
-                                            retries: 5,
-                                            height: 150,
-                                            fit: BoxFit.fill,
-                                            cache: true,
-                                            border: Border.all(
-                                                color: selectedImagesBoolList[index] ? Colors.red : Colors.transparent,
-                                                width: 2),
-                                            borderRadius: const BorderRadius.all(Radius.circular(8)),
-                                            loadStateChanged: (state) => defaultLoadStateChanged(state, iconSize: 30),
-                                          )
-                                    : const Icon(Icons.error, size: 30, color: Colors.red),
-                      ),
-                    ),
-                    Positioned(
-                      // ignore: sort_child_properties_last
-                      child: Container(
-                        decoration: const BoxDecoration(
-                            borderRadius: BorderRadius.all(Radius.circular(35)),
-                            color: Color.fromARGB(255, 199, 208, 216)),
-                        padding: const EdgeInsets.fromLTRB(5, 5, 5, 5),
-                        child: MSHCheckbox(
-                          colorConfig: MSHColorConfig.fromCheckedUncheckedDisabled(
-                              checkedColor: Colors.blue, uncheckedColor: Colors.blue, disabledColor: Colors.grey),
-                          size: 20,
-                          value: selectedImagesBoolList[index],
-                          style: MSHCheckboxStyle.fillScaleCheck,
-                          onChanged: (bool selected) {
-                            setState(() {
-                              selectedImagesBoolList[index] = selected;
-                            });
-                          },
-                        ),
-                      ),
-                      right: 4,
-                      top: 4,
-                    )
-                  ],
-                ),
-              );
-            },
-          )),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+      body: Column(
         children: [
-          SizedBox(
-              height: 40,
-              width: 40,
-              child: FloatingActionButton(
-                heroTag: 'switch',
-                backgroundColor: const Color.fromARGB(255, 180, 236, 182),
-                onPressed: () async {
-                  await showDialog(
-                    barrierDismissible: true,
-                    context: context,
-                    builder: (context) {
-                      return SimpleDialog(
-                        title: const Text(
-                          '选择要展示的图床',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        children: switchPBOptions.map((option) {
-                          return SimpleDialogOption(
-                            child: Text(option['text']!, textAlign: TextAlign.center),
-                            onPressed: () {
-                              Global.setShowedPBhost(option['host']!);
-                              Navigator.pop(context);
-                              pageIndex = 0;
-                              _onRefresh();
-                            },
-                          );
-                        }).toList(),
-                      );
-                    },
-                  );
-                },
-                child: const Icon(
-                  Icons.switch_left_outlined,
-                  color: Colors.white,
-                  size: 30,
+          Expanded(
+            child: SmartRefresher(
+                enablePullDown: true,
+                enablePullUp: !_hasLoadedAll,
+                header: const ClassicHeader(
+                  refreshStyle: RefreshStyle.Follow,
+                  idleText: '下拉刷新',
+                  refreshingText: '正在刷新',
+                  completeText: '刷新完成',
+                  failedText: '刷新失败',
+                  releaseText: '释放刷新',
                 ),
-              )),
-          const SizedBox(width: 10),
-          SizedBox(
-              height: 40,
-              width: 40,
-              child: FloatingActionButton(
-                heroTag: 'Home',
-                backgroundColor: Colors.blue,
-                onPressed: () async {
-                  setState(() {
-                    pageIndex = 0;
-                    currentVisibleImageUrlList.clear();
-                    currentVisibleImageDisplayedUrlList.clear();
-                    selectedImagesBoolList = List.filled(
-                      paginationSize,
-                      false,
-                    );
-                    refreshController.resetNoData();
-                  });
-                  initLoadUploadedImages();
-                },
-                child: const Icon(
-                  Icons.home_outlined,
-                  color: Colors.white,
-                  size: 30,
-                ),
-              )),
-          const SizedBox(width: 10),
-          SizedBox(
-              height: 40,
-              width: 40,
-              child: FloatingActionButton(
-                heroTag: 'copy',
-                backgroundColor: selectedImagesBoolList.contains(true)
-                    ? const Color.fromARGB(255, 232, 177, 241)
-                    : Colors.transparent,
-                elevation: 5,
-                onPressed: () async {
-                  if (!selectedImagesBoolList.contains(true)) {
-                    Fluttertoast.showToast(
-                        msg: "请先选择图片",
-                        toastLength: Toast.LENGTH_SHORT,
-                        timeInSecForIosWeb: 2,
-                        backgroundColor: Theme.of(context).brightness == Brightness.light ? Colors.black : Colors.white,
-                        textColor: Theme.of(context).brightness == Brightness.light ? Colors.white : Colors.black,
-                        fontSize: 16.0);
-                    return;
-                  } else {
-                    List multiUrls = [];
-
-                    for (int i = 0; i < currentVisibleImageUrlList.length; i++) {
-                      if (selectedImagesBoolList[i]) {
-                        String finalFormatedurl = ' ';
-                        finalFormatedurl = linkGeneratorMap[Global.defaultLKformat]!(
-                            currentVisibleImageUrlList[i], imageFileNameList[i + paginationSize * pageIndex]);
-
-                        multiUrls.add(finalFormatedurl);
-                      }
+                footer: CustomFooter(
+                  builder: (BuildContext context, LoadStatus? mode) {
+                    Widget body;
+                    if (mode == LoadStatus.idle) {
+                      body = const Text("上拉加载更多");
+                    } else if (mode == LoadStatus.loading) {
+                      body = const CircularProgressIndicator(strokeWidth: 2.0);
+                    } else if (mode == LoadStatus.failed) {
+                      body = const Text("加载失败，请重试");
+                    } else if (mode == LoadStatus.canLoading) {
+                      body = const Text("释放加载更多");
+                    } else {
+                      body = const Text("没有更多图片了");
                     }
-                    await Clipboard.setData(ClipboardData(text: multiUrls.join('\n')));
-                    showToast('已复制全部链接');
-                    return;
-                  }
-                },
-                child: const Icon(
-                  Icons.copy,
-                  color: Colors.white,
+                    return SizedBox(
+                      height: 55.0,
+                      child: Center(child: body),
+                    );
+                  },
                 ),
-              )),
-          const SizedBox(width: 10),
-          SizedBox(
-              height: 40,
-              width: 40,
-              child: FloatingActionButton(
-                heroTag: 'select',
-                backgroundColor: const Color.fromARGB(255, 248, 196, 237),
-                elevation: 5,
-                onPressed: () async {
-                  if (currentVisibleImageUrlList.isEmpty) {
-                    showToastWithContext(context, '相册为空');
-                    return;
-                  } else if (selectedImagesBoolList.contains(true)) {
-                    setState(() {
-                      selectedImagesBoolList = List.filled(selectedImagesBoolList.length, false, growable: false);
-                    });
-                  } else {
-                    setState(() {
-                      selectedImagesBoolList = List.filled(selectedImagesBoolList.length, true, growable: false);
-                    });
-                  }
-                },
-                child: const Icon(
-                  Icons.check_circle_outline,
-                  color: Colors.white,
+                controller: refreshController,
+                onRefresh: _onRefresh,
+                onLoading: _loadMoreImages,
+                child: _isLoading && imageUrlList.isEmpty
+                    ? const Center(child: CircularProgressIndicator())
+                    : imageUrlList.isEmpty
+                        ? const Center(child: Text('暂无图片'))
+                        : GridView.builder(
+                            controller: _scrollController,
+                            padding: const EdgeInsets.only(left: 2, right: 2, top: 2, bottom: 60),
+                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 3,
+                              childAspectRatio: 1,
+                              mainAxisSpacing: 2,
+                              crossAxisSpacing: 2,
+                            ),
+                            itemCount: _loadedImagesCount,
+                            cacheExtent: 1000,
+                            addRepaintBoundaries: true,
+                            addAutomaticKeepAlives: true,
+                            itemBuilder: (context, index) {
+                              // 确保布尔值列表长度足够
+                              if (index >= selectedImagesBoolList.length) {
+                                selectedImagesBoolList.add(false);
+                              }
+
+                              return GestureDetector(
+                                onTap: () => _handleImageTap(index),
+                                onDoubleTap: () => copyFormatedLink(index, Global.defaultLKformat),
+                                onLongPressStart: (LongPressStartDetails details) {
+                                  handleOnLongPress(
+                                      context, details.globalPosition.dx, details.globalPosition.dy - 20, index);
+                                },
+                                child: Stack(
+                                  fit: StackFit.expand,
+                                  children: [
+                                    SizedBox(
+                                      height: 150,
+                                      child: Card(
+                                        clipBehavior: Clip.antiAlias,
+                                        shape:
+                                            RoundedRectangleBorder(borderRadius: BorderRadiusDirectional.circular(8)),
+                                        child: _buildImageWidget(index),
+                                      ),
+                                    ),
+                                    Positioned(
+                                      right: 4,
+                                      top: 4,
+                                      child: Container(
+                                        decoration: const BoxDecoration(
+                                            borderRadius: BorderRadius.all(Radius.circular(35)),
+                                            color: Color.fromARGB(255, 199, 208, 216)),
+                                        padding: const EdgeInsets.fromLTRB(5, 5, 5, 5),
+                                        child: MSHCheckbox(
+                                          colorConfig: MSHColorConfig.fromCheckedUncheckedDisabled(
+                                              checkedColor: Colors.blue,
+                                              uncheckedColor: Colors.blue,
+                                              disabledColor: Colors.grey),
+                                          size: 20,
+                                          value: selectedImagesBoolList[index],
+                                          style: MSHCheckboxStyle.fillScaleCheck,
+                                          onChanged: (bool selected) {
+                                            setState(() {
+                                              selectedImagesBoolList[index] = selected;
+                                            });
+                                          },
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          )),
+          ),
+          Container(
+              padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 16.0),
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.1),
+                    blurRadius: 4.0,
+                    offset: const Offset(0, -1),
+                  ),
+                ],
+              ),
+              child: SafeArea(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ActionButton(
+                      icon: Icons.switch_left_outlined,
+                      label: nameToPara[Global.defaultShowedPBhost] ?? '选择图床',
+                      color: const Color.fromARGB(255, 180, 236, 182),
+                      onPressed: () async {
+                        await showDialog(
+                          barrierDismissible: true,
+                          context: context,
+                          builder: (context) {
+                            return SimpleDialog(
+                              title: const Text(
+                                '选择要展示的图床',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              children: switchPBOptions.map((option) {
+                                return SimpleDialogOption(
+                                  child: Text(option['text']!, textAlign: TextAlign.center),
+                                  onPressed: () {
+                                    Global.setShowedPBhost(option['host']!);
+                                    Navigator.pop(context);
+                                    _onRefresh();
+                                  },
+                                );
+                              }).toList(),
+                            );
+                          },
+                        );
+                      },
+                    ),
+                    ActionButton(
+                      icon: Icons.home_outlined,
+                      label: '主页',
+                      color: Colors.blue,
+                      onPressed: () async {
+                        setState(() {
+                          _loadedImagesCount = 0;
+                          imageUrlList.clear();
+                          imageDisplayedUrlList.clear();
+                          selectedImagesBoolList = List.filled(
+                            _loadBatchSize,
+                            false,
+                          );
+                          refreshController.resetNoData();
+                        });
+                        _initLoadImages();
+                      },
+                    ),
+                    ActionButton(
+                      icon: Icons.copy,
+                      label: '复制',
+                      color: selectedImagesBoolList.contains(true)
+                          ? const Color.fromARGB(255, 232, 177, 241)
+                          : Colors.grey,
+                      onPressed: () async {
+                        if (!selectedImagesBoolList.contains(true)) {
+                          showToastWithContext(context, "请先选择图片");
+                          return;
+                        }
+
+                        List<String> multiUrls = [];
+                        for (int i = 0; i < _loadedImagesCount; i++) {
+                          if (selectedImagesBoolList[i]) {
+                            String finalFormatedurl =
+                                linkGeneratorMap[Global.defaultLKformat]!(imageUrlList[i], imageFileNameList[i]);
+                            multiUrls.add(finalFormatedurl);
+                          }
+                        }
+                        await Clipboard.setData(ClipboardData(text: multiUrls.join('\n')));
+                        showToast('已复制全部链接');
+                      },
+                    ),
+                    ActionButton(
+                      icon: selectedImagesBoolList.contains(true) ? Icons.deselect : Icons.select_all,
+                      label: selectedImagesBoolList.contains(true) ? '取消' : '全选',
+                      color: const Color.fromARGB(255, 248, 196, 237),
+                      onPressed: () {
+                        if (imageUrlList.isEmpty) {
+                          showToastWithContext(context, '相册为空');
+                          return;
+                        }
+
+                        setState(() {
+                          final newValue = !selectedImagesBoolList.contains(true);
+                          selectedImagesBoolList =
+                              List.filled(selectedImagesBoolList.length, newValue, growable: false);
+                        });
+                      },
+                    ),
+                  ],
                 ),
               )),
         ],
@@ -647,147 +577,70 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
   }
 
   copyFormatedLink(int index, String format) async {
-    String link = currentVisibleImageUrlList[index];
-    String filename = imageFileNameList[index + pageIndex * paginationSize];
-    String formatedLink = linkGeneratorMap[format]!(link, filename);
-    Clipboard.setData(ClipboardData(text: formatedLink));
+    await Clipboard.setData(
+        ClipboardData(text: linkGeneratorMap[format]!(imageUrlList[index], imageFileNameList[index])));
     showToast('链接已复制');
   }
 
   handleOnLongPress(BuildContext context, double dx, double dy, int index) {
-    showMenu(context: context, position: RelativeRect.fromLTRB(dx, dy, dx + 50, dy - 50), items: [
-      const PopupMenuItem(
-        height: 20,
-        value: 1,
-        child: Center(
-          child: Text('Url', textAlign: TextAlign.center),
+    final menuItems = [
+      {'label': 'Url', 'value': 1, 'format': 'rawurl'},
+      {'label': 'Html', 'value': 2, 'format': 'html'},
+      {'label': 'Markdown', 'value': 3, 'format': 'markdown'},
+      {'label': 'BBcode', 'value': 4, 'format': 'bbcode'},
+      {'label': 'MD&Link', 'value': 5, 'format': 'markdown_with_link'},
+      {'label': '自定义格式', 'value': 6, 'format': 'custom'},
+      {'label': '删除', 'value': 7, 'format': ''},
+    ];
+
+    List<PopupMenuEntry<int>> popupItems = [];
+
+    for (int i = 0; i < menuItems.length; i++) {
+      popupItems.add(
+        PopupMenuItem(
+          height: 20,
+          value: menuItems[i]['value'] as int,
+          child: Center(
+            child: Text(menuItems[i]['label'] as String, textAlign: TextAlign.center),
+          ),
         ),
-      ),
-      const PopupMenuItem(
-        height: 1,
-        value: 10,
-        child: Divider(
-          height: 1,
-          color: Colors.grey,
-          thickness: 1,
-        ),
-      ),
-      const PopupMenuItem(
-        height: 20,
-        value: 2,
-        child: Center(
-          child: Text('Html', textAlign: TextAlign.center),
-        ),
-      ),
-      const PopupMenuItem(
-        height: 1,
-        value: 10,
-        child: Divider(
-          height: 1,
-          color: Colors.grey,
-          thickness: 1,
-        ),
-      ),
-      const PopupMenuItem(
-        height: 20,
-        value: 3,
-        child: Center(
-          child: Text('Markdown', textAlign: TextAlign.center),
-        ),
-      ),
-      const PopupMenuItem(
-        height: 1,
-        value: 10,
-        child: Divider(
-          height: 1,
-          color: Colors.grey,
-          thickness: 1,
-        ),
-      ),
-      const PopupMenuItem(
-        height: 20,
-        value: 4,
-        child: Center(
-          child: Text('BBcode', textAlign: TextAlign.center),
-        ),
-      ),
-      const PopupMenuItem(
-        height: 1,
-        value: 10,
-        child: Divider(
-          height: 1,
-          color: Colors.grey,
-          thickness: 1,
-        ),
-      ),
-      const PopupMenuItem(
-        height: 20,
-        value: 5,
-        child: Center(
-          child: Text('MD&Link', textAlign: TextAlign.center),
-        ),
-      ),
-      const PopupMenuItem(
-        height: 1,
-        value: 10,
-        child: Divider(
-          height: 1,
-          color: Colors.grey,
-          thickness: 1,
-        ),
-      ),
-      const PopupMenuItem(
-        height: 20,
-        value: 6,
-        child: Center(
-          child: Text('自定义格式', textAlign: TextAlign.center),
-        ),
-      ),
-      const PopupMenuItem(
-        height: 1,
-        value: 10,
-        child: Divider(
-          height: 1,
-          color: Colors.grey,
-          thickness: 1,
-        ),
-      ),
-      const PopupMenuItem(
-        height: 20,
-        value: 7,
-        child: Center(
-          child: Text('删除', textAlign: TextAlign.center),
-        ),
-      ),
-    ]).then((value) async {
-      switch (value) {
-        case 1:
-          copyFormatedLink(index, 'rawurl');
-        case 2:
-          copyFormatedLink(index, 'html');
-        case 3:
-          copyFormatedLink(index, 'markdown');
-        case 4:
-          copyFormatedLink(index, 'bbcode');
-        case 5:
-          copyFormatedLink(index, 'markdown_with_link');
-        case 6:
-          copyFormatedLink(index, 'custom');
-        case 7:
-          try {
-            await deleteImage(index);
-          } catch (e) {
-            FLog.error(
-                className: 'ImagePage',
-                methodName: 'handleOnLongPress_delete',
-                text: formatErrorMessage({}, e.toString()),
-                dataLogType: DataLogType.ERRORS.toString());
-            if (context.mounted) {
-              showToastWithContext(context, '删除失败');
-            }
+      );
+
+      if (i < menuItems.length - 1) {
+        popupItems.add(
+          const PopupMenuItem(
+            height: 1,
+            value: 10,
+            child: Divider(
+              height: 1,
+              color: Colors.grey,
+              thickness: 1,
+            ),
+          ),
+        );
+      }
+    }
+
+    showMenu(context: context, position: RelativeRect.fromLTRB(dx, dy, dx + 50, dy - 50), items: popupItems)
+        .then((value) async {
+      if (value == null || value == 10) return;
+
+      if (value == 7) {
+        try {
+          await deleteImage(index);
+        } catch (e) {
+          FLog.error(
+              className: 'ImagePage',
+              methodName: 'handleOnLongPress_delete',
+              text: formatErrorMessage({}, e.toString()),
+              dataLogType: DataLogType.ERRORS.toString());
+          if (context.mounted) {
+            showToastWithContext(context, '删除失败');
           }
-        default:
-          return;
+        }
+      } else {
+        final selectedItem = menuItems.firstWhere((item) => item['value'] == value);
+        copyFormatedLink(index, selectedItem['format'] as String);
       }
     });
   }
@@ -795,11 +648,12 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
   removeAllImages(List imagesIndex) async {
     bool isDeleteLocal = Global.getIsDeleteLocal();
     bool isDeleteCloud = Global.getIsDeleteCloud();
-    for (int i = 0; i < imagesIndex.length; i++) {
+    List<int> sortedIndices = List<int>.from(imagesIndex)..sort((a, b) => b.compareTo(a));
+    for (int index in sortedIndices) {
       try {
         Map deleteConfig = {
-          'pictureKey': imagePictureKeyList[imagesIndex[i] + (pageIndex * paginationSize) - i],
-          "name": imageFileNameList[imagesIndex[i] + (pageIndex * paginationSize) - i],
+          'pictureKey': imagePictureKeyList[index],
+          "name": imageFileNameList[index],
         };
 
         if (isDeleteCloud) {
@@ -810,10 +664,9 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
           }
         }
         if (Global.defaultShowedPBhost == 'PBhostExtend1') {
-          await AlbumSQL.deleteData(Global.imageDBExtend!, Global.defaultShowedPBhost,
-              imageIdList[imagesIndex[i] + (pageIndex * paginationSize) - i]);
+          await AlbumSQL.deleteData(Global.imageDBExtend!, Global.defaultShowedPBhost, imageIdList[index]);
           try {
-            await File(imageDisplayedUrlList[imagesIndex[i] + pageIndex * paginationSize - i]).delete();
+            await File(imageDisplayedUrlList[index]).delete();
           } catch (e) {
             FLog.error(
                 className: 'ImagePage',
@@ -824,16 +677,14 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
         } else if (Global.defaultShowedPBhost == 'PBhostExtend2' ||
             Global.defaultShowedPBhost == 'PBhostExtend3' ||
             Global.defaultShowedPBhost == 'PBhostExtend4') {
-          await AlbumSQL.deleteData(Global.imageDBExtend!, Global.defaultShowedPBhost,
-              imageIdList[imagesIndex[i] + (pageIndex * paginationSize) - i]);
+          await AlbumSQL.deleteData(Global.imageDBExtend!, Global.defaultShowedPBhost, imageIdList[index]);
         } else {
-          await AlbumSQL.deleteData(Global.imageDB!, Global.defaultShowedPBhost,
-              imageIdList[imagesIndex[i] + (pageIndex * paginationSize) - i]);
+          await AlbumSQL.deleteData(Global.imageDB!, Global.defaultShowedPBhost, imageIdList[index]);
         }
 
         if (isDeleteLocal) {
           try {
-            await File(imageLocalPathList[imagesIndex[i] + (pageIndex * paginationSize) - i]).delete();
+            await File(imageLocalPathList[index]).delete();
           } catch (e) {
             FLog.error(
                 className: 'ImagePage',
@@ -842,23 +693,14 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
                 dataLogType: DataLogType.ERRORS.toString());
           }
         }
-        imageIdList.removeAt(imagesIndex[i] + (pageIndex * paginationSize) - i);
-        imageUrlList.removeAt(imagesIndex[i] + (pageIndex * paginationSize) - i);
-        imageDisplayedUrlList.removeAt(imagesIndex[i] + (pageIndex * paginationSize) - i);
-        imageLocalPathList.removeAt(imagesIndex[i] + (pageIndex * paginationSize) - i);
-        imageFileNameList.removeAt(imagesIndex[i] + (pageIndex * paginationSize) - i);
-        imagePictureKeyList.removeAt(imagesIndex[i] + (pageIndex * paginationSize) - i);
+        imageIdList.removeAt(index);
+        imageUrlList.removeAt(index);
+        imageDisplayedUrlList.removeAt(index);
+        imageLocalPathList.removeAt(index);
+        imageFileNameList.removeAt(index);
+        imagePictureKeyList.removeAt(index);
         setState(() {
-          currentVisibleImageUrlList = imageUrlList.sublist(
-              pageIndex * paginationSize,
-              (pageIndex + 1) * paginationSize > imageUrlList.length
-                  ? imageUrlList.length
-                  : (pageIndex + 1) * paginationSize);
-          currentVisibleImageDisplayedUrlList = imageDisplayedUrlList.sublist(
-              pageIndex * paginationSize,
-              (pageIndex + 1) * paginationSize > imageDisplayedUrlList.length
-                  ? imageDisplayedUrlList.length
-                  : (pageIndex + 1) * paginationSize);
+          _loadedImagesCount = imageUrlList.length;
         });
       } catch (e) {
         FLog.error(
@@ -878,9 +720,10 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
       bool isDeleteCloud = Global.getIsDeleteCloud();
 
       Map deleteConfig = {
-        'pictureKey': imagePictureKeyList[index + (pageIndex * paginationSize)],
-        "name": imageFileNameList[index + (pageIndex * paginationSize)],
+        'pictureKey': imagePictureKeyList[index],
+        "name": imageFileNameList[index],
       };
+
       if (isDeleteCloud) {
         var result = await deleterentry(deleteConfig);
         if (result[0] != 'success') {
@@ -888,11 +731,11 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
           return;
         }
       }
+
       if (Global.defaultShowedPBhost == 'PBhostExtend1') {
-        await AlbumSQL.deleteData(
-            Global.imageDBExtend!, Global.defaultShowedPBhost, imageIdList[index + (pageIndex * paginationSize)]);
+        await AlbumSQL.deleteData(Global.imageDBExtend!, Global.defaultShowedPBhost, imageIdList[index]);
         try {
-          await File(imageDisplayedUrlList[index + pageIndex * paginationSize]).delete();
+          await File(imageDisplayedUrlList[index]).delete();
         } catch (e) {
           FLog.error(
               className: 'ImagePage',
@@ -903,16 +746,13 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
       } else if (Global.defaultShowedPBhost == 'PBhostExtend2' ||
           Global.defaultShowedPBhost == 'PBhostExtend3' ||
           Global.defaultShowedPBhost == 'PBhostExtend4') {
-        await AlbumSQL.deleteData(
-            Global.imageDBExtend!, Global.defaultShowedPBhost, imageIdList[index + (pageIndex * paginationSize)]);
+        await AlbumSQL.deleteData(Global.imageDBExtend!, Global.defaultShowedPBhost, imageIdList[index]);
       } else {
-        await AlbumSQL.deleteData(
-            Global.imageDB!, Global.defaultShowedPBhost, imageIdList[index + (pageIndex * paginationSize)]);
+        await AlbumSQL.deleteData(Global.imageDB!, Global.defaultShowedPBhost, imageIdList[index]);
       }
-
       if (isDeleteLocal) {
         try {
-          await File(imageLocalPathList[index + pageIndex * paginationSize]).delete();
+          await File(imageLocalPathList[index]).delete();
         } catch (e) {
           FLog.error(
               className: 'ImagePage',
@@ -921,35 +761,16 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
               dataLogType: DataLogType.ERRORS.toString());
         }
       }
+
       setState(() {
-        imageIdList.removeAt(index + paginationSize * pageIndex);
-        imageUrlList.removeAt(index + paginationSize * pageIndex);
-        imageDisplayedUrlList.removeAt(index + paginationSize * pageIndex);
-        imagePictureKeyList.removeAt(index + paginationSize * pageIndex);
-        imageFileNameList.removeAt(index + paginationSize * pageIndex);
-        imageLocalPathList.removeAt(index + paginationSize * pageIndex);
-        currentVisibleImageUrlList.removeAt(index);
-        currentVisibleImageDisplayedUrlList.removeAt(index);
-        selectedImagesBoolList = List.filled(paginationSize, false);
-        if (currentVisibleImageUrlList.isEmpty && pageIndex == 0) {
-          currentVisibleImageUrlList = [];
-          currentVisibleImageDisplayedUrlList = [];
-        } else if (currentVisibleImageUrlList.isEmpty && pageIndex > 0) {
-          pageIndex--;
-          currentVisibleImageUrlList =
-              imageUrlList.sublist(pageIndex * paginationSize, (pageIndex + 1) * paginationSize);
-          currentVisibleImageDisplayedUrlList =
-              imageDisplayedUrlList.sublist(pageIndex * paginationSize, (pageIndex + 1) * paginationSize);
-        } else if (imageUrlList.length >= (pageIndex + 1) * paginationSize) {
-          currentVisibleImageUrlList =
-              imageUrlList.sublist(pageIndex * paginationSize, (pageIndex + 1) * paginationSize);
-          currentVisibleImageDisplayedUrlList =
-              imageDisplayedUrlList.sublist(pageIndex * paginationSize, (pageIndex + 1) * paginationSize);
-        } else if (imageUrlList.length < (pageIndex + 1) * paginationSize) {
-          currentVisibleImageUrlList = imageUrlList.sublist(pageIndex * paginationSize, imageUrlList.length);
-          currentVisibleImageDisplayedUrlList =
-              imageDisplayedUrlList.sublist(pageIndex * paginationSize, imageDisplayedUrlList.length);
-        }
+        imageIdList.removeAt(index);
+        imageUrlList.removeAt(index);
+        imageDisplayedUrlList.removeAt(index);
+        imagePictureKeyList.removeAt(index);
+        imageFileNameList.removeAt(index);
+        imageLocalPathList.removeAt(index);
+        selectedImagesBoolList.removeAt(index);
+        _loadedImagesCount = _loadedImagesCount > 0 ? _loadedImagesCount - 1 : 0;
       });
     } catch (e) {
       FLog.error(
@@ -961,57 +782,58 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
     }
   }
 
-  /// 刷新或返回上一页
+  // 刷新操作
   _onRefresh() async {
-    if (pageIndex == 0 || pageIndex == 1) {
-      setState(() {
-        pageIndex = 0;
-        currentVisibleImageUrlList.clear();
-        currentVisibleImageDisplayedUrlList.clear();
-        selectedImagesBoolList = List.filled(
-          paginationSize,
-          false,
-        );
-        refreshController.resetNoData();
-      });
-      initLoadUploadedImages();
-    } else {
-      doBackUploadedImages();
-    }
+    setState(() {
+      _isLoading = true;
+      _loadedImagesCount = 0;
+      imageUrlList.clear();
+      imageDisplayedUrlList.clear();
+      imageIdList.clear();
+      imageFileNameList.clear();
+      imageLocalPathList.clear();
+      imagePictureKeyList.clear();
+      selectedImagesBoolList.clear();
+      _hasLoadedAll = false;
+    });
+    await _initLoadImages();
+    refreshController.refreshCompleted();
   }
 
-  /// 上拉加载
-  _onLoading() async {
-    doLoadUploadedImages();
+  // 加载更多图片
+  Future<void> _loadMoreImages() async {
+    if (_isLoading || _hasLoadedAll) return;
+
+    _isLoading = true;
+
+    final nextBatchEnd = _loadedImagesCount + _loadBatchSize;
+    final actualEnd = nextBatchEnd > imageUrlList.length ? imageUrlList.length : nextBatchEnd;
+
+    if (_loadedImagesCount >= imageUrlList.length) {
+      _hasLoadedAll = true;
+      _isLoading = false;
+      refreshController.loadNoData();
+      return;
+    }
+
+    setState(() {
+      _loadedImagesCount = actualEnd;
+    });
+
+    _isLoading = false;
+    refreshController.loadComplete();
   }
 
-  void addImageDetails(
-      Map<String, dynamic> map, String urlKey, String displayedUrlKey, bool isFormatUrl, bool isFormatDisplayedUrl) {
-    String url = map[urlKey].toString();
-    String displayedUrl = map[displayedUrlKey].toString();
-
-    if (isFormatUrl && !url.startsWith('https://') && !url.startsWith('http://')) {
-      url = 'http://$url';
-    }
-    if (isFormatDisplayedUrl && !displayedUrl.startsWith('https://') && !displayedUrl.startsWith('http://')) {
-      displayedUrl = 'http://$displayedUrl';
-    }
-
-    imageUrlList.add(url);
-    imageDisplayedUrlList.add(displayedUrl);
-    imageFileNameList.add(map['name']);
-    imagePictureKeyList.add(map['pictureKey']);
-    imageLocalPathList.add(map['path']);
-  }
-
-  void initLoadUploadedImages() async {
-    //所有的图床的图片ID
+  Future<void> _initLoadImages() async {
+    setState(() {
+      _isLoading = true;
+    });
     Map<String, dynamic> dbIdList = await AlbumSQL.getAllTableData(Global.imageDB!, 'id');
-    //扩展图床的图片ID
     Map<String, dynamic> extendDbIdListExtend = await AlbumSQL.getAllTableDataExtend(
       Global.imageDBExtend!,
       'id',
     );
+
     if (Global.defaultShowedPBhost == 'PBhostExtend1' ||
         Global.defaultShowedPBhost == 'PBhostExtend2' ||
         Global.defaultShowedPBhost == 'PBhostExtend3' ||
@@ -1022,11 +844,6 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
     }
 
     imageIdList = imageIdList.reversed.toList();
-    imageUrlList.clear();
-    imageDisplayedUrlList.clear();
-    imagePictureKeyList.clear();
-    imageFileNameList.clear();
-    imageLocalPathList.clear();
 
     for (int i = 0; i < imageIdList.length; i++) {
       List<Map<String, dynamic>> maps;
@@ -1064,66 +881,153 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
       }
     }
 
-    currentVisibleImageUrlList =
-        imageUrlList.sublist(0, paginationSize > imageUrlList.length ? imageUrlList.length : paginationSize);
-
-    currentVisibleImageDisplayedUrlList = imageDisplayedUrlList.sublist(
-        0, paginationSize > imageDisplayedUrlList.length ? imageDisplayedUrlList.length : paginationSize);
-
+    // 初始加载一批图片
+    final initialLoadCount = _loadBatchSize > imageUrlList.length ? imageUrlList.length : _loadBatchSize;
     setState(() {
-      refreshController.refreshCompleted();
+      _loadedImagesCount = initialLoadCount;
+      _hasLoadedAll = imageUrlList.length <= initialLoadCount;
+      _isLoading = false;
     });
-  }
 
-  void doLoadUploadedImages() async {
-    if (imageUrlList.length < paginationSize * (pageIndex + 1)) {
+    if (_hasLoadedAll) {
+      refreshController.loadNoData();
     } else {
-      pageIndex = pageIndex + 1;
-      currentVisibleImageUrlList.clear();
-      currentVisibleImageUrlList = imageUrlList.sublist(
-          (pageIndex) * paginationSize,
-          imageUrlList.length > paginationSize * (pageIndex + 1)
-              ? paginationSize * (pageIndex + 1)
-              : imageUrlList.length);
-      currentVisibleImageDisplayedUrlList.clear();
-      currentVisibleImageDisplayedUrlList = imageDisplayedUrlList.sublist(
-          (pageIndex) * paginationSize,
-          imageDisplayedUrlList.length > paginationSize * (pageIndex + 1)
-              ? paginationSize * (pageIndex + 1)
-              : imageDisplayedUrlList.length);
-      selectedImagesBoolList = List.filled(paginationSize, false);
+      refreshController.loadComplete();
     }
-    loadUploadedImages();
   }
 
-  void loadUploadedImages() async {
-    setState(() {
-      if (currentVisibleImageUrlList.isEmpty || imageUrlList.isEmpty) {
-        refreshController.loadNoData();
-      } else if (pageIndex == 0) {
-        refreshController.refreshCompleted();
-      } else if (imageUrlList.length < paginationSize * (pageIndex + 1)) {
-        refreshController.loadNoData();
+  // 优化：处理图片点击事件
+  void _handleImageTap(int index) {
+    switch (Global.defaultShowedPBhost) {
+      case 'lskypro':
+      case 'smms':
+      case 'imgur':
+      case 'qiniu':
+      case 'tencent':
+      case 'aliyun':
+      case 'upyun':
+      case 'PBhostExtend2':
+      case 'PBhostExtend3':
+        String urlList = imageUrlList.sublist(0, _loadedImagesCount).join(',');
+        Application.router.navigateTo(
+            context, '${Routes.albumImagePreview}?index=$index&images=${Uri.encodeComponent(urlList)}',
+            transition: TransitionType.none);
+      case 'github':
+        String urlList = '';
+        for (int i = 0; i < _loadedImagesCount; i++) {
+          urlList += imageUrlList[i] + ',';
+        }
+        Application.router.navigateTo(
+            context, '${Routes.albumImagePreview}?index=$index&images=${Uri.encodeComponent(urlList)}',
+            transition: TransitionType.none);
+      case 'PBhostExtend1':
+        String urlList = imageDisplayedUrlList.sublist(0, _loadedImagesCount).join(',');
+        Application.router.navigateTo(
+            context, '${Routes.localImagePreview}?index=$index&images=${Uri.encodeComponent(urlList)}',
+            transition: TransitionType.none);
+      case 'PBhostExtend4':
+        List trueUrlList = [];
+        List headersList = [];
+        RegExp reg = RegExp(r'Basic (.*)');
+        for (int i = 0; i < _loadedImagesCount; i++) {
+          String trueUrl = imageDisplayedUrlList[i].replaceAll(reg, '');
+          headersList.add({
+            'Authorization': reg.firstMatch(imageDisplayedUrlList[i])![0],
+          });
+          trueUrlList.add(trueUrl);
+        }
+        String urlList = trueUrlList.join(',');
+        Application.router.navigateTo(context,
+            '${Routes.webdavImagePreview}?index=$index&images=${Uri.encodeComponent(urlList)}&headersList=${Uri.encodeComponent(jsonEncode(headersList))}',
+            transition: TransitionType.none);
+    }
+  }
+
+  // 优化：构建图片Widget
+  Widget _buildImageWidget(int index) {
+    if (Global.defaultShowedPBhost == 'github' ||
+        Global.defaultShowedPBhost == 'imgur' ||
+        Global.defaultShowedPBhost == 'upyun' ||
+        Global.defaultShowedPBhost == 'aliyun' ||
+        Global.defaultShowedPBhost == 'qiniu' ||
+        Global.defaultShowedPBhost == 'tencent' ||
+        Global.defaultShowedPBhost == 'smms' ||
+        Global.defaultShowedPBhost == 'lskypro' ||
+        Global.defaultShowedPBhost == 'PBhostExtend2' ||
+        Global.defaultShowedPBhost == 'PBhostExtend3') {
+      String imageUrl = imageDisplayedUrlList[index];
+
+      return ExtendedImage.network(
+        imageUrl,
+        clearMemoryCacheIfFailed: true,
+        retries: 5,
+        height: 150,
+        fit: BoxFit.cover,
+        cache: true,
+        cacheMaxAge: const Duration(days: 7),
+        border: Border.all(color: selectedImagesBoolList[index] ? Colors.red : Colors.transparent, width: 2),
+        borderRadius: const BorderRadius.all(Radius.circular(8)),
+        loadStateChanged: (state) => defaultLoadStateChanged(state, iconSize: 30),
+      );
+    } else if (Global.defaultShowedPBhost == 'PBhostExtend1') {
+      return File(imageDisplayedUrlList[index]).existsSync()
+          ? ExtendedImage.file(
+              File(imageDisplayedUrlList[index]),
+              fit: BoxFit.cover,
+              clearMemoryCacheIfFailed: true,
+              height: 150,
+              border: Border.all(color: selectedImagesBoolList[index] ? Colors.red : Colors.transparent, width: 2),
+              borderRadius: const BorderRadius.all(Radius.circular(8)),
+              loadStateChanged: (state) => defaultLoadStateChanged(state, iconSize: 30),
+            )
+          : const Icon(Icons.error, size: 30, color: Colors.red);
+    } else if (Global.defaultShowedPBhost == 'PBhostExtend4') {
+      if (imageDisplayedUrlList[index].contains('Basic')) {
+        return ExtendedImage.network(
+          imageDisplayedUrlList[index].replaceAll(RegExp(r'Basic (.*)'), ''),
+          clearMemoryCacheIfFailed: true,
+          retries: 5,
+          height: 150,
+          fit: BoxFit.cover,
+          headers: {'Authorization': RegExp(r'Basic (.*)').firstMatch(imageDisplayedUrlList[index])![0]!},
+          cache: true,
+          border: Border.all(color: selectedImagesBoolList[index] ? Colors.red : Colors.transparent, width: 2),
+          borderRadius: const BorderRadius.all(Radius.circular(8)),
+          loadStateChanged: (state) => defaultLoadStateChanged(state, iconSize: 30),
+        );
       } else {
-        refreshController.loadComplete();
+        return ExtendedImage.network(
+          imageDisplayedUrlList[index],
+          clearMemoryCacheIfFailed: true,
+          retries: 5,
+          height: 150,
+          fit: BoxFit.cover,
+          cache: true,
+          border: Border.all(color: selectedImagesBoolList[index] ? Colors.red : Colors.transparent, width: 2),
+          borderRadius: const BorderRadius.all(Radius.circular(8)),
+          loadStateChanged: (state) => defaultLoadStateChanged(state, iconSize: 30),
+        );
       }
-    });
+    }
+    return const Icon(Icons.error, size: 30, color: Colors.red);
   }
 
-  void doBackUploadedImages() async {
-    pageIndex = pageIndex - 1;
-    currentVisibleImageUrlList.clear();
-    currentVisibleImageDisplayedUrlList.clear();
-    currentVisibleImageUrlList = imageUrlList.sublist((pageIndex) * paginationSize, paginationSize * (pageIndex + 1));
-    currentVisibleImageDisplayedUrlList =
-        imageDisplayedUrlList.sublist((pageIndex) * paginationSize, paginationSize * (pageIndex + 1));
-    selectedImagesBoolList = List.filled(paginationSize, false);
-    backUploadedImages();
-  }
+  void addImageDetails(
+      Map<String, dynamic> map, String urlKey, String displayedUrlKey, bool isFormatUrl, bool isFormatDisplayedUrl) {
+    String url = map[urlKey].toString();
+    String displayedUrl = map[displayedUrlKey].toString();
 
-  void backUploadedImages() async {
-    setState(() {
-      refreshController.refreshCompleted();
-    });
+    if (isFormatUrl && !url.startsWith('https://') && !url.startsWith('http://')) {
+      url = 'http://$url';
+    }
+    if (isFormatDisplayedUrl && !displayedUrl.startsWith('https://') && !displayedUrl.startsWith('http://')) {
+      displayedUrl = 'http://$displayedUrl';
+    }
+
+    imageUrlList.add(url);
+    imageDisplayedUrlList.add(displayedUrl);
+    imageFileNameList.add(map['name']);
+    imagePictureKeyList.add(map['pictureKey']);
+    imageLocalPathList.add(map['path']);
   }
 }

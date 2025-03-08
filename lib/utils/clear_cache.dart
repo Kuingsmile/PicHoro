@@ -2,11 +2,10 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 
 class CacheUtil {
-  static total() async {
+  static Future<String> total() async {
     Directory tempDir = await getTemporaryDirectory();
     int total = await _reduce(tempDir);
-    String mb = (total / 1024 / 1024).toStringAsFixed(2);
-    return mb;
+    return (total / 1024 / 1024).toStringAsFixed(2);
   }
 
   static Future<void> clear() async {
