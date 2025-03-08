@@ -5,6 +5,7 @@ import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/picture_host_configure/configure_store/configure_store_file.dart';
 import 'package:horopic/picture_host_manage/manage_api/aliyun_manage_api.dart';
 import 'package:horopic/picture_host_configure/configure_store/configure_template.dart';
+import 'package:horopic/picture_host_configure/widgets/configure_widgets.dart';
 
 class AliyunConfigureStoreEdit extends StatefulWidget {
   final String storeKey;
@@ -44,28 +45,20 @@ class AliyunConfigureStoreEditState extends State<AliyunConfigureStoreEdit> {
         switch (element) {
           case 'remarkName':
             _remarkNameController.text = widget.psInfo[element];
-            break;
           case 'keyId':
             _keyIdController.text = widget.psInfo[element];
-            break;
           case 'keySecret':
             _keySecretController.text = widget.psInfo[element];
-            break;
           case 'bucket':
             _bucketController.text = widget.psInfo[element];
-            break;
           case 'area':
             _areaController.text = widget.psInfo[element];
-            break;
           case 'path':
             _pathController.text = widget.psInfo[element];
-            break;
           case 'customUrl':
             _customUrlController.text = widget.psInfo[element];
-            break;
           case 'options':
             _optionsController.text = widget.psInfo[element];
-            break;
         }
       }
     }
@@ -87,128 +80,131 @@ class AliyunConfigureStoreEditState extends State<AliyunConfigureStoreEdit> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        elevation: 0,
-        title: titleText('备用配置设置'),
-      ),
+      appBar: ConfigureWidgets.buildConfigAppBar(title: '备用配置设置', context: context),
       body: Form(
         key: _formKey,
         child: ListView(
+          physics: const BouncingScrollPhysics(),
           children: [
-            TextFormField(
-              controller: _remarkNameController,
-              decoration: const InputDecoration(
-                label: Center(child: Text('可选：备注名称')),
-                hintText: '请输入备注名称',
-              ),
-              textAlign: TextAlign.center,
+            ConfigureWidgets.buildSettingCard(
+              title: '备注信息',
+              children: [
+                ConfigureWidgets.buildFormField(
+                  controller: _remarkNameController,
+                  labelText: '备注名称',
+                  hintText: '请输入备注名称（可选）',
+                  prefixIcon: Icons.bookmark,
+                ),
+              ],
             ),
-            TextFormField(
-              controller: _keyIdController,
-              decoration: const InputDecoration(
-                label: Center(child: Text('accessKeyId')),
-                hintText: '设定KeyId',
-              ),
-              textAlign: TextAlign.center,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return '请输入accessKeyId';
-                }
-                return null;
-              },
+            ConfigureWidgets.buildSettingCard(
+              title: '认证配置',
+              children: [
+                ConfigureWidgets.buildFormField(
+                  controller: _keyIdController,
+                  labelText: 'AccessKeyId',
+                  hintText: '设定KeyId',
+                  prefixIcon: Icons.key,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return '请输入accessKeyId';
+                    }
+                    return null;
+                  },
+                ),
+                ConfigureWidgets.buildFormField(
+                  controller: _keySecretController,
+                  labelText: 'AccessKeySecret',
+                  hintText: '设定KeySecret',
+                  prefixIcon: Icons.vpn_key,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return '请输入accessKeySecret';
+                    }
+                    return null;
+                  },
+                  obscureText: true,
+                ),
+              ],
             ),
-            TextFormField(
-              controller: _keySecretController,
-              decoration: const InputDecoration(
-                label: Center(child: Text('accessKeySecret')),
-                hintText: '设定KeySecret',
-              ),
-              textAlign: TextAlign.center,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return '请输入accessKeySecret';
-                }
-                return null;
-              },
+            ConfigureWidgets.buildSettingCard(
+              title: '存储配置',
+              children: [
+                ConfigureWidgets.buildFormField(
+                  controller: _bucketController,
+                  labelText: 'Bucket',
+                  hintText: '设定bucket',
+                  prefixIcon: Icons.storage,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return '请输入bucket';
+                    }
+                    return null;
+                  },
+                ),
+                ConfigureWidgets.buildFormField(
+                  controller: _areaController,
+                  labelText: '存储区域',
+                  hintText: '例如oss-cn-beijing',
+                  prefixIcon: Icons.location_on,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return '请输入存储区域';
+                    }
+                    return null;
+                  },
+                ),
+              ],
             ),
-            TextFormField(
-              controller: _bucketController,
-              decoration: const InputDecoration(
-                label: Center(child: Text('bucket')),
-                hintText: '设定bucket',
-              ),
-              textAlign: TextAlign.center,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return '请输入bucket';
-                }
-                return null;
-              },
+            ConfigureWidgets.buildSettingCard(
+              title: '路径设置',
+              children: [
+                ConfigureWidgets.buildFormField(
+                  controller: _pathController,
+                  labelText: '存储路径',
+                  hintText: '例如test/（可选）',
+                  prefixIcon: Icons.folder,
+                ),
+                ConfigureWidgets.buildFormField(
+                  controller: _customUrlController,
+                  labelText: '自定义域名',
+                  hintText: '例如https://test.com（可选）',
+                  prefixIcon: Icons.language,
+                ),
+                ConfigureWidgets.buildFormField(
+                  controller: _optionsController,
+                  labelText: '网站后缀',
+                  hintText: '例如?x-oss-process=xxx（可选）',
+                  prefixIcon: Icons.settings,
+                ),
+              ],
             ),
-            TextFormField(
-              controller: _areaController,
-              decoration: const InputDecoration(
-                contentPadding: EdgeInsets.zero,
-                label: Center(child: Text('存储区域')),
-                hintText: '例如oss-cn-beijing',
-              ),
-              textAlign: TextAlign.center,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return '请输入存储区域';
-                }
-                return null;
-              },
+            ConfigureWidgets.buildSettingCard(
+              title: '操作',
+              children: [
+                ConfigureWidgets.buildSettingItem(
+                  context: context,
+                  title: '导入当前图床配置',
+                  icon: Icons.cloud_download,
+                  onTap: () {
+                    _importConfig();
+                    setState(() {});
+                  },
+                ),
+                ConfigureWidgets.buildDivider(),
+                ConfigureWidgets.buildSettingItem(
+                  context: context,
+                  title: '保存配置',
+                  icon: Icons.save,
+                  onTap: () async {
+                    var result = await _saveConfig();
+                    if (result == true && mounted) {
+                      Navigator.pop(context, true);
+                    }
+                  },
+                ),
+              ],
             ),
-            TextFormField(
-              controller: _pathController,
-              decoration: const InputDecoration(
-                contentPadding: EdgeInsets.zero,
-                label: Center(child: Text('可选:存储路径')),
-                hintText: '例如test/',
-                hintStyle: TextStyle(fontSize: 13),
-              ),
-              textAlign: TextAlign.center,
-            ),
-            TextFormField(
-              controller: _customUrlController,
-              decoration: const InputDecoration(
-                contentPadding: EdgeInsets.zero,
-                label: Center(child: Text('可选:自定义域名')),
-                hintText: '例如https://test.com',
-                hintStyle: TextStyle(fontSize: 13),
-              ),
-              textAlign: TextAlign.center,
-            ),
-            TextFormField(
-              controller: _optionsController,
-              decoration: const InputDecoration(
-                contentPadding: EdgeInsets.zero,
-                label: Center(child: Text('可选:网站后缀')),
-                hintText: '例如?x-oss-process=xxx',
-                hintStyle: TextStyle(fontSize: 13),
-              ),
-              textAlign: TextAlign.center,
-            ),
-            ListTile(
-                title: ElevatedButton(
-              onPressed: () {
-                _importConfig();
-                setState(() {});
-              },
-              child: titleText('导入当前图床配置', fontsize: null),
-            )),
-            ListTile(
-                title: ElevatedButton(
-              onPressed: () async {
-                var result = await _saveConfig();
-                if (result == true && mounted) {
-                  Navigator.pop(context, true);
-                }
-              },
-              child: titleText('保存配置', fontsize: null),
-            )),
           ],
         ),
       ),

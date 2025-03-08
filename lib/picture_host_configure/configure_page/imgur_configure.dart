@@ -12,6 +12,7 @@ import 'package:horopic/utils/dio_proxy_adapter.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/picture_host_manage/manage_api/imgur_manage_api.dart';
 import 'package:horopic/utils/event_bus_utils.dart';
+import 'package:horopic/picture_host_configure/widgets/configure_widgets.dart';
 
 class ImgurConfig extends StatefulWidget {
   const ImgurConfig({super.key});
@@ -56,101 +57,100 @@ class ImgurConfigState extends State<ImgurConfig> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        centerTitle: true,
-        title: titleText('Imgur参数配置'),
-        actions: [
-          IconButton(
-            onPressed: () async {
-              await Application.router
-                  .navigateTo(context, '/configureStorePage?psHost=imgur', transition: TransitionType.cupertino);
-              await _initConfig();
-              setState(() {});
-            },
-            icon: const Icon(Icons.save_as_outlined, color: Color.fromARGB(255, 255, 255, 255), size: 35),
-          )
-        ],
-      ),
+      appBar: ConfigureWidgets.buildConfigAppBar(title: 'Imgur参数配置', context: context),
       body: Form(
         key: _formKey,
         child: ListView(
+          physics: const BouncingScrollPhysics(),
           children: [
-            TextFormField(
-              controller: _clientIdController,
-              decoration: const InputDecoration(
-                label: Center(child: Text('设定clientID')),
-                hintText: 'clientID',
-              ),
-              textAlign: TextAlign.center,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return '请输入clientID';
-                }
-                return null;
-              },
+            ConfigureWidgets.buildSettingCard(
+              title: '基本配置',
+              children: [
+                ConfigureWidgets.buildFormField(
+                  controller: _clientIdController,
+                  labelText: 'Client ID',
+                  hintText: '请输入Imgur的Client ID',
+                  prefixIcon: Icons.key,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return '请输入clientID';
+                    }
+                    return null;
+                  },
+                ),
+                ConfigureWidgets.buildFormField(
+                  controller: _proxyController,
+                  labelText: '代理设置',
+                  hintText: '可选:例如127.0.0.1:7890',
+                  prefixIcon: Icons.public,
+                ),
+              ],
             ),
-            TextFormField(
-              controller: _proxyController,
-              decoration: const InputDecoration(
-                label: Center(child: Text('可选:设定代理,需要配合手机VPN软件使用')),
-                hintText: '例如127.0.0.1:7890',
-              ),
-              textAlign: TextAlign.center,
+            ConfigureWidgets.buildSettingCard(
+              title: '操作',
+              children: [
+                ConfigureWidgets.buildSettingItem(
+                  context: context,
+                  title: '保存设置',
+                  icon: Icons.save,
+                  onTap: () {
+                    if (_formKey.currentState!.validate()) {
+                      showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (context) {
+                            return NetLoadingDialog(
+                              outsideDismiss: false,
+                              loading: true,
+                              loadingText: "配置中...",
+                              requestCallBack: _saveImgurConfig(),
+                            );
+                          });
+                    }
+                  },
+                ),
+                ConfigureWidgets.buildDivider(),
+                ConfigureWidgets.buildSettingItem(
+                  context: context,
+                  title: '检查当前配置',
+                  icon: Icons.check_circle,
+                  onTap: () {
+                    showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (context) {
+                          return NetLoadingDialog(
+                            outsideDismiss: false,
+                            loading: true,
+                            loadingText: "检查中...",
+                            requestCallBack: checkImgurConfig(),
+                          );
+                        });
+                  },
+                ),
+                ConfigureWidgets.buildDivider(),
+                ConfigureWidgets.buildSettingItem(
+                  context: context,
+                  title: '设置备用配置',
+                  icon: Icons.settings_backup_restore,
+                  onTap: () async {
+                    await Application.router
+                        .navigateTo(context, '/configureStorePage?psHost=imgur', transition: TransitionType.cupertino);
+                    await _initConfig();
+                    setState(() {});
+                  },
+                ),
+                ConfigureWidgets.buildDivider(),
+                ConfigureWidgets.buildSettingItem(
+                  context: context,
+                  title: '设为默认图床',
+                  icon: Icons.favorite,
+                  onTap: () {
+                    _setdefault();
+                  },
+                ),
+              ],
             ),
-            ListTile(
-                title: ElevatedButton(
-              onPressed: () {
-                if (_formKey.currentState!.validate()) {
-                  showDialog(
-                      context: context,
-                      barrierDismissible: false,
-                      builder: (context) {
-                        return NetLoadingDialog(
-                          outsideDismiss: false,
-                          loading: true,
-                          loadingText: "配置中...",
-                          requestCallBack: _saveImgurConfig(),
-                        );
-                      });
-                }
-              },
-              child: titleText('提交表单', fontsize: null),
-            )),
-            ListTile(
-                title: ElevatedButton(
-              onPressed: () {
-                showDialog(
-                    context: context,
-                    barrierDismissible: false,
-                    builder: (context) {
-                      return NetLoadingDialog(
-                        outsideDismiss: false,
-                        loading: true,
-                        loadingText: "检查中...",
-                        requestCallBack: checkImgurConfig(),
-                      );
-                    });
-              },
-              child: titleText('检查当前配置', fontsize: null),
-            )),
-            ListTile(
-                title: ElevatedButton(
-              onPressed: () async {
-                await Application.router
-                    .navigateTo(context, '/configureStorePage?psHost=imgur', transition: TransitionType.cupertino);
-                await _initConfig();
-                setState(() {});
-              },
-              child: titleText('设置备用配置', fontsize: null),
-            )),
-            ListTile(
-                title: ElevatedButton(
-              onPressed: () {
-                _setdefault();
-              },
-              child: titleText('设为默认图床', fontsize: null),
-            )),
           ],
         ),
       ),
@@ -177,7 +177,7 @@ class ImgurConfigState extends State<ImgurConfig> {
       return;
     } catch (e) {
       FLog.error(
-          className: 'ImgurConfigPage',
+          className: 'ImgurConfigState',
           methodName: '_saveImgurConfig',
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());

@@ -5,6 +5,7 @@ import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/picture_host_configure/configure_store/configure_store_file.dart';
 import 'package:horopic/picture_host_manage/manage_api/upyun_manage_api.dart';
 import 'package:horopic/picture_host_configure/configure_store/configure_template.dart';
+import 'package:horopic/picture_host_configure/widgets/configure_widgets.dart';
 
 class UpyunConfigureStoreEdit extends StatefulWidget {
   final String storeKey;
@@ -55,31 +56,22 @@ class UpyunConfigureStoreEditState extends State<UpyunConfigureStoreEdit> {
         switch (element) {
           case 'remarkName':
             _remarkNameController.text = widget.psInfo[element];
-            break;
           case 'bucket':
             _bucketController.text = widget.psInfo[element];
-            break;
           case 'operator':
             _operatorController.text = widget.psInfo[element];
-            break;
           case 'password':
             _passwordController.text = widget.psInfo[element];
-            break;
           case 'url':
             _urlController.text = widget.psInfo[element];
-            break;
           case 'options':
             _optionsController.text = widget.psInfo[element];
-            break;
           case 'path':
             _pathController.text = widget.psInfo[element];
-            break;
           case 'antiLeechToken':
             _antiLeechTokenController.text = widget.psInfo[element];
-            break;
           case 'antiLeechExpiration':
             _antiLeechExpirationController.text = widget.psInfo[element];
-            break;
         }
       }
     }
@@ -102,138 +94,137 @@ class UpyunConfigureStoreEditState extends State<UpyunConfigureStoreEdit> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        elevation: 0,
-        title: titleText('备用配置设置'),
-      ),
+      appBar: ConfigureWidgets.buildConfigAppBar(title: '备用配置设置', context: context),
       body: Form(
         key: _formKey,
         child: ListView(
+          physics: const BouncingScrollPhysics(),
           children: [
-            TextFormField(
-              controller: _remarkNameController,
-              decoration: const InputDecoration(
-                label: Center(child: Text('可选：备注名称')),
-                hintText: '请输入备注名称',
-              ),
-              textAlign: TextAlign.center,
+            ConfigureWidgets.buildSettingCard(
+              title: '备注信息',
+              children: [
+                ConfigureWidgets.buildFormField(
+                  controller: _remarkNameController,
+                  labelText: '备注名称',
+                  hintText: '请输入备注名称（可选）',
+                  prefixIcon: Icons.bookmark,
+                ),
+              ],
             ),
-            TextFormField(
-              controller: _bucketController,
-              decoration: const InputDecoration(
-                label: Center(child: Text('bucket')),
-                hintText: '设定bucket',
-              ),
-              textAlign: TextAlign.center,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return '请输入bucket';
-                }
-                return null;
-              },
+            ConfigureWidgets.buildSettingCard(
+              title: '认证配置',
+              children: [
+                ConfigureWidgets.buildFormField(
+                  controller: _bucketController,
+                  labelText: 'Bucket',
+                  hintText: '设定bucket',
+                  prefixIcon: Icons.storage,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return '请输入bucket';
+                    }
+                    return null;
+                  },
+                ),
+                ConfigureWidgets.buildFormField(
+                  controller: _operatorController,
+                  labelText: '操作员',
+                  hintText: '设定操作员',
+                  prefixIcon: Icons.person,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return '请输入操作员';
+                    }
+                    return null;
+                  },
+                ),
+                ConfigureWidgets.buildFormField(
+                  controller: _passwordController,
+                  labelText: '密码',
+                  hintText: '设定密码',
+                  prefixIcon: Icons.vpn_key,
+                  obscureText: true,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return '请输入密码';
+                    }
+                    return null;
+                  },
+                ),
+              ],
             ),
-            TextFormField(
-              controller: _operatorController,
-              decoration: const InputDecoration(
-                label: Center(child: Text('操作员')),
-                hintText: '设定操作员',
-              ),
-              textAlign: TextAlign.center,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return '请输入操作员';
-                }
-                return null;
-              },
+            ConfigureWidgets.buildSettingCard(
+              title: '存储配置',
+              children: [
+                ConfigureWidgets.buildFormField(
+                  controller: _urlController,
+                  labelText: '加速域名',
+                  hintText: '例如http://xxx.test.upcdn.net',
+                  prefixIcon: Icons.language,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return '请输入加速域名';
+                    }
+                    return null;
+                  },
+                ),
+                ConfigureWidgets.buildFormField(
+                  controller: _pathController,
+                  labelText: '存储路径',
+                  hintText: '例如test/（可选）',
+                  prefixIcon: Icons.folder,
+                ),
+                ConfigureWidgets.buildFormField(
+                  controller: _optionsController,
+                  labelText: '网站后缀',
+                  hintText: '例如!/fwfh/500x500（可选）',
+                  prefixIcon: Icons.settings,
+                ),
+              ],
             ),
-            TextFormField(
-              controller: _passwordController,
-              decoration: const InputDecoration(
-                label: Center(child: Text('密码')),
-                hintText: '设定密码',
-              ),
-              textAlign: TextAlign.center,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return '请输入密码';
-                }
-                return null;
-              },
+            ConfigureWidgets.buildSettingCard(
+              title: '防盗链设置',
+              children: [
+                ConfigureWidgets.buildFormField(
+                  controller: _antiLeechTokenController,
+                  labelText: '防盗链Token',
+                  hintText: '例如abc（可选）',
+                  prefixIcon: Icons.security,
+                ),
+                ConfigureWidgets.buildFormField(
+                  controller: _antiLeechExpirationController,
+                  labelText: '防盗链过期时间',
+                  hintText: '例如3600,单位秒（可选）',
+                  prefixIcon: Icons.timer,
+                ),
+              ],
             ),
-            TextFormField(
-              controller: _urlController,
-              decoration: const InputDecoration(
-                contentPadding: EdgeInsets.zero,
-                label: Center(child: Text('加速域名')),
-                hintText: '例如http://xxx.test.upcdn.net',
-              ),
-              textAlign: TextAlign.center,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return '请输入加速域名';
-                }
-                return null;
-              },
+            ConfigureWidgets.buildSettingCard(
+              title: '操作',
+              children: [
+                ConfigureWidgets.buildSettingItem(
+                  context: context,
+                  title: '导入当前图床配置',
+                  icon: Icons.cloud_download,
+                  onTap: () {
+                    _importConfig();
+                    setState(() {});
+                  },
+                ),
+                ConfigureWidgets.buildDivider(),
+                ConfigureWidgets.buildSettingItem(
+                  context: context,
+                  title: '保存配置',
+                  icon: Icons.save,
+                  onTap: () async {
+                    var result = await _saveConfig();
+                    if (result == true && mounted) {
+                      Navigator.pop(context, true);
+                    }
+                  },
+                ),
+              ],
             ),
-            TextFormField(
-              controller: _optionsController,
-              decoration: const InputDecoration(
-                contentPadding: EdgeInsets.zero,
-                label: Center(child: Text('可选：网站后缀')),
-                hintText: '例如!/fwfh/500x500',
-                hintStyle: TextStyle(fontSize: 13),
-              ),
-              textAlign: TextAlign.center,
-            ),
-            TextFormField(
-              controller: _pathController,
-              decoration: const InputDecoration(
-                contentPadding: EdgeInsets.zero,
-                label: Center(child: Text('可选: 存储路径')),
-                hintText: '例如test/',
-                hintStyle: TextStyle(fontSize: 13),
-              ),
-              textAlign: TextAlign.center,
-            ),
-            TextFormField(
-              controller: _antiLeechTokenController,
-              decoration: const InputDecoration(
-                contentPadding: EdgeInsets.zero,
-                label: Center(child: Text('可选: 防盗链Token')),
-                hintText: '例如abc',
-                hintStyle: TextStyle(fontSize: 13),
-              ),
-              textAlign: TextAlign.center,
-            ),
-            TextFormField(
-              controller: _antiLeechExpirationController,
-              decoration: const InputDecoration(
-                contentPadding: EdgeInsets.zero,
-                label: Center(child: Text('可选: 防盗链过期时间')),
-                hintText: '例如3600,单位秒',
-                hintStyle: TextStyle(fontSize: 13),
-              ),
-              textAlign: TextAlign.center,
-            ),
-            ListTile(
-                title: ElevatedButton(
-              onPressed: () {
-                _importConfig();
-                setState(() {});
-              },
-              child: titleText('导入当前图床配置', fontsize: null),
-            )),
-            ListTile(
-                title: ElevatedButton(
-              onPressed: () async {
-                var result = await _saveConfig();
-                if (result == true && mounted) {
-                  Navigator.pop(context, true);
-                }
-              },
-              child: titleText('保存配置', fontsize: null),
-            )),
           ],
         ),
       ),

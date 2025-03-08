@@ -16,13 +16,10 @@ class VirtualKeyboardView extends StatelessWidget {
           switch (index) {
             case 0:
               keyboard.ctrl = !keyboard.ctrl;
-              break;
             case 1:
               keyboard.alt = !keyboard.alt;
-              break;
             case 2:
               keyboard.shift = !keyboard.shift;
-              break;
           }
         },
         children: const [Text('Ctrl'), Text('Alt'), Text('Shift')],

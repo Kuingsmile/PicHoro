@@ -11,6 +11,7 @@ import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/picture_host_manage/manage_api/github_manage_api.dart';
 import 'package:horopic/utils/event_bus_utils.dart';
+import 'package:horopic/picture_host_configure/widgets/configure_widgets.dart';
 
 class GithubConfig extends StatefulWidget {
   const GithubConfig({super.key});
@@ -68,149 +69,141 @@ class GithubConfigState extends State<GithubConfig> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        centerTitle: true,
-        title: titleText('Github参数配置'),
-        actions: [
-          IconButton(
-            onPressed: () async {
-              await Application.router
-                  .navigateTo(context, '/configureStorePage?psHost=github', transition: TransitionType.cupertino);
-              await _initConfig();
-              setState(() {});
-            },
-            icon: const Icon(Icons.save_as_outlined, color: Color.fromARGB(255, 255, 255, 255), size: 35),
-          )
-        ],
-      ),
+      appBar: ConfigureWidgets.buildConfigAppBar(title: 'Github参数配置', context: context),
       body: Form(
         key: _formKey,
         child: ListView(
+          physics: const BouncingScrollPhysics(),
           children: [
-            TextFormField(
-              controller: _githubusernameController,
-              decoration: const InputDecoration(
-                label: Center(child: Text('Github用户名')),
-                hintText: '设定用户名',
-              ),
-              textAlign: TextAlign.center,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return '请输入Github用户名';
-                }
-                return null;
-              },
+            ConfigureWidgets.buildSettingCard(
+              title: '基本配置',
+              children: [
+                ConfigureWidgets.buildFormField(
+                  controller: _githubusernameController,
+                  labelText: 'Github用户名',
+                  hintText: '设定用户名',
+                  prefixIcon: Icons.person,
+                  validator: (value) {
+                    if (value == null || value.isEmpty || value.toString().trim().isEmpty) {
+                      return '请输入用户名';
+                    }
+                    return null;
+                  },
+                ),
+                ConfigureWidgets.buildFormField(
+                  controller: _repoController,
+                  labelText: '仓库名',
+                  hintText: '设定仓库名',
+                  prefixIcon: Icons.folder,
+                  validator: (value) {
+                    if (value == null || value.isEmpty || value.toString().trim().isEmpty) {
+                      return '请输入仓库名';
+                    }
+                    return null;
+                  },
+                ),
+                ConfigureWidgets.buildFormField(
+                  controller: _tokenController,
+                  labelText: 'Token',
+                  hintText: '设定Token',
+                  prefixIcon: Icons.vpn_key,
+                  validator: (value) {
+                    if (value == null || value.isEmpty || value.toString().trim().isEmpty) {
+                      return '请输入Token';
+                    }
+                    return null;
+                  },
+                ),
+              ],
             ),
-            TextFormField(
-              controller: _repoController,
-              decoration: const InputDecoration(
-                label: Center(child: Text('仓库名')),
-                hintText: '设定仓库名',
-              ),
-              textAlign: TextAlign.center,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return '请输入仓库名';
-                }
-                return null;
-              },
+            ConfigureWidgets.buildSettingCard(
+              title: '高级配置',
+              children: [
+                ConfigureWidgets.buildFormField(
+                  controller: _storePathController,
+                  labelText: '存储路径',
+                  hintText: '例如: test/',
+                  prefixIcon: Icons.folder_open,
+                ),
+                ConfigureWidgets.buildFormField(
+                  controller: _branchController,
+                  labelText: '分支',
+                  hintText: '默认为main',
+                  prefixIcon: Icons.hub,
+                ),
+                ConfigureWidgets.buildFormField(
+                  controller: _customDomainController,
+                  labelText: '自定义域名',
+                  hintText: 'eg: https://cdn.jsdelivr.net/gh/用户名/仓库名@分支名',
+                  prefixIcon: Icons.link,
+                ),
+              ],
             ),
-            TextFormField(
-              controller: _tokenController,
-              decoration: const InputDecoration(
-                label: Center(child: Text('token')),
-                hintText: '设定Token',
-              ),
-              textAlign: TextAlign.center,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return '请输入token';
-                }
-                return null;
-              },
+            ConfigureWidgets.buildSettingCard(
+              title: '操作',
+              children: [
+                ConfigureWidgets.buildSettingItem(
+                  context: context,
+                  title: '保存设置',
+                  icon: Icons.save,
+                  onTap: () {
+                    if (_formKey.currentState!.validate()) {
+                      showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (context) {
+                            return NetLoadingDialog(
+                              outsideDismiss: false,
+                              loading: true,
+                              loadingText: "配置中...",
+                              requestCallBack: _saveGithubConfig(),
+                            );
+                          });
+                    }
+                  },
+                ),
+                ConfigureWidgets.buildDivider(),
+                ConfigureWidgets.buildSettingItem(
+                  context: context,
+                  title: '检查当前配置',
+                  icon: Icons.check_circle,
+                  onTap: () {
+                    showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (context) {
+                          return NetLoadingDialog(
+                            outsideDismiss: false,
+                            loading: true,
+                            loadingText: "检查中...",
+                            requestCallBack: checkGithubConfig(),
+                          );
+                        });
+                  },
+                ),
+                ConfigureWidgets.buildDivider(),
+                ConfigureWidgets.buildSettingItem(
+                  context: context,
+                  title: '设置备用配置',
+                  icon: Icons.settings_backup_restore,
+                  onTap: () async {
+                    await Application.router
+                        .navigateTo(context, '/configureStorePage?psHost=github', transition: TransitionType.cupertino);
+                    await _initConfig();
+                    setState(() {});
+                  },
+                ),
+                ConfigureWidgets.buildDivider(),
+                ConfigureWidgets.buildSettingItem(
+                  context: context,
+                  title: '设为默认图床',
+                  icon: Icons.favorite,
+                  onTap: () {
+                    _setdefault();
+                  },
+                ),
+              ],
             ),
-            TextFormField(
-              controller: _storePathController,
-              decoration: const InputDecoration(
-                contentPadding: EdgeInsets.zero,
-                label: Center(child: Text('可选:存储路径')),
-                hintText: '例如: test/',
-              ),
-              textAlign: TextAlign.center,
-            ),
-            TextFormField(
-              controller: _branchController,
-              decoration: const InputDecoration(
-                contentPadding: EdgeInsets.zero,
-                label: Center(child: Text('可选：分支')),
-                hintText: '默认为main',
-              ),
-              textAlign: TextAlign.center,
-            ),
-            TextFormField(
-              controller: _customDomainController,
-              decoration: const InputDecoration(
-                contentPadding: EdgeInsets.zero,
-                label: Center(child: Text('可选：自定义域名')),
-                hintText: 'eg: https://cdn.jsdelivr.net/gh/用户名/仓库名@分支名',
-                hintStyle: TextStyle(fontSize: 13),
-              ),
-              textAlign: TextAlign.center,
-            ),
-            ListTile(
-                title: ElevatedButton(
-              onPressed: () {
-                if (_formKey.currentState!.validate()) {
-                  showDialog(
-                      context: context,
-                      barrierDismissible: false,
-                      builder: (context) {
-                        return NetLoadingDialog(
-                          outsideDismiss: false,
-                          loading: true,
-                          loadingText: "配置中...",
-                          requestCallBack: _saveGithubConfig(),
-                        );
-                      });
-                }
-              },
-              child: titleText('提交表单', fontsize: null),
-            )),
-            ListTile(
-                title: ElevatedButton(
-              onPressed: () {
-                showDialog(
-                    context: context,
-                    barrierDismissible: false,
-                    builder: (context) {
-                      return NetLoadingDialog(
-                        outsideDismiss: false,
-                        loading: true,
-                        loadingText: "检查中...",
-                        requestCallBack: checkGithubConfig(),
-                      );
-                    });
-              },
-              child: titleText('检查当前配置', fontsize: null),
-            )),
-            ListTile(
-                title: ElevatedButton(
-              onPressed: () async {
-                await Application.router
-                    .navigateTo(context, '/configureStorePage?psHost=github', transition: TransitionType.cupertino);
-                await _initConfig();
-                setState(() {});
-              },
-              child: titleText('设置备用配置', fontsize: null),
-            )),
-            ListTile(
-                title: ElevatedButton(
-              onPressed: () {
-                _setdefault();
-              },
-              child: titleText('设为默认图床', fontsize: null),
-            )),
           ],
         ),
       ),
@@ -257,7 +250,7 @@ class GithubConfigState extends State<GithubConfig> {
       showToast('保存成功');
     } catch (e) {
       FLog.error(
-          className: 'GithubConfigPage',
+          className: 'GithubConfigState',
           methodName: '_saveGithubConfig',
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());
@@ -304,7 +297,7 @@ class GithubConfigState extends State<GithubConfig> {
       }
     } catch (e) {
       FLog.error(
-          className: 'GithubConfigPage',
+          className: 'GithubConfigState',
           methodName: 'checkGithubConfig',
           text: formatErrorMessage({}, e.toString()),
           dataLogType: DataLogType.ERRORS.toString());

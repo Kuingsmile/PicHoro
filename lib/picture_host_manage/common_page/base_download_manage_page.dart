@@ -204,19 +204,14 @@ class BaseUpDownloadManagePageState extends State<BaseUpDownloadManagePage> {
     switch (currentPShost) {
       case 'lsky.pro':
         savedDir = '${widget.downloadPath}/PicHoro/Download/lskypro/${widget.albumName}/';
-        break;
       case 'imgur':
         savedDir = '${widget.downloadPath}/PicHoro/Download/imgur/${widget.albumName}/';
-        break;
       case 'github':
         savedDir = '${widget.downloadPath}/PicHoro/Download/github/${widget.userName}/${widget.repoName}/';
-        break;
       case 'ftp':
         savedDir = '${widget.downloadPath}/PicHoro/Download/ftp/${widget.ftpHost}/';
-        break;
       default:
         savedDir = '${widget.downloadPath}/PicHoro/Download/$currentPShost/${widget.bucketName}/';
-        break;
     }
     if (currentUploadList.isNotEmpty) {
       for (var i = 0; i < currentUploadList.length; i++) {
@@ -255,10 +250,8 @@ class BaseUpDownloadManagePageState extends State<BaseUpDownloadManagePage> {
                   switch (task.status.value) {
                     case UploadStatus.uploading:
                       await uploadManager.pauseUpload(path, fileName);
-                      break;
                     case UploadStatus.paused:
                       await uploadManager.resumeUpload(path, fileName);
-                      break;
                     default:
                       break;
                   }
@@ -362,10 +355,8 @@ class BaseUpDownloadManagePageState extends State<BaseUpDownloadManagePage> {
                   switch (task.status.value) {
                     case DownloadStatus.downloading:
                       await downloadManager.pauseDownload(url);
-                      break;
                     case DownloadStatus.paused:
                       await downloadManager.resumeDownload(url);
-                      break;
                     default:
                       break;
                   }
@@ -424,10 +415,8 @@ class BaseUpDownloadManagePageState extends State<BaseUpDownloadManagePage> {
             switch (currentPShost) {
               case 'lsky.pro':
                 externalStorageDirectory = '$externalStorageDirectory/PicHoro/Download/lskypro';
-                break;
               default:
                 externalStorageDirectory = '$externalStorageDirectory/PicHoro/Download/$currentPShost';
-                break;
             }
             // ignore: use_build_context_synchronously
             Application.router.navigateTo(context,

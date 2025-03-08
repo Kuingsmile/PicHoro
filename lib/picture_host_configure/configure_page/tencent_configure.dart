@@ -15,6 +15,7 @@ import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/event_bus_utils.dart';
 import 'package:horopic/picture_host_manage/manage_api/tencent_manage_api.dart';
+import 'package:horopic/picture_host_configure/widgets/configure_widgets.dart';
 
 class TencentConfig extends StatefulWidget {
   const TencentConfig({super.key});
@@ -52,6 +53,7 @@ class TencentConfigState extends State<TencentConfig> {
       setControllerText(_pathController, configMap['path']);
       setControllerText(_customUrlController, configMap['customUrl']);
       setControllerText(_optionsController, configMap['options']);
+      setState(() {});
     } catch (e) {
       FLog.error(
           className: 'TencentConfigState',
@@ -71,188 +73,171 @@ class TencentConfigState extends State<TencentConfig> {
     _pathController.dispose();
     _customUrlController.dispose();
     _optionsController.dispose();
-
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        centerTitle: true,
-        title: titleText('腾讯云参数配置'),
-        actions: [
-          IconButton(
-            onPressed: () async {
-              await Application.router
-                  .navigateTo(context, '/configureStorePage?psHost=tencent', transition: TransitionType.cupertino);
-              await _initConfig();
-              setState(() {});
-            },
-            icon: const Icon(Icons.save_as_outlined, color: Color.fromARGB(255, 255, 255, 255), size: 35),
-          )
-        ],
-      ),
+      appBar: ConfigureWidgets.buildConfigAppBar(title: '腾讯云参数配置', context: context),
       body: Form(
         key: _formKey,
         child: ListView(
+          physics: const BouncingScrollPhysics(),
           children: [
-            TextFormField(
-              controller: _secretIdController,
-              decoration: const InputDecoration(
-                label: Center(child: Text('secretId')),
-                hintText: '设定secretId',
-              ),
-              textAlign: TextAlign.center,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return '请输入secretId';
-                }
-                return null;
-              },
+            ConfigureWidgets.buildSettingCard(
+              title: '基本配置',
+              children: [
+                ConfigureWidgets.buildFormField(
+                  controller: _secretIdController,
+                  labelText: 'secretId',
+                  hintText: '请输入secretId',
+                  prefixIcon: Icons.vpn_key,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return '请输入secretId';
+                    }
+                    return null;
+                  },
+                ),
+                ConfigureWidgets.buildFormField(
+                  controller: _secretKeyController,
+                  labelText: 'secretKey',
+                  hintText: '请输入secretKey',
+                  prefixIcon: Icons.lock,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return '请输入secretKey';
+                    }
+                    return null;
+                  },
+                ),
+                ConfigureWidgets.buildFormField(
+                  controller: _bucketController,
+                  labelText: 'bucket',
+                  hintText: '如test-12345678',
+                  prefixIcon: Icons.storage,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return '请输入bucket';
+                    }
+                    return null;
+                  },
+                ),
+                ConfigureWidgets.buildFormField(
+                  controller: _appIdController,
+                  labelText: 'appId',
+                  hintText: '例如1234567890',
+                  prefixIcon: Icons.app_registration,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return '请输入appId';
+                    }
+                    return null;
+                  },
+                ),
+                ConfigureWidgets.buildFormField(
+                  controller: _areaController,
+                  labelText: '存储区域',
+                  hintText: '例如ap-nanjing',
+                  prefixIcon: Icons.location_on,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return '请输入存储区域';
+                    }
+                    return null;
+                  },
+                ),
+              ],
             ),
-            TextFormField(
-              controller: _secretKeyController,
-              decoration: const InputDecoration(
-                label: Center(child: Text('secretKey')),
-                hintText: '设定secretKey',
-              ),
-              textAlign: TextAlign.center,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return '请输入secretKey';
-                }
-                return null;
-              },
+            ConfigureWidgets.buildSettingCard(
+              title: '可选配置',
+              children: [
+                ConfigureWidgets.buildFormField(
+                  controller: _pathController,
+                  labelText: '存储路径',
+                  hintText: '例如test/',
+                  prefixIcon: Icons.folder,
+                ),
+                ConfigureWidgets.buildFormField(
+                  controller: _customUrlController,
+                  labelText: '自定义域名',
+                  hintText: '例如https://test.com',
+                  prefixIcon: Icons.link,
+                ),
+                ConfigureWidgets.buildFormField(
+                  controller: _optionsController,
+                  labelText: '网站后缀',
+                  hintText: '例如?imageMogr2',
+                  prefixIcon: Icons.settings,
+                ),
+              ],
             ),
-            TextFormField(
-              controller: _bucketController,
-              decoration: const InputDecoration(
-                label: Center(child: Text('bucket')),
-                hintText: '如test-12345678',
-              ),
-              textAlign: TextAlign.center,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return '请输入bucket';
-                }
-                return null;
-              },
+            ConfigureWidgets.buildSettingCard(
+              title: '操作',
+              children: [
+                ConfigureWidgets.buildSettingItem(
+                  context: context,
+                  title: '保存设置',
+                  icon: Icons.save,
+                  onTap: () {
+                    if (_formKey.currentState!.validate()) {
+                      showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (context) {
+                            return NetLoadingDialog(
+                              outsideDismiss: false,
+                              loading: true,
+                              loadingText: "配置中...",
+                              requestCallBack: _saveTencentConfig(),
+                            );
+                          });
+                    }
+                  },
+                ),
+                ConfigureWidgets.buildDivider(),
+                ConfigureWidgets.buildSettingItem(
+                  context: context,
+                  title: '检查当前配置',
+                  icon: Icons.check_circle,
+                  onTap: () {
+                    showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (context) {
+                          return NetLoadingDialog(
+                            outsideDismiss: false,
+                            loading: true,
+                            loadingText: "检查中...",
+                            requestCallBack: checkTencentConfig(),
+                          );
+                        });
+                  },
+                ),
+                ConfigureWidgets.buildDivider(),
+                ConfigureWidgets.buildSettingItem(
+                  context: context,
+                  title: '设置备用配置',
+                  icon: Icons.settings_backup_restore,
+                  onTap: () async {
+                    await Application.router.navigateTo(context, '/configureStorePage?psHost=tencent',
+                        transition: TransitionType.cupertino);
+                    await _initConfig();
+                    setState(() {});
+                  },
+                ),
+                ConfigureWidgets.buildDivider(),
+                ConfigureWidgets.buildSettingItem(
+                  context: context,
+                  title: '设为默认图床',
+                  icon: Icons.favorite,
+                  onTap: () {
+                    _setdefault();
+                  },
+                ),
+              ],
             ),
-            TextFormField(
-              controller: _appIdController,
-              decoration: const InputDecoration(
-                contentPadding: EdgeInsets.zero,
-                label: Center(child: Text('appId')),
-                hintText: '例如1234567890',
-              ),
-              textAlign: TextAlign.center,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return '请输入appId';
-                }
-                return null;
-              },
-            ),
-            TextFormField(
-              controller: _areaController,
-              decoration: const InputDecoration(
-                contentPadding: EdgeInsets.zero,
-                label: Center(child: Text('存储区域')),
-                hintText: '例如ap-nanjing',
-              ),
-              textAlign: TextAlign.center,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return '请输入存储区域';
-                }
-                return null;
-              },
-            ),
-            TextFormField(
-              controller: _pathController,
-              decoration: const InputDecoration(
-                contentPadding: EdgeInsets.zero,
-                label: Center(child: Text('可选:存储路径')),
-                hintText: '例如test/',
-                hintStyle: TextStyle(fontSize: 13),
-              ),
-              textAlign: TextAlign.center,
-            ),
-            TextFormField(
-              controller: _customUrlController,
-              decoration: const InputDecoration(
-                contentPadding: EdgeInsets.zero,
-                label: Center(child: Text('可选:自定义域名')),
-                hintText: '例如https://test.com',
-                hintStyle: TextStyle(fontSize: 13),
-              ),
-              textAlign: TextAlign.center,
-            ),
-            TextFormField(
-              controller: _optionsController,
-              decoration: const InputDecoration(
-                contentPadding: EdgeInsets.zero,
-                label: Center(child: Text('可选:网站后缀')),
-                hintText: '例如?imageMogr2',
-                hintStyle: TextStyle(fontSize: 13),
-              ),
-              textAlign: TextAlign.center,
-            ),
-            ListTile(
-                title: ElevatedButton(
-              onPressed: () {
-                if (_formKey.currentState!.validate()) {
-                  showDialog(
-                      context: context,
-                      barrierDismissible: false,
-                      builder: (context) {
-                        return NetLoadingDialog(
-                          outsideDismiss: false,
-                          loading: true,
-                          loadingText: "配置中...",
-                          requestCallBack: _saveTencentConfig(),
-                        );
-                      });
-                }
-              },
-              child: titleText('提交表单', fontsize: null),
-            )),
-            ListTile(
-                title: ElevatedButton(
-              onPressed: () {
-                showDialog(
-                    context: context,
-                    barrierDismissible: false,
-                    builder: (context) {
-                      return NetLoadingDialog(
-                        outsideDismiss: false,
-                        loading: true,
-                        loadingText: "检查中...",
-                        requestCallBack: checkTencentConfig(),
-                      );
-                    });
-              },
-              child: titleText('检查当前配置', fontsize: null),
-            )),
-            ListTile(
-                title: ElevatedButton(
-              onPressed: () async {
-                await Application.router
-                    .navigateTo(context, '/configureStorePage?psHost=tencent', transition: TransitionType.cupertino);
-                await _initConfig();
-                setState(() {});
-              },
-              child: titleText('设置备用配置', fontsize: null),
-            )),
-            ListTile(
-                title: ElevatedButton(
-              onPressed: () {
-                _setdefault();
-              },
-              child: titleText('设为默认图床', fontsize: null),
-            )),
           ],
         ),
       ),

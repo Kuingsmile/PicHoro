@@ -11,6 +11,7 @@ import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/event_bus_utils.dart';
 import 'package:horopic/picture_host_manage/manage_api/aws_manage_api.dart';
+import 'package:horopic/picture_host_configure/widgets/configure_widgets.dart';
 
 class AwsConfig extends StatefulWidget {
   const AwsConfig({super.key});
@@ -49,6 +50,7 @@ class AwsConfigState extends State<AwsConfig> {
       setControllerText(_uploadPathController, configMap['uploadPath']);
       setControllerText(_customUrlController, configMap['customUrl']);
       isS3PathStyle = configMap['isS3PathStyle'] ?? false;
+      isEnableSSL = configMap['isEnableSSL'] ?? true;
       setState(() {});
     } catch (e) {
       FLog.error(
@@ -71,193 +73,208 @@ class AwsConfigState extends State<AwsConfig> {
     super.dispose();
   }
 
+  Widget _buildSwitchItem({
+    required String title,
+    required IconData icon,
+    required bool value,
+    required Function(bool) onChanged,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Theme.of(context).primaryColor.withAlpha(51),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(icon, color: Theme.of(context).primaryColor),
+          ),
+          const SizedBox(width: 16),
+          Expanded(child: Text(title)),
+          Switch(
+            value: value,
+            onChanged: onChanged,
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        centerTitle: true,
-        title: titleText('S3兼容平台配置'),
-        actions: [
-          IconButton(
-            onPressed: () async {
-              await Application.router
-                  .navigateTo(context, '/configureStorePage?psHost=aws', transition: TransitionType.cupertino);
-              await _initConfig();
-              setState(() {});
-            },
-            icon: const Icon(Icons.save_as_outlined, color: Color.fromARGB(255, 255, 255, 255), size: 35),
-          )
-        ],
-      ),
+      appBar: ConfigureWidgets.buildConfigAppBar(title: 'S3兼容平台配置', context: context),
       body: Form(
         key: _formKey,
         child: ListView(
+          physics: const BouncingScrollPhysics(),
           children: [
-            TextFormField(
-              controller: _accessKeyIDController,
-              decoration: const InputDecoration(
-                label: Center(child: Text('Access Key ID')),
-                hintText: '设定Access Key ID',
-              ),
-              textAlign: TextAlign.center,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Access Key ID不能为空';
-                }
-                return null;
-              },
+            ConfigureWidgets.buildSettingCard(
+              title: '基本配置',
+              children: [
+                ConfigureWidgets.buildFormField(
+                  controller: _accessKeyIDController,
+                  labelText: 'Access Key ID',
+                  prefixIcon: Icons.key,
+                  hintText: '设定Access Key ID',
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Access Key ID不能为空';
+                    }
+                    return null;
+                  },
+                ),
+                ConfigureWidgets.buildFormField(
+                  controller: _secretAccessKeyController,
+                  labelText: 'Secret Access Key',
+                  prefixIcon: Icons.security,
+                  hintText: '设定Secret Access Key',
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Secret Access Key不能为空';
+                    }
+                    return null;
+                  },
+                ),
+                ConfigureWidgets.buildFormField(
+                  controller: _bucketController,
+                  labelText: 'Bucket',
+                  prefixIcon: Icons.storage,
+                  hintText: '设定bucket',
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Bucket不能为空';
+                    }
+                    return null;
+                  },
+                ),
+                ConfigureWidgets.buildFormField(
+                  controller: _endpointController,
+                  labelText: 'Endpoint',
+                  prefixIcon: Icons.dns,
+                  hintText: '例如s3.us-west-2.amazonaws.com',
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return '请输入endpoint';
+                    }
+                    if (value.startsWith('http://') || value.startsWith('https://')) {
+                      return 'endpoint不包含http://或https://';
+                    }
+                    return null;
+                  },
+                ),
+              ],
             ),
-            TextFormField(
-              controller: _secretAccessKeyController,
-              decoration: const InputDecoration(
-                label: Center(child: Text('Secret Access Key')),
-                hintText: '设定Secret Access Key',
-              ),
-              textAlign: TextAlign.center,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Secret Access Key不能为空';
-                }
-                return null;
-              },
-            ),
-            TextFormField(
-              controller: _bucketController,
-              decoration: const InputDecoration(
-                label: Center(child: Text('bucket')),
-                hintText: '设定bucket',
-              ),
-              textAlign: TextAlign.center,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return '请输入bucket';
-                }
-                return null;
-              },
-            ),
-            TextFormField(
-              controller: _endpointController,
-              decoration: const InputDecoration(
-                contentPadding: EdgeInsets.zero,
-                label: Center(child: Text('endpoint')),
-                hintText: '例如s3.us-west-2.amazonaws.com',
-              ),
-              textAlign: TextAlign.center,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return '请输入endpoint';
-                }
-                if (value.startsWith('http://') || value.startsWith('https://')) {
-                  return 'endpoint不包含http://或https://';
-                }
-                return null;
-              },
-            ),
-            TextFormField(
-              controller: _regionController,
-              decoration: const InputDecoration(
-                contentPadding: EdgeInsets.zero,
-                label: Center(child: Text('可选：存储区域')),
-                hintText: '例如us-west-2',
-              ),
-              textAlign: TextAlign.center,
-            ),
-            TextFormField(
-              controller: _uploadPathController,
-              decoration: const InputDecoration(
-                contentPadding: EdgeInsets.zero,
-                label: Center(child: Text('可选:存储路径')),
-                hintText: '例如test/',
-                hintStyle: TextStyle(fontSize: 13),
-              ),
-              textAlign: TextAlign.center,
-            ),
-            TextFormField(
-              controller: _customUrlController,
-              decoration: const InputDecoration(
-                contentPadding: EdgeInsets.zero,
-                label: Center(child: Text('可选:自定义域名')),
-                hintText: '例如https://test.com',
-                hintStyle: TextStyle(fontSize: 13),
-              ),
-              textAlign: TextAlign.center,
-            ),
-            ListTile(
-              title: const Text('是否使用S3路径风格'),
-              trailing: Switch(
-                value: isS3PathStyle,
-                onChanged: (value) {
-                  setState(() {
-                    isS3PathStyle = value;
-                  });
-                },
-              ),
-            ),
-            ListTile(
-              title: const Text('是否启用SSL连接'),
-              trailing: Switch(
-                value: isEnableSSL,
-                onChanged: (value) {
-                  setState(() {
-                    isEnableSSL = value;
-                  });
-                },
-              ),
-            ),
-            ListTile(
-                title: ElevatedButton(
-              onPressed: () {
-                if (_formKey.currentState!.validate()) {
-                  showDialog(
-                      context: context,
-                      barrierDismissible: false,
-                      builder: (context) {
-                        return NetLoadingDialog(
-                          outsideDismiss: false,
-                          loading: true,
-                          loadingText: "配置中...",
-                          requestCallBack: _saveAwsConfig(),
-                        );
-                      });
-                }
-              },
-              child: titleText('提交表单', fontsize: null),
-            )),
-            ListTile(
-                title: ElevatedButton(
-              onPressed: () {
-                showDialog(
-                    context: context,
-                    barrierDismissible: false,
-                    builder: (context) {
-                      return NetLoadingDialog(
-                        outsideDismiss: false,
-                        loading: true,
-                        loadingText: "检查中...",
-                        requestCallBack: checkAwsConfig(),
-                      );
+            ConfigureWidgets.buildSettingCard(
+              title: '高级配置',
+              children: [
+                ConfigureWidgets.buildFormField(
+                  controller: _regionController,
+                  labelText: '存储区域',
+                  prefixIcon: Icons.map,
+                  hintText: '例如us-west-2（可选）',
+                ),
+                ConfigureWidgets.buildFormField(
+                  controller: _uploadPathController,
+                  labelText: '存储路径',
+                  prefixIcon: Icons.folder_outlined,
+                  hintText: '例如test/（可选）',
+                ),
+                ConfigureWidgets.buildFormField(
+                  controller: _customUrlController,
+                  labelText: '自定义域名',
+                  prefixIcon: Icons.link,
+                  hintText: '例如https://test.com（可选）',
+                ),
+                _buildSwitchItem(
+                  title: '是否使用S3路径风格',
+                  icon: Icons.style,
+                  value: isS3PathStyle,
+                  onChanged: (value) {
+                    setState(() {
+                      isS3PathStyle = value;
                     });
-              },
-              child: titleText('检查当前配置', fontsize: null),
-            )),
-            ListTile(
-                title: ElevatedButton(
-              onPressed: () async {
-                await Application.router
-                    .navigateTo(context, '/configureStorePage?psHost=aws', transition: TransitionType.cupertino);
-                await _initConfig();
-                setState(() {});
-              },
-              child: titleText('设置备用配置', fontsize: null),
-            )),
-            ListTile(
-                title: ElevatedButton(
-              onPressed: () {
-                _setdefault();
-              },
-              child: titleText('设为默认图床', fontsize: null),
-            )),
+                  },
+                ),
+                _buildSwitchItem(
+                  title: '是否启用SSL连接',
+                  icon: Icons.lock_outline,
+                  value: isEnableSSL,
+                  onChanged: (value) {
+                    setState(() {
+                      isEnableSSL = value;
+                    });
+                  },
+                ),
+              ],
+            ),
+            ConfigureWidgets.buildSettingCard(
+              title: '操作',
+              children: [
+                ConfigureWidgets.buildSettingItem(
+                  context: context,
+                  title: '保存设置',
+                  icon: Icons.save,
+                  onTap: () {
+                    if (_formKey.currentState!.validate()) {
+                      showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (context) {
+                            return NetLoadingDialog(
+                              outsideDismiss: false,
+                              loading: true,
+                              loadingText: "配置中...",
+                              requestCallBack: _saveAwsConfig(),
+                            );
+                          });
+                    }
+                  },
+                ),
+                ConfigureWidgets.buildDivider(),
+                ConfigureWidgets.buildSettingItem(
+                  context: context,
+                  title: '检查当前配置',
+                  icon: Icons.check_circle,
+                  onTap: () {
+                    showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (context) {
+                          return NetLoadingDialog(
+                            outsideDismiss: false,
+                            loading: true,
+                            loadingText: "检查中...",
+                            requestCallBack: checkAwsConfig(),
+                          );
+                        });
+                  },
+                ),
+                ConfigureWidgets.buildDivider(),
+                ConfigureWidgets.buildSettingItem(
+                  context: context,
+                  title: '设置备用配置',
+                  icon: Icons.settings_backup_restore,
+                  onTap: () async {
+                    await Application.router
+                        .navigateTo(context, '/configureStorePage?psHost=aws', transition: TransitionType.cupertino);
+                    await _initConfig();
+                    setState(() {});
+                  },
+                ),
+                ConfigureWidgets.buildDivider(),
+                ConfigureWidgets.buildSettingItem(
+                  context: context,
+                  title: '设为默认图床',
+                  icon: Icons.favorite,
+                  onTap: () {
+                    _setdefault();
+                  },
+                ),
+              ],
+            ),
           ],
         ),
       ),

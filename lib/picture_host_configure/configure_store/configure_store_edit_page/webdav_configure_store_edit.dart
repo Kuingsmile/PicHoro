@@ -5,6 +5,7 @@ import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/picture_host_configure/configure_store/configure_store_file.dart';
 import 'package:horopic/picture_host_manage/manage_api/webdav_manage_api.dart';
 import 'package:horopic/picture_host_configure/configure_store/configure_template.dart';
+import 'package:horopic/picture_host_configure/widgets/configure_widgets.dart';
 
 class WebdavConfigureStoreEdit extends StatefulWidget {
   final String storeKey;
@@ -51,25 +52,18 @@ class WebdavConfigureStoreEditState extends State<WebdavConfigureStoreEdit> {
         switch (element) {
           case 'remarkName':
             _remarkNameController.text = widget.psInfo[element];
-            break;
           case 'host':
             _hostController.text = widget.psInfo[element];
-            break;
           case 'webdavusername':
             _webdavusernameController.text = widget.psInfo[element];
-            break;
           case 'password':
             _passwordController.text = widget.psInfo[element];
-            break;
           case 'uploadPath':
             _uploadPathController.text = widget.psInfo[element];
-            break;
           case 'customUrl':
             _customUrlController.text = widget.psInfo[element];
-            break;
           case 'webPath':
             _webPathController.text = widget.psInfo[element];
-            break;
         }
       }
     }
@@ -90,113 +84,117 @@ class WebdavConfigureStoreEditState extends State<WebdavConfigureStoreEdit> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        elevation: 0,
-        title: titleText('备用配置设置'),
-      ),
+      appBar: ConfigureWidgets.buildConfigAppBar(title: '备用配置设置', context: context),
       body: Form(
         key: _formKey,
         child: ListView(
+          physics: const BouncingScrollPhysics(),
           children: [
-            TextFormField(
-              controller: _remarkNameController,
-              decoration: const InputDecoration(
-                label: Center(child: Text('可选：备注名称')),
-                hintText: '请输入备注名称',
-              ),
-              textAlign: TextAlign.center,
+            ConfigureWidgets.buildSettingCard(
+              title: '备注信息',
+              children: [
+                ConfigureWidgets.buildFormField(
+                  controller: _remarkNameController,
+                  labelText: '备注名称',
+                  hintText: '请输入备注名称（可选）',
+                  prefixIcon: Icons.bookmark,
+                ),
+              ],
             ),
-            TextFormField(
-              controller: _hostController,
-              decoration: const InputDecoration(
-                label: Center(child: Text('域名')),
-                hintText: '例如: https://test.com/dav',
-              ),
-              textAlign: TextAlign.center,
-              validator: (value) {
-                if (value == null || value.isEmpty || value.toString().trim().isEmpty) {
-                  return '请输入域名';
-                }
-                if (!value.startsWith('http://') && !value.startsWith('https://')) {
-                  return '以http://或https://开头';
-                }
-                return null;
-              },
+            ConfigureWidgets.buildSettingCard(
+              title: '基本配置',
+              children: [
+                ConfigureWidgets.buildFormField(
+                  controller: _hostController,
+                  labelText: '域名',
+                  hintText: '例如: https://test.com/dav',
+                  prefixIcon: Icons.link,
+                  validator: (value) {
+                    if (value == null || value.isEmpty || value.toString().trim().isEmpty) {
+                      return '请输入域名';
+                    }
+                    if (!value.startsWith('http://') && !value.startsWith('https://')) {
+                      return '以http://或https://开头';
+                    }
+                    return null;
+                  },
+                ),
+                ConfigureWidgets.buildFormField(
+                  controller: _webdavusernameController,
+                  labelText: '用户名',
+                  hintText: '设定用户名',
+                  prefixIcon: Icons.person,
+                  validator: (value) {
+                    if (value == null || value.isEmpty || value.toString().trim().isEmpty) {
+                      return '请输入用户名';
+                    }
+                    return null;
+                  },
+                ),
+                ConfigureWidgets.buildFormField(
+                  controller: _passwordController,
+                  labelText: '密码',
+                  hintText: '输入密码',
+                  prefixIcon: Icons.lock,
+                  obscureText: true,
+                  validator: (value) {
+                    if (value == null || value.isEmpty || value.toString().trim().isEmpty) {
+                      return '请输入密码';
+                    }
+                    return null;
+                  },
+                ),
+              ],
             ),
-            TextFormField(
-              controller: _webdavusernameController,
-              decoration: const InputDecoration(
-                label: Center(child: Text('用户名')),
-                hintText: '设定用户名',
-              ),
-              textAlign: TextAlign.center,
-              validator: (value) {
-                if (value == null || value.isEmpty || value.toString().trim().isEmpty) {
-                  return '请输入用户名';
-                }
-                return null;
-              },
+            ConfigureWidgets.buildSettingCard(
+              title: '路径设置',
+              children: [
+                ConfigureWidgets.buildFormField(
+                  controller: _uploadPathController,
+                  labelText: '储存路径',
+                  hintText: '例如: /百度网盘/图床（可选）',
+                  prefixIcon: Icons.folder,
+                ),
+                ConfigureWidgets.buildFormField(
+                  controller: _customUrlController,
+                  labelText: '自定义域名',
+                  hintText: '例如: https://test.com（可选）',
+                  prefixIcon: Icons.language,
+                ),
+                ConfigureWidgets.buildFormField(
+                  controller: _webPathController,
+                  labelText: '拼接路径',
+                  hintText: '例如: /pic（可选）',
+                  prefixIcon: Icons.link,
+                ),
+              ],
             ),
-            TextFormField(
-              controller: _passwordController,
-              decoration: const InputDecoration(
-                label: Center(child: Text('密码')),
-                hintText: '输入密码',
-              ),
-              textAlign: TextAlign.center,
-              validator: (value) {
-                if (value == null || value.isEmpty || value.toString().trim().isEmpty) {
-                  return '请输入密码';
-                }
-                return null;
-              },
+            ConfigureWidgets.buildSettingCard(
+              title: '操作',
+              children: [
+                ConfigureWidgets.buildSettingItem(
+                  context: context,
+                  title: '导入当前图床配置',
+                  icon: Icons.download,
+                  onTap: () {
+                    _importConfig();
+                    setState(() {});
+                  },
+                ),
+                ConfigureWidgets.buildDivider(),
+                ConfigureWidgets.buildSettingItem(
+                  context: context,
+                  title: '保存配置',
+                  icon: Icons.save,
+                  onTap: () async {
+                    var result = await _saveConfig();
+                    if (result == true && mounted) {
+                      Navigator.pop(context, true);
+                    }
+                  },
+                ),
+              ],
             ),
-            TextFormField(
-              controller: _uploadPathController,
-              decoration: const InputDecoration(
-                contentPadding: EdgeInsets.zero,
-                label: Center(child: Text('可选：储存路径')),
-                hintText: '例如: /百度网盘/图床',
-              ),
-              textAlign: TextAlign.center,
-            ),
-            TextFormField(
-              controller: _customUrlController,
-              decoration: const InputDecoration(
-                contentPadding: EdgeInsets.zero,
-                label: Center(child: Text('可选：自定义域名')),
-                hintText: '例如: https://test.com',
-              ),
-              textAlign: TextAlign.center,
-            ),
-            TextFormField(
-              controller: _webPathController,
-              decoration: const InputDecoration(
-                contentPadding: EdgeInsets.zero,
-                label: Center(child: Text('可选：拼接路径')),
-                hintText: '例如: /pic',
-              ),
-              textAlign: TextAlign.center,
-            ),
-            ListTile(
-                title: ElevatedButton(
-              onPressed: () {
-                _importConfig();
-                setState(() {});
-              },
-              child: titleText('导入当前图床配置', fontsize: null),
-            )),
-            ListTile(
-                title: ElevatedButton(
-              onPressed: () async {
-                var result = await _saveConfig();
-                if (result == true && mounted) {
-                  Navigator.pop(context, true);
-                }
-              },
-              child: titleText('保存配置', fontsize: null),
-            )),
           ],
         ),
       ),

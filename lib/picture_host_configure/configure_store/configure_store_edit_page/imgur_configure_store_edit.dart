@@ -5,6 +5,7 @@ import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/picture_host_configure/configure_store/configure_store_file.dart';
 import 'package:horopic/picture_host_configure/configure_store/configure_template.dart';
 import 'package:horopic/picture_host_manage/manage_api/imgur_manage_api.dart';
+import 'package:horopic/picture_host_configure/widgets/configure_widgets.dart';
 
 class ImgurConfigureStoreEdit extends StatefulWidget {
   final String storeKey;
@@ -43,13 +44,10 @@ class ImgurConfigureStoreEditState extends State<ImgurConfigureStoreEdit> {
         switch (element) {
           case 'remarkName':
             _remarkNameController.text = widget.psInfo[element];
-            break;
           case 'clientId':
             _clientIdController.text = widget.psInfo[element];
-            break;
           case 'proxy':
             _proxyController.text = widget.psInfo[element];
-            break;
         }
       }
     }
@@ -66,63 +64,77 @@ class ImgurConfigureStoreEditState extends State<ImgurConfigureStoreEdit> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        elevation: 0,
-        title: titleText('备用配置设置'),
-      ),
+      appBar: ConfigureWidgets.buildConfigAppBar(title: '备用配置设置', context: context),
       body: Form(
         key: _formKey,
         child: ListView(
+          physics: const BouncingScrollPhysics(),
           children: [
-            TextFormField(
-              controller: _remarkNameController,
-              decoration: const InputDecoration(
-                label: Center(child: Text('可选：备注名称')),
-                hintText: '请输入备注名称',
-              ),
-              textAlign: TextAlign.center,
+            ConfigureWidgets.buildSettingCard(
+              title: '备注信息',
+              children: [
+                ConfigureWidgets.buildFormField(
+                  controller: _remarkNameController,
+                  labelText: '备注名称',
+                  hintText: '请输入备注名称（可选）',
+                  prefixIcon: Icons.bookmark,
+                ),
+              ],
             ),
-            TextFormField(
-              controller: _clientIdController,
-              decoration: const InputDecoration(
-                label: Center(child: Text('设定clientID')),
-                hintText: 'clientID',
-              ),
-              textAlign: TextAlign.center,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return '请输入clientID';
-                }
-                return null;
-              },
+            ConfigureWidgets.buildSettingCard(
+              title: '认证配置',
+              children: [
+                ConfigureWidgets.buildFormField(
+                  controller: _clientIdController,
+                  labelText: 'Client ID',
+                  hintText: '请输入clientID',
+                  prefixIcon: Icons.vpn_key,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return '请输入clientID';
+                    }
+                    return null;
+                  },
+                ),
+              ],
             ),
-            TextFormField(
-              controller: _proxyController,
-              decoration: const InputDecoration(
-                label: Center(child: Text('可选:设定代理,需要配合手机FQ软件使用')),
-                hintText: '例如127.0.0.1:7890',
-              ),
-              textAlign: TextAlign.center,
+            ConfigureWidgets.buildSettingCard(
+              title: '代理设置',
+              children: [
+                ConfigureWidgets.buildFormField(
+                  controller: _proxyController,
+                  labelText: '代理设置',
+                  hintText: '例如127.0.0.1:7890（可选）',
+                  prefixIcon: Icons.wifi,
+                ),
+              ],
             ),
-            ListTile(
-                title: ElevatedButton(
-              onPressed: () {
-                _importConfig();
-                setState(() {});
-              },
-              child: titleText('导入当前图床配置', fontsize: null),
-            )),
-            ListTile(
-                title: ElevatedButton(
-              onPressed: () async {
-                var result = await _saveConfig();
-                if (result == true && mounted) {
-                  Navigator.pop(context, true);
-                }
-              },
-              child: titleText('保存配置', fontsize: null),
-            )),
+            ConfigureWidgets.buildSettingCard(
+              title: '操作',
+              children: [
+                ConfigureWidgets.buildSettingItem(
+                  context: context,
+                  title: '导入当前图床配置',
+                  icon: Icons.cloud_download,
+                  onTap: () {
+                    _importConfig();
+                    setState(() {});
+                  },
+                ),
+                ConfigureWidgets.buildDivider(),
+                ConfigureWidgets.buildSettingItem(
+                  context: context,
+                  title: '保存配置',
+                  icon: Icons.save,
+                  onTap: () async {
+                    var result = await _saveConfig();
+                    if (result == true && mounted) {
+                      Navigator.pop(context, true);
+                    }
+                  },
+                ),
+              ],
+            ),
           ],
         ),
       ),

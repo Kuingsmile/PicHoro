@@ -11,6 +11,7 @@ import 'package:horopic/pages/loading.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/event_bus_utils.dart';
 import 'package:horopic/picture_host_manage/manage_api/alist_manage_api.dart';
+import 'package:horopic/picture_host_configure/widgets/configure_widgets.dart';
 
 class AlistConfig extends StatefulWidget {
   const AlistConfig({super.key});
@@ -73,173 +74,176 @@ class AlistConfigState extends State<AlistConfig> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        centerTitle: true,
-        title: titleText('Alist参数配置'),
-        actions: [
-          IconButton(
-            onPressed: () async {
-              await Application.router
-                  .navigateTo(context, '/configureStorePage?psHost=alist', transition: TransitionType.cupertino);
-              await _initConfig();
-              setState(() {});
-            },
-            icon: const Icon(Icons.save_as_outlined, color: Color.fromARGB(255, 255, 255, 255), size: 35),
-          )
-        ],
-      ),
+      appBar: ConfigureWidgets.buildConfigAppBar(title: 'Alist参数配置', context: context),
       body: Form(
         key: _formKey,
         child: ListView(
+          physics: const BouncingScrollPhysics(),
           children: [
-            TextFormField(
-              controller: _hostController,
-              decoration: const InputDecoration(
-                label: Center(child: Text('域名')),
-                hintText: '例如: https://alist.test.com',
-              ),
-              textAlign: TextAlign.center,
-              validator: (value) {
-                if (value == null || value.isEmpty || value.toString().trim().isEmpty) {
-                  return '请输入域名';
-                }
-                if (!value.startsWith('http://') && !value.startsWith('https://')) {
-                  return '以http://或https://开头';
-                }
-                return null;
-              },
+            ConfigureWidgets.buildSettingCard(
+              title: '基本配置',
+              children: [
+                ConfigureWidgets.buildFormField(
+                  controller: _hostController,
+                  labelText: '域名',
+                  hintText: '例如: https://alist.test.com',
+                  prefixIcon: Icons.link,
+                  validator: (value) {
+                    if (value == null || value.isEmpty || value.toString().trim().isEmpty) {
+                      return '请输入域名';
+                    }
+                    if (!value.startsWith('http://') && !value.startsWith('https://')) {
+                      return '以http://或https://开头';
+                    }
+                    return null;
+                  },
+                ),
+                ConfigureWidgets.buildFormField(
+                  controller: _adminTokenController,
+                  labelText: '管理员token',
+                  hintText: '输入管理员token（可选）',
+                  prefixIcon: Icons.vpn_key,
+                ),
+                ConfigureWidgets.buildFormField(
+                  controller: _alistusernameController,
+                  labelText: '用户名',
+                  hintText: '设定用户名（可选）',
+                  prefixIcon: Icons.person,
+                ),
+                ConfigureWidgets.buildFormField(
+                  controller: _passwordController,
+                  labelText: '密码',
+                  hintText: '输入密码（可选）',
+                  prefixIcon: Icons.lock,
+                  obscureText: true,
+                ),
+              ],
             ),
-            TextFormField(
-              controller: _adminTokenController,
-              decoration: const InputDecoration(
-                label: Center(child: Text('可选：管理员token')),
-                hintText: '输入管理员token',
-              ),
-              textAlign: TextAlign.center,
+            ConfigureWidgets.buildSettingCard(
+              title: '路径设置',
+              children: [
+                ConfigureWidgets.buildFormField(
+                  controller: _uploadPathController,
+                  labelText: '储存路径',
+                  hintText: '例如: /百度网盘/图床（可选）',
+                  prefixIcon: Icons.folder,
+                ),
+                ConfigureWidgets.buildFormField(
+                  controller: _alistWebpathController,
+                  labelText: '拼接路径',
+                  hintText: '例如: /pic（可选）',
+                  prefixIcon: Icons.link,
+                ),
+                ConfigureWidgets.buildFormField(
+                  controller: _customUrlController,
+                  labelText: '自定义URL',
+                  hintText: '例如: https://cdn.test.com（可选）',
+                  prefixIcon: Icons.language,
+                ),
+                ListTile(
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  leading: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).primaryColor.withAlpha(51),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(Icons.public, color: Theme.of(context).primaryColor),
+                  ),
+                  title: const Text('匿名访问'),
+                  trailing: Switch(
+                    value: _isAnonymous,
+                    onChanged: (value) {
+                      setState(() {
+                        _isAnonymous = value;
+                      });
+                    },
+                    activeColor: Theme.of(context).primaryColor,
+                  ),
+                ),
+              ],
             ),
-            TextFormField(
-              controller: _alistusernameController,
-              decoration: const InputDecoration(
-                label: Center(child: Text('可选：用户名')),
-                hintText: '设定用户名',
-              ),
-              textAlign: TextAlign.center,
-            ),
-            TextFormField(
-              controller: _passwordController,
-              decoration: const InputDecoration(
-                label: Center(child: Text('可选：密码')),
-                hintText: '输入密码',
-              ),
-              textAlign: TextAlign.center,
-            ),
-            TextFormField(
-              controller: _uploadPathController,
-              decoration: const InputDecoration(
-                contentPadding: EdgeInsets.zero,
-                label: Center(child: Text('可选：储存路径')),
-                hintText: '例如: /百度网盘/图床',
-              ),
-              textAlign: TextAlign.center,
-            ),
-            TextFormField(
-              controller: _alistWebpathController,
-              decoration: const InputDecoration(
-                contentPadding: EdgeInsets.zero,
-                label: Center(child: Text('可选：拼接路径')),
-                hintText: '例如: /pic',
-              ),
-              textAlign: TextAlign.center,
-            ),
-            TextFormField(
-              controller: _customUrlController,
-              decoration: const InputDecoration(
-                contentPadding: EdgeInsets.zero,
-                label: Center(child: Text('可选：自定义URL')),
-                hintText: '例如: https://cdn.test.com',
-              ),
-              textAlign: TextAlign.center,
-            ),
-            ListTile(
-              title: const Text('是否匿名访问'),
-              trailing: Switch(
-                value: _isAnonymous,
-                onChanged: (value) {
-                  setState(() {
-                    _isAnonymous = value;
-                  });
-                },
-              ),
-            ),
-            ListTile(
-                title: ElevatedButton(
-              onPressed: () {
-                if (_formKey.currentState!.validate()) {
-                  showDialog(
+            ConfigureWidgets.buildSettingCard(
+              title: '操作',
+              children: [
+                ConfigureWidgets.buildSettingItem(
+                  context: context,
+                  title: '保存设置',
+                  icon: Icons.save,
+                  onTap: () {
+                    if (_formKey.currentState!.validate()) {
+                      showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (context) {
+                            return NetLoadingDialog(
+                              outsideDismiss: false,
+                              loading: true,
+                              loadingText: "配置中...",
+                              requestCallBack: _saveAlistConfig(),
+                            );
+                          });
+                    }
+                  },
+                ),
+                ConfigureWidgets.buildDivider(),
+                ConfigureWidgets.buildSettingItem(
+                  context: context,
+                  title: '检查当前配置',
+                  icon: Icons.check_circle,
+                  onTap: () {
+                    showDialog(
                       context: context,
                       barrierDismissible: false,
                       builder: (context) {
                         return NetLoadingDialog(
                           outsideDismiss: false,
                           loading: true,
-                          loadingText: "配置中...",
-                          requestCallBack: _saveAlistConfig(),
+                          loadingText: "检查中...",
+                          requestCallBack: checkAlistConfig(),
                         );
-                      });
-                }
-              },
-              child: titleText('提交表单', fontsize: null),
-            )),
-            ListTile(
-                title: ElevatedButton(
-              onPressed: () {
-                showDialog(
-                    context: context,
-                    barrierDismissible: false,
-                    builder: (context) {
-                      return NetLoadingDialog(
-                        outsideDismiss: false,
-                        loading: true,
-                        loadingText: "检查中...",
-                        requestCallBack: checkAlistConfig(),
-                      );
-                    });
-              },
-              child: titleText('检查当前配置', fontsize: null),
-            )),
-            ListTile(
-                title: ElevatedButton(
-              onPressed: () async {
-                await Application.router
-                    .navigateTo(context, '/configureStorePage?psHost=alist', transition: TransitionType.cupertino);
-                await _initConfig();
-                setState(() {});
-              },
-              child: titleText('设置备用配置', fontsize: null),
-            )),
-            ListTile(
-                title: ElevatedButton(
-              onPressed: () {
-                _setdefault();
-              },
-              child: titleText('设为默认图床', fontsize: null),
-            )),
-            ListTile(
-              title: const Center(
-                child: Text(
-                  '当前token',
-                  style: TextStyle(color: Colors.black),
+                      },
+                    );
+                  },
                 ),
-              ),
-              subtitle: Center(
-                child: SelectableText(
-                  _currentJWT == '' ? '未配置' : _currentJWT,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(color: Colors.blue),
+                ConfigureWidgets.buildDivider(),
+                ConfigureWidgets.buildSettingItem(
+                  context: context,
+                  title: '设置备用配置',
+                  icon: Icons.settings_backup_restore,
+                  onTap: () async {
+                    await Application.router
+                        .navigateTo(context, '/configureStorePage?psHost=alist', transition: TransitionType.cupertino);
+                    await _initConfig();
+                    setState(() {});
+                  },
                 ),
-              ),
-            )
+                ConfigureWidgets.buildDivider(),
+                ConfigureWidgets.buildSettingItem(
+                  context: context,
+                  title: '设为默认图床',
+                  icon: Icons.favorite,
+                  onTap: () {
+                    _setdefault();
+                  },
+                ),
+              ],
+            ),
+            ConfigureWidgets.buildSettingCard(
+              title: '当前Token状态',
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                  child: SelectableText(
+                    _currentJWT == '' ? '未配置' : _currentJWT,
+                    style: TextStyle(
+                      color: _currentJWT == '' ? Colors.red : Colors.blue,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
       ),

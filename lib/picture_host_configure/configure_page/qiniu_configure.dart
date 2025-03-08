@@ -15,6 +15,7 @@ import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/event_bus_utils.dart';
 import 'package:horopic/api/qiniu_api.dart';
 import 'package:horopic/picture_host_manage/manage_api/qiniu_manage_api.dart';
+import 'package:horopic/picture_host_configure/widgets/configure_widgets.dart';
 
 class QiniuConfig extends StatefulWidget {
   const QiniuConfig({super.key});
@@ -68,178 +69,165 @@ class QiniuConfigState extends State<QiniuConfig> {
     _areaController.dispose();
     _optionsController.dispose();
     _pathController.dispose();
-
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        centerTitle: true,
-        title: titleText('七牛云参数配置'),
-        actions: [
-          IconButton(
-            onPressed: () async {
-              await Application.router
-                  .navigateTo(context, '/configureStorePage?psHost=qiniu', transition: TransitionType.cupertino);
-              await _initConfig();
-              setState(() {});
-            },
-            icon: const Icon(Icons.save_as_outlined, color: Color.fromARGB(255, 255, 255, 255), size: 35),
-          )
-        ],
-      ),
+      appBar: ConfigureWidgets.buildConfigAppBar(title: '七牛云参数配置', context: context),
       body: Form(
         key: _formKey,
         child: ListView(
+          physics: const BouncingScrollPhysics(),
           children: [
-            TextFormField(
-              controller: _accessKeyController,
-              decoration: const InputDecoration(
-                label: Center(child: Text('accessKey')),
-                hintText: '设定accessKey',
-              ),
-              textAlign: TextAlign.center,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return '请输入accessKey';
-                }
-                return null;
-              },
+            ConfigureWidgets.buildSettingCard(
+              title: '基本配置',
+              children: [
+                ConfigureWidgets.buildFormField(
+                  controller: _accessKeyController,
+                  labelText: 'accessKey',
+                  hintText: '请输入accessKey',
+                  prefixIcon: Icons.vpn_key,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return '请输入accessKey';
+                    }
+                    return null;
+                  },
+                ),
+                ConfigureWidgets.buildFormField(
+                  controller: _secretKeyController,
+                  labelText: 'secretKey',
+                  hintText: '请输入secretKey',
+                  prefixIcon: Icons.lock,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return '请输入secretKey';
+                    }
+                    return null;
+                  },
+                ),
+                ConfigureWidgets.buildFormField(
+                  controller: _bucketController,
+                  labelText: 'bucket',
+                  hintText: '请输入bucket',
+                  prefixIcon: Icons.storage,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return '请输入bucket';
+                    }
+                    return null;
+                  },
+                ),
+                ConfigureWidgets.buildFormField(
+                  controller: _urlController,
+                  labelText: '访问网址',
+                  hintText: '例如:https://xxx.yyy.gld.clouddn.com',
+                  prefixIcon: Icons.link,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return '请输入访问网址';
+                    }
+                    return null;
+                  },
+                ),
+                ConfigureWidgets.buildFormField(
+                  controller: _areaController,
+                  labelText: '存储区域',
+                  hintText: '设定存储区域',
+                  prefixIcon: Icons.location_on,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return '请输入存储区域';
+                    }
+                    return null;
+                  },
+                ),
+              ],
             ),
-            TextFormField(
-              controller: _secretKeyController,
-              decoration: const InputDecoration(
-                label: Center(child: Text('secretKey')),
-                hintText: '设定secretKey',
-              ),
-              textAlign: TextAlign.center,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return '请输入secretKey';
-                }
-                return null;
-              },
+            ConfigureWidgets.buildSettingCard(
+              title: '可选配置',
+              children: [
+                ConfigureWidgets.buildFormField(
+                  controller: _optionsController,
+                  labelText: '网站后缀',
+                  hintText: '例如?imageslim',
+                  prefixIcon: Icons.settings,
+                ),
+                ConfigureWidgets.buildFormField(
+                  controller: _pathController,
+                  labelText: '存储路径',
+                  hintText: '例如test/',
+                  prefixIcon: Icons.folder,
+                ),
+              ],
             ),
-            TextFormField(
-              controller: _bucketController,
-              decoration: const InputDecoration(
-                label: Center(child: Text('bucket')),
-                hintText: '设定bucket',
-              ),
-              textAlign: TextAlign.center,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return '请输入bucket';
-                }
-                return null;
-              },
+            ConfigureWidgets.buildSettingCard(
+              title: '操作',
+              children: [
+                ConfigureWidgets.buildSettingItem(
+                  context: context,
+                  title: '保存设置',
+                  icon: Icons.save,
+                  onTap: () {
+                    if (_formKey.currentState!.validate()) {
+                      showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (context) {
+                            return NetLoadingDialog(
+                              outsideDismiss: false,
+                              loading: true,
+                              loadingText: "配置中...",
+                              requestCallBack: _saveQiniuConfig(),
+                            );
+                          });
+                    }
+                  },
+                ),
+                ConfigureWidgets.buildDivider(),
+                ConfigureWidgets.buildSettingItem(
+                  context: context,
+                  title: '检查当前配置',
+                  icon: Icons.check_circle,
+                  onTap: () {
+                    showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (context) {
+                          return NetLoadingDialog(
+                            outsideDismiss: false,
+                            loading: true,
+                            loadingText: "检查中...",
+                            requestCallBack: checkQiniuConfig(),
+                          );
+                        });
+                  },
+                ),
+                ConfigureWidgets.buildDivider(),
+                ConfigureWidgets.buildSettingItem(
+                  context: context,
+                  title: '设置备用配置',
+                  icon: Icons.settings_backup_restore,
+                  onTap: () async {
+                    await Application.router
+                        .navigateTo(context, '/configureStorePage?psHost=qiniu', transition: TransitionType.cupertino);
+                    await _initConfig();
+                    setState(() {});
+                  },
+                ),
+                ConfigureWidgets.buildDivider(),
+                ConfigureWidgets.buildSettingItem(
+                  context: context,
+                  title: '设为默认图床',
+                  icon: Icons.favorite,
+                  onTap: () {
+                    _setdefault();
+                  },
+                ),
+              ],
             ),
-            TextFormField(
-              controller: _urlController,
-              decoration: const InputDecoration(
-                contentPadding: EdgeInsets.zero,
-                label: Center(child: Text('访问网址')),
-                hintText: '例如:https://xxx.yyy.gld.clouddn.com',
-              ),
-              textAlign: TextAlign.center,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return '请输入访问网址';
-                }
-                return null;
-              },
-            ),
-            TextFormField(
-              controller: _areaController,
-              decoration: const InputDecoration(
-                contentPadding: EdgeInsets.zero,
-                label: Center(child: Text('存储区域')),
-                hintText: '设定存储区域',
-              ),
-              textAlign: TextAlign.center,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return '请输入存储区域';
-                }
-                return null;
-              },
-            ),
-            TextFormField(
-              controller: _optionsController,
-              decoration: const InputDecoration(
-                contentPadding: EdgeInsets.zero,
-                label: Center(child: Text('可选:网站后缀')),
-                hintText: '例如?imageslim',
-                hintStyle: TextStyle(fontSize: 13),
-              ),
-              textAlign: TextAlign.center,
-            ),
-            TextFormField(
-              controller: _pathController,
-              decoration: const InputDecoration(
-                contentPadding: EdgeInsets.zero,
-                label: Center(child: Text('可选:存储路径')),
-                hintText: '例如test/',
-                hintStyle: TextStyle(fontSize: 13),
-              ),
-              textAlign: TextAlign.center,
-            ),
-            ListTile(
-                title: ElevatedButton(
-              onPressed: () {
-                if (_formKey.currentState!.validate()) {
-                  showDialog(
-                      context: context,
-                      barrierDismissible: false,
-                      builder: (context) {
-                        return NetLoadingDialog(
-                          outsideDismiss: false,
-                          loading: true,
-                          loadingText: "配置中...",
-                          requestCallBack: _saveQiniuConfig(),
-                        );
-                      });
-                }
-              },
-              child: titleText('提交表单', fontsize: null),
-            )),
-            ListTile(
-                title: ElevatedButton(
-              onPressed: () {
-                showDialog(
-                    context: context,
-                    barrierDismissible: false,
-                    builder: (context) {
-                      return NetLoadingDialog(
-                        outsideDismiss: false,
-                        loading: true,
-                        loadingText: "检查中...",
-                        requestCallBack: checkQiniuConfig(),
-                      );
-                    });
-              },
-              child: titleText('检查当前配置', fontsize: null),
-            )),
-            ListTile(
-                title: ElevatedButton(
-              onPressed: () async {
-                await Application.router
-                    .navigateTo(context, '/configureStorePage?psHost=qiniu', transition: TransitionType.cupertino);
-                await _initConfig();
-                setState(() {});
-              },
-              child: titleText('设置备用配置', fontsize: null),
-            )),
-            ListTile(
-                title: ElevatedButton(
-              onPressed: () {
-                _setdefault();
-              },
-              child: titleText('设为默认图床', fontsize: null),
-            )),
           ],
         ),
       ),

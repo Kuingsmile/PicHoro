@@ -5,6 +5,7 @@ import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/picture_host_configure/configure_store/configure_store_file.dart';
 import 'package:horopic/picture_host_manage/manage_api/ftp_manage_api.dart';
 import 'package:horopic/picture_host_configure/configure_store/configure_template.dart';
+import 'package:horopic/picture_host_configure/widgets/configure_widgets.dart';
 
 class FtpConfigureStoreEdit extends StatefulWidget {
   final String storeKey;
@@ -72,37 +73,26 @@ class FtpConfigureStoreEditState extends State<FtpConfigureStoreEdit> {
         switch (element) {
           case 'remarkName':
             _remarkNameController.text = widget.psInfo[element];
-            break;
           case 'ftpHost':
             _ftpHostController.text = widget.psInfo[element];
-            break;
           case 'ftpPort':
             _ftpPortController.text = widget.psInfo[element];
-            break;
           case 'ftpUser':
             _ftpUserController.text = widget.psInfo[element];
-            break;
           case 'ftpPassword':
             _ftpPasswordController.text = widget.psInfo[element];
-            break;
           case 'ftpHomeDir':
             _ftpHomeDirController.text = widget.psInfo[element];
-            break;
           case 'uploadPath':
             _ftpUploadPathController.text = widget.psInfo[element];
-            break;
           case 'ftpType':
             _ftpConfigMap['ftpType'] = widget.psInfo[element];
-            break;
           case 'isAnonymous':
             _ftpConfigMap['isAnonymous'] = widget.psInfo[element].toString();
-            break;
           case 'ftpCustomUrl':
             _ftpCustomUrlController.text = widget.psInfo[element];
-            break;
           case 'ftpWebPath':
             _ftpWebPathController.text = widget.psInfo[element];
-            break;
         }
       }
     }
@@ -125,157 +115,228 @@ class FtpConfigureStoreEditState extends State<FtpConfigureStoreEdit> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        elevation: 0,
-        title: titleText('备用配置设置'),
-      ),
+      appBar: ConfigureWidgets.buildConfigAppBar(title: '备用配置设置', context: context),
       body: Form(
         key: _formKey,
         child: ListView(
+          physics: const BouncingScrollPhysics(),
           children: [
-            TextFormField(
-              controller: _remarkNameController,
-              decoration: const InputDecoration(
-                label: Center(child: Text('可选：备注名称')),
-                hintText: '请输入备注名称',
-              ),
-              textAlign: TextAlign.center,
+            ConfigureWidgets.buildSettingCard(
+              title: '备注信息',
+              children: [
+                ConfigureWidgets.buildFormField(
+                  controller: _remarkNameController,
+                  labelText: '备注名称',
+                  hintText: '请输入备注名称（可选）',
+                  prefixIcon: Icons.bookmark,
+                ),
+              ],
             ),
-            TextFormField(
-              controller: _ftpHostController,
-              decoration: const InputDecoration(
-                label: Center(child: Text('FTP主机地址')),
-                hintText: '请输入FTP主机地址',
-              ),
-              textAlign: TextAlign.center,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return '请输入FTP主机地址';
-                }
-                return null;
-              },
+            ConfigureWidgets.buildSettingCard(
+              title: '基本配置',
+              children: [
+                ConfigureWidgets.buildFormField(
+                  controller: _ftpHostController,
+                  labelText: 'FTP主机地址',
+                  hintText: '请输入FTP主机地址',
+                  prefixIcon: Icons.computer,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return '请输入FTP主机地址';
+                    }
+                    return null;
+                  },
+                ),
+                ConfigureWidgets.buildFormField(
+                  controller: _ftpPortController,
+                  labelText: 'FTP端口',
+                  hintText: '如：21或者22',
+                  prefixIcon: Icons.settings_ethernet,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return '请输入FTP端口';
+                    }
+                    RegExp pattern = RegExp(r'^[0-9]{1,5}$');
+                    if (!pattern.hasMatch(value)) {
+                      return '请输入正确的FTP端口';
+                    }
+                    if (int.parse(value) > 65535) {
+                      return '请输入正确的FTP端口';
+                    }
+                    return null;
+                  },
+                ),
+                ConfigureWidgets.buildFormField(
+                  controller: _ftpUserController,
+                  labelText: 'FTP用户名',
+                  hintText: '勾选匿名时无需填写',
+                  prefixIcon: Icons.person,
+                ),
+                ConfigureWidgets.buildFormField(
+                  controller: _ftpPasswordController,
+                  labelText: 'FTP密码',
+                  hintText: '匿名或无密码时无需填写',
+                  prefixIcon: Icons.lock,
+                  obscureText: true,
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.grey.shade400),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: Theme.of(context).primaryColor.withAlpha(51),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Icon(
+                                      Icons.category,
+                                      color: Theme.of(context).primaryColor,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 16),
+                                  const Text('FTP类型'),
+                                ],
+                              ),
+                              DropdownButton<String>(
+                                value: _ftpConfigMap['ftpType'],
+                                underline: Container(),
+                                icon: const Icon(Icons.arrow_drop_down),
+                                onChanged: (String? newValue) {
+                                  setState(() {
+                                    _ftpConfigMap['ftpType'] = newValue!;
+                                  });
+                                },
+                                items: <String>['FTP', 'SFTP'].map<DropdownMenuItem<String>>((String value) {
+                                  return DropdownMenuItem<String>(
+                                    value: value,
+                                    child: Text(value),
+                                  );
+                                }).toList(),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.grey.shade400),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: Theme.of(context).primaryColor.withAlpha(51),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Icon(
+                                      Icons.person_outline,
+                                      color: Theme.of(context).primaryColor,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 16),
+                                  const Text('匿名登录'),
+                                ],
+                              ),
+                              Switch(
+                                value: _ftpConfigMap['isAnonymous'] == 'true',
+                                activeColor: Theme.of(context).primaryColor,
+                                onChanged: (value) {
+                                  setState(() {
+                                    _ftpConfigMap['isAnonymous'] = value.toString();
+                                  });
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-            TextFormField(
-              controller: _ftpPortController,
-              decoration: const InputDecoration(
-                label: Center(child: Text('FTP端口')),
-                hintText: '如：21或者22',
-              ),
-              textAlign: TextAlign.center,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return '请输入FTP端口';
-                }
-                RegExp pattern = RegExp(r'^[0-9]{1,5}$');
-                if (!pattern.hasMatch(value)) {
-                  return '请输入正确的FTP端口';
-                }
-                if (int.parse(value) > 65535) {
-                  return '请输入正确的FTP端口';
-                }
-                return null;
-              },
+            ConfigureWidgets.buildSettingCard(
+              title: '路径设置',
+              children: [
+                ConfigureWidgets.buildFormField(
+                  controller: _ftpUploadPathController,
+                  labelText: 'FTP上传路径',
+                  hintText: '例如：test/',
+                  prefixIcon: Icons.upload_file,
+                ),
+                ConfigureWidgets.buildFormField(
+                  controller: _ftpHomeDirController,
+                  labelText: '管理功能起始路径',
+                  hintText: '例如：/home/testuser/',
+                  prefixIcon: Icons.folder,
+                ),
+                ConfigureWidgets.buildFormField(
+                  controller: _ftpCustomUrlController,
+                  labelText: '自定义URL',
+                  hintText: '例如：https://www.test.com',
+                  prefixIcon: Icons.language,
+                ),
+                ConfigureWidgets.buildFormField(
+                  controller: _ftpWebPathController,
+                  labelText: '拼接用web路径',
+                  hintText: '例如：/test/',
+                  prefixIcon: Icons.link,
+                ),
+              ],
             ),
-            TextFormField(
-              controller: _ftpUserController,
-              decoration: const InputDecoration(
-                label: Center(child: Text('可选：FTP用户名')),
-                hintText: '勾选匿名时无需填写',
-              ),
-              textAlign: TextAlign.center,
+            ConfigureWidgets.buildSettingCard(
+              title: '操作',
+              children: [
+                ConfigureWidgets.buildSettingItem(
+                  context: context,
+                  title: '导入当前图床配置',
+                  icon: Icons.download,
+                  onTap: () {
+                    _importConfig();
+                    setState(() {});
+                  },
+                ),
+                ConfigureWidgets.buildDivider(),
+                ConfigureWidgets.buildSettingItem(
+                  context: context,
+                  title: '保存配置',
+                  icon: Icons.save,
+                  onTap: () async {
+                    var result = await _saveConfig();
+                    if (result == true && mounted) {
+                      Navigator.pop(context, true);
+                    }
+                  },
+                ),
+              ],
             ),
-            TextFormField(
-              controller: _ftpPasswordController,
-              decoration: const InputDecoration(
-                contentPadding: EdgeInsets.zero,
-                label: Center(child: Text('可选: FTP密码')),
-                hintText: '匿名或无密码时无需填写',
-              ),
-              textAlign: TextAlign.center,
-            ),
-            TextFormField(
-              controller: _ftpUploadPathController,
-              decoration: const InputDecoration(
-                contentPadding: EdgeInsets.zero,
-                label: Center(child: Text('可选: FTP上传路径')),
-                hintText: '例如：test/',
-              ),
-              textAlign: TextAlign.center,
-            ),
-            TextFormField(
-              controller: _ftpHomeDirController,
-              decoration: const InputDecoration(
-                contentPadding: EdgeInsets.zero,
-                label: Center(child: Text('可选: 管理功能起始路径')),
-                hintText: '例如：/home/testuser/',
-              ),
-              textAlign: TextAlign.center,
-            ),
-            TextFormField(
-              controller: _ftpCustomUrlController,
-              decoration: const InputDecoration(
-                contentPadding: EdgeInsets.zero,
-                label: Center(child: Text('可选: 自定义URL')),
-                hintText: '例如：https://www.test.com',
-              ),
-              textAlign: TextAlign.center,
-            ),
-            TextFormField(
-              controller: _ftpWebPathController,
-              decoration: const InputDecoration(
-                contentPadding: EdgeInsets.zero,
-                label: Center(child: Text('可选: 拼接用web路径')),
-                hintText: '例如：/test/',
-              ),
-              textAlign: TextAlign.center,
-            ),
-            ListTile(
-              title: const Text('FTP类型'),
-              trailing: DropdownButton<String>(
-                value: _ftpConfigMap['ftpType'],
-                onChanged: (String? newValue) {
-                  setState(() {
-                    _ftpConfigMap['ftpType'] = newValue!;
-                  });
-                },
-                items: <String>['FTP', 'SFTP'].map<DropdownMenuItem<String>>((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                }).toList(),
-              ),
-            ),
-            ListTile(
-              title: const Text('匿名登录'),
-              trailing: Switch(
-                value: _ftpConfigMap['isAnonymous'] == 'true',
-                onChanged: (value) {
-                  setState(() {
-                    _ftpConfigMap['isAnonymous'] = value.toString();
-                  });
-                },
-              ),
-            ),
-            ListTile(
-                title: ElevatedButton(
-              onPressed: () {
-                _importConfig();
-                setState(() {});
-              },
-              child: titleText('导入当前图床配置', fontsize: null),
-            )),
-            ListTile(
-                title: ElevatedButton(
-              onPressed: () async {
-                var result = await _saveConfig();
-                if (result == true && mounted) {
-                  Navigator.pop(context, true);
-                }
-              },
-              child: titleText('保存配置', fontsize: null),
-            )),
           ],
         ),
       ),

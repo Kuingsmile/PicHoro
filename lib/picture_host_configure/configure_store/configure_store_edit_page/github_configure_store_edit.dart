@@ -5,6 +5,7 @@ import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/picture_host_configure/configure_store/configure_store_file.dart';
 import 'package:horopic/picture_host_manage/manage_api/github_manage_api.dart';
 import 'package:horopic/picture_host_configure/configure_store/configure_template.dart';
+import 'package:horopic/picture_host_configure/widgets/configure_widgets.dart';
 
 class GithubConfigureStoreEdit extends StatefulWidget {
   final String storeKey;
@@ -52,25 +53,18 @@ class GithubConfigureStoreEditState extends State<GithubConfigureStoreEdit> {
         switch (element) {
           case 'remarkName':
             _remarkNameController.text = widget.psInfo[element];
-            break;
           case 'githubusername':
             _githubusernameController.text = widget.psInfo[element];
-            break;
           case 'repo':
             _repoController.text = widget.psInfo[element];
-            break;
           case 'token':
             _tokenController.text = widget.psInfo[element];
-            break;
           case 'storePath':
             _storePathController.text = widget.psInfo[element];
-            break;
           case 'branch':
             _branchController.text = widget.psInfo[element];
-            break;
           case 'customDomain':
             _customDomainController.text = widget.psInfo[element];
-            break;
         }
       }
     }
@@ -91,111 +85,113 @@ class GithubConfigureStoreEditState extends State<GithubConfigureStoreEdit> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        elevation: 0,
-        title: titleText('备用配置设置'),
-      ),
+      appBar: ConfigureWidgets.buildConfigAppBar(title: '备用配置设置', context: context),
       body: Form(
         key: _formKey,
         child: ListView(
+          physics: const BouncingScrollPhysics(),
           children: [
-            TextFormField(
-              controller: _remarkNameController,
-              decoration: const InputDecoration(
-                label: Center(child: Text('可选：备注名称')),
-                hintText: '请输入备注名称',
-              ),
-              textAlign: TextAlign.center,
+            ConfigureWidgets.buildSettingCard(
+              title: '备注信息',
+              children: [
+                ConfigureWidgets.buildFormField(
+                  controller: _remarkNameController,
+                  labelText: '备注名称',
+                  hintText: '请输入备注名称（可选）',
+                  prefixIcon: Icons.bookmark,
+                ),
+              ],
             ),
-            TextFormField(
-              controller: _githubusernameController,
-              decoration: const InputDecoration(
-                label: Center(child: Text('Github用户名')),
-                hintText: '设定用户名',
-              ),
-              textAlign: TextAlign.center,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return '请输入Github用户名';
-                }
-                return null;
-              },
+            ConfigureWidgets.buildSettingCard(
+              title: 'GitHub 基本配置',
+              children: [
+                ConfigureWidgets.buildFormField(
+                  controller: _githubusernameController,
+                  labelText: 'GitHub 用户名',
+                  hintText: '设定用户名',
+                  prefixIcon: Icons.person,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return '请输入GitHub用户名';
+                    }
+                    return null;
+                  },
+                ),
+                ConfigureWidgets.buildFormField(
+                  controller: _repoController,
+                  labelText: '仓库名',
+                  hintText: '设定仓库名',
+                  prefixIcon: Icons.folder_shared,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return '请输入仓库名';
+                    }
+                    return null;
+                  },
+                ),
+                ConfigureWidgets.buildFormField(
+                  controller: _tokenController,
+                  labelText: 'Token',
+                  hintText: '设定Token',
+                  prefixIcon: Icons.vpn_key,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return '请输入token';
+                    }
+                    return null;
+                  },
+                ),
+              ],
             ),
-            TextFormField(
-              controller: _repoController,
-              decoration: const InputDecoration(
-                label: Center(child: Text('仓库名')),
-                hintText: '设定仓库名',
-              ),
-              textAlign: TextAlign.center,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return '请输入仓库名';
-                }
-                return null;
-              },
+            ConfigureWidgets.buildSettingCard(
+              title: '路径与域名设置',
+              children: [
+                ConfigureWidgets.buildFormField(
+                  controller: _storePathController,
+                  labelText: '存储路径',
+                  hintText: '例如: test/（可选）',
+                  prefixIcon: Icons.folder,
+                ),
+                ConfigureWidgets.buildFormField(
+                  controller: _branchController,
+                  labelText: '分支',
+                  hintText: '例如: main（默认为main，可选）',
+                  prefixIcon: Icons.call_split,
+                ),
+                ConfigureWidgets.buildFormField(
+                  controller: _customDomainController,
+                  labelText: '自定义域名',
+                  hintText: '例如: https://cdn.jsdelivr.net/gh/用户名/仓库名@分支名（可选）',
+                  prefixIcon: Icons.language,
+                ),
+              ],
             ),
-            TextFormField(
-              controller: _tokenController,
-              decoration: const InputDecoration(
-                label: Center(child: Text('token')),
-                hintText: '设定Token',
-              ),
-              textAlign: TextAlign.center,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return '请输入token';
-                }
-                return null;
-              },
+            ConfigureWidgets.buildSettingCard(
+              title: '操作',
+              children: [
+                ConfigureWidgets.buildSettingItem(
+                  context: context,
+                  title: '导入当前图床配置',
+                  icon: Icons.cloud_download,
+                  onTap: () {
+                    _importConfig();
+                    setState(() {});
+                  },
+                ),
+                ConfigureWidgets.buildDivider(),
+                ConfigureWidgets.buildSettingItem(
+                  context: context,
+                  title: '保存配置',
+                  icon: Icons.save,
+                  onTap: () async {
+                    var result = await _saveConfig();
+                    if (result == true && mounted) {
+                      Navigator.pop(context, true);
+                    }
+                  },
+                ),
+              ],
             ),
-            TextFormField(
-              controller: _storePathController,
-              decoration: const InputDecoration(
-                contentPadding: EdgeInsets.zero,
-                label: Center(child: Text('可选:存储路径')),
-                hintText: '例如: test/',
-              ),
-              textAlign: TextAlign.center,
-            ),
-            TextFormField(
-              controller: _branchController,
-              decoration: const InputDecoration(
-                contentPadding: EdgeInsets.zero,
-                label: Center(child: Text('可选：分支')),
-                hintText: '例如: main(默认为main)',
-              ),
-              textAlign: TextAlign.center,
-            ),
-            TextFormField(
-              controller: _customDomainController,
-              decoration: const InputDecoration(
-                contentPadding: EdgeInsets.zero,
-                label: Center(child: Text('可选：自定义域名')),
-                hintText: 'eg: https://cdn.jsdelivr.net/gh/用户名/仓库名@分支名',
-                hintStyle: TextStyle(fontSize: 13),
-              ),
-              textAlign: TextAlign.center,
-            ),
-            ListTile(
-                title: ElevatedButton(
-              onPressed: () {
-                _importConfig();
-                setState(() {});
-              },
-              child: titleText('导入当前图床配置', fontsize: null),
-            )),
-            ListTile(
-                title: ElevatedButton(
-              onPressed: () async {
-                var result = await _saveConfig();
-                if (result == true && mounted) {
-                  Navigator.pop(context, true);
-                }
-              },
-              child: titleText('保存配置', fontsize: null),
-            )),
           ],
         ),
       ),

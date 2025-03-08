@@ -5,6 +5,7 @@ import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/picture_host_configure/configure_store/configure_store_file.dart';
 import 'package:horopic/picture_host_manage/manage_api/lskypro_manage_api.dart';
 import 'package:horopic/picture_host_configure/configure_store/configure_template.dart';
+import 'package:horopic/picture_host_configure/widgets/configure_widgets.dart';
 
 class LskyproConfigureStoreEdit extends StatefulWidget {
   final String storeKey;
@@ -47,19 +48,14 @@ class LskyproConfigureStoreEditState extends State<LskyproConfigureStoreEdit> {
         switch (element) {
           case 'remarkName':
             _remarkNameController.text = widget.psInfo[element];
-            break;
           case 'host':
             _hostController.text = widget.psInfo[element];
-            break;
           case 'token':
             _tokenController.text = widget.psInfo[element];
-            break;
           case 'strategy_id':
             _strategyIdController.text = widget.psInfo[element].toString();
-            break;
           case 'album_id':
             _albumIdController.text = widget.psInfo[element].toString();
-            break;
         }
       }
     }
@@ -78,93 +74,101 @@ class LskyproConfigureStoreEditState extends State<LskyproConfigureStoreEdit> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        elevation: 0,
-        title: titleText('备用配置设置'),
-      ),
+      appBar: ConfigureWidgets.buildConfigAppBar(title: '备用配置设置', context: context),
       body: Form(
         key: _formKey,
         child: ListView(
+          physics: const BouncingScrollPhysics(),
           children: [
-            TextFormField(
-              controller: _remarkNameController,
-              decoration: const InputDecoration(
-                label: Center(child: Text('可选：备注名称')),
-                hintText: '请输入备注名称',
-              ),
-              textAlign: TextAlign.center,
+            ConfigureWidgets.buildSettingCard(
+              title: '备注信息',
+              children: [
+                ConfigureWidgets.buildFormField(
+                  controller: _remarkNameController,
+                  labelText: '备注名称',
+                  hintText: '请输入备注名称（可选）',
+                  prefixIcon: Icons.bookmark,
+                ),
+              ],
             ),
-            TextFormField(
-              controller: _hostController,
-              decoration: const InputDecoration(
-                label: Center(child: Text('域名')),
-                hintText: '例如: https://imgx.horosama.com',
-              ),
-              textAlign: TextAlign.center,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return '请输入域名';
-                }
-                return null;
-              },
+            ConfigureWidgets.buildSettingCard(
+              title: '基本配置',
+              children: [
+                ConfigureWidgets.buildFormField(
+                  controller: _hostController,
+                  labelText: '域名',
+                  hintText: '例如: https://imgx.horosama.com',
+                  prefixIcon: Icons.language,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return '请输入域名';
+                    }
+                    return null;
+                  },
+                ),
+                ConfigureWidgets.buildFormField(
+                  controller: _tokenController,
+                  labelText: 'Token',
+                  hintText: '请输入Token',
+                  prefixIcon: Icons.vpn_key,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return '请输入Token';
+                    }
+                    return null;
+                  },
+                ),
+              ],
             ),
-            TextFormField(
-              controller: _tokenController,
-              decoration: const InputDecoration(
-                label: Center(child: Text('Token')),
-                hintText: '请输入Token',
-              ),
-              textAlign: TextAlign.center,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return '请输入Token';
-                }
-                return null;
-              },
+            ConfigureWidgets.buildSettingCard(
+              title: '高级设置',
+              children: [
+                ConfigureWidgets.buildFormField(
+                  controller: _strategyIdController,
+                  labelText: '储存策略ID',
+                  hintText: '输入用户名和密码获取列表,一般是1',
+                  prefixIcon: Icons.storage,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return '请输入储存策略Id';
+                    }
+                    return null;
+                  },
+                ),
+                ConfigureWidgets.buildFormField(
+                  controller: _albumIdController,
+                  labelText: '相册ID',
+                  hintText: '仅对付费版和修改了代码的免费版有效（可选）',
+                  prefixIcon: Icons.photo_album,
+                ),
+              ],
             ),
-            TextFormField(
-              controller: _strategyIdController,
-              decoration: const InputDecoration(
-                contentPadding: EdgeInsets.zero,
-                label: Center(child: Text('储存策略ID')),
-                hintText: '输入用户名和密码获取列表,一般是1',
-              ),
-              textAlign: TextAlign.center,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return '请输入储存策略Id';
-                }
-                return null;
-              },
+            ConfigureWidgets.buildSettingCard(
+              title: '操作',
+              children: [
+                ConfigureWidgets.buildSettingItem(
+                  context: context,
+                  title: '导入当前图床配置',
+                  icon: Icons.cloud_download,
+                  onTap: () {
+                    _importConfig();
+                    setState(() {});
+                  },
+                ),
+                ConfigureWidgets.buildDivider(),
+                ConfigureWidgets.buildSettingItem(
+                  context: context,
+                  title: '保存配置',
+                  icon: Icons.save,
+                  onTap: () async {
+                    var result = await _saveConfig();
+                    if (result == true && mounted) {
+                      Navigator.pop(context, true);
+                    }
+                  },
+                ),
+              ],
             ),
-            TextFormField(
-              controller: _albumIdController,
-              decoration: const InputDecoration(
-                contentPadding: EdgeInsets.zero,
-                label: Center(child: Text('可选:相册ID')),
-                hintText: '仅对付费版和修改了代码的免费版有效',
-              ),
-              textAlign: TextAlign.center,
-            ),
-            ListTile(
-                title: ElevatedButton(
-              onPressed: () {
-                _importConfig();
-                setState(() {});
-              },
-              child: titleText('导入当前图床配置', fontsize: null),
-            )),
-            ListTile(
-                title: ElevatedButton(
-              onPressed: () async {
-                var result = await _saveConfig();
-                if (result == true && mounted) {
-                  Navigator.pop(context, true);
-                }
-              },
-              child: titleText('保存配置', fontsize: null),
-            )),
           ],
         ),
       ),

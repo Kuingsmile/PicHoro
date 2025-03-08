@@ -11,6 +11,7 @@ import 'package:horopic/pages/loading.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/event_bus_utils.dart';
 import 'package:horopic/picture_host_manage/manage_api/lskypro_manage_api.dart';
+import 'package:horopic/picture_host_configure/widgets/configure_widgets.dart';
 
 const Map<String, String> statusMsgMap = {
   '403': '管理员关闭了接口功能',
@@ -71,163 +72,158 @@ class HostConfigState extends State<HostConfig> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        centerTitle: true,
-        title: titleText('兰空图床参数配置'),
-        actions: [
-          IconButton(
-            onPressed: () async {
-              await Application.router
-                  .navigateTo(context, '/configureStorePage?psHost=lsky.pro', transition: TransitionType.cupertino);
-              await _initConfig();
-              setState(() {});
-            },
-            icon: const Icon(Icons.save_as_outlined, color: Color.fromARGB(255, 255, 255, 255), size: 35),
-          )
-        ],
-      ),
+      appBar: ConfigureWidgets.buildConfigAppBar(title: '兰空图床参数配置', context: context),
       body: Form(
         key: _formKey,
         child: ListView(
+          physics: const BouncingScrollPhysics(),
           children: [
-            TextFormField(
-              controller: _hostController,
-              decoration: const InputDecoration(
-                label: Center(child: Text('域名')),
-                hintText: '例如: https://lsky.test.com',
-              ),
-              textAlign: TextAlign.center,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return '请输入域名';
-                }
-                return null;
-              },
-            ),
-            TextFormField(
-              controller: _usernameController,
-              decoration: const InputDecoration(
-                label: Center(child: Text('用户名')),
-                hintText: '设定用户名',
-              ),
-              textAlign: TextAlign.center,
-            ),
-            TextFormField(
-              controller: _passwdController,
-              decoration: const InputDecoration(
-                label: Center(child: Text('密码')),
-                hintText: '输入密码',
-              ),
-              textAlign: TextAlign.center,
-            ),
-            TextFormField(
-              controller: _strategyIdController,
-              decoration: const InputDecoration(
-                contentPadding: EdgeInsets.zero,
-                label: Center(child: Text('储存策略ID')),
-                hintText: '输入用户名和密码获取列表,一般是1',
-              ),
-              textAlign: TextAlign.center,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return '请输入储存策略Id';
-                }
-                return null;
-              },
-            ),
-            TextFormField(
-              controller: _albumIdController,
-              decoration: const InputDecoration(
-                contentPadding: EdgeInsets.zero,
-                label: Center(child: Text('可选:相册ID')),
-                hintText: '仅对付费版和修改了代码的免费版有效',
-              ),
-              textAlign: TextAlign.center,
-            ),
-            ListTile(
-                title: ElevatedButton(
-              onPressed: () {
-                if (_formKey.currentState!.validate()) {
-                  showDialog(
-                      context: context,
-                      barrierDismissible: false,
-                      builder: (context) {
-                        return NetLoadingDialog(
-                          outsideDismiss: false,
-                          loading: true,
-                          loadingText: "配置中...",
-                          requestCallBack: _saveHostConfig(),
-                        );
-                      });
-                }
-              },
-              child: titleText('提交表单', fontsize: null),
-            )),
-            ListTile(
-                title: ElevatedButton(
-              onPressed: () {
-                _getStrategyId();
-              },
-              child: titleText('获取储存策略Id列表', fontsize: null),
-            )),
-            ListTile(
-              title: ElevatedButton(
-                onPressed: () {
-                  _getAlbumId();
-                },
-                child: titleText('获取相册Id列表', fontsize: null),
-              ),
-            ),
-            ListTile(
-                title: ElevatedButton(
-              onPressed: () {
-                showDialog(
-                    context: context,
-                    barrierDismissible: false,
-                    builder: (context) {
-                      return NetLoadingDialog(
-                        outsideDismiss: false,
-                        loading: true,
-                        loadingText: "检查中...",
-                        requestCallBack: checkHostConfig(),
-                      );
-                    });
-              },
-              child: titleText('检查当前配置', fontsize: null),
-            )),
-            ListTile(
-                title: ElevatedButton(
-              onPressed: () async {
-                await Application.router
-                    .navigateTo(context, '/configureStorePage?psHost=lsky.pro', transition: TransitionType.cupertino);
-                await _initConfig();
-                setState(() {});
-              },
-              child: titleText('设置备用配置', fontsize: null),
-            )),
-            ListTile(
-                title: ElevatedButton(
-              onPressed: () {
-                _setdefault();
-              },
-              child: titleText('设为默认图床', fontsize: null),
-            )),
-            ListTile(
-              title: const Center(
-                child: Text(
-                  '当前token',
-                  style: TextStyle(color: Colors.black),
+            ConfigureWidgets.buildSettingCard(
+              title: '基本配置',
+              children: [
+                ConfigureWidgets.buildFormField(
+                  controller: _hostController,
+                  labelText: '域名',
+                  hintText: '例如: https://lsky.test.com',
+                  prefixIcon: Icons.link,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return '请输入域名';
+                    }
+                    return null;
+                  },
                 ),
-              ),
-              subtitle: Center(
-                child: SelectableText(
-                  _tokenController == '' ? '未配置' : _tokenController,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(color: Colors.blue),
+                ConfigureWidgets.buildFormField(
+                  controller: _usernameController,
+                  labelText: '用户名',
+                  hintText: '设定用户名',
+                  prefixIcon: Icons.person,
                 ),
-              ),
-            )
+                ConfigureWidgets.buildFormField(
+                  controller: _passwdController,
+                  labelText: '密码',
+                  hintText: '输入密码',
+                  prefixIcon: Icons.lock,
+                  obscureText: true,
+                ),
+                ConfigureWidgets.buildFormField(
+                  controller: _strategyIdController,
+                  labelText: '储存策略ID',
+                  hintText: '输入用户名和密码获取列表,一般是1',
+                  prefixIcon: Icons.storage,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return '请输入储存策略Id';
+                    }
+                    return null;
+                  },
+                ),
+                ConfigureWidgets.buildFormField(
+                  controller: _albumIdController,
+                  labelText: '相册ID (可选)',
+                  hintText: '仅对付费版和修改了代码的免费版有效',
+                  prefixIcon: Icons.photo_album,
+                ),
+              ],
+            ),
+            ConfigureWidgets.buildSettingCard(
+              title: '当前Token',
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                  child: SelectableText(
+                    _tokenController.isEmpty ? '未配置' : _tokenController,
+                    style: TextStyle(
+                      color: Theme.of(context).primaryColor,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            ConfigureWidgets.buildSettingCard(
+              title: '操作',
+              children: [
+                ConfigureWidgets.buildSettingItem(
+                  context: context,
+                  title: '保存设置',
+                  icon: Icons.save,
+                  onTap: () {
+                    if (_formKey.currentState!.validate()) {
+                      showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (context) {
+                            return NetLoadingDialog(
+                              outsideDismiss: false,
+                              loading: true,
+                              loadingText: "配置中...",
+                              requestCallBack: _saveHostConfig(),
+                            );
+                          });
+                    }
+                  },
+                ),
+                ConfigureWidgets.buildDivider(),
+                ConfigureWidgets.buildSettingItem(
+                  context: context,
+                  title: '获取储存策略ID列表',
+                  icon: Icons.list_alt,
+                  onTap: () {
+                    _getStrategyId();
+                  },
+                ),
+                ConfigureWidgets.buildDivider(),
+                ConfigureWidgets.buildSettingItem(
+                  context: context,
+                  title: '获取相册ID列表',
+                  icon: Icons.photo_library,
+                  onTap: () {
+                    _getAlbumId();
+                  },
+                ),
+                ConfigureWidgets.buildDivider(),
+                ConfigureWidgets.buildSettingItem(
+                  context: context,
+                  title: '检查当前配置',
+                  icon: Icons.check_circle,
+                  onTap: () {
+                    showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (context) {
+                          return NetLoadingDialog(
+                            outsideDismiss: false,
+                            loading: true,
+                            loadingText: "检查中...",
+                            requestCallBack: checkHostConfig(),
+                          );
+                        });
+                  },
+                ),
+                ConfigureWidgets.buildDivider(),
+                ConfigureWidgets.buildSettingItem(
+                  context: context,
+                  title: '设置备用配置',
+                  icon: Icons.settings_backup_restore,
+                  onTap: () async {
+                    await Application.router.navigateTo(context, '/configureStorePage?psHost=lsky.pro',
+                        transition: TransitionType.cupertino);
+                    await _initConfig();
+                    setState(() {});
+                  },
+                ),
+                ConfigureWidgets.buildDivider(),
+                ConfigureWidgets.buildSettingItem(
+                  context: context,
+                  title: '设为默认图床',
+                  icon: Icons.favorite,
+                  onTap: () {
+                    _setdefault();
+                  },
+                ),
+              ],
+            ),
           ],
         ),
       ),

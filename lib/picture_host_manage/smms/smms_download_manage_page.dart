@@ -78,10 +78,8 @@ class SmmsUpDownloadManagePageState extends State<SmmsUpDownloadManagePage> {
                   switch (task.status.value) {
                     case UploadStatus.uploading:
                       await uploadManager.pauseUpload(path, fileName);
-                      break;
                     case UploadStatus.paused:
                       await uploadManager.resumeUpload(path, fileName);
-                      break;
                     default:
                       break;
                   }
@@ -182,10 +180,8 @@ class SmmsUpDownloadManagePageState extends State<SmmsUpDownloadManagePage> {
                   switch (task.status.value) {
                     case DownloadStatus.downloading:
                       await downloadManager.pauseDownload(url);
-                      break;
                     case DownloadStatus.paused:
                       await downloadManager.resumeDownload(url);
-                      break;
                     default:
                       break;
                   }
