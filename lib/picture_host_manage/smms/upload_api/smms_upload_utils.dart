@@ -1,28 +1,16 @@
-import 'dart:async';
-import 'dart:collection';
 import 'dart:io';
-// ignore: depend_on_referenced_packages
-import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as my_path;
 
-import 'package:horopic/picture_host_manage/common_page/upload/pnc_upload_task.dart';
-import 'package:horopic/picture_host_manage/common_page/upload/pnc_upload_request.dart';
-import 'package:horopic/pages/upload_pages/upload_status.dart';
+import 'package:horopic/picture_host_manage/common_page/upload/base_upload_manager.dart';
 import 'package:horopic/utils/common_functions.dart';
 
-class UploadManager {
-  final Map<String, UploadTask> _cache = <String, UploadTask>{};
-  final Queue<dynamic> _queue = Queue();
-  Dio dio = Dio();
-
-  int maxConcurrentTasks = 2;
-  int runningTasks = 0;
-
+class UploadManager extends BaseUploadManager {
   static final UploadManager _instance = UploadManager._internal();
 
-  UploadManager._internal();
+  UploadManager._internal() {
+    maxConcurrentTasks = 2;
+  }
 
   factory UploadManager({int? maxConcurrentTasks}) {
     if (maxConcurrentTasks != null) {
@@ -31,277 +19,46 @@ class UploadManager {
     return _instance;
   }
 
-  void Function(int, int) createCallback(String path, String name) {
-    return (int sent, int total) {
-      getUpload(name)?.progress.value = sent / total;
+  @override
+  Future<void> performUpload(String path, String fileName, Map configMap, CancelToken cancelToken) async {
+    FormData formdata = FormData.fromMap({
+      "smfile": await MultipartFile.fromFile(path, filename: my_path.basename(path)),
+      "format": "json",
+    });
+
+    String token = configMap['token'];
+    BaseOptions options = setBaseOptions();
+    options.headers = {
+      "Authorization": token,
+      "Content-Type": "multipart/form-data",
     };
-  }
 
-  Future<void> upload(String path, String fileName, Map configMap, canceltoken) async {
-    try {
-      var task = getUpload(fileName);
+    Dio dio = Dio(options);
+    String uploadUrl = "https://smms.app/api/v2/upload";
 
-      if (task == null || task.status.value == UploadStatus.canceled) {
-        return;
-      }
-      setStatus(task, UploadStatus.uploading);
+    Response response = await dio.post(
+      uploadUrl,
+      data: formdata,
+      onSendProgress: createCallback(path, fileName),
+      cancelToken: cancelToken,
+    );
 
-      Response response;
-      FormData formdata = FormData.fromMap({
-        "smfile": await MultipartFile.fromFile(path, filename: my_path.basename(path)),
-        "format": "json",
-      });
-      String token = configMap['token'];
-      BaseOptions options = setBaseOptions();
-      options.headers = {
-        "Authorization": token,
-        "Content-Type": "multipart/form-data",
-      };
-      Dio dio = Dio(options);
-      String uploadUrl = "https://smms.app/api/v2/upload";
-      response = await dio.post(
-        uploadUrl,
-        data: formdata,
-        onSendProgress: createCallback(path, fileName),
-        cancelToken: canceltoken,
-      );
-      if (response.statusCode == HttpStatus.ok && response.data!['success'] == true) {
-        setStatus(task, UploadStatus.completed);
-      }
-    } catch (e) {
-      flogErr(
-          e,
-          {
-            'path': path,
-            'fileName': fileName,
-            'configMap': configMap,
-          },
-          'smmsUploadManager',
-          'upload');
-      var task = getUpload(fileName)!;
-      if (task.status.value != UploadStatus.canceled && task.status.value != UploadStatus.completed) {
-        setStatus(task, UploadStatus.failed);
-      }
-    }
-    runningTasks--;
-    if (_queue.isNotEmpty) {
-      _startExecution();
+    if (response.statusCode != HttpStatus.ok || response.data!['success'] != true) {
+      throw Exception("Upload failed: ${response.statusCode} - ${response.data}");
     }
   }
 
-  void _startExecution() async {
-    if (runningTasks == maxConcurrentTasks || _queue.isEmpty) {
-      return;
-    }
+  @override
+  void onUploadError(dynamic error, String path, String fileName) {
+    flogErr(
+        error,
+        {
+          'path': path,
+          'fileName': fileName,
+        },
+        'smmsUploadManager',
+        'upload');
 
-    while (_queue.isNotEmpty && runningTasks < maxConcurrentTasks) {
-      runningTasks++;
-      var currentRequest = _queue.removeFirst();
-      if (_cache[currentRequest.name]!.status.value.isCompleted) {
-        runningTasks--;
-        continue;
-      }
-      upload(currentRequest.path, currentRequest.name, currentRequest.configMap, currentRequest.cancelToken);
-      await Future.delayed(const Duration(milliseconds: 500), null);
-    }
-  }
-
-  UploadTask? getUpload(String fileName) {
-    return _cache[fileName];
-  }
-
-  void setStatus(UploadTask? task, UploadStatus status) {
-    if (task != null) {
-      task.status.value = status;
-    }
-  }
-
-  Future<UploadTask?> addUpload(String path, String fileName, Map<String, dynamic> configMap) async {
-    if (path.isNotEmpty && fileName.isNotEmpty) {
-      return await _addUploadRequest(UploadRequest(path, fileName, configMap));
-    }
-    return null;
-  }
-
-  Future<UploadTask> _addUploadRequest(UploadRequest uploadRequest) async {
-    if (_cache[uploadRequest.name] != null) {
-      if ((_cache[uploadRequest.name]!.status.value == UploadStatus.completed ||
-              _cache[uploadRequest.name]!.status.value == UploadStatus.uploading) &&
-          _cache[uploadRequest.name]!.request == uploadRequest) {
-        return _cache[uploadRequest.name]!;
-      } else {
-        _queue.remove(_cache[uploadRequest.name]);
-      }
-    }
-    _queue.add(UploadRequest(uploadRequest.path, uploadRequest.name, uploadRequest.configMap));
-    var task = UploadTask(_queue.last);
-    _cache[uploadRequest.name] = task;
-    _startExecution();
-    return task;
-  }
-
-  Future<void> pauseUpload(String path, String fileName) async {
-    var task = getUpload(fileName);
-    if (task != null) {
-      setStatus(task, UploadStatus.paused);
-      _queue.remove(task.request);
-      task.request.cancelToken.cancel();
-    }
-  }
-
-  Future<void> cancelUpload(String path, String fileName) async {
-    var task = getUpload(fileName);
-    if (task != null) {
-      setStatus(task, UploadStatus.canceled);
-      _queue.remove(task.request);
-      task.request.cancelToken.cancel();
-    }
-  }
-
-  Future<void> resumeUpload(String path, String fileName) async {
-    var task = getUpload(fileName);
-    if (task != null) {
-      setStatus(task, UploadStatus.uploading);
-      task.request.cancelToken = CancelToken();
-      _queue.add(task.request);
-    }
-    _startExecution();
-  }
-
-  Future<void> removeUpload(String path, String fileName) async {
-    await cancelUpload(path, fileName);
-    _cache.remove(path);
-  }
-
-  Future<UploadStatus> whenUploadComplete(String path, String fileName,
-      {Duration timeout = const Duration(hours: 2)}) async {
-    UploadTask? task = getUpload(fileName);
-
-    if (task != null) {
-      return task.whenUploadComplete(timeout: timeout);
-    } else {
-      return Future.error("Upload not found");
-    }
-  }
-
-  List<UploadTask> getALlUpload() {
-    return _cache.values as List<UploadTask>;
-  }
-
-  Future<void> addBatchUploads(List<String> paths, List<String> names, List<Map<String, dynamic>> configMaps) async {
-    for (var i = 0; i < paths.length; i++) {
-      await addUpload(paths[i], names[i], configMaps[i]);
-    }
-  }
-
-  List<UploadTask?> getBatchUploads(List<String> paths, List<String> names) {
-    return names.map((e) => _cache[e]).toList();
-  }
-
-  Future<void> pauseBatchUploads(List<String> paths, List<String> names) async {
-    for (var i = 0; i < paths.length; i++) {
-      await pauseUpload(paths[i], names[i]);
-    }
-  }
-
-  Future<void> cancelBatchUploads(List<String> paths, List<String> names) async {
-    for (var i = 0; i < paths.length; i++) {
-      await cancelUpload(paths[i], names[i]);
-    }
-  }
-
-  Future<void> resumeBatchUploads(List<String> paths, List<String> names) async {
-    for (var i = 0; i < paths.length; i++) {
-      await resumeUpload(paths[i], names[i]);
-    }
-  }
-
-  ValueNotifier<double> getBatchUploadProgress(List<String> paths, List<String> names) {
-    ValueNotifier<double> progress = ValueNotifier(0);
-    var total = paths.length;
-
-    if (total == 0) {
-      return progress;
-    }
-
-    if (total == 1) {
-      return getUpload(names.first)?.progress ?? progress;
-    }
-
-    var progressMap = <String, double>{};
-
-    for (var i = 0; i < paths.length; i++) {
-      UploadTask? task = getUpload(names[i]);
-      if (task != null) {
-        progressMap[paths[i]] = 0.0;
-        if (task.status.value.isCompleted) {
-          progressMap[paths[i]] = 1.0;
-          progress.value = progressMap.values.sum / total;
-        }
-
-        Null Function() progressListener;
-        progressListener = () {
-          progressMap[paths[i]] = task.progress.value;
-          progress.value = progressMap.values.sum / total;
-        };
-
-        task.progress.addListener(progressListener);
-        dynamic listener;
-        listener = () {
-          if (task.status.value.isCompleted) {
-            progressMap[paths[i]] = 1.0;
-            progress.value = progressMap.values.sum / total;
-            task.progress.removeListener(progressListener);
-            task.status.removeListener(listener);
-          }
-        };
-        task.status.addListener(listener);
-      } else {
-        total--;
-      }
-    }
-    return progress;
-  }
-
-  Future<List<UploadTask?>?> whenBatchUploadsComplete(List<String> paths, List<String> names,
-      {Duration timeout = const Duration(hours: 2)}) async {
-    var completer = Completer<List<UploadTask?>?>();
-    var completed = 0;
-    var total = paths.length;
-    for (var i = 0; i < paths.length; i++) {
-      UploadTask? task = getUpload(names[i]);
-
-      if (task != null) {
-        if (task.status.value.isCompleted) {
-          completed++;
-
-          if (completed == total) {
-            completer.complete(getBatchUploads(paths, names));
-          }
-        }
-
-        dynamic listener;
-        listener = () {
-          if (task.status.value.isCompleted) {
-            completed++;
-
-            if (completed == total) {
-              completer.complete(getBatchUploads(paths, names));
-              task.status.removeListener(listener);
-            }
-          }
-        };
-
-        task.status.addListener(listener);
-      } else {
-        total--;
-
-        if (total == 0) {
-          completer.complete(null);
-        }
-      }
-    }
-
-    return completer.future.timeout(timeout);
+    super.onUploadError(error, path, fileName);
   }
 }

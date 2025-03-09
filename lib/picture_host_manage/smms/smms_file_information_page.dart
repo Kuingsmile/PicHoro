@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:horopic/utils/common_functions.dart';
 
 class SmmsFileInformation extends StatefulWidget {
@@ -15,6 +16,76 @@ class SmmsFileInformationState extends State<SmmsFileInformation> {
     super.initState();
   }
 
+  void _copyToClipboard(String text) {
+    Clipboard.setData(ClipboardData(text: text));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('已复制到剪贴板'),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        duration: const Duration(seconds: 1),
+        action: SnackBarAction(
+          label: '关闭',
+          onPressed: () {
+            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoSection(String title, List<Widget> children) {
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+            child: Text(
+              title,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          ...children,
+          const SizedBox(height: 8),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoItem({
+    required String title,
+    required String value,
+    required IconData icon,
+    bool copyable = false,
+  }) {
+    return ListTile(
+      leading: Icon(icon, color: Theme.of(context).primaryColor),
+      title: Text(title),
+      subtitle: SelectableText(
+        value,
+        style: const TextStyle(fontSize: 15),
+      ),
+      trailing: copyable
+          ? IconButton(
+              icon: const Icon(Icons.copy, size: 20),
+              onPressed: () => _copyToClipboard(value),
+              tooltip: '复制',
+            )
+          : null,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -22,43 +93,97 @@ class SmmsFileInformationState extends State<SmmsFileInformation> {
         elevation: 0,
         centerTitle: true,
         title: titleText('文件基本信息'),
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withValues(alpha: 0.8)],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
+        ),
       ),
       body: ListView(
+        physics: const BouncingScrollPhysics(),
+        padding: const EdgeInsets.symmetric(vertical: 16.0),
         children: [
-          ListTile(
-            title: const Text('文件名称'),
-            subtitle: SelectableText(widget.fileMap['filename']),
+          _buildInfoSection(
+            '基本信息',
+            [
+              _buildInfoItem(
+                title: '文件名称',
+                value: widget.fileMap['filename'],
+                icon: Icons.insert_drive_file,
+                copyable: true,
+              ),
+              const Divider(height: 1, indent: 56),
+              _buildInfoItem(
+                title: '文件存储名',
+                value: widget.fileMap['storename'],
+                icon: Icons.storage,
+                copyable: true,
+              ),
+              const Divider(height: 1, indent: 56),
+              _buildInfoItem(
+                title: '文件大小',
+                value: getFileSize(widget.fileMap['size']),
+                icon: Icons.data_usage,
+              ),
+            ],
           ),
-          ListTile(
-            title: const Text('文件存储名'),
-            subtitle: SelectableText(widget.fileMap['storename']),
+          _buildInfoSection(
+            '图像属性',
+            [
+              _buildInfoItem(
+                title: '图片宽度',
+                value: widget.fileMap['width'].toString(),
+                icon: Icons.width_normal,
+              ),
+              const Divider(height: 1, indent: 56),
+              _buildInfoItem(
+                title: '图片高度',
+                value: widget.fileMap['height'].toString(),
+                icon: Icons.height,
+              ),
+            ],
           ),
-          ListTile(
-            title: const Text('文件大小'),
-            subtitle: SelectableText(getFileSize(widget.fileMap['size'])),
+          _buildInfoSection(
+            '时间信息',
+            [
+              _buildInfoItem(
+                title: '文件创建时间',
+                value: widget.fileMap['created_at'],
+                icon: Icons.access_time,
+              ),
+            ],
           ),
-          ListTile(
-            title: const Text('图片宽度'),
-            subtitle: SelectableText(widget.fileMap['width'].toString()),
+          _buildInfoSection(
+            '访问链接',
+            [
+              _buildInfoItem(
+                title: '文件页面',
+                value: widget.fileMap['page'],
+                icon: Icons.web,
+                copyable: true,
+              ),
+              const Divider(height: 1, indent: 56),
+              _buildInfoItem(
+                title: '文件链接',
+                value: widget.fileMap['url'],
+                icon: Icons.link,
+                copyable: true,
+              ),
+            ],
           ),
-          ListTile(
-            title: const Text('图片高度'),
-            subtitle: SelectableText(widget.fileMap['height'].toString()),
-          ),
-          ListTile(
-            title: const Text('文件页面'),
-            subtitle: SelectableText(widget.fileMap['page']),
-          ),
-          ListTile(
-            isThreeLine: true,
-            title: const Text('文件创建时间'),
-            subtitle: SelectableText(widget.fileMap['created_at']),
-          ),
-          ListTile(
-            title: const Text('文件链接'),
-            subtitle: SelectableText(widget.fileMap['url']),
-          ),
+          const SizedBox(height: 16),
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          _copyToClipboard(widget.fileMap['url']);
+        },
+        tooltip: '复制图片链接',
+        child: const Icon(Icons.content_copy),
       ),
     );
   }

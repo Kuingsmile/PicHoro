@@ -38,7 +38,7 @@ class ChangeThemeState extends State<ChangeTheme> {
               end: Alignment.bottomRight,
               colors: [
                 themeColor[key],
-                themeColor[key].withOpacity(0.7),
+                themeColor[key].withValues(alpha: 0.7),
               ],
             ),
             borderRadius: BorderRadius.circular(16),

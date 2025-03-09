@@ -43,6 +43,7 @@ class AlistConfigState extends State<AlistConfig> {
       Map configMap = await AlistManageAPI.getConfigMap();
       _hostController.text = configMap['host'] ?? '';
       _currentJWT = configMap['token'] ?? '';
+      _isAnonymous = configMap['token'] == '' ? true : false;
       setControllerText(_adminTokenController, configMap['adminToken']);
       setControllerText(_alistusernameController, configMap['alistusername']);
       setControllerText(_passwordController, configMap['password']);
@@ -171,7 +172,8 @@ class AlistConfigState extends State<AlistConfig> {
                   title: '保存设置',
                   icon: Icons.save,
                   onTap: () {
-                    if (_formKey.currentState!.validate()) {
+                    final isValid = _formKey.currentState!.validate();
+                    if (isValid) {
                       showDialog(
                           context: context,
                           barrierDismissible: false,
@@ -260,127 +262,137 @@ class AlistConfigState extends State<AlistConfig> {
   }
 
   Future<void> _saveAlistConfig() async {
-    String host = _hostController.text.trim();
-    host = host.replaceAll(RegExp(r'/+$'), '');
+    return Future.microtask(() async {
+      // Format and validate input fields
+      String host = _formatHost(_hostController.text);
+      String uploadPath = _formatPath(_uploadPathController.text, 'None');
+      String customUrl = _formatPath(_customUrlController.text, 'None');
+      String webPath = _formatWebPath(_alistWebpathController.text);
+      String adminToken = _formatToken(_adminTokenController.text);
+      final alistusername = _alistusernameController.text.trim();
+      final password = _passwordController.text.trim();
+      String token = '';
+
+      // Handle anonymous mode
+      if (_isAnonymous) {
+        await saveConfigHelper(host, 'None', 'None', 'None', '', uploadPath, webPath, customUrl);
+        if (!mounted) return;
+        setState(() {});
+        showToast('保存成功');
+        return;
+      }
+
+      // Try using admin token if available
+      if (adminToken != 'None') {
+        _currentJWT = adminToken;
+        await saveConfigHelper(host, adminToken, alistusername, password, adminToken, uploadPath, webPath, customUrl);
+        if (!mounted) return;
+        setState(() {});
+        if (context.mounted) {
+          return showCupertinoAlertDialog(
+              context: context,
+              barrierDismissible: false,
+              title: '配置成功',
+              content: '您的密钥为：\n$adminToken,\n请妥善保管，不要泄露给他人');
+        }
+        return;
+      }
+
+      try {
+        // Try username/password authentication
+        if (alistusername.isNotEmpty && password.isNotEmpty) {
+          var res = await AlistManageAPI.getToken(host, alistusername, password);
+          if (res[0] == 'success') {
+            token = res[1];
+            _currentJWT = token;
+            await saveConfigHelper(host, 'None', alistusername, password, token, uploadPath, webPath, customUrl);
+            if (!mounted) return;
+            setState(() {});
+            if (context.mounted) {
+              return showCupertinoAlertDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  title: '配置成功',
+                  content: '您的密钥为：\n$token,\n请妥善保管，不要泄露给他人');
+            }
+            return;
+          }
+          showToast('获取token失败');
+          return;
+        }
+
+        // Try using existing token
+        if (_currentJWT.isNotEmpty) {
+          await _validateAndSaveExistingToken(host, uploadPath, webPath, customUrl);
+          return;
+        }
+
+        showToast('请提供有效的身份验证信息');
+      } catch (e) {
+        FLog.error(
+            className: 'AlistConfigPage',
+            methodName: '_saveAlistConfig',
+            text: formatErrorMessage({}, e.toString()),
+            dataLogType: DataLogType.ERRORS.toString());
+        if (context.mounted) {
+          showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
+        }
+      }
+    });
+  }
+
+  String _formatHost(String value) {
+    String host = value.trim().replaceAll(RegExp(r'/+$'), '');
     if (!host.startsWith('http://') && !host.startsWith('https://')) {
       host = 'http://$host';
     }
+    return host;
+  }
 
-    String uploadPath = _uploadPathController.text.trim();
-    if (uploadPath.isEmpty || uploadPath == '/') {
-      uploadPath = 'None';
+  String _formatPath(String value, String defaultValue) {
+    String path = value.trim();
+    return (path.isEmpty || path == '/') ? defaultValue : path.replaceAll(RegExp(r'/+$'), '');
+  }
+
+  String _formatWebPath(String value) {
+    String path = value.trim();
+    if (path.isEmpty) {
+      return 'None';
     }
+    return path.endsWith('/') ? path : '$path/';
+  }
 
-    String customUrl = _customUrlController.text.trim();
-    if (customUrl.isEmpty) {
-      customUrl = 'None';
-    } else {
-      customUrl = customUrl.replaceAll(RegExp(r'/+$'), '');
-    }
+  String _formatToken(String value) {
+    return value.trim().isEmpty ? 'None' : value.trim();
+  }
 
-    String webPath = _alistWebpathController.text.trim();
-    if (webPath.isEmpty) {
-      webPath = 'None';
-    } else {
-      if (!webPath.endsWith('/')) {
-        webPath = '$webPath/';
-      }
-    }
+  Future<void> _validateAndSaveExistingToken(String host, String uploadPath, String webPath, String customUrl) async {
+    BaseOptions options = setBaseOptions();
+    options.headers = {
+      "Content-type": "application/json",
+      "Authorization": _currentJWT,
+    };
 
-    String adminToken = _adminTokenController.text.trim();
-    if (adminToken.isEmpty) {
-      adminToken = 'None';
-    }
+    Dio dio = Dio(options);
+    var response = await dio.get('$host/api/admin/setting/list', queryParameters: {'group': 0});
 
-    final alistusername = _alistusernameController.text.trim();
-    final password = _passwordController.text.trim();
-    String token = '';
+    if (response.statusCode == 200 && response.data['message'] == 'success') {
+      Map configMap = await AlistManageAPI.getConfigMap();
+      await saveConfigHelper(
+          host, 'None', configMap['alistusername'], configMap['password'], _currentJWT, uploadPath, webPath, customUrl);
 
-    if (_isAnonymous) {
-      saveConfigHelper(host, 'None', 'None', 'None', '', uploadPath, webPath, customUrl);
+      if (!mounted) return;
       setState(() {});
-      showToast('保存成功');
-      return;
-    }
 
-    if (adminToken != 'None') {
-      token = adminToken;
-      _currentJWT = token;
-      saveConfigHelper(host, adminToken, alistusername, password, token, uploadPath, webPath, customUrl);
-      setState(() {});
       if (context.mounted) {
-        return showCupertinoAlertDialog(
-            context: context, barrierDismissible: false, title: '配置成功', content: '您的密钥为：\n$token,\n请妥善保管，不要泄露给他人');
-      }
-      return;
-    }
-
-    if (alistusername.isNotEmpty && password.isNotEmpty) {
-      try {
-        var res = await AlistManageAPI.getToken(host, alistusername, password);
-        if (res[0] == 'success') {
-          token = res[1];
-          _currentJWT = token;
-          saveConfigHelper(host, 'None', alistusername, password, token, uploadPath, webPath, customUrl);
-          setState(() {});
-          if (context.mounted) {
-            return showCupertinoAlertDialog(
-                context: context, barrierDismissible: false, title: '配置成功', content: '您的密钥为：\n$token,\n请妥善保管，不要泄露给他人');
-          }
-          return;
-        } else {
-          showToast('获取token失败');
-        }
-      } catch (e) {
-        FLog.error(
-            className: 'AlistConfigPage',
-            methodName: '_saveAlistConfig',
-            text: formatErrorMessage({}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-        if (context.mounted) {
-          return showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
-        }
-        return;
+        showCupertinoAlertDialog(
+            context: context,
+            barrierDismissible: false,
+            title: '配置成功',
+            content: '您的密钥为：\n$_currentJWT,\n请妥善保管，不要泄露给他人');
       }
     } else {
-      BaseOptions options = setBaseOptions();
-      Map<String, dynamic> query = {
-        'group': 0,
-      };
-      options.headers = {
-        "Content-type": "application/json",
-        "Authorization": _currentJWT,
-      };
-      Dio dio = Dio(options);
-      try {
-        var response = await dio.get('$host/api/admin/setting/list', queryParameters: query);
-        if (response.statusCode == 200 && response.data['message'] == 'success') {
-          Map configMap = await AlistManageAPI.getConfigMap();
-          saveConfigHelper(host, 'None', configMap['alistusername'], configMap['password'], _currentJWT, uploadPath,
-              webPath, customUrl);
-          setState(() {});
-          if (context.mounted) {
-            return showCupertinoAlertDialog(
-                context: context,
-                barrierDismissible: false,
-                title: '配置成功',
-                content: '您的密钥为：\n$_currentJWT,\n请妥善保管，不要泄露给他人');
-          }
-          return;
-        } else {
-          showToast('配置失败');
-        }
-      } catch (e) {
-        FLog.error(
-            className: 'AlistConfigPage',
-            methodName: '_saveAlistConfig',
-            text: formatErrorMessage({}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-        if (context.mounted) {
-          return showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
-        }
-        return;
-      }
+      showToast('配置失败');
     }
   }
 
@@ -409,7 +421,7 @@ class AlistConfigState extends State<AlistConfig> {
           "Authorization": configMap["token"],
           "Content-type": "application/json",
         };
-        String profileUrl = configMap["host"] + "/api/fs/list'";
+        String profileUrl = configMap["host"] + "/api/fs/list";
         Dio dio = Dio(options);
         var response = await dio.post(profileUrl, data: dataMap);
         if (response.statusCode == 200 && response.data['message'] == 'success') {

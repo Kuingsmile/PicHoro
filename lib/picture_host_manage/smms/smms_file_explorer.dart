@@ -110,6 +110,15 @@ class SmmsFileExplorerState extends loading_state.BaseLoadingPageState<SmmsFileE
   @override
   AppBar get appBar => AppBar(
         elevation: 0,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withValues(alpha: 0.8)],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
+        ),
         leading: IconButton(
           icon: const Icon(
             Icons.arrow_back_ios,
@@ -121,7 +130,7 @@ class SmmsFileExplorerState extends loading_state.BaseLoadingPageState<SmmsFileE
         ),
         titleSpacing: 0,
         title: titleText(
-          'SM.MS文件浏览',
+          '文件',
         ),
         actions: [
           PopupMenuButton(
@@ -613,13 +622,39 @@ class SmmsFileExplorerState extends loading_state.BaseLoadingPageState<SmmsFileE
             children: [
               Image.asset(
                 'assets/images/empty.png',
-                width: 100,
-                height: 100,
+                width: 120,
+                height: 120,
               ),
-              const Center(
-                  child: Text('没有文件哦，点击右上角添加吧\n刚上传的文件\n可能需要一段时间才能显示',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))))
+              const SizedBox(height: 20),
+              const Text(
+                '没有文件哦，点击右上角添加吧',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Color.fromARGB(136, 121, 118, 118),
+                  fontWeight: FontWeight.w500,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                '刚上传的文件\n可能需要一段时间才能显示',
+                style: TextStyle(fontSize: 14, color: Color.fromARGB(136, 121, 118, 118)),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton.icon(
+                onPressed: () {
+                  _onrefresh();
+                },
+                icon: const Icon(Icons.refresh),
+                label: const Text('刷新'),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                ),
+              ),
             ],
           ),
         ));
@@ -694,103 +729,197 @@ class SmmsFileExplorerState extends loading_state.BaseLoadingPageState<SmmsFileE
           itemCount: allInfoList.length,
           itemBuilder: (context, index) {
             return Container(
-              padding: const EdgeInsets.only(left: 10, right: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               child: Column(
                 children: [
                   Slidable(
-                      direction: Axis.horizontal,
-                      endActionPane: ActionPane(
-                        motion: const ScrollMotion(),
-                        children: [
-                          SlidableAction(
-                            onPressed: (BuildContext context) {
-                              String shareUrl = allInfoList[index]['url'];
-                              Share.share(shareUrl);
-                            },
-                            autoClose: true,
-                            padding: EdgeInsets.zero,
-                            backgroundColor: const Color.fromARGB(255, 109, 196, 116),
-                            foregroundColor: Colors.white,
-                            icon: Icons.share,
-                            label: '分享',
+                    direction: Axis.horizontal,
+                    endActionPane: ActionPane(
+                      motion: const ScrollMotion(),
+                      children: [
+                        SlidableAction(
+                          onPressed: (BuildContext context) {
+                            String shareUrl = allInfoList[index]['url'];
+                            Share.share(shareUrl);
+                          },
+                          autoClose: true,
+                          padding: EdgeInsets.zero,
+                          backgroundColor: const Color.fromARGB(255, 109, 196, 116),
+                          foregroundColor: Colors.white,
+                          icon: Icons.share,
+                          label: '分享',
+                          borderRadius: const BorderRadius.only(
+                            topLeft: Radius.circular(12),
+                            bottomLeft: Radius.circular(12),
                           ),
-                          SlidableAction(
-                            onPressed: (BuildContext context) async {
-                              showCupertinoDialog(
-                                  barrierDismissible: true,
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return CupertinoAlertDialog(
-                                      title: const Text('通知'),
-                                      content: Text('确定要删除${allInfoList[index]['filename']}吗？'),
-                                      actions: <Widget>[
-                                        CupertinoDialogAction(
-                                          child: const Text('取消', style: TextStyle(color: Colors.blue)),
-                                          onPressed: () {
-                                            Navigator.pop(context);
-                                          },
-                                        ),
-                                        CupertinoDialogAction(
-                                          child: const Text('确定', style: TextStyle(color: Colors.blue)),
-                                          onPressed: () async {
-                                            Navigator.pop(context);
-                                            var result = await SmmsManageAPI.deleteFile(allInfoList[index]['hash']);
-                                            if (result[0] == 'success') {
-                                              showToast('删除成功');
-                                              setState(() {
-                                                allInfoList.removeAt(index);
-                                                selectedFilesBool.removeAt(index);
-                                              });
-                                            } else {
-                                              showToast('删除失败');
-                                            }
-                                          },
-                                        ),
-                                      ],
-                                    );
-                                  });
-                            },
-                            backgroundColor: const Color(0xFFFE4A49),
-                            foregroundColor: Colors.white,
-                            icon: Icons.delete,
-                            label: '删除',
+                        ),
+                        SlidableAction(
+                          onPressed: (BuildContext context) async {
+                            showCupertinoDialog(
+                                barrierDismissible: true,
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return CupertinoAlertDialog(
+                                    title: const Text('通知'),
+                                    content: Text('确定要删除${allInfoList[index]['filename']}吗？'),
+                                    actions: <Widget>[
+                                      CupertinoDialogAction(
+                                        child: const Text('取消', style: TextStyle(color: Colors.blue)),
+                                        onPressed: () {
+                                          Navigator.pop(context);
+                                        },
+                                      ),
+                                      CupertinoDialogAction(
+                                        child: const Text('确定', style: TextStyle(color: Colors.blue)),
+                                        onPressed: () async {
+                                          Navigator.pop(context);
+                                          var result = await SmmsManageAPI.deleteFile(allInfoList[index]['hash']);
+                                          if (result[0] == 'success') {
+                                            showToast('删除成功');
+                                            setState(() {
+                                              allInfoList.removeAt(index);
+                                              selectedFilesBool.removeAt(index);
+                                            });
+                                          } else {
+                                            showToast('删除失败');
+                                          }
+                                        },
+                                      ),
+                                    ],
+                                  );
+                                });
+                          },
+                          backgroundColor: const Color(0xFFFE4A49),
+                          foregroundColor: Colors.white,
+                          icon: Icons.delete,
+                          label: '删除',
+                          borderRadius: const BorderRadius.only(
+                            topRight: Radius.circular(12),
+                            bottomRight: Radius.circular(12),
                           ),
-                        ],
+                        ),
+                      ],
+                    ),
+                    child: Card(
+                      elevation: 0.5,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        side: BorderSide(
+                          color: selectedFilesBool[index]
+                              ? Theme.of(context).primaryColor.withValues(alpha: 0.5)
+                              : Colors.transparent,
+                          width: 1.5,
+                        ),
                       ),
-                      child: Stack(fit: StackFit.loose, children: [
-                        Container(
-                          color: selectedFilesBool[index] ? const Color(0x311192F3) : Colors.transparent,
-                          child: ListTile(
+                      color: selectedFilesBool[index]
+                          ? Theme.of(context).primaryColor.withValues(alpha: 0.1)
+                          : Theme.of(context).cardColor,
+                      child: Stack(
+                        fit: StackFit.loose,
+                        children: [
+                          ListTile(
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                             minLeadingWidth: 0,
                             minVerticalPadding: 0,
-                            leading: SizedBox(
-                              width: 50,
-                              height: 50,
-                              child: iconImageLoad(index),
+                            leading: Container(
+                              width: 56,
+                              height: 56,
+                              padding: const EdgeInsets.all(2),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: Colors.grey.withValues(alpha: 0.3),
+                                  width: 1,
+                                ),
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(6),
+                                child: iconImageLoad(index),
+                              ),
                             ),
                             title: Text(
-                                allInfoList[index]['filename'].length > 20
-                                    ? allInfoList[index]['filename'].substring(0, 10) +
-                                        '...${allInfoList[index]['filename'].substring(allInfoList[index]['filename'].length - 10)}'
-                                    : allInfoList[index]['filename'],
-                                style: const TextStyle(fontSize: 14)),
-                            subtitle: Text(
-                              '${allInfoList[index]['created_at']}   ${getFileSize(allInfoList[index]['size'])}',
-                              style: const TextStyle(fontSize: 12),
+                              allInfoList[index]['filename'].length > 20
+                                  ? allInfoList[index]['filename'].substring(0, 10) +
+                                      '...${allInfoList[index]['filename'].substring(allInfoList[index]['filename'].length - 10)}'
+                                  : allInfoList[index]['filename'],
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w500,
+                                color: Theme.of(context).textTheme.titleLarge?.color,
+                              ),
                             ),
-                            trailing: IconButton(
-                              icon: const Icon(Icons.more_horiz),
-                              onPressed: () {
-                                showModalBottomSheet(
-                                    isScrollControlled: true,
-                                    context: context,
-                                    builder: (context) {
-                                      return buildBottomSheetWidget(
-                                        context,
-                                        index,
-                                      );
-                                    });
-                              },
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const SizedBox(height: 4),
+                                Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.access_time_outlined,
+                                      size: 14,
+                                      color: Colors.grey,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      allInfoList[index]['created_at'],
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        color: Colors.grey[600],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 2),
+                                Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.file_copy_outlined,
+                                      size: 14,
+                                      color: Colors.grey,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      getFileSize(allInfoList[index]['size']),
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        color: Colors.grey[600],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                            trailing: Container(
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).cardColor,
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.05),
+                                    spreadRadius: 1,
+                                    blurRadius: 3,
+                                    offset: const Offset(0, 1),
+                                  ),
+                                ],
+                              ),
+                              child: IconButton(
+                                icon: const Icon(
+                                  Icons.more_horiz,
+                                  color: Colors.blueGrey,
+                                ),
+                                onPressed: () {
+                                  showModalBottomSheet(
+                                      isScrollControlled: true,
+                                      backgroundColor: Colors.transparent,
+                                      context: context,
+                                      builder: (context) {
+                                        return buildBottomSheetWidget(
+                                          context,
+                                          index,
+                                        );
+                                      });
+                                },
+                              ),
                             ),
                             onTap: () async {
                               String urlList = '';
@@ -803,39 +932,49 @@ class SmmsFileExplorerState extends loading_state.BaseLoadingPageState<SmmsFileE
                                   '${Routes.albumImagePreview}?index=$index&images=${Uri.encodeComponent(urlList)}',
                                   transition: TransitionType.none);
                             },
+                            onLongPress: () {
+                              setState(() {
+                                selectedFilesBool[index] = !selectedFilesBool[index];
+                              });
+                            },
                           ),
-                        ),
-                        Positioned(
-                          // ignore: sort_child_properties_last
-                          child: Container(
-                            decoration: const BoxDecoration(
-                                borderRadius: BorderRadius.all(Radius.circular(55)),
-                                color: Color.fromARGB(255, 235, 242, 248)),
-                            padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-                            child: MSHCheckbox(
-                              colorConfig: MSHColorConfig.fromCheckedUncheckedDisabled(
-                                  checkedColor: Colors.blue, uncheckedColor: Colors.blue, disabledColor: Colors.blue),
-                              size: 16,
-                              value: selectedFilesBool[index],
-                              style: MSHCheckboxStyle.fillScaleCheck,
-                              onChanged: (selected) {
-                                setState(() {
-                                  if (selected) {
-                                    selectedFilesBool[index] = true;
-                                  } else {
-                                    selectedFilesBool[index] = false;
-                                  }
-                                });
-                              },
+                          Positioned(
+                            left: 2,
+                            top: 2,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                borderRadius: const BorderRadius.all(Radius.circular(55)),
+                                color: Theme.of(context).scaffoldBackgroundColor,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.1),
+                                    spreadRadius: 1,
+                                    blurRadius: 2,
+                                  ),
+                                ],
+                              ),
+                              padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+                              child: MSHCheckbox(
+                                colorConfig: MSHColorConfig.fromCheckedUncheckedDisabled(
+                                  checkedColor: Theme.of(context).primaryColor,
+                                  uncheckedColor: Colors.grey,
+                                  disabledColor: Colors.grey.withValues(alpha: 0.5),
+                                ),
+                                size: 18,
+                                value: selectedFilesBool[index],
+                                style: MSHCheckboxStyle.fillScaleCheck,
+                                onChanged: (selected) {
+                                  setState(() {
+                                    selectedFilesBool[index] = selected;
+                                  });
+                                },
+                              ),
                             ),
                           ),
-                          left: 0,
-                          top: 25,
-                        ),
-                      ])),
-                  const Divider(
-                    height: 1,
-                  )
+                        ],
+                      ),
+                    ),
+                  ),
                 ],
               ),
             );
@@ -851,12 +990,11 @@ class SmmsFileExplorerState extends loading_state.BaseLoadingPageState<SmmsFileE
         allInfoList[index]['url'],
         clearMemoryCacheIfFailed: true,
         retries: 5,
-        height: 30,
-        fit: BoxFit.fill,
+        height: 50,
+        width: 50,
+        fit: BoxFit.cover,
         cache: true,
-        border: Border.all(color: Colors.transparent, width: 2),
-        borderRadius: const BorderRadius.all(Radius.circular(8)),
-        loadStateChanged: (state) => defaultLoadStateChanged(state, iconSize: 30),
+        loadStateChanged: (state) => defaultLoadStateChanged(state, iconSize: 50),
       );
     } catch (e) {
       FLog.error(
@@ -876,8 +1014,8 @@ class SmmsFileExplorerState extends loading_state.BaseLoadingPageState<SmmsFileE
       }
       return Image.asset(
         iconPath,
-        width: 30,
-        height: 30,
+        width: 50,
+        height: 50,
       );
     }
   }
@@ -886,52 +1024,102 @@ class SmmsFileExplorerState extends loading_state.BaseLoadingPageState<SmmsFileE
     BuildContext context,
     int index,
   ) {
-    return SingleChildScrollView(
+    return Container(
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(16),
+          topRight: Radius.circular(16),
+        ),
+      ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          ListTile(
-            leading: iconImageLoad(index),
-            visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
-            minLeadingWidth: 0,
-            title: Text(
-                allInfoList[index]['filename'].length > 20
-                    ? allInfoList[index]['filename'].substring(0, 10) +
-                        '...${allInfoList[index]['filename'].substring(allInfoList[index]['filename'].length - 10)}'
-                    : allInfoList[index]['filename'],
-                style: const TextStyle(fontSize: 14)),
-            subtitle: Text(
-              '${allInfoList[index]['created_at']}   ${getFileSize(allInfoList[index]['size'])}',
-              style: const TextStyle(fontSize: 12),
+          Container(
+            height: 6,
+            width: 40,
+            margin: const EdgeInsets.symmetric(vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.grey[300],
+              borderRadius: BorderRadius.circular(3),
             ),
           ),
-          const Divider(
-            height: 0.1,
-            color: Color.fromARGB(255, 230, 230, 230),
-          ),
-          ListTile(
-              leading: const Icon(
-                Icons.info_outline_rounded,
-                color: Color.fromARGB(255, 97, 141, 236),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(
+                  color: Colors.grey[200]!,
+                  width: 1,
+                ),
               ),
-              minLeadingWidth: 0,
-              title: const Text('文件详情'),
-              onTap: () async {
-                Navigator.pop(context);
-                Application.router.navigateTo(context,
-                    '${Routes.smmsFileInformation}?fileMap=${Uri.encodeComponent(jsonEncode(allInfoList[index]))}',
-                    transition: TransitionType.cupertino);
-              }),
-          const Divider(
-            height: 0.1,
-            color: Color.fromARGB(255, 230, 230, 230),
-          ),
-          ListTile(
-            leading: const Icon(
-              Icons.link_rounded,
-              color: Color.fromARGB(255, 97, 141, 236),
             ),
-            minLeadingWidth: 0,
-            title: const Text('复制链接(设置中的默认格式)'),
+            child: Row(
+              children: [
+                Container(
+                  width: 60,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.grey.withValues(alpha: 0.3)),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(7),
+                    child: iconImageLoad(index),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        allInfoList[index]['filename'].length > 25
+                            ? allInfoList[index]['filename'].substring(0, 12) +
+                                '...${allInfoList[index]['filename'].substring(allInfoList[index]['filename'].length - 12)}'
+                            : allInfoList[index]['filename'],
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '${allInfoList[index]['created_at']}',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        getFileSize(allInfoList[index]['size']),
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          _buildActionTile(
+            icon: Icons.info_outline_rounded,
+            iconColor: const Color.fromARGB(255, 97, 141, 236),
+            title: '文件详情',
+            onTap: () async {
+              Navigator.pop(context);
+              Application.router.navigateTo(context,
+                  '${Routes.smmsFileInformation}?fileMap=${Uri.encodeComponent(jsonEncode(allInfoList[index]))}',
+                  transition: TransitionType.cupertino);
+            },
+          ),
+          _buildActionTile(
+            icon: Icons.link_rounded,
+            iconColor: const Color.fromARGB(255, 97, 141, 236),
+            title: '复制链接(设置中的默认格式)',
             onTap: () async {
               String format = Global.getLKformat();
               String shareUrl = allInfoList[index]['url'];
@@ -944,17 +1132,20 @@ class SmmsFileExplorerState extends loading_state.BaseLoadingPageState<SmmsFileE
               showToast('复制完毕');
             },
           ),
-          const Divider(
-            height: 0.1,
-            color: Color.fromARGB(255, 230, 230, 230),
+          _buildActionTile(
+            icon: Icons.share,
+            iconColor: const Color.fromARGB(255, 76, 175, 80),
+            title: '分享链接',
+            onTap: () {
+              Navigator.pop(context);
+              String shareUrl = allInfoList[index]['url'];
+              Share.share(shareUrl);
+            },
           ),
-          ListTile(
-            leading: const Icon(
-              Icons.delete_outline,
-              color: Color.fromARGB(255, 240, 85, 131),
-            ),
-            minLeadingWidth: 0,
-            title: const Text('删除'),
+          _buildActionTile(
+            icon: Icons.delete_outline,
+            iconColor: const Color.fromARGB(255, 240, 85, 131),
+            title: '删除文件',
             onTap: () async {
               Navigator.pop(context);
               showCupertinoDialog(
@@ -993,8 +1184,43 @@ class SmmsFileExplorerState extends loading_state.BaseLoadingPageState<SmmsFileE
               );
             },
           ),
+          const SizedBox(height: 12),
         ],
       ),
+    );
+  }
+
+  Widget _buildActionTile({
+    required IconData icon,
+    required Color iconColor,
+    required String title,
+    required VoidCallback onTap,
+  }) {
+    return ListTile(
+      leading: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: iconColor.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Icon(
+          icon,
+          color: iconColor,
+          size: 24,
+        ),
+      ),
+      title: Text(
+        title,
+        style: const TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      trailing: const Icon(
+        Icons.chevron_right,
+        color: Colors.grey,
+      ),
+      onTap: onTap,
     );
   }
 }

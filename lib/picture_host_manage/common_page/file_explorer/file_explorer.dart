@@ -46,6 +46,15 @@ class FileExplorerState extends State<FileExplorer> {
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withValues(alpha: 0.8)],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
+        ),
         leading: IconButton(
           icon: const Icon(
             Icons.arrow_back_ios,
