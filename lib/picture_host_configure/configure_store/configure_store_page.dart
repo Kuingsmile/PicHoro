@@ -163,7 +163,7 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
                           Expanded(
                             flex: 3,
                             child: SelectableText(
-                              values[i] == ConfigureTemplate.placeholder ? '未配置' : values[i],
+                              values[i] == ConfigureTemplate.placeholder ? '未配置' : values[i].toString(),
                               style: TextStyle(
                                 color: values[i] == ConfigureTemplate.placeholder ? Colors.grey : Colors.black87,
                               ),
@@ -301,6 +301,315 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
     return true;
   }
 
+  String checkPlaceholder(String? value) {
+    if (value == null || value == ConfigureTemplate.placeholder) {
+      return 'None';
+    }
+    return value;
+  }
+
+  Future<bool> applyConfigAsDefault(String hostType, Map psInfo) async {
+    try {
+      switch (hostType) {
+        case 'aliyun':
+          return await _applyAliyunConfig(psInfo);
+        case 'aws':
+          return await _applyAwsConfig(psInfo);
+        case 'ftp':
+          return await _applyFtpConfig(psInfo);
+        case 'github':
+          return await _applyGithubConfig(psInfo);
+        case 'imgur':
+          return await _applyImgurConfig(psInfo);
+        case 'lsky.pro':
+          return await _applyLskyConfig(psInfo);
+        case 'qiniu':
+          return await _applyQiniuConfig(psInfo);
+        case 'sm.ms':
+          return await _applySmmsConfig(psInfo);
+        case 'tencent':
+          return await _applyTencentConfig(psInfo);
+        case 'upyun':
+          return await _applyUpyunConfig(psInfo);
+        case 'alist':
+          return await _applyAlistConfig(psInfo);
+        case 'webdav':
+          return await _applyWebdavConfig(psInfo);
+        default:
+          showToast('未知图床类型');
+          return false;
+      }
+    } catch (e) {
+      FLog.error(
+          className: 'ConfigureStorePage',
+          methodName: 'applyConfigAsDefault',
+          text: formatErrorMessage({}, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
+      return false;
+    }
+  }
+
+  Future<bool> _applyAliyunConfig(Map psInfo) async {
+    String keyId = psInfo['keyId']!;
+    String keySecret = psInfo['keySecret']!;
+    String bucket = psInfo['bucket']!;
+    String area = psInfo['area']!;
+
+    if (!validateUndetermined([keyId, keySecret, bucket, area])) {
+      showToast('请先去设置参数');
+      return false;
+    }
+
+    String path = checkPlaceholder(psInfo['path']);
+    String customUrl = checkPlaceholder(psInfo['customUrl']);
+    String options = checkPlaceholder(psInfo['options']);
+
+    final config = AliyunConfigModel(keyId, keySecret, bucket, area, path, customUrl, options);
+    final configFile = await AliyunManageAPI.localFile;
+    await configFile.writeAsString(jsonEncode(config));
+    showToast('设置成功');
+    return true;
+  }
+
+  Future<bool> _applyAwsConfig(Map psInfo) async {
+    String accessKeyId = psInfo['accessKeyId']!;
+    String secretAccessKey = psInfo['secretAccessKey']!;
+    String bucket = psInfo['bucket']!;
+    String endpoint = psInfo['endpoint']!;
+
+    if (!validateUndetermined([accessKeyId, secretAccessKey, bucket, endpoint])) {
+      showToast('请先去设置参数');
+      return false;
+    }
+
+    String region = checkPlaceholder(psInfo['region']);
+    String uploadPath = checkPlaceholder(psInfo['uploadPath']);
+    String customUrl = checkPlaceholder(psInfo['customUrl']);
+    bool isS3PathStyle = psInfo['isS3PathStyle'] ?? false;
+    bool isEnableSSL = psInfo['isEnableSSL'] ?? true;
+
+    final config = AwsConfigModel(
+        accessKeyId, secretAccessKey, bucket, endpoint, region, uploadPath, customUrl, isS3PathStyle, isEnableSSL);
+    final configFile = await AwsManageAPI.localFile;
+    await configFile.writeAsString(jsonEncode(config));
+    showToast('设置成功');
+    return true;
+  }
+
+  Future<bool> _applyFtpConfig(Map psInfo) async {
+    String ftpHost = psInfo['ftpHost']!;
+    String ftpPort = psInfo['ftpPort']!;
+    String ftpType = psInfo['ftpType']!;
+    String isAnonymous = psInfo['isAnonymous']!.toString();
+
+    if (!validateUndetermined([ftpHost, ftpPort, ftpType, isAnonymous])) {
+      showToast('请先去设置参数');
+      return false;
+    }
+
+    String ftpUser = checkPlaceholder(psInfo['ftpUser']);
+    String ftpPassword = checkPlaceholder(psInfo['ftpPassword']);
+    String uploadPath = checkPlaceholder(psInfo['uploadPath']);
+    String ftpHomeDir = checkPlaceholder(psInfo['ftpHomeDir']);
+    String ftpCustomUrl = checkPlaceholder(psInfo['ftpCustomUrl']);
+    String ftpWebPath = checkPlaceholder(psInfo['ftpWebPath']);
+
+    final config = FTPConfigModel(
+        ftpHost, ftpPort, ftpUser, ftpPassword, ftpType, isAnonymous, uploadPath, ftpHomeDir, ftpCustomUrl, ftpWebPath);
+    final configFile = await FTPManageAPI.localFile;
+    await configFile.writeAsString(jsonEncode(config));
+    showToast('设置成功');
+    return true;
+  }
+
+  Future<bool> _applyGithubConfig(Map psInfo) async {
+    String githubusername = psInfo['githubusername']!;
+    String repo = psInfo['repo']!;
+    String token = psInfo['token']!;
+    String storePath = psInfo['storePath']!;
+    String branch = psInfo['branch']!;
+    String customDomain = psInfo['customDomain']!;
+
+    if (!validateUndetermined([githubusername, repo, token, branch])) {
+      showToast('请先去设置参数');
+      return false;
+    }
+
+    storePath = checkPlaceholder(storePath);
+    customDomain = checkPlaceholder(customDomain);
+
+    final config = GithubConfigModel(githubusername, repo, token, storePath, branch, customDomain);
+    final configFile = await GithubManageAPI.localFile;
+    await configFile.writeAsString(jsonEncode(config));
+    showToast('设置成功');
+    return true;
+  }
+
+  Future<bool> _applyImgurConfig(Map psInfo) async {
+    String clientId = psInfo['clientId']!;
+    String proxy = psInfo['proxy']!;
+
+    if (!validateUndetermined([clientId])) {
+      showToast('请先去设置参数');
+      return false;
+    }
+
+    proxy = checkPlaceholder(proxy);
+
+    final config = ImgurConfigModel(clientId, proxy);
+    final configFile = await ImgurManageAPI.localFile;
+    await configFile.writeAsString(jsonEncode(config));
+    showToast('设置成功');
+    return true;
+  }
+
+  Future<bool> _applyLskyConfig(Map psInfo) async {
+    String host = psInfo['host']!;
+    String token = psInfo['token']!;
+    String strategyId = psInfo['strategy_id']!.toString();
+    String albumId = psInfo['album_id']!.toString();
+
+    if (!validateUndetermined([host, token, strategyId])) {
+      showToast('请先去设置参数');
+      return false;
+    }
+
+    albumId = checkPlaceholder(albumId);
+
+    final config = HostConfigModel(host, token, strategyId, albumId);
+    final configFile = await LskyproManageAPI.localFile;
+    await configFile.writeAsString(jsonEncode(config));
+    showToast('设置成功');
+    return true;
+  }
+
+  Future<bool> _applyQiniuConfig(Map psInfo) async {
+    String accessKey = psInfo['accessKey']!;
+    String secretKey = psInfo['secretKey']!;
+    String bucket = psInfo['bucket']!;
+    String url = psInfo['url']!;
+    String area = psInfo['area']!;
+
+    if (!validateUndetermined([accessKey, secretKey, bucket, url, area])) {
+      showToast('请先去设置参数');
+      return false;
+    }
+
+    String options = checkPlaceholder(psInfo['options']);
+    String path = checkPlaceholder(psInfo['path']);
+
+    final config = QiniuConfigModel(accessKey, secretKey, bucket, url, area, options, path);
+    final configFile = await QiniuManageAPI.localFile;
+    await configFile.writeAsString(jsonEncode(config));
+    showToast('设置成功');
+    return true;
+  }
+
+  Future<bool> _applySmmsConfig(Map psInfo) async {
+    String token = psInfo['token']!;
+
+    if (!validateUndetermined([token])) {
+      showToast('请先去设置参数');
+      return false;
+    }
+
+    final config = SmmsConfigModel(token);
+    final configFile = await SmmsManageAPI.localFile;
+    await configFile.writeAsString(jsonEncode(config));
+    showToast('设置成功');
+    return true;
+  }
+
+  Future<bool> _applyTencentConfig(Map psInfo) async {
+    String secretId = psInfo['secretId']!;
+    String secretKey = psInfo['secretKey']!;
+    String bucket = psInfo['bucket']!;
+    String appId = psInfo['appId']!;
+    String area = psInfo['area']!;
+
+    if (!validateUndetermined([secretId, secretKey, bucket, appId, area])) {
+      showToast('请先去设置参数');
+      return false;
+    }
+
+    String path = checkPlaceholder(psInfo['path']);
+    String customUrl = checkPlaceholder(psInfo['customUrl']);
+    String options = checkPlaceholder(psInfo['options']);
+
+    final config = TencentConfigModel(secretId, secretKey, bucket, appId, area, path, customUrl, options);
+    final configFile = await TencentManageAPI.localFile;
+    await configFile.writeAsString(jsonEncode(config));
+    showToast('设置成功');
+    return true;
+  }
+
+  Future<bool> _applyUpyunConfig(Map psInfo) async {
+    String bucket = psInfo['bucket']!;
+    String operator = psInfo['operator']!;
+    String password = psInfo['password']!;
+    String url = psInfo['url']!;
+
+    if (!validateUndetermined([bucket, operator, password, url])) {
+      showToast('请先去设置参数');
+      return false;
+    }
+
+    String options = checkPlaceholder(psInfo['options']);
+    String path = checkPlaceholder(psInfo['path']);
+    String antiLeechToken = checkPlaceholder(psInfo['antiLeechToken']);
+    String antiLeechType = checkPlaceholder(psInfo['antiLeechType']);
+
+    final config = UpyunConfigModel(bucket, operator, password, url, options, path, antiLeechToken, antiLeechType);
+    final configFile = await UpyunManageAPI.localFile;
+    await configFile.writeAsString(jsonEncode(config));
+    showToast('设置成功');
+    return true;
+  }
+
+  Future<bool> _applyAlistConfig(Map psInfo) async {
+    String host = psInfo['host'];
+
+    if (!validateUndetermined([host])) {
+      showToast('请先去设置参数');
+      return false;
+    }
+
+    String adminToken = checkPlaceholder(psInfo['adminToken']);
+    String alistusername = checkPlaceholder(psInfo['alistusername']);
+    String password = checkPlaceholder(psInfo['password']);
+    String token = checkPlaceholder(psInfo['token']);
+    String uploadPath = checkPlaceholder(psInfo['uploadPath']);
+    String webPath = checkPlaceholder(psInfo['webPath']);
+    String customUrl = checkPlaceholder(psInfo['customUrl']);
+
+    final config = AlistConfigModel(host, adminToken, alistusername, password, token, uploadPath, webPath, customUrl);
+    final configFile = await AlistManageAPI.localFile;
+    await configFile.writeAsString(jsonEncode(config));
+    showToast('设置成功');
+    return true;
+  }
+
+  Future<bool> _applyWebdavConfig(Map psInfo) async {
+    String host = psInfo['host']!;
+    String webdavusername = psInfo['webdavusername']!;
+    String password = psInfo['password']!;
+
+    if (!validateUndetermined([host, webdavusername, password])) {
+      showToast('请先去设置参数');
+      return false;
+    }
+
+    String uploadPath = checkPlaceholder(psInfo['uploadPath']);
+    String customUrl = checkPlaceholder(psInfo['customUrl']);
+    String webPath = checkPlaceholder(psInfo['webPath']);
+
+    final config = WebdavConfigModel(host, webdavusername, password, uploadPath, customUrl, webPath);
+    final configFile = await WebdavManageAPI.localFile;
+    await configFile.writeAsString(jsonEncode(config));
+    showToast('设置成功');
+    return true;
+  }
+
   Widget buildBottomSheetWidget(BuildContext context, String storeName, Map psInfo) {
     String remarkName = psInfo['remarkName']!;
     bool isConfigured = !ConfigureStoreFile().checkIfOneUndetermined(psInfo);
@@ -381,526 +690,20 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
             ),
             const Divider(),
             ListTile(
-                leading: const Icon(
-                  Icons.check_box_outlined,
-                  color: Color.fromARGB(255, 97, 141, 236),
-                ),
-                minLeadingWidth: 0,
-                title: const Text('替代图床默认配置'),
-                trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                onTap: () async {
-                  if (widget.psHost == 'aliyun') {
-                    try {
-                      String keyId = psInfo['keyId']!;
-                      String keySecret = psInfo['keySecret']!;
-                      String bucket = psInfo['bucket']!;
-                      String area = psInfo['area']!;
-                      String path = psInfo['path']!;
-                      String customUrl = psInfo['customUrl']!;
-                      String options = psInfo['options']!;
-                      bool valid = validateUndetermined([
-                        keyId,
-                        keySecret,
-                        bucket,
-                        area,
-                      ]);
-                      if (!valid) {
-                        showToast('请先去设置参数');
-                        return;
-                      }
-                      if (path == ConfigureTemplate.placeholder) {
-                        path = 'None';
-                      }
-                      if (customUrl == ConfigureTemplate.placeholder) {
-                        customUrl = 'None';
-                      }
-                      if (options == ConfigureTemplate.placeholder) {
-                        options = 'None';
-                      }
-
-                      final aliyunConfig = AliyunConfigModel(keyId, keySecret, bucket, area, path, customUrl, options);
-                      final aliyunConfigJson = jsonEncode(aliyunConfig);
-                      final aliyunConfigFile = await AliyunManageAPI.localFile;
-                      await aliyunConfigFile.writeAsString(aliyunConfigJson);
-                      return showToast('设置成功');
-                    } catch (e) {
-                      FLog.error(
-                          className: 'AliyunConfigureStorePage',
-                          methodName: 'saveAliyunConfig',
-                          text: formatErrorMessage({}, e.toString()),
-                          dataLogType: DataLogType.ERRORS.toString());
-                      return showToast('保存失败');
-                    }
-                  } else if (widget.psHost == 'aws') {
-                    try {
-                      String accessKeyId = psInfo['accessKeyId']!;
-                      String secretAccessKey = psInfo['secretAccessKey']!;
-                      String bucket = psInfo['bucket']!;
-                      String endpoint = psInfo['endpoint']!;
-                      String region = psInfo['region']!;
-                      String uploadPath = psInfo['uploadPath']!;
-                      String customUrl = psInfo['customUrl']!;
-                      bool isS3PathStyle = psInfo['isS3PathStyle'] ?? false;
-                      bool isEnableSSL = psInfo['isEnableSSL'] ?? true;
-                      bool valid = validateUndetermined([
-                        accessKeyId,
-                        secretAccessKey,
-                        bucket,
-                        endpoint,
-                      ]);
-                      if (!valid) {
-                        showToast('请先去设置参数');
-                        return;
-                      }
-                      if (uploadPath == ConfigureTemplate.placeholder) {
-                        uploadPath = 'None';
-                      }
-                      if (customUrl == ConfigureTemplate.placeholder) {
-                        customUrl = 'None';
-                      }
-                      if (region == ConfigureTemplate.placeholder) {
-                        region = 'None';
-                      }
-
-                      final awsConfig = AwsConfigModel(accessKeyId, secretAccessKey, bucket, endpoint, region,
-                          uploadPath, customUrl, isS3PathStyle, isEnableSSL);
-                      final awsConfigJson = jsonEncode(awsConfig);
-                      final awsConfigFile = await AwsManageAPI.localFile;
-                      await awsConfigFile.writeAsString(awsConfigJson);
-                      return showToast('设置成功');
-                    } catch (e) {
-                      FLog.error(
-                          className: 'AwsConfigureStorePage',
-                          methodName: 'saveAwsConfig',
-                          text: formatErrorMessage({}, e.toString()),
-                          dataLogType: DataLogType.ERRORS.toString());
-                      return showToast('保存失败');
-                    }
-                  } else if (widget.psHost == 'ftp') {
-                    try {
-                      String ftpHost = psInfo['ftpHost']!;
-                      String ftpPort = psInfo['ftpPort']!;
-                      String ftpUser = psInfo['ftpUser']!;
-                      String ftpPassword = psInfo['ftpPassword']!;
-                      String ftpType = psInfo['ftpType']!;
-                      String isAnonymous = psInfo['isAnonymous']!.toString();
-                      String uploadPath = psInfo['uploadPath']!;
-                      String ftpHomeDir = psInfo['ftpHomeDir']!;
-                      String? ftpCustomUrl = psInfo['ftpCustomUrl'];
-                      String? ftpWebPath = psInfo['ftpWebPath'];
-                      bool valid = validateUndetermined([
-                        ftpHost,
-                        ftpPort,
-                        ftpType,
-                        isAnonymous,
-                      ]);
-                      if (!valid) {
-                        showToast('请先去设置参数');
-                        return;
-                      }
-                      if (ftpUser == ConfigureTemplate.placeholder) {
-                        ftpUser = 'None';
-                      }
-                      if (ftpPassword == ConfigureTemplate.placeholder) {
-                        ftpPassword = 'None';
-                      }
-                      if (uploadPath == ConfigureTemplate.placeholder) {
-                        uploadPath = 'None';
-                      }
-                      if (ftpHomeDir == ConfigureTemplate.placeholder) {
-                        ftpHomeDir = 'None';
-                      }
-                      if (ftpCustomUrl == ConfigureTemplate.placeholder || ftpCustomUrl == null) {
-                        ftpCustomUrl = 'None';
-                      }
-                      if (ftpWebPath == ConfigureTemplate.placeholder || ftpWebPath == null) {
-                        ftpWebPath = 'None';
-                      }
-
-                      final ftpConfig = FTPConfigModel(
-                        ftpHost,
-                        ftpPort,
-                        ftpUser,
-                        ftpPassword,
-                        ftpType,
-                        isAnonymous,
-                        uploadPath,
-                        ftpHomeDir,
-                        ftpCustomUrl,
-                        ftpWebPath,
-                      );
-                      final ftpConfigJson = jsonEncode(ftpConfig);
-                      final ftpConfigFile = await FTPManageAPI.localFile;
-                      await ftpConfigFile.writeAsString(ftpConfigJson);
-                      return showToast('设置成功');
-                    } catch (e) {
-                      FLog.error(
-                          className: 'FtpConfigureStorePage',
-                          methodName: 'saveFtpConfig',
-                          text: formatErrorMessage({}, e.toString()),
-                          dataLogType: DataLogType.ERRORS.toString());
-                      return showToast('保存失败');
-                    }
-                  } else if (widget.psHost == 'github') {
-                    try {
-                      String githubusername = psInfo['githubusername']!;
-                      String repo = psInfo['repo']!;
-                      String token = psInfo['token']!;
-                      String storePath = psInfo['storePath']!;
-                      String branch = psInfo['branch']!;
-                      String customDomain = psInfo['customDomain']!;
-                      bool valid = validateUndetermined([githubusername, repo, token, branch]);
-                      if (!valid) {
-                        showToast('请先去设置参数');
-                        return;
-                      }
-                      if (storePath == ConfigureTemplate.placeholder) {
-                        storePath = 'None';
-                      }
-                      if (customDomain == ConfigureTemplate.placeholder) {
-                        customDomain = 'None';
-                      }
-
-                      final githubConfig = GithubConfigModel(
-                        githubusername,
-                        repo,
-                        token,
-                        storePath,
-                        branch,
-                        customDomain,
-                      );
-                      final githubConfigJson = jsonEncode(githubConfig);
-                      final githubConfigFile = await GithubManageAPI.localFile;
-                      await githubConfigFile.writeAsString(githubConfigJson);
-                      return showToast('设置成功');
-                    } catch (e) {
-                      FLog.error(
-                          className: 'GithubConfigureStorePage',
-                          methodName: 'saveGithubConfig',
-                          text: formatErrorMessage({}, e.toString()),
-                          dataLogType: DataLogType.ERRORS.toString());
-                      return showToast('保存失败');
-                    }
-                  } else if (widget.psHost == 'imgur') {
-                    try {
-                      String clientId = psInfo['clientId']!;
-                      String proxy = psInfo['proxy']!;
-                      bool valid = validateUndetermined([
-                        clientId,
-                      ]);
-                      if (!valid) {
-                        showToast('请先去设置参数');
-                        return;
-                      }
-                      if (proxy == ConfigureTemplate.placeholder) {
-                        proxy = 'None';
-                      }
-                      final imgurConfig = ImgurConfigModel(
-                        clientId,
-                        proxy,
-                      );
-                      final imgurConfigJson = jsonEncode(imgurConfig);
-                      final imgurConfigFile = await ImgurManageAPI.localFile;
-                      await imgurConfigFile.writeAsString(imgurConfigJson);
-                      return showToast('设置成功');
-                    } catch (e) {
-                      FLog.error(
-                          className: 'ImgurConfigureStorePage',
-                          methodName: 'saveImgurConfig',
-                          text: formatErrorMessage({}, e.toString()),
-                          dataLogType: DataLogType.ERRORS.toString());
-                      return showToast('保存失败');
-                    }
-                  } else if (widget.psHost == 'lsky.pro') {
-                    try {
-                      String host = psInfo['host']!;
-                      String token = psInfo['token']!;
-                      String strategyId = psInfo['strategy_id']!.toString();
-                      String albumId = psInfo['album_id']!.toString();
-                      bool valid = validateUndetermined([
-                        host,
-                        token,
-                        strategyId,
-                      ]);
-                      if (!valid) {
-                        showToast('请先去设置参数');
-                        return;
-                      }
-                      if (albumId == ConfigureTemplate.placeholder) {
-                        albumId = 'None';
-                      }
-
-                      final lskyproConfig = HostConfigModel(
-                        host,
-                        token,
-                        strategyId,
-                        albumId,
-                      );
-                      final lskyproConfigJson = jsonEncode(lskyproConfig);
-                      final lskyproConfigFile = await LskyproManageAPI.localFile;
-                      await lskyproConfigFile.writeAsString(lskyproConfigJson);
-                      return showToast('设置成功');
-                    } catch (e) {
-                      FLog.error(
-                          className: 'LskyproConfigureStorePage',
-                          methodName: 'saveLskyProConfig',
-                          text: formatErrorMessage({}, e.toString()),
-                          dataLogType: DataLogType.ERRORS.toString());
-                      return showToast('保存失败');
-                    }
-                  } else if (widget.psHost == 'qiniu') {
-                    try {
-                      String accessKey = psInfo['accessKey']!;
-                      String secretKey = psInfo['secretKey']!;
-                      String bucket = psInfo['bucket']!;
-                      String url = psInfo['url']!;
-                      String area = psInfo['area']!;
-                      String options = psInfo['options']!;
-                      String path = psInfo['path']!;
-                      bool valid = validateUndetermined([
-                        accessKey,
-                        secretKey,
-                        bucket,
-                        url,
-                        area,
-                      ]);
-                      if (!valid) {
-                        showToast('请先去设置参数');
-                        return;
-                      }
-                      if (options == ConfigureTemplate.placeholder) {
-                        options = 'None';
-                      }
-                      if (path == ConfigureTemplate.placeholder) {
-                        path = 'None';
-                      }
-
-                      final qiniuConfig = QiniuConfigModel(
-                        accessKey,
-                        secretKey,
-                        bucket,
-                        url,
-                        area,
-                        options,
-                        path,
-                      );
-                      final qiniuConfigJson = jsonEncode(qiniuConfig);
-                      final qiniuConfigFile = await QiniuManageAPI.localFile;
-                      await qiniuConfigFile.writeAsString(qiniuConfigJson);
-                      return showToast('设置成功');
-                    } catch (e) {
-                      FLog.error(
-                          className: 'QiniuConfigureStorePage',
-                          methodName: 'saveQiniuConfig',
-                          text: formatErrorMessage({}, e.toString()),
-                          dataLogType: DataLogType.ERRORS.toString());
-                      return showToast('保存失败');
-                    }
-                  } else if (widget.psHost == 'sm.ms') {
-                    try {
-                      String token = psInfo['token']!;
-                      bool valid = validateUndetermined([
-                        token,
-                      ]);
-                      if (!valid) {
-                        showToast('请先去设置参数');
-                        return;
-                      }
-
-                      final smmsConfig = SmmsConfigModel(
-                        token,
-                      );
-                      final smmsConfigJson = jsonEncode(smmsConfig);
-                      final smmsConfigFile = await SmmsManageAPI.localFile;
-                      await smmsConfigFile.writeAsString(smmsConfigJson);
-                      return showToast('设置成功');
-                    } catch (e) {
-                      FLog.error(
-                          className: 'SmmsConfigureStorePage',
-                          methodName: 'saveSmmsConfig',
-                          text: formatErrorMessage({}, e.toString()),
-                          dataLogType: DataLogType.ERRORS.toString());
-                      return showToast('保存失败');
-                    }
-                  } else if (widget.psHost == 'tencent') {
-                    try {
-                      String secretId = psInfo['secretId']!;
-                      String secretKey = psInfo['secretKey']!;
-                      String bucket = psInfo['bucket']!;
-                      String appId = psInfo['appId']!;
-                      String area = psInfo['area']!;
-                      String path = psInfo['path']!;
-                      String customUrl = psInfo['customUrl']!;
-                      String options = psInfo['options']!;
-                      bool valid = validateUndetermined([
-                        secretId,
-                        secretKey,
-                        bucket,
-                        appId,
-                        area,
-                      ]);
-                      if (!valid) {
-                        showToast('请先去设置参数');
-                        return;
-                      }
-                      if (path == ConfigureTemplate.placeholder) {
-                        path = 'None';
-                      }
-                      if (customUrl == ConfigureTemplate.placeholder) {
-                        customUrl = 'None';
-                      }
-                      if (options == ConfigureTemplate.placeholder) {
-                        options = 'None';
-                      }
-
-                      final tencentConfig =
-                          TencentConfigModel(secretId, secretKey, bucket, appId, area, path, customUrl, options);
-                      final tencentConfigJson = jsonEncode(tencentConfig);
-                      final tencentConfigFile = await TencentManageAPI.localFile;
-                      await tencentConfigFile.writeAsString(tencentConfigJson);
-                      return showToast('设置成功');
-                    } catch (e) {
-                      FLog.error(
-                          className: 'TencentConfigureStorePage',
-                          methodName: 'saveTencentConfig',
-                          text: formatErrorMessage({}, e.toString()),
-                          dataLogType: DataLogType.ERRORS.toString());
-                      return showToast('保存失败');
-                    }
-                  } else if (widget.psHost == 'upyun') {
-                    try {
-                      String bucket = psInfo['bucket']!;
-                      String operator = psInfo['operator']!;
-                      String password = psInfo['password']!;
-                      String url = psInfo['url']!;
-                      String options = psInfo['options']!;
-                      String path = psInfo['path']!;
-                      String antiLeechToken = psInfo['antiLeechToken']!;
-                      String antiLeechType = psInfo['antiLeechType']!;
-
-                      bool valid = validateUndetermined([
-                        bucket,
-                        operator,
-                        password,
-                        url,
-                      ]);
-                      if (!valid) {
-                        showToast('请先去设置参数');
-                        return;
-                      }
-                      if (path == ConfigureTemplate.placeholder) {
-                        path = 'None';
-                      }
-
-                      final upyunConfig = UpyunConfigModel(
-                          bucket, operator, password, url, options, path, antiLeechToken, antiLeechType);
-                      final upyunConfigJson = jsonEncode(upyunConfig);
-                      final upyunConfigFile = await UpyunManageAPI.localFile;
-                      await upyunConfigFile.writeAsString(upyunConfigJson);
-                      return showToast('设置成功');
-                    } catch (e) {
-                      FLog.error(
-                          className: 'UpyunConfigureStorePage',
-                          methodName: 'saveUpyunConfig',
-                          text: formatErrorMessage({}, e.toString()),
-                          dataLogType: DataLogType.ERRORS.toString());
-                      return showToast('保存失败');
-                    }
-                  } else if (widget.psHost == 'alist') {
-                    try {
-                      String host = psInfo['host'];
-                      String? adminToken = psInfo['adminToken'];
-                      String alistusername = psInfo['alistusername'];
-                      String password = psInfo['password'];
-                      String token = psInfo['token'];
-                      String uploadPath = psInfo['uploadPath'];
-                      String? webPath = psInfo['webPath'];
-                      String? customUrl = psInfo['customUrl'];
-                      bool valid = validateUndetermined([
-                        host,
-                      ]);
-                      if (!valid) {
-                        showToast('请先去设置参数');
-                        return;
-                      }
-                      uploadPath = checkPlaceholder(uploadPath);
-                      adminToken = checkPlaceholder(adminToken);
-                      alistusername = checkPlaceholder(alistusername);
-                      password = checkPlaceholder(password);
-                      webPath = checkPlaceholder(webPath);
-                      customUrl = checkPlaceholder(customUrl);
-
-                      final alistConfig = AlistConfigModel(
-                        host,
-                        adminToken,
-                        alistusername,
-                        password,
-                        token,
-                        uploadPath,
-                        webPath,
-                        customUrl,
-                      );
-                      final alistConfigJson = jsonEncode(alistConfig);
-                      final alistConfigFile = await AlistManageAPI.localFile;
-                      await alistConfigFile.writeAsString(alistConfigJson);
-                      return showToast('设置成功');
-                    } catch (e) {
-                      FLog.error(
-                          className: 'AlistConfigureStorePage',
-                          methodName: 'saveAlistConfig',
-                          text: formatErrorMessage({}, e.toString()),
-                          dataLogType: DataLogType.ERRORS.toString());
-                      return showToast('保存失败');
-                    }
-                  } else if (widget.psHost == 'webdav') {
-                    try {
-                      String host = psInfo['host']!;
-                      String webdavusername = psInfo['webdavusername']!;
-                      String password = psInfo['password']!;
-                      String uploadPath = psInfo['uploadPath']!;
-                      String? customUrl = psInfo['customUrl'];
-                      String? webPath = psInfo['webPath'];
-                      bool valid = validateUndetermined([
-                        host,
-                        webdavusername,
-                        password,
-                      ]);
-                      if (!valid) {
-                        showToast('请先去设置参数');
-                        return;
-                      }
-                      if (uploadPath == ConfigureTemplate.placeholder) {
-                        uploadPath = 'None';
-                      }
-                      if (customUrl == ConfigureTemplate.placeholder || customUrl == null) {
-                        customUrl = 'None';
-                      }
-                      if (webPath == ConfigureTemplate.placeholder || webPath == null) {
-                        webPath = 'None';
-                      }
-
-                      final webdavConfig = WebdavConfigModel(
-                        host,
-                        webdavusername,
-                        password,
-                        uploadPath,
-                        customUrl,
-                        webPath,
-                      );
-                      final webdavConfigJson = jsonEncode(webdavConfig);
-                      final webdavConfigFile = await WebdavManageAPI.localFile;
-                      await webdavConfigFile.writeAsString(webdavConfigJson);
-                      return showToast('设置成功');
-                    } catch (e) {
-                      FLog.error(
-                          className: 'WebdavConfigureStorePage',
-                          methodName: 'saveWebdavConfig',
-                          text: formatErrorMessage({}, e.toString()),
-                          dataLogType: DataLogType.ERRORS.toString());
-                      return showToast('保存失败');
-                    }
-                  }
-                }),
+              leading: const Icon(
+                Icons.check_box_outlined,
+                color: Color.fromARGB(255, 97, 141, 236),
+              ),
+              minLeadingWidth: 0,
+              title: const Text('替代图床默认配置'),
+              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+              onTap: () async {
+                bool success = await applyConfigAsDefault(widget.psHost, psInfo);
+                if (!success) {
+                  showToast('保存失败');
+                }
+              },
+            ),
             const Divider(),
             ListTile(
               leading: const Icon(
