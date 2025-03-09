@@ -31,6 +31,15 @@ class ImagePreviewState extends State<ImagePreview> {
         elevation: 0,
         centerTitle: true,
         title: titleText('图片预览'),
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withAlpha(200)],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
+        ),
       ),
       body: PageView.builder(
         controller: _pageController,

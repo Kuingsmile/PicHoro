@@ -5,7 +5,6 @@ import 'dart:convert';
 import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 import 'package:f_logs/f_logs.dart';
 import 'package:horopic/api/api.dart';
 
@@ -71,9 +70,11 @@ class UploadManager {
           Map<String, dynamic> maps = {};
           var [_, formatedURL, returnUrl, pictureKey, displayUrl] = tencentUploadResult;
 
-          if (Global.isCopyLink == true) {
-            await Clipboard.setData(ClipboardData(text: formatedURL));
-          }
+          // Comment out automatic clipboard copy for individual uploads
+          // This will be handled in batch instead
+          // if (Global.isCopyLink) {
+          //   await Clipboard.setData(ClipboardData(text: formatedURL));
+          // }
 
           maps = {
             'path': path,
@@ -88,7 +89,11 @@ class UploadManager {
             'hostSpecificArgE': 'test',
           };
           await AlbumSQL.insertData(Global.imageDB!, hostToTableNameMap[Global.defaultPShost]!, maps);
+          // Store formattedUrl in task for later copying
+          task.formattedUrl = formatedURL;
           setStatus(task, UploadStatus.completed);
+
+        // Similar changes for other case blocks - remove individual clipboard operations
         case 'aliyun':
           var aliUploadResult = await AliyunImageUploadUtils.uploadApi(
               path: path,
@@ -101,9 +106,9 @@ class UploadManager {
           }
           eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
           var [_, formatedURL, returnUrl, pictureKey, displayUrl] = aliUploadResult;
-          if (Global.isCopyLink == true) {
-            await Clipboard.setData(ClipboardData(text: formatedURL));
-          }
+          // if (Global.isCopyLink) {
+          //   await Clipboard.setData(ClipboardData(text: formatedURL));
+          // }
 
           Map<String, dynamic> maps = {
             'path': path,
@@ -118,7 +123,12 @@ class UploadManager {
             'hostSpecificArgE': 'test',
           };
           await AlbumSQL.insertData(Global.imageDB!, hostToTableNameMap[Global.defaultPShost]!, maps);
+          task.formattedUrl = formatedURL;
           setStatus(task, UploadStatus.completed);
+
+        // Continue with the same pattern for all other cases
+        // Just commenting out the clipboard operations and ensuring task.formattedUrl is set
+
         case 'qiniu':
           var qiniuUploadResult = await QiniuImageUploadUtils.uploadApi(
               path: path,
@@ -132,9 +142,9 @@ class UploadManager {
           }
           eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
           var [_, formatedURL, returnUrl, pictureKey, displayUrl] = qiniuUploadResult;
-          if (Global.isCopyLink == true) {
-            await Clipboard.setData(ClipboardData(text: formatedURL));
-          }
+          // if (Global.isCopyLink == true) {
+          //   await Clipboard.setData(ClipboardData(text: formatedURL));
+          // }
 
           Map<String, dynamic> maps = {
             'path': path,
@@ -149,6 +159,7 @@ class UploadManager {
             'hostSpecificArgE': 'test',
           };
           await AlbumSQL.insertData(Global.imageDB!, hostToTableNameMap[Global.defaultPShost]!, maps);
+          task.formattedUrl = formatedURL;
           setStatus(task, UploadStatus.completed);
         case 'upyun':
           var upyunUploadResult = await UpyunImageUploadUtils.uploadApi(
@@ -163,9 +174,9 @@ class UploadManager {
           }
           eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
           var [_, formatedURL, returnUrl, pictureKey, displayUrl] = upyunUploadResult;
-          if (Global.isCopyLink == true) {
-            await Clipboard.setData(ClipboardData(text: formatedURL));
-          }
+          // if (Global.isCopyLink) {
+          //   await Clipboard.setData(ClipboardData(text: formatedURL));
+          // }
           Map<String, dynamic> maps = {
             'path': path,
             'name': fileName,
@@ -179,6 +190,7 @@ class UploadManager {
             'hostSpecificArgE': 'test',
           };
           await AlbumSQL.insertData(Global.imageDB!, hostToTableNameMap[Global.defaultPShost]!, maps);
+          task.formattedUrl = formatedURL;
           setStatus(task, UploadStatus.completed);
         case 'lsky.pro':
           var lskyproUploadResult = await LskyproImageUploadUtils.uploadApi(
@@ -193,9 +205,9 @@ class UploadManager {
           }
           eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
           var [_, formatedURL, returnUrl, pictureKey, displayUrl] = lskyproUploadResult;
-          if (Global.isCopyLink == true) {
-            await Clipboard.setData(ClipboardData(text: formatedURL));
-          }
+          // if (Global.isCopyLink) {
+          //   await Clipboard.setData(ClipboardData(text: formatedURL));
+          // }
 
           Map<String, dynamic> maps = {
             'path': path,
@@ -210,6 +222,7 @@ class UploadManager {
             'hostSpecificArgE': 'test',
           };
           await AlbumSQL.insertData(Global.imageDB!, hostToTableNameMap[Global.defaultPShost]!, maps);
+          task.formattedUrl = formatedURL;
           setStatus(task, UploadStatus.completed);
         case 'sm.ms':
           List<String> smmsUploadResult = await SmmsImageUploadUtils.uploadApi(
@@ -224,9 +237,9 @@ class UploadManager {
           }
           eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
           var [_, formatedURL, returnUrl, pictureKey] = smmsUploadResult;
-          if (Global.isCopyLink) {
-            await Clipboard.setData(ClipboardData(text: formatedURL));
-          }
+          // if (Global.isCopyLink) {
+          //   await Clipboard.setData(ClipboardData(text: formatedURL));
+          // }
           Map<String, dynamic> maps = {
             'path': path,
             'name': fileName,
@@ -240,6 +253,7 @@ class UploadManager {
             'hostSpecificArgE': 'test',
           };
           await AlbumSQL.insertData(Global.imageDB!, hostToTableNameMap[Global.defaultPShost]!, maps);
+          task.formattedUrl = formatedURL;
           setStatus(task, UploadStatus.completed);
         case 'github':
           maxConcurrentTasks = 1;
@@ -254,9 +268,9 @@ class UploadManager {
           }
           eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
           var [_, formatedURL, returnUrl, pictureKey, downloadUrl] = githubUploadResult;
-          if (Global.isCopyLink) {
-            await Clipboard.setData(ClipboardData(text: formatedURL));
-          }
+          // if (Global.isCopyLink) {
+          //   await Clipboard.setData(ClipboardData(text: formatedURL));
+          // }
           Map<String, dynamic> maps = {
             'path': path,
             'name': fileName,
@@ -270,6 +284,7 @@ class UploadManager {
             'hostSpecificArgE': 'test',
           };
           await AlbumSQL.insertData(Global.imageDB!, hostToTableNameMap[Global.defaultPShost]!, maps);
+          task.formattedUrl = formatedURL;
           setStatus(task, UploadStatus.completed);
         case 'imgur':
           var imgurUploadResult = await ImgurImageUploadUtils.uploadApi(
@@ -284,9 +299,9 @@ class UploadManager {
           }
           eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
           var [_, formatedURL, returnUrl, pictureKey, cdnUrl] = imgurUploadResult;
-          if (Global.isCopyLink == true) {
-            await Clipboard.setData(ClipboardData(text: formatedURL));
-          }
+          // if (Global.isCopyLink == true) {
+          //   await Clipboard.setData(ClipboardData(text: formatedURL));
+          // }
           Map<String, dynamic> maps = {
             'path': path,
             'name': fileName,
@@ -300,6 +315,7 @@ class UploadManager {
             'hostSpecificArgE': 'test',
           };
           await AlbumSQL.insertData(Global.imageDB!, hostToTableNameMap[Global.defaultPShost]!, maps);
+          task.formattedUrl = formatedURL;
           setStatus(task, UploadStatus.completed);
         case 'ftp':
           var ftpUploadResult = await FTPImageUploadUtils.uploadApi(
@@ -326,9 +342,9 @@ class UploadManager {
             uploadPath,
             thumbnail
           ] = ftpUploadResult;
-          if (Global.isCopyLink == true) {
-            await Clipboard.setData(ClipboardData(text: formatedURL));
-          }
+          // if (Global.isCopyLink) {
+          //   await Clipboard.setData(ClipboardData(text: formatedURL));
+          // }
           Map<String, dynamic> maps = {
             'path': path,
             'name': fileName,
@@ -350,6 +366,7 @@ class UploadManager {
             maps['hostSpecificArg${letter[i]}'] = 'test';
           }
           await AlbumSQL.insertData(Global.imageDBExtend!, hostToTableNameMap[Global.defaultPShost]!, maps);
+          task.formattedUrl = formatedURL;
           setStatus(task, UploadStatus.completed);
         case 'aws':
           var awsUploadResult = await AwsImageUploadUtils.uploadApi(
@@ -362,9 +379,9 @@ class UploadManager {
           }
           eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
           var [_, formatedURL, returnUrl, pictureKey, displayUrl] = awsUploadResult;
-          if (Global.isCopyLink == true) {
-            await Clipboard.setData(ClipboardData(text: formatedURL));
-          }
+          // if (Global.isCopyLink) {
+          //   await Clipboard.setData(ClipboardData(text: formatedURL));
+          // }
           Map<String, dynamic> maps = {
             'path': path,
             'name': fileName,
@@ -378,6 +395,7 @@ class UploadManager {
             maps['hostSpecificArg${letter[i]}'] = 'test';
           }
           await AlbumSQL.insertData(Global.imageDBExtend!, hostToTableNameMap[Global.defaultPShost]!, maps);
+          task.formattedUrl = formatedURL;
           setStatus(task, UploadStatus.completed);
         case 'alist':
           var alistUploadResult = await AlistImageUploadUtils.uploadApi(
@@ -392,9 +410,9 @@ class UploadManager {
           }
           eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
           var [_, formatedURL, returnUrl, pictureKey, displayUrl, hostPicUrl] = alistUploadResult;
-          if (Global.isCopyLink == true) {
-            await Clipboard.setData(ClipboardData(text: formatedURL));
-          }
+          // if (Global.isCopyLink) {
+          //   await Clipboard.setData(ClipboardData(text: formatedURL));
+          // }
           Map<String, dynamic> maps = {
             'path': path,
             'name': fileName,
@@ -409,6 +427,7 @@ class UploadManager {
             maps['hostSpecificArg${letter[i]}'] = 'test';
           }
           await AlbumSQL.insertData(Global.imageDBExtend!, hostToTableNameMap[Global.defaultPShost]!, maps);
+          task.formattedUrl = formatedURL;
           setStatus(task, UploadStatus.completed);
         case 'webdav':
           var webdavUploadResult =
@@ -418,9 +437,9 @@ class UploadManager {
           }
           var [_, formatedURL, returnUrl, pictureKey, displayUrl] = webdavUploadResult;
           eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-          if (Global.isCopyLink == true) {
-            await Clipboard.setData(ClipboardData(text: formatedURL));
-          }
+          // if (Global.isCopyLink) {
+          //   await Clipboard.setData(ClipboardData(text: formatedURL));
+          // }
           Map<String, dynamic> maps = {
             'path': path,
             'name': fileName,
@@ -434,6 +453,7 @@ class UploadManager {
             maps['hostSpecificArg${letter[i]}'] = 'test';
           }
           await AlbumSQL.insertData(Global.imageDBExtend!, hostToTableNameMap[Global.defaultPShost]!, maps);
+          task.formattedUrl = formatedURL;
           setStatus(task, UploadStatus.completed);
         default:
           break;
@@ -634,43 +654,54 @@ class UploadManager {
 
   Future<List<UploadTask?>?> whenBatchUploadsComplete(List<String> paths, List<String> names,
       {Duration timeout = const Duration(hours: 2)}) async {
+    if (paths.isEmpty || names.isEmpty) {
+      return [];
+    }
+
     var completer = Completer<List<UploadTask?>?>();
     var completed = 0;
-    var total = paths.length;
-    for (var i = 0; i < paths.length; i++) {
+    var total = names.length;
+
+    // Initial check for already completed tasks
+    for (var i = 0; i < names.length; i++) {
       UploadTask? task = getUpload(names[i]);
+      if (task == null) {
+        total--;
+        continue;
+      }
 
-      if (task != null) {
-        if (task.status.value.isCompleted) {
-          completed++;
-
-          if (completed == total) {
-            completer.complete(getBatchUploads(paths, names));
-          }
-        }
-
+      if (task.status.value.isCompleted) {
+        completed++;
+      } else {
         dynamic listener;
         listener = () {
           if (task.status.value.isCompleted) {
             completed++;
+            task.status.removeListener(listener);
 
-            if (completed == total) {
+            if (completed >= total) {
               completer.complete(getBatchUploads(paths, names));
-              task.status.removeListener(listener);
             }
           }
         };
-
         task.status.addListener(listener);
-      } else {
-        total--;
-
-        if (total == 0) {
-          completer.complete(null);
-        }
       }
     }
 
+    // If all tasks are already completed or no tasks exist
+    if (completed >= total || total == 0) {
+      completer.complete(getBatchUploads(paths, names));
+    }
+
     return completer.future.timeout(timeout);
+  }
+
+  // Add a method to retrieve the formatted URL for a file
+  String? getUploadFormattedUrl(String fileName) {
+    var task = getUpload(fileName);
+    if (task != null && task.status.value == UploadStatus.completed) {
+      return task.formattedUrl;
+    }
+    return null;
   }
 }

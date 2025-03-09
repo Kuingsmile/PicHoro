@@ -58,7 +58,7 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
   // 是否已加载所有图片
   bool _hasLoadedAll = false;
 
-  // 用于选择的列表
+  // 用于选择的列表 - Change to growable list
   List<bool> selectedImagesBoolList = [];
 
   // 滚动控制器
@@ -190,8 +190,17 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
     super.build(context);
     return Scaffold(
       appBar: AppBar(
-          title: titleText(
-            '${nameToPara[Global.defaultShowedPBhost]}相册',
+          title: Column(
+            children: [
+              titleText(
+                '${nameToPara[Global.defaultShowedPBhost]}相册',
+              ),
+              if (selectedImagesBoolList.contains(true))
+                Text(
+                  '已选择 ${selectedImagesBoolList.where((selected) => selected).length} 项',
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white70),
+                ),
+            ],
           ),
           centerTitle: true,
           systemOverlayStyle: const SystemUiOverlayStyle(
@@ -331,7 +340,6 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
                           toDelete.add(i);
                         }
                       }
-                      selectedImagesBoolList = List.filled(_loadBatchSize, false);
                       Navigator.pop(context);
                       await removeAllImages(toDelete);
                       showToast('删除完成');
@@ -563,8 +571,10 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
 
                         setState(() {
                           final newValue = !selectedImagesBoolList.contains(true);
-                          selectedImagesBoolList =
-                              List.filled(selectedImagesBoolList.length, newValue, growable: false);
+                          // Ensure we're setting the value for all images, not just displayed ones
+                          for (int i = 0; i < selectedImagesBoolList.length; i++) {
+                            selectedImagesBoolList[i] = newValue;
+                          }
                         });
                       },
                     ),
@@ -711,6 +721,13 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
         rethrow;
       }
     }
+
+    // After removing all selected images, update the selectedImagesBoolList for remaining images
+    setState(() {
+      selectedImagesBoolList = List.filled(imageUrlList.length, false, growable: true);
+      _loadedImagesCount = imageUrlList.length < _loadedImagesCount ? imageUrlList.length : _loadedImagesCount;
+    });
+
     return true;
   }
 
@@ -793,7 +810,7 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
       imageFileNameList.clear();
       imageLocalPathList.clear();
       imagePictureKeyList.clear();
-      selectedImagesBoolList.clear();
+      selectedImagesBoolList.clear(); // Now it's a growable list
       _hasLoadedAll = false;
     });
     await _initLoadImages();
@@ -814,6 +831,12 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
       _isLoading = false;
       refreshController.loadNoData();
       return;
+    }
+
+    // Ensure selectedImagesBoolList is big enough
+    if (selectedImagesBoolList.length < actualEnd) {
+      int elementsToAdd = actualEnd - selectedImagesBoolList.length;
+      selectedImagesBoolList.addAll(List.filled(elementsToAdd, false));
     }
 
     setState(() {
@@ -883,6 +906,10 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
 
     // 初始加载一批图片
     final initialLoadCount = _loadBatchSize > imageUrlList.length ? imageUrlList.length : _loadBatchSize;
+
+    // Initialize selectedImagesBoolList with the right size
+    selectedImagesBoolList = List.filled(imageUrlList.length, false, growable: true);
+
     setState(() {
       _loadedImagesCount = initialLoadCount;
       _hasLoadedAll = imageUrlList.length <= initialLoadCount;

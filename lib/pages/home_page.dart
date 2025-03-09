@@ -54,6 +54,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
   List uploadList = [];
   List<String> uploadPathList = [];
   List<String> uploadFileNameList = [];
+  Map<String, String> uploadedLinks = {}; // Track links for each file
   var uploadManager = UploadManager(maxConcurrentTasks: 1);
   ic_intent.Intent? _initialIntent;
 
@@ -98,42 +99,12 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
         File imageFile = await toFile(imageList[i]);
         String imagePath = imageFile.path;
         if (imagePath.isNotEmpty) {
-          if (Global.isCustomRename == true) {
-            Global.imageFile = await renamePictureWithCustomFormat(imageFile);
-          } else if (Global.isTimeStamp == true) {
-            Global.imageFile = await renamePictureWithTimestamp(imageFile);
-          } else if (Global.isRandomName == true) {
-            Global.imageFile = await renamePictureWithRandomString(imageFile);
-          } else {
-            Global.imageFile = my_path.basename(imageFile.path);
-          }
-
-          File compressedFile;
-          if (Global.isCompress == true) {
-            ImageCompress imageCompress = ImageCompress();
-            compressedFile = await imageCompress.compressAndGetFile(
-                imageFile.path, my_path.basename(Global.imageFile!), Global.defaultCompressFormat,
-                minHeight: Global.minHeight, minWidth: Global.minWidth, quality: Global.quality);
-          } else {
-            compressedFile = imageFile;
-          }
+          File compressedFile = await processImageFile(imageFile);
           Global.imagesList.add(Global.imageFile!);
           Global.imagesFileList.add(compressedFile);
         }
       }
-      if (Global.imagesList.isNotEmpty) {
-        for (int i = 0; i < Global.imagesList.length; i++) {
-          uploadList.add([Global.imagesFileList[i].path, Global.imagesList[i]]);
-          uploadPathList.add(Global.imagesFileList[i].path);
-          uploadFileNameList.add(Global.imagesList[i]);
-        }
-      }
-      setState(() {
-        Global.imagesList.clear();
-        Global.imagesFileList.clear();
-        Global.imageFile = null;
-        Global.imageOriginalFile = null;
-      });
+      addToUploadList();
     } catch (e) {
       FLog.error(
           className: 'HomePage',
@@ -145,11 +116,28 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
     }
   }
 
+  void addToUploadList() {
+    if (Global.imagesList.isNotEmpty) {
+      for (int i = 0; i < Global.imagesList.length; i++) {
+        uploadList.add([Global.imagesFileList[i].path, Global.imagesList[i]]);
+        uploadPathList.add(Global.imagesFileList[i].path);
+        uploadFileNameList.add(Global.imagesList[i]);
+      }
+    }
+    setState(() {
+      Global.imagesList.clear();
+      Global.imagesFileList.clear();
+      Global.imageFile = null;
+      Global.imageOriginalFile = null;
+    });
+  }
+
   clearAllList() {
     setState(() {
       uploadList.clear();
       uploadPathList.clear();
       uploadFileNameList.clear();
+      uploadedLinks.clear(); // Clear the links map too
       Global.imagesList.clear();
       Global.imagesFileList.clear();
       Global.imageFile = null;
@@ -162,12 +150,41 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
     actionEventBus.cancel();
 
     clipboardList.clear();
+    uploadedLinks.clear(); // Clear links map on dispose
     super.dispose();
   }
 
+  // Refresh links from tasks
+  void _updateLinksFromTasks() {
+    for (var i = 0; i < uploadList.length; i++) {
+      String fileName = uploadList[i][1];
+      var task = uploadManager.getUpload(fileName);
+      if (task != null && task.status.value == UploadStatus.completed && task.formattedUrl.isNotEmpty) {
+        uploadedLinks[fileName] = task.formattedUrl;
+      }
+    }
+  }
+
   _createUploadListItem() {
+    _updateLinksFromTasks(); // Update links from tasks before rendering
+
     List<Widget> list = [];
     for (var i = uploadList.length - 1; i >= 0; i--) {
+      String fileName = uploadList[i][1];
+      String? clipboardLink;
+
+      // Check if we have the link in our map
+      if (uploadedLinks.containsKey(fileName)) {
+        clipboardLink = uploadedLinks[fileName];
+      } else {
+        // Try to get it from the task if available
+        var task = uploadManager.getUpload(fileName);
+        if (task != null && task.status.value == UploadStatus.completed && task.formattedUrl.isNotEmpty) {
+          clipboardLink = task.formattedUrl;
+          uploadedLinks[fileName] = clipboardLink;
+        }
+      }
+
       list.add(ListItem(
           onUploadPlayPausedPressed: (path, fileName) async {
             var task = uploadManager.getUpload(uploadList[i][1]);
@@ -188,10 +205,18 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
           },
           onDelete: (path, fileName) async {
             await uploadManager.removeUpload(path, fileName);
-            setState(() {});
+            setState(() {
+              // Also remove from links map when deleted
+              uploadedLinks.remove(fileName);
+            });
+          },
+          onCopy: (link) {
+            flutter_services.Clipboard.setData(flutter_services.ClipboardData(text: link!));
+            showToastWithContext(context, '链接已复制到剪贴板');
           },
           path: uploadList[i][0],
           fileName: uploadList[i][1],
+          clipboardLink: clipboardLink,
           uploadTask: uploadManager.getUpload(uploadList[i][1])));
     }
     List<Widget> list2 = [
@@ -199,53 +224,69 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
         height: 5,
         color: Colors.transparent,
       ),
-      Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          TextButton(
-              onPressed: () async {
-                await uploadManager.addBatchUploads(uploadPathList, uploadFileNameList);
-                setState(() {});
-              },
-              child: const Text(
-                "全部开始",
-                style: TextStyle(color: Colors.blue, fontSize: 16, fontWeight: FontWeight.bold),
-              )),
-          TextButton(
-              onPressed: () async {
-                await uploadManager.cancelBatchUploads(uploadPathList, uploadFileNameList);
-              },
-              child: const Text(
-                "全部取消",
-                style: TextStyle(color: Colors.blue, fontSize: 16, fontWeight: FontWeight.bold),
-              )),
-          TextButton(
-              onPressed: () async {
-                await clearAllList();
-                setState(() {});
-              },
-              child: const Text(
-                "全部清空",
-                style: TextStyle(color: Colors.blue, fontSize: 16, fontWeight: FontWeight.bold),
-              )),
-        ],
-      ),
-      ValueListenableBuilder(
-          valueListenable: uploadManager.getBatchUploadProgress(uploadPathList, uploadFileNameList),
-          builder: (context, value, child) {
-            return Container(
-              color: const Color.fromARGB(255, 219, 239, 255),
-              height: 10,
-              margin: const EdgeInsets.symmetric(vertical: 4),
-              child: LinearProgressIndicator(
-                value: value,
+      Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12.0),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withValues(alpha: 0.2),
+              spreadRadius: 1,
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _actionButton(
+                      icon: Icons.play_arrow,
+                      label: "全部开始",
+                      onPressed: () async {
+                        await uploadManager.addBatchUploads(uploadPathList, uploadFileNameList);
+                        _handleBatchUploadCompletion(uploadPathList, uploadFileNameList);
+                        setState(() {});
+                      }),
+                  _actionButton(
+                      icon: Icons.cancel,
+                      label: "全部取消",
+                      onPressed: () async {
+                        await uploadManager.cancelBatchUploads(uploadPathList, uploadFileNameList);
+                      }),
+                  _actionButton(
+                      icon: Icons.delete_sweep,
+                      label: "全部清空",
+                      onPressed: () async {
+                        await clearAllList();
+                        setState(() {});
+                      }),
+                ],
               ),
-            );
-          }),
+            ),
+          ],
+        ),
+      ),
     ];
     list2.addAll(list);
 
     return list2;
+  }
+
+  Widget _actionButton({required IconData icon, required String label, required Function() onPressed}) {
+    return TextButton.icon(
+      onPressed: onPressed,
+      icon: Icon(icon, color: Theme.of(context).primaryColor, size: 18),
+      label: Text(
+        label,
+        style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold),
+      ),
+    );
   }
 
   _imageFromCamera() async {
@@ -255,30 +296,11 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
       showToast('未拍摄图片');
       return;
     }
-    final File fileImage = File(pickedImage.path);
 
     Global.imagesList.clear();
     Global.imagesFileList.clear();
-
-    //图片重命名
-    if (Global.isCustomRename == true) {
-      Global.imageFile = await renamePictureWithCustomFormat(fileImage);
-    } else if (Global.isTimeStamp == true) {
-      Global.imageFile = renamePictureWithTimestamp(fileImage);
-    } else if (Global.isRandomName == true) {
-      Global.imageFile = renamePictureWithRandomString(fileImage);
-    } else {
-      Global.imageFile = my_path.basename(fileImage.path);
-    }
-    File compressedFile;
-    if (Global.isCompress == true) {
-      ImageCompress imageCompress = ImageCompress();
-      compressedFile = await imageCompress.compressAndGetFile(
-          pickedImage.path, my_path.basename(Global.imageFile!), Global.defaultCompressFormat,
-          minHeight: Global.minHeight, minWidth: Global.minWidth, quality: Global.quality);
-    } else {
-      compressedFile = fileImage;
-    }
+    final File fileImage = File(pickedImage.path);
+    File compressedFile = await processImageFile(fileImage);
     Global.imagesList.add(Global.imageFile!);
     Global.imagesFileList.add(compressedFile);
   }
@@ -310,26 +332,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
           File file = File('$tempPath/Web$timeStamp$randomString.jpg');
           await file.writeAsBytes(response.bodyBytes);
           Global.imageFile = file.path;
-
-          //图片重命名
-          if (Global.isCustomRename == true) {
-            Global.imageFile = await renamePictureWithCustomFormat(file);
-          } else if (Global.isTimeStamp == true) {
-            Global.imageFile = await renamePictureWithTimestamp(file);
-          } else if (Global.isRandomName == true) {
-            Global.imageFile = await renamePictureWithRandomString(file);
-          } else {
-            Global.imageFile = my_path.basename(file.path);
-          }
-          File compressedFile;
-          if (Global.isCompress == true) {
-            ImageCompress imageCompress = ImageCompress();
-            compressedFile = await imageCompress.compressAndGetFile(
-                file.path, my_path.basename(Global.imageFile!), Global.defaultCompressFormat,
-                minHeight: Global.minHeight, minWidth: Global.minWidth, quality: Global.quality);
-          } else {
-            compressedFile = file;
-          }
+          File compressedFile = await processImageFile(file);
           Global.imagesList.add(Global.imageFile!);
           Global.imagesFileList.add(compressedFile);
           successCount++;
@@ -369,28 +372,20 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
         if (clipboardList.isEmpty) {
           return showToast('未拍摄图片');
         }
-        if (clipboardList.length == 1) {
-          await flutter_services.Clipboard.setData(flutter_services.ClipboardData(text: clipboardList[0]));
-        } else {
-          await flutter_services.Clipboard.setData(flutter_services.ClipboardData(
-              text: clipboardList
-                  .toString()
-                  .substring(1, clipboardList.toString().length - 1)
-                  .replaceAll(', ', '\n')
-                  .replaceAll(',', '\n')));
+        if (clipboardList.isNotEmpty) {
+          await flutter_services.Clipboard.setData(flutter_services.ClipboardData(text: clipboardList.join('\n')));
         }
-        clipboardList.clear();
       }
       return showToast('上传完成');
     }
 
     File fileImage = File(pickedImage.path);
 
-    if (Global.isCustomRename == true) {
+    if (Global.isCustomRename) {
       Global.imageFile = await renamePictureWithCustomFormat(fileImage);
-    } else if (Global.isTimeStamp == true) {
+    } else if (Global.isTimeStamp) {
       Global.imageFile = await renamePictureWithTimestamp(fileImage);
-    } else if (Global.isRandomName == true) {
+    } else if (Global.isRandomName) {
       Global.imageFile = await renamePictureWithRandomString(fileImage);
     } else {
       Global.imageFile = my_path.basename(fileImage.path);
@@ -418,22 +413,21 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
   }
 
   Map<String, dynamic> getUploadResultMap(String path, String fullName, List uploadResult) {
-    Map<String, dynamic> maps = {};
+    Map<String, dynamic> maps = {
+      'path': path,
+      'name': fullName,
+      'url': uploadResult[2],
+      'PBhost': Global.defaultPShost,
+      'pictureKey': uploadResult[3],
+    };
     switch (Global.defaultPShost) {
       case 'sm.ms':
         //["success", formatedURL, returnUrl, pictureKey]
-        maps = {
-          'path': path,
-          'name': fullName,
-          'url': uploadResult[2], //返回地址可以直接访问
-          'PBhost': Global.defaultPShost,
-          'pictureKey': uploadResult[3],
-          'hostSpecificArgA': 'test',
-          'hostSpecificArgB': 'test',
-          'hostSpecificArgC': 'test',
-          'hostSpecificArgD': 'test',
-          'hostSpecificArgE': 'test',
-        };
+        maps['hostSpecificArgA'] = 'test';
+        maps['hostSpecificArgB'] = 'test';
+        maps['hostSpecificArgC'] = 'test';
+        maps['hostSpecificArgD'] = 'test';
+        maps['hostSpecificArgE'] = 'test';
       case 'lsky.pro':
       case 'github':
       case 'imgur':
@@ -442,69 +436,35 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
       case 'aliyun':
       case 'upyun':
         // ["success", formatedURL, returnUrl, pictureKey,displayUrl]
-        maps = {
-          'path': path,
-          'name': fullName,
-          'url': uploadResult[2], //tencent文件原始地址
-          'PBhost': Global.defaultPShost,
-          'pictureKey': uploadResult[3],
-          'hostSpecificArgA': uploadResult[4], //实际展示的是displayUrl
-          'hostSpecificArgB': 'test',
-          'hostSpecificArgC': 'test',
-          'hostSpecificArgD': 'test',
-          'hostSpecificArgE': 'test',
-        };
+        maps['hostSpecificArgA'] = uploadResult[4]; // displayUrl
+        maps['hostSpecificArgB'] = 'test';
+        maps['hostSpecificArgC'] = 'test';
+        maps['hostSpecificArgD'] = 'test';
+        maps['hostSpecificArgE'] = 'test';
       case 'ftp':
         // ["success", formatedURL, returnUrl, pictureKey,displayUrl]
-        maps = {
-          'path': path,
-          'name': fullName,
-          'url': uploadResult[2], //ftp文件原始地址
-          'PBhost': Global.defaultPShost,
-          'pictureKey': uploadResult[3],
-          'hostSpecificArgA': uploadResult[4], //实际展示的是displayUrl
-          'hostSpecificArgB': uploadResult[5], //ftp自定义域名
-          'hostSpecificArgC': uploadResult[6], //ftp端口
-          'hostSpecificArgD': uploadResult[7], //ftp用户名
-          'hostSpecificArgE': uploadResult[8], //ftp密码
-          'hostSpecificArgF': uploadResult[9], //ftp类型
-          'hostSpecificArgG': uploadResult[10], //ftp是否匿名
-          'hostSpecificArgH': uploadResult[11], //ftp路径
-          'hostSpecificArgI': uploadResult[12], //缩略图路径
-        };
-        List letter = 'JKLMNOPQRSTUVWXYZ'.split('');
-        for (int i = 0; i < letter.length; i++) {
-          maps['hostSpecificArg${letter[i]}'] = 'test';
+        // A-I:  displayUrl, ftp自定义域名, ftp端口, ftp用户名, ftp密码, ftp类型, ftp是否匿名, ftp路径, 缩略图路径
+        for (int i = 0; i < 8; i++) {
+          maps['hostSpecificArg${String.fromCharCode(65 + i)}'] = uploadResult[i + 4];
+        }
+        maps['hostSpecificArgI'] = uploadResult[12]; // 缩略图路径
+        // Add remaining default values
+        for (int i = 9; i < 26; i++) {
+          maps['hostSpecificArg${String.fromCharCode(65 + i)}'] = 'test';
         }
       case 'aws':
       case 'webdav':
         // ["success", formatedURL, returnUrl, pictureKey,displayUrl]
-        maps = {
-          'path': path,
-          'name': fullName,
-          'url': uploadResult[2], //aws文件原始地址
-          'PBhost': Global.defaultPShost,
-          'pictureKey': uploadResult[3],
-          'hostSpecificArgA': uploadResult[4], //实际展示的是displayUrl
-        };
-        List letter = 'BCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-        for (int i = 0; i < letter.length; i++) {
-          maps['hostSpecificArg${letter[i]}'] = 'test';
+        maps['hostSpecificArgA'] = uploadResult[4]; // displayUrl
+        for (int i = 1; i < 26; i++) {
+          maps['hostSpecificArg${String.fromCharCode(65 + i)}'] = 'test';
         }
       case 'alist':
         // ["success", formatedURL, returnUrl, pictureKey, displayUrl,hostPicUrl]
-        maps = {
-          'path': path,
-          'name': fullName,
-          'url': uploadResult[2], //alist文件原始地址
-          'PBhost': Global.defaultPShost,
-          'pictureKey': uploadResult[3],
-          'hostSpecificArgA': uploadResult[4], //实际展示的是displayUrl
-          'hostSpecificArgB': uploadResult[5], //源站地址，访问后会302跳转到returnUrl
-        };
-        List letter = 'CDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-        for (int i = 0; i < letter.length; i++) {
-          maps['hostSpecificArg${letter[i]}'] = 'test';
+        maps['hostSpecificArgA'] = uploadResult[4]; // displayUrl
+        maps['hostSpecificArgB'] = uploadResult[5]; //源站地址，访问后会302跳转到returnUrl
+        for (int i = 2; i < 26; i++) {
+          maps['hostSpecificArg${String.fromCharCode(65 + i)}'] = 'test';
         }
     }
     return maps;
@@ -540,6 +500,10 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
       }
 
       clipboardList.add(uploadResult[1]); //这里是formatedURL, 用来复制到剪贴板
+      setState(() {
+        // Add to uploadedLinks map
+        uploadedLinks[fullName] = uploadResult[1];
+      });
       Global.multiUpload = 'success';
       return;
     } else {
@@ -565,26 +529,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
 
     for (var i = 0; i < pickedImage.length; i++) {
       File? fileImage = await pickedImage[i].originFile;
-
-      if (Global.isCustomRename == true) {
-        Global.imageFile = await renamePictureWithCustomFormat(fileImage!);
-      } else if (Global.isTimeStamp == true) {
-        Global.imageFile = await renamePictureWithTimestamp(fileImage!);
-      } else if (Global.isRandomName == true) {
-        Global.imageFile = await renamePictureWithRandomString(fileImage!);
-      } else {
-        Global.imageFile = my_path.basename(fileImage!.path);
-      }
-
-      File compressedFile;
-      if (Global.isCompress == true) {
-        ImageCompress imageCompress = ImageCompress();
-        compressedFile = await imageCompress.compressAndGetFile(
-            fileImage.path, my_path.basename(Global.imageFile!), Global.defaultCompressFormat,
-            minHeight: Global.minHeight, minWidth: Global.minWidth, quality: Global.quality);
-      } else {
-        compressedFile = fileImage;
-      }
+      File compressedFile = await processImageFile(fileImage!);
       Global.imagesList.add(Global.imageFile!);
       Global.imagesFileList.add(compressedFile);
     }
@@ -618,21 +563,15 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
         }
 
         clipboardList.add(uploadResult[1]);
+        setState(() {
+          // Add to uploadedLinks map
+          uploadedLinks[Global.imagesList[i]] = uploadResult[1];
+        });
       } else {
         failCount++;
         failList.add(Global.imagesList[i]);
       }
     }
-
-    setState(() {
-      uploadList.clear();
-      uploadPathList.clear();
-      uploadFileNameList.clear();
-      Global.imagesList.clear();
-      Global.imagesFileList.clear();
-      Global.imageFile = null;
-      Global.imageOriginalFile = null;
-    });
 
     if (successCount == 0) {
       String content = "全部上传失败\n\n失败的图片列表:\n\n";
@@ -645,10 +584,9 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
       return;
     } else if (failCount == 0) {
       eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-      if (Global.isCopyLink == true) {
-        await flutter_services.Clipboard.setData(flutter_services.ClipboardData(
-            text: clipboardList.toString().substring(1, clipboardList.toString().length - 1)));
-        clipboardList.clear();
+      if (Global.isCopyLink == true && clipboardList.isNotEmpty) {
+        // Save all links to clipboard with new line separator
+        await flutter_services.Clipboard.setData(flutter_services.ClipboardData(text: clipboardList.join('\n')));
       }
       String content = "图片列表:\n";
       for (String successImage in successList) {
@@ -664,14 +602,9 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
       }
     } else {
       eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-      if (Global.isCopyLink == true) {
-        await flutter_services.Clipboard.setData(flutter_services.ClipboardData(
-            text: clipboardList
-                .toString()
-                .substring(1, clipboardList.toString().length - 1)
-                .replaceAll(', ', '\n')
-                .replaceAll(',', '\n')));
-        clipboardList.clear();
+      if (Global.isCopyLink == true && clipboardList.isNotEmpty) {
+        // Save all successful links to clipboard with new line separator
+        await flutter_services.Clipboard.setData(flutter_services.ClipboardData(text: clipboardList.join('\n')));
       }
 
       String content = "部分上传成功~\n\n上传成功的图片列表:\n\n";
@@ -689,6 +622,198 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
     }
   }
 
+  Future<void> _handleBatchUploadCompletion(List<String> paths, List<String> fileNames) async {
+    // Wait for all uploads to complete
+    try {
+      await uploadManager.whenBatchUploadsComplete(paths, fileNames);
+
+      // After completion, update all links
+      clipboardList.clear();
+      for (var i = 0; i < fileNames.length; i++) {
+        var task = uploadManager.getUpload(fileNames[i]);
+        if (task != null && task.status.value == UploadStatus.completed && task.formattedUrl.isNotEmpty) {
+          // Add to clipboard list
+          clipboardList.add(task.formattedUrl);
+          // Update the links map
+          setState(() {
+            uploadedLinks[fileNames[i]] = task.formattedUrl;
+          });
+        }
+      }
+
+      // Copy all successful links to clipboard if enabled
+      if (Global.isCopyLink && clipboardList.isNotEmpty) {
+        await flutter_services.Clipboard.setData(flutter_services.ClipboardData(text: clipboardList.join('\n')));
+        if (context.mounted) {
+          showToastWithContext(context, '已复制${clipboardList.length}个链接到剪贴板');
+        }
+      }
+    } catch (e) {
+      FLog.error(
+          className: 'HomePage',
+          methodName: '_handleBatchUploadCompletion',
+          text: formatErrorMessage({
+            'paths': paths,
+            'fileNames': fileNames,
+          }, e.toString()),
+          dataLogType: DataLogType.ERRORS.toString());
+    }
+  }
+
+  Future<void> showFormatSelectionDialog() async {
+    await showDialog(
+      barrierDismissible: true,
+      context: context,
+      builder: (context) {
+        return SimpleDialog(
+          title: const Text(
+            '选择默认链接格式',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          children: [
+            _buildFormatOption('rawurl', 'URL格式'),
+            _buildFormatOption('html', 'HTML格式'),
+            _buildFormatOption('bbcode', 'BBcode格式'),
+            _buildFormatOption('markdown', 'markdown格式'),
+            _buildFormatOption('markdown_with_link', 'markdown格式(带链接)'),
+            _buildFormatOption('custom', '自定义格式'),
+            SimpleDialogOption(
+              child: TextFormField(
+                textAlign: TextAlign.center,
+                initialValue: Global.customLinkFormat,
+                decoration: const InputDecoration(
+                  hintText: r'使用$url和$fileName作为占位符',
+                ),
+                onChanged: (String value) {
+                  Global.setCustomLinkFormat(value);
+                },
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildFormatOption(String format, String label) {
+    return SimpleDialogOption(
+      child: Text(
+        Global.defaultLKformat == format ? '$label \u2713' : label,
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          color: Global.defaultLKformat == format ? Colors.blue : Colors.black,
+          fontWeight: Global.defaultLKformat == format ? FontWeight.bold : FontWeight.normal,
+        ),
+      ),
+      onPressed: () async {
+        Global.setLKformat(format);
+        if (mounted) {
+          showToastWithContext(context, '已设置为$label');
+          Navigator.pop(context);
+        }
+      },
+    );
+  }
+
+  List<SpeedDialChild> _buildSpeedDialChildren() {
+    // Main image hosts
+    final List<Map<String, dynamic>> mainHosts = [
+      {'id': 'upyun', 'icon': 0x0055, 'label': '又拍'},
+      {'id': 'tencent', 'icon': 0x0054, 'label': '腾讯'},
+      {'id': 'sm.ms', 'icon': 0x0053, 'label': 'SM.MS'},
+      {'id': 'qiniu', 'icon': 0x0051, 'label': '七牛'},
+      {'id': 'lsky.pro', 'icon': 0x004C, 'label': '兰空'},
+      {'id': 'imgur', 'icon': 0x0049, 'label': 'Imgur'},
+      {'id': 'github', 'icon': 0x0047, 'label': 'Github'},
+      {'id': 'ftp', 'icon': 0x0046, 'label': 'FTP'},
+      {'id': 'aliyun', 'icon': 0x0041, 'label': '阿里'},
+    ];
+
+    // More hosts for the dialog
+    final List<Map<String, dynamic>> moreHosts = [
+      {'id': 'alist', 'label': 'Alist V3'},
+      {'id': 'aws', 'label': 'S3兼容平台'},
+      {'id': 'webdav', 'label': 'WebDAV'},
+    ];
+
+    List<SpeedDialChild> children = mainHosts
+        .map((host) => SpeedDialChild(
+              shape: const CircleBorder(),
+              child: Icon(
+                IconData(host['icon']),
+                color: Colors.white,
+              ),
+              backgroundColor:
+                  Global.defaultPShost == host['id'] ? Colors.amber : const Color.fromARGB(255, 97, 180, 248),
+              label: host['label'],
+              labelStyle: const TextStyle(fontSize: 12.0),
+              labelBackgroundColor: Colors.white,
+              elevation: 3,
+              onTap: () async {
+                await setdefaultPShostRemoteAndLocal(host['id']);
+                eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
+                setState(() {});
+              },
+            ))
+        .toList();
+
+    // Add "More" button
+    children.add(SpeedDialChild(
+      shape: const CircleBorder(),
+      child: const Icon(
+        Icons.more_horiz_rounded,
+        color: Colors.white,
+      ),
+      backgroundColor: !mainHosts.map((host) => host['id']).contains(Global.defaultPShost)
+          ? Colors.amber
+          : const Color.fromARGB(255, 97, 180, 248),
+      label: '更多',
+      labelStyle: const TextStyle(fontSize: 12.0),
+      labelBackgroundColor: Colors.white,
+      elevation: 3,
+      onTap: () async {
+        await showDialog(
+          barrierDismissible: true,
+          context: context,
+          builder: (context) {
+            return SimpleDialog(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
+              title: const Text(
+                '选择要为默认的图床',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              children: moreHosts
+                  .map((host) => SimpleDialogOption(
+                        child: ListTile(
+                          dense: true,
+                          visualDensity: VisualDensity.compact,
+                          title: Text(host['label'],
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                  color: Global.defaultPShost == host['id']
+                                      ? Colors.amber
+                                      : const Color.fromARGB(255, 97, 180, 248))),
+                          onTap: () async {
+                            Navigator.pop(context);
+                            await setdefaultPShostRemoteAndLocal(host['id']);
+                            eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
+                            setState(() {});
+                          },
+                        ),
+                      ))
+                  .toList(),
+            );
+          },
+        );
+        setState(() {});
+      },
+    ));
+
+    return children;
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -703,7 +828,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
           flexibleSpace: Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withValues(alpha: 0.8)],
+                colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withAlpha(200)],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
               ),
@@ -711,149 +836,63 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
           ),
           actions: [
             PopupMenuButton(
+                icon: const Icon(
+                  Icons.settings,
+                  color: Colors.white,
+                  size: 26,
+                ),
+                position: PopupMenuPosition.under,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
+                itemBuilder: (BuildContext context) {
+                  return [
+                    PopupMenuItem(
+                      padding: EdgeInsets.zero,
+                      child: Row(
+                        children: [
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          const Text('自动复制链接'),
+                          Switch(
+                            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            value: Global.isCopyLink,
+                            activeColor: Theme.of(context).primaryColor,
+                            onChanged: (value) async {
+                              if (value == true) {
+                                showToastWithContext(context, '开启链接复制');
+                              } else {
+                                showToastWithContext(context, '关闭链接复制');
+                              }
+                              Global.setIsCopyLink(value);
+                              setState(() {});
+                              if (context.mounted) {
+                                Navigator.pop(context);
+                              }
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    const PopupMenuItem(
+                      value: 1,
+                      child: Text('选择默认链接格式'),
+                    ),
+                    const PopupMenuItem(
+                      value: 2,
+                      child: Text('文件重命名方式'),
+                    ),
+                  ];
+                },
                 onSelected: (value) {
                   if (value == 1) {
-                    showDialog(
-                      barrierDismissible: true,
-                      context: context,
-                      builder: (context) {
-                        return SimpleDialog(
-                          title: const Text(
-                            '选择默认链接格式',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          children: [
-                            SimpleDialogOption(
-                              child: Text(
-                                Global.defaultLKformat == 'rawurl' ? 'URL格式 \u2713' : 'URL格式',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: Global.defaultLKformat == 'rawurl' ? Colors.blue : Colors.black,
-                                  fontWeight: Global.defaultLKformat == 'rawurl' ? FontWeight.bold : FontWeight.normal,
-                                ),
-                              ),
-                              onPressed: () async {
-                                Global.setLKformat('rawurl');
-                                if (context.mounted) {
-                                  showToastWithContext(context, '已设置为URL格式');
-                                  Navigator.pop(context);
-                                }
-                              },
-                            ),
-                            SimpleDialogOption(
-                              child: Text(
-                                Global.defaultLKformat == 'html' ? 'HTML格式 \u2713' : 'HTML格式',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: Global.defaultLKformat == 'html' ? Colors.blue : Colors.black,
-                                  fontWeight: Global.defaultLKformat == 'html' ? FontWeight.bold : FontWeight.normal,
-                                ),
-                              ),
-                              onPressed: () async {
-                                Global.setLKformat('html');
-                                if (mounted) {
-                                  showToastWithContext(context, '已设置为HTML格式');
-                                  Navigator.pop(context);
-                                }
-                              },
-                            ),
-                            SimpleDialogOption(
-                              child: Text(
-                                Global.defaultLKformat == 'bbcode' ? 'BBcode格式 \u2713' : 'BBcode格式',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: Global.defaultLKformat == 'bbcode' ? Colors.blue : Colors.black,
-                                  fontWeight: Global.defaultLKformat == 'bbcode' ? FontWeight.bold : FontWeight.normal,
-                                ),
-                              ),
-                              onPressed: () async {
-                                Global.setLKformat('bbcode');
-                                if (mounted) {
-                                  showToastWithContext(context, '已设置为BBcode格式');
-                                  Navigator.pop(context);
-                                }
-                              },
-                            ),
-                            SimpleDialogOption(
-                              child: Text(
-                                Global.defaultLKformat == 'markdown' ? 'markdown格式 \u2713' : 'markdown格式',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: Global.defaultLKformat == 'markdown' ? Colors.blue : Colors.black,
-                                  fontWeight:
-                                      Global.defaultLKformat == 'markdown' ? FontWeight.bold : FontWeight.normal,
-                                ),
-                              ),
-                              onPressed: () async {
-                                Global.setLKformat('markdown');
-                                if (mounted) {
-                                  showToastWithContext(context, '已设置为markdown格式');
-                                  Navigator.pop(context);
-                                }
-                              },
-                            ),
-                            SimpleDialogOption(
-                              child: Text(
-                                Global.defaultLKformat == 'markdown_with_link'
-                                    ? 'markdown格式(带链接) \u2713'
-                                    : 'markdown格式(带链接)',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: Global.defaultLKformat == 'markdown_with_link' ? Colors.blue : Colors.black,
-                                  fontWeight: Global.defaultLKformat == 'markdown_with_link'
-                                      ? FontWeight.bold
-                                      : FontWeight.normal,
-                                ),
-                              ),
-                              onPressed: () async {
-                                Global.setLKformat('markdown_with_link');
-                                if (context.mounted) {
-                                  showToastWithContext(context, '已设置为md_link格式');
-                                  Navigator.pop(context);
-                                }
-                              },
-                            ),
-                            SimpleDialogOption(
-                              child: Text(
-                                Global.defaultLKformat == 'custom' ? '自定义格式 \u2713' : '自定义格式',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: Global.defaultLKformat == 'custom' ? Colors.blue : Colors.black,
-                                  fontWeight: Global.defaultLKformat == 'custom' ? FontWeight.bold : FontWeight.normal,
-                                ),
-                              ),
-                              onPressed: () async {
-                                Global.setLKformat('custom');
-                                if (context.mounted) {
-                                  showToastWithContext(context, '已设置为自定义格式');
-                                  Navigator.pop(context);
-                                }
-                              },
-                            ),
-                            SimpleDialogOption(
-                              child: TextFormField(
-                                textAlign: TextAlign.center,
-                                initialValue: Global.customLinkFormat,
-                                decoration: const InputDecoration(
-                                  hintText: r'使用$url和$fileName作为占位符',
-                                ),
-                                onChanged: (String value) {
-                                  Global.setCustomLinkFormat(value);
-                                },
-                              ),
-                            ),
-                          ],
-                        );
-                      },
-                    );
+                    showFormatSelectionDialog();
                   } else if (value == 2) {
                     showDialog(
                       barrierDismissible: true,
                       context: context,
                       builder: (context) {
                         return SimpleDialog(
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                           title: const Text(
                             '选择重命名方式',
                             textAlign: TextAlign.center,
@@ -865,6 +904,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
                                 title: const Text('开启时间戳重命名'),
                                 subtitle: const Text('优先级按照自定义>时间戳>随机字符串'),
                                 trailing: Switch(
+                                  activeColor: Theme.of(context).primaryColor,
                                   value: Global.isTimeStamp,
                                   onChanged: (value) async {
                                     Global.setIsTimeStamp(value);
@@ -885,6 +925,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
                                 title: const Text('开启随机字符串重命名'),
                                 subtitle: const Text('字符串长度固定为30'),
                                 trailing: Switch(
+                                  activeColor: Theme.of(context).primaryColor,
                                   value: Global.isRandomName,
                                   onChanged: (value) async {
                                     Global.setIsRandomName(value);
@@ -904,6 +945,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
                               child: ListTile(
                                 title: const Text('使用自定义重命名'),
                                 trailing: Switch(
+                                  activeColor: Theme.of(context).primaryColor,
                                   value: Global.isCustomRename,
                                   onChanged: (value) async {
                                     Global.setIsCustomeRename(value);
@@ -980,57 +1022,12 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
                       },
                     );
                   }
-                },
-                icon: const Icon(
-                  Icons.settings,
-                  color: Colors.white,
-                  size: 30,
-                ),
-                position: PopupMenuPosition.under,
-                itemBuilder: (BuildContext context) {
-                  return [
-                    PopupMenuItem(
-                      padding: EdgeInsets.zero,
-                      child: Row(
-                        children: [
-                          const SizedBox(
-                            width: 10,
-                          ),
-                          const Text('自动复制链接'),
-                          Switch(
-                            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                            value: Global.isCopyLink,
-                            onChanged: (value) async {
-                              if (value == true) {
-                                showToastWithContext(context, '开启链接复制');
-                              } else {
-                                showToastWithContext(context, '关闭链接复制');
-                              }
-                              Global.setIsCopyLink(value);
-                              setState(() {});
-                              if (context.mounted) {
-                                Navigator.pop(context);
-                              }
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                    const PopupMenuItem(
-                      value: 1,
-                      child: Text('选择默认链接格式'),
-                    ),
-                    const PopupMenuItem(
-                      value: 2,
-                      child: Text('文件重命名方式'),
-                    ),
-                  ];
                 }),
             IconButton(
               icon: const Icon(
                 Icons.cleaning_services_sharp,
                 color: Colors.white,
-                size: 30,
+                size: 26,
               ),
               onPressed: () {
                 uploadList.clear();
@@ -1057,15 +1054,16 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
                   children: [
                     Image.asset(
                       'assets/images/empty.png',
-                      width: 150,
-                      height: 150,
+                      width: 180,
+                      height: 180,
                     ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    const Text('',
+                    const SizedBox(height: 20),
+                    Text('点击下方按钮上传图片',
                         textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))),
+                        style: TextStyle(fontSize: 18, color: Theme.of(context).primaryColor.withValues(alpha: 0.7))),
+                    const SizedBox(height: 10),
+                    Text('当前图床: ${psNameTranslate[Global.defaultPShost]}',
+                        textAlign: TextAlign.center, style: TextStyle(fontSize: 14, color: Colors.grey[600])),
                   ],
                 ),
               )
@@ -1075,13 +1073,25 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
                 ),
               ),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-        floatingActionButton: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-          SizedBox(
-              height: 40,
-              width: 40,
-              child: FloatingActionButton(
-                heroTag: 'camera',
-                backgroundColor: const Color.fromARGB(255, 180, 236, 182),
+        floatingActionButton: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(30),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.1),
+                  blurRadius: 10,
+                  spreadRadius: 1,
+                ),
+              ],
+            ),
+            child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+              _buildActionButton(
+                color: const Color.fromARGB(255, 180, 236, 182),
+                icon: Icons.camera_alt_outlined,
+                tooltip: '拍照上传',
                 onPressed: () async {
                   await _imageFromCamera();
                   for (int i = 0; i < Global.imagesList.length; i++) {
@@ -1106,64 +1116,28 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
                     return;
                   }
                 },
-                child: const Icon(
-                  Icons.camera_alt_outlined,
-                  color: Colors.white,
-                  size: 30,
-                ),
-              )),
-          const SizedBox(width: 10),
-          SizedBox(
-              height: 40,
-              width: 40,
-              child: FloatingActionButton(
-                heroTag: 'picture',
-                backgroundColor: const Color.fromARGB(255, 112, 215, 247),
+              ),
+              _buildActionButton(
+                color: const Color.fromARGB(255, 112, 215, 247),
+                icon: Icons.image_outlined,
+                tooltip: '从相册选择',
                 onPressed: () async {
                   await _multiImagePickerFromGallery();
-                  if (Global.imagesList.isNotEmpty) {
-                    for (int i = 0; i < Global.imagesList.length; i++) {
-                      uploadList.add([Global.imagesFileList[i].path, Global.imagesList[i]]);
-                      uploadPathList.add(Global.imagesFileList[i].path);
-                      uploadFileNameList.add(Global.imagesList[i]);
-                    }
-                  }
-                  setState(() {
-                    Global.imagesList.clear();
-                    Global.imagesFileList.clear();
-                    Global.imageFile = null;
-                    Global.imageOriginalFile = null;
-                  });
+                  addToUploadList();
                 },
-                child: const Icon(
-                  Icons.image_outlined,
-                  color: Colors.white,
-                  size: 30,
-                ),
-              )),
-          const SizedBox(width: 10),
-          SizedBox(
-              height: 40,
-              width: 40,
-              child: FloatingActionButton(
-                heroTag: 'multi',
-                backgroundColor: const Color.fromARGB(255, 237, 201, 241),
+              ),
+              _buildActionButton(
+                color: const Color.fromARGB(255, 237, 201, 241),
+                icon: Icons.camera,
+                tooltip: '连续拍照',
                 onPressed: () {
                   _captureAndGoBack();
                 },
-                child: const Icon(
-                  Icons.camera,
-                  color: Colors.white,
-                  size: 30,
-                ),
-              )),
-          const SizedBox(width: 10),
-          SizedBox(
-              height: 40,
-              width: 40,
-              child: FloatingActionButton(
-                heroTag: 'network',
-                backgroundColor: const Color.fromARGB(255, 248, 231, 136),
+              ),
+              _buildActionButton(
+                color: const Color.fromARGB(255, 248, 231, 136),
+                icon: Icons.wifi,
+                tooltip: '从网络获取',
                 onPressed: () async {
                   await showDialog(
                       context: context,
@@ -1176,266 +1150,63 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
                           requestCallBack: _imageFromNetwork(),
                         );
                       });
-                  if (Global.imagesList.isNotEmpty) {
-                    for (int i = 0; i < Global.imagesList.length; i++) {
-                      uploadList.add([Global.imagesFileList[i].path, Global.imagesList[i]]);
-                      uploadPathList.add(Global.imagesFileList[i].path);
-                      uploadFileNameList.add(Global.imagesList[i]);
-                    }
-                  }
-                  setState(() {
-                    Global.imagesList.clear();
-                    Global.imagesFileList.clear();
-                    Global.imageFile = null;
-                    Global.imageOriginalFile = null;
-                  });
-                },
-                child: const Icon(
-                  Icons.wifi,
-                  color: Colors.white,
-                  size: 30,
-                ),
-              )),
-          const SizedBox(width: 10),
-          SpeedDial(
-            renderOverlay: true,
-            overlayOpacity: 0.5,
-            buttonSize: const Size(41, 41),
-            childrenButtonSize: const Size(40, 40),
-            animatedIcon: AnimatedIcons.menu_close,
-            animatedIconTheme: const IconThemeData(color: Colors.white, size: 33.0),
-            backgroundColor: Colors.blue,
-            visible: true,
-            curve: Curves.bounceIn,
-            children: [
-              SpeedDialChild(
-                shape: const CircleBorder(),
-                child: const Icon(
-                  IconData(0x0055),
-                  color: Colors.white,
-                ),
-                backgroundColor:
-                    Global.defaultPShost == 'upyun' ? Colors.amber : const Color.fromARGB(255, 97, 180, 248),
-                label: '又拍',
-                labelStyle: const TextStyle(fontSize: 12.0),
-                onTap: () async {
-                  await setdefaultPShostRemoteAndLocal('upyun');
-                  eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-                  setState(() {});
+                  addToUploadList();
                 },
               ),
-              SpeedDialChild(
-                shape: const CircleBorder(),
-                child: const Icon(
-                  IconData(0x0054),
-                  color: Colors.white,
-                ),
-                backgroundColor:
-                    Global.defaultPShost == 'tencent' ? Colors.amber : const Color.fromARGB(255, 97, 180, 248),
-                label: '腾讯',
-                labelStyle: const TextStyle(fontSize: 12.0),
-                onTap: () async {
-                  await setdefaultPShostRemoteAndLocal('tencent');
-                  eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-                  setState(() {});
-                },
+              SpeedDial(
+                activeIcon: Icons.close,
+                activeForegroundColor: Colors.white,
+                activeBackgroundColor: Colors.redAccent,
+                renderOverlay: true,
+                overlayOpacity: 0.5,
+                buttonSize: const Size(40, 40),
+                childrenButtonSize: const Size(40, 40),
+                animatedIcon: AnimatedIcons.menu_close,
+                animatedIconTheme: const IconThemeData(color: Colors.white, size: 25.0),
+                backgroundColor: Colors.blue,
+                visible: true,
+                curve: Curves.bounceIn,
+                tooltip: '选择图床',
+                children: _buildSpeedDialChildren(),
               ),
-              SpeedDialChild(
-                shape: const CircleBorder(),
-                child: const Icon(
-                  IconData(0x0053),
-                  color: Colors.white,
-                ),
-                backgroundColor:
-                    Global.defaultPShost == 'sm.ms' ? Colors.amber : const Color.fromARGB(255, 97, 180, 248),
-                label: 'SM.MS',
-                labelStyle: const TextStyle(fontSize: 12.0),
-                onTap: () async {
-                  await setdefaultPShostRemoteAndLocal('sm.ms');
-                  eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-                  setState(() {});
-                },
-              ),
-              SpeedDialChild(
-                shape: const CircleBorder(),
-                child: const Icon(
-                  IconData(0x0051),
-                  color: Colors.white,
-                ),
-                backgroundColor:
-                    Global.defaultPShost == 'qiniu' ? Colors.amber : const Color.fromARGB(255, 97, 180, 248),
-                label: '七牛',
-                labelStyle: const TextStyle(fontSize: 12.0),
-                onTap: () async {
-                  await setdefaultPShostRemoteAndLocal('qiniu');
-                  eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-                  setState(() {});
-                },
-              ),
-              SpeedDialChild(
-                shape: const CircleBorder(),
-                child: const Icon(
-                  IconData(0x004C),
-                  color: Colors.white,
-                ),
-                backgroundColor:
-                    Global.defaultPShost == 'lsky.pro' ? Colors.amber : const Color.fromARGB(255, 97, 180, 248),
-                label: '兰空',
-                labelStyle: const TextStyle(fontSize: 12.0),
-                onTap: () async {
-                  await setdefaultPShostRemoteAndLocal('lsky.pro');
-                  eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-                  setState(() {});
-                },
-              ),
-              SpeedDialChild(
-                shape: const CircleBorder(),
-                child: const Icon(
-                  IconData(0x0049),
-                  color: Colors.white,
-                ),
-                backgroundColor:
-                    Global.defaultPShost == 'imgur' ? Colors.amber : const Color.fromARGB(255, 97, 180, 248),
-                label: 'Imgur',
-                labelStyle: const TextStyle(fontSize: 12.0),
-                onTap: () async {
-                  await setdefaultPShostRemoteAndLocal('imgur');
-                  eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-                  setState(() {});
-                },
-              ),
-              SpeedDialChild(
-                shape: const CircleBorder(),
-                child: const Icon(
-                  IconData(0x0047),
-                  color: Colors.white,
-                ),
-                backgroundColor:
-                    Global.defaultPShost == 'github' ? Colors.amber : const Color.fromARGB(255, 97, 180, 248),
-                label: 'Github',
-                labelStyle: const TextStyle(fontSize: 12.0),
-                onTap: () async {
-                  await setdefaultPShostRemoteAndLocal('github');
-                  eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-                  setState(() {});
-                },
-              ),
-              SpeedDialChild(
-                shape: const CircleBorder(),
-                child: const Icon(
-                  IconData(0x0046),
-                  color: Colors.white,
-                ),
-                backgroundColor: Global.defaultPShost == 'ftp' ? Colors.amber : const Color.fromARGB(255, 97, 180, 248),
-                label: 'FTP',
-                labelStyle: const TextStyle(fontSize: 12.0),
-                onTap: () async {
-                  await setdefaultPShostRemoteAndLocal('ftp');
-                  eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-                  setState(() {});
-                },
-              ),
-              SpeedDialChild(
-                shape: const CircleBorder(),
-                child: const Icon(
-                  IconData(0x0041),
-                  color: Colors.white,
-                ),
-                backgroundColor:
-                    Global.defaultPShost == 'aliyun' ? Colors.amber : const Color.fromARGB(255, 97, 180, 248),
-                label: '阿里',
-                labelStyle: const TextStyle(fontSize: 12.0),
-                onTap: () async {
-                  await setdefaultPShostRemoteAndLocal('aliyun');
-                  eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-                  setState(() {});
-                },
-              ),
-              SpeedDialChild(
-                shape: const CircleBorder(),
-                child: const Icon(
-                  Icons.more_horiz_rounded,
-                  color: Colors.white,
-                ),
-                backgroundColor: !['aliyun', 'ftp', 'github', 'imgur', 'lsky.pro', 'qiniu', 'sm.ms', 'tencent', 'upyun']
-                        .contains(Global.defaultPShost)
-                    ? Colors.amber
-                    : const Color.fromARGB(255, 97, 180, 248),
-                label: '更多',
-                labelStyle: const TextStyle(fontSize: 12.0),
-                onTap: () async {
-                  await showDialog(
-                    barrierDismissible: true,
-                    context: context,
-                    builder: (context) {
-                      return SimpleDialog(
-                        title: const Text(
-                          '选择要为默认的图床',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        children: [
-                          SimpleDialogOption(
-                              child: ListTile(
-                            dense: true,
-                            visualDensity: VisualDensity.compact,
-                            title: Text('Alist V3',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                    color: Global.defaultPShost == 'alist'
-                                        ? Colors.amber
-                                        : const Color.fromARGB(255, 97, 180, 248))),
-                            onTap: () async {
-                              Navigator.pop(context);
-                              await setdefaultPShostRemoteAndLocal('alist');
-                              eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-                              setState(() {});
-                            },
-                          )),
-                          SimpleDialogOption(
-                              child: ListTile(
-                            dense: true,
-                            visualDensity: VisualDensity.compact,
-                            title: Text('S3兼容平台',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                    color: Global.defaultPShost == 'aws'
-                                        ? Colors.amber
-                                        : const Color.fromARGB(255, 97, 180, 248))),
-                            onTap: () async {
-                              Navigator.pop(context);
-                              await setdefaultPShostRemoteAndLocal('aws');
-                              eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-                              setState(() {});
-                            },
-                          )),
-                          SimpleDialogOption(
-                              child: ListTile(
-                            dense: true,
-                            visualDensity: VisualDensity.compact,
-                            title: Text('WebDAV',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                    color: Global.defaultPShost == 'webdav'
-                                        ? Colors.amber
-                                        : const Color.fromARGB(255, 97, 180, 248))),
-                            onTap: () async {
-                              Navigator.pop(context);
-                              await setdefaultPShostRemoteAndLocal('webdav');
-                              eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-                              setState(() {});
-                            },
-                          )),
-                        ],
-                      );
-                    },
-                  );
-                  setState(() {});
-                },
-              ),
-            ],
+            ])));
+  }
+
+  Widget _buildActionButton(
+      {required Color color, required IconData icon, required Function() onPressed, required String tooltip}) {
+    return SizedBox(
+        height: 40,
+        width: 40,
+        child: FloatingActionButton(
+          heroTag: icon.toString(),
+          backgroundColor: color,
+          tooltip: tooltip,
+          onPressed: onPressed,
+          elevation: 4,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+          child: Icon(
+            icon,
+            color: Colors.white,
+            size: 24,
           ),
-        ]));
+        ));
+  }
+}
+
+// Clipper for rounded rectangle
+class ClipRoundedRectangle extends CustomClipper<RRect> {
+  final BorderRadius borderRadius;
+
+  ClipRoundedRectangle({required this.borderRadius});
+
+  @override
+  RRect getClip(Size size) {
+    return borderRadius.toRRect(Offset.zero & size);
+  }
+
+  @override
+  bool shouldReclip(CustomClipper<RRect> oldClipper) {
+    return true;
   }
 }
 
@@ -1445,13 +1216,17 @@ class ListItem extends StatefulWidget {
   final UploadTask? uploadTask;
   final String path;
   final String fileName;
+  final String? clipboardLink;
+  final Function(String?)? onCopy;
   const ListItem(
       {super.key,
       required this.onUploadPlayPausedPressed,
       required this.onDelete,
       required this.path,
       required this.fileName,
-      this.uploadTask});
+      this.uploadTask,
+      this.clipboardLink,
+      this.onCopy});
 
   @override
   ListItemState createState() => ListItemState();
@@ -1465,98 +1240,236 @@ class ListItemState extends State<ListItem> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(1.0),
-      child: Container(
-        decoration: BoxDecoration(
-            border: Border.all(
-              color: const Color.fromARGB(255, 203, 237, 253),
-            ),
-            borderRadius: const BorderRadius.all(Radius.circular(20))),
-        padding: const EdgeInsets.all(1.0),
-        child: Column(
+    // Get clipboard link from task if available and not already set
+    String? clipboardLink = widget.clipboardLink;
+    if (clipboardLink == null &&
+        widget.uploadTask != null &&
+        widget.uploadTask!.status.value == UploadStatus.completed) {
+      clipboardLink = widget.uploadTask!.formattedUrl;
+    }
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12.0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withValues(alpha: 0.15),
+            spreadRadius: 1,
+            blurRadius: 3,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                getImageIcon(widget.path),
-                Expanded(
-                    child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '文件名:${widget.fileName}',
-                    ),
-                    if (widget.uploadTask != null)
-                      ValueListenableBuilder(
-                          valueListenable: widget.uploadTask!.status,
-                          builder: (context, value, child) {
-                            return Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 8),
-                              child:
-                                  Text("状态: ${uploadStatus[value.toString()]}", style: const TextStyle(fontSize: 14)),
-                            );
-                          }),
-                  ],
-                )),
-                widget.uploadTask != null
-                    ? ValueListenableBuilder(
-                        valueListenable: widget.uploadTask!.status,
-                        builder: (context, value, child) {
-                          switch (widget.uploadTask!.status.value) {
-                            case UploadStatus.completed:
-                              return IconButton(
-                                  onPressed: () {
-                                    widget.onDelete(widget.path, widget.fileName);
-                                  },
-                                  icon: const Icon(
-                                    Icons.delete,
-                                    color: Colors.red,
-                                  ));
-                            case UploadStatus.failed:
-                            case UploadStatus.canceled:
-                              return IconButton(
-                                  onPressed: () async {
-                                    await widget.onUploadPlayPausedPressed(widget.path, widget.fileName);
-                                  },
-                                  icon: const Icon(
-                                    Icons.cloud_upload_outlined,
-                                    color: Colors.blue,
-                                  ));
-                            default:
-                              return widget.uploadTask == null || widget.uploadTask!.status.value == UploadStatus.queued
-                                  ? const Icon(
-                                      Icons.query_builder_rounded,
-                                      color: Colors.blue,
-                                    )
-                                  : ValueListenableBuilder(
-                                      valueListenable: widget.uploadTask!.progress,
-                                      builder: (context, value, child) {
-                                        return Container(
-                                          height: 20,
-                                          width: 20,
-                                          margin: const EdgeInsets.fromLTRB(0, 0, 10, 0),
-                                          child: CircularProgressIndicator(
-                                            value: value,
-                                            strokeWidth: 4,
-                                            color: widget.uploadTask!.status.value == UploadStatus.paused
-                                                ? Colors.grey
-                                                : Colors.blue,
-                                          ),
-                                        );
-                                      });
-                          }
-                        })
-                    : IconButton(
-                        onPressed: () async {
-                          await widget.onUploadPlayPausedPressed(widget.path, widget.fileName);
-                        },
-                        icon: const Icon(
-                          Icons.cloud_upload_outlined,
-                          color: Colors.green,
-                        ))
-              ],
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8.0),
+              child: SizedBox(
+                width: 45,
+                height: 45,
+                child: getImageIcon(widget.path),
+              ),
             ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    widget.fileName,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 14,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  if (widget.uploadTask != null)
+                    ValueListenableBuilder(
+                      valueListenable: widget.uploadTask!.status,
+                      builder: (context, value, child) {
+                        Color statusColor;
+                        switch (value) {
+                          case UploadStatus.completed:
+                            statusColor = Colors.green;
+                          case UploadStatus.failed:
+                          case UploadStatus.canceled:
+                            statusColor = Colors.red;
+                          case UploadStatus.uploading:
+                            statusColor = Colors.blue;
+                          default:
+                            statusColor = Colors.grey;
+                        }
+
+                        return Row(
+                          children: [
+                            Container(
+                              width: 8,
+                              height: 8,
+                              decoration: BoxDecoration(
+                                color: statusColor,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              "${uploadStatus[value.toString()]}",
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: statusColor,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            if (value == UploadStatus.uploading)
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.only(left: 8.0),
+                                  child: ValueListenableBuilder(
+                                    valueListenable: widget.uploadTask!.progress,
+                                    builder: (context, progressValue, child) {
+                                      return Container(
+                                        height: 4,
+                                        clipBehavior: Clip.hardEdge,
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(2),
+                                        ),
+                                        child: LinearProgressIndicator(
+                                          value: progressValue,
+                                          backgroundColor: Colors.grey.withValues(alpha: 0.2),
+                                          valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).primaryColor),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ),
+                          ],
+                        );
+                      },
+                    ),
+                ],
+              ),
+            ),
+            if (widget.uploadTask != null &&
+                widget.uploadTask!.status.value == UploadStatus.completed &&
+                (clipboardLink != null || widget.uploadTask!.formattedUrl.isNotEmpty))
+              IconButton(
+                onPressed: () {
+                  String linkText = clipboardLink ?? widget.uploadTask!.formattedUrl;
+                  flutter_services.Clipboard.setData(flutter_services.ClipboardData(
+                    text: linkText,
+                  ));
+                  showToastWithContext(context, '链接已复制到剪贴板');
+                  if (widget.onCopy != null) {
+                    widget.onCopy!(linkText);
+                  }
+                },
+                icon: const Icon(
+                  Icons.copy,
+                  color: Colors.green,
+                  size: 22,
+                ),
+                splashRadius: 24,
+              ),
+            widget.uploadTask != null
+                ? ValueListenableBuilder(
+                    valueListenable: widget.uploadTask!.status,
+                    builder: (context, value, child) {
+                      switch (widget.uploadTask!.status.value) {
+                        case UploadStatus.completed:
+                          return IconButton(
+                            onPressed: () {
+                              widget.onDelete(widget.path, widget.fileName);
+                            },
+                            icon: const Icon(
+                              Icons.delete_outline,
+                              color: Colors.red,
+                              size: 22,
+                            ),
+                            splashRadius: 24,
+                          );
+                        case UploadStatus.failed:
+                        case UploadStatus.canceled:
+                          return IconButton(
+                            onPressed: () async {
+                              await widget.onUploadPlayPausedPressed(widget.path, widget.fileName);
+                            },
+                            icon: const Icon(
+                              Icons.refresh_rounded,
+                              color: Colors.blue,
+                              size: 22,
+                            ),
+                            splashRadius: 24,
+                          );
+                        case UploadStatus.paused:
+                          return IconButton(
+                            onPressed: () async {
+                              await widget.onUploadPlayPausedPressed(widget.path, widget.fileName);
+                            },
+                            icon: const Icon(
+                              Icons.play_arrow_rounded,
+                              color: Colors.green,
+                              size: 24,
+                            ),
+                            splashRadius: 24,
+                          );
+                        case UploadStatus.uploading:
+                          return IconButton(
+                            onPressed: () async {
+                              await widget.onUploadPlayPausedPressed(widget.path, widget.fileName);
+                            },
+                            icon: const Icon(
+                              Icons.pause_rounded,
+                              color: Colors.orange,
+                              size: 22,
+                            ),
+                            splashRadius: 24,
+                          );
+                        default:
+                          return widget.uploadTask == null || widget.uploadTask!.status.value == UploadStatus.queued
+                              ? const Padding(
+                                  padding: EdgeInsets.all(12.0),
+                                  child: Icon(
+                                    Icons.access_time_rounded,
+                                    color: Colors.grey,
+                                    size: 22,
+                                  ),
+                                )
+                              : ValueListenableBuilder(
+                                  valueListenable: widget.uploadTask!.progress,
+                                  builder: (context, value, child) {
+                                    return Container(
+                                      height: 24,
+                                      width: 24,
+                                      margin: const EdgeInsets.fromLTRB(0, 0, 12, 0),
+                                      child: CircularProgressIndicator(
+                                        value: value,
+                                        strokeWidth: 3,
+                                        color: widget.uploadTask!.status.value == UploadStatus.paused
+                                            ? Colors.grey
+                                            : Colors.blue,
+                                      ),
+                                    );
+                                  });
+                      }
+                    })
+                : IconButton(
+                    onPressed: () async {
+                      await widget.onUploadPlayPausedPressed(widget.path, widget.fileName);
+                    },
+                    icon: const Icon(
+                      Icons.cloud_upload_outlined,
+                      color: Colors.green,
+                      size: 22,
+                    ),
+                    splashRadius: 24,
+                  ),
           ],
         ),
       ),
@@ -1571,4 +1484,29 @@ TableRow generateTableRow(String placeholder, String description) {
       TableCell(child: Center(child: Text(description))),
     ],
   );
+}
+
+Future<File> processImageFile(File imageFile) async {
+  String fileName;
+
+  if (Global.isCustomRename) {
+    fileName = await renamePictureWithCustomFormat(imageFile);
+  } else if (Global.isTimeStamp) {
+    fileName = await renamePictureWithTimestamp(imageFile);
+  } else if (Global.isRandomName) {
+    fileName = await renamePictureWithRandomString(imageFile);
+  } else {
+    fileName = my_path.basename(imageFile.path);
+  }
+  Global.imageFile = fileName;
+  File compressedFile;
+  if (Global.isCompress) {
+    ImageCompress imageCompress = ImageCompress();
+    compressedFile = await imageCompress.compressAndGetFile(
+        imageFile.path, my_path.basename(Global.imageFile!), Global.defaultCompressFormat,
+        minHeight: Global.minHeight, minWidth: Global.minWidth, quality: Global.quality);
+  } else {
+    compressedFile = imageFile;
+  }
+  return compressedFile;
 }
