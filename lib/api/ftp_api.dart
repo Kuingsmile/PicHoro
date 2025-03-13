@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:f_logs/f_logs.dart';
 import 'package:ftpconnect/ftpconnect.dart';
 import 'package:dartssh2/dartssh2.dart';
 import 'package:path_provider/path_provider.dart';
@@ -195,37 +194,37 @@ class FTPImageUploadUtils {
                 '$ftpCachePath/$thumbnailFileName'
               ];
             } else {
-              FLog.error(
-                  className: "FTPImageUploadUtils",
-                  methodName: "uploadApiFTP",
-                  text: formatErrorMessage({
+              flogErr(
+                  'upload faild',
+                  {
                     'path': path,
                     'name': name,
-                  }, 'upload failed'),
-                  dataLogType: DataLogType.ERRORS.toString());
+                  },
+                  "FTPImageUploadUtils",
+                  "uploadApiFTP");
               return ['failed'];
             }
           } else {
-            FLog.error(
-                className: "FTPImageUploadUtils",
-                methodName: "uploadApiFTP",
-                text: formatErrorMessage({
+            flogErr(
+                'connect failed',
+                {
                   'path': path,
                   'name': name,
-                }, 'connect failed'),
-                dataLogType: DataLogType.ERRORS.toString());
+                },
+                "FTPImageUploadUtils",
+                "uploadApiFTP");
             return ['failed'];
           }
       }
     } catch (e) {
-      FLog.error(
-          className: "FTPImageUploadUtils",
-          methodName: "uploadApiFTP",
-          text: formatErrorMessage({
+      flogErr(
+          e,
+          {
             'path': path,
             'name': name,
-          }, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+          },
+          "FTPImageUploadUtils",
+          "uploadApiFTP");
       return ['failed'];
     }
   }
@@ -286,11 +285,14 @@ class FTPImageUploadUtils {
         return ['success'];
       }
     } catch (e) {
-      FLog.error(
-          className: "FTPImageUploadUtils",
-          methodName: "deleteApi",
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(
+          e,
+          {
+            'deleteMap': deleteMap,
+            'configMap': configMap,
+          },
+          "FTPImageUploadUtils",
+          "deleteApi");
       return ['failed'];
     }
   }

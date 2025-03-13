@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:f_logs/f_logs.dart';
 
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/picture_host_configure/configure_store/configure_store_file.dart';
 import 'package:horopic/picture_host_configure/configure_store/configure_template.dart';
 import 'package:horopic/picture_host_manage/manage_api/imgur_manage_api.dart';
-import 'package:horopic/picture_host_configure/widgets/configure_widgets.dart';
+import 'package:horopic/widgets/configure_widgets.dart';
 
 class ImgurConfigureStoreEdit extends StatefulWidget {
   final String storeKey;
@@ -187,11 +186,7 @@ class ImgurConfigureStoreEditState extends State<ImgurConfigureStoreEdit> {
         showToast('保存成功');
         return true;
       } catch (e) {
-        FLog.error(
-            className: 'ImgurConfigStoreEditPage',
-            methodName: '_saveConfig',
-            text: formatErrorMessage({}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
+        flogErr(e, {}, 'ImgurConfigStoreEditPage', '_saveConfig');
       }
       showToast('保存失败');
       return false;

@@ -1,17 +1,16 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:f_logs/f_logs.dart';
 import 'package:fluro/fluro.dart';
 import 'package:minio/minio.dart';
 
 import 'package:horopic/router/application.dart';
-import 'package:horopic/pages/loading.dart';
+import 'package:horopic/widgets/net_loading_dialog.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/event_bus_utils.dart';
 import 'package:horopic/picture_host_manage/manage_api/aws_manage_api.dart';
-import 'package:horopic/picture_host_configure/widgets/configure_widgets.dart';
+import 'package:horopic/widgets/configure_widgets.dart';
 
 class AwsConfig extends StatefulWidget {
   const AwsConfig({super.key});
@@ -53,11 +52,7 @@ class AwsConfigState extends State<AwsConfig> {
       isEnableSSL = configMap['isEnableSSL'] ?? true;
       setState(() {});
     } catch (e) {
-      FLog.error(
-          className: 'AwsConfigState',
-          methodName: 'initConfig',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {}, 'AwsConfigState', 'initConfig');
     }
   }
 
@@ -322,11 +317,7 @@ class AwsConfigState extends State<AwsConfig> {
       await awsConfigFile.writeAsString(awsConfigJson);
       showToast('保存成功');
     } catch (e) {
-      FLog.error(
-          className: 'AwsConfigPage',
-          methodName: 'saveConfig',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {}, 'AwsConfigPage', 'saveConfig');
       if (context.mounted) {
         return showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
       }
@@ -385,11 +376,7 @@ class AwsConfigState extends State<AwsConfig> {
                 '检测通过，您的配置信息为:\nAccessKeyID:\n$accessKeyID\nSecretAccessKey:\n$secretAccessKey\nBucket:\n$bucket\nEndpoint:\n$endpoint\nRegion:\n$region\nUploadPath:\n${configMap['uploadPath']}\nCustomUrl:\n${configMap['customUrl']}\n是否使用S3路径风格:\n${configMap['isS3PathStyle']}\n是否启用SSL连接:\n$isEnableSSL');
       }
     } catch (e) {
-      FLog.error(
-          className: 'AwsConfigPage',
-          methodName: 'checkAwsConfig',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {}, 'AwsConfigPage', 'checkAwsConfig');
       if (context.mounted) {
         return showCupertinoAlertDialog(context: context, title: "检查失败!", content: e.toString());
       }

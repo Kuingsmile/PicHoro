@@ -3,7 +3,6 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:f_logs/f_logs.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'package:horopic/utils/global.dart';
@@ -28,11 +27,7 @@ class SmmsManageAPI {
       final file = await localFile;
       return await file.readAsString();
     } catch (e) {
-      FLog.error(
-          className: 'SmmsManageAPI',
-          methodName: 'readSmmsConfig',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {}, "SmmsManageAPI", "readSmmsConfig");
       return "Error";
     }
   }

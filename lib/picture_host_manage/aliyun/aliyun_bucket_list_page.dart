@@ -4,11 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:grouped_list/grouped_list.dart';
 import 'package:fluro/fluro.dart';
-import 'package:f_logs/f_logs.dart';
 
 import 'package:horopic/router/application.dart';
 import 'package:horopic/router/routers.dart';
-import 'package:horopic/picture_host_manage/common_page/loading_state.dart' as loading_state;
+import 'package:horopic/picture_host_manage/common/loading_state.dart' as loading_state;
 import 'package:horopic/picture_host_manage/manage_api/aliyun_manage_api.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/global.dart';
@@ -102,11 +101,7 @@ class AliyunBucketListState extends loading_state.BaseLoadingPageState<AliyunBuc
         });
       }
     } catch (e) {
-      FLog.error(
-          className: 'AliyunBucketListState',
-          methodName: 'initBucketList',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {}, 'AliyunBucketListState', 'initBucketList');
       if (mounted) {
         setState(() {
           state = loading_state.LoadState.ERROR;
@@ -296,11 +291,7 @@ class AliyunBucketListState extends loading_state.BaseLoadingPageState<AliyunBuc
                         aclState['aclState'] = '未获取';
                       }
                     } catch (e) {
-                      FLog.error(
-                          className: 'AliyunBucketListPage',
-                          methodName: 'buildSuccess_more',
-                          text: formatErrorMessage({}, e.toString()),
-                          dataLogType: DataLogType.ERRORS.toString());
+                      flogErr(e, {}, 'AliyunBucketListPage', 'buildSuccess_more');
                       aclState['aclState'] = '未获取';
                     }
                     setState(() {});
@@ -508,11 +499,7 @@ class AliyunBucketListState extends loading_state.BaseLoadingPageState<AliyunBuc
                     }
                     return;
                   } catch (e) {
-                    FLog.error(
-                        className: 'AliyunBucketListPage',
-                        methodName: 'buildBottomSheetWidget',
-                        text: formatErrorMessage({}, e.toString()),
-                        dataLogType: DataLogType.ERRORS.toString());
+                    flogErr(e, {}, 'AliyunBucketListPage', 'buildBottomSheetWidget');
                     showToast('删除失败');
                     if (context.mounted) {
                       Navigator.of(context).pop();

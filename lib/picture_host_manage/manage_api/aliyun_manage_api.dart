@@ -4,7 +4,6 @@ import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:f_logs/f_logs.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as my_path;
 import 'package:xml2json/xml2json.dart';
@@ -64,11 +63,7 @@ class AliyunManageAPI {
       String contents = await file.readAsString();
       return contents;
     } catch (e) {
-      FLog.error(
-          className: 'AliyunManageAPI',
-          methodName: 'readAliyunConfig',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {}, 'AliyunManageAPI', 'readAliyunConfig');
       return "Error";
     }
   }
@@ -137,17 +132,17 @@ class AliyunManageAPI {
       String authorization = "OSS $accessKeyId:$signature";
       return authorization;
     } catch (e) {
-      FLog.error(
-          className: 'AliyunManageAPI',
-          methodName: 'aliyunAuthorization',
-          text: formatErrorMessage({
+      flogErr(
+          e,
+          {
             'method': method,
             'canonicalizedResource': canonicalizedResource,
             'headers': headers,
             'contentMd5': contentMd5,
             'contentType': contentType,
-          }, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+          },
+          'AliyunManageAPI',
+          'aliyunAuthorization');
       rethrow;
     }
   }
@@ -391,14 +386,14 @@ class AliyunManageAPI {
       await aliyunConfigFile.writeAsString(aliyunConfigJson);
       return ['success'];
     } catch (e) {
-      FLog.error(
-          className: "AliyunManageAPI",
-          methodName: "setDefaultBucket",
-          text: formatErrorMessage({
+      flogErr(
+          e,
+          {
             'element': element,
             'folder': folder,
-          }, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+          },
+          "AliyunManageAPI",
+          "setDefaultBucket");
       return ['failed'];
     }
   }

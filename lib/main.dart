@@ -1,6 +1,6 @@
-import 'package:f_logs/f_logs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:horopic/utils/analytics_service.dart';
 import 'package:horopic/utils/system_font_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -12,12 +12,14 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   try {
     await mainInit();
+    AnalyticsService().trackAppOpen();
   } catch (e) {
-    FLog.error(
-        className: 'main',
-        methodName: 'mainInit',
-        text: formatErrorMessage({}, e.toString()),
-        dataLogType: DataLogType.ERRORS.toString());
+    flogErr(
+      e,
+      {},
+      'main',
+      'mainInit',
+    );
   }
 
   runApp(const MyApp());

@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluro/fluro.dart';
-import 'package:f_logs/f_logs.dart';
 
 import 'package:horopic/picture_host_configure/configure_store/configure_store_file.dart';
 import 'package:horopic/picture_host_configure/configure_page/configure_export.dart';
@@ -340,11 +339,7 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
           return false;
       }
     } catch (e) {
-      FLog.error(
-          className: 'ConfigureStorePage',
-          methodName: 'applyConfigAsDefault',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {}, 'ConfigureStorePage', 'applyConfigAsDefault');
       return false;
     }
   }

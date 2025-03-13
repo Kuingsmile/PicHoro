@@ -4,7 +4,6 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter/services.dart';
-import 'package:f_logs/f_logs.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'package:horopic/utils/global.dart';
@@ -29,11 +28,7 @@ class GithubManageAPI {
       String contents = await file.readAsString();
       return contents;
     } catch (e) {
-      FLog.error(
-          className: 'GithubManageAPI',
-          methodName: 'readGithubConfig',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {}, 'GithubManageAPI', 'readGithubConfig');
       return "Error";
     }
   }
@@ -172,7 +167,13 @@ class GithubManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      flogErr(e, {}, "GithubManageAPI", "getOtherReposList");
+      flogErr(
+          e,
+          {
+            'username': username,
+          },
+          "GithubManageAPI",
+          "getOtherReposList");
       return [e.toString()];
     }
   }
@@ -239,6 +240,7 @@ class GithubManageAPI {
           {
             'username': username,
             'repoName': repoName,
+            'branch': branch,
           },
           "GithubManageAPI",
           "getRootDirSha");
@@ -274,6 +276,7 @@ class GithubManageAPI {
           {
             'username': username,
             'repoName': repoName,
+            'sha': sha,
           },
           "GithubManageAPI",
           "getRepoDirList");
@@ -306,29 +309,18 @@ class GithubManageAPI {
         }
       }
     } catch (e) {
-      if (e is DioException) {
-        if (e.toString().contains('This repository is empty')) {
-          return ['empty'];
-        } else {
-          FLog.error(
-              className: "GithubManageAPI",
-              methodName: "isDirEmpty",
-              text: formatErrorMessage({
-                'username': username,
-                'repoName': repoName,
-              }, e.toString(), isDioError: true, dioErrorMessage: e),
-              dataLogType: DataLogType.ERRORS.toString());
-        }
-      } else {
-        FLog.error(
-            className: "GithubManageAPI",
-            methodName: "isDirEmpty",
-            text: formatErrorMessage({
-              'username': username,
-              'repoName': repoName,
-            }, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
+      if (e is DioException && e.toString().contains('This repository is empty')) {
+        return ['empty'];
       }
+      flogErr(
+          e,
+          {
+            'username': username,
+            'repoName': repoName,
+            'bucketPrefix': bucketPrefix,
+          },
+          'GithubManageAPI',
+          'isDirEmpty');
       return ['error'];
     }
   }
@@ -356,25 +348,15 @@ class GithubManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "GithubManageAPI",
-            methodName: "getRepoFileContent",
-            text: formatErrorMessage({
-              'username': username,
-              'repoName': repoName,
-            }, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "GithubManageAPI",
-            methodName: "getRepoFileContent",
-            text: formatErrorMessage({
-              'username': username,
-              'repoName': repoName,
-            }, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogErr(
+          e,
+          {
+            'username': username,
+            'repoName': repoName,
+            'filePath': filePath,
+          },
+          'GithubManageAPI',
+          'getRepoFileContent');
       return [e.toString()];
     }
   }
@@ -407,29 +389,17 @@ class GithubManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "GithubManageAPI",
-            methodName: "deleteRepoFile",
-            text: formatErrorMessage({
-              'username': username,
-              'repoName': repoName,
-              'path': path,
-              'branch': branch,
-            }, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "GithubManageAPI",
-            methodName: "deleteRepoFile",
-            text: formatErrorMessage({
-              'username': username,
-              'repoName': repoName,
-              'path': path,
-              'branch': branch,
-            }, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogErr(
+          e,
+          {
+            'username': username,
+            'repoName': repoName,
+            'path': path,
+            'sha': sha,
+            'branch': branch,
+          },
+          "GithubManageAPI",
+          "deleteRepoFile");
       return [e.toString()];
     }
   }
@@ -466,27 +436,17 @@ class GithubManageAPI {
         await deleteFolder(username, repoName, '${path + dirs[i]['path']}/', branch, dirs[i]['sha']);
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "GithubManageAPI",
-            methodName: "deleteFolder",
-            text: formatErrorMessage({
-              'username': username,
-              'repoName': repoName,
-              'path': path,
-            }, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "GithubManageAPI",
-            methodName: "deleteFolder",
-            text: formatErrorMessage({
-              'username': username,
-              'repoName': repoName,
-              'path': path,
-            }, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogErr(
+          e,
+          {
+            'username': username,
+            'repoName': repoName,
+            'path': path,
+            'branch': branch,
+            'sha': sha,
+          },
+          "GithubManageAPI",
+          "deleteFolder");
       return [e.toString()];
     }
   }
@@ -514,11 +474,14 @@ class GithubManageAPI {
       await githubConfigFile.writeAsString(githubConfigJson);
       return ['success'];
     } catch (e) {
-      FLog.error(
-          className: "GithubManageAPI",
-          methodName: "setDefaultRepo",
-          text: formatErrorMessage({'folder': folder}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(
+          e,
+          {
+            'element': element,
+            'folder': folder,
+          },
+          "GithubManageAPI",
+          "setDefaultRepo");
       return ['failed'];
     }
   }
@@ -578,23 +541,14 @@ class GithubManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "GithubManageAPI",
-            methodName: "createFolder",
-            text: formatErrorMessage({
-              'newPrefix': newPrefix,
-            }, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "GithubManageAPI",
-            methodName: "createFolder",
-            text: formatErrorMessage({
-              'newPrefix': newPrefix,
-            }, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogErr(
+          e,
+          {
+            'element': element,
+            'newPrefix': newPrefix,
+          },
+          "GithubManageAPI",
+          "createFolder");
       return [e.toString()];
     }
   }
@@ -645,25 +599,16 @@ class GithubManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "GithubManageAPI",
-            methodName: "uploadFile",
-            text: formatErrorMessage({
-              'filePath': filePath,
-              'newPrefix': newPrefix,
-            }, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "GithubManageAPI",
-            methodName: "uploadFile",
-            text: formatErrorMessage({
-              'filePath': filePath,
-              'newPrefix': newPrefix,
-            }, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogErr(
+          e,
+          {
+            'element': element,
+            'filename': filename,
+            'filePath': filePath,
+            'newPrefix': newPrefix,
+          },
+          "GithubManageAPI",
+          "uploadFile");
       return [e.toString()];
     }
   }
@@ -695,20 +640,15 @@ class GithubManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "GithubManageAPI",
-            methodName: "uploadNetworkFile",
-            text: formatErrorMessage({'fileLink': fileLink, 'prefix': prefix}, e.toString(),
-                isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "GithubManageAPI",
-            methodName: "uploadNetworkFile",
-            text: formatErrorMessage({'fileLink': fileLink, 'prefix': prefix}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogErr(
+          e,
+          {
+            'fileLink': fileLink,
+            'element': element,
+            'prefix': prefix,
+          },
+          "GithubManageAPI",
+          "uploadNetworkFile");
       return ['failed'];
     }
   }

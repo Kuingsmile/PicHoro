@@ -39,6 +39,15 @@ class UpyunTokenManageState extends State<UpyunTokenManage> {
         centerTitle: true,
         elevation: 0,
         title: titleText('又拍云Token管理'),
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withAlpha(204)],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
+        ),
       ),
       body: Center(
         child: Column(

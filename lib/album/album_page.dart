@@ -5,12 +5,11 @@ import 'package:flutter/material.dart';
 
 import 'package:extended_image/extended_image.dart';
 import 'package:fluro/fluro.dart';
-import 'package:f_logs/f_logs.dart';
 import 'package:flutter/services.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:msh_checkbox/msh_checkbox.dart';
 
-import 'package:horopic/album/load_state_change.dart';
+import 'package:horopic/widgets/load_state_change.dart';
 import 'package:horopic/album/album_sql.dart';
 import 'package:horopic/utils/event_bus_utils.dart';
 
@@ -345,11 +344,7 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
                       showToast('删除完成');
                       return;
                     } catch (e) {
-                      FLog.error(
-                          className: 'UploadedImagesState',
-                          methodName: 'build_delete_button',
-                          text: formatErrorMessage({}, e.toString()),
-                          dataLogType: DataLogType.ERRORS.toString());
+                      flogErr(e, {}, 'UploadedImagesState', 'build_delete_button');
                       if (context.mounted) {
                         Application.router
                             .navigateTo(context, Routes.albumUploadedImages, transition: TransitionType.none);
@@ -639,11 +634,7 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
         try {
           await deleteImage(index);
         } catch (e) {
-          FLog.error(
-              className: 'ImagePage',
-              methodName: 'handleOnLongPress_delete',
-              text: formatErrorMessage({}, e.toString()),
-              dataLogType: DataLogType.ERRORS.toString());
+          flogErr(e, {}, 'ImagePage', 'handleOnLongPress_delete');
           if (context.mounted) {
             showToastWithContext(context, '删除失败');
           }
@@ -678,11 +669,7 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
           try {
             await File(imageDisplayedUrlList[index]).delete();
           } catch (e) {
-            FLog.error(
-                className: 'ImagePage',
-                methodName: 'deleteALLFTPThumbnail',
-                text: formatErrorMessage({}, e.toString()),
-                dataLogType: DataLogType.ERRORS.toString());
+            flogErr(e, {}, 'ImagePage', 'deleteALLFTPThumbnail');
           }
         } else if (Global.defaultShowedPBhost == 'PBhostExtend2' ||
             Global.defaultShowedPBhost == 'PBhostExtend3' ||
@@ -696,11 +683,7 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
           try {
             await File(imageLocalPathList[index]).delete();
           } catch (e) {
-            FLog.error(
-                className: 'ImagePage',
-                methodName: 'deleteImageAll',
-                text: formatErrorMessage({}, e.toString()),
-                dataLogType: DataLogType.ERRORS.toString());
+            flogErr(e, {}, 'ImagePage', 'deleteImageAll');
           }
         }
         imageIdList.removeAt(index);
@@ -713,11 +696,7 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
           _loadedImagesCount = imageUrlList.length;
         });
       } catch (e) {
-        FLog.error(
-            className: 'ImagePage',
-            methodName: 'deleteImageAll',
-            text: formatErrorMessage({}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
+        flogErr(e, {}, 'ImagePage', 'deleteImageAll');
         rethrow;
       }
     }
@@ -754,11 +733,7 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
         try {
           await File(imageDisplayedUrlList[index]).delete();
         } catch (e) {
-          FLog.error(
-              className: 'ImagePage',
-              methodName: 'deleteFTPThumbnail',
-              text: formatErrorMessage({}, e.toString()),
-              dataLogType: DataLogType.ERRORS.toString());
+          flogErr(e, {}, 'ImagePage', 'deleteFTPThumbnail');
         }
       } else if (Global.defaultShowedPBhost == 'PBhostExtend2' ||
           Global.defaultShowedPBhost == 'PBhostExtend3' ||
@@ -771,11 +746,7 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
         try {
           await File(imageLocalPathList[index]).delete();
         } catch (e) {
-          FLog.error(
-              className: 'ImagePage',
-              methodName: 'deleteImage',
-              text: formatErrorMessage({}, e.toString()),
-              dataLogType: DataLogType.ERRORS.toString());
+          flogErr(e, {}, 'ImagePage', 'deleteImage');
         }
       }
 
@@ -790,11 +761,7 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
         _loadedImagesCount = _loadedImagesCount > 0 ? _loadedImagesCount - 1 : 0;
       });
     } catch (e) {
-      FLog.error(
-          className: 'ImagePage',
-          methodName: 'deleteImage',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {}, 'ImagePage', 'deleteImage');
       rethrow;
     }
   }

@@ -2,16 +2,15 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:f_logs/f_logs.dart';
 import 'package:fluro/fluro.dart';
 
 import 'package:horopic/router/application.dart';
 import 'package:horopic/utils/common_functions.dart';
-import 'package:horopic/pages/loading.dart';
+import 'package:horopic/widgets/net_loading_dialog.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/event_bus_utils.dart';
 import 'package:horopic/picture_host_manage/manage_api/lskypro_manage_api.dart';
-import 'package:horopic/picture_host_configure/widgets/configure_widgets.dart';
+import 'package:horopic/widgets/configure_widgets.dart';
 
 const Map<String, String> statusMsgMap = {
   '403': '管理员关闭了接口功能',
@@ -51,11 +50,7 @@ class HostConfigState extends State<HostConfig> {
       setControllerText(_albumIdController, configMap['album_id']);
       setState(() {});
     } catch (e) {
-      FLog.error(
-          className: 'LskyproConfigState',
-          methodName: '_initConfig',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {}, 'LskyproConfigState', '_initConfig');
     }
   }
 
@@ -301,11 +296,7 @@ class HostConfigState extends State<HostConfig> {
           }
         }
       } catch (e) {
-        FLog.error(
-            className: 'HostConfigPage',
-            methodName: '_getStrategyId',
-            text: formatErrorMessage({}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
+        flogErr(e, {}, 'HostConfigPage', '_getStrategyId');
         if (context.mounted) {
           showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
         }
@@ -336,11 +327,7 @@ class HostConfigState extends State<HostConfig> {
           showToast('获取储存策略Id列表失败');
         }
       } catch (e) {
-        FLog.error(
-            className: 'HostConfigPage',
-            methodName: '_getStrategyId',
-            text: formatErrorMessage({}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
+        flogErr(e, {}, 'HostConfigPage', '_getStrategyId');
         if (context.mounted) {
           showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
         }
@@ -420,11 +407,7 @@ class HostConfigState extends State<HostConfig> {
           }
         }
       } catch (e) {
-        FLog.error(
-            className: 'HostConfigPage',
-            methodName: '_getAlbumId',
-            text: formatErrorMessage({}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
+        flogErr(e, {}, 'HostConfigPage', '_getAlbumId');
         if (context.mounted) {
           showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
         }
@@ -455,11 +438,7 @@ class HostConfigState extends State<HostConfig> {
           showToast('获取相册Id列表失败');
         }
       } catch (e) {
-        FLog.error(
-            className: 'HostConfigPage',
-            methodName: '_getAlbumId',
-            text: formatErrorMessage({}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
+        flogErr(e, {}, 'HostConfigPage', '_getAlbumId');
         if (context.mounted) {
           showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
         }
@@ -525,11 +504,7 @@ class HostConfigState extends State<HostConfig> {
           }
         }
       } catch (e) {
-        FLog.error(
-            className: 'HostConfigPage',
-            methodName: '_saveHostConfig',
-            text: formatErrorMessage({}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
+        flogErr(e, {}, 'HostConfigPage', '_saveHostConfig');
         if (context.mounted) {
           return showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
         }
@@ -560,11 +535,7 @@ class HostConfigState extends State<HostConfig> {
           showToast('配置失败');
         }
       } catch (e) {
-        FLog.error(
-            className: 'HostConfigPage',
-            methodName: '_saveHostConfig',
-            text: formatErrorMessage({}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
+        flogErr(e, {}, 'HostConfigPage', '_saveHostConfig');
         if (context.mounted) {
           return showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
         }
@@ -614,11 +585,7 @@ class HostConfigState extends State<HostConfig> {
         }
       }
     } catch (e) {
-      FLog.error(
-          className: 'ConfigPage',
-          methodName: 'checkHostConfig',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {}, 'ConfigPage', 'checkHostConfig');
       if (context.mounted) {
         return showCupertinoAlertDialog(context: context, title: "检查失败!", content: e.toString());
       }

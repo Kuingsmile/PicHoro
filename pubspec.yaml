@@ -39,10 +39,12 @@ dependencies:
   barcode_scan2: 4.2.4
   camera: ^0.10.5+3
   chewie: ^1.10.0
+  collection: ^1.19.0
   crypto: 3.0.6
   dart_des: 1.0.2
   dartssh2: ^2.11.0
   data_table_2: ^2.5.18
+  device_info_plus: ^9.1.2
   dio: ^5.3.2
   event_bus: ^2.0.1
   extended_image: ^9.0.2

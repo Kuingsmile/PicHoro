@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:f_logs/f_logs.dart';
 
 import 'package:horopic/picture_host_manage/manage_api/qiniu_manage_api.dart';
 import 'package:horopic/utils/common_functions.dart';
@@ -53,11 +52,7 @@ class QiniuBucketDomainAreaConfigState extends State<QiniuBucketDomainAreaConfig
         setState(() {});
       }
     } catch (e) {
-      FLog.error(
-          className: 'QiniuBucketDomainAreaConfigState',
-          methodName: '_initConfig',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {}, "QiniuBucketDomainAreaConfigState", "_initConfig");
     }
   }
 
@@ -79,6 +74,15 @@ class QiniuBucketDomainAreaConfigState extends State<QiniuBucketDomainAreaConfig
         elevation: 0,
         centerTitle: true,
         title: titleText('${widget.element['name']}配置'),
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withAlpha(204)],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
+        ),
       ),
       body: Form(
         key: _formKey,
@@ -135,11 +139,7 @@ class QiniuBucketDomainAreaConfigState extends State<QiniuBucketDomainAreaConfig
                         }
                       }
                     } catch (e) {
-                      FLog.error(
-                          className: 'QiniuBucketDomainAreaConfigState',
-                          methodName: 'build',
-                          text: formatErrorMessage({}, e.toString()),
-                          dataLogType: DataLogType.ERRORS.toString());
+                      flogErr(e, {}, "QiniuBucketDomainAreaConfigState", "build");
                     }
                   }
                 },

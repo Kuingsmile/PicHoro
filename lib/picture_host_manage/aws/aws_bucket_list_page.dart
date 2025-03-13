@@ -4,11 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:grouped_list/grouped_list.dart';
 import 'package:fluro/fluro.dart';
-import 'package:f_logs/f_logs.dart';
 
 import 'package:horopic/router/application.dart';
 import 'package:horopic/router/routers.dart';
-import 'package:horopic/picture_host_manage/common_page/loading_state.dart' as loading_state;
+import 'package:horopic/picture_host_manage/common/loading_state.dart' as loading_state;
 import 'package:horopic/picture_host_manage/manage_api/aws_manage_api.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/global.dart';
@@ -104,11 +103,7 @@ class AwsBucketListState extends loading_state.BaseLoadingPageState<AwsBucketLis
         });
       }
     } catch (e) {
-      FLog.error(
-          className: 'AwsBucketListState',
-          methodName: 'initBucketList',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {}, 'AwsBucketListState', 'initBucketList');
       if (mounted) {
         setState(() {
           state = loading_state.LoadState.ERROR;
@@ -136,6 +131,15 @@ class AwsBucketListState extends loading_state.BaseLoadingPageState<AwsBucketLis
         elevation: 0,
         centerTitle: true,
         title: titleText('S3存储桶列表'),
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withAlpha(204)],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
+        ),
         actions: [
           IconButton(
             onPressed: () async {
@@ -413,13 +417,13 @@ class AwsBucketListState extends loading_state.BaseLoadingPageState<AwsBucketLis
                     }
                     return;
                   } catch (e) {
-                    FLog.error(
-                        className: 'AwsBucketListPage',
-                        methodName: 'buildBottomSheetWidget_deleteBucket',
-                        text: formatErrorMessage({
+                    flogErr(
+                        e,
+                        {
                           'element': element,
-                        }, e.toString()),
-                        dataLogType: DataLogType.ERRORS.toString());
+                        },
+                        'AwsBucketListPage',
+                        'buildBottomSheetWidget_deleteBucket');
                     showToast('删除失败');
                     if (context.mounted) {
                       Navigator.of(context).pop();

@@ -8,7 +8,6 @@ import 'package:flutter/services.dart' as flutter_services;
 
 import 'package:external_path/external_path.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:f_logs/f_logs.dart';
 import 'package:fluro/fluro.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:share_plus/share_plus.dart';
@@ -21,10 +20,10 @@ import 'package:path_provider/path_provider.dart';
 import 'package:horopic/router/application.dart';
 import 'package:horopic/router/routers.dart';
 import 'package:horopic/picture_host_manage/manage_api/github_manage_api.dart';
-import 'package:horopic/picture_host_manage/common_page/loading_state.dart' as loading_state;
+import 'package:horopic/picture_host_manage/common/loading_state.dart' as loading_state;
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/common_functions.dart';
-import 'package:horopic/pages/loading.dart';
+import 'package:horopic/widgets/net_loading_dialog.dart';
 import 'package:horopic/utils/image_compress.dart';
 import 'package:horopic/picture_host_manage/aws/aws_file_explorer.dart' show NewFolderDialog, NewFolderDialogContent;
 
@@ -223,11 +222,7 @@ class GithubFileExplorerState extends loading_state.BaseLoadingPageState<GithubF
         return 'error';
       }
     } catch (e) {
-      FLog.error(
-          className: "githubFileExplorerState",
-          methodName: "downloadFile",
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {}, 'githubFileExplorerState', 'downloadFile');
     }
     return 'error';
   }
@@ -245,6 +240,15 @@ class GithubFileExplorerState extends loading_state.BaseLoadingPageState<GithubF
           },
         ),
         titleSpacing: 0,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withAlpha(204)],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
+        ),
         title: Text(
             widget.bucketPrefix == ''
                 ? widget.element['name']
@@ -608,13 +612,13 @@ class GithubFileExplorerState extends loading_state.BaseLoadingPageState<GithubF
                                 }
                                 _getBucketList();
                               } catch (e) {
-                                FLog.error(
-                                    className: "GithubManagePage",
-                                    methodName: "uploadNetworkFileEntry",
-                                    text: formatErrorMessage({
+                                flogErr(
+                                    e,
+                                    {
                                       'url': url.text,
-                                    }, e.toString()),
-                                    dataLogType: DataLogType.ERRORS.toString());
+                                    },
+                                    'GithubManagePage',
+                                    'uploadNetworkFileEntry');
                                 if (mounted) {
                                   showToastWithContext(context, "错误");
                                 }
@@ -728,11 +732,7 @@ class GithubFileExplorerState extends loading_state.BaseLoadingPageState<GithubF
                     showToast('删除完成');
                     return;
                   } catch (e) {
-                    FLog.error(
-                        className: 'GithubBucketPage',
-                        methodName: 'deleteAll',
-                        text: formatErrorMessage({}, e.toString()),
-                        dataLogType: DataLogType.ERRORS.toString());
+                    flogErr(e, {}, 'GithubFileExplorerState', 'deleteAll');
                     showToast('删除失败');
                   }
                 },
@@ -997,13 +997,13 @@ class GithubFileExplorerState extends loading_state.BaseLoadingPageState<GithubF
         });
       }
     } catch (e) {
-      FLog.error(
-          className: "GithubFilePage",
-          methodName: "deleteAll",
-          text: formatErrorMessage({
+      flogErr(
+          e,
+          {
             'toDelete': toDelete,
-          }, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+          },
+          'GithubFileExplorerState',
+          'deleteAll');
       rethrow;
     }
   }

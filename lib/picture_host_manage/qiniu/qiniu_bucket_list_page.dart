@@ -1,15 +1,14 @@
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:grouped_list/grouped_list.dart';
 import 'package:fluro/fluro.dart';
-import 'package:f_logs/f_logs.dart';
 
 import 'package:horopic/router/application.dart';
 import 'package:horopic/router/routers.dart';
-import 'package:horopic/picture_host_manage/common_page/loading_state.dart' as loading_state;
+import 'package:horopic/picture_host_manage/common/loading_state.dart' as loading_state;
 import 'package:horopic/picture_host_manage/manage_api/qiniu_manage_api.dart';
 import 'package:horopic/utils/common_functions.dart';
 
@@ -121,11 +120,7 @@ class QiniuBucketListState extends loading_state.BaseLoadingPageState<QiniuBucke
         });
       }
     } catch (e) {
-      FLog.error(
-          className: 'QiniuBucketListState',
-          methodName: 'initBucketList',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {}, 'QiniuBucketListState', 'initBucketList');
       if (mounted) {
         setState(() {
           state = loading_state.LoadState.ERROR;
@@ -141,6 +136,15 @@ class QiniuBucketListState extends loading_state.BaseLoadingPageState<QiniuBucke
         elevation: 0,
         centerTitle: true,
         title: titleText('七牛云存储桶列表'),
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withAlpha(204)],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
+        ),
         actions: [
           IconButton(
             onPressed: () async {
@@ -325,11 +329,16 @@ class QiniuBucketListState extends loading_state.BaseLoadingPageState<QiniuBucke
                   showToast('设置失败');
                 }
               } catch (e) {
-                FLog.error(
-                    className: 'QiniuManagePage',
-                    methodName: 'setDefaultPSHost',
-                    text: formatErrorMessage({}, e.toString()),
-                    dataLogType: DataLogType.ERRORS.toString());
+                flogErr(
+                    e,
+                    {
+                      'domain': domainController.text,
+                      'area': areaController.text,
+                      'path': pathController.text,
+                      'option': optionController.text,
+                    },
+                    'QiniuManagePage',
+                    'setDefaultPSHost');
               }
             },
           ),
@@ -585,11 +594,14 @@ class QiniuBucketListState extends loading_state.BaseLoadingPageState<QiniuBucke
                     }
                     return;
                   } catch (e) {
-                    FLog.error(
-                        className: 'QiniuBucketListPage',
-                        methodName: 'buildBottomSheetWidget',
-                        text: formatErrorMessage({}, e.toString()),
-                        dataLogType: DataLogType.ERRORS.toString());
+                    flogErr(
+                      e,
+                      {
+                        'name': element['name'],
+                      },
+                      'QiniuBucketListPage',
+                      'buildBottomSheetWidget',
+                    );
                     showToast('删除失败');
                     if (context.mounted) {
                       Navigator.of(context).pop();

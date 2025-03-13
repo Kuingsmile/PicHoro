@@ -7,7 +7,6 @@ import 'package:flutter/services.dart' as flutter_services;
 
 import 'package:external_path/external_path.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:f_logs/f_logs.dart';
 import 'package:fluro/fluro.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:share_plus/share_plus.dart';
@@ -19,10 +18,10 @@ import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 import 'package:horopic/router/application.dart';
 import 'package:horopic/router/routers.dart';
 import 'package:horopic/picture_host_manage/manage_api/webdav_manage_api.dart';
-import 'package:horopic/picture_host_manage/common_page/loading_state.dart' as loading_state;
+import 'package:horopic/picture_host_manage/common/loading_state.dart' as loading_state;
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/common_functions.dart';
-import 'package:horopic/pages/loading.dart';
+import 'package:horopic/widgets/net_loading_dialog.dart';
 import 'package:horopic/utils/image_compress.dart';
 
 class WebdavFileExplorer extends StatefulWidget {
@@ -144,6 +143,15 @@ class WebdavFileExplorerState extends loading_state.BaseLoadingPageState<WebdavF
           },
         ),
         titleSpacing: 0,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withAlpha(204)],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
+        ),
         title: Text(
             widget.bucketPrefix == '/'
                 ? '根目录'
@@ -543,13 +551,14 @@ class WebdavFileExplorerState extends loading_state.BaseLoadingPageState<WebdavF
                                 }
                                 _getBucketList();
                               } catch (e) {
-                                FLog.error(
-                                    className: "WebdavManagePage",
-                                    methodName: "uploadNetworkFileEntry",
-                                    text: formatErrorMessage({
-                                      'url': url.text,
-                                    }, e.toString()),
-                                    dataLogType: DataLogType.ERRORS.toString());
+                                flogErr(
+                                  e,
+                                  {
+                                    'url': url.text,
+                                  },
+                                  "WebdavManagePage",
+                                  "uploadNetworkFileEntry",
+                                );
                                 if (mounted) {
                                   showToastWithContext(context, "错误");
                                 }
@@ -665,11 +674,14 @@ class WebdavFileExplorerState extends loading_state.BaseLoadingPageState<WebdavF
                     showToast('删除完成');
                     return;
                   } catch (e) {
-                    FLog.error(
-                        className: 'WebdavBucketPage',
-                        methodName: 'deleteAll',
-                        text: formatErrorMessage({}, e.toString()),
-                        dataLogType: DataLogType.ERRORS.toString());
+                    flogErr(
+                      e,
+                      {
+                        'toDelete': selectedFilesBool,
+                      },
+                      "WebdavManagePage",
+                      "deleteAll",
+                    );
                     showToast('删除失败');
                   }
                 },
@@ -731,7 +743,7 @@ class WebdavFileExplorerState extends loading_state.BaseLoadingPageState<WebdavF
                     urlList.add(host + downloadList[i]['path']);
                   }
                   Global.webdavDownloadList.addAll(urlList);
-                   Global.setWebdavDownloadList(Global.webdavDownloadList);
+                  Global.setWebdavDownloadList(Global.webdavDownloadList);
                   String downloadPath =
                       await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
                   String bucketName = widget.bucketPrefix == '/'
@@ -865,13 +877,12 @@ class WebdavFileExplorerState extends loading_state.BaseLoadingPageState<WebdavF
         });
       }
     } catch (e) {
-      FLog.error(
-          className: "WebdavManagePage",
-          methodName: "deleteAll",
-          text: formatErrorMessage({
-            'toDelete': toDelete,
-          }, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(
+        e,
+        {'toDelete': toDelete},
+        'WebdavManagePage',
+        'deleteAll',
+      );
       rethrow;
     }
   }

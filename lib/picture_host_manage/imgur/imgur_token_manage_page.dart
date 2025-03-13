@@ -46,6 +46,15 @@ class ImgurTokenManageState extends State<ImgurTokenManage> {
         centerTitle: true,
         elevation: 0,
         title: titleText('Imgur账户管理'),
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withAlpha(204)],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
+        ),
       ),
       body: Center(
         child: ListView(

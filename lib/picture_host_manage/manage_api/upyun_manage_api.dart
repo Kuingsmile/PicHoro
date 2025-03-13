@@ -3,7 +3,6 @@ import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
-import 'package:f_logs/f_logs.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -39,11 +38,7 @@ class UpyunManageAPI {
       String contents = await file.readAsString();
       return contents;
     } catch (e) {
-      FLog.error(
-          className: 'UpyunManageAPI',
-          methodName: 'readUpyunConfig',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {}, 'UpyunManageAPI', 'readUpyunConfig');
       return "Error";
     }
   }
@@ -68,11 +63,7 @@ class UpyunManageAPI {
       String contents = await file.readAsString();
       return contents;
     } catch (e) {
-      FLog.error(
-          className: 'UpyunManageAPI',
-          methodName: 'readUpyunManageConfig',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {}, 'UpyunManageAPI', 'readUpyunManageConfig');
       return "Error";
     }
   }
@@ -84,11 +75,16 @@ class UpyunManageAPI {
           .writeAsString(jsonEncode({'email': email, 'password': password, 'token': token, 'tokenname': tokenname}));
       return true;
     } catch (e) {
-      FLog.error(
-          className: 'UpyunManageAPI',
-          methodName: 'saveUpyunManageConfig',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(
+          e,
+          {
+            'email': email,
+            'password': password,
+            'token': token,
+            'tokenname': tokenname,
+          },
+          'UpyunManageAPI',
+          'saveUpyunManageConfig');
       return false;
     }
   }
@@ -104,11 +100,7 @@ class UpyunManageAPI {
       String contents = await file.readAsString();
       return contents;
     } catch (e) {
-      FLog.error(
-          className: 'UpyunManageAPI',
-          methodName: 'readUpyunOperatorConfig',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {}, 'UpyunManageAPI', 'readUpyunOperatorConfig');
       return "Error";
     }
   }
@@ -127,11 +119,16 @@ class UpyunManageAPI {
       await file.writeAsString(jsonEncode(oldContent));
       return true;
     } catch (e) {
-      FLog.error(
-          className: 'UpyunManageAPI',
-          methodName: 'saveUpyunOperatorConfig',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(
+          e,
+          {
+            'bucket': bucket,
+            'email': email,
+            'operator': operator,
+            'password': password,
+          },
+          'UpyunManageAPI',
+          'saveUpyunOperatorConfig');
       return false;
     }
   }
@@ -145,11 +142,7 @@ class UpyunManageAPI {
       await file.writeAsString(jsonEncode(oldContent));
       return true;
     } catch (e) {
-      FLog.error(
-          className: 'UpyunManageAPI',
-          methodName: 'deleteUpyunOperatorConfig',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {'bucket': bucket}, 'UpyunManageAPI', 'deleteUpyunOperatorConfig');
       return false;
     }
   }
@@ -178,7 +171,7 @@ class UpyunManageAPI {
   }
 
   //get MD5
-  static getContentMd5(var variable) async {
+  static Future<String> getContentMd5(var variable) async {
     if (isString(variable)) {
       return base64.encode(md5.convert(utf8.encode(variable)).bytes);
     } else if (isFile(variable)) {
@@ -213,15 +206,17 @@ class UpyunManageAPI {
       String authorization = 'UPYUN $operatorName:$signature';
       return authorization;
     } catch (e) {
-      FLog.error(
-          className: 'UpyunManageAPI',
-          methodName: 'upyunAuthorization',
-          text: formatErrorMessage({
+      flogErr(
+          e,
+          {
             'method': method,
             'uri': uri,
             'contentMd5': contentMd5,
-          }, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+            'operatorName': operatorName,
+            'operatorPassword': operatorPassword,
+          },
+          'UpyunManageAPI',
+          'upyunAuthorization');
       return "";
     }
   }
@@ -248,7 +243,14 @@ class UpyunManageAPI {
       }
       return ['success', response.data];
     } catch (e) {
-      flogErr(e, {}, 'UpyunManageAPI', 'getToken');
+      flogErr(
+          e,
+          {
+            'email': email,
+            'password': password,
+          },
+          'UpyunManageAPI',
+          'getToken');
       return ['failed'];
     }
   }
@@ -268,7 +270,13 @@ class UpyunManageAPI {
       }
       return ['success'];
     } catch (e) {
-      flogErr(e, {}, 'UpyunManageAPI', 'checkToken');
+      flogErr(
+          e,
+          {
+            'token': token,
+          },
+          'UpyunManageAPI',
+          'checkToken');
       return ['failed'];
     }
   }
@@ -293,7 +301,14 @@ class UpyunManageAPI {
       }
       return ['success'];
     } catch (e) {
-      flogErr(e, {}, 'UpyunManageAPI', 'deleteToken');
+      flogErr(
+          e,
+          {
+            'token': token,
+            'tokenname': tokenname,
+          },
+          'UpyunManageAPI',
+          'deleteToken');
       return ['failed'];
     }
   }
@@ -382,7 +397,13 @@ class UpyunManageAPI {
       }
       return ['success', response.data];
     } catch (e) {
-      flogErr(e, {}, 'UpyunManageAPI', 'getBucketInfo');
+      flogErr(
+          e,
+          {
+            'bucketName': bucketName,
+          },
+          'UpyunManageAPI',
+          'getBucketInfo');
       return [e.toString()];
     }
   }
@@ -415,7 +436,13 @@ class UpyunManageAPI {
       }
       return ['success'];
     } catch (e) {
-      flogErr(e, {}, 'UpyunManageAPI', 'deleteBucket');
+      flogErr(
+          e,
+          {
+            'bucketName': bucketName,
+          },
+          'UpyunManageAPI',
+          'deleteBucket');
       return [e.toString()];
     }
   }
@@ -447,7 +474,13 @@ class UpyunManageAPI {
       }
       return ['success'];
     } catch (e) {
-      flogErr(e, {}, 'UpyunManageAPI', 'putBucket');
+      flogErr(
+          e,
+          {
+            'bucketName': bucketName,
+          },
+          'UpyunManageAPI',
+          'putBucket');
       return [e.toString()];
     }
   }
@@ -478,7 +511,13 @@ class UpyunManageAPI {
       }
       return ['success', response.data['operators']];
     } catch (e) {
-      flogErr(e, {}, 'UpyunManageAPI', 'getOperator');
+      flogErr(
+          e,
+          {
+            'bucketName': bucketName,
+          },
+          'UpyunManageAPI',
+          'getOperator');
       return [e.toString()];
     }
   }
@@ -510,7 +549,14 @@ class UpyunManageAPI {
       }
       return ['success'];
     } catch (e) {
-      flogErr(e, {}, 'UpyunManageAPI', 'addOperator');
+      flogErr(
+          e,
+          {
+            'bucketName': bucketName,
+            'operatorName': operatorName,
+          },
+          'UpyunManageAPI',
+          'addOperator');
       return [e.toString()];
     }
   }
@@ -542,7 +588,14 @@ class UpyunManageAPI {
       }
       return ['success'];
     } catch (e) {
-      flogErr(e, {}, 'UpyunManageAPI', 'deleteOperator');
+      flogErr(
+          e,
+          {
+            'bucketName': bucketName,
+            'operatorName': operatorName,
+          },
+          'UpyunManageAPI',
+          'deleteOperator');
       return [e.toString()];
     }
   }
@@ -594,11 +647,15 @@ class UpyunManageAPI {
       await upyunConfigFile.writeAsString(upyunConfigJson);
       return ['success'];
     } catch (e) {
-      FLog.error(
-          className: "UpyunManageAPI",
-          methodName: "setDefaultBucketFromListPage",
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(
+          e,
+          {
+            'element': element,
+            'upyunManageConfigMap': upyunManageConfigMap,
+            'textMap': textMap,
+          },
+          'UpyunManageAPI',
+          'setDefaultBucketFromListPage');
       return ['failed'];
     }
   }
@@ -835,11 +892,7 @@ class UpyunManageAPI {
       await upyunConfigFile.writeAsString(upyunConfigJson);
       return ['success'];
     } catch (e) {
-      FLog.error(
-          className: "UpyunManageAPI",
-          methodName: "setDefaultBucket",
-          text: formatErrorMessage({'folder': folder}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {'folder': folder}, 'UpyunManageAPI', 'setDefaultBucket');
       return ['failed'];
     }
   }

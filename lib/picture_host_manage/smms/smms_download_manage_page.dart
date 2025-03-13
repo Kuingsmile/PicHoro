@@ -5,12 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:fluro/fluro.dart';
 import 'package:external_path/external_path.dart';
 
-import 'package:horopic/picture_host_manage/smms/upload_api/smms_upload_utils.dart';
-import 'package:horopic/picture_host_manage/smms/download_api/smms_downloader.dart';
-import 'package:horopic/picture_host_manage/common_page/download/pnc_download_task.dart';
-import 'package:horopic/picture_host_manage/common_page/download/pnc_download_status.dart';
-import 'package:horopic/picture_host_manage/common_page/upload/pnc_upload_task.dart';
-import 'package:horopic/pages/upload_pages/upload_status.dart';
+import 'package:horopic/picture_host_manage/common/upload/managers/smms_upload_manager.dart';
+import 'package:horopic/picture_host_manage/common/download/managers/smms_download_manager.dart';
+import 'package:horopic/picture_host_manage/common/download/common_service/base_download_task.dart';
+import 'package:horopic/picture_host_manage/common/download/common_service/base_download_status.dart';
+import 'package:horopic/picture_host_manage/common/upload/common_service/base_upload_task.dart';
+import 'package:horopic/pages/upload_helper/upload_status.dart';
 import 'package:horopic/router/application.dart';
 import 'package:horopic/router/routers.dart';
 import 'package:horopic/utils/common_functions.dart';

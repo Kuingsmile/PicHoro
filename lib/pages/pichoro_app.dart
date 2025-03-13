@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:horopic/pages/home_page.dart';
 import 'package:horopic/album/album_page.dart';
 import 'package:horopic/configure_page/configure_page.dart';
-import 'package:horopic/picture_host_manage/common_page/picture_host_manage_entry.dart';
+import 'package:horopic/picture_host_manage/picture_host_manage_entry.dart';
 
 class PicHoroAPP extends StatefulWidget {
   final int selectedIndex;

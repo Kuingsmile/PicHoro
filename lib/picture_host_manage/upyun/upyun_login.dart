@@ -1,11 +1,10 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:f_logs/f_logs.dart';
 import 'package:fluro/fluro.dart';
 
 import 'package:horopic/utils/common_functions.dart';
-import 'package:horopic/pages/loading.dart';
+import 'package:horopic/widgets/net_loading_dialog.dart';
 import 'package:horopic/picture_host_manage/manage_api/upyun_manage_api.dart';
 import 'package:horopic/router/application.dart';
 import 'package:horopic/router/routers.dart';
@@ -77,11 +76,15 @@ class UpyunLogInState extends State<UpyunLogIn> {
         }
       }
     } catch (e) {
-      FLog.error(
-          className: 'UpyunLogInState',
-          methodName: '_saveuserpasswd',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(
+        e,
+        {
+          'userName': _userNametext.text,
+          'password': _passwordcontroller.text,
+        },
+        'UpyunLogInState',
+        '_saveuserpasswd',
+      );
       return showToast('未知错误');
     }
   }
@@ -93,6 +96,15 @@ class UpyunLogInState extends State<UpyunLogIn> {
         centerTitle: true,
         elevation: 0,
         title: titleText('登录又拍云'),
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withAlpha(204)],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
+        ),
       ),
       body: signUpPage(),
     );

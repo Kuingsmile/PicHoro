@@ -5,9 +5,9 @@ import 'package:f_logs/f_logs.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:intl/intl.dart';
 
-import 'package:horopic/pages/loading.dart';
+import 'package:horopic/widgets/net_loading_dialog.dart';
 import 'package:horopic/utils/common_functions.dart';
-import 'package:horopic/picture_host_manage/common_page/loading_state.dart' as loading_state;
+import 'package:horopic/picture_host_manage/common/loading_state.dart' as loading_state;
 
 class LogPage extends StatefulWidget {
   const LogPage({super.key});
@@ -80,11 +80,7 @@ class LogPageState extends loading_state.BaseLoadingPageState<LogPage> {
         });
       }
     } catch (e) {
-      FLog.error(
-          className: 'LogPageState',
-          methodName: 'getAlllog',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {}, 'LogPageState', 'getAlllog');
       state = loading_state.LoadState.ERROR;
       setState(() {});
     }
@@ -280,11 +276,7 @@ class LogPageState extends loading_state.BaseLoadingPageState<LogPage> {
             context: context, title: '导出成功', content: '导出成功，日志已复制到剪切板\n文件路径：\n${file.path}');
       }
     } catch (e) {
-      FLog.error(
-          className: 'LogPageState',
-          methodName: 'exportLogToFile',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {}, 'LogPageState', 'exportLogToFile');
       if (context.mounted) {
         return showToastWithContext(context, '导出失败');
       }

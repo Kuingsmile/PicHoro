@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:fluro/fluro.dart';
-import 'package:f_logs/f_logs.dart';
 
 import 'package:horopic/router/application.dart';
 import 'package:horopic/router/routers.dart';
-import 'package:horopic/picture_host_manage/common_page/loading_state.dart' as loading_state;
+import 'package:horopic/picture_host_manage/common/loading_state.dart' as loading_state;
 import 'package:horopic/picture_host_manage/manage_api/smms_manage_api.dart';
 import 'package:horopic/utils/common_functions.dart';
 
@@ -37,11 +36,7 @@ class SmmsManageHomePageState extends loading_state.BaseLoadingPageState<SmmsMan
         setState(() {});
       }
     } catch (e) {
-      FLog.error(
-          className: 'SmmsManageHomePageState',
-          methodName: 'initProfile',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {}, "SmmsManageHomePageState", "initProfile");
       if (mounted) {
         setState(() {
           state = loading_state.LoadState.ERROR;
@@ -300,7 +295,7 @@ class SmmsManageHomePageState extends loading_state.BaseLoadingPageState<SmmsMan
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      "已用: ${userProfile['disk_usage']?.toString() ?? '0'} MB",
+                      "已用: ${userProfile['disk_usage']?.toString() ?? '0'}",
                       style: const TextStyle(color: Colors.grey, fontSize: 14),
                     ),
                     Text(

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:f_logs/f_logs.dart';
 import 'package:horopic/utils/event_bus_utils.dart';
 
 import 'package:horopic/utils/common_functions.dart';
@@ -230,13 +229,13 @@ setdefaultPShostRemoteAndLocal(String psHost) async {
 
     showToast('已设置$psHost为默认图床');
   } catch (e) {
-    FLog.error(
-        className: 'setdefaultPShostRemoteAndLocal',
-        methodName: 'setdefaultPShostRemoteAndLocal',
-        text: formatErrorMessage({
+    flogErr(
+        e,
+        {
           'psHost': psHost,
-        }, e.toString()),
-        dataLogType: DataLogType.ERRORS.toString());
+        },
+        'setdefaultPShostRemoteAndLocal',
+        'setdefaultPShostRemoteAndLocal');
     showToast('错误');
   }
 }

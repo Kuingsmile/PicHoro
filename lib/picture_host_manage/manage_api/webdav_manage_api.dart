@@ -3,7 +3,6 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:f_logs/f_logs.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'package:horopic/utils/global.dart';
@@ -29,11 +28,7 @@ class WebdavManageAPI {
       String contents = await file.readAsString();
       return contents;
     } catch (e) {
-      FLog.error(
-          className: 'WebdavManageAPI',
-          methodName: 'readWebdavConfig',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {}, "WebdavManageAPI", "readWebdavConfig");
       return "Error";
     }
   }
@@ -91,7 +86,13 @@ class WebdavManageAPI {
       }
       return ['success', fileList];
     } catch (e) {
-      flogErr(e, {}, "WebdavManageAPI", "getFileList");
+      flogErr(
+          e,
+          {
+            'path': path,
+          },
+          "WebdavManageAPI",
+          "getFileList");
       return [e.toString()];
     }
   }
@@ -102,7 +103,13 @@ class WebdavManageAPI {
       await client.mkdirAll(path);
       return ['success'];
     } catch (e) {
-      flogErr(e, {}, "WebdavManageAPI", "createDir");
+      flogErr(
+          e,
+          {
+            'path': path,
+          },
+          "WebdavManageAPI",
+          "createDir");
       return [e.toString()];
     }
   }
@@ -113,7 +120,13 @@ class WebdavManageAPI {
       await client.remove(path);
       return ['success'];
     } catch (e) {
-      flogErr(e, {}, "WebdavManageAPI", "deleteFile");
+      flogErr(
+          e,
+          {
+            'path': path,
+          },
+          "WebdavManageAPI",
+          "deleteFile");
       return [e.toString()];
     }
   }
@@ -127,7 +140,14 @@ class WebdavManageAPI {
       await client.rename(path, newName, true);
       return ['success'];
     } catch (e) {
-      flogErr(e, {}, "WebdavManageAPI", "renameFile");
+      flogErr(
+          e,
+          {
+            'path': path,
+            'newName': newName,
+          },
+          "WebdavManageAPI",
+          "renameFile");
       return [e.toString()];
     }
   }
@@ -151,11 +171,13 @@ class WebdavManageAPI {
       await webdavConfigFile.writeAsString(webdavConfigJson);
       return ['success'];
     } catch (e) {
-      FLog.error(
-          className: "WebdavManageAPI",
-          methodName: "setDefaultBucket",
-          text: formatErrorMessage({'folder': folder}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(
+          e,
+          {
+            'folder': folder,
+          },
+          "WebdavManageAPI",
+          "setDefaultBucket");
       return ['failed'];
     }
   }

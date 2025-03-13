@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:f_logs/f_logs.dart';
 import 'package:dartssh2/dartssh2.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -45,11 +44,7 @@ class SFTPLocalImagePreviewState extends State<SFTPLocalImagePreview> {
       file.writeAsBytesSync(await remoteFile.readBytes());
       return file.path;
     } catch (e) {
-      FLog.error(
-          className: "SFTPLocalImagePreviewState",
-          methodName: "downloadFile",
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {}, 'SFTPLocalImagePreviewState', 'downloadFile');
     }
   }
 
@@ -65,6 +60,15 @@ class SFTPLocalImagePreviewState extends State<SFTPLocalImagePreview> {
         elevation: 0,
         centerTitle: true,
         title: titleText('图片预览'),
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withAlpha(204)],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
+        ),
       ),
       body: FutureBuilder(
         future: downloadFile(),

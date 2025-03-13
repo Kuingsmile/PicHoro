@@ -101,8 +101,8 @@ class GithubImageUploadUtils {
       flogErr(
           e,
           {
-            'path': deleteMap['path'],
-            'name': deleteMap['name'],
+            'deleteMap': deleteMap,
+            'configMap': configMap,
           },
           "GithubImageUploadUtils",
           "deleteApi");

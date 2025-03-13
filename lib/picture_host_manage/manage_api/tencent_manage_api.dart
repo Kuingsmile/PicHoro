@@ -4,7 +4,6 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:f_logs/f_logs.dart';
 import 'package:crypto/crypto.dart';
 import 'package:xml2json/xml2json.dart';
 import 'package:path_provider/path_provider.dart';
@@ -56,11 +55,7 @@ class TencentManageAPI {
       final file = await localFile;
       return await file.readAsString();
     } catch (e) {
-      FLog.error(
-          className: "TencentManageAPI",
-          methodName: "readTencentConfig",
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {}, "TencentManageAPI", "readTencentConfig");
       return "Error";
     }
   }
@@ -380,11 +375,7 @@ class TencentManageAPI {
       await tencentConfigFile.writeAsString(tencentConfigJson);
       return ['success'];
     } catch (e) {
-      FLog.error(
-          className: "TencentManageAPI",
-          methodName: "setDefaultBucket",
-          text: formatErrorMessage({'element': element, 'folder': folder}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {'element': element, 'folder': folder}, "TencentManageAPI", "setDefaultBucket");
       return ['failed'];
     }
   }
@@ -732,11 +723,10 @@ class TencentManageAPI {
       Dio dio = Dio(baseoptions);
 
       var response = await dio.put('https://$host$urlpath');
-      if (response.statusCode == 200) {
-        return ['success'];
-      } else {
+      if (response.statusCode != 200) {
         return ['failed'];
       }
+      return ['success'];
     } catch (e) {
       flogErr(e, {'element': element, 'prefix': prefix, 'newfolder': newfolder}, "TencentManageAPI", "createFolder");
       return [e.toString()];

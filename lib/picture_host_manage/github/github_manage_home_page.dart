@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:fluro/fluro.dart';
-import 'package:f_logs/f_logs.dart';
 
 import 'package:horopic/router/application.dart';
-import 'package:horopic/picture_host_manage/common_page/loading_state.dart' as loading_state;
+import 'package:horopic/picture_host_manage/common/loading_state.dart' as loading_state;
 import 'package:horopic/picture_host_manage/manage_api/github_manage_api.dart';
 import 'package:horopic/utils/common_functions.dart';
 
@@ -38,11 +37,7 @@ class GithubManageHomePageState extends loading_state.BaseLoadingPageState<Githu
         setState(() {});
       }
     } catch (e) {
-      FLog.error(
-          className: 'GithubManageHomePageState',
-          methodName: 'initProfile',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {}, 'GithubManageHomePageState', 'initProfile');
       if (mounted) {
         setState(() {
           state = loading_state.LoadState.ERROR;
@@ -64,6 +59,15 @@ class GithubManageHomePageState extends loading_state.BaseLoadingPageState<Githu
         elevation: 0,
         centerTitle: true,
         title: titleText('Github 个人信息'),
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withAlpha(204)],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
+        ),
       );
 
   @override

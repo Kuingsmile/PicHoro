@@ -2,16 +2,15 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:f_logs/f_logs.dart';
 import 'package:fluro/fluro.dart';
 
 import 'package:horopic/router/application.dart';
-import 'package:horopic/pages/loading.dart';
+import 'package:horopic/widgets/net_loading_dialog.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/picture_host_manage/manage_api/github_manage_api.dart';
 import 'package:horopic/utils/event_bus_utils.dart';
-import 'package:horopic/picture_host_configure/widgets/configure_widgets.dart';
+import 'package:horopic/widgets/configure_widgets.dart';
 
 class GithubConfig extends StatefulWidget {
   const GithubConfig({super.key});
@@ -47,11 +46,7 @@ class GithubConfigState extends State<GithubConfig> {
       setControllerText(_customDomainController, configMap['customDomain']);
       setState(() {});
     } catch (e) {
-      FLog.error(
-          className: 'GithubConfigState',
-          methodName: '_initConfig',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {}, 'GithubConfigState', '_initConfig');
     }
   }
 
@@ -249,11 +244,7 @@ class GithubConfigState extends State<GithubConfig> {
       await githubConfigFile.writeAsString(githubConfigJson);
       showToast('保存成功');
     } catch (e) {
-      FLog.error(
-          className: 'GithubConfigState',
-          methodName: '_saveGithubConfig',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {}, 'GithubConfigState', '_saveGithubConfig');
       if (context.mounted) {
         return showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
       }
@@ -296,11 +287,7 @@ class GithubConfigState extends State<GithubConfig> {
         }
       }
     } catch (e) {
-      FLog.error(
-          className: 'GithubConfigState',
-          methodName: 'checkGithubConfig',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {}, 'GithubConfigState', 'checkGithubConfig');
       if (context.mounted) {
         return showCupertinoAlertDialog(context: context, title: "检查失败!", content: e.toString());
       }

@@ -4,11 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:grouped_list/grouped_list.dart';
 import 'package:fluro/fluro.dart';
-import 'package:f_logs/f_logs.dart';
 
 import 'package:horopic/router/application.dart';
 import 'package:horopic/router/routers.dart';
-import 'package:horopic/picture_host_manage/common_page/loading_state.dart' as loading_state;
+import 'package:horopic/picture_host_manage/common/loading_state.dart' as loading_state;
 import 'package:horopic/picture_host_manage/manage_api/tencent_manage_api.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/global.dart';
@@ -98,11 +97,12 @@ class TencentBucketListState extends loading_state.BaseLoadingPageState<TencentB
         });
       }
     } catch (e) {
-      FLog.error(
-          className: 'TencentBucketListState',
-          methodName: 'initBucketList',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(
+        e,
+        {},
+        "TencentBucketListState",
+        "initBucketList",
+      );
       if (mounted) {
         setState(() {
           state = loading_state.LoadState.ERROR;
@@ -130,6 +130,15 @@ class TencentBucketListState extends loading_state.BaseLoadingPageState<TencentB
         elevation: 0,
         centerTitle: true,
         title: titleText('腾讯云存储桶列表'),
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withAlpha(204)],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
+        ),
         actions: [
           IconButton(
             onPressed: () async {
@@ -307,13 +316,14 @@ class TencentBucketListState extends loading_state.BaseLoadingPageState<TencentB
                         aclState['aclState'] = '未获取';
                       }
                     } catch (e) {
-                      FLog.error(
-                          className: 'TencentBucketListPage',
-                          methodName: 'buildSuccess_trailing_onPressed',
-                          text: formatErrorMessage({
-                            'element': element,
-                          }, e.toString()),
-                          dataLogType: DataLogType.ERRORS.toString());
+                      flogErr(
+                        e,
+                        {
+                          'element': element,
+                        },
+                        "TencentBucketListState",
+                        "buildSuccess_trailing_onPressed",
+                      );
                       aclState['aclState'] = '未获取';
                     }
                     setState(() {});
@@ -522,13 +532,14 @@ class TencentBucketListState extends loading_state.BaseLoadingPageState<TencentB
                     }
                     return;
                   } catch (e) {
-                    FLog.error(
-                        className: 'TencentBucketListPage',
-                        methodName: 'buildBottomSheetWidget_deleteBucket',
-                        text: formatErrorMessage({
-                          'element': element,
-                        }, e.toString()),
-                        dataLogType: DataLogType.ERRORS.toString());
+                    flogErr(
+                      e,
+                      {
+                        'element': element,
+                      },
+                      "TencentBucketListState",
+                      "buildBottomSheetWidget_deleteBucket",
+                    );
                     showToast('删除失败');
                     if (context.mounted) {
                       Navigator.of(context).pop();

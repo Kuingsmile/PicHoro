@@ -7,7 +7,6 @@ import 'package:flutter/services.dart' as flutter_services;
 
 import 'package:external_path/external_path.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:f_logs/f_logs.dart';
 import 'package:fluro/fluro.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:share_plus/share_plus.dart';
@@ -20,10 +19,10 @@ import 'package:horopic/router/application.dart';
 import 'package:horopic/router/routers.dart';
 import 'package:horopic/picture_host_manage/manage_api/alist_manage_api.dart';
 
-import 'package:horopic/picture_host_manage/common_page/loading_state.dart' as loading_state;
+import 'package:horopic/picture_host_manage/common/loading_state.dart' as loading_state;
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/common_functions.dart';
-import 'package:horopic/pages/loading.dart';
+import 'package:horopic/widgets/net_loading_dialog.dart';
 import 'package:horopic/utils/image_compress.dart';
 
 bool isCoverFile = false;
@@ -165,6 +164,15 @@ class AlistFileExplorerState extends loading_state.BaseLoadingPageState<AlistFil
               fontSize: 15,
               fontWeight: FontWeight.bold,
             )),
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withAlpha(204)],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
+        ),
         actions: [
           PopupMenuButton(
             icon: const Icon(
@@ -545,13 +553,13 @@ class AlistFileExplorerState extends loading_state.BaseLoadingPageState<AlistFil
                                 }
                                 _getBucketList();
                               } catch (e) {
-                                FLog.error(
-                                    className: "AlistManagePage",
-                                    methodName: "uploadNetworkFileEntry",
-                                    text: formatErrorMessage({
+                                flogErr(
+                                    e,
+                                    {
                                       'url': url.text,
-                                    }, e.toString()),
-                                    dataLogType: DataLogType.ERRORS.toString());
+                                    },
+                                    'AlistManagePage',
+                                    'uploadNetworkFileEntry');
                                 if (mounted) {
                                   showToastWithContext(context, "错误");
                                 }
@@ -661,11 +669,7 @@ class AlistFileExplorerState extends loading_state.BaseLoadingPageState<AlistFil
                     showToast('删除完成');
                     return;
                   } catch (e) {
-                    FLog.error(
-                        className: 'AlistBucketPage',
-                        methodName: 'deleteAll',
-                        text: formatErrorMessage({}, e.toString()),
-                        dataLogType: DataLogType.ERRORS.toString());
+                    flogErr(e, {}, 'AlistManagePage', 'deleteAll');
                     showToast('删除失败');
                   }
                 },
@@ -879,13 +883,13 @@ class AlistFileExplorerState extends loading_state.BaseLoadingPageState<AlistFil
         });
       }
     } catch (e) {
-      FLog.error(
-          className: "AlistManagePage",
-          methodName: "deleteAll",
-          text: formatErrorMessage({
+      flogErr(
+          e,
+          {
             'toDelete': toDelete,
-          }, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+          },
+          'AlistManagePage',
+          'deleteAll');
       rethrow;
     }
   }

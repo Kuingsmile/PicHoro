@@ -443,11 +443,7 @@ Future<void> _saveConfig(Future<File> fileGetter, dynamic config) async {
 }
 
 void _logError(String methodName, Map<String, dynamic> params, dynamic error) {
-  FLog.error(
-      className: 'AllPShostState',
-      methodName: methodName,
-      text: formatErrorMessage(params, error.toString()),
-      dataLogType: DataLogType.ERRORS.toString());
+  flogErr(error, params, 'AllPShostState', methodName);
 }
 
 String _normalizePath(String path) {

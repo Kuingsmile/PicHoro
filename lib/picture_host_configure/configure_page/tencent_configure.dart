@@ -4,18 +4,17 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:f_logs/f_logs.dart';
 import 'package:fluro/fluro.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'package:horopic/router/application.dart';
 import 'package:horopic/api/tencent_api.dart';
-import 'package:horopic/pages/loading.dart';
+import 'package:horopic/widgets/net_loading_dialog.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/event_bus_utils.dart';
 import 'package:horopic/picture_host_manage/manage_api/tencent_manage_api.dart';
-import 'package:horopic/picture_host_configure/widgets/configure_widgets.dart';
+import 'package:horopic/widgets/configure_widgets.dart';
 
 class TencentConfig extends StatefulWidget {
   const TencentConfig({super.key});
@@ -55,11 +54,7 @@ class TencentConfigState extends State<TencentConfig> {
       setControllerText(_optionsController, configMap['options']);
       setState(() {});
     } catch (e) {
-      FLog.error(
-          className: 'TencentConfigState',
-          methodName: 'initConfig',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {}, 'TencentConfigState', '_initConfig');
     }
   }
 
@@ -291,11 +286,7 @@ class TencentConfigState extends State<TencentConfig> {
       await tencentConfigFile.writeAsString(tencentConfigJson);
       showToast('保存成功');
     } catch (e) {
-      FLog.error(
-          className: 'TencentConfigPage',
-          methodName: 'saveConfig',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {}, 'TencentConfigPage', 'saveConfig');
       if (context.mounted) {
         return showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
       }
@@ -407,11 +398,7 @@ ${configMap['options']}
         }
       }
     } catch (e) {
-      FLog.error(
-          className: 'TencentConfigPage',
-          methodName: 'checkTencentConfig',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {}, 'TencentConfigPage', 'checkTencentConfig');
       if (context.mounted) {
         return showCupertinoAlertDialog(context: context, title: "检查失败!", content: e.toString());
       }

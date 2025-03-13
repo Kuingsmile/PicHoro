@@ -94,7 +94,14 @@ class ImgurImageUploadUtils {
       }
       return ["success"];
     } catch (e) {
-      flogErr(e, {}, "ImgurImageUploadUtils", "deleteApi");
+      flogErr(
+          e,
+          {
+            'deleteMap': deleteMap,
+            'configMap': configMap,
+          },
+          "ImgurImageUploadUtils",
+          "deleteApi");
       return ["failed"];
     }
   }

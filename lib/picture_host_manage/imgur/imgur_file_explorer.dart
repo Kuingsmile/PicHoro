@@ -6,23 +6,21 @@ import 'package:flutter/material.dart';
 
 import 'package:external_path/external_path.dart';
 import 'package:fluro/fluro.dart';
-import 'package:f_logs/f_logs.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:flutter/services.dart' as flutter_services;
 import 'package:path/path.dart' as my_path;
 import 'package:pull_to_refresh/pull_to_refresh.dart';
-
 import 'package:msh_checkbox/msh_checkbox.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 
 import 'package:horopic/picture_host_manage/manage_api/imgur_manage_api.dart';
-import 'package:horopic/pages/loading.dart';
+import 'package:horopic/widgets/net_loading_dialog.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/router/application.dart';
 import 'package:horopic/router/routers.dart';
-import 'package:horopic/picture_host_manage/common_page/loading_state.dart' as loading_state;
+import 'package:horopic/picture_host_manage/common/loading_state.dart' as loading_state;
 import 'package:horopic/utils/image_compress.dart';
 import 'package:horopic/picture_host_manage/aws/aws_file_explorer.dart' show NewFolderDialog, NewFolderDialogContent;
 
@@ -166,11 +164,7 @@ class ImgurFileExplorerState extends loading_state.BaseLoadingPageState<ImgurFil
         }
       }
     } catch (e) {
-      FLog.error(
-          className: 'ImgurFileExplorerState',
-          methodName: '_getFileList',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {}, 'ImgurFileExplorerState', '_getFileList');
       state = loading_state.LoadState.ERROR;
     }
     if (mounted) {
@@ -203,6 +197,15 @@ class ImgurFileExplorerState extends loading_state.BaseLoadingPageState<ImgurFil
           },
         ),
         titleSpacing: 0,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withAlpha(204)],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
+        ),
         title: Text(widget.albumInfo.isEmpty ? '文件管理' : widget.albumInfo['title'],
             style: const TextStyle(
               color: Colors.white,
@@ -557,13 +560,14 @@ class ImgurFileExplorerState extends loading_state.BaseLoadingPageState<ImgurFil
                               _getFileList();
                               setState(() {});
                             } catch (e) {
-                              FLog.error(
-                                  className: 'imgurManagePage',
-                                  methodName: 'uploadNetworkFileEntry',
-                                  text: formatErrorMessage({
-                                    'url': url,
-                                  }, e.toString()),
-                                  dataLogType: DataLogType.ERRORS.toString());
+                              flogErr(
+                                e,
+                                {
+                                  'url': url.text,
+                                },
+                                'ImgurFileExplorerState',
+                                'uploadNetworkFileEntry',
+                              );
                               if (mounted) {
                                 showToastWithContext(context, '错误');
                               }
@@ -670,11 +674,7 @@ class ImgurFileExplorerState extends loading_state.BaseLoadingPageState<ImgurFil
                     showToast('删除完成');
                     return;
                   } catch (e) {
-                    FLog.error(
-                        className: 'ImgurManagePage',
-                        methodName: 'deleteAll_button',
-                        text: formatErrorMessage({}, e.toString()),
-                        dataLogType: DataLogType.ERRORS.toString());
+                    flogErr(e, {}, 'ImgurManagePage', 'deleteAll_button');
                     showToast('删除失败');
                   }
                 },
@@ -717,13 +717,14 @@ class ImgurFileExplorerState extends loading_state.BaseLoadingPageState<ImgurFil
         });
       }
     } catch (e) {
-      FLog.error(
-          className: "ImgurManagePage",
-          methodName: "deleteAll",
-          text: formatErrorMessage({
-            'toDelete': toDelete,
-          }, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(
+        e,
+        {
+          'toDelete': toDelete,
+        },
+        'ImgurManagePage',
+        'deleteAll',
+      );
       rethrow;
     }
   }

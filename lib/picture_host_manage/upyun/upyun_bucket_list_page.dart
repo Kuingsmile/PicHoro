@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:fluro/fluro.dart';
-import 'package:f_logs/f_logs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -9,7 +8,7 @@ import 'package:grouped_list/grouped_list.dart';
 
 import 'package:horopic/router/application.dart';
 import 'package:horopic/router/routers.dart';
-import 'package:horopic/picture_host_manage/common_page/loading_state.dart' as loading_state;
+import 'package:horopic/picture_host_manage/common/loading_state.dart' as loading_state;
 import 'package:horopic/picture_host_manage/manage_api/upyun_manage_api.dart';
 import 'package:horopic/utils/common_functions.dart';
 
@@ -130,11 +129,12 @@ class UpyunBucketListState extends loading_state.BaseLoadingPageState<UpyunBucke
         });
       }
     } catch (e) {
-      FLog.error(
-          className: 'UpyunBucketListState',
-          methodName: 'initBucketList',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(
+        e,
+        {},
+        'UpyunBucketListState',
+        'initBucketList',
+      );
       if (mounted) {
         setState(() {
           state = loading_state.LoadState.ERROR;
@@ -150,6 +150,15 @@ class UpyunBucketListState extends loading_state.BaseLoadingPageState<UpyunBucke
         elevation: 0,
         centerTitle: true,
         title: titleText('又拍云存储桶列表'),
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withAlpha(204)],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
+        ),
         actions: [
           IconButton(
             onPressed: () async {
@@ -541,11 +550,12 @@ class UpyunBucketListState extends loading_state.BaseLoadingPageState<UpyunBucke
                   showToast('设置失败');
                 }
               } catch (e) {
-                FLog.error(
-                    className: 'UpyunManagePage',
-                    methodName: 'setDefaultPSHost',
-                    text: formatErrorMessage({}, e.toString()),
-                    dataLogType: DataLogType.ERRORS.toString());
+                flogErr(
+                  e,
+                  {},
+                  'UpyunBucketListState',
+                  'setDefaultPSHost',
+                );
               }
             },
           ),
@@ -710,11 +720,12 @@ class UpyunBucketListState extends loading_state.BaseLoadingPageState<UpyunBucke
                 }
               }
             } catch (e) {
-              FLog.error(
-                  className: 'UpyunManagePage',
-                  methodName: 'removeOperatorSelectionCupertinoDialog',
-                  text: formatErrorMessage({}, e.toString()),
-                  dataLogType: DataLogType.ERRORS.toString());
+              flogErr(
+                e,
+                {},
+                'UpyunBucketListState',
+                'removeOperatorSelectionCupertinoDialog',
+              );
             }
           },
         ),
@@ -862,13 +873,14 @@ class UpyunBucketListState extends loading_state.BaseLoadingPageState<UpyunBucke
                     }
                     return;
                   } catch (e) {
-                    FLog.error(
-                        className: 'UpyunBucketListPage',
-                        methodName: 'buildBottomSheetWidget_deleteBucket',
-                        text: formatErrorMessage({
-                          'element': element,
-                        }, e.toString()),
-                        dataLogType: DataLogType.ERRORS.toString());
+                    flogErr(
+                      e,
+                      {
+                        'element': element,
+                      },
+                      'UpyunBucketListState',
+                      'buildBottomSheetWidget_deleteBucket',
+                    );
                     showToast('删除失败');
                     if (context.mounted) {
                       Navigator.of(context).pop();

@@ -3,7 +3,6 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:f_logs/f_logs.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'package:horopic/utils/global.dart';
@@ -91,11 +90,7 @@ class AlistManageAPI {
       String contents = await file.readAsString();
       return contents;
     } catch (e) {
-      FLog.error(
-          className: 'AlistManageAPI',
-          methodName: 'readAlistConfig',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {}, 'AlistManageAPI', 'readAlistConfig');
       return "Error";
     }
   }
@@ -364,13 +359,13 @@ class AlistManageAPI {
       await alistConfigFile.writeAsString(alistConfigJson);
       return ['success'];
     } catch (e) {
-      FLog.error(
-          className: "AlistManageAPI",
-          methodName: "setDefaultBucket",
-          text: formatErrorMessage({
+      flogErr(
+          e,
+          {
             'path': path,
-          }, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+          },
+          "AlistManageAPI",
+          "setDefaultBucket");
       return ['failed'];
     }
   }

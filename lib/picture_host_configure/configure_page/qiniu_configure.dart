@@ -3,19 +3,18 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:f_logs/f_logs.dart';
 import 'package:fluro/fluro.dart';
 import 'package:qiniu_flutter_sdk/qiniu_flutter_sdk.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'package:horopic/router/application.dart';
-import 'package:horopic/pages/loading.dart';
+import 'package:horopic/widgets/net_loading_dialog.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/event_bus_utils.dart';
 import 'package:horopic/api/qiniu_api.dart';
 import 'package:horopic/picture_host_manage/manage_api/qiniu_manage_api.dart';
-import 'package:horopic/picture_host_configure/widgets/configure_widgets.dart';
+import 'package:horopic/widgets/configure_widgets.dart';
 
 class QiniuConfig extends StatefulWidget {
   const QiniuConfig({super.key});
@@ -52,11 +51,7 @@ class QiniuConfigState extends State<QiniuConfig> {
       setControllerText(_optionsController, configMap['options']);
       setControllerText(_pathController, configMap['path']);
     } catch (e) {
-      FLog.error(
-          className: 'QiniuConfigState',
-          methodName: '_initConfig',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {}, 'QiniuConfigState', '_initConfig');
     }
   }
 
@@ -275,11 +270,7 @@ class QiniuConfigState extends State<QiniuConfig> {
       await qiniuConfigFile.writeAsString(qiniuConfigJson);
       showToast('保存成功');
     } catch (e) {
-      FLog.error(
-          className: 'QiniuConfigPage',
-          methodName: '_saveQiniuConfig',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {}, 'QiniuConfigState', '_saveQiniuConfig');
       if (context.mounted) {
         return showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
       }
@@ -351,11 +342,7 @@ class QiniuConfigState extends State<QiniuConfig> {
         }
       }
     } catch (e) {
-      FLog.error(
-          className: 'QiniuConfigPage',
-          methodName: 'checkQiniuConfig',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {}, 'QiniuConfigState', 'checkQiniuConfig');
       if (context.mounted) {
         return showCupertinoAlertDialog(context: context, title: "检查失败!", content: e.toString());
       }

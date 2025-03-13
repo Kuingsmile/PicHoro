@@ -1,11 +1,9 @@
-// ignore_for_file: unnecessary_brace_in_string_interps
 import 'dart:io';
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:f_logs/f_logs.dart';
 import 'package:sqflite/utils/utils.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:minio/minio.dart';
@@ -32,11 +30,7 @@ class AwsManageAPI {
       String contents = await file.readAsString();
       return contents;
     } catch (e) {
-      FLog.error(
-          className: "AwsManageAPI",
-          methodName: "readAwsConfig",
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {}, 'AwsManageAPI', 'readAwsConfig');
       return "Error";
     }
   }
@@ -125,12 +119,7 @@ class AwsManageAPI {
       var response = await minio.listBuckets();
       return ['success', response];
     } catch (e) {
-      FLog.error(
-          className: "AwsManageAPI",
-          methodName: "getBucketList",
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
-
+      flogErr(e, {}, 'AwsManageAPI', 'getBucketList');
       return [e.toString()];
     }
   }
@@ -166,12 +155,13 @@ class AwsManageAPI {
 
       return ['success', response];
     } catch (e) {
-      FLog.error(
-          className: "AwsManageAPI",
-          methodName: "getBucketRegion",
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
-
+      flogErr(
+          e,
+          {
+            'bucket': bucket,
+          },
+          'AwsManageAPI',
+          'getBucketRegion');
       return [e.toString()];
     }
   }
@@ -226,11 +216,13 @@ class AwsManageAPI {
       }
       return ['success'];
     } catch (e) {
-      FLog.error(
-          className: "AwsManageAPI",
-          methodName: "createBucket",
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(
+          e,
+          {
+            'newBucketConfigMap': newBucketConfigMap,
+          },
+          'AwsManageAPI',
+          'createBucket');
       return [e.toString()];
     }
   }
@@ -281,12 +273,13 @@ class AwsManageAPI {
 
       return ['success', response];
     } catch (e) {
-      FLog.error(
-          className: "AwsManageAPI",
-          methodName: "getBucketList",
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
-
+      flogErr(
+          e,
+          {
+            'element': element,
+          },
+          'AwsManageAPI',
+          'deleteBucket');
       return [e.toString()];
     }
   }
@@ -324,11 +317,7 @@ class AwsManageAPI {
       await awsConfigFile.writeAsString(awsConfigJson);
       return ['success'];
     } catch (e) {
-      FLog.error(
-          className: "AwsManageAPI",
-          methodName: "setDefaultBucket",
-          text: formatErrorMessage({'element': element, 'folder': folder}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {'element': element, 'folder': folder}, 'AwsManageAPI', 'setDefaultBucket');
       return ['failed'];
     }
   }
@@ -389,12 +378,7 @@ class AwsManageAPI {
       objects['CommonPrefixes'] = result.prefixes;
       return ['success', objects];
     } catch (e) {
-      FLog.error(
-          className: "AwsManageAPI",
-          methodName: "getBucketList",
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
-
+      flogErr(e, {'element': element, 'query': query}, 'AwsManageAPI', 'queryBucketFiles');
       return [e.toString()];
     }
   }
@@ -446,12 +430,7 @@ class AwsManageAPI {
 
       return ['success', response];
     } catch (e) {
-      FLog.error(
-          className: "AwsManageAPI",
-          methodName: "getBucketList",
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
-
+      flogErr(e, {'element': element, 'key': key}, 'AwsManageAPI', 'deleteFile');
       return [e.toString()];
     }
   }
@@ -489,13 +468,7 @@ class AwsManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      FLog.error(
-          className: "UpyunManageAPI",
-          methodName: "deleteFolder",
-          text: formatErrorMessage({
-            'prefix': prefix,
-          }, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {'element': element, 'prefix': prefix}, 'AwsManageAPI', 'deleteFolder');
       return ['failed'];
     }
   }
@@ -549,12 +522,7 @@ class AwsManageAPI {
 
       return ['success', response];
     } catch (e) {
-      FLog.error(
-          className: "AwsManageAPI",
-          methodName: "getBucketList",
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
-
+      flogErr(e, {'element': element, 'key': key, 'newKey': newKey}, 'AwsManageAPI', 'copyFile');
       return [e.toString()];
     }
   }
@@ -644,12 +612,7 @@ class AwsManageAPI {
       var response = await minio.putObject(bucket, '$prefix$newfolder/placeholder.txt', Stream.fromIterable([]));
       return ['success', response];
     } catch (e) {
-      FLog.error(
-          className: "AwsManageAPI",
-          methodName: "getBucketList",
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
-
+      flogErr(e, {'element': element, 'prefix': prefix, 'newfolder': newfolder}, 'AwsManageAPI', 'createFolder');
       return [e.toString()];
     }
   }
@@ -717,13 +680,17 @@ class AwsManageAPI {
       );
       return ['success'];
     } catch (e) {
-      FLog.error(
-          className: "AwsManageAPI",
-          methodName: "uploadFile",
-          text: formatErrorMessage(
-              {'element': element, 'filename': filename, 'filepath': filepath, 'prefix': prefix}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
-
+      flogErr(
+        e,
+        {
+          'element': element,
+          'filename': filename,
+          'filepath': filepath,
+          'prefix': prefix,
+        },
+        'AwsManageAPI',
+        'uploadFile',
+      );
       return ['error'];
     }
   }

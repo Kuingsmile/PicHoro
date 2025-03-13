@@ -1,17 +1,16 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:f_logs/f_logs.dart';
 import 'package:fluro/fluro.dart';
+import 'package:webdav_client/webdav_client.dart' as webdav;
 
 import 'package:horopic/router/application.dart';
 import 'package:horopic/utils/common_functions.dart';
-import 'package:horopic/pages/loading.dart';
+import 'package:horopic/widgets/net_loading_dialog.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/event_bus_utils.dart';
 import 'package:horopic/picture_host_manage/manage_api/webdav_manage_api.dart';
-import 'package:horopic/picture_host_configure/widgets/configure_widgets.dart';
-import 'package:webdav_client/webdav_client.dart' as webdav;
+import 'package:horopic/widgets/configure_widgets.dart';
 
 class WebdavConfig extends StatefulWidget {
   const WebdavConfig({super.key});
@@ -46,11 +45,7 @@ class WebdavConfigState extends State<WebdavConfig> {
       setControllerText(_webPathController, configMap['webPath']);
       setState(() {});
     } catch (e) {
-      FLog.error(
-          className: 'webdavConfigState',
-          methodName: '_initConfig',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {}, 'webdavConfigState', '_initConfig');
     }
   }
 
@@ -256,11 +251,7 @@ class WebdavConfigState extends State<WebdavConfig> {
       setState(() {});
       showToast('保存成功');
     } catch (e) {
-      FLog.error(
-          className: 'WebdavConfigPage',
-          methodName: '_saveWebdavConfig',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {}, 'WebdavConfigState', '_saveWebdavConfig');
       if (context.mounted) {
         return showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
       }
@@ -304,11 +295,7 @@ ${configMap["webPath"]}
 """);
       }
     } catch (e) {
-      FLog.error(
-          className: 'WebdavConfigPage',
-          methodName: 'checkWebdavConfig',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {}, 'WebdavConfigState', 'checkWebdavConfig');
       if (context.mounted) {
         return showCupertinoAlertDialog(context: context, title: "检查失败!", content: e.toString());
       }

@@ -97,7 +97,14 @@ class LskyproImageUploadUtils {
       }
       return ["failed"];
     } catch (e) {
-      flogErr(e, {}, "LskyproImageUploadUtils", "deleteApi");
+      flogErr(
+          e,
+          {
+            'deleteMap': deleteMap,
+            'configMap': configMap,
+          },
+          "LskyproImageUploadUtils",
+          "deleteApi");
       return ["failed"];
     }
   }

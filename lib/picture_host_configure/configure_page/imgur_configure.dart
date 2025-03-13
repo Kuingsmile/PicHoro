@@ -2,17 +2,16 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 
 import 'package:dio/dio.dart';
-import 'package:f_logs/f_logs.dart';
 import 'package:fluro/fluro.dart';
 
 import 'package:horopic/router/application.dart';
-import 'package:horopic/pages/loading.dart';
+import 'package:horopic/widgets/net_loading_dialog.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/dio_proxy_adapter.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/picture_host_manage/manage_api/imgur_manage_api.dart';
 import 'package:horopic/utils/event_bus_utils.dart';
-import 'package:horopic/picture_host_configure/widgets/configure_widgets.dart';
+import 'package:horopic/widgets/configure_widgets.dart';
 
 class ImgurConfig extends StatefulWidget {
   const ImgurConfig({super.key});
@@ -39,11 +38,7 @@ class ImgurConfigState extends State<ImgurConfig> {
       setControllerText(_proxyController, configMap['proxy']);
       setState(() {});
     } catch (e) {
-      FLog.error(
-          className: 'ImgurConfigState',
-          methodName: '_initConfig',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {}, 'ImgurConfigState', '_initConfig');
     }
   }
 
@@ -176,11 +171,7 @@ class ImgurConfigState extends State<ImgurConfig> {
       showToast('保存成功');
       return;
     } catch (e) {
-      FLog.error(
-          className: 'ImgurConfigState',
-          methodName: '_saveImgurConfig',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {}, 'ImgurConfigState', '_saveImgurConfig');
       if (context.mounted) {
         return showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
       }
@@ -233,11 +224,7 @@ class ImgurConfigState extends State<ImgurConfig> {
       }
       return;
     } catch (e) {
-      FLog.error(
-          className: 'ImgurConfigPage',
-          methodName: 'checkImgurConfig',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {}, 'ImgurConfigState', 'checkImgurConfig');
       if (context.mounted) {
         return showCupertinoAlertDialog(context: context, title: "检查失败!", content: e.toString());
       }

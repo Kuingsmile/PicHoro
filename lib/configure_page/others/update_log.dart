@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:extended_image/extended_image.dart';
 
-import 'package:horopic/album/load_state_change.dart';
+import 'package:horopic/widgets/load_state_change.dart';
 import 'package:horopic/utils/common_functions.dart';
 
 class UpdateLog extends StatefulWidget {

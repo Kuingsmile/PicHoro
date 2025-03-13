@@ -7,7 +7,7 @@ import 'package:barcode_scan2/barcode_scan2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluro/fluro.dart';
-import 'package:f_logs/f_logs.dart';
+
 import 'package:horopic/picture_host_manage/manage_api/alist_manage_api.dart';
 import 'package:horopic/picture_host_manage/manage_api/aliyun_manage_api.dart';
 import 'package:horopic/picture_host_manage/manage_api/aws_manage_api.dart';
@@ -25,7 +25,7 @@ import 'package:horopic/utils/common_functions.dart';
 
 import 'package:horopic/picture_host_configure/configure_page/configure_export.dart';
 
-import 'package:horopic/pages/loading.dart';
+import 'package:horopic/widgets/net_loading_dialog.dart';
 
 import 'package:horopic/router/application.dart';
 import 'package:horopic/router/routers.dart';

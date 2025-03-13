@@ -4,20 +4,18 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:external_path/external_path.dart';
-import 'package:f_logs/f_logs.dart';
 import 'package:fluro/fluro.dart';
 
-import 'package:horopic/picture_host_manage/alist/download_api/alist_downloader.dart';
-import 'package:horopic/picture_host_manage/alist/download_api/alist_download_task.dart';
-import 'package:horopic/picture_host_manage/common_page/download/pnc_download_status.dart';
-import 'package:horopic/picture_host_manage/alist/upload_api/alist_upload_utils.dart';
-import 'package:horopic/pages/upload_pages/upload_status.dart';
-import 'package:horopic/picture_host_manage/alist/upload_api/alist_upload_task.dart';
+import 'package:horopic/picture_host_manage/common/download/managers/alist_download_manager.dart';
+import 'package:horopic/picture_host_manage/common/download/common_service/base_download_task.dart';
+import 'package:horopic/picture_host_manage/common/download/common_service/base_download_status.dart';
+import 'package:horopic/picture_host_manage/common/upload/managers/alist_upload_manager.dart';
+import 'package:horopic/pages/upload_helper/upload_status.dart';
+import 'package:horopic/picture_host_manage/common/upload/common_service/base_upload_task.dart';
 import 'package:horopic/router/application.dart';
 import 'package:horopic/router/routers.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/global.dart';
-//修改自flutter_download_manager包 https://github.com/nabil6391/flutter_download_manager 作者@nabil6391
 
 class AlistUpDownloadManagePage extends StatefulWidget {
   final String bucketName;
@@ -194,7 +192,8 @@ class AlistUpDownloadManagePageState extends State<AlistUpDownloadManagePage> {
                   }
                   setState(() {});
                 } else {
-                  await downloadManager.addDownload(url, "$savedDir$fileName", fileName, configMap);
+                  await downloadManager.addDownload(url, "$savedDir$fileName",
+                      fileName: fileName, configMap: configMap);
                   setState(() {});
                 }
               },
@@ -203,13 +202,13 @@ class AlistUpDownloadManagePageState extends State<AlistUpDownloadManagePage> {
                 try {
                   await file.delete();
                 } catch (e) {
-                  FLog.error(
-                      className: 'AlistUpDownloadManagePageState',
-                      methodName: '_createDownloadListItem_delete',
-                      text: formatErrorMessage({
+                  flogErr(
+                      e,
+                      {
                         'fileName': fileName,
-                      }, e.toString()),
-                      dataLogType: DataLogType.ERRORS.toString());
+                      },
+                      'AlistUpDownloadManagePageState',
+                      '_createDownloadListItem_delete');
                 }
                 await downloadManager.removeDownload(url);
                 setState(() {});
@@ -269,8 +268,8 @@ class AlistUpDownloadManagePageState extends State<AlistUpDownloadManagePage> {
         children: [
           TextButton(
               onPressed: () async {
-                await downloadManager.addBatchDownloads(
-                    downloadUrlList, savedDir, downloadFileNameList, downloadConfigMapList);
+                await downloadManager.addBatchDownloads(downloadUrlList, savedDir,
+                    fileNames: downloadFileNameList, configMaps: downloadConfigMapList);
                 setState(() {});
               },
               child: const Text(
@@ -330,6 +329,15 @@ class AlistUpDownloadManagePageState extends State<AlistUpDownloadManagePage> {
               elevation: 0,
               title: titleText(
                 '上传下载管理',
+              ),
+              flexibleSpace: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withAlpha(204)],
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                  ),
+                ),
               ),
               bottom: const TabBar(
                 padding: EdgeInsets.all(0),

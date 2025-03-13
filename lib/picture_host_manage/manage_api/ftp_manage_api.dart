@@ -1,12 +1,10 @@
 import 'dart:io';
 import 'dart:convert';
 
+import 'package:dartssh2/dartssh2.dart';
 import 'package:dio/dio.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:f_logs/f_logs.dart';
 import 'package:path_provider/path_provider.dart';
-
-import 'package:dartssh2/dartssh2.dart';
 
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/picture_host_configure/configure_page/ftp_configure.dart';
@@ -30,11 +28,7 @@ class FTPManageAPI {
       String contents = await file.readAsString();
       return contents;
     } catch (e) {
-      FLog.error(
-          className: 'FTPManageAPI',
-          methodName: 'readFTPConfig',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {}, "FTPManageAPI", "readFTPConfig");
       return "Error";
     }
   }
@@ -97,11 +91,13 @@ class FTPManageAPI {
       client.close();
       return ['success', itemAttrs];
     } catch (e) {
-      FLog.error(
-          className: 'FTPManageAPI',
-          methodName: 'getDirectoryContentSFTP',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(
+          e,
+          {
+            'folder': folder,
+          },
+          "FTPManageAPI",
+          "getDirectoryContentSFTP");
       return ["failed"];
     }
   }
@@ -126,11 +122,13 @@ class FTPManageAPI {
       client.close();
       return ['success', utf8.decode(result)];
     } catch (e) {
-      FLog.error(
-          className: 'FTPManageAPI',
-          methodName: 'executeCommandSFTP',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(
+          e,
+          {
+            'command': command,
+          },
+          "FTPManageAPI",
+          "executeCommandSFTP");
       return ["failed"];
     }
   }
@@ -156,11 +154,14 @@ class FTPManageAPI {
       client.close();
       return ['success', ''];
     } catch (e) {
-      FLog.error(
-          className: 'FTPManageAPI',
-          methodName: 'renameFileSFTP',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(
+          e,
+          {
+            'oldName': oldName,
+            'newName': newName,
+          },
+          "FTPManageAPI",
+          "renameFileSFTP");
       return ["failed"];
     }
   }
@@ -186,11 +187,13 @@ class FTPManageAPI {
       client.close();
       return ['success', ''];
     } catch (e) {
-      FLog.error(
-          className: 'FTPManageAPI',
-          methodName: 'createFolderSFTP',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(
+          e,
+          {
+            'folderName': folderName,
+          },
+          "FTPManageAPI",
+          "createFolderSFTP");
       return ["failed"];
     }
   }
@@ -221,11 +224,13 @@ class FTPManageAPI {
       client.close();
       return ['success', ''];
     } catch (e) {
-      FLog.error(
-          className: 'FTPManageAPI',
-          methodName: 'deleteFolderSFTP',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(
+          e,
+          {
+            'folderName': folderName,
+          },
+          "FTPManageAPI",
+          "deleteFolderSFTP");
       return ["failed"];
     }
   }
@@ -255,11 +260,13 @@ class FTPManageAPI {
       client.close();
       return ['success', ''];
     } catch (e) {
-      FLog.error(
-          className: 'FTPManageAPI',
-          methodName: 'deleteFileSFTP',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(
+          e,
+          {
+            'fileName': fileName,
+          },
+          "FTPManageAPI",
+          "deleteFileSFTP");
       return ["failed"];
     }
   }
@@ -286,11 +293,13 @@ class FTPManageAPI {
       await ftpConfigFile.writeAsString(ftpConfigJson);
       return ['success'];
     } catch (e) {
-      FLog.error(
-          className: "FTPManageAPI",
-          methodName: "setDefaultBucketSFTP",
-          text: formatErrorMessage({'folder': folder}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(
+          e,
+          {
+            'folder': folder,
+          },
+          "FTPManageAPI",
+          "setDefaultBucketSFTP");
       return ['failed'];
     }
   }
@@ -336,11 +345,15 @@ class FTPManageAPI {
       client.close();
       return ['success', ''];
     } catch (e) {
-      FLog.error(
-          className: 'FTPManageAPI',
-          methodName: 'uploadFileSFTP',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(
+          e,
+          {
+            'uploadPath': uploadPath,
+            'filePath': filePath,
+            'fileName': fileName,
+          },
+          "FTPManageAPI",
+          "uploadFileSFTP");
       return ["failed"];
     }
   }
@@ -375,6 +388,7 @@ class FTPManageAPI {
           e,
           {
             'fileLink': fileLink,
+            'uploadPath': uploadPath,
           },
           "FTPManageAPI",
           "uploadNetworkFileSFTP");

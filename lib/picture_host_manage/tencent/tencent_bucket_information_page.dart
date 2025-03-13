@@ -23,6 +23,15 @@ class BucketInformationState extends State<BucketInformation> {
         elevation: 0,
         centerTitle: true,
         title: titleText('基本信息'),
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withAlpha(204)],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
+        ),
       ),
       body: ListView(
         children: [

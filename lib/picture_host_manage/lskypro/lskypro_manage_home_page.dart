@@ -1,11 +1,11 @@
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:fluro/fluro.dart';
-import 'package:f_logs/f_logs.dart';
 
 import 'package:horopic/router/application.dart';
 import 'package:horopic/router/routers.dart';
-import 'package:horopic/picture_host_manage/common_page/loading_state.dart' as loading_state;
+import 'package:horopic/picture_host_manage/common/loading_state.dart' as loading_state;
 import 'package:horopic/picture_host_manage/manage_api/lskypro_manage_api.dart';
 import 'package:horopic/utils/common_functions.dart';
 
@@ -39,11 +39,7 @@ class LskyproManageHomePageState extends loading_state.BaseLoadingPageState<Lsky
         setState(() {});
       }
     } catch (e) {
-      FLog.error(
-          className: 'LskyproManageHomePageState',
-          methodName: 'initProfile',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {}, 'LskyproManageHomePageState', 'initProfile');
       if (mounted) {
         setState(() {
           state = loading_state.LoadState.ERROR;
@@ -58,6 +54,15 @@ class LskyproManageHomePageState extends loading_state.BaseLoadingPageState<Lsky
         elevation: 0,
         centerTitle: true,
         title: titleText('兰空图床信息'),
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withAlpha(204)],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
+        ),
       );
 
   @override

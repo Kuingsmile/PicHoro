@@ -230,7 +230,8 @@ class TencentImageUploadUtils {
       flogErr(
           e,
           {
-            'fileName': fileName,
+            'deleteMap': deleteMap,
+            'configMap': configMap,
           },
           "TencentImageUploadUtils",
           "deleteApi");

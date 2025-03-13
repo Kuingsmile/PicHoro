@@ -7,14 +7,13 @@ import 'package:image_picker/image_picker.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 import 'package:flutter/services.dart' as flutter_services;
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
-import 'package:f_logs/f_logs.dart';
 import 'package:http/http.dart' as my_http;
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as my_path;
 
 import 'package:horopic/album/album_sql.dart';
 import 'package:horopic/utils/event_bus_utils.dart';
-import 'package:horopic/pages/loading.dart';
+import 'package:horopic/widgets/net_loading_dialog.dart';
 import 'package:horopic/picture_host_configure/default_picture_host_select.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/global.dart';
@@ -22,9 +21,9 @@ import 'package:horopic/utils/uploader.dart';
 import 'package:receive_intent/receive_intent.dart' as ic_intent;
 import 'package:uri_to_file/uri_to_file.dart';
 
-import 'package:horopic/pages/upload_pages/upload_task.dart';
-import 'package:horopic/pages/upload_pages/upload_utils.dart';
-import 'package:horopic/pages/upload_pages/upload_status.dart';
+import 'package:horopic/pages/upload_helper/upload_task.dart';
+import 'package:horopic/pages/upload_helper/upload_utils.dart';
+import 'package:horopic/pages/upload_helper/upload_status.dart';
 
 import 'package:horopic/utils/image_compress.dart';
 
@@ -106,13 +105,13 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
       }
       addToUploadList();
     } catch (e) {
-      FLog.error(
-          className: 'HomePage',
-          methodName: '_initIntent',
-          text: formatErrorMessage({
+      flogErr(
+          e,
+          {
             'intent': _initialIntent,
-          }, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+          },
+          'HomePage',
+          '_initIntent');
     }
   }
 
@@ -325,11 +324,17 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
           continue;
         }
         try {
-          var response = await my_http.get(Uri.parse(urlList[i]));
+          Uri uri = Uri.parse(urlList[i]);
+          var response = await my_http.get(uri);
+          String fileExt = '.jpg';
+          String path = uri.path.toLowerCase();
+          if (path.contains('.')) {
+            fileExt = path.substring(path.lastIndexOf('.'));
+          }
           String tempPath = await getTemporaryDirectory().then((value) => value.path);
           String timeStamp = DateTime.now().millisecondsSinceEpoch.toString();
           String randomString = randomStringGenerator(5);
-          File file = File('$tempPath/Web$timeStamp$randomString.jpg');
+          File file = File('$tempPath/Web$timeStamp$randomString.$fileExt');
           await file.writeAsBytes(response.bodyBytes);
           Global.imageFile = file.path;
           File compressedFile = await processImageFile(file);
@@ -337,13 +342,13 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
           Global.imagesFileList.add(compressedFile);
           successCount++;
         } catch (e) {
-          FLog.error(
-              className: 'ImagePage',
-              methodName: '_imageFromNetwork',
-              text: formatErrorMessage({
+          flogErr(
+              e,
+              {
                 'url': urlList[i],
-              }, e.toString()),
-              dataLogType: DataLogType.ERRORS.toString());
+              },
+              'ImagePage',
+              '_imageFromNetwork');
           failCount++;
           continue;
         }
@@ -354,13 +359,13 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
         return showToast('剪贴板内无链接');
       }
     } catch (e) {
-      FLog.error(
-          className: 'ImagePage',
-          methodName: '_imageFromNetwork',
-          text: formatErrorMessage({
+      flogErr(
+          e,
+          {
             'url': url,
-          }, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+          },
+          'ImagePage',
+          '_imageFromNetwork');
       return showToast('获取图片失败');
     }
   }
@@ -649,14 +654,14 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
         }
       }
     } catch (e) {
-      FLog.error(
-          className: 'HomePage',
-          methodName: '_handleBatchUploadCompletion',
-          text: formatErrorMessage({
+      flogErr(
+          e,
+          {
             'paths': paths,
             'fileNames': fileNames,
-          }, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+          },
+          'HomePage',
+          '_handleBatchUploadCompletion');
     }
   }
 

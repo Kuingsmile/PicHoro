@@ -3,7 +3,6 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:f_logs/f_logs.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'package:horopic/utils/global.dart';
@@ -28,11 +27,7 @@ class ImgurManageAPI {
       String contents = await file.readAsString();
       return contents;
     } catch (e) {
-      FLog.error(
-          className: 'ImgurManageAPI',
-          methodName: 'readImgurConfig',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {}, 'ImgurManageAPI', 'readImgurConfig');
       return "Error";
     }
   }
@@ -48,27 +43,21 @@ class ImgurManageAPI {
       String contents = await file.readAsString();
       return contents;
     } catch (e) {
-      FLog.error(
-          className: 'ImgurManageAPI',
-          methodName: 'readImgurManageConfig',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {}, 'ImgurManageAPI', 'readImgurManageConfig');
       return "Error";
     }
   }
 
-  static Future<bool> saveImgurManageConfig(String imguruser, String clientid, String accesstoken, String proxy) async {
+  static Future<bool> saveImgurManageConfig(
+      String imgurUsername, String clientid, String accesstoken, String proxy) async {
     try {
       final file = await _manageLocalFile;
       await file.writeAsString(
-          jsonEncode({'imguruser': imguruser, 'clientid': clientid, 'accesstoken': accesstoken, 'proxy': proxy}));
+          jsonEncode({'imguruser': imgurUsername, 'clientid': clientid, 'accesstoken': accesstoken, 'proxy': proxy}));
       return true;
     } catch (e) {
-      FLog.error(
-          className: 'ImgurManageAPI',
-          methodName: 'saveImgurManageConfig',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {'imguruser': imgurUsername, 'clientid': clientid, 'accesstoken': accesstoken, 'proxy': proxy},
+          'ImgurManageAPI', 'saveImgurManageConfig');
       return false;
     }
   }
@@ -117,19 +106,16 @@ class ImgurManageAPI {
         return ["failed"];
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "ImgurManageAPI",
-            methodName: "checkToken",
-            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "ImgurManageAPI",
-            methodName: "checkToken",
-            text: formatErrorMessage({}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogErr(
+        e,
+        {
+          'username': username,
+          'accesstoken': accesstoken,
+          'proxy': proxy,
+        },
+        'ImgurManageAPI',
+        'checkToken',
+      );
       return [e.toString()];
     }
   }
@@ -172,19 +158,16 @@ class ImgurManageAPI {
           return ["failed"];
         }
       } catch (e) {
-        if (e is DioException) {
-          FLog.error(
-              className: "ImgurManageAPI",
-              methodName: "getAlbumList",
-              text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
-              dataLogType: DataLogType.ERRORS.toString());
-        } else {
-          FLog.error(
-              className: "ImgurManageAPI",
-              methodName: "getAlbumList",
-              text: formatErrorMessage({}, e.toString()),
-              dataLogType: DataLogType.ERRORS.toString());
-        }
+        flogErr(
+          e,
+          {
+            'username': username,
+            'accesstoken': accesstoken,
+            'proxy': proxy,
+          },
+          'ImgurManageAPI',
+          'getAlbumList',
+        );
         return [e.toString()];
       }
     }
@@ -219,19 +202,16 @@ class ImgurManageAPI {
         return ["failed"];
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "ImgurManageAPI",
-            methodName: "getAlbumInfo",
-            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "ImgurManageAPI",
-            methodName: "getAlbumInfo",
-            text: formatErrorMessage({}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogErr(
+        e,
+        {
+          'clienID': clienID,
+          'albumhash': albumhash,
+          'proxy': proxy,
+        },
+        'ImgurManageAPI',
+        'getAlbumInfo',
+      );
       return [e.toString()];
     }
   }
@@ -273,19 +253,16 @@ class ImgurManageAPI {
           return ["failed"];
         }
       } catch (e) {
-        if (e is DioException) {
-          FLog.error(
-              className: "ImgurManageAPI",
-              methodName: "getImagesList",
-              text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
-              dataLogType: DataLogType.ERRORS.toString());
-        } else {
-          FLog.error(
-              className: "ImgurManageAPI",
-              methodName: "getImagesList",
-              text: formatErrorMessage({}, e.toString()),
-              dataLogType: DataLogType.ERRORS.toString());
-        }
+        flogErr(
+          e,
+          {
+            'username': username,
+            'accesstoken': accesstoken,
+            'proxy': proxy,
+          },
+          'ImgurManageAPI',
+          'getImagesList',
+        );
         return [e.toString()];
       }
     }
@@ -295,15 +272,13 @@ class ImgurManageAPI {
   //is no image
   static isEmptyAccount(String username, String accesstoken, String proxy) async {
     var queryResult = await getImagesList(username, accesstoken, proxy);
-    if (queryResult[0] == 'success') {
-      if (queryResult[1].length == 0) {
-        return ['empty'];
-      } else {
-        return ['notempty'];
-      }
-    } else {
+    if (queryResult[0] != 'success') {
       return ['error'];
     }
+    if (queryResult[1].length == 0) {
+      return ['empty'];
+    }
+    return ['notempty'];
   }
 
   //get images of album
@@ -334,19 +309,16 @@ class ImgurManageAPI {
         return ["failed"];
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "ImgurManageAPI",
-            methodName: "getAlbumImages",
-            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "ImgurManageAPI",
-            methodName: "getAlbumImages",
-            text: formatErrorMessage({}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogErr(
+        e,
+        {
+          'clientID': clientID,
+          'albumHash': albumHash,
+          'proxy': proxy,
+        },
+        'ImgurManageAPI',
+        'getAlbumImages',
+      );
       return [e.toString()];
     }
   }
@@ -429,19 +401,16 @@ class ImgurManageAPI {
         return ["failed"];
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "ImgurManageAPI",
-            methodName: "createAlbum",
-            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "ImgurManageAPI",
-            methodName: "createAlbum",
-            text: formatErrorMessage({}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogErr(
+        e,
+        {
+          'accesstoken': accesstoken,
+          'title': title,
+          'proxy': proxy,
+        },
+        'ImgurManageAPI',
+        'createAlbum',
+      );
       return [e.toString()];
     }
   }
@@ -476,19 +445,16 @@ class ImgurManageAPI {
         return ["failed"];
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "ImgurManageAPI",
-            methodName: "deleteAlbum",
-            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "ImgurManageAPI",
-            methodName: "deleteAlbum",
-            text: formatErrorMessage({}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogErr(
+        e,
+        {
+          'accesstoken': accesstoken,
+          'albumHash': albumHash,
+          'proxy': proxy,
+        },
+        'ImgurManageAPI',
+        'deleteAlbum',
+      );
       return [e.toString()];
     }
   }
@@ -523,19 +489,16 @@ class ImgurManageAPI {
         return ["failed"];
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "ImgurManageAPI",
-            methodName: "deleteImage",
-            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "ImgurManageAPI",
-            methodName: "deleteImage",
-            text: formatErrorMessage({}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogErr(
+        e,
+        {
+          'accesstoken': accesstoken,
+          'imageHash': imageHash,
+          'proxy': proxy,
+        },
+        'ImgurManageAPI',
+        'deleteImage',
+      );
       return [e.toString()];
     }
   }
@@ -589,19 +552,18 @@ class ImgurManageAPI {
         return ["failed"];
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "ImgurManageAPI",
-            methodName: "uploadFile",
-            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "ImgurManageAPI",
-            methodName: "uploadFile",
-            text: formatErrorMessage({}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogErr(
+        e,
+        {
+          'accesstoken': accesstoken,
+          'albumHash': albumHash,
+          'filename': filename,
+          'filepath': filepath,
+          'proxy': proxy,
+        },
+        'ImgurManageAPI',
+        'uploadFile',
+      );
       return [e.toString()];
     }
   }
@@ -616,30 +578,26 @@ class ImgurManageAPI {
       String saveFilePath = '$savePath/$filename';
       Dio dio = Dio();
       Response response = await dio.download(fileLink, saveFilePath);
-      if (response.statusCode == 200) {
-        var uploadResult = await uploadFile(accesstoken, albumHash, filename, saveFilePath, proxy);
-        if (uploadResult[0] == "success") {
-          return ['success'];
-        } else {
-          return ['failed'];
-        }
-      } else {
+      if (response.statusCode != 200) {
         return ['failed'];
       }
-    } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "ImgurManageAPI",
-            methodName: "uploadNetworkFile",
-            text: formatErrorMessage({'fileLink': fileLink}, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "ImgurManageAPI",
-            methodName: "uploadNetworkFile",
-            text: formatErrorMessage({'fileLink': fileLink}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
+      var uploadResult = await uploadFile(accesstoken, albumHash, filename, saveFilePath, proxy);
+      if (uploadResult[0] != "success") {
+        return ['failed'];
       }
+      return ['success'];
+    } catch (e) {
+      flogErr(
+        e,
+        {
+          'fileLink': fileLink,
+          'accesstoken': accesstoken,
+          'albumHash': albumHash,
+          'proxy': proxy,
+        },
+        'ImgurManageAPI',
+        'uploadNetworkFile',
+      );
       return ['failed'];
     }
   }
@@ -665,9 +623,8 @@ class ImgurManageAPI {
     } else if (failCount == 0) {
       return Fluttertoast.showToast(
           msg: '上传成功', toastLength: Toast.LENGTH_SHORT, timeInSecForIosWeb: 2, fontSize: 16.0);
-    } else {
-      return Fluttertoast.showToast(
-          msg: '成功$successCount,失败$failCount', toastLength: Toast.LENGTH_SHORT, timeInSecForIosWeb: 2, fontSize: 16.0);
     }
+    return Fluttertoast.showToast(
+        msg: '成功$successCount,失败$failCount', toastLength: Toast.LENGTH_SHORT, timeInSecForIosWeb: 2, fontSize: 16.0);
   }
 }

@@ -3,7 +3,6 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:f_logs/f_logs.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'package:horopic/utils/global.dart';
@@ -27,11 +26,7 @@ class LskyproManageAPI {
       String contents = await file.readAsString();
       return contents;
     } catch (e) {
-      FLog.error(
-          className: 'LskyproManageAPI',
-          methodName: 'readLskyproConfig',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {}, 'LskyproManageAPI', 'readLskyproConfig');
       return "Error";
     }
   }
@@ -41,8 +36,7 @@ class LskyproManageAPI {
     if (configStr == '') {
       return {};
     }
-    Map configMap = json.decode(configStr);
-    return configMap;
+    return json.decode(configStr);
   }
 
   static isString(var variable) {
@@ -73,19 +67,7 @@ class LskyproManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "LskyproManageAPI",
-            methodName: "getUserInfo",
-            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "LskyproManageAPI",
-            methodName: "getUserInfo",
-            text: formatErrorMessage({}, e.toString(), isDioError: false),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogErr(e, {}, 'LskyproManageAPI', 'getUserInfo');
       return [e.toString()];
     }
   }
@@ -126,19 +108,7 @@ class LskyproManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "LskyproManageAPI",
-            methodName: "getAlbums",
-            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "LskyproManageAPI",
-            methodName: "getAlbums",
-            text: formatErrorMessage({}, e.toString(), isDioError: false),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogErr(e, {}, 'LskyproManageAPI', 'getAlbums');
       return [e.toString()];
     }
   }
@@ -180,19 +150,13 @@ class LskyproManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "LskyproManageAPI",
-            methodName: "getPhoto",
-            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "LskyproManageAPI",
-            methodName: "getPhoto",
-            text: formatErrorMessage({}, e.toString(), isDioError: false),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogErr(
+          e,
+          {
+            'albumId': albumId,
+          },
+          'LskyproManageAPI',
+          'getPhoto');
       return [e.toString()];
     }
   }
@@ -222,19 +186,13 @@ class LskyproManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "LskyproManageAPI",
-            methodName: "deleteFile",
-            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "LskyproManageAPI",
-            methodName: "deleteFile",
-            text: formatErrorMessage({}, e.toString(), isDioError: false),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogErr(
+          e,
+          {
+            'deleteKey': deleteKey,
+          },
+          'LskyproManageAPI',
+          'deleteFile');
       return [e.toString()];
     }
   }
@@ -263,19 +221,13 @@ class LskyproManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "LskyproManageAPI",
-            methodName: "deleteAlbum",
-            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "LskyproManageAPI",
-            methodName: "deleteAlbum",
-            text: formatErrorMessage({}, e.toString(), isDioError: false),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogErr(
+          e,
+          {
+            'id': id,
+          },
+          'LskyproManageAPI',
+          'deleteAlbum');
       return [e.toString()];
     }
   }
@@ -312,19 +264,14 @@ class LskyproManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "LskyproManageAPI",
-            methodName: "uploadFile",
-            text: formatErrorMessage({}, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "LskyproManageAPI",
-            methodName: "uploadFile",
-            text: formatErrorMessage({}, e.toString(), isDioError: false),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogErr(
+          e,
+          {
+            'filename': filename,
+            'path': path,
+          },
+          'LskyproManageAPI',
+          'uploadFile');
       return [e.toString()];
     }
   }
@@ -353,19 +300,13 @@ class LskyproManageAPI {
         return ['failed'];
       }
     } catch (e) {
-      if (e is DioException) {
-        FLog.error(
-            className: "LskyproManageAPI",
-            methodName: "uploadNetworkFile",
-            text: formatErrorMessage({'fileLink': fileLink}, e.toString(), isDioError: true, dioErrorMessage: e),
-            dataLogType: DataLogType.ERRORS.toString());
-      } else {
-        FLog.error(
-            className: "LskyproManageAPI",
-            methodName: "uploadNetworkFile",
-            text: formatErrorMessage({'fileLink': fileLink}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
-      }
+      flogErr(
+          e,
+          {
+            'fileLink': fileLink,
+          },
+          'LskyproManageAPI',
+          'uploadNetworkFile');
       return ['failed'];
     }
   }

@@ -6,7 +6,6 @@ import 'package:flutter/services.dart';
 
 import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
-import 'package:f_logs/f_logs.dart';
 import 'package:fluro/fluro.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as my_path;
@@ -16,8 +15,8 @@ import 'package:horopic/utils/event_bus_utils.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/picture_host_manage/manage_api/aliyun_manage_api.dart';
-import 'package:horopic/pages/loading.dart';
-import 'package:horopic/picture_host_configure/widgets/configure_widgets.dart';
+import 'package:horopic/widgets/net_loading_dialog.dart';
+import 'package:horopic/widgets/configure_widgets.dart';
 
 class AliyunConfig extends StatefulWidget {
   const AliyunConfig({super.key});
@@ -55,11 +54,7 @@ class AliyunConfigState extends State<AliyunConfig> {
       setControllerText(_optionsController, configMap['options']);
       setState(() {});
     } catch (e) {
-      FLog.error(
-          className: 'AliyunConfigState',
-          methodName: '_initConfig',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {}, 'AliyunConfigPage', '_initConfig');
     }
   }
 
@@ -276,11 +271,7 @@ class AliyunConfigState extends State<AliyunConfig> {
       await aliyunConfigFile.writeAsString(aliyunConfigJson);
       showToast('保存成功');
     } catch (e) {
-      FLog.error(
-          className: 'AliyunConfigPage',
-          methodName: 'saveAliyunConfig',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {}, 'AliyunConfigPage', 'saveAliyunConfig');
       if (context.mounted) {
         return showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
       }
@@ -368,11 +359,7 @@ class AliyunConfigState extends State<AliyunConfig> {
         }
       }
     } catch (e) {
-      FLog.error(
-          className: 'AliyunConfigPage',
-          methodName: 'checkAliyunConfig',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {}, 'AliyunConfigPage', 'checkAliyunConfig');
       if (context.mounted) {
         return showCupertinoAlertDialog(context: context, title: "检查失败!", content: e.toString());
       }

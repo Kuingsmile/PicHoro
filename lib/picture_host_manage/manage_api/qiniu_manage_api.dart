@@ -3,7 +3,6 @@ import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
-import 'package:f_logs/f_logs.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'package:horopic/utils/global.dart';
@@ -51,11 +50,7 @@ class QiniuManageAPI {
       String contents = await file.readAsString();
       return contents;
     } catch (e) {
-      FLog.error(
-          className: 'QiniuManageAPI',
-          methodName: 'readQiniuConfig',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {}, "QiniuManageAPI", "readQiniuConfig");
       return "Error";
     }
   }
@@ -71,11 +66,7 @@ class QiniuManageAPI {
       String contents = await file.readAsString();
       return contents;
     } catch (e) {
-      FLog.error(
-          className: 'QiniuManageAPI',
-          methodName: 'readQiniuManageConfig',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {}, "QiniuManageAPI", "readQiniuManageConfig");
       return "Error";
     }
   }
@@ -86,11 +77,15 @@ class QiniuManageAPI {
       await file.writeAsString(jsonEncode({'bucket': bucket, 'domain': domain, 'area': area}));
       return true;
     } catch (e) {
-      FLog.error(
-          className: 'QiniuManageAPI',
-          methodName: 'saveQiniuManageConfig',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(
+          e,
+          {
+            'bucket': bucket,
+            'domain': domain,
+            'area': area,
+          },
+          "QiniuManageAPI",
+          "saveQiniuManageConfig");
       return false;
     }
   }
@@ -177,7 +172,6 @@ signingStr=signingStr+\n(换行符)+\n(换行符)
 如果您设置了请求Body，并且设置Content-Type不为"application/octet-stream"类型，Body也需要加入待签名字符串
 signingStr=signingStr+<body>
 */
-  //get authorization
   static Future<String> qiniuAuthorization(String method, String path, String? query, String host, String? contentType,
       Map? xQiniuHeaders, String body, String accessKey, String secretKey) async {
     try {
@@ -210,18 +204,21 @@ signingStr=signingStr+<body>
       var encodedSign = urlSafeBase64Encode(sign.bytes);
       return '$accessKey:$encodedSign';
     } catch (e) {
-      FLog.error(
-          className: 'QiniuManageAPI',
-          methodName: 'QiniuAuthorization',
-          text: formatErrorMessage({
+      flogErr(
+          e,
+          {
             'method': method,
             'path': path,
             'query': query,
             'host': host,
             'contentType': contentType,
+            'xQiniuHeaders': xQiniuHeaders,
             'body': body,
-          }, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+            'accessKey': accessKey,
+            'secretKey': secretKey,
+          },
+          "QiniuManageAPI",
+          "qiniuAuthorization");
       return "";
     }
   }
@@ -500,11 +497,8 @@ signingStr=signingStr+<body>
       await qiniuConfigFile.writeAsString(qiniuConfigJson);
       return ['success'];
     } catch (e) {
-      FLog.error(
-          className: "QiniuManageAPI",
-          methodName: "setDefaultBucketFromListPage",
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {'element': element, 'textMap': textMap, 'folder': folder}, "QiniuManageAPI",
+          "setDefaultBucketFromListPage");
       return ['failed'];
     }
   }

@@ -1,19 +1,18 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:f_logs/f_logs.dart';
 import 'package:ftpconnect/ftpconnect.dart';
 import 'package:dartssh2/dartssh2.dart';
 import 'package:fluro/fluro.dart';
 import 'package:horopic/utils/event_bus_utils.dart';
 
-import 'package:horopic/pages/loading.dart';
+import 'package:horopic/widgets/net_loading_dialog.dart';
 import 'package:horopic/router/routers.dart';
 import 'package:horopic/router/application.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/picture_host_manage/manage_api/ftp_manage_api.dart';
-import 'package:horopic/picture_host_configure/widgets/configure_widgets.dart';
+import 'package:horopic/widgets/configure_widgets.dart';
 
 class FTPConfig extends StatefulWidget {
   const FTPConfig({super.key});
@@ -70,11 +69,7 @@ class FTPConfigState extends State<FTPConfig> {
       setControllerText(_ftpWebPathController, configMap['ftpWebPath']);
       setState(() {});
     } catch (e) {
-      FLog.error(
-          className: 'FTPConfigState',
-          methodName: '_initConfig',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {}, 'FTPConfigState' 'FTPConfigState', '_initConfig');
     }
   }
 
@@ -365,11 +360,7 @@ class FTPConfigState extends State<FTPConfig> {
       await ftpConfigFile.writeAsString(ftpConfigJson);
       showToast('保存成功');
     } catch (e) {
-      FLog.error(
-          className: 'FTPConfigPage',
-          methodName: '_saveFTPConfig_2',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {}, 'FTPConfigPage', '_saveFTPConfig_2');
       if (context.mounted) {
         return showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
       }
@@ -440,11 +431,7 @@ class FTPConfigState extends State<FTPConfig> {
         }
       }
     } catch (e) {
-      FLog.error(
-          className: 'FTPConfigPage',
-          methodName: 'checkFTPConfig',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {}, 'FTPConfigPage', 'checkFTPConfig');
       if (context.mounted) {
         return showCupertinoAlertDialog(context: context, title: "检查失败!", content: e.toString());
       }

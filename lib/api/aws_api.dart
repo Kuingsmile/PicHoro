@@ -171,13 +171,13 @@ class AwsImageUploadUtils {
 
     try {
       await minio.removeObject(bucket, urlpath);
-
       return ['success'];
     } catch (e) {
       flogErr(
           e,
           {
-            'fileName': fileName,
+            'deleteMap': deleteMap,
+            'configMap': configMap,
           },
           "AwsImageUploadUtils",
           "deleteApi");

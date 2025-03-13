@@ -214,7 +214,8 @@ class QiniuImageUploadUtils {
       flogErr(
           e,
           {
-            'fileName': fileName,
+            'deleteMap': deleteMap,
+            'configMap': configMap,
           },
           "QiniuImageUploadUtils",
           "deleteApi");

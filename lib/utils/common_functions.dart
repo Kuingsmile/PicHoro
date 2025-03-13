@@ -566,7 +566,9 @@ mainInit() async {
   await SpUtil.getInstance();
   await Permissionutils.askPermissionStorage();
   await Permissionutils.askPermissionCamera();
-  await Permissionutils.askPermissionGallery();
+  await Permissionutils.askPermissionPhotos();
+  await Permissionutils.askPermissionVideo();
+  await Permissionutils.askPermissionAudio();
   await Permissionutils.askPermissionManageExternalStorage();
   await Permissionutils.askPermissionMediaLibrary();
   await Permissionutils.askPermissionRequestInstallPackage();

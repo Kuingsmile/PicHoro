@@ -16,14 +16,14 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:msh_checkbox/msh_checkbox.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 
-import 'package:horopic/album/load_state_change.dart';
+import 'package:horopic/widgets/load_state_change.dart';
 import 'package:horopic/picture_host_manage/manage_api/lskypro_manage_api.dart';
-import 'package:horopic/pages/loading.dart';
+import 'package:horopic/widgets/net_loading_dialog.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/router/application.dart';
 import 'package:horopic/router/routers.dart';
-import 'package:horopic/picture_host_manage/common_page/loading_state.dart' as loading_state;
+import 'package:horopic/picture_host_manage/common/loading_state.dart' as loading_state;
 import 'package:horopic/utils/image_compress.dart';
 
 class LskyproFileExplorer extends StatefulWidget {
@@ -188,6 +188,15 @@ class LskyproFileExplorerState extends loading_state.BaseLoadingPageState<Lskypr
               fontSize: 15,
               fontWeight: FontWeight.bold,
             )),
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withAlpha(204)],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
+        ),
         actions: [
           PopupMenuButton(
               icon: const Icon(

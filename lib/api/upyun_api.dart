@@ -187,7 +187,8 @@ class UpyunImageUploadUtils {
       flogErr(
           e,
           {
-            'fileName': fileName,
+            'deleteMap': deleteMap,
+            'configMap': configMap,
           },
           "UpyunImageUploadUtils",
           "deleteApi");

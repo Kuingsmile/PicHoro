@@ -2,16 +2,15 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:f_logs/f_logs.dart';
 import 'package:fluro/fluro.dart';
 
 import 'package:horopic/router/application.dart';
 import 'package:horopic/utils/common_functions.dart';
-import 'package:horopic/pages/loading.dart';
+import 'package:horopic/widgets/net_loading_dialog.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/event_bus_utils.dart';
 import 'package:horopic/picture_host_manage/manage_api/alist_manage_api.dart';
-import 'package:horopic/picture_host_configure/widgets/configure_widgets.dart';
+import 'package:horopic/widgets/configure_widgets.dart';
 
 class AlistConfig extends StatefulWidget {
   const AlistConfig({super.key});
@@ -52,11 +51,7 @@ class AlistConfigState extends State<AlistConfig> {
       setControllerText(_customUrlController, configMap['customUrl']);
       setState(() {});
     } catch (e) {
-      FLog.error(
-          className: 'alistConfigState',
-          methodName: '_initConfig',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {}, 'alistConfigState', '_initConfig');
     }
   }
 
@@ -329,11 +324,7 @@ class AlistConfigState extends State<AlistConfig> {
 
         showToast('请提供有效的身份验证信息');
       } catch (e) {
-        FLog.error(
-            className: 'AlistConfigPage',
-            methodName: '_saveAlistConfig',
-            text: formatErrorMessage({}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
+        flogErr(e, {}, 'AlistConfigPage', '_saveAlistConfig');
         if (context.mounted) {
           showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
         }
@@ -469,11 +460,7 @@ class AlistConfigState extends State<AlistConfig> {
         return;
       }
     } catch (e) {
-      FLog.error(
-          className: 'ConfigPage',
-          methodName: 'checkAlistConfig',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {}, 'ConfigPage', 'checkAlistConfig' 'checkAlistConfig');
       if (context.mounted) {
         return showCupertinoAlertDialog(context: context, title: "检查失败!", content: e.toString());
       }

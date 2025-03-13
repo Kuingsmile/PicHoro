@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:f_logs/f_logs.dart';
-import 'package:horopic/picture_host_configure/configure_page/alist_configure.dart';
 
+import 'package:horopic/picture_host_configure/configure_page/alist_configure.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/picture_host_configure/configure_store/configure_store_file.dart';
 import 'package:horopic/picture_host_manage/manage_api/alist_manage_api.dart';
 import 'package:horopic/picture_host_configure/configure_store/configure_template.dart';
-import 'package:horopic/picture_host_configure/widgets/configure_widgets.dart';
+import 'package:horopic/widgets/configure_widgets.dart';
 
 class AlistConfigureStoreEdit extends StatefulWidget {
   final String storeKey;
@@ -303,11 +302,7 @@ class AlistConfigureStoreEditState extends State<AlistConfigureStoreEdit> {
         showToast('保存成功');
         return true;
       } catch (e) {
-        FLog.error(
-            className: 'AlistConfigStoreEditPage',
-            methodName: '_saveConfig',
-            text: formatErrorMessage({}, e.toString()),
-            dataLogType: DataLogType.ERRORS.toString());
+        flogErr(e, {}, 'AlistConfigStoreEditPage', '_saveConfig');
       }
       showToast('保存失败');
       return false;

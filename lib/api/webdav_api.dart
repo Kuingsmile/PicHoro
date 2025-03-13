@@ -90,7 +90,14 @@ class WebdavImageUploadUtils {
 
       return ["success"];
     } catch (e) {
-      flogErr(e, {}, "WebdavImageUploadUtils", "deleteApi");
+      flogErr(
+          e,
+          {
+            'deleteMap': deleteMap,
+            'configMap': configMap,
+          },
+          "WebdavImageUploadUtils",
+          "deleteApi");
       return ["failed"];
     }
   }

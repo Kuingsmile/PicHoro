@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'package:fluro/fluro.dart';
 
-import 'package:horopic/utils/web_view.dart';
+import 'package:horopic/widgets/web_view.dart';
 
 import 'package:horopic/pages/pichoro_app.dart';
 import 'package:horopic/pages/home_page.dart';
@@ -35,10 +35,10 @@ import 'package:horopic/picture_host_manage/tencent/tencent_new_bucket_configure
 import 'package:horopic/picture_host_manage/tencent/tencent_file_explorer.dart';
 import 'package:horopic/picture_host_manage/tencent/tencent_file_information_page.dart';
 
-import 'package:horopic/picture_host_manage/common_page/file_explorer/file_explorer.dart';
-import 'package:horopic/picture_host_manage/common_page/file_explorer/local_image_preview.dart';
-import 'package:horopic/picture_host_manage/common_page/file_explorer/net_video_player.dart';
-import 'package:horopic/picture_host_manage/common_page/base_download_manage_page.dart';
+import 'package:horopic/picture_host_manage/common/file_explorer/local_file_explorer.dart';
+import 'package:horopic/picture_host_manage/common/file_explorer/local_image_preview.dart';
+import 'package:horopic/picture_host_manage/common/file_explorer/net_video_player.dart';
+import 'package:horopic/picture_host_manage/common/base_up_down_load_manage_page.dart';
 
 import 'package:horopic/picture_host_manage/smms/smms_manage_home_page.dart';
 import 'package:horopic/picture_host_manage/smms/smms_file_explorer.dart';
@@ -86,8 +86,8 @@ import 'package:horopic/picture_host_manage/ftp/sftp_file_information_page.dart'
 import 'package:horopic/picture_host_manage/ftp/ssh_terminal.dart';
 import 'package:horopic/picture_host_manage/ftp/sftp_local_image_preview.dart';
 
-import 'package:horopic/picture_host_manage/common_page/file_explorer/md_preview.dart';
-import 'package:horopic/picture_host_manage/common_page/file_explorer/pdf_viewer.dart';
+import 'package:horopic/picture_host_manage/common/file_explorer/md_preview.dart';
+import 'package:horopic/picture_host_manage/common/file_explorer/pdf_viewer.dart';
 
 import 'package:horopic/picture_host_manage/aws/aws_bucket_list_page.dart';
 import 'package:horopic/picture_host_manage/aws/aws_new_bucket_configure.dart';
@@ -96,8 +96,6 @@ import 'package:horopic/picture_host_manage/aws/aws_file_information_page.dart';
 
 import 'package:horopic/picture_host_manage/alist/alist_bucket_list_page.dart';
 import 'package:horopic/picture_host_manage/alist/alist_bucket_information_page.dart';
-import 'package:horopic/picture_host_manage/alist/alist_new_bucket_configure.dart';
-import 'package:horopic/picture_host_manage/alist/alist_new_bucket_router.dart';
 import 'package:horopic/picture_host_manage/alist/alist_file_explorer.dart';
 import 'package:horopic/picture_host_manage/alist/alist_file_information_page.dart';
 import 'package:horopic/picture_host_manage/alist/alist_download_manage_page.dart';
@@ -803,23 +801,6 @@ var alistBucketInformationHandler = Handler(handlerFunc: (BuildContext? context,
   return AlistBucketInformation(
     bucketMap: bucketMap,
   );
-});
-
-//Alist新建存储桶页面
-var newAlistBucketHandler = Handler(handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
-  String driver = params['driver']!.first;
-  String update = params['update']!.first;
-  Map<String, dynamic> bucketMap = json.decode(params['bucketMap']!.first);
-  return AlistNewBucketConfig(
-    driver: driver,
-    update: update,
-    bucketMap: bucketMap,
-  );
-});
-
-//Alist新建存储导航页面
-var newAlistBucketNavigationHandler = Handler(handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
-  return const AlistNewBucketRouter();
 });
 
 //Alist存储桶文件列表页面

@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:external_path/external_path.dart';
 import 'package:fluro/fluro.dart';
-import 'package:f_logs/f_logs.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:flutter/services.dart' as flutter_services;
@@ -17,15 +16,14 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:msh_checkbox/msh_checkbox.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 
-import 'package:horopic/album/load_state_change.dart';
+import 'package:horopic/widgets/load_state_change.dart';
 import 'package:horopic/picture_host_manage/manage_api/smms_manage_api.dart';
-import 'package:horopic/pages/loading.dart';
+import 'package:horopic/widgets/net_loading_dialog.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/router/application.dart';
 import 'package:horopic/router/routers.dart';
-import 'package:horopic/picture_host_manage/common_page/loading_state.dart' as loading_state;
-
+import 'package:horopic/picture_host_manage/common/loading_state.dart' as loading_state;
 import 'package:horopic/utils/image_compress.dart';
 
 class SmmsFileExplorer extends StatefulWidget {
@@ -84,11 +82,7 @@ class SmmsFileExplorerState extends loading_state.BaseLoadingPageState<SmmsFileE
         state = loading_state.LoadState.ERROR;
       }
     } catch (e) {
-      FLog.error(
-          className: 'SmmsFileExplorer',
-          methodName: '_getFileList',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {}, "SmmsFileExplorerState", "_getFileList");
       state = loading_state.LoadState.ERROR;
     }
     if (mounted) {
@@ -343,13 +337,7 @@ class SmmsFileExplorerState extends loading_state.BaseLoadingPageState<SmmsFileE
                               _getFileList();
                               setState(() {});
                             } catch (e) {
-                              FLog.error(
-                                  className: 'SmmsManagePage',
-                                  methodName: 'uploadNetworkFileEntry',
-                                  text: formatErrorMessage({
-                                    'url': url,
-                                  }, e.toString()),
-                                  dataLogType: DataLogType.ERRORS.toString());
+                              flogErr(e, {'url': url}, "SmmsFileExplorerState", "uploadNetworkFileEntry");
                               if (mounted) {
                                 showToastWithContext(context, '错误');
                               }
@@ -412,11 +400,7 @@ class SmmsFileExplorerState extends loading_state.BaseLoadingPageState<SmmsFileE
                     showToast('删除完成');
                     return;
                   } catch (e) {
-                    FLog.error(
-                        className: 'SmmsManagePage',
-                        methodName: 'deleteAll_button',
-                        text: formatErrorMessage({}, e.toString()),
-                        dataLogType: DataLogType.ERRORS.toString());
+                    flogErr(e, {}, "SmmsManagePage", "deleteAll_button");
                     showToast('删除失败');
                   }
                 },
@@ -441,11 +425,7 @@ class SmmsFileExplorerState extends loading_state.BaseLoadingPageState<SmmsFileE
         }
       }
     } catch (e) {
-      FLog.error(
-          className: 'SmmsManagePage',
-          methodName: 'deleteAll',
-          text: formatErrorMessage({'toDelete': toDelete}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {'toDelete': toDelete}, "SmmsManagePage", "deleteAll");
       rethrow;
     }
   }
@@ -997,11 +977,7 @@ class SmmsFileExplorerState extends loading_state.BaseLoadingPageState<SmmsFileE
         loadStateChanged: (state) => defaultLoadStateChanged(state, iconSize: 50),
       );
     } catch (e) {
-      FLog.error(
-          className: 'SmmsFileExplorer',
-          methodName: 'iconImageLoad',
-          text: formatErrorMessage({'index': index}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {'index': index}, "SmmsFileExplorer", "iconImageLoad");
       String fileExtension = allInfoList[index]['url'].split('.').last;
       fileExtension = fileExtension.toLowerCase();
       String iconPath = 'assets/icons/';

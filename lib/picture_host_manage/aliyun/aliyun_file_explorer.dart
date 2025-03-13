@@ -9,7 +9,6 @@ import 'package:external_path/external_path.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fluro/fluro.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:f_logs/f_logs.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:path/path.dart' as my_path;
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -19,10 +18,10 @@ import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 import 'package:horopic/router/application.dart';
 import 'package:horopic/router/routers.dart';
 import 'package:horopic/picture_host_manage/manage_api/aliyun_manage_api.dart';
-import 'package:horopic/picture_host_manage/common_page/loading_state.dart' as loading_state;
+import 'package:horopic/picture_host_manage/common/loading_state.dart' as loading_state;
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/common_functions.dart';
-import 'package:horopic/pages/loading.dart';
+import 'package:horopic/widgets/net_loading_dialog.dart';
 import 'package:horopic/utils/image_compress.dart';
 import 'package:horopic/picture_host_manage/aws/aws_file_explorer.dart'
     show RenameDialog, RenameDialogContent, NewFolderDialog, NewFolderDialogContent;
@@ -552,13 +551,13 @@ class AliyunFileExplorerState extends loading_state.BaseLoadingPageState<AliyunF
                                 }
                                 _getBucketList();
                               } catch (e) {
-                                FLog.error(
-                                    className: 'AliyunFileExplorer',
-                                    methodName: 'uploadNetworkFileEntry',
-                                    text: formatErrorMessage({
+                                flogErr(
+                                    e,
+                                    {
                                       'url': url.text,
-                                    }, e.toString()),
-                                    dataLogType: DataLogType.ERRORS.toString());
+                                    },
+                                    'AliyunFileExplorer',
+                                    'uploadNetworkFileEntry');
                                 if (mounted) {
                                   showToastWithContext(context, "错误");
                                 }
@@ -669,11 +668,7 @@ class AliyunFileExplorerState extends loading_state.BaseLoadingPageState<AliyunF
                     showToast('删除完成');
                     return;
                   } catch (e) {
-                    FLog.error(
-                        className: 'AliyunFileExplorer',
-                        methodName: 'deleteAll',
-                        text: formatErrorMessage({}, e.toString()),
-                        dataLogType: DataLogType.ERRORS.toString());
+                    flogErr(e, {}, 'AliyunFileExplorer', 'deleteAll');
                     showToast('删除失败');
                   }
                 },
@@ -863,13 +858,13 @@ class AliyunFileExplorerState extends loading_state.BaseLoadingPageState<AliyunF
         });
       }
     } catch (e) {
-      FLog.error(
-          className: 'AliyunManagePage',
-          methodName: 'deleteAll',
-          text: formatErrorMessage({
+      flogErr(
+          e,
+          {
             'toDelete': toDelete,
-          }, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+          },
+          'AliyunFileExplorer',
+          'deleteAll');
       rethrow;
     }
   }

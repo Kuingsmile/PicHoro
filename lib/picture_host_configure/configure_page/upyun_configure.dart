@@ -1,19 +1,19 @@
 import 'dart:io';
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:f_logs/f_logs.dart';
 import 'package:fluro/fluro.dart';
 import 'package:horopic/api/upyun_api.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'package:horopic/router/application.dart';
-import 'package:horopic/pages/loading.dart';
+import 'package:horopic/widgets/net_loading_dialog.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/event_bus_utils.dart';
 import 'package:horopic/picture_host_manage/manage_api/upyun_manage_api.dart';
-import 'package:horopic/picture_host_configure/widgets/configure_widgets.dart';
+import 'package:horopic/widgets/configure_widgets.dart';
 
 class UpyunConfig extends StatefulWidget {
   const UpyunConfig({super.key});
@@ -52,11 +52,7 @@ class UpyunConfigState extends State<UpyunConfig> {
       setControllerText(_antiLeechTokenController, configMap['antiLeechToken']);
       setControllerText(_antiLeechExpirationController, configMap['antiLeechExpiration']);
     } catch (e) {
-      FLog.error(
-          className: 'UpyunConfigState',
-          methodName: '_initCongfig',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {}, 'UpyunConfigState', '_initCongfig');
     }
   }
 
@@ -273,11 +269,7 @@ class UpyunConfigState extends State<UpyunConfig> {
       await upyunConfigFile.writeAsString(upyunConfigJson);
       showToast('保存成功');
     } catch (e) {
-      FLog.error(
-          className: 'UpyunConfigPageState',
-          methodName: 'saveConfig',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {}, 'UpyunConfigPageState', 'saveConfig');
       if (context.mounted) {
         return showCupertinoAlertDialog(context: context, title: '错误', content: e.toString());
       }
@@ -336,11 +328,7 @@ ${configMap['antiLeechExpiration']}
         }
       }
     } catch (e) {
-      FLog.error(
-          className: 'UpyunConfigPageState',
-          methodName: 'checkUpyunConfig',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {}, 'UpyunConfigPageState', 'checkUpyunConfig');
       if (context.mounted) {
         return showCupertinoAlertDialog(context: context, title: "检查失败!", content: e.toString());
       }

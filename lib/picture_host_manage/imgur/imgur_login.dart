@@ -1,9 +1,10 @@
-import 'package:flutter/material.dart';
-import 'package:f_logs/f_logs.dart';
-import 'package:fluro/fluro.dart';
 import 'dart:convert';
+
+import 'package:flutter/material.dart';
+import 'package:fluro/fluro.dart';
+
 import 'package:horopic/utils/common_functions.dart';
-import 'package:horopic/pages/loading.dart';
+import 'package:horopic/widgets/net_loading_dialog.dart';
 import 'package:horopic/picture_host_manage/manage_api/imgur_manage_api.dart';
 import 'package:horopic/router/application.dart';
 import 'package:horopic/router/routers.dart';
@@ -50,11 +51,7 @@ class ImgurLogInState extends State<ImgurLogIn> {
         return showToast('登录失败');
       }
     } catch (e) {
-      FLog.error(
-          className: 'ImgurLogInState',
-          methodName: '_saveuserpasswd',
-          text: formatErrorMessage({}, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+      flogErr(e, {}, 'ImgurLogInState', '_saveuserpasswd');
       return showToast('未知错误');
     }
   }
@@ -66,6 +63,15 @@ class ImgurLogInState extends State<ImgurLogIn> {
         centerTitle: true,
         elevation: 0,
         title: titleText('登录Imgur'),
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withAlpha(204)],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
+        ),
       ),
       body: signUpPage(),
     );

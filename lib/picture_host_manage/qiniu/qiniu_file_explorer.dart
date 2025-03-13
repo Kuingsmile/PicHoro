@@ -4,10 +4,8 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' as flutter_services;
-
 import 'package:external_path/external_path.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:f_logs/f_logs.dart';
 import 'package:fluro/fluro.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:share_plus/share_plus.dart';
@@ -19,10 +17,10 @@ import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 import 'package:horopic/router/application.dart';
 import 'package:horopic/router/routers.dart';
 import 'package:horopic/picture_host_manage/manage_api/qiniu_manage_api.dart';
-import 'package:horopic/picture_host_manage/common_page/loading_state.dart' as loading_state;
+import 'package:horopic/picture_host_manage/common/loading_state.dart' as loading_state;
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/common_functions.dart';
-import 'package:horopic/pages/loading.dart';
+import 'package:horopic/widgets/net_loading_dialog.dart';
 import 'package:horopic/utils/image_compress.dart';
 import 'package:horopic/picture_host_manage/aws/aws_file_explorer.dart'
     show RenameDialog, RenameDialogContent, NewFolderDialog, NewFolderDialogContent;
@@ -170,6 +168,15 @@ class QiniuFileExplorerState extends loading_state.BaseLoadingPageState<QiniuFil
               fontSize: 15,
               fontWeight: FontWeight.bold,
             )),
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withAlpha(204)],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
+        ),
         actions: [
           PopupMenuButton(
             icon: const Icon(
@@ -567,13 +574,14 @@ class QiniuFileExplorerState extends loading_state.BaseLoadingPageState<QiniuFil
                                 }
                                 _getBucketList();
                               } catch (e) {
-                                FLog.error(
-                                    className: "QiniuManagePage",
-                                    methodName: "sisyphusFetch",
-                                    text: formatErrorMessage({
-                                      'url': url.text,
-                                    }, e.toString()),
-                                    dataLogType: DataLogType.ERRORS.toString());
+                                flogErr(
+                                  e,
+                                  {
+                                    'url': url.text,
+                                  },
+                                  "QiniuManagePage",
+                                  "sisyphusFetch",
+                                );
                                 if (mounted) {
                                   showToastWithContext(context, "错误");
                                 }
@@ -684,11 +692,14 @@ class QiniuFileExplorerState extends loading_state.BaseLoadingPageState<QiniuFil
                     showToast('删除完成');
                     return;
                   } catch (e) {
-                    FLog.error(
-                        className: 'QiniuBucketPage',
-                        methodName: 'deleteAll',
-                        text: formatErrorMessage({}, e.toString()),
-                        dataLogType: DataLogType.ERRORS.toString());
+                    flogErr(
+                      e,
+                      {
+                        'selectedFilesBool': selectedFilesBool,
+                      },
+                      "QiniuFileExplorer",
+                      "deleteAll",
+                    );
                     showToast('删除失败');
                   }
                 },
@@ -887,13 +898,13 @@ class QiniuFileExplorerState extends loading_state.BaseLoadingPageState<QiniuFil
         });
       }
     } catch (e) {
-      FLog.error(
-          className: "QiniuManagePage",
-          methodName: "deleteAll",
-          text: formatErrorMessage({
+      flogErr(
+          e,
+          {
             'toDelete': toDelete,
-          }, e.toString()),
-          dataLogType: DataLogType.ERRORS.toString());
+          },
+          "QiniuFileExplorerState",
+          "deleteAll");
       rethrow;
     }
   }

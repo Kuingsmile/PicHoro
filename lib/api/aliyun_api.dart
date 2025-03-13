@@ -164,7 +164,14 @@ class AliyunImageUploadUtils {
       );
       return response.statusCode == 204 ? ["success"] : ["failed"];
     } catch (e) {
-      flogErr(e, {}, "AliyunImageUploadUtils", "deleteApi");
+      flogErr(
+          e,
+          {
+            'deleteMap': deleteMap,
+            'configMap': configMap,
+          },
+          "AliyunImageUploadUtils",
+          "deleteApi");
       return ["failed"];
     }
   }
