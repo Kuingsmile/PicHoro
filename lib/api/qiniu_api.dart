@@ -141,11 +141,8 @@ class QiniuImageUploadUtils {
 
         if (options == 'None') {
           returnUrl = '$url/${response.data['key']}';
-          displayUrl = '$url/${response.data['key']}?imageView2/2/w/500/h/500';
+          displayUrl = '$url/${response.data['key']}';
         } else {
-          if (!options.startsWith('?')) {
-            options = '?$options';
-          }
           returnUrl = '$url/${response.data['key']}$options';
           displayUrl = '$url/${response.data['key']}$options';
         }

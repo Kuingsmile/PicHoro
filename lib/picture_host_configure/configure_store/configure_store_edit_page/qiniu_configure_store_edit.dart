@@ -277,11 +277,7 @@ class QiniuConfigureStoreEditState extends State<QiniuConfigureStoreEdit> {
         url = url.substring(0, url.length - 1);
       }
 
-      if (options.isNotEmpty) {
-        if (!options.startsWith('?')) {
-          options = '?$options';
-        }
-      } else {
+      if (options.isEmpty) {
         options = ConfigureTemplate.placeholder;
       }
 

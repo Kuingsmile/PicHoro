@@ -92,6 +92,10 @@ dependencies:
     git:
       url: https://github.com/re7gog/android_system_font.git
       ref: master
+  f_logs:
+    git:
+      url: https://github.com/Kuingsmile/flutterdep.git
+      path: f_logs-2.0.1
   syncfusion_flutter_pdfviewer:
     git:
       url: https://github.com/Kuingsmile/flutterdep.git

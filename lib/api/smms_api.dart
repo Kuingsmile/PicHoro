@@ -15,7 +15,6 @@ class SmmsImageUploadUtils {
       });
   }
 
-  //上传接口
   static Future<List<String>> uploadApi({
     required String path,
     required String name,

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:fluro/fluro.dart';
 
 import 'package:horopic/router/application.dart';
+import 'package:horopic/router/routers.dart';
 import 'package:horopic/widgets/net_loading_dialog.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/global.dart';
@@ -118,8 +119,8 @@ class SmmsConfigState extends State<SmmsConfig> {
                   title: '设置备用配置',
                   icon: Icons.settings_backup_restore,
                   onTap: () async {
-                    await Application.router
-                        .navigateTo(context, '/configureStorePage?psHost=sm.ms', transition: TransitionType.cupertino);
+                    await Application.router.navigateTo(context, '${Routes.configureStorePage}?psHost=sm.ms',
+                        transition: TransitionType.cupertino);
                     await _initConfig();
                     setState(() {});
                   },

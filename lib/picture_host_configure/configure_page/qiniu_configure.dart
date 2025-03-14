@@ -239,9 +239,6 @@ class QiniuConfigState extends State<QiniuConfig> {
       String options = _optionsController.text.trim();
       String path = _pathController.text.trim();
 
-      if (options.isNotEmpty && !options.startsWith('?')) {
-        options = '?$options';
-      }
       if (options.isEmpty) {
         options = 'None';
       }

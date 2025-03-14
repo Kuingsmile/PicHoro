@@ -248,8 +248,6 @@ Future<void> _configureQiniu(Map<String, dynamic> jsonResult) async {
 
     if (qiniuOptions.isEmpty) {
       qiniuOptions = 'None';
-    } else if (!qiniuOptions.startsWith('?')) {
-      qiniuOptions = '?$qiniuOptions';
     }
 
     final qiniuConfig =
