@@ -24,7 +24,7 @@ import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/router/application.dart';
 import 'package:horopic/router/routers.dart';
 import 'package:horopic/picture_host_manage/common/loading_state.dart' as loading_state;
-import 'package:horopic/utils/image_compress.dart';
+import 'package:horopic/utils/image_compressor.dart';
 
 class SmmsFileExplorer extends StatefulWidget {
   const SmmsFileExplorer({
@@ -276,7 +276,7 @@ class SmmsFileExplorerState extends loading_state.BaseLoadingPageState<SmmsFileE
                               for (int i = 0; i < files.length; i++) {
                                 File compressedFile;
                                 if (Global.isCompress == true) {
-                                  ImageCompress imageCompress = ImageCompress();
+                                  ImageCompressor imageCompress = ImageCompressor();
                                   compressedFile = await imageCompress.compressAndGetFile(
                                       files[i].path, my_path.basename(files[i].path), Global.defaultCompressFormat,
                                       minHeight: Global.minHeight, minWidth: Global.minWidth, quality: Global.quality);
@@ -294,7 +294,7 @@ class SmmsFileExplorerState extends loading_state.BaseLoadingPageState<SmmsFileE
                               if (mounted) {
                                 Application.router
                                     .navigateTo(context,
-                                        '/smmsUpDownloadManagePage?downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=0',
+                                        '/baseUpDownloadManagePage?downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=0&currentListIndex=8',
                                         transition: TransitionType.inFromRight)
                                     .then((value) {
                                   _getFileList();
@@ -365,7 +365,7 @@ class SmmsFileExplorerState extends loading_state.BaseLoadingPageState<SmmsFileE
                 }
                 if (mounted) {
                   Application.router.navigateTo(context,
-                      '/smmsUpDownloadManagePage?downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=$index',
+                      '/baseUpDownloadManagePage?downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=$index&currentListIndex=8',
                       transition: TransitionType.inFromRight);
                 }
               },
@@ -484,7 +484,7 @@ class SmmsFileExplorerState extends loading_state.BaseLoadingPageState<SmmsFileE
                       await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
                   if (mounted) {
                     Application.router.navigateTo(context,
-                        '/smmsUpDownloadManagePage?downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=1',
+                        '/baseUpDownloadManagePage?downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=1&currentListIndex=8',
                         transition: TransitionType.inFromRight);
                   }
                 },

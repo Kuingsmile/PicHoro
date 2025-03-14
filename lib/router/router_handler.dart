@@ -42,7 +42,6 @@ import 'package:horopic/picture_host_manage/common/base_up_down_load_manage_page
 
 import 'package:horopic/picture_host_manage/smms/smms_manage_home_page.dart';
 import 'package:horopic/picture_host_manage/smms/smms_file_explorer.dart';
-import 'package:horopic/picture_host_manage/smms/smms_download_manage_page.dart';
 import 'package:horopic/picture_host_manage/smms/smms_file_information_page.dart';
 
 import 'package:horopic/picture_host_manage/aliyun/aliyun_bucket_list_page.dart';
@@ -98,7 +97,6 @@ import 'package:horopic/picture_host_manage/alist/alist_bucket_list_page.dart';
 import 'package:horopic/picture_host_manage/alist/alist_bucket_information_page.dart';
 import 'package:horopic/picture_host_manage/alist/alist_file_explorer.dart';
 import 'package:horopic/picture_host_manage/alist/alist_file_information_page.dart';
-import 'package:horopic/picture_host_manage/alist/alist_download_manage_page.dart';
 
 import 'package:horopic/picture_host_manage/webdav/webdav_file_explorer.dart';
 import 'package:horopic/picture_host_manage/webdav/webdav_file_information_page.dart';
@@ -495,13 +493,6 @@ var smmsFileInformationHandler = Handler(handlerFunc: (BuildContext? context, Ma
   );
 });
 
-//SM.MS存储下载文件页面
-var smmsUpDownloadFileHandler = Handler(handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
-  String downloadPath = params['downloadPath']!.first;
-  String tabIndex = params['tabIndex']!.first;
-  return SmmsUpDownloadManagePage(downloadPath: downloadPath, tabIndex: tabIndex);
-});
-
 //阿里云存储桶列表页面
 var aliyunBucketListHandler = Handler(handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
   return const AliyunBucketList();
@@ -822,15 +813,6 @@ var alistFileInformationHandler = Handler(handlerFunc: (BuildContext? context, M
     fileMap: fileMap,
   );
 });
-
-//Alist存储下载文件页面
-var alistDownloadFileHandler = Handler(handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
-  var bucketName = params['bucketName']!.first;
-  String downloadPath = params['downloadPath']!.first;
-  String tabIndex = params['tabIndex']!.first;
-  return AlistUpDownloadManagePage(bucketName: bucketName, downloadPath: downloadPath, tabIndex: tabIndex);
-});
-
 //pdfviewer
 var pdfViewerHandler = Handler(handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
   String url = params['url']!.first;
@@ -863,11 +845,11 @@ var webdavFileInformationHandler = Handler(handlerFunc: (BuildContext? context, 
 
 //通用下载文件页面
 var baseDownloadFileHandler = Handler(handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
-  String userName = params['userName'] == null ? '' : params['userName']!.first;
-  String repoName = params['repoName'] == null ? '' : params['repoName']!.first;
-  String albumName = params['albumName'] == null ? '' : params['albumName']!.first;
-  String ftpHost = params['ftpHost'] == null ? '' : params['ftpHost']!.first;
-  var bucketName = params['bucketName'] == null ? '' : params['bucketName']!.first;
+  String userName = params['userName']?.first ?? '';
+  String repoName = params['repoName']?.first ?? '';
+  String albumName = params['albumName']?.first ?? '';
+  String ftpHost = params['ftpHost']?.first ?? '';
+  String bucketName = params['bucketName']?.first ?? '';
   String downloadPath = params['downloadPath']!.first;
   String tabIndex = params['tabIndex']!.first;
   int currentListIndex = int.parse(params['currentListIndex']!.first);

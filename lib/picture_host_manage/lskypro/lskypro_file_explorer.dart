@@ -24,7 +24,7 @@ import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/router/application.dart';
 import 'package:horopic/router/routers.dart';
 import 'package:horopic/picture_host_manage/common/loading_state.dart' as loading_state;
-import 'package:horopic/utils/image_compress.dart';
+import 'package:horopic/utils/image_compressor.dart';
 
 class LskyproFileExplorer extends StatefulWidget {
   final Map userProfile;
@@ -464,7 +464,7 @@ class LskyproFileExplorerState extends loading_state.BaseLoadingPageState<Lskypr
                               for (int i = 0; i < files.length; i++) {
                                 File compressedFile;
                                 if (Global.isCompress == true) {
-                                  ImageCompress imageCompress = ImageCompress();
+                                  ImageCompressor imageCompress = ImageCompressor();
                                   compressedFile = await imageCompress.compressAndGetFile(
                                       files[i].path, my_path.basename(files[i].path), Global.defaultCompressFormat,
                                       minHeight: Global.minHeight, minWidth: Global.minWidth, quality: Global.quality);

@@ -564,14 +564,14 @@ Future<void> deleteApkFile() async {
 /// APPinit
 mainInit() async {
   await SpUtil.getInstance();
-  await Permissionutils.askPermissionStorage();
-  await Permissionutils.askPermissionCamera();
-  await Permissionutils.askPermissionPhotos();
-  await Permissionutils.askPermissionVideo();
-  await Permissionutils.askPermissionAudio();
-  await Permissionutils.askPermissionManageExternalStorage();
-  await Permissionutils.askPermissionMediaLibrary();
-  await Permissionutils.askPermissionRequestInstallPackage();
+  await PermissionHelper.requestStoragePermission();
+  await PermissionHelper.requestCameraPermission();
+  await PermissionHelper.requestPhotoPermission();
+  await PermissionHelper.requestVideoPermission();
+  await PermissionHelper.requestAudioPermission();
+  await PermissionHelper.requestManageExternalStoragePermission();
+  await PermissionHelper.requestMediaLibraryAccess();
+  await PermissionHelper.requestInstallPackagePermission();
   Global.setUser(Global.getUser());
   deleteApkFile();
   Global.setPassword(Global.getPassword());
@@ -653,7 +653,7 @@ mainInit() async {
 //获得小图标，图片预览
 Widget getImageIcon(String path) {
   try {
-    List imageType = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp'];
+    List imageType = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp', '.avif'];
     if (imageType.contains(path.substring(path.lastIndexOf('.')).toLowerCase())) {
       return Image.file(File(path), width: 30, height: 30, fit: BoxFit.fill);
     } else if (Global.iconList.contains(my_path.extension(path).substring(1).toLowerCase())) {

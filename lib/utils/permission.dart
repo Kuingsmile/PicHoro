@@ -1,7 +1,7 @@
 import 'package:permission_handler/permission_handler.dart';
 
-class Permissionutils {
-  static Future<bool> askForPermission(Permission permission) async {
+class PermissionHelper {
+  static Future<bool> requestPermission(Permission permission) async {
     final PermissionStatus status = await permission.status;
     if (status.isGranted) {
       return true;
@@ -11,12 +11,13 @@ class Permissionutils {
     }
   }
 
-  static Future<bool> askPermissionStorage() async => askForPermission(Permission.storage);
-  static Future<bool> askPermissionCamera() async => askForPermission(Permission.camera);
-  static Future<bool> askPermissionPhotos() async => askForPermission(Permission.photos);
-  static Future<bool> askPermissionVideo() async => askForPermission(Permission.videos);
-  static Future<bool> askPermissionAudio() async => askForPermission(Permission.audio);
-  static Future<bool> askPermissionRequestInstallPackage() async => askForPermission(Permission.requestInstallPackages);
-  static Future<bool> askPermissionManageExternalStorage() async => askForPermission(Permission.manageExternalStorage);
-  static Future<bool> askPermissionMediaLibrary() async => askForPermission(Permission.mediaLibrary);
+  static Future<bool> requestStoragePermission() async => requestPermission(Permission.storage);
+  static Future<bool> requestCameraPermission() async => requestPermission(Permission.camera);
+  static Future<bool> requestPhotoPermission() async => requestPermission(Permission.photos);
+  static Future<bool> requestVideoPermission() async => requestPermission(Permission.videos);
+  static Future<bool> requestAudioPermission() async => requestPermission(Permission.audio);
+  static Future<bool> requestInstallPackagePermission() async => requestPermission(Permission.requestInstallPackages);
+  static Future<bool> requestManageExternalStoragePermission() async =>
+      requestPermission(Permission.manageExternalStorage);
+  static Future<bool> requestMediaLibraryAccess() async => requestPermission(Permission.mediaLibrary);
 }

@@ -4,8 +4,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:external_path/external_path.dart';
 import 'package:fluro/fluro.dart';
-import 'package:horopic/picture_host_manage/common/download/common_service/base_download_manager.dart';
 
+import 'package:horopic/picture_host_manage/common/download/common_service/base_download_manager.dart';
 import 'package:horopic/picture_host_manage/common/download/common_service/base_download_status.dart';
 import 'package:horopic/picture_host_manage/common/common_widget.dart';
 import 'package:horopic/pages/upload_helper/upload_status.dart';
@@ -51,6 +51,7 @@ class BaseUpDownloadManagePage extends StatefulWidget {
   final String downloadPath;
   final String tabIndex;
   final int currentListIndex;
+
   const BaseUpDownloadManagePage({
     super.key,
     required this.userName,
@@ -77,6 +78,11 @@ class BaseUpDownloadManagePageState extends State<BaseUpDownloadManagePage> {
   List<Map<String, dynamic>> uploadConfigMapList = [];
   List<String> currentUploadList = [];
   List<String> currentDownloadList = [];
+
+  /// used for alist
+  List<String> downloadUrlList = [];
+  List<String> downloadFileNameList = [];
+  List<Map<String, dynamic>> downloadConfigMapList = [];
 
   late BaseDownloadManager downloadManager;
   late BaseUploadManager uploadManager;
@@ -219,6 +225,8 @@ class BaseUpDownloadManagePageState extends State<BaseUpDownloadManagePage> {
         savedDir = '${widget.downloadPath}/PicHoro/Download/github/${widget.userName}/${widget.repoName}/';
       case 'ftp':
         savedDir = '${widget.downloadPath}/PicHoro/Download/ftp/${widget.ftpHost}/';
+      case 'sm.ms':
+        savedDir = '${widget.downloadPath}/PicHoro/Download/smms/';
       default:
         savedDir = '${widget.downloadPath}/PicHoro/Download/$currentPShost/${widget.bucketName}/';
     }
@@ -229,6 +237,15 @@ class BaseUpDownloadManagePageState extends State<BaseUpDownloadManagePage> {
         uploadFileNameList.add(currentElement[1]);
         Map<String, dynamic> tempMap = currentElement[2];
         uploadConfigMapList.add(tempMap);
+      }
+    }
+    if (currentPShost == 'alist' && currentDownloadList.isNotEmpty) {
+      for (var i = 0; i < currentDownloadList.length; i++) {
+        var currentElement = jsonDecode(currentDownloadList[i]);
+        downloadUrlList.add(currentElement[0]);
+        downloadFileNameList.add(currentElement[1]);
+        Map<String, dynamic> tempMap = currentElement[2];
+        downloadConfigMapList.add(tempMap);
       }
     }
   }
@@ -372,11 +389,15 @@ class BaseUpDownloadManagePageState extends State<BaseUpDownloadManagePage> {
                   Navigator.pop(context);
                   currentDownloadList.remove(currentDownloadList[i]);
                   await currentSetDownloadList(currentDownloadList);
+                  if (currentPShost == 'smms') {
+                    Global.smmsSavedNameList.remove(Global.smmsSavedNameList[i]);
+                    Global.setSmmsSavedNameList(Global.smmsSavedNameList);
+                  }
                   setState(() {});
                 });
           },
-          child: ListItem(
-              onDownloadPlayPausedPressed: (url) async {
+          child: DownloadListItem(
+              onDownloadPlayPausedPressed: (url, fileName, configMap) async {
                 var task = downloadManager.getDownload(currentDownloadList[i]);
                 if (task != null &&
                     task.status.value != DownloadStatus.completed &&
@@ -396,6 +417,11 @@ class BaseUpDownloadManagePageState extends State<BaseUpDownloadManagePage> {
                   if (case1.contains(currentPShost)) {
                     String fileName = url.substring(url.lastIndexOf('/') + 1);
                     await downloadManager.addDownload(url, "$savedDir$fileName");
+                  } else if (currentPShost == 'sm.ms') {
+                    await downloadManager.addDownload(url, "$savedDir${Global.smmsSavedNameList[i]}");
+                  } else if (currentPShost == 'alist') {
+                    await downloadManager.addDownload(url, "$savedDir$fileName",
+                        fileName: fileName, configMap: configMap);
                   } else {
                     await downloadManager.addDownload(url, "$savedDir${downloadManager.getFileNameFromUrl(url)}");
                   }
@@ -403,12 +429,19 @@ class BaseUpDownloadManagePageState extends State<BaseUpDownloadManagePage> {
                   setState(() {});
                 }
               },
-              onDelete: (url) async {
-                var fileName = "$savedDir${downloadManager.getFileNameFromUrl(url)}";
-                if (currentPShost == 'github' && fileName.contains('?')) {
-                  fileName = fileName.substring(0, fileName.indexOf('?'));
+              onDelete: (url, fileName) async {
+                String fileNameFormated;
+                if (currentPShost == 'sm.ms') {
+                  fileNameFormated = "$savedDir${Global.smmsSavedNameList[Global.smmsDownloadList.indexOf(url)]}";
+                } else if (currentPShost == 'alist') {
+                  fileNameFormated = '$savedDir$fileName';
+                } else {
+                  fileNameFormated = "$savedDir${downloadManager.getFileNameFromUrl(url)}";
                 }
-                var file = File(fileName);
+                if (currentPShost == 'github' && fileNameFormated.contains('?')) {
+                  fileNameFormated = fileNameFormated.substring(0, fileNameFormated.indexOf('?'));
+                }
+                var file = File(fileNameFormated);
                 try {
                   await file.delete();
                 } catch (e) {
@@ -424,8 +457,14 @@ class BaseUpDownloadManagePageState extends State<BaseUpDownloadManagePage> {
                 await downloadManager.removeDownload(url);
                 setState(() {});
               },
-              url: currentDownloadList[i],
-              downloadTask: downloadManager.getDownload(currentDownloadList[i]))));
+              index: i,
+              savedFileNameList: currentPShost == 'sm.ms' ? Global.smmsSavedNameList : null,
+              currentPShost: currentPShost,
+              url: currentPShost == 'alist' ? jsonDecode(Global.alistDownloadList[i])[0] : currentDownloadList[i],
+              fileName: currentPShost == 'alist' ? jsonDecode(Global.alistDownloadList[i])[1] : null,
+              configMap: currentPShost == 'alist' ? jsonDecode(Global.alistDownloadList[i])[2] : null,
+              downloadTask: downloadManager.getDownload(
+                  currentPShost == 'alist' ? jsonDecode(Global.alistDownloadList[i])[0] : currentDownloadList[i]))));
     }
     List<Widget> list2 = [
       const SizedBox(height: 16),
@@ -446,21 +485,14 @@ class BaseUpDownloadManagePageState extends State<BaseUpDownloadManagePage> {
                 onPressed: () async {
                   String externalStorageDirectory =
                       await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
-                  if (['lsky.pro', 'imgur', 'github', 'ftp'].contains(currentPShost)) {
-                    switch (currentPShost) {
-                      case 'lsky.pro':
-                        externalStorageDirectory = '$externalStorageDirectory/PicHoro/Download/lskypro';
-                      case 'github':
-                        externalStorageDirectory = '$externalStorageDirectory/PicHoro/Download/github';
-                      case 'ftp':
-                        externalStorageDirectory = '$externalStorageDirectory/PicHoro/Download/ftp';
-                      case 'imgur':
-                        externalStorageDirectory = '$externalStorageDirectory/PicHoro/Download/imgur';
-                    }
-                  } else {
-                    externalStorageDirectory = '$externalStorageDirectory/PicHoro/Download/$currentPShost';
+                  switch (currentPShost) {
+                    case 'lsky.pro':
+                      externalStorageDirectory = '$externalStorageDirectory/PicHoro/Download/lskypro';
+                    case 'sm.ms':
+                      externalStorageDirectory = '$externalStorageDirectory/PicHoro/Download/smms';
+                    default:
+                      externalStorageDirectory = '$externalStorageDirectory/PicHoro/Download/$currentPShost';
                   }
-                  // ignore: use_build_context_synchronously
                   Application.router.navigateTo(context,
                       '${Routes.fileExplorer}?currentDirPath=${Uri.encodeComponent(externalStorageDirectory)}&rootPath=${Uri.encodeComponent(externalStorageDirectory)}',
                       transition: TransitionType.cupertino);
@@ -483,6 +515,9 @@ class BaseUpDownloadManagePageState extends State<BaseUpDownloadManagePage> {
                   List<String> tempList = [];
                   await currentSetDownloadList(tempList);
                   currentDownloadList = tempList;
+                  if (currentPShost == 'sm.ms') {
+                    Global.setSmmsSavedNameList([]);
+                  }
                   setState(() {});
                 },
                 icon: const Icon(Icons.delete_sweep, size: 20),
@@ -517,7 +552,21 @@ class BaseUpDownloadManagePageState extends State<BaseUpDownloadManagePage> {
                   icon: Icons.download,
                   label: "全部下载",
                   onPressed: () async {
-                    await downloadManager.addBatchDownloads(currentDownloadList, savedDir);
+                    if (currentPShost == 'sm.ms') {
+                      String externalStorageDirectory =
+                          await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
+                      externalStorageDirectory = '$externalStorageDirectory/PicHoro/Download/smms';
+                      List<String> savedDirList = [];
+                      for (var i = 0; i < Global.smmsSavedNameList.length; i++) {
+                        savedDirList.add('$externalStorageDirectory/${Global.smmsSavedNameList[i]}');
+                      }
+                      await downloadManager.addBatchDownloadsWithDirs(currentDownloadList, savedDirList);
+                    } else if (currentPShost == 'alist') {
+                      await downloadManager.addBatchDownloads(downloadUrlList, savedDir,
+                          fileNames: downloadFileNameList, configMaps: downloadConfigMapList);
+                    } else {
+                      await downloadManager.addBatchDownloads(currentDownloadList, savedDir);
+                    }
                     setState(() {});
                   },
                 ),
@@ -525,28 +574,35 @@ class BaseUpDownloadManagePageState extends State<BaseUpDownloadManagePage> {
                   icon: Icons.pause,
                   label: "全部暂停",
                   onPressed: () async {
-                    await downloadManager.pauseBatchDownloads(currentDownloadList);
+                    await downloadManager.pauseBatchDownloads(
+                      currentPShost == 'alist' ? downloadUrlList : currentDownloadList,
+                    );
                   },
                 ),
                 _buildActionButton(
                   icon: Icons.play_arrow,
                   label: "全部继续",
                   onPressed: () async {
-                    await downloadManager.resumeBatchDownloads(currentDownloadList);
+                    await downloadManager.resumeBatchDownloads(
+                      currentPShost == 'alist' ? downloadUrlList : currentDownloadList,
+                    );
                   },
                 ),
                 _buildActionButton(
                   icon: Icons.cancel,
                   label: "全部取消",
                   onPressed: () async {
-                    await downloadManager.cancelBatchDownloads(currentDownloadList);
+                    await downloadManager.cancelBatchDownloads(
+                      currentPShost == 'alist' ? downloadUrlList : currentDownloadList,
+                    );
                   },
                 ),
               ],
             ),
             const SizedBox(height: 12),
             ValueListenableBuilder(
-                valueListenable: downloadManager.getBatchDownloadProgress(currentDownloadList),
+                valueListenable: downloadManager
+                    .getBatchDownloadProgress(currentPShost == 'alist' ? downloadUrlList : currentDownloadList),
                 builder: (context, value, child) {
                   return Container(
                     height: 8,
@@ -608,7 +664,7 @@ class BaseUpDownloadManagePageState extends State<BaseUpDownloadManagePage> {
               flexibleSpace: Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withAlpha(204)],
+                    colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withValues(alpha: 0.8)],
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                   ),

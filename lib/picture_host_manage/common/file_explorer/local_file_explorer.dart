@@ -32,6 +32,7 @@ class FileExplorerState extends State<FileExplorer> {
 
   // Predefined constants
   final List<String> _imageExtensions = [
+    '.avif',
     '.jpg',
     '.jpeg',
     '.png',
@@ -663,6 +664,7 @@ class FileExplorerState extends State<FileExplorer> {
 
   Widget imageIcon(String path) {
     List imageList = [
+      '.avif',
       '.jpg',
       '.jpeg',
       '.png',

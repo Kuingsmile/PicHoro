@@ -23,7 +23,7 @@ import 'package:horopic/picture_host_manage/common/loading_state.dart' as loadin
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/widgets/net_loading_dialog.dart';
-import 'package:horopic/utils/image_compress.dart';
+import 'package:horopic/utils/image_compressor.dart';
 
 bool isCoverFile = false;
 
@@ -434,7 +434,7 @@ class AlistFileExplorerState extends loading_state.BaseLoadingPageState<AlistFil
                                   if (Global.imgExt
                                       .contains(my_path.extension(files[i].path).toLowerCase().substring(1))) {
                                     if (Global.isCompress == true) {
-                                      ImageCompress imageCompress = ImageCompress();
+                                      ImageCompressor imageCompress = ImageCompressor();
                                       compressedFile = await imageCompress.compressAndGetFile(
                                           files[i].path, my_path.basename(files[i].path), Global.defaultCompressFormat,
                                           minHeight: Global.minHeight,
@@ -455,7 +455,7 @@ class AlistFileExplorerState extends loading_state.BaseLoadingPageState<AlistFil
                                 if (mounted) {
                                   Application.router
                                       .navigateTo(context,
-                                          '/alistUpDownloadManagePage?bucketName=${Uri.encodeComponent('Alist_${widget.element['mount_path'].split('/').last}')}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=0',
+                                          '/baseUpDownloadManagePage?bucketName=${Uri.encodeComponent('Alist_${widget.element['mount_path'].split('/').last}')}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=0&currentListIndex=0',
                                           transition: TransitionType.inFromRight)
                                       .then((value) {
                                     _getBucketList();
@@ -492,7 +492,7 @@ class AlistFileExplorerState extends loading_state.BaseLoadingPageState<AlistFil
                                 for (int i = 0; i < files.length; i++) {
                                   File compressedFile;
                                   if (Global.isCompress == true) {
-                                    ImageCompress imageCompress = ImageCompress();
+                                    ImageCompressor imageCompress = ImageCompressor();
                                     compressedFile = await imageCompress.compressAndGetFile(
                                         files[i].path, my_path.basename(files[i].path), Global.defaultCompressFormat,
                                         minHeight: Global.minHeight,
@@ -512,7 +512,7 @@ class AlistFileExplorerState extends loading_state.BaseLoadingPageState<AlistFil
                                 if (mounted) {
                                   Application.router
                                       .navigateTo(context,
-                                          '/alistUpDownloadManagePage?bucketName=${Uri.encodeComponent('Alist_${widget.element['mount_path'].split('/').last}')}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=0',
+                                          '/baseUpDownloadManagePage?bucketName=${Uri.encodeComponent('Alist_${widget.element['mount_path'].split('/').last}')}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=0&currentListIndex=0',
                                           transition: TransitionType.inFromRight)
                                       .then((value) {
                                     _getBucketList();
@@ -631,7 +631,7 @@ class AlistFileExplorerState extends loading_state.BaseLoadingPageState<AlistFil
                 if (mounted) {
                   Application.router
                       .navigateTo(context,
-                          '/alistUpDownloadManagePage?bucketName=${Uri.encodeComponent('Alist_${widget.element['mount_path'].split('/').last}')}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=$index',
+                          '/baseUpDownloadManagePage?bucketName=${Uri.encodeComponent('Alist_${widget.element['mount_path'].split('/').last}')}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=$index&currentListIndex=0',
                           transition: TransitionType.inFromRight)
                       .then((value) {
                     _getBucketList();
@@ -762,7 +762,7 @@ class AlistFileExplorerState extends loading_state.BaseLoadingPageState<AlistFil
                       await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
                   // ignore: use_build_context_synchronously
                   Application.router.navigateTo(context,
-                      '/alistUpDownloadManagePage?bucketName=${Uri.encodeComponent('Alist_${widget.element['mount_path'].split('/').last}')}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=1',
+                      '/baseUpDownloadManagePage?bucketName=${Uri.encodeComponent('Alist_${widget.element['mount_path'].split('/').last}')}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=1&currentListIndex=0',
                       transition: TransitionType.inFromRight);
                 },
                 child: const Icon(

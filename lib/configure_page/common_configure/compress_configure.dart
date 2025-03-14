@@ -210,6 +210,7 @@ class CompressConfigureState extends State<CompressConfigure> {
                     'png',
                     'jpeg',
                     'webp',
+                    'avif',
                   ].map<DropdownMenuItem<String>>((String value) {
                     return DropdownMenuItem<String>(
                       value: value,

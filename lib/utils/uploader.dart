@@ -21,7 +21,7 @@ Map<String, Function> uploadFunc = {
   'webdav': WebdavImageUploadUtils.uploadApi,
 };
 
-//获取图床配置文件
+///获取图床配置文件
 Future<File> get _localFile async {
   final directory = await getApplicationDocumentsDirectory();
   String defaultConfig = Global.getPShost();
@@ -30,7 +30,7 @@ Future<File> get _localFile async {
   return ensureFileExists(File('${directory.path}/${defaultUser}_${getpdconfig(defaultConfig)}.txt'));
 }
 
-//读取图床配置文件
+///读取图床配置文件
 Future<String> readPictureHostConfig() async {
   return (await _localFile).readAsString();
 }
@@ -39,9 +39,8 @@ uploaderentry({required String path, required String name}) async {
   try {
     String configData = await readPictureHostConfig();
     if (configData == '') return ["failed"];
-    Map configMap = jsonDecode(configData);
     String defaultConfig = Global.getPShost();
-    return await uploadFunc[defaultConfig]!(path: path, name: name, configMap: configMap);
+    return await uploadFunc[defaultConfig]!(path: path, name: name, configMap: jsonDecode(configData));
   } catch (e) {
     return ["failed"];
   }

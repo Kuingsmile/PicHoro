@@ -60,7 +60,6 @@ class Routes {
   static String smmsManageHomePage = "/smmsManageHomePage";
   static String smmsFileExplorer = "/smmsFileExplorer";
   static String smmsFileInformation = "/smmsFileInformation";
-  static String smmsUpDownloadManagePage = "/smmsUpDownloadManagePage";
   static String userInformationPage = '/userInformationPage';
   static String pictureHostInfoPage = '/pictureHostInfoPage';
   static String aliyunBucketList = '/aliyunBucketList';
@@ -106,7 +105,6 @@ class Routes {
   static String alistBucketInformation = "/alistBucketInformation";
   static String alistFileExplorer = "/alistFileExplorer";
   static String alistFileInformation = "/alistFileInformation";
-  static String alistUpDownloadManagePage = "/alistUpDownloadManagePage";
   static String netVideoPlayer = "/netVideoPlayer";
   static String pdfViewer = "/pdfViewer";
   static String webdavFileExplorer = "/webdavFileExplorer";
@@ -171,7 +169,6 @@ class Routes {
     router.define(smmsManageHomePage, handler: smmsManageHomePageHandler);
     router.define(smmsFileExplorer, handler: smmsFileExplorerHandler);
     router.define(smmsFileInformation, handler: smmsFileInformationHandler);
-    router.define(smmsUpDownloadManagePage, handler: smmsUpDownloadFileHandler);
     router.define(aliyunBucketList, handler: aliyunBucketListHandler);
     router.define(aliyunNewBucketConfig, handler: newAliyunBucketHandler);
     router.define(aliyunBucketInformation, handler: aliyunBucketInformationHandler);
@@ -217,7 +214,6 @@ class Routes {
     router.define(alistBucketInformation, handler: alistBucketInformationHandler);
     router.define(alistFileExplorer, handler: alistFileExplorerHandler);
     router.define(alistFileInformation, handler: alistFileInformationHandler);
-    router.define(alistUpDownloadManagePage, handler: alistDownloadFileHandler);
     router.define(netVideoPlayer, handler: netVideoPlayerHandler);
     router.define(pdfViewer, handler: pdfViewerHandler);
     router.define(webdavFileExplorer, handler: webdavFileExplorerHandler);

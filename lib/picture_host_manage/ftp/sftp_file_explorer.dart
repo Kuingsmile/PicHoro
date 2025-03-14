@@ -24,7 +24,7 @@ import 'package:horopic/picture_host_manage/common/loading_state.dart' as loadin
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/widgets/net_loading_dialog.dart';
-import 'package:horopic/utils/image_compress.dart';
+import 'package:horopic/utils/image_compressor.dart';
 
 bool isCoverFile = false;
 
@@ -464,7 +464,7 @@ class SFTPFileExplorerState extends loading_state.BaseLoadingPageState<SFTPFileE
                                   if (Global.imgExt
                                       .contains(my_path.extension(files[i].path).toLowerCase().substring(1))) {
                                     if (Global.isCompress == true) {
-                                      ImageCompress imageCompress = ImageCompress();
+                                      ImageCompressor imageCompress = ImageCompressor();
                                       compressedFile = await imageCompress.compressAndGetFile(
                                           files[i].path, my_path.basename(files[i].path), Global.defaultCompressFormat,
                                           minHeight: Global.minHeight,
@@ -521,7 +521,7 @@ class SFTPFileExplorerState extends loading_state.BaseLoadingPageState<SFTPFileE
                                 for (int i = 0; i < files.length; i++) {
                                   File compressedFile;
                                   if (Global.isCompress == true) {
-                                    ImageCompress imageCompress = ImageCompress();
+                                    ImageCompressor imageCompress = ImageCompressor();
                                     compressedFile = await imageCompress.compressAndGetFile(
                                         files[i].path, my_path.basename(files[i].path), Global.defaultCompressFormat,
                                         minHeight: Global.minHeight,

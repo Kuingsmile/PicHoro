@@ -25,7 +25,7 @@ import 'package:horopic/pages/upload_helper/upload_task.dart';
 import 'package:horopic/pages/upload_helper/upload_utils.dart';
 import 'package:horopic/pages/upload_helper/upload_status.dart';
 
-import 'package:horopic/utils/image_compress.dart';
+import 'package:horopic/utils/image_compressor.dart';
 
 Map uploadStatus = {
   'UploadStatus.uploading': "上传中",
@@ -478,10 +478,11 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
   _processUploadAndReturnToCamera() async {
     File compressedFile;
     if (Global.isCompress == true) {
-      ImageCompress imageCompress = ImageCompress();
+      ImageCompressor imageCompress = ImageCompressor();
       compressedFile = await imageCompress.compressAndGetFile(
           Global.imageOriginalFile!.path, my_path.basename(Global.imageFile!), Global.defaultCompressFormat,
           minHeight: Global.minHeight, minWidth: Global.minWidth, quality: Global.quality);
+      Global.imageFile = '${my_path.dirname(Global.imageFile!)}/${my_path.basename(compressedFile.path)}';
     } else {
       compressedFile = Global.imageOriginalFile!;
     }
@@ -1506,10 +1507,11 @@ Future<File> processImageFile(File imageFile) async {
   Global.imageFile = fileName;
   File compressedFile;
   if (Global.isCompress) {
-    ImageCompress imageCompress = ImageCompress();
+    ImageCompressor imageCompress = ImageCompressor();
     compressedFile = await imageCompress.compressAndGetFile(
         imageFile.path, my_path.basename(Global.imageFile!), Global.defaultCompressFormat,
         minHeight: Global.minHeight, minWidth: Global.minWidth, quality: Global.quality);
+    Global.imageFile = '${my_path.dirname(Global.imageFile!)}/${my_path.basename(compressedFile.path)}';
   } else {
     compressedFile = imageFile;
   }
