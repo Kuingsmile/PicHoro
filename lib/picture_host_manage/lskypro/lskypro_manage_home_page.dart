@@ -31,9 +31,9 @@ class LskyproManageHomePageState extends loading_state.BaseLoadingPageState<Lsky
       var profileMap = await LskyproManageAPI.getUserInfo();
       if (profileMap[0] == 'success') {
         userProfile = profileMap[1]['data'];
-        state = loading_state.LoadState.SUCCESS;
+        state = loading_state.LoadState.success;
       } else {
-        state = loading_state.LoadState.ERROR;
+        state = loading_state.LoadState.error;
       }
       if (mounted) {
         setState(() {});
@@ -42,7 +42,7 @@ class LskyproManageHomePageState extends loading_state.BaseLoadingPageState<Lsky
       flogErr(e, {}, 'LskyproManageHomePageState', 'initProfile');
       if (mounted) {
         setState(() {
-          state = loading_state.LoadState.ERROR;
+          state = loading_state.LoadState.error;
         });
       }
       showToast('获取用户信息失败');
@@ -95,7 +95,7 @@ class LskyproManageHomePageState extends loading_state.BaseLoadingPageState<Lsky
             ),
             onPressed: () {
               setState(() {
-                state = loading_state.LoadState.LOADING;
+                state = loading_state.LoadState.loading;
               });
             },
             child: const Text('重新加载'),

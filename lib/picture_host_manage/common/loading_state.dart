@@ -1,8 +1,6 @@
-// ignore_for_file: constant_identifier_names
-
 import 'package:flutter/material.dart';
 
-enum LoadState { LOADING, EMPTY, ERROR, SUCCESS }
+enum LoadState { loading, empty, error, success }
 
 abstract class BaseLoadingPageState<T extends StatefulWidget> extends State<T> {
   LoadState? state;
@@ -10,7 +8,7 @@ abstract class BaseLoadingPageState<T extends StatefulWidget> extends State<T> {
   @override
   void initState() {
     super.initState();
-    state = LoadState.LOADING;
+    state = LoadState.loading;
   }
 
   @override
@@ -23,13 +21,13 @@ abstract class BaseLoadingPageState<T extends StatefulWidget> extends State<T> {
 
   Widget get buildStateWidget {
     switch (state) {
-      case LoadState.EMPTY:
+      case LoadState.empty:
         return buildEmpty();
-      case LoadState.ERROR:
+      case LoadState.error:
         return buildError();
-      case LoadState.LOADING:
+      case LoadState.loading:
         return buildLoading();
-      case LoadState.SUCCESS:
+      case LoadState.success:
         return buildSuccess();
       default:
         return buildError();

@@ -110,22 +110,22 @@ Handler webviewHandler = Handler(handlerFunc: (BuildContext? context, Map<String
   return WebViewPage(url: url, title: title, enableJs: enableJs);
 });
 
-//root
+///root
 Handler rootHandler = Handler(handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
   return const PicHoroAPP();
 });
 
-//主页
+///主页
 var homePageHandler = Handler(handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
   return const HomePage();
 });
 
-//相册
+///相册
 var albumUploadedImagesHandler = Handler(handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
   return const UploadedImages();
 });
 
-//相册预览
+///相册预览
 var albumImagePreviewHandler = Handler(handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
   var index = params['index']!.first;
   List images = params['images']!.first.split(',');
@@ -135,7 +135,7 @@ var albumImagePreviewHandler = Handler(handlerFunc: (BuildContext? context, Map<
   );
 });
 
-//webdav图片预览
+///webdav图片预览
 var webdavImagePreviewHandler = Handler(handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
   var index = params['index']!.first;
   List images = params['images']!.first.split(',');
@@ -147,7 +147,7 @@ var webdavImagePreviewHandler = Handler(handlerFunc: (BuildContext? context, Map
   );
 });
 
-//本地文件相册预览
+///本地文件相册预览
 var localImagePreviewHandler = Handler(handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
   var index = params['index']!.first;
   List images = params['images']!.first.split(',');
@@ -157,27 +157,27 @@ var localImagePreviewHandler = Handler(handlerFunc: (BuildContext? context, Map<
   );
 });
 
-//配置页面
+///配置页面
 var configurePageHandler = Handler(handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
   return const ConfigurePage();
 });
 
-//图片压缩设置页面
+///图片压缩设置页面
 var compressConfigureHandler = Handler(handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
   return const CompressConfigure();
 });
 
-//日志
+///日志
 var logsHandler = Handler(handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
   return const LogPage();
 });
 
-//图床配置页面
+///图床配置页面
 var allPShostHandler = Handler(handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
   return const AllPShost();
 });
 
-//默认图床配置页面
+///默认图床配置页面
 var defaultPShostSelectHandler = Handler(handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
   return const DefaultPShostSelect();
 });

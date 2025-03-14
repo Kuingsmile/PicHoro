@@ -156,14 +156,6 @@ PicHoro 是一款基于 Flutter 的手机端云存储平台/图床管理和文�
 
 ## 开发说明
 
-### 依赖项目
-
-克隆本项目后，请同时克隆以下项目到同级目录:
-
-```bash
-git clone https://github.com/Kuingsmile/flutterdep
-```
-
 ### 软件修改步骤
 
 1. 准备环境: 安装 Android Studio、Android SDK 21+ 和 Flutter 3.13
@@ -195,72 +187,6 @@ if ($request->has('album_id')) {
         }
     }
 }
-```
-
-### 依赖包修改
-
-本 APP 使用的部分依赖包需要手动修改:
-
-#### 1. minio_new
-
-包含在 `https://github.com/Kuingsmile/flutterdep` 中，无需手动修改。
-
-1. `queries['maxKeys']`修改为 `queries['max-keys']`
-2. 添加导入 `import 'package:xml2json/xml2json.dart';`
-3. 如下修改 `listBuckets`函数
-
-```dart
-  Future<List<Bucket>> listBuckets() async {
-    final resp = await _client.request(
-      method: 'GET',
-      region: region ?? 'us-east-1',
-    );
-    final myTransformer = Xml2Json();
-    myTransformer.parse(resp.body);
-    Map responseMap = json.decode(myTransformer.toParker());
-    List<Bucket> buckets = [];
-    if (responseMap['ListAllMyBucketsResult'] == null ||
-        responseMap['ListAllMyBucketsResult']['Buckets'] == null ||
-        responseMap['ListAllMyBucketsResult']['Buckets']['Bucket'] == null ||
-        responseMap['ListAllMyBucketsResult']['Buckets']['Bucket'].length ==
-            0) {
-      return buckets;
-    }
-    if (responseMap['ListAllMyBucketsResult']['Buckets']['Bucket'] is! List) {
-      buckets.add(Bucket(
-          DateTime.parse(responseMap['ListAllMyBucketsResult']['Buckets']
-              ['Bucket']['CreationDate']),
-          responseMap['ListAllMyBucketsResult']['Buckets']['Bucket']['Name']));
-      return buckets;
-    }
-    for (var bucket in responseMap['ListAllMyBucketsResult']['Buckets']
-        ['Bucket']) {
-      buckets
-          .add(Bucket(DateTime.parse(bucket['CreationDate']), bucket['Name']));
-    }
-    return buckets;
-  }
-```
-
-#### 2. chewie
-
-文件路径示例: `"D:\flutter\.pub-cache\hosted\pub.flutter-io.cn\chewie-1.3.6\lib\src\player_with_controls.dart"`
-
-修改第 86 行:
-
-```dart
-return Container(
-    color:Colors.black,
-    child:Center(
-    child: SizedBox(
-      height: MediaQuery.of(context).size.height,
-      width: MediaQuery.of(context).size.width,
-      child: AspectRatio(
-        aspectRatio: calculateAspectRatio(context),
-        child: buildPlayerWithControls(chewieController, context),
-      ),
-    )),
-  );
 ```
 
 ### 软件打包

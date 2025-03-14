@@ -28,9 +28,9 @@ class SmmsManageHomePageState extends loading_state.BaseLoadingPageState<SmmsMan
       var profileMap = await SmmsManageAPI.getUserProfile();
       if (profileMap[0] == 'success') {
         userProfile = profileMap[1];
-        state = loading_state.LoadState.SUCCESS;
+        state = loading_state.LoadState.success;
       } else {
-        state = loading_state.LoadState.ERROR;
+        state = loading_state.LoadState.error;
       }
       if (mounted) {
         setState(() {});
@@ -39,7 +39,7 @@ class SmmsManageHomePageState extends loading_state.BaseLoadingPageState<SmmsMan
       flogErr(e, {}, "SmmsManageHomePageState", "initProfile");
       if (mounted) {
         setState(() {
-          state = loading_state.LoadState.ERROR;
+          state = loading_state.LoadState.error;
         });
       }
       showToast('获取用户信息失败');
@@ -104,7 +104,7 @@ class SmmsManageHomePageState extends loading_state.BaseLoadingPageState<SmmsMan
             label: const Text('重新加载'),
             onPressed: () {
               setState(() {
-                state = loading_state.LoadState.LOADING;
+                state = loading_state.LoadState.loading;
                 initProfile();
               });
             },

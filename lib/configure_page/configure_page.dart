@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
+import 'package:dio/dio.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:r_upgrade/r_upgrade.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:fluro/fluro.dart';
 import 'package:provider/provider.dart';
 
@@ -10,7 +10,6 @@ import 'package:horopic/router/application.dart';
 import 'package:horopic/router/routers.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/theme_provider.dart';
-import 'package:dio/dio.dart';
 
 class ConfigurePage extends StatefulWidget {
   const ConfigurePage({super.key});
@@ -102,8 +101,7 @@ class ConfigurePageState extends State<ConfigurePage> with AutomaticKeepAliveCli
 
   _checkUpdate() async {
     if (_isLoading) {
-      return Fluttertoast.showToast(
-          msg: "正在获取版本信息", toastLength: Toast.LENGTH_SHORT, timeInSecForIosWeb: 2, fontSize: 16.0);
+      return showToast("正在获取版本信息");
     }
 
     if (latestVersion == ' ') {
@@ -119,8 +117,9 @@ class ConfigurePageState extends State<ConfigurePage> with AutomaticKeepAliveCli
     if (_updateAvailable) {
       _showUpdateDialog(version, latestVersion);
     } else {
-      return Fluttertoast.showToast(
-          msg: "已是最新版本", toastLength: Toast.LENGTH_SHORT, timeInSecForIosWeb: 2, fontSize: 16.0);
+      return showToast(
+        "已是最新版本",
+      );
     }
   }
 

@@ -44,8 +44,7 @@ class GithubNewRepoConfigState extends State<GithubNewRepoConfig> {
     resetgithubManageConfigMap();
   }
 
-  // ignore: non_constant_identifier_names
-  List<String> gitignore_templateList = [
+  List<String> gitignoreTemplates = [
     'None',
     'Actionscript',
     'Ada',
@@ -176,8 +175,7 @@ class GithubNewRepoConfigState extends State<GithubNewRepoConfig> {
     'stella',
   ];
 
-  // ignore: non_constant_identifier_names
-  Map<String, String> license_template = {
+  Map<String, String> licenseTemplate = {
     'None': 'None',
     'Apache License 2.0': 'apache-2.0',
     'GNU General Public License v3.0': 'gpl-3.0',
@@ -285,7 +283,7 @@ class GithubNewRepoConfigState extends State<GithubNewRepoConfig> {
               icon: const Icon(Icons.arrow_drop_down, size: 30),
               autofocus: true,
               value: githubManageConfigMap['gitignore_template'],
-              items: createFromList(gitignore_templateList, 15),
+              items: createFromList(gitignoreTemplates, 15),
               onChanged: (value) {
                 githubManageConfigMap['gitignore_template'] = value;
                 setState(() {});
@@ -300,7 +298,7 @@ class GithubNewRepoConfigState extends State<GithubNewRepoConfig> {
               icon: const Icon(Icons.arrow_drop_down, size: 30),
               autofocus: true,
               value: githubManageConfigMap['license_template'],
-              items: createFromMap(license_template, 14),
+              items: createFromMap(licenseTemplate, 14),
               onChanged: (value) {
                 githubManageConfigMap['license_template'] = value;
                 setState(() {});

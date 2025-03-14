@@ -66,7 +66,7 @@ class AwsFileExplorerState extends loading_state.BaseLoadingPageState<AwsFileExp
     if (res2[0] != 'success') {
       if (mounted) {
         setState(() {
-          state = loading_state.LoadState.ERROR;
+          state = loading_state.LoadState.error;
         });
       }
       return;
@@ -111,7 +111,7 @@ class AwsFileExplorerState extends loading_state.BaseLoadingPageState<AwsFileExp
     if (allInfoList.isEmpty) {
       if (mounted) {
         setState(() {
-          state = loading_state.LoadState.EMPTY;
+          state = loading_state.LoadState.empty;
         });
       }
     } else {
@@ -121,7 +121,7 @@ class AwsFileExplorerState extends loading_state.BaseLoadingPageState<AwsFileExp
           for (var i = 0; i < allInfoList.length; i++) {
             selectedFilesBool.add(false);
           }
-          state = loading_state.LoadState.SUCCESS;
+          state = loading_state.LoadState.success;
         });
       }
     }
@@ -621,7 +621,6 @@ class AwsFileExplorerState extends loading_state.BaseLoadingPageState<AwsFileExp
               onPressed: () async {
                 String downloadPath =
                     await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
-                // ignore: use_build_context_synchronously
                 int index = 1;
                 if (Global.awsDownloadList.isEmpty) {
                   index = 0;
@@ -682,14 +681,14 @@ class AwsFileExplorerState extends loading_state.BaseLoadingPageState<AwsFileExp
     return Scaffold(
       appBar: appBar,
       body: buildStateWidget,
-      floatingActionButtonLocation: state == loading_state.LoadState.ERROR ||
-              state == loading_state.LoadState.EMPTY ||
-              state == loading_state.LoadState.LOADING
+      floatingActionButtonLocation: state == loading_state.LoadState.error ||
+              state == loading_state.LoadState.empty ||
+              state == loading_state.LoadState.loading
           ? null
           : FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: state == loading_state.LoadState.ERROR ||
-              state == loading_state.LoadState.EMPTY ||
-              state == loading_state.LoadState.LOADING
+      floatingActionButton: state == loading_state.LoadState.error ||
+              state == loading_state.LoadState.empty ||
+              state == loading_state.LoadState.loading
           ? null
           : floatingActionButton,
     );
@@ -735,7 +734,6 @@ class AwsFileExplorerState extends loading_state.BaseLoadingPageState<AwsFileExp
                   Global.setAwsDownloadList(Global.awsDownloadList);
                   String downloadPath =
                       await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
-                  // ignore: use_build_context_synchronously
                   Application.router.navigateTo(context,
                       '/baseUpDownloadManagePage?bucketName=${widget.element['name']}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=1&currentListIndex=2',
                       transition: TransitionType.inFromRight);
@@ -872,7 +870,7 @@ class AwsFileExplorerState extends loading_state.BaseLoadingPageState<AwsFileExp
       }
       if (allInfoList.isEmpty) {
         setState(() {
-          state = loading_state.LoadState.EMPTY;
+          state = loading_state.LoadState.empty;
         });
       }
     } catch (e) {
@@ -917,7 +915,7 @@ class AwsFileExplorerState extends loading_state.BaseLoadingPageState<AwsFileExp
             ),
             onPressed: () {
               setState(() {
-                state = loading_state.LoadState.LOADING;
+                state = loading_state.LoadState.loading;
               });
               _getBucketList();
             },
@@ -1103,7 +1101,8 @@ class AwsFileExplorerState extends loading_state.BaseLoadingPageState<AwsFileExp
                             ),
                           ),
                           Positioned(
-                            // ignore: sort_child_properties_last
+                            left: -0.5,
+                            top: 20,
                             child: Container(
                               decoration: const BoxDecoration(
                                   borderRadius: BorderRadius.all(Radius.circular(55)),
@@ -1126,8 +1125,6 @@ class AwsFileExplorerState extends loading_state.BaseLoadingPageState<AwsFileExp
                                 },
                               ),
                             ),
-                            left: -0.5,
-                            top: 20,
                           )
                         ],
                       ),
@@ -1404,7 +1401,8 @@ class AwsFileExplorerState extends loading_state.BaseLoadingPageState<AwsFileExp
                             ),
                           ),
                           Positioned(
-                            // ignore: sort_child_properties_last
+                            left: 0,
+                            top: 22,
                             child: Container(
                               decoration: const BoxDecoration(
                                   borderRadius: BorderRadius.all(Radius.circular(55)),
@@ -1429,8 +1427,6 @@ class AwsFileExplorerState extends loading_state.BaseLoadingPageState<AwsFileExp
                                 },
                               ),
                             ),
-                            left: 0,
-                            top: 22,
                           ),
                         ])),
                     const Divider(

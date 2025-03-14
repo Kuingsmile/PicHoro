@@ -29,9 +29,9 @@ class GithubManageHomePageState extends loading_state.BaseLoadingPageState<Githu
       var profileMap = await GithubManageAPI.getUserInfo();
       if (profileMap[0] == 'success') {
         userProfile = profileMap[1];
-        state = loading_state.LoadState.SUCCESS;
+        state = loading_state.LoadState.success;
       } else {
-        state = loading_state.LoadState.ERROR;
+        state = loading_state.LoadState.error;
       }
       if (mounted) {
         setState(() {});
@@ -40,7 +40,7 @@ class GithubManageHomePageState extends loading_state.BaseLoadingPageState<Githu
       flogErr(e, {}, 'GithubManageHomePageState', 'initProfile');
       if (mounted) {
         setState(() {
-          state = loading_state.LoadState.ERROR;
+          state = loading_state.LoadState.error;
         });
       }
       showToast('获取用户信息失败');
@@ -100,7 +100,7 @@ class GithubManageHomePageState extends loading_state.BaseLoadingPageState<Githu
             ),
             onPressed: () {
               setState(() {
-                state = loading_state.LoadState.LOADING;
+                state = loading_state.LoadState.loading;
               });
             },
             child: const Text('重新加载'),

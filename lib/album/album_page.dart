@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:horopic/album/action_button.dart';
 import 'package:universal_io/io.dart';
 import 'dart:convert';
@@ -114,8 +116,7 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
   ];
 
   bool albumKeepAlive = true;
-  // ignore: prefer_typing_uninitialized_variables
-  var actionEventBus;
+  late StreamSubscription<AlbumRefreshEvent> actionEventBus;
 
   @override
   bool get wantKeepAlive => albumKeepAlive;

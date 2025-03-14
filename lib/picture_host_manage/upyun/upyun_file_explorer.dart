@@ -63,7 +63,7 @@ class UpyunFileExplorerState extends loading_state.BaseLoadingPageState<UpyunFil
       if (res2[0] != 'success') {
         if (mounted) {
           setState(() {
-            state = loading_state.LoadState.ERROR;
+            state = loading_state.LoadState.error;
           });
         }
         return;
@@ -108,7 +108,7 @@ class UpyunFileExplorerState extends loading_state.BaseLoadingPageState<UpyunFil
       if (allInfoList.isEmpty) {
         if (mounted) {
           setState(() {
-            state = loading_state.LoadState.EMPTY;
+            state = loading_state.LoadState.empty;
           });
         }
       } else {
@@ -118,7 +118,7 @@ class UpyunFileExplorerState extends loading_state.BaseLoadingPageState<UpyunFil
             for (var i = 0; i < allInfoList.length; i++) {
               selectedFilesBool.add(false);
             }
-            state = loading_state.LoadState.SUCCESS;
+            state = loading_state.LoadState.success;
           });
         }
       }
@@ -136,7 +136,7 @@ class UpyunFileExplorerState extends loading_state.BaseLoadingPageState<UpyunFil
       if (mounted) {
         showToastWithContext(context, '获取文件列表失败');
         setState(() {
-          state = loading_state.LoadState.ERROR;
+          state = loading_state.LoadState.error;
         });
       }
     }
@@ -635,7 +635,6 @@ class UpyunFileExplorerState extends loading_state.BaseLoadingPageState<UpyunFil
               onPressed: () async {
                 String downloadPath =
                     await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
-                // ignore: use_build_context_synchronously
                 int index = 1;
                 if (Global.upyunDownloadList.isEmpty) {
                   index = 0;
@@ -705,14 +704,14 @@ class UpyunFileExplorerState extends loading_state.BaseLoadingPageState<UpyunFil
     return Scaffold(
       appBar: appBar,
       body: buildStateWidget,
-      floatingActionButtonLocation: state == loading_state.LoadState.ERROR ||
-              state == loading_state.LoadState.EMPTY ||
-              state == loading_state.LoadState.LOADING
+      floatingActionButtonLocation: state == loading_state.LoadState.error ||
+              state == loading_state.LoadState.empty ||
+              state == loading_state.LoadState.loading
           ? null
           : FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: state == loading_state.LoadState.ERROR ||
-              state == loading_state.LoadState.EMPTY ||
-              state == loading_state.LoadState.LOADING
+      floatingActionButton: state == loading_state.LoadState.error ||
+              state == loading_state.LoadState.empty ||
+              state == loading_state.LoadState.loading
           ? null
           : floatingActionButton,
     );
@@ -754,7 +753,6 @@ class UpyunFileExplorerState extends loading_state.BaseLoadingPageState<UpyunFil
                   Global.setUpyunDownloadList(Global.upyunDownloadList);
                   String downloadPath =
                       await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
-                  // ignore: use_build_context_synchronously
                   Application.router.navigateTo(context,
                       '/baseUpDownloadManagePage?bucketName=${widget.element['bucket']}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=1&currentListIndex=10',
                       transition: TransitionType.inFromRight);
@@ -869,7 +867,7 @@ class UpyunFileExplorerState extends loading_state.BaseLoadingPageState<UpyunFil
       }
       if (allInfoList.isEmpty) {
         setState(() {
-          state = loading_state.LoadState.EMPTY;
+          state = loading_state.LoadState.empty;
         });
       }
     } catch (e) {
@@ -915,7 +913,7 @@ class UpyunFileExplorerState extends loading_state.BaseLoadingPageState<UpyunFil
             ),
             onPressed: () {
               setState(() {
-                state = loading_state.LoadState.LOADING;
+                state = loading_state.LoadState.loading;
               });
               _getBucketList();
             },
@@ -1087,7 +1085,8 @@ class UpyunFileExplorerState extends loading_state.BaseLoadingPageState<UpyunFil
                             ),
                           ),
                           Positioned(
-                            // ignore: sort_child_properties_last
+                            left: -0.5,
+                            top: 20,
                             child: Container(
                               decoration: const BoxDecoration(
                                   borderRadius: BorderRadius.all(Radius.circular(55)),
@@ -1110,8 +1109,6 @@ class UpyunFileExplorerState extends loading_state.BaseLoadingPageState<UpyunFil
                                 },
                               ),
                             ),
-                            left: -0.5,
-                            top: 20,
                           )
                         ],
                       ),
@@ -1345,7 +1342,8 @@ class UpyunFileExplorerState extends loading_state.BaseLoadingPageState<UpyunFil
                             ),
                           ),
                           Positioned(
-                            // ignore: sort_child_properties_last
+                            left: 0,
+                            top: 22,
                             child: Container(
                               decoration: const BoxDecoration(
                                   borderRadius: BorderRadius.all(Radius.circular(55)),
@@ -1368,8 +1366,6 @@ class UpyunFileExplorerState extends loading_state.BaseLoadingPageState<UpyunFil
                                 },
                               ),
                             ),
-                            left: 0,
-                            top: 22,
                           ),
                         ])),
                     const Divider(

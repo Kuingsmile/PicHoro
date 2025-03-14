@@ -427,8 +427,8 @@ class _NetVideoPlayerState extends State<NetVideoPlayer> {
             });
             String nextVideoUrl = widget.videoList[activeIndex]['url'];
             if (widget.type == 'normal') {
-              // ignore: deprecated_member_use
-              _videoPlayerController = VideoPlayerController.network(nextVideoUrl, httpHeaders: widget.headers);
+              _videoPlayerController =
+                  VideoPlayerController.networkUrl(Uri.parse(nextVideoUrl), httpHeaders: widget.headers);
               _chewieController = ChewieController(
                 videoPlayerController: _videoPlayerController,
                 aspectRatio: 16 / 9,

@@ -10,14 +10,11 @@ class PicHoroAPP extends StatefulWidget {
   const PicHoroAPP({super.key, this.selectedIndex = 0});
 
   @override
-  // ignore: no_logic_in_create_state
-  TabsPageState createState() => TabsPageState(selectedIndex);
+  TabsPageState createState() => TabsPageState();
 }
 
 class TabsPageState extends State<PicHoroAPP> {
-  int _selectedIndex;
-
-  TabsPageState(this._selectedIndex);
+  late int _selectedIndex;
   late PageController _pageController;
 
   final List<Widget> _pageList = [
@@ -30,6 +27,7 @@ class TabsPageState extends State<PicHoroAPP> {
   @override
   void initState() {
     super.initState();
+    _selectedIndex = widget.selectedIndex;
     _pageController = PageController(initialPage: _selectedIndex);
   }
 

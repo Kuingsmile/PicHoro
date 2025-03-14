@@ -59,7 +59,7 @@ class GithubReposListState extends loading_state.BaseLoadingPageState<GithubRepo
       if (bucketListResponse[0] != 'success') {
         if (mounted) {
           setState(() {
-            state = loading_state.LoadState.ERROR;
+            state = loading_state.LoadState.error;
           });
         }
         refreshController.refreshCompleted();
@@ -68,7 +68,7 @@ class GithubReposListState extends loading_state.BaseLoadingPageState<GithubRepo
       if (bucketListResponse[1].length == 0) {
         if (mounted) {
           setState(() {
-            state = loading_state.LoadState.EMPTY;
+            state = loading_state.LoadState.empty;
           });
         }
         refreshController.refreshCompleted();
@@ -88,9 +88,9 @@ class GithubReposListState extends loading_state.BaseLoadingPageState<GithubRepo
       if (mounted) {
         setState(() {
           if (repoMap.isEmpty) {
-            state = loading_state.LoadState.EMPTY;
+            state = loading_state.LoadState.empty;
           } else {
-            state = loading_state.LoadState.SUCCESS;
+            state = loading_state.LoadState.success;
           }
           refreshController.refreshCompleted();
         });
@@ -99,7 +99,7 @@ class GithubReposListState extends loading_state.BaseLoadingPageState<GithubRepo
       flogErr(e, {}, 'GithubReposListState', 'initRepoList');
       if (mounted) {
         setState(() {
-          state = loading_state.LoadState.ERROR;
+          state = loading_state.LoadState.error;
         });
       }
       showToast('获取失败');
@@ -187,7 +187,7 @@ class GithubReposListState extends loading_state.BaseLoadingPageState<GithubRepo
             ),
             onPressed: () {
               setState(() {
-                state = loading_state.LoadState.LOADING;
+                state = loading_state.LoadState.loading;
               });
               initRepoList();
             },

@@ -103,7 +103,7 @@ class AlistBucketListState extends loading_state.BaseLoadingPageState<AlistBucke
       if (bucketListResponse[0] != 'success') {
         if (mounted) {
           setState(() {
-            state = loading_state.LoadState.ERROR;
+            state = loading_state.LoadState.error;
           });
         }
         refreshController.refreshCompleted();
@@ -112,7 +112,7 @@ class AlistBucketListState extends loading_state.BaseLoadingPageState<AlistBucke
       if (bucketListResponse[1]['total'] == 0) {
         if (mounted) {
           setState(() {
-            state = loading_state.LoadState.EMPTY;
+            state = loading_state.LoadState.empty;
           });
         }
         refreshController.refreshCompleted();
@@ -133,9 +133,9 @@ class AlistBucketListState extends loading_state.BaseLoadingPageState<AlistBucke
       if (mounted) {
         setState(() {
           if (filteredBucketMap.isEmpty) {
-            state = loading_state.LoadState.EMPTY;
+            state = loading_state.LoadState.empty;
           } else {
-            state = loading_state.LoadState.SUCCESS;
+            state = loading_state.LoadState.success;
           }
           refreshController.refreshCompleted();
         });
@@ -144,7 +144,7 @@ class AlistBucketListState extends loading_state.BaseLoadingPageState<AlistBucke
       flogErr(e, {}, 'AlistBucketListState', 'initBucketList');
       if (mounted) {
         setState(() {
-          state = loading_state.LoadState.ERROR;
+          state = loading_state.LoadState.error;
         });
       }
       showToast('获取失败');
@@ -317,7 +317,7 @@ class AlistBucketListState extends loading_state.BaseLoadingPageState<AlistBucke
             ),
             onPressed: () {
               setState(() {
-                state = loading_state.LoadState.LOADING;
+                state = loading_state.LoadState.loading;
               });
               initBucketList();
             },

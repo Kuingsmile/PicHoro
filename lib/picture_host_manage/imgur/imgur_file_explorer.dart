@@ -79,7 +79,7 @@ class ImgurFileExplorerState extends loading_state.BaseLoadingPageState<ImgurFil
                 dirAllInfoList.add(albumInforesult[1]);
               } else {
                 setState(() {
-                  state = loading_state.LoadState.ERROR;
+                  state = loading_state.LoadState.error;
                 });
                 return;
               }
@@ -89,7 +89,7 @@ class ImgurFileExplorerState extends loading_state.BaseLoadingPageState<ImgurFil
           }
         } else {
           setState(() {
-            state = loading_state.LoadState.ERROR;
+            state = loading_state.LoadState.error;
           });
           return;
         }
@@ -112,7 +112,7 @@ class ImgurFileExplorerState extends loading_state.BaseLoadingPageState<ImgurFil
           }
         } else {
           setState(() {
-            state = loading_state.LoadState.ERROR;
+            state = loading_state.LoadState.error;
           });
           return;
         }
@@ -138,7 +138,7 @@ class ImgurFileExplorerState extends loading_state.BaseLoadingPageState<ImgurFil
           }
         } else {
           setState(() {
-            state = loading_state.LoadState.ERROR;
+            state = loading_state.LoadState.error;
           });
           return;
         }
@@ -149,7 +149,7 @@ class ImgurFileExplorerState extends loading_state.BaseLoadingPageState<ImgurFil
       if (allInfoList.isEmpty) {
         if (mounted) {
           setState(() {
-            state = loading_state.LoadState.EMPTY;
+            state = loading_state.LoadState.empty;
           });
         }
       } else {
@@ -159,13 +159,13 @@ class ImgurFileExplorerState extends loading_state.BaseLoadingPageState<ImgurFil
             selectedFilesBool.add(false);
           }
           setState(() {
-            state = loading_state.LoadState.SUCCESS;
+            state = loading_state.LoadState.success;
           });
         }
       }
     } catch (e) {
       flogErr(e, {}, 'ImgurFileExplorerState', '_getFileList');
-      state = loading_state.LoadState.ERROR;
+      state = loading_state.LoadState.error;
     }
     if (mounted) {
       setState(() {});
@@ -713,7 +713,7 @@ class ImgurFileExplorerState extends loading_state.BaseLoadingPageState<ImgurFil
       }
       if (allInfoList.isEmpty) {
         setState(() {
-          state = loading_state.LoadState.EMPTY;
+          state = loading_state.LoadState.empty;
         });
       }
     } catch (e) {
@@ -734,14 +734,14 @@ class ImgurFileExplorerState extends loading_state.BaseLoadingPageState<ImgurFil
     return Scaffold(
       appBar: appBar,
       body: buildStateWidget,
-      floatingActionButtonLocation: state == loading_state.LoadState.ERROR ||
-              state == loading_state.LoadState.EMPTY ||
-              state == loading_state.LoadState.LOADING
+      floatingActionButtonLocation: state == loading_state.LoadState.error ||
+              state == loading_state.LoadState.empty ||
+              state == loading_state.LoadState.loading
           ? null
           : FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: state == loading_state.LoadState.ERROR ||
-              state == loading_state.LoadState.EMPTY ||
-              state == loading_state.LoadState.LOADING
+      floatingActionButton: state == loading_state.LoadState.error ||
+              state == loading_state.LoadState.empty ||
+              state == loading_state.LoadState.loading
           ? null
           : floatingActionButton,
     );
@@ -930,7 +930,7 @@ class ImgurFileExplorerState extends loading_state.BaseLoadingPageState<ImgurFil
             ),
             onPressed: () {
               setState(() {
-                state = loading_state.LoadState.LOADING;
+                state = loading_state.LoadState.loading;
               });
               _getFileList();
             },
@@ -1067,7 +1067,8 @@ class ImgurFileExplorerState extends loading_state.BaseLoadingPageState<ImgurFil
                             ),
                           ),
                           Positioned(
-                            // ignore: sort_child_properties_last
+                            left: -0.5,
+                            top: 20,
                             child: Container(
                               decoration: const BoxDecoration(
                                   borderRadius: BorderRadius.all(Radius.circular(55)),
@@ -1090,8 +1091,6 @@ class ImgurFileExplorerState extends loading_state.BaseLoadingPageState<ImgurFil
                                 },
                               ),
                             ),
-                            left: -0.5,
-                            top: 20,
                           )
                         ],
                       ),
@@ -1184,13 +1183,8 @@ class ImgurFileExplorerState extends loading_state.BaseLoadingPageState<ImgurFil
                               ),
                               title: Text(
                                   allInfoList[index]['id'].length > 20
-                                      // ignore: prefer_interpolation_to_compose_strings
-                                      ? allInfoList[index]['id'].toString().substring(0, 10) +
-                                          '...${allInfoList[index]['id'].toString().substring(allInfoList[index]['id'].toString().length - 10)}.${allInfoList[index]['link'].split('.').last}'
-                                      // ignore: prefer_interpolation_to_compose_strings
-                                      : allInfoList[index]['id'].toString() +
-                                          '.' +
-                                          allInfoList[index]['link'].split('.').last,
+                                      ? '${allInfoList[index]['id'].toString().substring(0, 10)}...${allInfoList[index]['id'].toString().substring(allInfoList[index]['id'].toString().length - 10)}.${allInfoList[index]['link'].split('.').last}'
+                                      : '${allInfoList[index]['id']}.${allInfoList[index]['link'].split('.').last}',
                                   style: const TextStyle(fontSize: 14)),
                               subtitle: Text(
                                   '${DateTime.fromMillisecondsSinceEpoch(allInfoList[index]['datetime'] * 1000).toString().substring(0, 19)} ${getFileSize(int.parse(allInfoList[index]['size'].toString().split('.')[0]))}',
@@ -1284,7 +1278,8 @@ class ImgurFileExplorerState extends loading_state.BaseLoadingPageState<ImgurFil
                             ),
                           ),
                           Positioned(
-                            // ignore: sort_child_properties_last
+                            left: 0,
+                            top: 22,
                             child: Container(
                               decoration: const BoxDecoration(
                                   borderRadius: BorderRadius.all(Radius.circular(55)),
@@ -1307,8 +1302,6 @@ class ImgurFileExplorerState extends loading_state.BaseLoadingPageState<ImgurFil
                                 },
                               ),
                             ),
-                            left: 0,
-                            top: 22,
                           ),
                         ])),
                     const Divider(

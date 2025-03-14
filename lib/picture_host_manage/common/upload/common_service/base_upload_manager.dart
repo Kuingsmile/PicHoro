@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:collection';
-// ignore: depend_on_referenced_packages
+
 import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';

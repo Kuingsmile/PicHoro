@@ -59,7 +59,7 @@ class LskyproFileExplorerState extends loading_state.BaseLoadingPageState<Lskypr
     try {
       if (widget.userProfile['image_num'] == 0) {
         setState(() {
-          state = loading_state.LoadState.EMPTY;
+          state = loading_state.LoadState.empty;
         });
         return;
       }
@@ -76,7 +76,7 @@ class LskyproFileExplorerState extends loading_state.BaseLoadingPageState<Lskypr
           }
         } else {
           setState(() {
-            state = loading_state.LoadState.ERROR;
+            state = loading_state.LoadState.error;
           });
           return;
         }
@@ -91,7 +91,7 @@ class LskyproFileExplorerState extends loading_state.BaseLoadingPageState<Lskypr
           }
         } else {
           setState(() {
-            state = loading_state.LoadState.ERROR;
+            state = loading_state.LoadState.error;
           });
           return;
         }
@@ -118,7 +118,7 @@ class LskyproFileExplorerState extends loading_state.BaseLoadingPageState<Lskypr
           }
         } else {
           setState(() {
-            state = loading_state.LoadState.ERROR;
+            state = loading_state.LoadState.error;
           });
           return;
         }
@@ -135,7 +135,7 @@ class LskyproFileExplorerState extends loading_state.BaseLoadingPageState<Lskypr
       if (allInfoList.isEmpty) {
         if (mounted) {
           setState(() {
-            state = loading_state.LoadState.EMPTY;
+            state = loading_state.LoadState.empty;
           });
         }
       } else {
@@ -145,13 +145,13 @@ class LskyproFileExplorerState extends loading_state.BaseLoadingPageState<Lskypr
             for (var i = 0; i < allInfoList.length; i++) {
               selectedFilesBool.add(false);
             }
-            state = loading_state.LoadState.SUCCESS;
+            state = loading_state.LoadState.success;
           });
         }
       }
     } catch (e) {
       flogErr(e, {}, 'LskyproFileExplorerState', '_getFileList');
-      state = loading_state.LoadState.ERROR;
+      state = loading_state.LoadState.error;
     }
     if (mounted) {
       setState(() {});
@@ -641,7 +641,7 @@ class LskyproFileExplorerState extends loading_state.BaseLoadingPageState<Lskypr
       }
       if (allInfoList.isEmpty) {
         setState(() {
-          state = loading_state.LoadState.EMPTY;
+          state = loading_state.LoadState.empty;
         });
       }
     } catch (e) {
@@ -661,14 +661,14 @@ class LskyproFileExplorerState extends loading_state.BaseLoadingPageState<Lskypr
     return Scaffold(
       appBar: appBar,
       body: buildStateWidget,
-      floatingActionButtonLocation: state == loading_state.LoadState.ERROR ||
-              state == loading_state.LoadState.EMPTY ||
-              state == loading_state.LoadState.LOADING
+      floatingActionButtonLocation: state == loading_state.LoadState.error ||
+              state == loading_state.LoadState.empty ||
+              state == loading_state.LoadState.loading
           ? null
           : FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: state == loading_state.LoadState.ERROR ||
-              state == loading_state.LoadState.EMPTY ||
-              state == loading_state.LoadState.LOADING
+      floatingActionButton: state == loading_state.LoadState.error ||
+              state == loading_state.LoadState.empty ||
+              state == loading_state.LoadState.loading
           ? null
           : floatingActionButton,
     );
@@ -855,7 +855,7 @@ class LskyproFileExplorerState extends loading_state.BaseLoadingPageState<Lskypr
             ),
             onPressed: () {
               setState(() {
-                state = loading_state.LoadState.LOADING;
+                state = loading_state.LoadState.loading;
               });
               _getFileList();
             },
@@ -989,7 +989,8 @@ class LskyproFileExplorerState extends loading_state.BaseLoadingPageState<Lskypr
                             ),
                           ),
                           Positioned(
-                            // ignore: sort_child_properties_last
+                            left: -0.5,
+                            top: 20,
                             child: Container(
                               decoration: const BoxDecoration(
                                   borderRadius: BorderRadius.all(Radius.circular(55)),
@@ -1012,8 +1013,6 @@ class LskyproFileExplorerState extends loading_state.BaseLoadingPageState<Lskypr
                                 },
                               ),
                             ),
-                            left: -0.5,
-                            top: 20,
                           )
                         ],
                       ),
@@ -1138,7 +1137,8 @@ class LskyproFileExplorerState extends loading_state.BaseLoadingPageState<Lskypr
                             ),
                           ),
                           Positioned(
-                            // ignore: sort_child_properties_last
+                            left: 0,
+                            top: 22,
                             child: Container(
                               decoration: const BoxDecoration(
                                   borderRadius: BorderRadius.all(Radius.circular(55)),
@@ -1161,8 +1161,6 @@ class LskyproFileExplorerState extends loading_state.BaseLoadingPageState<Lskypr
                                 },
                               ),
                             ),
-                            left: 0,
-                            top: 22,
                           ),
                         ])),
                     const Divider(

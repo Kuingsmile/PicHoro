@@ -2,7 +2,6 @@ import 'dart:io';
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'package:horopic/utils/global.dart';
@@ -618,13 +617,10 @@ class ImgurManageAPI {
     }
 
     if (successCount == 0) {
-      return Fluttertoast.showToast(
-          msg: '上传失败', toastLength: Toast.LENGTH_SHORT, timeInSecForIosWeb: 2, fontSize: 16.0);
+      return showToast('上传失败');
     } else if (failCount == 0) {
-      return Fluttertoast.showToast(
-          msg: '上传成功', toastLength: Toast.LENGTH_SHORT, timeInSecForIosWeb: 2, fontSize: 16.0);
+      return showToast('上传成功');
     }
-    return Fluttertoast.showToast(
-        msg: '成功$successCount,失败$failCount', toastLength: Toast.LENGTH_SHORT, timeInSecForIosWeb: 2, fontSize: 16.0);
+    return showToast('成功$successCount,失败$failCount');
   }
 }

@@ -4,15 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/common_functions.dart';
 
-// ignore: must_be_immutable
 class NetLoadingDialog extends StatefulWidget {
-  String loadingText;
-  bool outsideDismiss;
-  bool loading;
+  final String loadingText;
+  final bool outsideDismiss;
+  final bool loading;
 
-  Future<dynamic> requestCallBack;
+  final Future<dynamic>? requestCallBack;
 
-  NetLoadingDialog(
+  const NetLoadingDialog(
       {super.key,
       this.loadingText = "loading...",
       this.outsideDismiss = false,
@@ -27,9 +26,8 @@ class _LoadingDialog extends State<NetLoadingDialog> {
   @override
   void initState() {
     super.initState();
-    // ignore: unnecessary_null_comparison
     if (widget.requestCallBack != null) {
-      widget.requestCallBack.then((err) {
+      widget.requestCallBack?.then((err) {
         err;
         Global.operateDone = true;
         Navigator.pop(context);

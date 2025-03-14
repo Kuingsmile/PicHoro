@@ -55,7 +55,7 @@ class SmmsFileExplorerState extends loading_state.BaseLoadingPageState<SmmsFileE
       if (fileList[0] == 'success') {
         Map firstPageMap = fileList[1];
         if (firstPageMap['Count'] == 0) {
-          state = loading_state.LoadState.EMPTY;
+          state = loading_state.LoadState.empty;
         } else {
           int totalPage = firstPageMap['TotalPages'];
           allInfoList.clear();
@@ -73,17 +73,17 @@ class SmmsFileExplorerState extends loading_state.BaseLoadingPageState<SmmsFileE
           for (int i = 0; i < allInfoList.length; i++) {
             selectedFilesBool.add(false);
           }
-          state = loading_state.LoadState.SUCCESS;
+          state = loading_state.LoadState.success;
           if (mounted) {
             setState(() {});
           }
         }
       } else {
-        state = loading_state.LoadState.ERROR;
+        state = loading_state.LoadState.error;
       }
     } catch (e) {
       flogErr(e, {}, "SmmsFileExplorerState", "_getFileList");
-      state = loading_state.LoadState.ERROR;
+      state = loading_state.LoadState.error;
     }
     if (mounted) {
       setState(() {});
@@ -420,7 +420,7 @@ class SmmsFileExplorerState extends loading_state.BaseLoadingPageState<SmmsFileE
         });
         if (allInfoList.isEmpty) {
           setState(() {
-            state = loading_state.LoadState.EMPTY;
+            state = loading_state.LoadState.empty;
           });
         }
       }
@@ -435,14 +435,14 @@ class SmmsFileExplorerState extends loading_state.BaseLoadingPageState<SmmsFileE
     return Scaffold(
       appBar: appBar,
       body: buildStateWidget,
-      floatingActionButtonLocation: state == loading_state.LoadState.ERROR ||
-              state == loading_state.LoadState.EMPTY ||
-              state == loading_state.LoadState.LOADING
+      floatingActionButtonLocation: state == loading_state.LoadState.error ||
+              state == loading_state.LoadState.empty ||
+              state == loading_state.LoadState.loading
           ? null
           : FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: state == loading_state.LoadState.ERROR ||
-              state == loading_state.LoadState.EMPTY ||
-              state == loading_state.LoadState.LOADING
+      floatingActionButton: state == loading_state.LoadState.error ||
+              state == loading_state.LoadState.empty ||
+              state == loading_state.LoadState.loading
           ? null
           : floatingActionButton,
     );
@@ -653,7 +653,7 @@ class SmmsFileExplorerState extends loading_state.BaseLoadingPageState<SmmsFileE
             ),
             onPressed: () {
               setState(() {
-                state = loading_state.LoadState.LOADING;
+                state = loading_state.LoadState.loading;
               });
               _getFileList();
             },

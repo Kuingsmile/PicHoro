@@ -149,105 +149,56 @@ downloadTxtFile(String urlpath, String fileName, Map<String, dynamic>? headers) 
   }
 }
 
-/// 弹出对话框
-showAlertDialog({
-  bool? barrierDismissible,
-  required BuildContext context,
-  required String title,
-  required String content,
-}) {
-  return showDialog(
-      context: context,
-      barrierDismissible: barrierDismissible == true ? true : false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          contentPadding: const EdgeInsets.only(left: 20, right: 20),
-          title: Center(
-            child: Text(
-              title,
-              style: const TextStyle(
-                fontSize: 23.0,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(20)),
-          ),
-          content: SizedBox(
-            height: 200,
-            width: 300,
-            child: ListView(
-              children: [
-                const SizedBox(
-                  height: 20,
-                ),
-                Text(content)
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Center(
-                child: Text(
-                  '确  定',
-                  style: TextStyle(
-                    color: Colors.blue,
-                    fontSize: 20.0,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        );
-      });
-}
-
 /// cupertino风格的alertDialog
 showCupertinoAlertDialog({
   bool? barrierDismissible,
   required BuildContext context,
   required String title,
   required String content,
+  String confirmText = '确定',
 }) {
   return showCupertinoDialog(
       context: context,
-      barrierDismissible: barrierDismissible == true ? true : false,
+      barrierDismissible: barrierDismissible ?? false,
       builder: (BuildContext context) {
         return CupertinoAlertDialog(
-          title: Center(
-            child: Text(
-              title,
-              style: const TextStyle(
-                fontSize: 23.0,
-                fontWeight: FontWeight.bold,
+          title: Text(
+            title,
+            style: const TextStyle(
+              fontSize: 22.0,
+              fontWeight: FontWeight.w600,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          content: Container(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.6,
+              maxWidth: MediaQuery.of(context).size.width * 0.8,
+            ),
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12.0),
+                child: Text(
+                  content,
+                  style: const TextStyle(
+                    fontSize: 16.0,
+                    height: 1.4,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
               ),
             ),
           ),
-          content: SizedBox(
-            height: 150,
-            width: 300,
-            child: ListView(
-              children: [Text(content)],
-            ),
-          ),
           actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Center(
-                child: Text(
-                  '确定',
-                  style: TextStyle(
-                    color: Colors.blue,
-                    fontSize: 20.0,
-                    fontWeight: FontWeight.bold,
-                  ),
+            CupertinoDialogAction(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                confirmText,
+                style: TextStyle(
+                  color: CupertinoTheme.of(context).primaryColor,
+                  fontSize: 17.0,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             ),
@@ -256,30 +207,74 @@ showCupertinoAlertDialog({
       });
 }
 
-/// cupertino风格的alertDialog Style 2
+/// cupertino风格的alertDialog  带确认函数
 showCupertinoAlertDialogWithConfirmFunc({
   required BuildContext context,
   required String title,
   required String content,
   required onConfirm,
+  bool barrierDismissible = true,
+  String cancelText = '取消',
+  String confirmText = '确定',
 }) {
   return showCupertinoDialog(
-      barrierDismissible: true,
+      barrierDismissible: barrierDismissible,
       context: context,
       builder: (BuildContext context) {
         return CupertinoAlertDialog(
-          title: Text(title),
-          content: Text(content),
+          title: Text(
+            title,
+            style: const TextStyle(
+              fontSize: 22.0,
+              fontWeight: FontWeight.w600,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          content: Container(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.6,
+              maxWidth: MediaQuery.of(context).size.width * 0.8,
+            ),
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12.0),
+                child: Text(
+                  content,
+                  style: const TextStyle(
+                    fontSize: 16.0,
+                    height: 1.4,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+          ),
           actions: <Widget>[
             CupertinoDialogAction(
-              child: const Text('取消', style: TextStyle(color: Colors.blue)),
-              onPressed: () {
-                Navigator.pop(context);
-              },
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                cancelText,
+                style: TextStyle(
+                  color: CupertinoColors.destructiveRed,
+                  fontSize: 17.0,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
             ),
             CupertinoDialogAction(
-              onPressed: onConfirm,
-              child: const Text('确定', style: TextStyle(color: Colors.blue)),
+              onPressed: () {
+                onConfirm();
+                if (context.mounted) Navigator.pop(context);
+              },
+              child: Text(
+                confirmText,
+                style: TextStyle(
+                  color: CupertinoTheme.of(context).primaryColor,
+                  fontSize: 17.0,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
             ),
           ],
         );
@@ -287,48 +282,46 @@ showCupertinoAlertDialogWithConfirmFunc({
 }
 
 /// 弹出toast
-showToast(String msg) {
-  Fluttertoast.showToast(msg: msg, toastLength: Toast.LENGTH_SHORT, timeInSecForIosWeb: 2, fontSize: 16.0);
+showToast(
+  String msg, {
+  Toast toastLength = Toast.LENGTH_SHORT,
+  int timeInSecForIosWeb = 2,
+  double fontSize = 16.0,
+  ToastGravity gravity = ToastGravity.BOTTOM,
+  Color? backgroundColor,
+  Color? textColor,
+}) {
+  Fluttertoast.showToast(
+    msg: msg,
+    toastLength: toastLength,
+    timeInSecForIosWeb: timeInSecForIosWeb,
+    fontSize: fontSize,
+    gravity: gravity,
+    backgroundColor: backgroundColor ?? Colors.black.withValues(alpha: 0.7),
+    textColor: textColor ?? Colors.white,
+  );
 }
 
 /// 带context的toast
-showToastWithContext(BuildContext context, String msg) {
-  Fluttertoast.showToast(
-      msg: msg,
-      toastLength: Toast.LENGTH_SHORT,
-      timeInSecForIosWeb: 2,
-      backgroundColor: Theme.of(context).brightness == Brightness.light ? Colors.black : Colors.white,
-      textColor: Theme.of(context).brightness == Brightness.light ? Colors.white : Colors.black,
-      fontSize: 16.0);
-}
+showToastWithContext(
+  BuildContext context,
+  String msg, {
+  Toast toastLength = Toast.LENGTH_SHORT,
+  int timeInSecForIosWeb = 2,
+  double fontSize = 16.0,
+  ToastGravity gravity = ToastGravity.BOTTOM,
+}) {
+  final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
-/// 底部选择框
-void bottomPickerSheet(BuildContext context, Function imageFromCamera, Function imageFromGallery) {
-  showModalBottomSheet(
-      context: context,
-      builder: (BuildContext bc) {
-        return SafeArea(
-            child: Wrap(
-          children: [
-            ListTile(
-              leading: const Icon(Icons.photo_camera),
-              title: const Text('拍照'),
-              onTap: () {
-                imageFromCamera();
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.photo_library),
-              title: const Text('相册'),
-              onTap: () {
-                imageFromGallery();
-                Navigator.pop(context);
-              },
-            )
-          ],
-        ));
-      });
+  Fluttertoast.showToast(
+    msg: msg,
+    toastLength: toastLength,
+    timeInSecForIosWeb: timeInSecForIosWeb,
+    fontSize: fontSize,
+    gravity: gravity,
+    backgroundColor: isDarkMode ? Colors.white.withValues(alpha: 0.8) : Colors.black.withValues(alpha: 0.7),
+    textColor: isDarkMode ? Colors.black : Colors.white,
+  );
 }
 
 /// title text
@@ -363,14 +356,12 @@ String renameFileWithRandomString(int length) {
 
 /// rename picture with timestamp
 renamePictureWithTimestamp(File file) {
-  var fileExtension = my_path.extension(file.path);
-  return renameFileWithTimestamp() + fileExtension;
+  return renameFileWithTimestamp() + my_path.extension(file.path);
 }
 
 /// rename picture with random string
 renamePictureWithRandomString(File file) {
-  var fileExtension = my_path.extension(file.path);
-  return renameFileWithRandomString(30) + fileExtension;
+  return renameFileWithRandomString(30) + my_path.extension(file.path);
 }
 
 /// rename picture with custom format

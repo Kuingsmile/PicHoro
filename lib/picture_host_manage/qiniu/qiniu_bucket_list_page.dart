@@ -80,7 +80,7 @@ class QiniuBucketListState extends loading_state.BaseLoadingPageState<QiniuBucke
       if (bucketListResponse[0] != 'success') {
         if (mounted) {
           setState(() {
-            state = loading_state.LoadState.ERROR;
+            state = loading_state.LoadState.error;
           });
           showToast('获取失败');
         }
@@ -91,7 +91,7 @@ class QiniuBucketListState extends loading_state.BaseLoadingPageState<QiniuBucke
       if (bucketListResponse[1] == null) {
         if (mounted) {
           setState(() {
-            state = loading_state.LoadState.EMPTY;
+            state = loading_state.LoadState.empty;
           });
         }
         refreshController.refreshCompleted();
@@ -112,9 +112,9 @@ class QiniuBucketListState extends loading_state.BaseLoadingPageState<QiniuBucke
       if (mounted) {
         setState(() {
           if (bucketMap.isEmpty) {
-            state = loading_state.LoadState.EMPTY;
+            state = loading_state.LoadState.empty;
           } else {
-            state = loading_state.LoadState.SUCCESS;
+            state = loading_state.LoadState.success;
           }
           refreshController.refreshCompleted();
         });
@@ -123,7 +123,7 @@ class QiniuBucketListState extends loading_state.BaseLoadingPageState<QiniuBucke
       flogErr(e, {}, 'QiniuBucketListState', 'initBucketList');
       if (mounted) {
         setState(() {
-          state = loading_state.LoadState.ERROR;
+          state = loading_state.LoadState.error;
         });
       }
       showToast('获取失败');
@@ -191,7 +191,7 @@ class QiniuBucketListState extends loading_state.BaseLoadingPageState<QiniuBucke
             ),
             onPressed: () {
               setState(() {
-                state = loading_state.LoadState.LOADING;
+                state = loading_state.LoadState.loading;
               });
               initBucketList();
             },

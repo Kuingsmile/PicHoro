@@ -72,7 +72,7 @@ class UpyunBucketListState extends loading_state.BaseLoadingPageState<UpyunBucke
       if (bucketListResponse[0] != 'success') {
         if (mounted) {
           setState(() {
-            state = loading_state.LoadState.ERROR;
+            state = loading_state.LoadState.error;
           });
         }
         refreshController.refreshCompleted();
@@ -81,7 +81,7 @@ class UpyunBucketListState extends loading_state.BaseLoadingPageState<UpyunBucke
       if (bucketListResponse.isEmpty) {
         if (mounted) {
           setState(() {
-            state = loading_state.LoadState.EMPTY;
+            state = loading_state.LoadState.empty;
           });
         }
         refreshController.refreshCompleted();
@@ -99,7 +99,7 @@ class UpyunBucketListState extends loading_state.BaseLoadingPageState<UpyunBucke
         if (bucketInfoResponse[0] != 'success') {
           if (mounted) {
             setState(() {
-              state = loading_state.LoadState.ERROR;
+              state = loading_state.LoadState.error;
             });
           }
           refreshController.refreshCompleted();
@@ -121,9 +121,9 @@ class UpyunBucketListState extends loading_state.BaseLoadingPageState<UpyunBucke
       if (mounted) {
         setState(() {
           if (bucketMap.isEmpty) {
-            state = loading_state.LoadState.EMPTY;
+            state = loading_state.LoadState.empty;
           } else {
-            state = loading_state.LoadState.SUCCESS;
+            state = loading_state.LoadState.success;
           }
           refreshController.refreshCompleted();
         });
@@ -137,7 +137,7 @@ class UpyunBucketListState extends loading_state.BaseLoadingPageState<UpyunBucke
       );
       if (mounted) {
         setState(() {
-          state = loading_state.LoadState.ERROR;
+          state = loading_state.LoadState.error;
         });
       }
       showToast('获取失败');
@@ -216,7 +216,7 @@ class UpyunBucketListState extends loading_state.BaseLoadingPageState<UpyunBucke
             ),
             onPressed: () {
               setState(() {
-                state = loading_state.LoadState.LOADING;
+                state = loading_state.LoadState.loading;
               });
               initBucketList();
             },

@@ -31,10 +31,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  android_system_font:
-    git:
-      url: https://github.com/re7gog/android_system_font.git
-      ref: master
   auto_orientation: ^2.3.1
   barcode_scan2: 4.2.4
   camera: ^0.10.5+3
@@ -92,10 +88,18 @@ dependencies:
   xml2json: ^6.2.0
   xterm: ^4.0.0
   minio: ^3.5.0
-  f_logs:
-    path: ../flutterdep/f_logs-2.0.1
+  android_system_font:
+    git:
+      url: https://github.com/re7gog/android_system_font.git
+      ref: master
   syncfusion_flutter_pdfviewer:
-    path: ../flutterdep/syncfusion_flutter_pdfviewer-22.2.10
+    git:
+      url: https://github.com/Kuingsmile/flutterdep.git
+      path: syncfusion_flutter_pdfviewer-22.2.10
+  syncfusion_flutter_pdf:
+    git:
+      url: https://github.com/Kuingsmile/flutterdep.git
+      path: syncfusion_flutter_pdf-22.2.10
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8

@@ -61,7 +61,7 @@ class LogPageState extends loading_state.BaseLoadingPageState<LogPage> {
     try {
       logs = await FLog.getAllLogs();
       if (logs.isEmpty) {
-        state = loading_state.LoadState.EMPTY;
+        state = loading_state.LoadState.empty;
         setState(() {});
       } else {
         logs = logs.length > 150 ? logs.sublist(logs.length - 150, logs.length) : logs;
@@ -76,12 +76,12 @@ class LogPageState extends loading_state.BaseLoadingPageState<LogPage> {
             ..['日志内容'] = logs[i].text;
         }
         setState(() {
-          state = loading_state.LoadState.SUCCESS;
+          state = loading_state.LoadState.success;
         });
       }
     } catch (e) {
       flogErr(e, {}, 'LogPageState', 'getAlllog');
-      state = loading_state.LoadState.ERROR;
+      state = loading_state.LoadState.error;
       setState(() {});
     }
   }
@@ -397,7 +397,7 @@ class LogPageState extends loading_state.BaseLoadingPageState<LogPage> {
             ),
             onPressed: () {
               setState(() {
-                state = loading_state.LoadState.LOADING;
+                state = loading_state.LoadState.loading;
               });
               getAlllog();
             },
