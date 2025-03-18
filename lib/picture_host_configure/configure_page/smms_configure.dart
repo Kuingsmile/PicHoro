@@ -23,6 +23,7 @@ class SmmsConfig extends StatefulWidget {
 class SmmsConfigState extends State<SmmsConfig> {
   final _formKey = GlobalKey<FormState>();
   final _tokenController = TextEditingController();
+  final SmmsManageAPI _smmsManageAPI = SmmsManageAPI();
 
   @override
   void initState() {
@@ -32,7 +33,7 @@ class SmmsConfigState extends State<SmmsConfig> {
 
   _initConfig() async {
     try {
-      Map configMap = await SmmsManageAPI.getConfigMap();
+      Map configMap = await _smmsManageAPI.getConfigMap();
       _tokenController.text = configMap['token'] ?? '';
     } catch (e) {
       flogErr(e, {}, 'SmmsConfigState', '_initConfig');
@@ -148,7 +149,7 @@ class SmmsConfigState extends State<SmmsConfig> {
 
       final smmsConfig = SmmsConfigModel(token);
       final smmsConfigJson = jsonEncode(smmsConfig);
-      final smmsConfigFile = await SmmsManageAPI.localFile;
+      final smmsConfigFile = await _smmsManageAPI.localFile();
       await smmsConfigFile.writeAsString(smmsConfigJson);
       showToast('保存成功');
     } catch (e) {
@@ -161,7 +162,7 @@ class SmmsConfigState extends State<SmmsConfig> {
 
   checkSmmsConfig() async {
     try {
-      Map configMap = await SmmsManageAPI.getConfigMap();
+      Map configMap = await _smmsManageAPI.getConfigMap();
       if (configMap.isEmpty) {
         if (context.mounted) {
           return showCupertinoAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");

@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:horopic/widgets/common_widgets.dart';
 
 import 'package:open_filex/open_filex.dart';
 import 'package:path/path.dart' as my_path;
@@ -93,27 +94,14 @@ class FileExplorerState extends State<FileExplorer> {
     return AppBar(
       elevation: 0,
       centerTitle: true,
-      flexibleSpace: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withValues(alpha: 0.8)],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
-      ),
+      flexibleSpace: getFlexibleSpace(context),
       leading: IconButton(
         icon: const Icon(Icons.arrow_back_ios, size: 20),
         onPressed: () => Navigator.pop(context),
       ),
       titleSpacing: 0,
-      title: Text(
+      title: titleText(
         my_path.basename(widget.currentDirPath),
-        style: const TextStyle(
-          fontSize: 18,
-          color: Colors.white,
-          fontWeight: FontWeight.bold,
-        ),
       ),
       actions: [
         _buildSortButton(),
@@ -232,7 +220,6 @@ class FileExplorerState extends State<FileExplorer> {
           for (int i = 0; i < selectedFilesBool.length; i++) {
             if (selectedFilesBool[i]) toDelete.add(i);
           }
-          Navigator.pop(context);
           await deleteAll(toDelete);
           showToast('删除完成');
         } catch (e) {
@@ -259,7 +246,7 @@ class FileExplorerState extends State<FileExplorer> {
             ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 20),
           ElevatedButton.icon(
             onPressed: _onrefresh,
             icon: const Icon(Icons.refresh),
@@ -282,61 +269,65 @@ class FileExplorerState extends State<FileExplorer> {
     bool isSelected = selectedFilesBool[index];
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      child: Slidable(
-        direction: Axis.horizontal,
-        endActionPane: ActionPane(
-          motion: const ScrollMotion(),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+        child: Column(
           children: [
-            SlidableAction(
-              onPressed: (_) => _handleDeleteFile(file),
-              backgroundColor: const Color(0xFFFE4A49),
-              foregroundColor: Colors.white,
-              icon: Icons.delete,
-              label: '删除',
-              borderRadius: const BorderRadius.all(Radius.circular(12)),
-            ),
-          ],
-        ),
-        child: Card(
-          elevation: 0.5,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-            side: BorderSide(
-              color: isSelected ? Theme.of(context).primaryColor.withValues(alpha: 0.5) : Colors.transparent,
-              width: 1.5,
-            ),
-          ),
-          color: isSelected ? Theme.of(context).primaryColor.withValues(alpha: 0.1) : Theme.of(context).cardColor,
-          child: Stack(
-            fit: StackFit.loose,
-            children: [
-              ListTile(
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                minLeadingWidth: 0,
-                minVerticalPadding: 0,
-                leading: _buildFileIcon(file, isDirectory),
-                title: Text(
-                  my_path.basename(file.path),
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w500,
-                    color: Theme.of(context).textTheme.titleLarge?.color,
+            Slidable(
+              direction: Axis.horizontal,
+              endActionPane: ActionPane(
+                motion: const ScrollMotion(),
+                children: [
+                  SlidableAction(
+                    onPressed: (_) => _handleDeleteFile(file),
+                    backgroundColor: const Color(0xFFFE4A49),
+                    foregroundColor: Colors.white,
+                    icon: Icons.delete,
+                    label: '删除',
+                    borderRadius: const BorderRadius.all(Radius.circular(12)),
+                  ),
+                ],
+              ),
+              child: Card(
+                elevation: 0.5,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(
+                    color: isSelected ? Theme.of(context).primaryColor.withValues(alpha: 0.5) : Colors.transparent,
+                    width: 1.5,
                   ),
                 ),
-                subtitle: isDirectory ? null : _buildFileDetails(file),
-                trailing: isDirectory ? const Icon(Icons.chevron_right, color: Colors.grey) : _buildMoreButton(file),
-                onTap: () => _handleFileTap(file, isDirectory, index),
-                onLongPress: () => setState(() {
-                  selectedFilesBool[index] = !isSelected;
-                }),
+                color: isSelected ? Theme.of(context).primaryColor.withValues(alpha: 0.1) : Theme.of(context).cardColor,
+                child: Stack(
+                  fit: StackFit.loose,
+                  children: [
+                    ListTile(
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      minLeadingWidth: 0,
+                      minVerticalPadding: 0,
+                      leading: _buildFileIcon(file, isDirectory),
+                      title: Text(
+                        my_path.basename(file.path),
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                          color: Theme.of(context).textTheme.titleLarge?.color,
+                        ),
+                      ),
+                      subtitle: isDirectory ? null : _buildFileDetails(file),
+                      trailing:
+                          isDirectory ? const Icon(Icons.chevron_right, color: Colors.grey) : _buildMoreButton(file),
+                      onTap: () => _handleFileTap(file, isDirectory, index),
+                      onLongPress: () => setState(() {
+                        selectedFilesBool[index] = !isSelected;
+                      }),
+                    ),
+                    _buildCheckbox(index),
+                  ],
+                ),
               ),
-              _buildCheckbox(index),
-            ],
-          ),
-        ),
-      ),
-    );
+            ),
+          ],
+        ));
   }
 
   Widget _buildFileIcon(FileSystemEntity file, bool isDirectory) {
@@ -723,37 +714,22 @@ class FileExplorerState extends State<FileExplorer> {
   }
 
   void deleteFile(BuildContext context, FileSystemEntity file) {
-    showCupertinoDialog(
-      barrierDismissible: true,
-      context: context,
-      builder: (BuildContext context) => CupertinoAlertDialog(
-        title: const Text('通知'),
-        content: Text('是否确定删除${my_path.basename(file.path)}?'),
-        actions: [
-          CupertinoDialogAction(
-            child: const Text('取消', style: TextStyle(color: Colors.blue)),
-            onPressed: () => Navigator.pop(context),
-          ),
-          CupertinoDialogAction(
-            child: const Text('确定', style: TextStyle(color: Colors.blue)),
-            onPressed: () {
-              try {
-                if (file.statSync().type == FileSystemEntityType.directory) {
-                  Directory(file.path).deleteSync(recursive: true);
-                } else {
-                  file.deleteSync();
-                }
-                getCurrentPathFiles(file.parent.path);
-              } catch (e) {
-                flogErr(e, {}, 'FilePage', 'deleteFile');
-                showToastWithContext(context, '删除失败');
-              }
-              Navigator.pop(context);
-            },
-          ),
-        ],
-      ),
-    );
+    showCupertinoAlertDialogWithConfirmFunc(
+        context: context,
+        content: '是否删除${my_path.basename(file.path)}?',
+        onConfirm: () {
+          try {
+            if (file.statSync().type == FileSystemEntityType.directory) {
+              Directory(file.path).deleteSync(recursive: true);
+            } else {
+              file.deleteSync();
+            }
+            getCurrentPathFiles(file.parent.path);
+          } catch (e) {
+            flogErr(e, {}, 'FilePage', 'deleteFile');
+            showToastWithContext(context, '删除失败');
+          }
+        });
   }
 
   void renameFile(BuildContext context, FileSystemEntity file) {

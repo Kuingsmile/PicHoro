@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:horopic/widgets/common_widgets.dart';
 
 import 'package:url_launcher/url_launcher.dart';
 import 'package:extended_image/extended_image.dart';
@@ -40,15 +41,7 @@ class MarkDownPreviewState extends State<MarkDownPreview> {
         elevation: 0,
         centerTitle: true,
         title: titleText(widget.fileName),
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withAlpha(204)],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-          ),
-        ),
+        flexibleSpace: getFlexibleSpace(context),
       ),
       body: widget.filePath.split(".").last == "md"
           ? FutureBuilder(

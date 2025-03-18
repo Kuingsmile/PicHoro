@@ -6,6 +6,7 @@ import 'package:horopic/utils/clear_cache.dart';
 import 'package:horopic/router/application.dart';
 import 'package:horopic/router/routers.dart';
 import 'package:horopic/utils/common_functions.dart';
+import 'package:horopic/widgets/common_widgets.dart';
 
 class CommonConfig extends StatefulWidget {
   const CommonConfig({super.key});
@@ -78,15 +79,7 @@ class CommonConfigState extends State<CommonConfig> {
         title: titleText(
           '通用设置',
         ),
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withValues(alpha: 0.8)],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-          ),
-        ),
+        flexibleSpace: getFlexibleSpace(context),
       ),
       body: ListView(
         physics: const BouncingScrollPhysics(),
@@ -223,9 +216,6 @@ class CommonConfigState extends State<CommonConfig> {
                       onConfirm: () async {
                         await CacheUtil.clear();
                         showToast('清理成功');
-                        if (mounted) {
-                          Navigator.pop(context);
-                        }
                       },
                     );
                   }

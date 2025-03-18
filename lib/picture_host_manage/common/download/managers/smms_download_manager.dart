@@ -17,9 +17,7 @@ class DownloadManager extends BaseDownloadManager {
   }
 
   @override
-  Future<void> download(String url, String savePath, CancelToken cancelToken,
-      {bool forceDownload = false, Map configMap = const {}}) async {
-    await processDownload(url, savePath, cancelToken, 'smmsDownloadManager',
-        forceDownload: forceDownload, configMap: configMap);
+  Future<void> download(String url, String savePath, CancelToken cancelToken, {Map configMap = const {}}) async {
+    await processDownload(url, savePath, cancelToken, 'smmsDownloadManager', configMap: configMap);
   }
 }

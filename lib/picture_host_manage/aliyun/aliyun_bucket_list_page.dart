@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:horopic/picture_host_manage/common/rename_dialog_widgets.dart';
+import 'package:horopic/widgets/common_widgets.dart';
 
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:grouped_list/grouped_list.dart';
@@ -11,7 +13,6 @@ import 'package:horopic/picture_host_manage/common/loading_state.dart' as loadin
 import 'package:horopic/picture_host_manage/manage_api/aliyun_manage_api.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/global.dart';
-import 'package:horopic/picture_host_manage/alist/alist_file_explorer.dart' show RenameDialog, RenameDialogContent;
 
 class AliyunBucketList extends StatefulWidget {
   const AliyunBucketList({super.key});
@@ -129,6 +130,7 @@ class AliyunBucketListState extends loading_state.BaseLoadingPageState<AliyunBuc
         elevation: 0,
         centerTitle: true,
         title: titleText('阿里云存储桶列表'),
+        flexibleSpace: getFlexibleSpace(context),
         actions: [
           IconButton(
             onPressed: () async {
@@ -146,59 +148,14 @@ class AliyunBucketListState extends loading_state.BaseLoadingPageState<AliyunBuc
       );
 
   @override
-  Widget buildEmpty() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Image.asset(
-            'assets/images/empty.png',
-            width: 100,
-            height: 100,
-          ),
-          const Text('没有存储桶，点击右上角添加哦', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118)))
-        ],
-      ),
-    );
-  }
+  String get emptyText => '没有存储桶，点击右上角添加哦';
 
   @override
-  Widget buildError() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Text('加载失败', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))),
-          ElevatedButton(
-            style: ButtonStyle(
-              backgroundColor: WidgetStateProperty.all(Colors.blue),
-            ),
-            onPressed: () {
-              setState(() {
-                state = loading_state.LoadState.loading;
-              });
-              initBucketList();
-            },
-            child: const Text('重新加载'),
-          )
-        ],
-      ),
-    );
-  }
-
-  @override
-  Widget buildLoading() {
-    return const Center(
-      child: SizedBox(
-        width: 30,
-        height: 30,
-        child: CircularProgressIndicator(
-          strokeWidth: 2,
-          backgroundColor: Colors.transparent,
-          valueColor: AlwaysStoppedAnimation(Colors.blue),
-        ),
-      ),
-    );
+  onErrorRetry() {
+    setState(() {
+      state = loading_state.LoadState.loading;
+    });
+    initBucketList();
   }
 
   @override
@@ -353,7 +310,7 @@ class AliyunBucketListState extends loading_state.BaseLoadingPageState<AliyunBuc
                                 : Global.bucketCustomUrl['aliyun-${element['name']}']!.length > 20
                                     ? '${Global.bucketCustomUrl['aliyun-${element['name']}']!.substring(0, 20)}...'
                                     : Global.bucketCustomUrl['aliyun-${element['name']}']!,
-                        okBtnTap: () async {
+                        onConfirm: (bool isCoverFile) async {
                           if (!vc.text.startsWith(RegExp(r'http|https'))) {
                             showToast('链接必须以http或https开头');
                             return;
@@ -363,9 +320,8 @@ class AliyunBucketListState extends loading_state.BaseLoadingPageState<AliyunBuc
                           Global.setBucketCustomUrl(Global.bucketCustomUrl);
                           showToast('设置成功');
                         },
-                        vc: vc,
-                        cancelBtnTap: () {},
-                        stateBoolText: '',
+                        renameTextController: vc,
+                        onCancel: () {},
                       ),
                     );
                   });
@@ -481,29 +437,18 @@ class AliyunBucketListState extends loading_state.BaseLoadingPageState<AliyunBuc
             minLeadingWidth: 0,
             title: const Text('删除存储桶', style: TextStyle(fontSize: 15)),
             onTap: () async {
+              Navigator.pop(context);
               return showCupertinoAlertDialogWithConfirmFunc(
                 title: '删除存储桶',
                 content: '是否删除存储桶？\n删除前请清空该存储桶!',
                 context: context,
                 onConfirm: () async {
-                  try {
-                    Navigator.of(context).pop();
-                    Navigator.of(context).pop();
-                    var result = await AliyunManageAPI.deleteBucket(element);
-                    if (result[0] == 'success') {
-                      showToast('删除成功');
-                      _onRefresh();
-                      return;
-                    } else {
-                      showToast('删除失败');
-                    }
-                    return;
-                  } catch (e) {
-                    flogErr(e, {}, 'AliyunBucketListPage', 'buildBottomSheetWidget');
+                  var result = await AliyunManageAPI.deleteBucket(element);
+                  if (result[0] == 'success') {
+                    showToast('删除成功');
+                    _onRefresh();
+                  } else {
                     showToast('删除失败');
-                    if (context.mounted) {
-                      Navigator.of(context).pop();
-                    }
                   }
                 },
               );

@@ -297,12 +297,9 @@ class AliyunManageAPI {
         'content-type': 'application/json',
       };
       String authorization = await aliyunAuthorization(method, urlpath, baseoptions.headers, '', 'application/json');
-
       baseoptions.headers['Authorization'] = authorization;
       Dio dio = Dio(baseoptions);
-
       var response = await dio.delete('https://$host');
-
       if (response.statusCode == 204) {
         return ['success'];
       } else {

@@ -9,6 +9,9 @@ import 'package:external_path/external_path.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fluro/fluro.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:horopic/picture_host_manage/common/new_folder_widgets.dart';
+import 'package:horopic/picture_host_manage/common/rename_dialog_widgets.dart';
+import 'package:horopic/widgets/common_widgets.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:path/path.dart' as my_path;
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -23,10 +26,6 @@ import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/widgets/net_loading_dialog.dart';
 import 'package:horopic/utils/image_compressor.dart';
-import 'package:horopic/picture_host_manage/aws/aws_file_explorer.dart'
-    show RenameDialog, RenameDialogContent, NewFolderDialog, NewFolderDialogContent;
-
-bool isCoverFile = false;
 
 class UpyunFileExplorer extends StatefulWidget {
   final Map element;
@@ -166,15 +165,7 @@ class UpyunFileExplorerState extends loading_state.BaseLoadingPageState<UpyunFil
           },
         ),
         titleSpacing: 0,
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withAlpha(204)],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-          ),
-        ),
+        flexibleSpace: getFlexibleSpace(context),
         title: Text(widget.bucketPrefix == '/' ? '根目录' : widget.bucketPrefix,
             style: const TextStyle(
               color: Colors.white,
@@ -599,11 +590,10 @@ class UpyunFileExplorerState extends loading_state.BaseLoadingPageState<UpyunFil
                                     return NewFolderDialog(
                                       contentWidget: NewFolderDialogContent(
                                         title: "  请输入新文件夹名\n / 分隔创建嵌套文件夹",
-                                        okBtnTap: () async {
+                                        onConfirm: () async {
                                           String newName = newFolder.text;
                                           if (newName.isEmpty) {
-                                            showToastWithContext(context, "文件夹名不能为空");
-                                            return;
+                                            return showToastWithContext(context, "文件夹名不能为空");
                                           }
                                           var copyResult = await UpyunManageAPI.createFolder(
                                               widget.element, widget.bucketPrefix, newName);
@@ -615,8 +605,8 @@ class UpyunFileExplorerState extends loading_state.BaseLoadingPageState<UpyunFil
                                           }
                                           setState(() {});
                                         },
-                                        vc: newFolder,
-                                        cancelBtnTap: () {},
+                                        folderNameController: newFolder,
+                                        onCancel: () {},
                                       ),
                                     );
                                   });
@@ -675,7 +665,6 @@ class UpyunFileExplorerState extends loading_state.BaseLoadingPageState<UpyunFil
                         toDelete.add(i);
                       }
                     }
-                    Navigator.pop(context);
                     await deleteAll(toDelete);
                     showToast('删除完成');
                     return;
@@ -789,7 +778,7 @@ class UpyunFileExplorerState extends loading_state.BaseLoadingPageState<UpyunFil
                         String fileName = '';
                         rawurl = '$hostPrefix${widget.bucketPrefix}${allInfoList[i]['name']}';
                         fileName = allInfoList[i]['name'];
-                        finalFormatedurl = linkGeneratorMap[Global.defaultLKformat]!(rawurl, fileName);
+                        finalFormatedurl = getFormatedUrl(rawurl, fileName);
                         multiUrls.add(finalFormatedurl);
                       }
                     }
@@ -884,59 +873,11 @@ class UpyunFileExplorerState extends loading_state.BaseLoadingPageState<UpyunFil
   }
 
   @override
-  Widget buildEmpty() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Image.asset(
-            'assets/images/empty.png',
-            width: 100,
-            height: 100,
-          ),
-          const Text('没有文件哦，点击右上角添加吧', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118)))
-        ],
-      ),
-    );
-  }
-
-  @override
-  Widget buildError() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Text('加载失败,请检查网络', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))),
-          ElevatedButton(
-            style: ButtonStyle(
-              backgroundColor: WidgetStateProperty.all(Colors.blue),
-            ),
-            onPressed: () {
-              setState(() {
-                state = loading_state.LoadState.loading;
-              });
-              _getBucketList();
-            },
-            child: const Text('重新加载'),
-          )
-        ],
-      ),
-    );
-  }
-
-  @override
-  Widget buildLoading() {
-    return const Center(
-      child: SizedBox(
-        width: 30,
-        height: 30,
-        child: CircularProgressIndicator(
-          strokeWidth: 2,
-          backgroundColor: Colors.transparent,
-          valueColor: AlwaysStoppedAnimation(Colors.blue),
-        ),
-      ),
-    );
+  void onErrorRetry() {
+    setState(() {
+      state = loading_state.LoadState.loading;
+    });
+    _getBucketList();
   }
 
   @override
@@ -1284,59 +1225,6 @@ class UpyunFileExplorerState extends loading_state.BaseLoadingPageState<UpyunFil
                                         '${Routes.mdPreview}?filePath=${Uri.encodeComponent(filePath)}&fileName=${Uri.encodeComponent(fileName)}',
                                         transition: TransitionType.none);
                                   }
-                                } else if (Global.chewieExt
-                                    .contains(allInfoList[index]['name'].split('.').last.toLowerCase())) {
-                                  String shareUrl = '';
-                                  List videoList = [];
-                                  int newImageIndex = index - dirAllInfoList.length;
-                                  for (int i = dirAllInfoList.length; i < allInfoList.length; i++) {
-                                    if (Global.chewieExt
-                                        .contains(allInfoList[i]['name'].split('.').last.toLowerCase())) {
-                                      shareUrl = widget.element['url'] + widget.bucketPrefix + allInfoList[i]['name'];
-                                      videoList.add({"url": shareUrl, "name": allInfoList[i]['name']});
-                                    } else if (i < index) {
-                                      newImageIndex--;
-                                    }
-                                  }
-                                  Map<String, dynamic> headers = {};
-                                  Application.router.navigateTo(this.context,
-                                      '${Routes.netVideoPlayer}?videoList=${Uri.encodeComponent(jsonEncode(videoList))}&index=$newImageIndex&type=${Uri.encodeComponent('normal')}&headers=${Uri.encodeComponent(jsonEncode(headers))}',
-                                      transition: TransitionType.none);
-                                } else if (Global.vlcExt
-                                    .contains(allInfoList[index]['name'].split('.').last.toLowerCase())) {
-                                  String shareUrl = '';
-                                  String subUrl = '';
-                                  List videoList = [];
-                                  int newImageIndex = index - dirAllInfoList.length;
-                                  Map subtitleFileMap = {};
-                                  for (int i = dirAllInfoList.length; i < allInfoList.length; i++) {
-                                    if (Global.subtitleFileExt
-                                        .contains(allInfoList[i]['name'].split('.').last.toLowerCase())) {
-                                      subUrl = widget.element['url'] + widget.bucketPrefix + allInfoList[i]['name'];
-                                      subtitleFileMap[allInfoList[i]['name'].split('.').first] = subUrl;
-                                    }
-                                    if (Global.vlcExt
-                                        .contains(allInfoList[index]['name'].split('.').last.toLowerCase())) {
-                                      shareUrl = widget.element['url'] + widget.bucketPrefix + allInfoList[i]['name'];
-                                      videoList.add({
-                                        "url": shareUrl,
-                                        "name": allInfoList[i]['name'],
-                                        "subtitlePath": '',
-                                      });
-                                    } else if (i < index) {
-                                      newImageIndex--;
-                                    }
-                                  }
-                                  for (int i = 0; i < videoList.length; i++) {
-                                    if (subtitleFileMap.containsKey(videoList[i]['name'].split('.').first)) {
-                                      videoList[i]['subtitlePath'] =
-                                          subtitleFileMap[videoList[i]['name'].split('.').first];
-                                    }
-                                  }
-                                  Map<String, dynamic> headers = {};
-                                  Application.router.navigateTo(this.context,
-                                      '${Routes.netVideoPlayer}?videoList=${Uri.encodeComponent(jsonEncode(videoList))}&index=$newImageIndex&type=${Uri.encodeComponent('mkv')}&headers=${Uri.encodeComponent(jsonEncode(headers))}',
-                                      transition: TransitionType.none);
                                 }
                               },
                             ),
@@ -1430,7 +1318,6 @@ class UpyunFileExplorerState extends loading_state.BaseLoadingPageState<UpyunFil
             minLeadingWidth: 0,
             title: const Text('复制链接(设置中的默认格式)'),
             onTap: () async {
-              String format = Global.getLKformat();
               String hostPrefix = widget.element['url'];
               if (hostPrefix.endsWith('/')) {
                 hostPrefix = hostPrefix.substring(0, hostPrefix.length - 1);
@@ -1439,7 +1326,7 @@ class UpyunFileExplorerState extends loading_state.BaseLoadingPageState<UpyunFil
               String fileName = '';
               rawurl = '$hostPrefix${widget.bucketPrefix}${allInfoList[index]['name']}';
               fileName = allInfoList[index]['name'];
-              String formatedLink = linkGeneratorMap[format]!(rawurl, fileName);
+              String formatedLink = getFormatedUrl(rawurl, fileName);
               await flutter_services.Clipboard.setData(flutter_services.ClipboardData(text: formatedLink));
               if (mounted) {
                 Navigator.pop(context);
@@ -1467,7 +1354,7 @@ class UpyunFileExplorerState extends loading_state.BaseLoadingPageState<UpyunFil
                       return RenameDialog(
                         contentWidget: RenameDialogContent(
                           title: "新文件名 '/'分割文件夹",
-                          okBtnTap: () async {
+                          onConfirm: (bool isCoverFile) async {
                             String newName = vc.text;
                             if (isCoverFile) {
                               var copyResult = await UpyunManageAPI.renameFile(
@@ -1495,9 +1382,9 @@ class UpyunFileExplorerState extends loading_state.BaseLoadingPageState<UpyunFil
                               }
                             }
                           },
-                          vc: vc,
-                          cancelBtnTap: () {},
-                          stateBoolText: '是否覆盖同名文件',
+                          renameTextController: vc,
+                          onCancel: () {},
+                          isShowCoverFileWidget: true,
                         ),
                       );
                     });

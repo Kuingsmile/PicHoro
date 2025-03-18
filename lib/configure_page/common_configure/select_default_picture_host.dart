@@ -18,6 +18,7 @@ import 'package:horopic/picture_host_manage/manage_api/qiniu_manage_api.dart';
 import 'package:horopic/picture_host_manage/manage_api/smms_manage_api.dart';
 import 'package:horopic/picture_host_manage/manage_api/tencent_manage_api.dart';
 import 'package:horopic/picture_host_manage/manage_api/upyun_manage_api.dart';
+import 'package:horopic/widgets/common_widgets.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'package:horopic/utils/global.dart';
@@ -275,15 +276,7 @@ class AllPShostState extends State<AllPShost> {
         elevation: 0,
         centerTitle: true,
         title: titleText('图床设置'),
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withValues(alpha: 0.8)],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-          ),
-        ),
+        flexibleSpace: getFlexibleSpace(context),
       ),
       body: ListView(
         physics: const BouncingScrollPhysics(),

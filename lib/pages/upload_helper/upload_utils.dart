@@ -68,13 +68,6 @@ class UploadManager {
           eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
           Map<String, dynamic> maps = {};
           var [_, formatedURL, returnUrl, pictureKey, displayUrl] = tencentUploadResult;
-
-          // Comment out automatic clipboard copy for individual uploads
-          // This will be handled in batch instead
-          // if (Global.isCopyLink) {
-          //   await Clipboard.setData(ClipboardData(text: formatedURL));
-          // }
-
           maps = {
             'path': path,
             'name': fileName,
@@ -88,11 +81,9 @@ class UploadManager {
             'hostSpecificArgE': 'test',
           };
           await AlbumSQL.insertData(Global.imageDB!, hostToTableNameMap[Global.defaultPShost]!, maps);
-          // Store formattedUrl in task for later copying
           task.formattedUrl = formatedURL;
           setStatus(task, UploadStatus.completed);
 
-        // Similar changes for other case blocks - remove individual clipboard operations
         case 'aliyun':
           var aliUploadResult = await AliyunImageUploadUtils.uploadApi(
               path: path,
@@ -105,10 +96,6 @@ class UploadManager {
           }
           eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
           var [_, formatedURL, returnUrl, pictureKey, displayUrl] = aliUploadResult;
-          // if (Global.isCopyLink) {
-          //   await Clipboard.setData(ClipboardData(text: formatedURL));
-          // }
-
           Map<String, dynamic> maps = {
             'path': path,
             'name': fileName,
@@ -125,9 +112,6 @@ class UploadManager {
           task.formattedUrl = formatedURL;
           setStatus(task, UploadStatus.completed);
 
-        // Continue with the same pattern for all other cases
-        // Just commenting out the clipboard operations and ensuring task.formattedUrl is set
-
         case 'qiniu':
           var qiniuUploadResult = await QiniuImageUploadUtils.uploadApi(
               path: path,
@@ -141,10 +125,6 @@ class UploadManager {
           }
           eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
           var [_, formatedURL, returnUrl, pictureKey, displayUrl] = qiniuUploadResult;
-          // if (Global.isCopyLink == true) {
-          //   await Clipboard.setData(ClipboardData(text: formatedURL));
-          // }
-
           Map<String, dynamic> maps = {
             'path': path,
             'name': fileName,
@@ -173,9 +153,6 @@ class UploadManager {
           }
           eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
           var [_, formatedURL, returnUrl, pictureKey, displayUrl] = upyunUploadResult;
-          // if (Global.isCopyLink) {
-          //   await Clipboard.setData(ClipboardData(text: formatedURL));
-          // }
           Map<String, dynamic> maps = {
             'path': path,
             'name': fileName,
@@ -204,9 +181,6 @@ class UploadManager {
           }
           eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
           var [_, formatedURL, returnUrl, pictureKey, displayUrl] = lskyproUploadResult;
-          // if (Global.isCopyLink) {
-          //   await Clipboard.setData(ClipboardData(text: formatedURL));
-          // }
 
           Map<String, dynamic> maps = {
             'path': path,
@@ -236,9 +210,7 @@ class UploadManager {
           }
           eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
           var [_, formatedURL, returnUrl, pictureKey] = smmsUploadResult;
-          // if (Global.isCopyLink) {
-          //   await Clipboard.setData(ClipboardData(text: formatedURL));
-          // }
+
           Map<String, dynamic> maps = {
             'path': path,
             'name': fileName,
@@ -267,9 +239,7 @@ class UploadManager {
           }
           eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
           var [_, formatedURL, returnUrl, pictureKey, downloadUrl] = githubUploadResult;
-          // if (Global.isCopyLink) {
-          //   await Clipboard.setData(ClipboardData(text: formatedURL));
-          // }
+
           Map<String, dynamic> maps = {
             'path': path,
             'name': fileName,
@@ -298,9 +268,6 @@ class UploadManager {
           }
           eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
           var [_, formatedURL, returnUrl, pictureKey, cdnUrl] = imgurUploadResult;
-          // if (Global.isCopyLink == true) {
-          //   await Clipboard.setData(ClipboardData(text: formatedURL));
-          // }
           Map<String, dynamic> maps = {
             'path': path,
             'name': fileName,
@@ -341,9 +308,7 @@ class UploadManager {
             uploadPath,
             thumbnail
           ] = ftpUploadResult;
-          // if (Global.isCopyLink) {
-          //   await Clipboard.setData(ClipboardData(text: formatedURL));
-          // }
+
           Map<String, dynamic> maps = {
             'path': path,
             'name': fileName,
@@ -378,9 +343,7 @@ class UploadManager {
           }
           eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
           var [_, formatedURL, returnUrl, pictureKey, displayUrl] = awsUploadResult;
-          // if (Global.isCopyLink) {
-          //   await Clipboard.setData(ClipboardData(text: formatedURL));
-          // }
+
           Map<String, dynamic> maps = {
             'path': path,
             'name': fileName,
@@ -409,9 +372,7 @@ class UploadManager {
           }
           eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
           var [_, formatedURL, returnUrl, pictureKey, displayUrl, hostPicUrl] = alistUploadResult;
-          // if (Global.isCopyLink) {
-          //   await Clipboard.setData(ClipboardData(text: formatedURL));
-          // }
+
           Map<String, dynamic> maps = {
             'path': path,
             'name': fileName,
@@ -436,9 +397,7 @@ class UploadManager {
           }
           var [_, formatedURL, returnUrl, pictureKey, displayUrl] = webdavUploadResult;
           eventBus.fire(AlbumRefreshEvent(albumKeepAlive: false));
-          // if (Global.isCopyLink) {
-          //   await Clipboard.setData(ClipboardData(text: formatedURL));
-          // }
+
           Map<String, dynamic> maps = {
             'path': path,
             'name': fileName,

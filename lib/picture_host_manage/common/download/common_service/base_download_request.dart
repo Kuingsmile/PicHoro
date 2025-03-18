@@ -6,7 +6,6 @@ class DownloadRequest {
   final String? fileName;
   final Map<String, dynamic>? configMap;
   var cancelToken = CancelToken();
-  var forceDownload = false;
 
   DownloadRequest(
     this.url,

@@ -3,6 +3,7 @@ import 'package:horopic/utils/event_bus_utils.dart';
 
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/global.dart';
+import 'package:horopic/widgets/common_widgets.dart';
 
 class DefaultPShostSelect extends StatefulWidget {
   const DefaultPShostSelect({super.key});
@@ -99,15 +100,7 @@ class DefaultPShostSelectState extends State<DefaultPShostSelect> {
         elevation: 0,
         centerTitle: true,
         title: titleText('默认图床选择'),
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withValues(alpha: 0.8)],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-          ),
-        ),
+        flexibleSpace: getFlexibleSpace(context),
       ),
       body: ListView(
         physics: const BouncingScrollPhysics(),

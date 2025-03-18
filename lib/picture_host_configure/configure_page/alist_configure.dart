@@ -39,7 +39,7 @@ class AlistConfigState extends State<AlistConfig> {
 
   _initConfig() async {
     try {
-      Map configMap = await AlistManageAPI.getConfigMap();
+      Map configMap = await AlistManageAPI().getConfigMap();
       _hostController.text = configMap['host'] ?? '';
       _currentJWT = configMap['token'] ?? '';
       _isAnonymous = configMap['token'] == '' ? true : false;
@@ -252,7 +252,7 @@ class AlistConfigState extends State<AlistConfig> {
     final alistConfig =
         AlistConfigModel(host, adminToken, alistusername, password, token, uploadPath, webPath, customUrl);
     final alistConfigJson = jsonEncode(alistConfig);
-    final alistConfigFile = await AlistManageAPI.localFile;
+    final alistConfigFile = await AlistManageAPI().localFile();
     await alistConfigFile.writeAsString(alistConfigJson);
   }
 
@@ -296,7 +296,7 @@ class AlistConfigState extends State<AlistConfig> {
       try {
         // Try username/password authentication
         if (alistusername.isNotEmpty && password.isNotEmpty) {
-          var res = await AlistManageAPI.getToken(host, alistusername, password);
+          var res = await AlistManageAPI().getToken(host, alistusername, password);
           if (res[0] == 'success') {
             token = res[1];
             _currentJWT = token;
@@ -368,7 +368,7 @@ class AlistConfigState extends State<AlistConfig> {
     var response = await dio.get('$host/api/admin/setting/list', queryParameters: {'group': 0});
 
     if (response.statusCode == 200 && response.data['message'] == 'success') {
-      Map configMap = await AlistManageAPI.getConfigMap();
+      Map configMap = await AlistManageAPI().getConfigMap();
       await saveConfigHelper(
           host, 'None', configMap['alistusername'], configMap['password'], _currentJWT, uploadPath, webPath, customUrl);
 
@@ -389,7 +389,7 @@ class AlistConfigState extends State<AlistConfig> {
 
   checkAlistConfig() async {
     try {
-      Map configMap = await AlistManageAPI.getConfigMap();
+      Map configMap = await AlistManageAPI().getConfigMap();
       if (configMap.isEmpty) {
         if (context.mounted) {
           return showCupertinoAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");

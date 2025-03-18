@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:horopic/utils/common_functions.dart';
+import 'package:horopic/widgets/common_widgets.dart';
 
 class AwsFileInformation extends StatefulWidget {
   final Map fileMap;
@@ -22,15 +23,7 @@ class AwsFileInformationState extends State<AwsFileInformation> {
         elevation: 0,
         centerTitle: true,
         title: titleText('文件基本信息'),
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withAlpha(204)],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-          ),
-        ),
+        flexibleSpace: getFlexibleSpace(context),
       ),
       body: ListView(
         children: [

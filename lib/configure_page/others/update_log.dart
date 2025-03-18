@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter/services.dart';
+import 'package:horopic/widgets/common_widgets.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:extended_image/extended_image.dart';
 
@@ -32,15 +33,7 @@ class UpdateLogState extends State<UpdateLog> {
         title: titleText(
           '更新日志',
         ),
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withValues(alpha: 0.8)],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-          ),
-        ),
+        flexibleSpace: getFlexibleSpace(context),
       ),
       body: FutureBuilder(
         future: _future,

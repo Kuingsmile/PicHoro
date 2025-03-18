@@ -7,9 +7,15 @@ import 'package:path_provider/path_provider.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/picture_host_configure/configure_page/alist_configure.dart';
+import 'package:horopic/picture_host_manage/common/base_manage_api.dart';
 
-class AlistManageAPI {
-  static Map driverTranslate = {
+class AlistManageAPI extends BaseManageApi {
+  static final AlistManageAPI _instance = AlistManageAPI._internal();
+  AlistManageAPI._internal();
+  factory AlistManageAPI() {
+    return _instance;
+  }
+  Map driverTranslate = {
     '115 Cloud': '115网盘',
     '115 Share': '115网盘分享',
     '123Pan': '123网盘',
@@ -73,45 +79,14 @@ class AlistManageAPI {
     'YandexDisk': 'Yandex网盘',
   };
 
-  static Future<File> get localFile async {
-    final path = await _localPath;
-    String defaultUser = Global.getUser();
-    return ensureFileExists(File('$path/${defaultUser}_alist_config.txt'));
-  }
+  @override
+  String configFileName() => 'alist_config.txt';
 
-  static Future<String> get _localPath async {
-    return (await getApplicationDocumentsDirectory()).path;
-  }
+  bool isString(var variable) => variable is String;
 
-  static Future<String> readAlistConfig() async {
-    try {
-      final file = await localFile;
-      String contents = await file.readAsString();
-      return contents;
-    } catch (e) {
-      flogErr(e, {}, 'AlistManageAPI', 'readAlistConfig');
-      return "Error";
-    }
-  }
+  bool isFile(var variable) => variable is File;
 
-  static Future<Map> getConfigMap() async {
-    String configStr = await readAlistConfig();
-    if (configStr == '') {
-      return {};
-    }
-    Map configMap = json.decode(configStr);
-    return configMap;
-  }
-
-  static isString(var variable) {
-    return variable is String;
-  }
-
-  static isFile(var variable) {
-    return variable is File;
-  }
-
-  static getToken(String host, String username, String password) async {
+  Future<List> getToken(String host, String username, String password) async {
     try {
       String url = '$host/api/auth/login';
       Map<String, dynamic> queryParameters = {
@@ -128,8 +103,6 @@ class AlistManageAPI {
       var response = await dio.post(url, data: queryParameters);
       if (response.statusCode == 200 && response.data['message'] == 'success') {
         return ['success', response.data['data']['token']];
-      } else {
-        return ['failed'];
       }
     } catch (e) {
       flogErr(
@@ -139,35 +112,34 @@ class AlistManageAPI {
           },
           "AlistManageAPI",
           "getToken");
-      return [e.toString()];
     }
+    return ['failed'];
   }
 
-  static refreshToken() async {
+  refreshToken() async {
     Map configMap = await getConfigMap();
     String uploadPath = configMap['uploadPath'];
     String token = configMap['token'];
-    var res = await AlistManageAPI.getToken(configMap['host'], configMap['alistusername'], configMap['password']);
-    if (res[0] == 'success') {
-      token = res[1];
-      final alistConfig = AlistConfigModel(
-        configMap['host'],
-        'None',
-        configMap['alistusername'],
-        configMap['password'],
-        token,
-        uploadPath,
-        configMap['webPath'] ?? 'None',
-        configMap['customUrl'] ?? 'None',
-      );
-      final alistConfigJson = jsonEncode(alistConfig);
-      final alistConfigFile = await AlistManageAPI.localFile;
-      alistConfigFile.writeAsString(alistConfigJson);
-
-      return ['success', token];
-    } else {
+    var res = await getToken(configMap['host'], configMap['alistusername'], configMap['password']);
+    if (res[0] != 'success') {
       return ['failed'];
     }
+    token = res[1];
+    final alistConfig = AlistConfigModel(
+      configMap['host'],
+      'None',
+      configMap['alistusername'],
+      configMap['password'],
+      token,
+      uploadPath,
+      configMap['webPath'] ?? 'None',
+      configMap['customUrl'] ?? 'None',
+    );
+    final alistConfigJson = jsonEncode(alistConfig);
+    final alistConfigFile = await localFile();
+    alistConfigFile.writeAsString(alistConfigJson);
+
+    return ['success', token];
   }
 
   static getUsedToken(Map configMap) {
@@ -179,163 +151,7 @@ class AlistManageAPI {
     return token;
   }
 
-  static getBucketList() async {
-    try {
-      Map configMap = await getConfigMap();
-      String host = configMap['host'];
-      String token = getUsedToken(configMap);
-      String url = '$host/api/admin/storage/list';
-
-      BaseOptions baseoptions = setBaseOptions();
-      baseoptions.headers = {
-        "Authorization": token,
-      };
-      Dio dio = Dio(baseoptions);
-
-      var response = await dio.get(
-        url,
-      );
-      if (response.statusCode == 200 && response.data['message'] == 'success') {
-        return ['success', response.data['data']];
-      } else {
-        return ['failed'];
-      }
-    } catch (e) {
-      flogErr(e, {}, "AlistManageAPI", "getBucketList");
-      return [e.toString()];
-    }
-  }
-
-  static changeBucketState(Map element, bool enable) async {
-    try {
-      Map configMap = await getConfigMap();
-      String host = configMap['host'];
-      String token = getUsedToken(configMap);
-      String enableUrl = '$host/api/admin/storage/enable';
-      String disableUrl = '$host/api/admin/storage/disable';
-
-      BaseOptions baseoptions = setBaseOptions();
-      baseoptions.headers = {
-        "Authorization": token,
-      };
-      Map<String, dynamic> queryParameters = {
-        'id': element['id'],
-      };
-      Dio dio = Dio(baseoptions);
-
-      Response response;
-      if (enable) {
-        response = await dio.post(
-          enableUrl,
-          queryParameters: queryParameters,
-        );
-      } else {
-        response = await dio.post(
-          disableUrl,
-          queryParameters: queryParameters,
-        );
-      }
-      if (response.statusCode == 200 && response.data['message'] == 'success') {
-        return ['success'];
-      } else {
-        return ['failed'];
-      }
-    } catch (e) {
-      flogErr(e, {}, "AlistManageAPI", "changeBucketState");
-      return [e.toString()];
-    }
-  }
-
-  static deleteBucket(Map element) async {
-    try {
-      Map configMap = await getConfigMap();
-      String host = configMap['host'];
-      String token = getUsedToken(configMap);
-      String url = '$host/api/admin/storage/delete';
-
-      BaseOptions baseoptions = setBaseOptions();
-      baseoptions.headers = {
-        "Authorization": token,
-      };
-      Map<String, dynamic> queryParameters = {
-        'id': element['id'],
-      };
-      Dio dio = Dio(baseoptions);
-
-      var response = await dio.post(
-        url,
-        queryParameters: queryParameters,
-      );
-      if (response.statusCode == 200 && response.data['message'] == 'success') {
-        return ['success'];
-      } else {
-        return ['failed'];
-      }
-    } catch (e) {
-      flogErr(e, {}, "AlistManageAPI", "deleteBucket");
-      return [e.toString()];
-    }
-  }
-
-  static createBucket(Map newBucketConfig) async {
-    try {
-      Map configMap = await getConfigMap();
-      String host = configMap['host'];
-      String token = getUsedToken(configMap);
-      String url = '$host/api/admin/storage/create';
-
-      BaseOptions baseoptions = setBaseOptions();
-      baseoptions.headers = {
-        "Authorization": token,
-        "Content-Type": "application/json",
-      };
-      Dio dio = Dio(baseoptions);
-
-      var response = await dio.post(
-        url,
-        data: newBucketConfig,
-      );
-      if (response.statusCode == 200 && response.data['message'] == 'success') {
-        return ['success'];
-      } else {
-        return ['failed'];
-      }
-    } catch (e) {
-      flogErr(e, {}, "AlistManageAPI", "createBucket");
-      return [e.toString()];
-    }
-  }
-
-  static updateBucket(Map newBucketConfig) async {
-    try {
-      Map configMap = await getConfigMap();
-      String host = configMap['host'];
-      String token = getUsedToken(configMap);
-      String url = '$host/api/admin/storage/update';
-
-      BaseOptions baseoptions = setBaseOptions();
-      baseoptions.headers = {
-        "Authorization": token,
-        "Content-Type": "application/json",
-      };
-      Dio dio = Dio(baseoptions);
-
-      var response = await dio.post(
-        url,
-        data: newBucketConfig,
-      );
-      if (response.statusCode == 200 && response.data['message'] == 'success') {
-        return ['success'];
-      } else {
-        return ['failed'];
-      }
-    } catch (e) {
-      flogErr(e, {}, "AlistManageAPI", "updateBucket");
-      return [e.toString()];
-    }
-  }
-
-  static setDefaultBucket(String path) async {
+  setDefaultBucket(String path) async {
     try {
       Map configMap = await getConfigMap();
       String uploadPath = path;
@@ -354,7 +170,7 @@ class AlistManageAPI {
         configMap['customUrl'] ?? 'None',
       );
       final alistConfigJson = jsonEncode(alistConfig);
-      final alistConfigFile = await localFile;
+      final alistConfigFile = await localFile();
       await alistConfigFile.writeAsString(alistConfigJson);
       return ['success'];
     } catch (e) {
@@ -369,90 +185,89 @@ class AlistManageAPI {
     }
   }
 
-  static getTotalPage(
-    String folder,
-    String refresh,
-  ) async {
+  _makeRequest(
+    String endpoint, {
+    dynamic data,
+    Map<String, dynamic>? queryParameters,
+    Map<String, dynamic>? headers,
+    required Function onSuccess,
+    String method = 'POST',
+    String callFunction = 'makeRequest',
+  }) async {
     try {
       Map configMap = await getConfigMap();
       String host = configMap['host'];
       String token = getUsedToken(configMap);
-      String url = '$host/api/fs/list';
+      String url = '$host$endpoint';
 
       BaseOptions baseoptions = setBaseOptions();
       baseoptions.headers = {
         "Authorization": token,
-        "Content-Type": "application/json",
-      };
-      Map<String, dynamic> dataMap = {
-        "page": 1,
-        "path": folder,
-        "per_page": 1,
-        "refresh": refresh == 'Refresh' ? true : false,
+        ...?headers,
       };
       Dio dio = Dio(baseoptions);
 
-      var response = await dio.post(
-        url,
-        data: dataMap,
-      );
-      if (response.statusCode == 200 && response.data['message'] == 'success') {
-        if (response.data['data']['total'] == 0) {
-          return ['success', 0];
-        }
-        int totalPage = (response.data['data']['total'] / 50).ceil();
-        return ['success', totalPage];
+      Response response;
+      if (method == 'GET') {
+        response = await dio.get(url, queryParameters: queryParameters);
+      } else if (method == 'POST') {
+        response = await dio.post(url, data: data, queryParameters: queryParameters);
       } else {
-        return ['failed'];
+        response = await dio.put(url, data: data, queryParameters: queryParameters);
       }
+
+      if (response.statusCode == 200 && response.data['message'] == 'success') {
+        return onSuccess(response);
+      }
+      flogErr(
+        response,
+        {
+          'url': url,
+          'data': data,
+          'queryParameters': queryParameters,
+          'headers': headers,
+        },
+        "AlistManageAPI",
+        callFunction,
+      );
     } catch (e) {
-      flogErr(e, {}, "AlistManageAPI", "getTotalPage");
-      return [e.toString()];
+      flogErr(e, {}, "AlistManageAPI", callFunction);
     }
+    return ['failed'];
   }
 
-  static listFolderByPage(String folder, String refresh, int page) async {
-    try {
-      Map configMap = await getConfigMap();
-      String host = configMap['host'];
-      String token = getUsedToken(configMap);
-      String url = '$host/api/fs/list';
-
-      BaseOptions baseoptions = setBaseOptions();
-      baseoptions.headers = {
-        "Authorization": token,
-        "Content-Type": "application/json",
-      };
-      Map<String, dynamic> dataMap = {
-        "page": page,
-        "path": folder,
-        "per_page": 50,
-        "refresh": refresh == 'Refresh' ? true : false,
-      };
-      Dio dio = Dio(baseoptions);
-      List fileList = [];
-
-      var response = await dio.post(
-        url,
-        data: dataMap,
-      );
-      if (response.statusCode == 200 && response.data['message'] == 'success') {
-        if (response.data['data']['total'] == 0) {
-          return ['success', fileList];
-        }
-        fileList = response.data['data']['content'];
-
-        return ['success', fileList];
-      } else {
-        return ['failed'];
-      }
-    } catch (e) {
-      flogErr(e, {}, "AlistManageAPI", "listFolderByPage");
-      return [e.toString()];
-    }
+  getBucketList() async {
+    return await _makeRequest(
+      '/api/admin/storage/list',
+      method: 'GET',
+      onSuccess: (response) => ['success', response.data['data']],
+      callFunction: 'getBucketList',
+    );
   }
 
-  static listFolder(String folder, String refresh) async {
+  changeBucketState(Map element, bool enable) async {
+    return await _makeRequest(
+      '/api/admin/storage/${enable ? 'enable' : 'disable'}',
+      queryParameters: {
+        'id': element['id'],
+      },
+      onSuccess: (response) => ['success'],
+      callFunction: 'changeBucketState',
+    );
+  }
+
+  deleteBucket(Map element) async {
+    return await _makeRequest(
+      '/api/admin/storage/delete',
+      queryParameters: {
+        'id': element['id'],
+      },
+      onSuccess: (response) => ['success'],
+      callFunction: 'deleteBucket',
+    );
+  }
+
+  listFolder(String folder, String refresh) async {
     try {
       Map configMap = await getConfigMap();
       String host = configMap['host'];
@@ -502,196 +317,108 @@ class AlistManageAPI {
             }
           }
         }
-
         return ['success', fileList];
-      } else {
-        return ['failed'];
       }
     } catch (e) {
       flogErr(e, {}, "AlistManageAPI", "listFolder");
-      return [e.toString()];
     }
+    return ['failed'];
   }
 
-  static getFileInfo(String path) async {
-    try {
-      Map configMap = await getConfigMap();
-      String host = configMap['host'];
-      String token = getUsedToken(configMap);
-      String url = '$host/api/fs/get';
-
-      BaseOptions baseoptions = setBaseOptions();
-      baseoptions.headers = {
-        "Authorization": token,
-        "Content-Type": "application/json",
-      };
-      Map<String, dynamic> dataMap = {
+  getFileInfo(String path) async {
+    return await _makeRequest(
+      '/api/fs/get',
+      data: {
         "path": path,
-      };
-      Dio dio = Dio(baseoptions);
-
-      var response = await dio.post(
-        url,
-        data: dataMap,
-      );
-      if (response.statusCode == 200 && response.data['message'] == 'success') {
-        return ['success', response.data['data']];
-      } else {
-        return ['failed'];
-      }
-    } catch (e) {
-      flogErr(e, {}, "AlistManageAPI", "getFileInfo");
-      return [e.toString()];
-    }
+      },
+      headers: {
+        "Content-Type": "application/json",
+      },
+      onSuccess: (response) => ['success', response.data['data']],
+      callFunction: 'getFileInfo',
+    );
   }
 
-  static mkDir(String path) async {
-    try {
-      Map configMap = await getConfigMap();
-      String host = configMap['host'];
-      String token = getUsedToken(configMap);
-      String url = '$host/api/fs/mkdir';
-
-      BaseOptions baseoptions = setBaseOptions();
-      baseoptions.headers = {
-        "Authorization": token,
-        "Content-Type": "application/json",
-      };
-      Map<String, dynamic> dataMap = {
+  mkDir(String path) async {
+    return await _makeRequest(
+      '/api/fs/mkdir',
+      data: {
         "path": path,
-      };
-      Dio dio = Dio(baseoptions);
-
-      var response = await dio.post(
-        url,
-        data: dataMap,
-      );
-      if (response.statusCode == 200 && response.data['message'] == 'success') {
-        return ['success'];
-      } else {
-        return ['failed'];
-      }
-    } catch (e) {
-      flogErr(e, {}, "AlistManageAPI", "mkDir");
-      return [e.toString()];
-    }
+      },
+      headers: {
+        "Content-Type": "application/json",
+      },
+      onSuccess: (response) => ['success'],
+      callFunction: 'mkDir',
+    );
   }
 
-  static rename(String source, String target) async {
-    try {
-      Map configMap = await getConfigMap();
-      String host = configMap['host'];
-      String token = getUsedToken(configMap);
-      String url = '$host/api/fs/rename';
-
-      BaseOptions baseoptions = setBaseOptions();
-      baseoptions.headers = {
-        "Authorization": token,
-        "Content-Type": "application/json",
-      };
-      Map<String, dynamic> dataMap = {
+  rename(String source, String target) async {
+    return await _makeRequest(
+      '/api/fs/rename',
+      data: {
         "path": source,
         "name": target,
-      };
-      Dio dio = Dio(baseoptions);
-
-      var response = await dio.post(
-        url,
-        data: dataMap,
-      );
-      if (response.statusCode == 200 && response.data['message'] == 'success') {
-        return ['success'];
-      } else {
-        return ['failed'];
-      }
-    } catch (e) {
-      flogErr(e, {}, "AlistManageAPI", "rename");
-      return [e.toString()];
-    }
+      },
+      headers: {
+        "Content-Type": "application/json",
+      },
+      onSuccess: (response) => ['success'],
+      callFunction: 'rename',
+    );
   }
 
-  static remove(String dir, List names) async {
-    try {
-      Map configMap = await getConfigMap();
-      String host = configMap['host'];
-      String token = getUsedToken(configMap);
-      String url = '$host/api/fs/remove';
-
-      BaseOptions baseoptions = setBaseOptions();
-      baseoptions.headers = {
-        "Authorization": token,
-        "Content-Type": "application/json",
-      };
-      Map<String, dynamic> dataMap = {
+  remove(String dir, List names) async {
+    return await _makeRequest(
+      '/api/fs/remove',
+      data: {
         "dir": dir,
         "names": names,
-      };
-      Dio dio = Dio(baseoptions);
-
-      var response = await dio.post(
-        url,
-        data: dataMap,
-      );
-      if (response.statusCode == 200 && response.data['message'] == 'success') {
-        return ['success'];
-      } else {
-        return ['failed'];
-      }
-    } catch (e) {
-      flogErr(e, {}, "AlistManageAPI", "remove");
-      return [e.toString()];
-    }
+      },
+      headers: {
+        "Content-Type": "application/json",
+      },
+      onSuccess: (response) => ['success'],
+      callFunction: 'remove',
+    );
   }
 
-  static uploadFile(String filename, String filepath, String uploadPath) async {
-    try {
-      Map configMap = await getConfigMap();
-      if (uploadPath == 'None') {
-        uploadPath = '/';
-      } else {
-        if (!uploadPath.startsWith('/')) {
-          uploadPath = '/$uploadPath';
-        }
-        if (!uploadPath.endsWith('/')) {
-          uploadPath = '$uploadPath/';
-        }
+  uploadFile(String filename, String filepath, String uploadPath) async {
+    if (uploadPath == 'None') {
+      uploadPath = '/';
+    } else {
+      if (!uploadPath.startsWith('/')) {
+        uploadPath = '/$uploadPath';
       }
-      String filePath = uploadPath + filename;
-      FormData formdata = FormData.fromMap({
-        "file": await MultipartFile.fromFile(filepath, filename: filename),
-      });
-      File uploadFile = File(filepath);
-      int contentLength = await uploadFile.length().then((value) {
-        return value;
-      });
-
-      BaseOptions baseoptions = setBaseOptions();
-      baseoptions.headers = {
-        "Authorization": getUsedToken(configMap),
-        "Content-Type": Global.multipartString,
-        "file-path": Uri.encodeComponent(filePath),
-        "Content-Length": contentLength,
-      };
-      Dio dio = Dio(baseoptions);
-      String uploadUrl = configMap["host"] + "/api/fs/form";
-
-      var response = await dio.put(
-        uploadUrl,
-        data: formdata,
-      );
-      if (response.statusCode == 200 && response.data['message'] == 'success') {
-        return ['success'];
-      } else {
-        return ['failed'];
+      if (!uploadPath.endsWith('/')) {
+        uploadPath = '$uploadPath/';
       }
-    } catch (e) {
-      flogErr(e, {}, "AlistManageAPI", "uploadFile");
-      return [e.toString()];
     }
+    String filePath = uploadPath + filename;
+    FormData formdata = FormData.fromMap({
+      "file": await MultipartFile.fromFile(filepath, filename: filename),
+    });
+    File uploadFile = File(filepath);
+    int contentLength = await uploadFile.length().then((value) {
+      return value;
+    });
+    Map<String, dynamic> headers = {
+      "Content-Type": Global.multipartString,
+      "file-path": Uri.encodeComponent(filePath),
+      "Content-Length": contentLength,
+    };
+    return await _makeRequest(
+      '/api/fs/form',
+      data: formdata,
+      headers: headers,
+      method: 'PUT',
+      onSuccess: (response) => ['success'],
+      callFunction: 'uploadFile',
+    );
   }
 
   //从网络链接下载文件后上传
-  static uploadNetworkFile(String fileLink, String uploadPath) async {
+  uploadNetworkFile(String fileLink, String uploadPath) async {
     try {
       String filename = fileLink.substring(fileLink.lastIndexOf("/") + 1, fileLink.length);
       filename = filename.substring(0, !filename.contains("?") ? filename.length : filename.indexOf("?"));
@@ -709,19 +436,15 @@ class AlistManageAPI {
         );
         if (uploadResult[0] == "success") {
           return ['success'];
-        } else {
-          return ['failed'];
         }
-      } else {
-        return ['failed'];
       }
     } catch (e) {
       flogErr(e, {'fileLink': fileLink, 'uploadPath': uploadPath}, "AlistManageAPI", "uploadNetworkFile");
-      return ['failed'];
     }
+    return ['failed'];
   }
 
-  static uploadNetworkFileEntry(List fileList, String uploadPath) async {
+  uploadNetworkFileEntry(List fileList, String uploadPath) async {
     int successCount = 0;
     int failCount = 0;
 
@@ -741,8 +464,7 @@ class AlistManageAPI {
       return showToast('上传失败');
     } else if (failCount == 0) {
       return showToast('上传成功');
-    } else {
-      return showToast('成功$successCount,失败$failCount');
     }
+    return showToast('成功$successCount,失败$failCount');
   }
 }

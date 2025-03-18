@@ -93,7 +93,7 @@ class UploadManager extends BaseUploadManager {
       cancelToken: cancelToken,
     );
     if (response.statusCode != HttpStatus.noContent) {
-      throw Exception('Upload failed with status code: ${response.statusCode}');
+      throw Exception('Upload failed: ${response.statusCode} - ${response.data}');
     }
   }
 

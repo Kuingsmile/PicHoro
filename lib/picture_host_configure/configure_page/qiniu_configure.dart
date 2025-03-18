@@ -285,7 +285,6 @@ class QiniuConfigState extends State<QiniuConfig> {
         return;
       }
 
-      //save asset image to app dir
       String assetPath = 'assets/validateImage/PicHoroValidate.jpeg';
       String appDir = await getApplicationDocumentsDirectory().then((value) {
         return value.path;

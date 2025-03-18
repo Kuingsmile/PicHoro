@@ -4,6 +4,7 @@ import 'package:horopic/album/album_sql.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/event_bus_utils.dart';
 import 'package:horopic/utils/common_functions.dart';
+import 'package:horopic/widgets/common_widgets.dart';
 
 class EmptyDatabase extends StatefulWidget {
   const EmptyDatabase({super.key});
@@ -50,7 +51,6 @@ class EmptyDatabaseState extends State<EmptyDatabase> {
 
   // Clear a specific table
   Future<void> _clearTable(String table, String name, bool isExtended) async {
-    Navigator.pop(context);
     if (table == 'all') {
       await AlbumSQL.emptyAllTable(Global.imageDB!);
       await AlbumSQL.emptyAllTableExtend(Global.imageDBExtend!);
@@ -68,15 +68,7 @@ class EmptyDatabaseState extends State<EmptyDatabase> {
         elevation: 0,
         centerTitle: true,
         title: titleText('选择需要清空的数据库'),
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withValues(alpha: .8)],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-          ),
-        ),
+        flexibleSpace: getFlexibleSpace(context),
       ),
       body: ListView.builder(
         physics: const BouncingScrollPhysics(),

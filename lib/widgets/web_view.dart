@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:horopic/widgets/common_widgets.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 import 'package:horopic/utils/common_functions.dart';
@@ -31,15 +32,7 @@ class WebViewPageState extends State<WebViewPage> {
       appBar: AppBar(
         centerTitle: true,
         elevation: 0,
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withAlpha(204)],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-          ),
-        ),
+        flexibleSpace: getFlexibleSpace(context),
         title: widget.title == 'None' ? titleText('网页浏览') : titleText(widget.title),
       ),
       body: WebViewWidget(

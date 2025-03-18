@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:horopic/utils/common_functions.dart';
+import 'package:horopic/widgets/common_widgets.dart';
 
 class ConfigureWidgets {
   static Widget buildSettingCard({required String title, required List<Widget> children}) {
@@ -84,23 +86,11 @@ class ConfigureWidgets {
     return AppBar(
       elevation: 0,
       centerTitle: true,
-      title: Text(
+      title: titleText(
         title,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-        ),
+        fontsize: 18,
       ),
-      flexibleSpace: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withAlpha(204)],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
-      ),
+      flexibleSpace: getFlexibleSpace(context),
     );
   }
 

@@ -202,7 +202,7 @@ class AlistConfigureStoreEditState extends State<AlistConfigureStoreEdit> {
 
   _importConfig() async {
     try {
-      Map configMap = await AlistManageAPI.getConfigMap();
+      Map configMap = await AlistManageAPI().getConfigMap();
       _hostController.text = configMap['host'];
       _tokenController.text = configMap['token'];
       if (configMap['adminToken'] != 'None' && configMap['adminToken'] != null) {

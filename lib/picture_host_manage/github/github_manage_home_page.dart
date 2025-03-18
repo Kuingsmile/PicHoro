@@ -6,6 +6,7 @@ import 'package:horopic/router/application.dart';
 import 'package:horopic/picture_host_manage/common/loading_state.dart' as loading_state;
 import 'package:horopic/picture_host_manage/manage_api/github_manage_api.dart';
 import 'package:horopic/utils/common_functions.dart';
+import 'package:horopic/widgets/common_widgets.dart';
 
 class GithubManageHomePage extends StatefulWidget {
   const GithubManageHomePage({super.key});
@@ -59,70 +60,18 @@ class GithubManageHomePageState extends loading_state.BaseLoadingPageState<Githu
         elevation: 0,
         centerTitle: true,
         title: titleText('Github 个人信息'),
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withAlpha(204)],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-          ),
-        ),
+        flexibleSpace: getFlexibleSpace(context),
       );
 
   @override
-  Widget buildEmpty() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Image.asset(
-            'assets/images/empty.png',
-            width: 100,
-            height: 100,
-          ),
-          const Text('暂无数据', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118)))
-        ],
-      ),
-    );
-  }
+  String get emptyText => '暂无数据';
 
   @override
-  Widget buildError() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Text('加载失败', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))),
-          ElevatedButton(
-            style: ButtonStyle(
-              backgroundColor: WidgetStateProperty.all(Colors.blue),
-            ),
-            onPressed: () {
-              setState(() {
-                state = loading_state.LoadState.loading;
-              });
-            },
-            child: const Text('重新加载'),
-          )
-        ],
-      ),
-    );
-  }
-
-  @override
-  Widget buildLoading() {
-    return const Center(
-      child: SizedBox(
-        width: 30,
-        height: 30,
-        child: CircularProgressIndicator(
-          strokeWidth: 2,
-          backgroundColor: Colors.transparent,
-          valueColor: AlwaysStoppedAnimation(Colors.blue),
-        ),
-      ),
-    );
+  void onErrorRetry() {
+    setState(() {
+      state = loading_state.LoadState.loading;
+    });
+    initProfile();
   }
 
   Widget otherRepo() {

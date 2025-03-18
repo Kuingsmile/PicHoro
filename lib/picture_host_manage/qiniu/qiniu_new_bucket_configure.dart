@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:horopic/picture_host_manage/manage_api/qiniu_manage_api.dart';
 import 'package:horopic/utils/common_functions.dart';
+import 'package:horopic/widgets/common_widgets.dart';
 
 class QiniuNewBucketConfig extends StatefulWidget {
   const QiniuNewBucketConfig({
@@ -38,15 +39,7 @@ class QiniuNewBucketConfigState extends State<QiniuNewBucketConfig> {
         elevation: 0,
         centerTitle: true,
         title: titleText('新建存储桶'),
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withAlpha(204)],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-          ),
-        ),
+        flexibleSpace: getFlexibleSpace(context),
       ),
       body: ListView(
         children: [

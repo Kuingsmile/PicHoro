@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'dart:convert';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' as flutter_services;
 
@@ -9,6 +8,9 @@ import 'package:external_path/external_path.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fluro/fluro.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:horopic/picture_host_manage/common/new_folder_widgets.dart';
+import 'package:horopic/picture_host_manage/common/rename_dialog_widgets.dart';
+import 'package:horopic/widgets/common_widgets.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:path/path.dart' as my_path;
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -24,8 +26,6 @@ import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/widgets/net_loading_dialog.dart';
 import 'package:horopic/utils/image_compressor.dart';
-
-bool isCoverFile = false;
 
 class AwsFileExplorer extends StatefulWidget {
   final Map element;
@@ -160,15 +160,7 @@ class AwsFileExplorerState extends loading_state.BaseLoadingPageState<AwsFileExp
               fontSize: 15,
               fontWeight: FontWeight.bold,
             )),
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withAlpha(204)],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-          ),
-        ),
+        flexibleSpace: getFlexibleSpace(context),
         actions: [
           PopupMenuButton(
             icon: const Icon(
@@ -583,11 +575,10 @@ class AwsFileExplorerState extends loading_state.BaseLoadingPageState<AwsFileExp
                                     return NewFolderDialog(
                                       contentWidget: NewFolderDialogContent(
                                         title: "  请输入新文件夹名\n / 分隔创建嵌套文件夹",
-                                        okBtnTap: () async {
+                                        onConfirm: () async {
                                           String newName = newFolder.text;
                                           if (newName.isEmpty) {
-                                            showToastWithContext(context, "文件夹名不能为空");
-                                            return;
+                                            return showToastWithContext(context, "文件夹名不能为空");
                                           }
                                           if (newName.endsWith('/')) {
                                             newName = newName.substring(0, newName.length - 1);
@@ -601,8 +592,8 @@ class AwsFileExplorerState extends loading_state.BaseLoadingPageState<AwsFileExp
                                             showToast('创建失败');
                                           }
                                         },
-                                        vc: newFolder,
-                                        cancelBtnTap: () {},
+                                        folderNameController: newFolder,
+                                        onCancel: () {},
                                       ),
                                     );
                                   });
@@ -661,10 +652,8 @@ class AwsFileExplorerState extends loading_state.BaseLoadingPageState<AwsFileExp
                         toDelete.add(i);
                       }
                     }
-                    Navigator.pop(context);
                     await deleteAll(toDelete);
                     showToast('删除完成');
-                    return;
                   } catch (e) {
                     flogErr(e, {}, 'TencentBucketPage', 'deleteAll');
                     showToast('删除失败');
@@ -792,7 +781,7 @@ class AwsFileExplorerState extends loading_state.BaseLoadingPageState<AwsFileExp
                           rawurl = shareUrlPrefix + allInfoList[i].key;
                           fileName = allInfoList[i].key.split('/').last;
                         }
-                        finalFormatedurl = linkGeneratorMap[Global.defaultLKformat]!(rawurl, fileName);
+                        finalFormatedurl = getFormatedUrl(rawurl, fileName);
 
                         multiUrls.add(finalFormatedurl);
                       }
@@ -886,59 +875,11 @@ class AwsFileExplorerState extends loading_state.BaseLoadingPageState<AwsFileExp
   }
 
   @override
-  Widget buildEmpty() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Image.asset(
-            'assets/images/empty.png',
-            width: 100,
-            height: 100,
-          ),
-          const Text('没有文件哦，点击右上角添加吧', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118)))
-        ],
-      ),
-    );
-  }
-
-  @override
-  Widget buildError() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Text('加载失败,请检查网络', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))),
-          ElevatedButton(
-            style: ButtonStyle(
-              backgroundColor: WidgetStateProperty.all(Colors.blue),
-            ),
-            onPressed: () {
-              setState(() {
-                state = loading_state.LoadState.loading;
-              });
-              _getBucketList();
-            },
-            child: const Text('重新加载'),
-          )
-        ],
-      ),
-    );
-  }
-
-  @override
-  Widget buildLoading() {
-    return const Center(
-      child: SizedBox(
-        width: 30,
-        height: 30,
-        child: CircularProgressIndicator(
-          strokeWidth: 2,
-          backgroundColor: Colors.transparent,
-          valueColor: AlwaysStoppedAnimation(Colors.blue),
-        ),
-      ),
-    );
+  void onErrorRetry() {
+    setState(() {
+      state = loading_state.LoadState.loading;
+    });
+    _getBucketList();
   }
 
   @override
@@ -982,83 +923,66 @@ class AwsFileExplorerState extends loading_state.BaseLoadingPageState<AwsFileExp
                         children: [
                           SlidableAction(
                             onPressed: (BuildContext context) async {
-                              showCupertinoDialog(
-                                  barrierDismissible: true,
+                              showCupertinoAlertDialogWithConfirmFunc(
                                   context: context,
-                                  builder: (BuildContext context) {
-                                    return CupertinoAlertDialog(
-                                      title: const Text('通知'),
-                                      content: Text('确定要删除 ${allInfoList[index]} 吗？'),
-                                      actions: <Widget>[
-                                        CupertinoDialogAction(
-                                          child: const Text('取消', style: TextStyle(color: Colors.blue)),
-                                          onPressed: () {
-                                            Navigator.pop(context);
-                                          },
-                                        ),
-                                        CupertinoDialogAction(
-                                          child: const Text('确定', style: TextStyle(color: Colors.blue)),
-                                          onPressed: () async {
-                                            Navigator.pop(context);
-                                            Global.operateDone = false;
-                                            await showDialog(
-                                                context: context,
-                                                barrierDismissible: false,
-                                                builder: (context) {
-                                                  return NetLoadingDialog(
-                                                    outsideDismiss: false,
-                                                    loading: true,
-                                                    loadingText: "删除中...",
-                                                    requestCallBack:
-                                                        AwsManageAPI.deleteFolder(widget.element, allInfoList[index]),
-                                                  );
-                                                });
-                                            while (!Global.operateDone) {
-                                              await Future.delayed(const Duration(milliseconds: 250));
-                                            }
-                                            Global.operateDone = false;
-                                            var queryResult = await AwsManageAPI.queryBucketFiles(widget.element, {
-                                              'prefix': widget.bucketPrefix,
-                                            });
-                                            var dir = queryResult[1]['CommonPrefixes'];
-                                            if (dir == null) {
-                                              showToast('删除成功');
-                                              setState(() {
-                                                allInfoList.removeAt(index);
-                                                dirAllInfoList.removeAt(index);
-                                                selectedFilesBool.removeAt(index);
-                                              });
-                                            } else if (dir != null) {
-                                              if (dir is! List) {
-                                                dir = [dir];
-                                              }
-                                              bool deleted = true;
-                                              for (var element in dir) {
-                                                if (allInfoList[index] == element) {
-                                                  deleted = false;
-                                                  break;
-                                                }
-                                              }
-                                              if (deleted == true) {
-                                                showToast('删除成功');
-                                                setState(() {
-                                                  allInfoList.removeAt(index);
-                                                  dirAllInfoList.removeAt(index);
-                                                  selectedFilesBool.removeAt(index);
-                                                });
-                                              } else {
-                                                showToast('删除失败');
-                                              }
-                                            }
-                                          },
-                                        ),
-                                      ],
-                                    );
+                                  content: '确定要删除 ${allInfoList[index]} 吗?',
+                                  onConfirm: () async {
+                                    Global.operateDone = false;
+                                    await showDialog(
+                                        context: context,
+                                        barrierDismissible: false,
+                                        builder: (context) {
+                                          return NetLoadingDialog(
+                                            outsideDismiss: false,
+                                            loading: true,
+                                            loadingText: "删除中...",
+                                            requestCallBack:
+                                                AwsManageAPI.deleteFolder(widget.element, allInfoList[index]),
+                                          );
+                                        });
+                                    while (!Global.operateDone) {
+                                      await Future.delayed(const Duration(milliseconds: 250));
+                                    }
+                                    Global.operateDone = false;
+                                    var queryResult = await AwsManageAPI.queryBucketFiles(widget.element, {
+                                      'prefix': widget.bucketPrefix,
+                                    });
+                                    var dir = queryResult[1]['CommonPrefixes'];
+                                    if (dir == null) {
+                                      showToast('删除成功');
+                                      setState(() {
+                                        allInfoList.removeAt(index);
+                                        dirAllInfoList.removeAt(index);
+                                        selectedFilesBool.removeAt(index);
+                                      });
+                                    } else if (dir != null) {
+                                      if (dir is! List) {
+                                        dir = [dir];
+                                      }
+                                      bool deleted = true;
+                                      for (var element in dir) {
+                                        if (allInfoList[index] == element) {
+                                          deleted = false;
+                                          break;
+                                        }
+                                      }
+                                      if (deleted == true) {
+                                        showToast('删除成功');
+                                        setState(() {
+                                          allInfoList.removeAt(index);
+                                          dirAllInfoList.removeAt(index);
+                                          selectedFilesBool.removeAt(index);
+                                        });
+                                      } else {
+                                        showToast('删除失败');
+                                      }
+                                    }
                                   });
                             },
                             backgroundColor: const Color(0xFFFE4A49),
                             foregroundColor: Colors.white,
                             spacing: 0,
+                            autoClose: true,
                             icon: Icons.delete,
                             label: '删除',
                           ),
@@ -1194,39 +1118,21 @@ class AwsFileExplorerState extends loading_state.BaseLoadingPageState<AwsFileExp
                             ),
                             SlidableAction(
                               onPressed: (BuildContext context) async {
-                                showCupertinoDialog(
-                                    barrierDismissible: true,
+                                showCupertinoAlertDialogWithConfirmFunc(
                                     context: context,
-                                    builder: (BuildContext context) {
-                                      return CupertinoAlertDialog(
-                                        title: const Text('通知'),
-                                        content: Text('确定要删除${allInfoList[index].key.split('/').last}吗？'),
-                                        actions: <Widget>[
-                                          CupertinoDialogAction(
-                                            child: const Text('取消', style: TextStyle(color: Colors.blue)),
-                                            onPressed: () {
-                                              Navigator.pop(context);
-                                            },
-                                          ),
-                                          CupertinoDialogAction(
-                                            child: const Text('确定', style: TextStyle(color: Colors.blue)),
-                                            onPressed: () async {
-                                              Navigator.pop(context);
-                                              var result =
-                                                  await AwsManageAPI.deleteFile(widget.element, allInfoList[index].key);
-                                              if (result[0] == 'success') {
-                                                showToast('删除成功');
-                                                setState(() {
-                                                  allInfoList.removeAt(index);
-                                                  selectedFilesBool.removeAt(index);
-                                                });
-                                              } else {
-                                                showToast('删除失败');
-                                              }
-                                            },
-                                          ),
-                                        ],
-                                      );
+                                    content: '确定要删除 ${allInfoList[index].key.split('/').last} 吗?',
+                                    onConfirm: () async {
+                                      var result =
+                                          await AwsManageAPI.deleteFile(widget.element, allInfoList[index].key);
+                                      if (result[0] == 'success') {
+                                        showToast('删除成功');
+                                        setState(() {
+                                          allInfoList.removeAt(index);
+                                          selectedFilesBool.removeAt(index);
+                                        });
+                                      } else {
+                                        showToast('删除失败');
+                                      }
                                     });
                               },
                               backgroundColor: const Color(0xFFFE4A49),
@@ -1337,63 +1243,6 @@ class AwsFileExplorerState extends loading_state.BaseLoadingPageState<AwsFileExp
                                   if (context.mounted) {
                                     Application.router.navigateTo(this.context,
                                         '${Routes.mdPreview}?filePath=${Uri.encodeComponent(filePath)}&fileName=${Uri.encodeComponent(fileName)}',
-                                        transition: TransitionType.none);
-                                  }
-                                } else if (Global.chewieExt
-                                    .contains(allInfoList[index].key.split('.').last.toLowerCase())) {
-                                  String shareUrl = '';
-
-                                  List videoList = [];
-                                  int newImageIndex = index - dirAllInfoList.length;
-                                  for (int i = dirAllInfoList.length; i < allInfoList.length; i++) {
-                                    if (Global.chewieExt.contains(allInfoList[i].key.split('.').last.toLowerCase())) {
-                                      shareUrl = shareUrlPrefix + allInfoList[i].key;
-                                      videoList.add({"url": shareUrl, "name": allInfoList[i].key});
-                                    } else if (i < index) {
-                                      newImageIndex--;
-                                    }
-                                  }
-                                  Map<String, dynamic> headers = {};
-                                  if (context.mounted) {
-                                    Application.router.navigateTo(this.context,
-                                        '${Routes.netVideoPlayer}?videoList=${Uri.encodeComponent(jsonEncode(videoList))}&index=$newImageIndex&type=${Uri.encodeComponent('normal')}&headers=${Uri.encodeComponent(jsonEncode(headers))}',
-                                        transition: TransitionType.none);
-                                  }
-                                } else if (Global.vlcExt
-                                    .contains(allInfoList[index].key.split('.').last.toLowerCase())) {
-                                  //vlc预览视频
-                                  String shareUrl = '';
-                                  String subUrl = '';
-                                  List videoList = [];
-                                  int newImageIndex = index - dirAllInfoList.length;
-                                  Map subtitleFileMap = {};
-                                  for (int i = dirAllInfoList.length; i < allInfoList.length; i++) {
-                                    if (Global.subtitleFileExt
-                                        .contains(allInfoList[i].key.split('.').last.toLowerCase())) {
-                                      subUrl = shareUrlPrefix + allInfoList[i].key;
-                                      subtitleFileMap[allInfoList[i].key.split('.').first] = subUrl;
-                                    }
-                                    if (Global.vlcExt.contains(allInfoList[index].key.split('.').last.toLowerCase())) {
-                                      shareUrl = shareUrlPrefix + allInfoList[i].key;
-                                      videoList.add({
-                                        "url": shareUrl,
-                                        "name": allInfoList[i].key,
-                                        "subtitlePath": '',
-                                      });
-                                    } else if (i < index) {
-                                      newImageIndex--;
-                                    }
-                                  }
-                                  for (int i = 0; i < videoList.length; i++) {
-                                    if (subtitleFileMap.containsKey(videoList[i]['name'].split('.').first)) {
-                                      videoList[i]['subtitlePath'] =
-                                          subtitleFileMap[videoList[i]['name'].split('.').first];
-                                    }
-                                  }
-                                  Map<String, dynamic> headers = {};
-                                  if (context.mounted) {
-                                    Application.router.navigateTo(this.context,
-                                        '${Routes.netVideoPlayer}?videoList=${Uri.encodeComponent(jsonEncode(videoList))}&index=$newImageIndex&type=${Uri.encodeComponent('mkv')}&headers=${Uri.encodeComponent(jsonEncode(headers))}',
                                         transition: TransitionType.none);
                                   }
                                 }
@@ -1520,10 +1369,9 @@ class AwsFileExplorerState extends loading_state.BaseLoadingPageState<AwsFileExp
                       : '${isEnableSSL ? 'https' : 'http'}://${widget.element['name']}.$endpoint/';
                 }
               }
-              String format = Global.getLKformat();
               String shareUrl = shareUrlPrefix + allInfoList[index].key;
               String filename = my_path.basename(allInfoList[index].key.split('/').last);
-              String formatedLink = linkGeneratorMap[format]!(shareUrl, filename);
+              String formatedLink = getFormatedUrl(shareUrl, filename);
               await flutter_services.Clipboard.setData(flutter_services.ClipboardData(text: formatedLink));
               if (mounted) {
                 Navigator.pop(context);
@@ -1551,7 +1399,7 @@ class AwsFileExplorerState extends loading_state.BaseLoadingPageState<AwsFileExp
                       return RenameDialog(
                         contentWidget: RenameDialogContent(
                           title: "新文件名 '/'分割文件夹",
-                          okBtnTap: () async {
+                          onConfirm: (bool isCoverFile) async {
                             String newName = vc.text;
                             if (isCoverFile) {
                               var copyResult =
@@ -1589,9 +1437,9 @@ class AwsFileExplorerState extends loading_state.BaseLoadingPageState<AwsFileExp
                               }
                             }
                           },
-                          vc: vc,
-                          cancelBtnTap: () {},
-                          stateBoolText: '是否覆盖同名文件',
+                          renameTextController: vc,
+                          onCancel: () {},
+                          isShowCoverFileWidget: true,
                         ),
                       );
                     });
@@ -1609,38 +1457,20 @@ class AwsFileExplorerState extends loading_state.BaseLoadingPageState<AwsFileExp
             title: const Text('删除'),
             onTap: () async {
               Navigator.pop(context);
-              showCupertinoDialog(
-                barrierDismissible: true,
+              showCupertinoAlertDialogWithConfirmFunc(
                 context: context,
-                builder: (BuildContext context) {
-                  return CupertinoAlertDialog(
-                    title: const Text('通知'),
-                    content: Text('确定要删除${allInfoList[index].key.split('/').last}吗？'),
-                    actions: <Widget>[
-                      CupertinoDialogAction(
-                        child: const Text('取消', style: TextStyle(color: Colors.blue)),
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                      ),
-                      CupertinoDialogAction(
-                        child: const Text('确定', style: TextStyle(color: Colors.blue)),
-                        onPressed: () async {
-                          Navigator.pop(context);
-                          var result = await AwsManageAPI.deleteFile(widget.element, allInfoList[index].key);
-                          if (result[0] == 'success') {
-                            showToast('删除成功');
-                            setState(() {
-                              allInfoList.removeAt(index);
-                              selectedFilesBool.removeAt(index);
-                            });
-                          } else {
-                            showToast('删除失败');
-                          }
-                        },
-                      ),
-                    ],
-                  );
+                content: '确定要删除 ${allInfoList[index].key.split('/').last} 吗?',
+                onConfirm: () async {
+                  var result = await AwsManageAPI.deleteFile(widget.element, allInfoList[index].key);
+                  if (result[0] == 'success') {
+                    showToast('删除成功');
+                    setState(() {
+                      allInfoList.removeAt(index);
+                      selectedFilesBool.removeAt(index);
+                    });
+                  } else {
+                    showToast('删除失败');
+                  }
                 },
               );
             },
@@ -1700,352 +1530,64 @@ class AwsFileExplorerState extends loading_state.BaseLoadingPageState<AwsFileExp
               title: const Text('删除'),
               onTap: () async {
                 Navigator.pop(context);
-                showCupertinoDialog(
-                  barrierDismissible: true,
+                showCupertinoAlertDialogWithConfirmFunc(
                   context: context,
-                  builder: (BuildContext context) {
-                    return CupertinoAlertDialog(
-                      title: const Text('通知'),
-                      content: Text('确定要删除${allInfoList[index]}吗？'),
-                      actions: <Widget>[
-                        CupertinoDialogAction(
-                          child: const Text('取消', style: TextStyle(color: Colors.blue)),
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                        ),
-                        CupertinoDialogAction(
-                          child: const Text('确定', style: TextStyle(color: Colors.blue)),
-                          onPressed: () async {
-                            Navigator.pop(context);
-                            Global.operateDone = false;
-                            await showDialog(
-                                context: context,
-                                barrierDismissible: false,
-                                builder: (context) {
-                                  return NetLoadingDialog(
-                                    outsideDismiss: false,
-                                    loading: true,
-                                    loadingText: "删除中...",
-                                    requestCallBack: AwsManageAPI.deleteFolder(widget.element, allInfoList[index]),
-                                  );
-                                });
-                            while (!Global.operateDone) {
-                              await Future.delayed(const Duration(milliseconds: 250));
-                            }
-                            Global.operateDone = false;
-                            var queryResult = await AwsManageAPI.queryBucketFiles(widget.element, {
-                              'prefix': widget.bucketPrefix,
-                            });
-                            var dir = queryResult[1]['CommonPrefixes'];
-                            if (dir == null) {
-                              showToast('删除成功');
-                              setState(() {
-                                allInfoList.removeAt(index);
-                                dirAllInfoList.removeAt(index);
-                                selectedFilesBool.removeAt(index);
-                              });
-                            } else if (dir != null) {
-                              if (dir is! List) {
-                                dir = [dir];
-                              }
-                              bool deleted = true;
-                              for (var element in dir) {
-                                if (allInfoList[index] == element) {
-                                  deleted = false;
-                                  break;
-                                }
-                              }
-                              if (deleted == true) {
-                                showToast('删除成功');
-                                setState(() {
-                                  allInfoList.removeAt(index);
-                                  dirAllInfoList.removeAt(index);
-                                  selectedFilesBool.removeAt(index);
-                                });
-                              } else {
-                                showToast('删除失败');
-                              }
-                            }
-                          },
-                        ),
-                      ],
-                    );
+                  content: '确定要删除 ${allInfoList[index]} 吗?',
+                  onConfirm: () async {
+                    Global.operateDone = false;
+                    await showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (context) {
+                          return NetLoadingDialog(
+                            outsideDismiss: false,
+                            loading: true,
+                            loadingText: "删除中...",
+                            requestCallBack: AwsManageAPI.deleteFolder(widget.element, allInfoList[index]),
+                          );
+                        });
+                    while (!Global.operateDone) {
+                      await Future.delayed(const Duration(milliseconds: 250));
+                    }
+                    Global.operateDone = false;
+                    var queryResult = await AwsManageAPI.queryBucketFiles(widget.element, {
+                      'prefix': widget.bucketPrefix,
+                    });
+                    var dir = queryResult[1]['CommonPrefixes'];
+                    if (dir == null) {
+                      showToast('删除成功');
+                      setState(() {
+                        allInfoList.removeAt(index);
+                        dirAllInfoList.removeAt(index);
+                        selectedFilesBool.removeAt(index);
+                      });
+                    } else if (dir != null) {
+                      if (dir is! List) {
+                        dir = [dir];
+                      }
+                      bool deleted = true;
+                      for (var element in dir) {
+                        if (allInfoList[index] == element) {
+                          deleted = false;
+                          break;
+                        }
+                      }
+                      if (deleted == true) {
+                        showToast('删除成功');
+                        setState(() {
+                          allInfoList.removeAt(index);
+                          dirAllInfoList.removeAt(index);
+                          selectedFilesBool.removeAt(index);
+                        });
+                      } else {
+                        showToast('删除失败');
+                      }
+                    }
                   },
                 );
               }),
         ],
       ),
     );
-  }
-}
-
-class RenameDialog extends AlertDialog {
-  RenameDialog({super.key, required Widget contentWidget})
-      : super(
-          content: contentWidget,
-          contentPadding: EdgeInsets.zero,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(30),
-            //side: BorderSide(color: Colors.blue, width: 3)
-          ),
-        );
-}
-
-//弹出框 修改自https://www.jianshu.com/p/4144837a789b
-double btnHeight = 60;
-double borderWidth = 2;
-
-class RenameDialogContent extends StatefulWidget {
-  final String title;
-  final String cancelBtnTitle;
-  final String okBtnTitle;
-  final VoidCallback cancelBtnTap;
-  final VoidCallback okBtnTap;
-  final TextEditingController vc;
-  final String stateBoolText;
-  const RenameDialogContent(
-      {super.key,
-      required this.title,
-      this.cancelBtnTitle = "取消",
-      this.okBtnTitle = "确定",
-      required this.cancelBtnTap,
-      required this.okBtnTap,
-      required this.vc,
-      required this.stateBoolText});
-
-  @override
-  RenameDialogContentState createState() => RenameDialogContentState();
-}
-
-class RenameDialogContentState extends State<RenameDialogContent> {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-        margin: const EdgeInsets.only(top: 20),
-        height: 190,
-        width: 10000,
-        alignment: Alignment.bottomCenter,
-        child: Column(
-          children: [
-            Container(
-                alignment: Alignment.center,
-                child: Text(
-                  widget.title,
-                  style: const TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 20),
-                )),
-            //const Spacer(),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(30, 0, 30, 0),
-              child: TextFormField(
-                cursorHeight: 20,
-                textAlign: TextAlign.center,
-                style: const TextStyle(color: Colors.black87),
-                controller: widget.vc,
-                validator: (value) {
-                  if (value!.isEmpty) {
-                    return '不能为空';
-                  }
-                  return null;
-                },
-                decoration: const InputDecoration(
-                    enabledBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Color.fromARGB(255, 234, 236, 238)),
-                    ),
-                    focusedBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.blue),
-                    )),
-              ),
-            ),
-            Padding(
-                padding: const EdgeInsets.fromLTRB(30, 0, 30, 0),
-                child: Row(
-                  children: [
-                    Checkbox(
-                        value: isCoverFile,
-                        onChanged: (value) {
-                          setState(() {
-                            isCoverFile = value!;
-                          });
-                        }),
-                    Text(
-                      widget.stateBoolText,
-                      style: const TextStyle(color: Colors.black87, fontSize: 15),
-                    )
-                  ],
-                )),
-            Container(
-              // color: Colors.red,
-              height: btnHeight,
-              margin: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-              child: Column(
-                children: [
-                  Container(
-                    width: double.infinity,
-                    color: const Color.fromARGB(255, 234, 236, 238),
-                    height: borderWidth,
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      TextButton(
-                        onPressed: () {
-                          widget.vc.text = "";
-                          widget.cancelBtnTap();
-                          Navigator.of(context).pop();
-                        },
-                        child: Text(
-                          widget.cancelBtnTitle,
-                          style: const TextStyle(fontSize: 22, color: Colors.blue),
-                        ),
-                      ),
-                      Container(
-                        width: borderWidth,
-                        color: const Color.fromARGB(255, 234, 236, 238),
-                        height: btnHeight - borderWidth - borderWidth,
-                      ),
-                      TextButton(
-                          onPressed: () {
-                            widget.okBtnTap();
-                            Navigator.of(context).pop();
-                            widget.vc.text = "";
-                          },
-                          child: Text(
-                            widget.okBtnTitle,
-                            style: const TextStyle(fontSize: 22, color: Color.fromARGB(255, 169, 173, 177)),
-                          )),
-                    ],
-                  ),
-                ],
-              ),
-            )
-          ],
-        ));
-  }
-}
-
-class NewFolderDialog extends AlertDialog {
-  NewFolderDialog({super.key, required Widget contentWidget})
-      : super(
-          content: contentWidget,
-          contentPadding: EdgeInsets.zero,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(30),
-            //side: BorderSide(color: Colors.blue, width: 3)
-          ),
-        );
-}
-
-//弹出框 修改自https://www.jianshu.com/p/4144837a789b
-
-class NewFolderDialogContent extends StatefulWidget {
-  final String title;
-  final String cancelBtnTitle;
-  final String okBtnTitle;
-  final VoidCallback cancelBtnTap;
-  final VoidCallback okBtnTap;
-  final TextEditingController vc;
-  const NewFolderDialogContent({
-    super.key,
-    required this.title,
-    this.cancelBtnTitle = "取消",
-    this.okBtnTitle = "确定",
-    required this.cancelBtnTap,
-    required this.okBtnTap,
-    required this.vc,
-  });
-
-  @override
-  NewFolderDialogContentState createState() => NewFolderDialogContentState();
-}
-
-class NewFolderDialogContentState extends State<NewFolderDialogContent> {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-        margin: const EdgeInsets.only(top: 20),
-        height: 190,
-        width: 10000,
-        alignment: Alignment.bottomCenter,
-        child: Column(
-          children: [
-            Container(
-                alignment: Alignment.center,
-                child: Text(
-                  widget.title,
-                  style: const TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 20),
-                )),
-            //const Spacer(),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(30, 0, 30, 0),
-              child: TextFormField(
-                cursorHeight: 20,
-                textAlign: TextAlign.center,
-                style: const TextStyle(color: Colors.black87),
-                controller: widget.vc,
-                validator: (value) {
-                  if (value!.isEmpty) {
-                    return '不能为空';
-                  }
-                  return null;
-                },
-                decoration: const InputDecoration(
-                    enabledBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Color.fromARGB(255, 14, 103, 192)),
-                    ),
-                    focusedBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.blue),
-                    )),
-              ),
-            ),
-            const Spacer(),
-            //A check box with a label
-            Container(
-              // color: Colors.red,
-              height: btnHeight,
-              margin: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-              child: Column(
-                children: [
-                  Container(
-                    width: double.infinity,
-                    color: const Color.fromARGB(255, 234, 236, 238),
-                    height: borderWidth,
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      TextButton(
-                        onPressed: () {
-                          widget.vc.text = "";
-                          widget.cancelBtnTap();
-                          Navigator.of(context).pop();
-                        },
-                        child: Text(
-                          widget.cancelBtnTitle,
-                          style: const TextStyle(fontSize: 22, color: Colors.blue),
-                        ),
-                      ),
-                      Container(
-                        width: borderWidth,
-                        color: const Color.fromARGB(255, 234, 236, 238),
-                        height: btnHeight - borderWidth - borderWidth,
-                      ),
-                      TextButton(
-                          onPressed: () {
-                            widget.okBtnTap();
-                            Navigator.of(context).pop();
-                            widget.vc.text = "";
-                          },
-                          child: Text(
-                            widget.okBtnTitle,
-                            style: const TextStyle(fontSize: 22, color: Colors.blue),
-                          )),
-                    ],
-                  ),
-                ],
-              ),
-            )
-          ],
-        ));
   }
 }

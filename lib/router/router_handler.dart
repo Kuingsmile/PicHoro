@@ -37,7 +37,6 @@ import 'package:horopic/picture_host_manage/tencent/tencent_file_information_pag
 
 import 'package:horopic/picture_host_manage/common/file_explorer/local_file_explorer.dart';
 import 'package:horopic/picture_host_manage/common/file_explorer/local_image_preview.dart';
-import 'package:horopic/picture_host_manage/common/file_explorer/net_video_player.dart';
 import 'package:horopic/picture_host_manage/common/base_up_down_load_manage_page.dart';
 
 import 'package:horopic/picture_host_manage/smms/smms_manage_home_page.dart';
@@ -461,20 +460,6 @@ var fileExplorerHandler = Handler(handlerFunc: (BuildContext? context, Map<Strin
   );
 });
 
-//视频播放页面
-var netVideoPlayerHandler = Handler(handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
-  var videoList = json.decode(params['videoList']!.first);
-  int index = int.parse(params['index']!.first);
-  String type = params['type']!.first;
-  Map<String, String> headers = Map<String, String>.from(json.decode(params['headers']!.first));
-  return NetVideoPlayer(
-    videoList: videoList,
-    index: index,
-    type: type,
-    headers: headers,
-  );
-});
-
 //SMMS图床管理首页
 var smmsManageHomePageHandler = Handler(handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
   return const SmmsManageHomePage();
@@ -796,11 +781,13 @@ var alistBucketInformationHandler = Handler(handlerFunc: (BuildContext? context,
 
 //Alist存储桶文件列表页面
 var alistFileExplorerHandler = Handler(handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
-  var element = json.decode(params['element']!.first);
+  var currentStorageInfoMap = json.decode(params['currentStorageInfoMap']!.first);
   var bucketPrefix = params['bucketPrefix']!.first;
   String refresh = params['refresh']!.first;
+  var configMap = json.decode(params['configMap']!.first);
   return AlistFileExplorer(
-    element: element,
+    configMap: configMap,
+    currentStorageInfoMap: currentStorageInfoMap,
     bucketPrefix: bucketPrefix,
     refresh: refresh,
   );

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/common_functions.dart';
+import 'package:horopic/widgets/common_widgets.dart';
 
 class LinkFormatSelect extends StatefulWidget {
   const LinkFormatSelect({super.key});
@@ -68,15 +69,7 @@ class LinkFormatSelectState extends State<LinkFormatSelect> {
         title: titleText(
           '链接格式选择',
         ),
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withValues(alpha: 0.8)],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-          ),
-        ),
+        flexibleSpace: getFlexibleSpace(context),
       ),
       body: ListView(
         physics: const BouncingScrollPhysics(),

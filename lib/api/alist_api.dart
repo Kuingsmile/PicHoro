@@ -12,7 +12,7 @@ class AlistImageUploadUtils {
     String today = getToday('yyyyMMdd');
     String alistToday = Global.getTodayAlistUpdate();
     if (alistToday != today && configMap['token'] != '') {
-      var res = await AlistManageAPI.getToken(configMap['host'], configMap['alistusername'], configMap['password']);
+      var res = await AlistManageAPI().getToken(configMap['host'], configMap['alistusername'], configMap['password']);
       if (res[0] != 'success') {
         return ['failed'];
       }
@@ -28,7 +28,7 @@ class AlistImageUploadUtils {
         configMap['customUrl'] ?? 'None',
       );
       final alistConfigJson = jsonEncode(alistConfig);
-      final alistConfigFile = await AlistManageAPI.localFile;
+      final alistConfigFile = await AlistManageAPI().localFile();
       alistConfigFile.writeAsString(alistConfigJson);
       Global.setTodayAlistUpdate(today);
     }
@@ -142,9 +142,7 @@ class AlistImageUploadUtils {
           hostPicUrl = '$hostPicUrl?sign=${responseGet.data!['data']['sign']}';
         }
       }
-
       String formatedURL = getFormatedUrl(hostPicUrl, name);
-
       return ["success", formatedURL, returnUrl, pictureKey, displayUrl, hostPicUrl];
     } catch (e) {
       flogErr(

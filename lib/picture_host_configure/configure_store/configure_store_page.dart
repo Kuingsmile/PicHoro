@@ -21,6 +21,7 @@ import 'package:horopic/picture_host_manage/manage_api/webdav_manage_api.dart';
 
 import 'package:horopic/router/application.dart';
 import 'package:horopic/utils/common_functions.dart';
+import 'package:horopic/widgets/common_widgets.dart';
 
 class ConfigureStorePage extends StatefulWidget {
   final String psHost;
@@ -198,15 +199,7 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
         centerTitle: true,
         elevation: 0,
         title: titleText(psNameTranslate[widget.psHost]!),
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withAlpha(204)],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-          ),
-        ),
+        flexibleSpace: getFlexibleSpace(context),
         actions: [
           IconButton(
             icon: const Icon(
@@ -220,7 +213,6 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
                 content: '是否重置所有已保存配置?',
                 context: context,
                 onConfirm: () async {
-                  Navigator.pop(context);
                   await ConfigureStoreFile().resetConfigureFile(widget.psHost);
                   setState(() {
                     showToast('重置成功');
@@ -509,7 +501,7 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
     }
 
     final config = SmmsConfigModel(token);
-    final configFile = await SmmsManageAPI.localFile;
+    final configFile = await SmmsManageAPI().localFile();
     await configFile.writeAsString(jsonEncode(config));
     showToast('设置成功');
     return true;
@@ -578,7 +570,7 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
     String customUrl = checkPlaceholder(psInfo['customUrl']);
 
     final config = AlistConfigModel(host, adminToken, alistusername, password, token, uploadPath, webPath, customUrl);
-    final configFile = await AlistManageAPI.localFile;
+    final configFile = await AlistManageAPI().localFile();
     await configFile.writeAsString(jsonEncode(config));
     showToast('设置成功');
     return true;
@@ -709,6 +701,7 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
               title: const Text('重置配置'),
               trailing: const Icon(Icons.arrow_forward_ios, size: 16),
               onTap: () async {
+                Navigator.pop(context);
                 showCupertinoAlertDialogWithConfirmFunc(
                   title: '通知',
                   content: '是否重置配置$storeName?',
@@ -718,9 +711,6 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
                       widget.psHost,
                       storeName,
                     );
-                    if (mounted) {
-                      Navigator.pop(context);
-                    }
                     setState(() {
                       showToast('重置成功');
                     });

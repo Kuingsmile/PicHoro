@@ -126,7 +126,7 @@ class SmmsConfigureStoreEditState extends State<SmmsConfigureStoreEdit> {
 
   _importConfig() async {
     try {
-      Map configMap = await SmmsManageAPI.getConfigMap();
+      Map configMap = await SmmsManageAPI().getConfigMap();
       _tokenController.text = configMap['token'];
       showToast('导入成功');
     } catch (e) {

@@ -13,6 +13,7 @@ import 'package:horopic/picture_host_manage/manage_api/upyun_manage_api.dart';
 import 'package:horopic/picture_host_manage/manage_api/imgur_manage_api.dart';
 import 'package:horopic/picture_host_manage/manage_api/ftp_manage_api.dart';
 import 'package:horopic/picture_host_manage/manage_api/alist_manage_api.dart';
+import 'package:horopic/widgets/common_widgets.dart';
 
 class PsHostHomePage extends StatefulWidget {
   const PsHostHomePage({super.key});
@@ -274,7 +275,7 @@ class PsHostHomePageState extends State<PsHostHomePage> with AutomaticKeepAliveC
           () async {
             showToast('开始校验');
             try {
-              Map configMap = await AlistManageAPI.getConfigMap();
+              Map configMap = await AlistManageAPI().getConfigMap();
               if (configMap['token'] == '') {
                 String prefix = configMap['uploadPath'];
                 if (prefix == 'None') {
@@ -290,7 +291,7 @@ class PsHostHomePageState extends State<PsHostHomePage> with AutomaticKeepAliveC
                 };
                 if (mounted) {
                   Application.router.navigateTo(context,
-                      '${Routes.alistFileExplorer}?element=${Uri.encodeComponent(jsonEncode(element))}&bucketPrefix=${Uri.encodeComponent(prefix)}&refresh=${Uri.encodeComponent('doNotRefresh')}',
+                      '${Routes.alistFileExplorer}?currentStorageInfoMap=${Uri.encodeComponent(jsonEncode(element))}&bucketPrefix=${Uri.encodeComponent(prefix)}&refresh=${Uri.encodeComponent('doNotRefresh')}&configMap=${Uri.encodeComponent(jsonEncode(configMap))}',
                       transition: TransitionType.cupertino);
                   return;
                 }
@@ -298,7 +299,7 @@ class PsHostHomePageState extends State<PsHostHomePage> with AutomaticKeepAliveC
               String? adminToken = configMap['adminToken'];
               if (adminToken == null || adminToken == 'None' || adminToken.trim().isEmpty) {
                 String today = getToday('yyyyMMdd');
-                var refreshToken = await AlistManageAPI.refreshToken();
+                var refreshToken = await AlistManageAPI().refreshToken();
                 if (refreshToken[0] != 'success') {
                   showToast('刷新Token失败');
                   return;
@@ -306,9 +307,9 @@ class PsHostHomePageState extends State<PsHostHomePage> with AutomaticKeepAliveC
                 Global.setTodayAlistUpdate(today);
               }
 
-              var bucketListResponse = await AlistManageAPI.getBucketList();
+              var bucketListResponse = await AlistManageAPI().getBucketList();
               if (bucketListResponse[0] != 'success') {
-                Map configMap = await AlistManageAPI.getConfigMap();
+                Map configMap = await AlistManageAPI().getConfigMap();
                 String prefix = configMap['uploadPath'];
                 if (prefix == 'None') {
                   prefix = '/';
@@ -323,7 +324,7 @@ class PsHostHomePageState extends State<PsHostHomePage> with AutomaticKeepAliveC
                 };
                 if (mounted) {
                   Application.router.navigateTo(context,
-                      '${Routes.alistFileExplorer}?element=${Uri.encodeComponent(jsonEncode(element))}&bucketPrefix=${Uri.encodeComponent(prefix)}&refresh=${Uri.encodeComponent('doNotRefresh')}',
+                      '${Routes.alistFileExplorer}?currentStorageInfoMap=${Uri.encodeComponent(jsonEncode(element))}&bucketPrefix=${Uri.encodeComponent(prefix)}&refresh=${Uri.encodeComponent('doNotRefresh')}&configMap=${Uri.encodeComponent(jsonEncode(configMap))}',
                       transition: TransitionType.cupertino);
                 }
               } else {
@@ -381,19 +382,7 @@ class PsHostHomePageState extends State<PsHostHomePage> with AutomaticKeepAliveC
         title: titleText(
           '图床管理-长按拖动',
         ),
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Theme.of(context).primaryColor,
-                Theme.of(context).primaryColor.withValues(alpha: 0.7),
-                Theme.of(context).primaryColor.withValues(alpha: 0.5),
-              ],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-          ),
-        ),
+        flexibleSpace: getFlexibleSpace(context),
         actions: [
           Container(
             margin: const EdgeInsets.symmetric(horizontal: 8.0),

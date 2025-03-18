@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/picture_host_manage/manage_api/upyun_manage_api.dart';
+import 'package:horopic/widgets/common_widgets.dart';
 
 class UpyunTokenManage extends StatefulWidget {
   const UpyunTokenManage({super.key});
@@ -39,15 +40,7 @@ class UpyunTokenManageState extends State<UpyunTokenManage> {
         centerTitle: true,
         elevation: 0,
         title: titleText('又拍云Token管理'),
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withAlpha(204)],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-          ),
-        ),
+        flexibleSpace: getFlexibleSpace(context),
       ),
       body: Center(
         child: Column(
@@ -73,12 +66,12 @@ class UpyunTokenManageState extends State<UpyunTokenManage> {
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () async {
+                Navigator.pop(context);
                 showCupertinoAlertDialogWithConfirmFunc(
                   content: '是否删除Token:$token?',
                   title: '删除Token',
                   context: context,
                   onConfirm: () async {
-                    Navigator.pop(context);
                     var result = await UpyunManageAPI.deleteToken(token, tokenName);
                     if (result[0] == 'success') {
                       var queryResult = await UpyunManageAPI.readUpyunManageConfig();
@@ -91,7 +84,6 @@ class UpyunTokenManageState extends State<UpyunTokenManage> {
                         await UpyunManageAPI.saveUpyunManageConfig(email, password, token, tokenName);
                         showToast('Token已删除');
                         if (mounted) {
-                          Navigator.pop(context);
                           Navigator.pop(context);
                         }
                       }

@@ -55,7 +55,7 @@ class UploadManager extends BaseUploadManager {
       onSendProgress: createCallback(path, fileName),
     );
     if (response.statusCode != HttpStatus.ok && response.statusCode != HttpStatus.created) {
-      throw Exception('Upload failed with status code: ${response.statusCode}');
+      throw Exception('Upload failed: ${response.statusCode} - ${response.data}');
     }
   }
 

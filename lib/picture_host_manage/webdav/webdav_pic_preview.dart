@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:extended_image/extended_image.dart';
+import 'package:horopic/widgets/common_widgets.dart';
 import 'package:horopic/widgets/load_state_change.dart';
 import 'package:horopic/utils/common_functions.dart';
 
@@ -32,15 +33,7 @@ class WebdavImagePreviewState extends State<WebdavImagePreview> {
         elevation: 0,
         centerTitle: true,
         title: titleText('图片预览'),
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withAlpha(204)],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-          ),
-        ),
+        flexibleSpace: getFlexibleSpace(context),
       ),
       body: PageView.builder(
         controller: _pageController,

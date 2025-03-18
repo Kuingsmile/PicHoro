@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'dart:convert';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:external_path/external_path.dart';
@@ -22,7 +21,8 @@ import 'package:horopic/router/application.dart';
 import 'package:horopic/router/routers.dart';
 import 'package:horopic/picture_host_manage/common/loading_state.dart' as loading_state;
 import 'package:horopic/utils/image_compressor.dart';
-import 'package:horopic/picture_host_manage/aws/aws_file_explorer.dart' show NewFolderDialog, NewFolderDialogContent;
+import 'package:horopic/picture_host_manage/common/new_folder_widgets.dart';
+import 'package:horopic/widgets/common_widgets.dart';
 
 class ImgurFileExplorer extends StatefulWidget {
   final Map userProfile;
@@ -197,15 +197,7 @@ class ImgurFileExplorerState extends loading_state.BaseLoadingPageState<ImgurFil
           },
         ),
         titleSpacing: 0,
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withAlpha(204)],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-          ),
-        ),
+        flexibleSpace: getFlexibleSpace(context),
         title: Text(widget.albumInfo.isEmpty ? '文件管理' : widget.albumInfo['title'],
             style: const TextStyle(
               color: Colors.white,
@@ -591,7 +583,7 @@ class ImgurFileExplorerState extends loading_state.BaseLoadingPageState<ImgurFil
                                   return NewFolderDialog(
                                     contentWidget: NewFolderDialogContent(
                                       title: "  请输入相册名",
-                                      okBtnTap: () async {
+                                      onConfirm: () async {
                                         String newName = newFolder.text;
                                         if (newName.isEmpty) {
                                           showToastWithContext(context, "相册名不能为空");
@@ -606,8 +598,8 @@ class ImgurFileExplorerState extends loading_state.BaseLoadingPageState<ImgurFil
                                           showToast('创建失败');
                                         }
                                       },
-                                      vc: newFolder,
-                                      cancelBtnTap: () {},
+                                      folderNameController: newFolder,
+                                      onCancel: () {},
                                     ),
                                   );
                                 });
@@ -669,7 +661,6 @@ class ImgurFileExplorerState extends loading_state.BaseLoadingPageState<ImgurFil
                         toDelete.add(i);
                       }
                     }
-                    Navigator.pop(context);
                     await deleteAll(toDelete);
                     showToast('删除完成');
                     return;
@@ -819,7 +810,7 @@ class ImgurFileExplorerState extends loading_state.BaseLoadingPageState<ImgurFil
                         fileName = i <= dirAllInfoList.length - 1
                             ? 'Directory'
                             : '${allInfoList[i]['id'].toString()}.${allInfoList[i]['link'].split('.').last}';
-                        finalFormatedurl = linkGeneratorMap[Global.defaultLKformat]!(rawurl, fileName);
+                        finalFormatedurl = getFormatedUrl(rawurl, fileName);
                         multiUrls.add(finalFormatedurl);
                       }
                     }
@@ -877,83 +868,11 @@ class ImgurFileExplorerState extends loading_state.BaseLoadingPageState<ImgurFil
       );
 
   @override
-  Widget buildEmpty() {
-    return SmartRefresher(
-        controller: refreshController,
-        enablePullDown: true,
-        enablePullUp: false,
-        header: const ClassicHeader(
-          refreshStyle: RefreshStyle.Follow,
-          idleText: '下拉刷新',
-          refreshingText: '正在刷新',
-          completeText: '刷新完成',
-          failedText: '刷新失败',
-          releaseText: '释放刷新',
-        ),
-        footer: const ClassicFooter(
-          loadStyle: LoadStyle.ShowWhenLoading,
-          idleText: '上拉加载',
-          loadingText: '正在加载',
-          noDataText: '没有更多啦',
-          failedText: '没有更多啦',
-          canLoadingText: '释放加载',
-        ),
-        onRefresh: _onrefresh,
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Image.asset(
-                'assets/images/empty.png',
-                width: 100,
-                height: 100,
-              ),
-              const Center(
-                  child: Text('没有文件哦，点击右上角添加吧',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))))
-            ],
-          ),
-        ));
-  }
-
-  @override
-  Widget buildError() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Text('加载失败,请检查网络', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))),
-          ElevatedButton(
-            style: ButtonStyle(
-              backgroundColor: WidgetStateProperty.all(Colors.blue),
-            ),
-            onPressed: () {
-              setState(() {
-                state = loading_state.LoadState.loading;
-              });
-              _getFileList();
-            },
-            child: const Text('重新加载'),
-          )
-        ],
-      ),
-    );
-  }
-
-  @override
-  Widget buildLoading() {
-    return const Center(
-      child: SizedBox(
-        width: 30,
-        height: 30,
-        child: CircularProgressIndicator(
-          strokeWidth: 2,
-          backgroundColor: Colors.transparent,
-          valueColor: AlwaysStoppedAnimation(Colors.blue),
-        ),
-      ),
-    );
+  void onErrorRetry() {
+    setState(() {
+      state = loading_state.LoadState.loading;
+    });
+    _getFileList();
   }
 
   @override
@@ -997,43 +916,25 @@ class ImgurFileExplorerState extends loading_state.BaseLoadingPageState<ImgurFil
                         children: [
                           SlidableAction(
                             onPressed: (BuildContext context) async {
-                              showCupertinoDialog(
-                                  barrierDismissible: true,
+                              showCupertinoAlertDialogWithConfirmFunc(
                                   context: context,
-                                  builder: (BuildContext context) {
-                                    return CupertinoAlertDialog(
-                                      title: const Text('通知'),
-                                      content: Text('确定要删除${allInfoList[index]['title']}吗？'),
-                                      actions: <Widget>[
-                                        CupertinoDialogAction(
-                                          child: const Text('取消', style: TextStyle(color: Colors.blue)),
-                                          onPressed: () {
-                                            Navigator.pop(context);
-                                          },
-                                        ),
-                                        CupertinoDialogAction(
-                                          child: const Text('确定', style: TextStyle(color: Colors.blue)),
-                                          onPressed: () async {
-                                            Navigator.pop(context);
-                                            var result = await ImgurManageAPI.deleteAlbum(
-                                              widget.userProfile['accesstoken'],
-                                              allInfoList[index]['id'],
-                                              widget.userProfile['proxy'],
-                                            );
-                                            if (result[0] == 'success') {
-                                              showToast('删除成功');
-                                              setState(() {
-                                                allInfoList.removeAt(index);
-                                                dirAllInfoList.removeAt(index);
-                                                selectedFilesBool.removeAt(index);
-                                              });
-                                            } else {
-                                              showToast('删除失败');
-                                            }
-                                          },
-                                        ),
-                                      ],
+                                  content: '确定要删除${allInfoList[index]['title']}吗?',
+                                  onConfirm: () async {
+                                    var result = await ImgurManageAPI.deleteAlbum(
+                                      widget.userProfile['accesstoken'],
+                                      allInfoList[index]['id'],
+                                      widget.userProfile['proxy'],
                                     );
+                                    if (result[0] == 'success') {
+                                      showToast('删除成功');
+                                      setState(() {
+                                        allInfoList.removeAt(index);
+                                        dirAllInfoList.removeAt(index);
+                                        selectedFilesBool.removeAt(index);
+                                      });
+                                    } else {
+                                      showToast('删除失败');
+                                    }
                                   });
                             },
                             backgroundColor: const Color(0xFFFE4A49),
@@ -1125,42 +1026,22 @@ class ImgurFileExplorerState extends loading_state.BaseLoadingPageState<ImgurFil
                             ),
                             SlidableAction(
                               onPressed: (BuildContext context) async {
-                                showCupertinoDialog(
-                                    barrierDismissible: true,
+                                showCupertinoAlertDialogWithConfirmFunc(
                                     context: context,
-                                    builder: (BuildContext context) {
-                                      return CupertinoAlertDialog(
-                                        title: const Text('通知'),
-                                        content: Text(
-                                            '确定要删除${allInfoList[index]['id']}.${allInfoList[index]['link'].split('.').last}吗？'),
-                                        actions: <Widget>[
-                                          CupertinoDialogAction(
-                                            child: const Text('取消', style: TextStyle(color: Colors.blue)),
-                                            onPressed: () {
-                                              Navigator.pop(context);
-                                            },
-                                          ),
-                                          CupertinoDialogAction(
-                                            child: const Text('确定', style: TextStyle(color: Colors.blue)),
-                                            onPressed: () async {
-                                              Navigator.pop(context);
-                                              var result = await ImgurManageAPI.deleteImage(
-                                                  widget.userProfile['accesstoken'],
-                                                  allInfoList[index]['id'],
-                                                  widget.userProfile['proxy']);
-                                              if (result[0] == 'success') {
-                                                showToast('删除成功');
-                                                setState(() {
-                                                  allInfoList.removeAt(index);
-                                                  selectedFilesBool.removeAt(index);
-                                                });
-                                              } else {
-                                                showToast('删除失败');
-                                              }
-                                            },
-                                          ),
-                                        ],
-                                      );
+                                    content:
+                                        '确定要删除${allInfoList[index]['id']}.${allInfoList[index]['link'].split('.').last}吗?',
+                                    onConfirm: () async {
+                                      var result = await ImgurManageAPI.deleteImage(widget.userProfile['accesstoken'],
+                                          allInfoList[index]['id'], widget.userProfile['proxy']);
+                                      if (result[0] == 'success') {
+                                        showToast('删除成功');
+                                        setState(() {
+                                          allInfoList.removeAt(index);
+                                          selectedFilesBool.removeAt(index);
+                                        });
+                                      } else {
+                                        showToast('删除失败');
+                                      }
                                     });
                               },
                               backgroundColor: const Color(0xFFFE4A49),
@@ -1214,64 +1095,6 @@ class ImgurFileExplorerState extends loading_state.BaseLoadingPageState<ImgurFil
                                   urlList = urlList.substring(0, urlList.length - 1);
                                   Application.router.navigateTo(this.context,
                                       '${Routes.albumImagePreview}?index=$newImageIndex&images=${Uri.encodeComponent(urlList)}',
-                                      transition: TransitionType.none);
-                                } else if (Global.chewieExt
-                                    .contains(allInfoList[index]['link'].split('.').last.toLowerCase())) {
-                                  String shareUrl = '';
-                                  List videoList = [];
-                                  int newImageIndex = index - dirAllInfoList.length;
-                                  for (int i = dirAllInfoList.length; i < allInfoList.length; i++) {
-                                    if (Global.chewieExt
-                                        .contains(allInfoList[i]['link'].split('.').last.toLowerCase())) {
-                                      shareUrl = allInfoList[i]['link'];
-                                      videoList.add({
-                                        "url": shareUrl,
-                                        "name": '${allInfoList[i]['id']}.${allInfoList[i]['link'].split('.').last}',
-                                      });
-                                    } else if (i < index) {
-                                      newImageIndex--;
-                                    }
-                                  }
-                                  Map<String, dynamic> headers = {};
-                                  Application.router.navigateTo(this.context,
-                                      '${Routes.netVideoPlayer}?videoList=${Uri.encodeComponent(jsonEncode(videoList))}&index=$newImageIndex&type=${Uri.encodeComponent('normal')}&headers=${Uri.encodeComponent(jsonEncode(headers))}',
-                                      transition: TransitionType.none);
-                                } else if (Global.vlcExt
-                                    .contains(allInfoList[index]['link'].split('.').last.toLowerCase())) {
-                                  //vlc预览视频
-                                  String shareUrl = '';
-                                  String subUrl = '';
-                                  List videoList = [];
-                                  int newImageIndex = index - dirAllInfoList.length;
-                                  Map subtitleFileMap = {};
-                                  for (int i = dirAllInfoList.length; i < allInfoList.length; i++) {
-                                    if (Global.subtitleFileExt
-                                        .contains(allInfoList[i]['link'].split('.').last.toLowerCase())) {
-                                      subUrl = allInfoList[i]['link'].toString();
-                                      subtitleFileMap[allInfoList[i]['link'].split('.').first] = subUrl;
-                                    }
-                                    if (Global.vlcExt
-                                        .contains(allInfoList[index]['link'].split('.').last.toLowerCase())) {
-                                      shareUrl = allInfoList[i]['link'].toString();
-                                      videoList.add({
-                                        "url": shareUrl,
-                                        "name": '${allInfoList[i]['id']}.${allInfoList[i]['link'].split('.').last}',
-                                        "subtitlePath": '',
-                                      });
-                                    } else if (i < index) {
-                                      newImageIndex--;
-                                    }
-                                  }
-                                  for (int i = 0; i < videoList.length; i++) {
-                                    if (subtitleFileMap.containsKey(videoList[i]['name'].split('.').first)) {
-                                      videoList[i]['subtitlePath'] =
-                                          subtitleFileMap[videoList[i]['name'].split('.').first];
-                                    }
-                                  }
-                                  Map<String, dynamic> headers = {};
-
-                                  Application.router.navigateTo(this.context,
-                                      '${Routes.netVideoPlayer}?videoList=${Uri.encodeComponent(jsonEncode(videoList))}&index=$newImageIndex&type=${Uri.encodeComponent('mkv')}&headers=${Uri.encodeComponent(jsonEncode(headers))}',
                                       transition: TransitionType.none);
                                 }
                               },
@@ -1386,12 +1209,11 @@ class ImgurFileExplorerState extends loading_state.BaseLoadingPageState<ImgurFil
             minLeadingWidth: 0,
             title: const Text('复制链接(设置中的默认格式)'),
             onTap: () async {
-              String format = Global.getLKformat();
               String shareUrl = allInfoList[index]['link'];
               String filename = allInfoList[index]['id'] == null
                   ? 'None'
                   : '${allInfoList[index]['id'].toString()}.${allInfoList[index]['link'].split('.').last}';
-              String formatedLink = linkGeneratorMap[format]!(shareUrl, filename);
+              String formatedLink = getFormatedUrl(shareUrl, filename);
               await flutter_services.Clipboard.setData(flutter_services.ClipboardData(text: formatedLink));
               if (mounted) {
                 Navigator.pop(context);
@@ -1412,39 +1234,21 @@ class ImgurFileExplorerState extends loading_state.BaseLoadingPageState<ImgurFil
             title: const Text('删除'),
             onTap: () async {
               Navigator.pop(context);
-              showCupertinoDialog(
-                barrierDismissible: true,
+              showCupertinoAlertDialogWithConfirmFunc(
                 context: context,
-                builder: (BuildContext context) {
-                  return CupertinoAlertDialog(
-                    title: const Text('通知'),
-                    content: Text('确定要删除${allInfoList[index]['id']}.${allInfoList[index]['link'].split('.').last}吗？'),
-                    actions: <Widget>[
-                      CupertinoDialogAction(
-                        child: const Text('取消', style: TextStyle(color: Colors.blue)),
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                      ),
-                      CupertinoDialogAction(
-                        child: const Text('确定', style: TextStyle(color: Colors.blue)),
-                        onPressed: () async {
-                          Navigator.pop(context);
-                          var result = await ImgurManageAPI.deleteImage(
-                              widget.userProfile['accesstoken'], allInfoList[index]['id'], widget.userProfile['proxy']);
-                          if (result[0] == 'success') {
-                            showToast('删除成功');
-                            setState(() {
-                              allInfoList.removeAt(index);
-                              selectedFilesBool.removeAt(index);
-                            });
-                          } else {
-                            showToast('删除失败');
-                          }
-                        },
-                      ),
-                    ],
-                  );
+                content: '确定要删除${allInfoList[index]['id']}.${allInfoList[index]['link'].split('.').last}吗?',
+                onConfirm: () async {
+                  var result = await ImgurManageAPI.deleteImage(
+                      widget.userProfile['accesstoken'], allInfoList[index]['id'], widget.userProfile['proxy']);
+                  if (result[0] == 'success') {
+                    showToast('删除成功');
+                    setState(() {
+                      allInfoList.removeAt(index);
+                      selectedFilesBool.removeAt(index);
+                    });
+                  } else {
+                    showToast('删除失败');
+                  }
                 },
               );
             },

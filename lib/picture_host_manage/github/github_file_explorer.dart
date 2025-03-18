@@ -2,7 +2,6 @@ import 'dart:io';
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' as flutter_services;
 
@@ -25,7 +24,8 @@ import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/widgets/net_loading_dialog.dart';
 import 'package:horopic/utils/image_compressor.dart';
-import 'package:horopic/picture_host_manage/aws/aws_file_explorer.dart' show NewFolderDialog, NewFolderDialogContent;
+import 'package:horopic/picture_host_manage/common/new_folder_widgets.dart';
+import 'package:horopic/widgets/common_widgets.dart';
 
 class GithubFileExplorer extends StatefulWidget {
   final Map element;
@@ -240,15 +240,7 @@ class GithubFileExplorerState extends loading_state.BaseLoadingPageState<GithubF
           },
         ),
         titleSpacing: 0,
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withAlpha(204)],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-          ),
-        ),
+        flexibleSpace: getFlexibleSpace(context),
         title: Text(
             widget.bucketPrefix == ''
                 ? widget.element['name']
@@ -646,11 +638,10 @@ class GithubFileExplorerState extends loading_state.BaseLoadingPageState<GithubF
                                     return NewFolderDialog(
                                       contentWidget: NewFolderDialogContent(
                                         title: "  请输入新文件夹名\n / 分隔创建嵌套文件夹",
-                                        okBtnTap: () async {
+                                        onConfirm: () async {
                                           String newName = newFolder.text;
                                           if (newName.isEmpty) {
-                                            showToastWithContext(context, "文件夹名不能为空");
-                                            return;
+                                            return showToastWithContext(context, "文件夹名不能为空");
                                           }
                                           if (newName.startsWith("/")) {
                                             newName = newName.substring(1);
@@ -666,8 +657,8 @@ class GithubFileExplorerState extends loading_state.BaseLoadingPageState<GithubF
                                             showToast('创建失败');
                                           }
                                         },
-                                        vc: newFolder,
-                                        cancelBtnTap: () {},
+                                        folderNameController: newFolder,
+                                        onCancel: () {},
                                       ),
                                     );
                                   });
@@ -726,10 +717,8 @@ class GithubFileExplorerState extends loading_state.BaseLoadingPageState<GithubF
                         toDelete.add(i);
                       }
                     }
-                    Navigator.pop(context);
                     await deleteAll(toDelete);
                     showToast('删除完成');
-                    return;
                   } catch (e) {
                     flogErr(e, {}, 'GithubFileExplorerState', 'deleteAll');
                     showToast('删除失败');
@@ -860,7 +849,7 @@ class GithubFileExplorerState extends loading_state.BaseLoadingPageState<GithubF
                           rawurl =
                               'https://raw.githubusercontent.com/${widget.element['showedUsername']}/${widget.element['name']}/${widget.element['default_branch']}/${widget.bucketPrefix}${allInfoList[i]['path']}';
                           fileName = allInfoList[i]['path'];
-                          finalFormatedurl = linkGeneratorMap[Global.defaultLKformat]!(rawurl, fileName);
+                          finalFormatedurl = getFormatedUrl(rawurl, fileName);
 
                           multiUrls.add(finalFormatedurl);
                         }
@@ -896,7 +885,7 @@ class GithubFileExplorerState extends loading_state.BaseLoadingPageState<GithubF
                             failCount++;
                           }
                           fileName = allInfoList[i]['path'];
-                          finalFormatedurl = linkGeneratorMap[Global.defaultLKformat]!(rawurl, fileName);
+                          finalFormatedurl = getFormatedUrl(rawurl, fileName);
                           multiUrls.add(finalFormatedurl);
                         }
                       }
@@ -1006,59 +995,11 @@ class GithubFileExplorerState extends loading_state.BaseLoadingPageState<GithubF
   }
 
   @override
-  Widget buildEmpty() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Image.asset(
-            'assets/images/empty.png',
-            width: 100,
-            height: 100,
-          ),
-          const Text('没有文件哦，点击右上角添加吧', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118)))
-        ],
-      ),
-    );
-  }
-
-  @override
-  Widget buildError() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Text('加载失败,请检查网络', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))),
-          ElevatedButton(
-            style: ButtonStyle(
-              backgroundColor: WidgetStateProperty.all(Colors.blue),
-            ),
-            onPressed: () {
-              setState(() {
-                state = loading_state.LoadState.loading;
-              });
-              _getBucketList();
-            },
-            child: const Text('重新加载'),
-          )
-        ],
-      ),
-    );
-  }
-
-  @override
-  Widget buildLoading() {
-    return const Center(
-      child: SizedBox(
-        width: 30,
-        height: 30,
-        child: CircularProgressIndicator(
-          strokeWidth: 2,
-          backgroundColor: Colors.transparent,
-          valueColor: AlwaysStoppedAnimation(Colors.blue),
-        ),
-      ),
-    );
+  void onErrorRetry() {
+    setState(() {
+      state = loading_state.LoadState.loading;
+    });
+    _getBucketList();
   }
 
   @override
@@ -1103,48 +1044,30 @@ class GithubFileExplorerState extends loading_state.BaseLoadingPageState<GithubF
                           SlidableAction(
                             onPressed: (BuildContext context) async {
                               if (widget.element['showedUsername'] == adminUserName) {
-                                showCupertinoDialog(
-                                    barrierDismissible: true,
+                                showCupertinoAlertDialogWithConfirmFunc(
                                     context: context,
-                                    builder: (BuildContext context) {
-                                      return CupertinoAlertDialog(
-                                        title: const Text('通知'),
-                                        content: Text('确定要删除${allInfoList[index]['path']}吗？'),
-                                        actions: <Widget>[
-                                          CupertinoDialogAction(
-                                            child: const Text('取消', style: TextStyle(color: Colors.blue)),
-                                            onPressed: () {
-                                              Navigator.pop(context);
-                                            },
-                                          ),
-                                          CupertinoDialogAction(
-                                            child: const Text('确定', style: TextStyle(color: Colors.blue)),
-                                            onPressed: () async {
-                                              Navigator.pop(context);
-                                              await showDialog(
-                                                  context: context,
-                                                  barrierDismissible: false,
-                                                  builder: (context) {
-                                                    return NetLoadingDialog(
-                                                      outsideDismiss: false,
-                                                      loading: true,
-                                                      loadingText: "删除中...",
-                                                      requestCallBack: GithubManageAPI.deleteFolder(
-                                                          widget.element['showedUsername'],
-                                                          widget.element['name'],
-                                                          '${widget.bucketPrefix + allInfoList[index]['path']}/',
-                                                          widget.element['default_branch'],
-                                                          allInfoList[index]['sha']),
-                                                    );
-                                                  });
-                                              setState(() {
-                                                showToast('操作完毕');
-                                                _onrefresh();
-                                              });
-                                            },
-                                          ),
-                                        ],
-                                      );
+                                    content: '确定要删除${allInfoList[index]['path']}吗?',
+                                    onConfirm: () async {
+                                      await showDialog(
+                                          context: context,
+                                          barrierDismissible: false,
+                                          builder: (context) {
+                                            return NetLoadingDialog(
+                                              outsideDismiss: false,
+                                              loading: true,
+                                              loadingText: "删除中...",
+                                              requestCallBack: GithubManageAPI.deleteFolder(
+                                                  widget.element['showedUsername'],
+                                                  widget.element['name'],
+                                                  '${widget.bucketPrefix + allInfoList[index]['path']}/',
+                                                  widget.element['default_branch'],
+                                                  allInfoList[index]['sha']),
+                                            );
+                                          });
+                                      setState(() {
+                                        showToast('操作完毕');
+                                        _onrefresh();
+                                      });
                                     });
                               } else {
                                 showToast('您没有权限删除');
@@ -1285,44 +1208,26 @@ class GithubFileExplorerState extends loading_state.BaseLoadingPageState<GithubF
                             SlidableAction(
                               onPressed: (BuildContext context) async {
                                 if (widget.element['showedUsername'] == adminUserName) {
-                                  showCupertinoDialog(
-                                    barrierDismissible: true,
+                                  showCupertinoAlertDialogWithConfirmFunc(
                                     context: context,
-                                    builder: (BuildContext context) {
-                                      return CupertinoAlertDialog(
-                                        title: const Text('通知'),
-                                        content: Text('确定要删除${allInfoList[index]['path']}吗？'),
-                                        actions: <Widget>[
-                                          CupertinoDialogAction(
-                                            child: const Text('取消', style: TextStyle(color: Colors.blue)),
-                                            onPressed: () {
-                                              Navigator.pop(context);
-                                            },
-                                          ),
-                                          CupertinoDialogAction(
-                                            child: const Text('确定', style: TextStyle(color: Colors.blue)),
-                                            onPressed: () async {
-                                              Navigator.pop(context);
-                                              String path = widget.bucketPrefix + allInfoList[index]['path'];
-                                              var result = await GithubManageAPI.deleteRepoFile(
-                                                  widget.element['showedUsername'],
-                                                  widget.element['name'],
-                                                  path,
-                                                  allInfoList[index]['sha'],
-                                                  widget.element['default_branch']);
-                                              if (result[0] == 'success') {
-                                                showToast('删除成功');
-                                                setState(() {
-                                                  allInfoList.removeAt(index);
-                                                  selectedFilesBool.removeAt(index);
-                                                });
-                                              } else {
-                                                showToast('删除失败');
-                                              }
-                                            },
-                                          ),
-                                        ],
-                                      );
+                                    content: '确定要删除${allInfoList[index]['path']}吗?',
+                                    onConfirm: () async {
+                                      String path = widget.bucketPrefix + allInfoList[index]['path'];
+                                      var result = await GithubManageAPI.deleteRepoFile(
+                                          widget.element['showedUsername'],
+                                          widget.element['name'],
+                                          path,
+                                          allInfoList[index]['sha'],
+                                          widget.element['default_branch']);
+                                      if (result[0] == 'success') {
+                                        showToast('删除成功');
+                                        setState(() {
+                                          allInfoList.removeAt(index);
+                                          selectedFilesBool.removeAt(index);
+                                        });
+                                      } else {
+                                        showToast('删除失败');
+                                      }
                                     },
                                   );
                                 } else {
@@ -1573,11 +1478,10 @@ class GithubFileExplorerState extends loading_state.BaseLoadingPageState<GithubF
             title: const Text('复制链接(设置中的默认格式)'),
             onTap: () async {
               if (widget.element['showedUsername'] != adminUserName || widget.element['private'] == false) {
-                String format = Global.getLKformat();
                 String shareUrl =
                     'https://raw.githubusercontent.com/${widget.element['showedUsername']}/${widget.element['name']}/${widget.element['default_branch']}/${widget.bucketPrefix}${allInfoList[index]['path']}';
                 String filename = my_path.basename(allInfoList[index]['path']);
-                String formatedLink = linkGeneratorMap[format]!(shareUrl, filename);
+                String formatedLink = getFormatedUrl(shareUrl, filename);
                 await flutter_services.Clipboard.setData(flutter_services.ClipboardData(text: formatedLink));
                 if (mounted) {
                   Navigator.pop(context);
@@ -1591,10 +1495,9 @@ class GithubFileExplorerState extends loading_state.BaseLoadingPageState<GithubF
                   widget.bucketPrefix + allInfoList[index]['path'],
                 );
                 if (result[0] == 'success') {
-                  String format = Global.getLKformat();
                   String shareUrl = result[1]['download_url'];
                   String filename = my_path.basename(allInfoList[index]['path']);
-                  String formatedLink = linkGeneratorMap[format]!(shareUrl, filename);
+                  String formatedLink = getFormatedUrl(shareUrl, filename);
                   await flutter_services.Clipboard.setData(flutter_services.ClipboardData(text: formatedLink));
                   if (mounted) {
                     Navigator.pop(context);
@@ -1620,44 +1523,22 @@ class GithubFileExplorerState extends loading_state.BaseLoadingPageState<GithubF
             onTap: () async {
               if (widget.element['showedUsername'] == adminUserName) {
                 Navigator.pop(context);
-                showCupertinoDialog(
-                  barrierDismissible: true,
+                showCupertinoAlertDialogWithConfirmFunc(
                   context: context,
-                  builder: (BuildContext context) {
-                    return CupertinoAlertDialog(
-                      title: const Text('通知'),
-                      content: Text('确定要删除${allInfoList[index]['path']}吗？'),
-                      actions: <Widget>[
-                        CupertinoDialogAction(
-                          child: const Text('取消', style: TextStyle(color: Colors.blue)),
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                        ),
-                        CupertinoDialogAction(
-                          child: const Text('确定', style: TextStyle(color: Colors.blue)),
-                          onPressed: () async {
-                            Navigator.pop(context);
-                            String path = widget.bucketPrefix + allInfoList[index]['path'];
-                            var result = await GithubManageAPI.deleteRepoFile(
-                                widget.element['showedUsername'],
-                                widget.element['name'],
-                                path,
-                                allInfoList[index]['sha'],
-                                widget.element['default_branch']);
-                            if (result[0] == 'success') {
-                              showToast('删除成功');
-                              setState(() {
-                                allInfoList.removeAt(index);
-                                selectedFilesBool.removeAt(index);
-                              });
-                            } else {
-                              showToast('删除失败');
-                            }
-                          },
-                        ),
-                      ],
-                    );
+                  content: '确定要删除${allInfoList[index]['path']}吗?',
+                  onConfirm: () async {
+                    String path = widget.bucketPrefix + allInfoList[index]['path'];
+                    var result = await GithubManageAPI.deleteRepoFile(widget.element['showedUsername'],
+                        widget.element['name'], path, allInfoList[index]['sha'], widget.element['default_branch']);
+                    if (result[0] == 'success') {
+                      showToast('删除成功');
+                      setState(() {
+                        allInfoList.removeAt(index);
+                        selectedFilesBool.removeAt(index);
+                      });
+                    } else {
+                      showToast('删除失败');
+                    }
                   },
                 );
               } else {
@@ -1722,48 +1603,30 @@ class GithubFileExplorerState extends loading_state.BaseLoadingPageState<GithubF
               title: const Text('删除'),
               onTap: () async {
                 Navigator.pop(context);
-                showCupertinoDialog(
-                  barrierDismissible: true,
+                showCupertinoAlertDialogWithConfirmFunc(
                   context: context,
-                  builder: (BuildContext context) {
-                    return CupertinoAlertDialog(
-                      title: const Text('通知'),
-                      content: Text('确定要删除目录${allInfoList[index]['path']}吗？'),
-                      actions: <Widget>[
-                        CupertinoDialogAction(
-                          child: const Text('取消', style: TextStyle(color: Colors.blue)),
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                        ),
-                        CupertinoDialogAction(
-                          child: const Text('确定', style: TextStyle(color: Colors.blue)),
-                          onPressed: () async {
-                            Navigator.pop(context);
-                            await showDialog(
-                                context: context,
-                                barrierDismissible: false,
-                                builder: (context) {
-                                  return NetLoadingDialog(
-                                    outsideDismiss: false,
-                                    loading: true,
-                                    loadingText: "删除中...",
-                                    requestCallBack: GithubManageAPI.deleteFolder(
-                                        widget.element['showedUsername'],
-                                        widget.element['name'],
-                                        '${widget.bucketPrefix + allInfoList[index]['path']}/',
-                                        widget.element['default_branch'],
-                                        allInfoList[index]['sha']),
-                                  );
-                                });
-                            setState(() {
-                              showToast('操作完毕');
-                              _onrefresh();
-                            });
-                          },
-                        ),
-                      ],
-                    );
+                  content: '确定要删除目录${allInfoList[index]['path']}吗?',
+                  onConfirm: () async {
+                    await showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (context) {
+                          return NetLoadingDialog(
+                            outsideDismiss: false,
+                            loading: true,
+                            loadingText: "删除中...",
+                            requestCallBack: GithubManageAPI.deleteFolder(
+                                widget.element['showedUsername'],
+                                widget.element['name'],
+                                '${widget.bucketPrefix + allInfoList[index]['path']}/',
+                                widget.element['default_branch'],
+                                allInfoList[index]['sha']),
+                          );
+                        });
+                    setState(() {
+                      showToast('操作完毕');
+                      _onrefresh();
+                    });
                   },
                 );
               }),

@@ -8,22 +8,24 @@ import 'package:horopic/utils/common_functions.dart';
 
 class QiniuImageUploadUtils {
   static Map<String, String> areaHostMap = {
-    'z0': 'https://upload.qiniup.com', //华东
-    'cn-east-2': 'https://upload-cn-east-2.qiniup.com', //华东 浙江2
-    'z1': 'https://upload-z1.qiniup.com', //华北
-    'z2': 'https://upload-z2.qiniup.com', //华南
-    'na0': 'https://upload-na0.qiniup.com', //北美
-    'as0': 'https://upload-as0.qiniup.com', //东南亚
-    'ap-northeast-1': 'https://upload-ap-northeast-1.qiniup.com', //亚太首尔
-    'ap-southeast-2': 'https://upload-ap-southeast-2.qiniup.com', //亚太-河内
+    'z0': 'https://up-z0.qiniup.com', //华东
+    'cn-east-2': 'https://up-cn-east-2.qiniup.com', //华东 浙江2
+    'z1': 'https://up-z1.qiniup.com', //华北-河北
+    'z2': 'https://up-z2.qiniup.com', //华南-广东
+    'cn-northwest-1': 'https://up-cn-northwest-1.qiniup.com', //西北-陕西
+    'na0': 'https://up-na0.qiniup.com', //北美
+    'as0': 'https://up-as0.qiniup.com', //东南亚
+    'ap-northeast-1': 'https://up-ap-northeast-1.qiniup.com', //亚太首尔
+    'ap-southeast-2': 'https://up-ap-southeast-2.qiniup.com', //亚太-河内
+    'ap-southeast-3': 'https://up-ap-southeast-3.qiniup.com', //亚太-胡志明
   };
-  //url安全的base64编码
+
+  /// url安全的base64编码
   static String urlSafeBase64Encode(List<int> bytes) {
-    String base64 = base64Encode(bytes);
-    return base64.replaceAll('+', '-').replaceAll('/', '_');
+    return base64Encode(bytes).replaceAll('+', '-').replaceAll('/', '_');
   }
 
-  //url安全的base64编码的上传策略
+  /// url安全的base64编码的上传策略
   static String geturlSafeBase64EncodePutPolicy(String bucket, String key, String path) {
     Map<String, dynamic> putPolicy;
     if (path == 'None') {
@@ -75,7 +77,6 @@ class QiniuImageUploadUtils {
     return '$accessKey:$encodedSign';
   }
 
-  //上传接口
   static uploadApi({
     required String path,
     required String name,
@@ -115,7 +116,7 @@ class QiniuImageUploadUtils {
 
       String urlSafeBase64EncodePutPolicy = geturlSafeBase64EncodePutPolicy(bucket, key, qiniupath);
       String uploadToken = getUploadToken(accessKey, secretKey, urlSafeBase64EncodePutPolicy);
-      String host = QiniuImageUploadUtils.areaHostMap[area]!;
+      String host = QiniuImageUploadUtils.areaHostMap[area] ?? 'https://up.qiniup.com';
       FormData formData = FormData.fromMap({
         "key": urlpath,
         "fileName": name,

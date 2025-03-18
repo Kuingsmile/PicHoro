@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import 'package:horopic/picture_host_manage/manage_api/qiniu_manage_api.dart';
 import 'package:horopic/utils/common_functions.dart';
+import 'package:horopic/widgets/common_widgets.dart';
 
 class QiniuBucketDomainAreaConfig extends StatefulWidget {
   final Map element;
@@ -63,8 +64,7 @@ class QiniuBucketDomainAreaConfigState extends State<QiniuBucketDomainAreaConfig
   }
 
   getExistedDomain() async {
-    var result = await QiniuManageAPI.queryDomains(widget.element);
-    return result;
+    return await QiniuManageAPI.queryDomains(widget.element);
   }
 
   @override
@@ -74,15 +74,7 @@ class QiniuBucketDomainAreaConfigState extends State<QiniuBucketDomainAreaConfig
         elevation: 0,
         centerTitle: true,
         title: titleText('${widget.element['name']}配置'),
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withAlpha(204)],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-          ),
-        ),
+        flexibleSpace: getFlexibleSpace(context),
       ),
       body: Form(
         key: _formKey,

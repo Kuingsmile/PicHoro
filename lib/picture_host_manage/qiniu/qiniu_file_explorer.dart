@@ -8,6 +8,9 @@ import 'package:external_path/external_path.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fluro/fluro.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:horopic/picture_host_manage/common/new_folder_widgets.dart';
+import 'package:horopic/picture_host_manage/common/rename_dialog_widgets.dart';
+import 'package:horopic/widgets/common_widgets.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:path/path.dart' as my_path;
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -22,8 +25,6 @@ import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/widgets/net_loading_dialog.dart';
 import 'package:horopic/utils/image_compressor.dart';
-import 'package:horopic/picture_host_manage/aws/aws_file_explorer.dart'
-    show RenameDialog, RenameDialogContent, NewFolderDialog, NewFolderDialogContent;
 
 bool isCoverFile = false;
 
@@ -168,15 +169,7 @@ class QiniuFileExplorerState extends loading_state.BaseLoadingPageState<QiniuFil
               fontSize: 15,
               fontWeight: FontWeight.bold,
             )),
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withAlpha(204)],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-          ),
-        ),
+        flexibleSpace: getFlexibleSpace(context),
         actions: [
           PopupMenuButton(
             icon: const Icon(
@@ -605,11 +598,10 @@ class QiniuFileExplorerState extends loading_state.BaseLoadingPageState<QiniuFil
                                     return NewFolderDialog(
                                       contentWidget: NewFolderDialogContent(
                                         title: "  请输入新文件夹名\n / 分隔创建嵌套文件夹",
-                                        okBtnTap: () async {
+                                        onConfirm: () async {
                                           String newName = newFolder.text;
                                           if (newName.isEmpty) {
-                                            showToastWithContext(context, "文件夹名不能为空");
-                                            return;
+                                            return showToastWithContext(context, "文件夹名不能为空");
                                           }
                                           if (newName.startsWith("/")) {
                                             newName = newName.substring(1);
@@ -626,8 +618,8 @@ class QiniuFileExplorerState extends loading_state.BaseLoadingPageState<QiniuFil
                                             showToast('创建失败');
                                           }
                                         },
-                                        vc: newFolder,
-                                        cancelBtnTap: () {},
+                                        folderNameController: newFolder,
+                                        onCancel: () {},
                                       ),
                                     );
                                   });
@@ -686,10 +678,8 @@ class QiniuFileExplorerState extends loading_state.BaseLoadingPageState<QiniuFil
                         toDelete.add(i);
                       }
                     }
-                    Navigator.pop(context);
                     await deleteAll(toDelete);
                     showToast('删除完成');
-                    return;
                   } catch (e) {
                     flogErr(
                       e,
@@ -814,7 +804,7 @@ class QiniuFileExplorerState extends loading_state.BaseLoadingPageState<QiniuFil
                           rawurl = '$domain/${allInfoList[i]['key']}';
                           fileName = allInfoList[i]['key'].substring(allInfoList[i]['key'].lastIndexOf('/') + 1);
                         }
-                        finalFormatedurl = linkGeneratorMap[Global.defaultLKformat]!(rawurl, fileName);
+                        finalFormatedurl = getFormatedUrl(rawurl, fileName);
 
                         multiUrls.add(finalFormatedurl);
                       }
@@ -908,59 +898,11 @@ class QiniuFileExplorerState extends loading_state.BaseLoadingPageState<QiniuFil
   }
 
   @override
-  Widget buildEmpty() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Image.asset(
-            'assets/images/empty.png',
-            width: 100,
-            height: 100,
-          ),
-          const Text('没有文件哦，点击右上角添加吧', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118)))
-        ],
-      ),
-    );
-  }
-
-  @override
-  Widget buildError() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Text('加载失败,请检查网络', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))),
-          ElevatedButton(
-            style: ButtonStyle(
-              backgroundColor: WidgetStateProperty.all(Colors.blue),
-            ),
-            onPressed: () {
-              setState(() {
-                state = loading_state.LoadState.loading;
-              });
-              _getBucketList();
-            },
-            child: const Text('重新加载'),
-          )
-        ],
-      ),
-    );
-  }
-
-  @override
-  Widget buildLoading() {
-    return const Center(
-      child: SizedBox(
-        width: 30,
-        height: 30,
-        child: CircularProgressIndicator(
-          strokeWidth: 2,
-          backgroundColor: Colors.transparent,
-          valueColor: AlwaysStoppedAnimation(Colors.blue),
-        ),
-      ),
-    );
+  void onErrorRetry() {
+    setState(() {
+      state = loading_state.LoadState.loading;
+    });
+    _getBucketList();
   }
 
   //build the file list with filetype icon ，name and last modified time
@@ -1005,90 +947,72 @@ class QiniuFileExplorerState extends loading_state.BaseLoadingPageState<QiniuFil
                         children: [
                           SlidableAction(
                             onPressed: (BuildContext context) async {
-                              showCupertinoDialog(
-                                  barrierDismissible: true,
+                              showCupertinoAlertDialogWithConfirmFunc(
                                   context: context,
-                                  builder: (BuildContext context) {
-                                    return CupertinoAlertDialog(
-                                      title: const Text('通知'),
-                                      content: Text('确定要删除${allInfoList[index]}吗？'),
-                                      actions: <Widget>[
-                                        CupertinoDialogAction(
-                                          child: const Text('取消', style: TextStyle(color: Colors.blue)),
-                                          onPressed: () {
-                                            Navigator.pop(context);
-                                          },
-                                        ),
-                                        CupertinoDialogAction(
-                                          child: const Text('确定', style: TextStyle(color: Colors.blue)),
-                                          onPressed: () async {
-                                            Navigator.pop(context);
-                                            Global.operateDone = false;
-                                            await showDialog(
-                                                context: context,
-                                                barrierDismissible: false,
-                                                builder: (context) {
-                                                  return NetLoadingDialog(
-                                                    outsideDismiss: false,
-                                                    loading: true,
-                                                    loadingText: "删除中...",
-                                                    requestCallBack:
-                                                        QiniuManageAPI.deleteFolder(widget.element, allInfoList[index]),
-                                                  );
-                                                });
-                                            while (!Global.operateDone) {
-                                              await Future.delayed(const Duration(milliseconds: 250));
+                                  content: '确定要删除${allInfoList[index]}吗?',
+                                  onConfirm: () async {
+                                    Global.operateDone = false;
+                                    await showDialog(
+                                        context: context,
+                                        barrierDismissible: false,
+                                        builder: (context) {
+                                          return NetLoadingDialog(
+                                            outsideDismiss: false,
+                                            loading: true,
+                                            loadingText: "删除中...",
+                                            requestCallBack:
+                                                QiniuManageAPI.deleteFolder(widget.element, allInfoList[index]),
+                                          );
+                                        });
+                                    while (!Global.operateDone) {
+                                      await Future.delayed(const Duration(milliseconds: 250));
+                                    }
+                                    Global.operateDone = false;
+                                    var queryResult = await QiniuManageAPI.queryBucketFiles(
+                                      widget.element,
+                                      widget.bucketPrefix == ''
+                                          ? {
+                                              'bucket': widget.element['name'],
+                                              'limit': 1000,
+                                              'delimiter': '/',
                                             }
-                                            Global.operateDone = false;
-                                            var queryResult = await QiniuManageAPI.queryBucketFiles(
-                                              widget.element,
-                                              widget.bucketPrefix == ''
-                                                  ? {
-                                                      'bucket': widget.element['name'],
-                                                      'limit': 1000,
-                                                      'delimiter': '/',
-                                                    }
-                                                  : {
-                                                      'prefix': widget.bucketPrefix,
-                                                      'bucket': widget.element['name'],
-                                                      'limit': 1000,
-                                                      'delimiter': '/',
-                                                    },
-                                            );
-                                            var dir = queryResult[1]['commonPrefixes'];
-                                            if (dir == null) {
-                                              showToast('删除成功');
-                                              setState(() {
-                                                allInfoList.removeAt(index);
-                                                dirAllInfoList.removeAt(index);
-                                                selectedFilesBool.removeAt(index);
-                                              });
-                                            } else if (dir != null) {
-                                              if (dir is! List) {
-                                                dir = [dir];
-                                              }
-                                              bool deleted = true;
-                                              for (var element in dir) {
-                                                if (allInfoList[index] == element) {
-                                                  deleted = false;
-                                                  break;
-                                                }
-                                              }
-                                              if (deleted == true) {
-                                                showToast('删除成功');
-                                                setState(() {
-                                                  allInfoList.removeAt(index);
-                                                  dirAllInfoList.removeAt(index);
-                                                  selectedFilesBool.removeAt(index);
-                                                });
-                                              } else {
-                                                showToast('删除失败');
-                                              }
-                                            }
-                                          },
-                                        ),
-                                      ],
+                                          : {
+                                              'prefix': widget.bucketPrefix,
+                                              'bucket': widget.element['name'],
+                                              'limit': 1000,
+                                              'delimiter': '/',
+                                            },
                                     );
+                                    var dir = queryResult[1]['commonPrefixes'];
+                                    if (dir == null) {
+                                      showToast('删除成功');
+                                      setState(() {
+                                        allInfoList.removeAt(index);
+                                        dirAllInfoList.removeAt(index);
+                                        selectedFilesBool.removeAt(index);
+                                      });
+                                    } else if (dir != null) {
+                                      if (dir is! List) {
+                                        dir = [dir];
+                                      }
+                                      bool deleted = true;
+                                      for (var element in dir) {
+                                        if (allInfoList[index] == element) {
+                                          deleted = false;
+                                          break;
+                                        }
+                                      }
+                                      if (deleted == true) {
+                                        showToast('删除成功');
+                                        setState(() {
+                                          allInfoList.removeAt(index);
+                                          dirAllInfoList.removeAt(index);
+                                          selectedFilesBool.removeAt(index);
+                                        });
+                                      } else {
+                                        showToast('删除失败');
+                                      }
+                                    }
                                   });
                             },
                             backgroundColor: const Color(0xFFFE4A49),
@@ -1219,39 +1143,21 @@ class QiniuFileExplorerState extends loading_state.BaseLoadingPageState<QiniuFil
                             ),
                             SlidableAction(
                               onPressed: (BuildContext context) async {
-                                showCupertinoDialog(
-                                    barrierDismissible: true,
+                                showCupertinoAlertDialogWithConfirmFunc(
                                     context: context,
-                                    builder: (BuildContext context) {
-                                      return CupertinoAlertDialog(
-                                        title: const Text('通知'),
-                                        content: Text('确定要删除${allInfoList[index]['key']}吗？'),
-                                        actions: <Widget>[
-                                          CupertinoDialogAction(
-                                            child: const Text('取消', style: TextStyle(color: Colors.blue)),
-                                            onPressed: () {
-                                              Navigator.pop(context);
-                                            },
-                                          ),
-                                          CupertinoDialogAction(
-                                            child: const Text('确定', style: TextStyle(color: Colors.blue)),
-                                            onPressed: () async {
-                                              Navigator.pop(context);
-                                              var result = await QiniuManageAPI.deleteFile(
-                                                  widget.element, allInfoList[index]['key']);
-                                              if (result[0] == 'success') {
-                                                showToast('删除成功');
-                                                setState(() {
-                                                  allInfoList.removeAt(index);
-                                                  selectedFilesBool.removeAt(index);
-                                                });
-                                              } else {
-                                                showToast('删除失败');
-                                              }
-                                            },
-                                          ),
-                                        ],
-                                      );
+                                    content: '确定要删除${allInfoList[index]['key']}吗?',
+                                    onConfirm: () async {
+                                      var result =
+                                          await QiniuManageAPI.deleteFile(widget.element, allInfoList[index]['key']);
+                                      if (result[0] == 'success') {
+                                        showToast('删除成功');
+                                        setState(() {
+                                          allInfoList.removeAt(index);
+                                          selectedFilesBool.removeAt(index);
+                                        });
+                                      } else {
+                                        showToast('删除失败');
+                                      }
                                     });
                               },
                               backgroundColor: const Color(0xFFFE4A49),
@@ -1347,60 +1253,6 @@ class QiniuFileExplorerState extends loading_state.BaseLoadingPageState<QiniuFil
                                         '${Routes.mdPreview}?filePath=${Uri.encodeComponent(filePath)}&fileName=${Uri.encodeComponent(fileName)}',
                                         transition: TransitionType.none);
                                   }
-                                } else if (Global.chewieExt
-                                    .contains(allInfoList[index]['key'].split('.').last.toLowerCase())) {
-                                  String shareUrl = '';
-                                  List videoList = [];
-                                  int newImageIndex = index - dirAllInfoList.length;
-                                  for (int i = dirAllInfoList.length; i < allInfoList.length; i++) {
-                                    if (Global.chewieExt
-                                        .contains(allInfoList[i]['key'].split('.').last.toLowerCase())) {
-                                      shareUrl = '$domain/${allInfoList[i]['key']}';
-                                      videoList.add({"url": shareUrl, "name": allInfoList[i]['key']});
-                                    } else if (i < index) {
-                                      newImageIndex--;
-                                    }
-                                  }
-                                  Map<String, dynamic> headers = {};
-                                  Application.router.navigateTo(this.context,
-                                      '${Routes.netVideoPlayer}?videoList=${Uri.encodeComponent(jsonEncode(videoList))}&index=$newImageIndex&type=${Uri.encodeComponent('normal')}&headers=${Uri.encodeComponent(jsonEncode(headers))}',
-                                      transition: TransitionType.none);
-                                } else if (Global.vlcExt
-                                    .contains(allInfoList[index]['key'].split('.').last.toLowerCase())) {
-                                  //vlc预览视频
-                                  String shareUrl = '';
-                                  String subUrl = '';
-                                  List videoList = [];
-                                  int newImageIndex = index - dirAllInfoList.length;
-                                  Map subtitleFileMap = {};
-                                  for (int i = dirAllInfoList.length; i < allInfoList.length; i++) {
-                                    if (Global.subtitleFileExt
-                                        .contains(allInfoList[i]['key'].split('.').last.toLowerCase())) {
-                                      subUrl = '$domain/${allInfoList[i]['key']}';
-                                      subtitleFileMap[allInfoList[i]['key'].split('.').first] = subUrl;
-                                    }
-                                    if (Global.vlcExt
-                                        .contains(allInfoList[index]['key'].split('.').last.toLowerCase())) {
-                                      shareUrl = '$domain/${allInfoList[i]['key']}';
-                                      videoList.add({
-                                        "url": shareUrl,
-                                        "name": allInfoList[i]['key'],
-                                        "subtitlePath": '',
-                                      });
-                                    } else if (i < index) {
-                                      newImageIndex--;
-                                    }
-                                  }
-                                  for (int i = 0; i < videoList.length; i++) {
-                                    if (subtitleFileMap.containsKey(videoList[i]['name'].split('.').first)) {
-                                      videoList[i]['subtitlePath'] =
-                                          subtitleFileMap[videoList[i]['name'].split('.').first];
-                                    }
-                                  }
-                                  Map<String, dynamic> headers = {};
-                                  Application.router.navigateTo(this.context,
-                                      '${Routes.netVideoPlayer}?videoList=${Uri.encodeComponent(jsonEncode(videoList))}&index=$newImageIndex&type=${Uri.encodeComponent('mkv')}&headers=${Uri.encodeComponent(jsonEncode(headers))}',
-                                      transition: TransitionType.none);
                                 }
                               },
                             ),
@@ -1500,7 +1352,6 @@ class QiniuFileExplorerState extends loading_state.BaseLoadingPageState<QiniuFil
             minLeadingWidth: 0,
             title: const Text('复制链接(设置中的默认格式)'),
             onTap: () async {
-              String format = Global.getLKformat();
               String domain = widget.element['domain'];
               if (domain == 'None') {
                 showToast('域名为空');
@@ -1515,7 +1366,7 @@ class QiniuFileExplorerState extends loading_state.BaseLoadingPageState<QiniuFil
               String shareUrl = '$domain/${allInfoList[index]['key']}';
 
               String filename = my_path.basename(allInfoList[index]['key']);
-              String formatedLink = linkGeneratorMap[format]!(shareUrl, filename);
+              String formatedLink = getFormatedUrl(shareUrl, filename);
               await flutter_services.Clipboard.setData(flutter_services.ClipboardData(text: formatedLink));
               if (mounted) {
                 Navigator.pop(context);
@@ -1543,7 +1394,7 @@ class QiniuFileExplorerState extends loading_state.BaseLoadingPageState<QiniuFil
                       return RenameDialog(
                         contentWidget: RenameDialogContent(
                           title: "新文件名 '/'分割文件夹",
-                          okBtnTap: () async {
+                          onConfirm: (bool isCoverFile) async {
                             String newName = vc.text;
                             if (isCoverFile) {
                               var copyResult = await QiniuManageAPI.copyFile(
@@ -1567,9 +1418,9 @@ class QiniuFileExplorerState extends loading_state.BaseLoadingPageState<QiniuFil
                               }
                             }
                           },
-                          vc: vc,
-                          cancelBtnTap: () {},
-                          stateBoolText: '是否覆盖同名文件',
+                          renameTextController: vc,
+                          onCancel: () {},
+                          isShowCoverFileWidget: true,
                         ),
                       );
                     });
@@ -1587,38 +1438,20 @@ class QiniuFileExplorerState extends loading_state.BaseLoadingPageState<QiniuFil
             title: const Text('删除'),
             onTap: () async {
               Navigator.pop(context);
-              showCupertinoDialog(
-                barrierDismissible: true,
+              showCupertinoAlertDialogWithConfirmFunc(
                 context: context,
-                builder: (BuildContext context) {
-                  return CupertinoAlertDialog(
-                    title: const Text('通知'),
-                    content: Text('确定要删除${allInfoList[index]['key']}吗？'),
-                    actions: <Widget>[
-                      CupertinoDialogAction(
-                        child: const Text('取消', style: TextStyle(color: Colors.blue)),
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                      ),
-                      CupertinoDialogAction(
-                        child: const Text('确定', style: TextStyle(color: Colors.blue)),
-                        onPressed: () async {
-                          Navigator.pop(context);
-                          var result = await QiniuManageAPI.deleteFile(widget.element, allInfoList[index]['key']);
-                          if (result[0] == 'success') {
-                            showToast('删除成功');
-                            setState(() {
-                              allInfoList.removeAt(index);
-                              selectedFilesBool.removeAt(index);
-                            });
-                          } else {
-                            showToast('删除失败');
-                          }
-                        },
-                      ),
-                    ],
-                  );
+                content: '确定要删除${allInfoList[index]['key']}吗?',
+                onConfirm: () async {
+                  var result = await QiniuManageAPI.deleteFile(widget.element, allInfoList[index]['key']);
+                  if (result[0] == 'success') {
+                    showToast('删除成功');
+                    setState(() {
+                      allInfoList.removeAt(index);
+                      selectedFilesBool.removeAt(index);
+                    });
+                  } else {
+                    showToast('删除失败');
+                  }
                 },
               );
             },

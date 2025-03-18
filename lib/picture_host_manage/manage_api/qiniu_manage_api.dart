@@ -12,14 +12,16 @@ import 'package:horopic/picture_host_configure/configure_page/qiniu_configure.da
 
 class QiniuManageAPI {
   static Map<String, String> areaUploadCodeName = {
-    'z0': 'https://upload.qiniup.com', //华东
-    'cn-east-2': 'https://upload-cn-east-2.qiniup.com', //华东 浙江2
-    'z1': 'https://upload-z1.qiniup.com', //华北
-    'z2': 'https://upload-z2.qiniup.com', //广东
-    'na0': 'https://upload-na0.qiniup.com', //北美
-    'as0': 'https://upload-as0.qiniup.com', //东南亚
-    'ap-northeast-1': 'https://upload-ap-northeast-1.qiniup.com', //亚太首尔
-    'ap-southeast-2': 'https://upload-ap-southeast-2.qiniup.com', //亚太-河内
+    'z0': 'https://up-z0.qiniup.com', //华东
+    'cn-east-2': 'https://up-cn-east-2.qiniup.com', //华东 浙江2
+    'z1': 'https://up-z1.qiniup.com', //华北-河北
+    'z2': 'https://up-z2.qiniup.com', //华南-广东
+    'cn-northwest-1': 'https://up-cn-northwest-1.qiniup.com', //西北-陕西
+    'na0': 'https://up-na0.qiniup.com', //北美
+    'as0': 'https://up-as0.qiniup.com', //东南亚
+    'ap-northeast-1': 'https://up-ap-northeast-1.qiniup.com', //亚太首尔
+    'ap-southeast-2': 'https://up-ap-southeast-2.qiniup.com', //亚太-河内
+    'ap-southeast-3': 'https://up-ap-southeast-3.qiniup.com', //亚太-胡志明
   };
 
   static Map<String, String> areaCodeName = {
@@ -27,10 +29,12 @@ class QiniuManageAPI {
     'cn-east-2': '华东 浙江2',
     'z1': '华北-河北',
     'z2': '华南-广东',
+    'cn-northwest-1': '西北-陕西',
     'na0': '北美-洛杉矶',
     'as0': '亚太-新加坡',
     'ap-northeast-1': '亚太-首尔',
     'ap-southeast-2': '亚太-河内',
+    'ap-southeast-3': '亚太-胡志明',
   };
 
   static Future<File> get localFile async {

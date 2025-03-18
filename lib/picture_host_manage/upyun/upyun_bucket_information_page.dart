@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:horopic/picture_host_manage/manage_api/upyun_manage_api.dart';
 import 'package:horopic/utils/common_functions.dart';
+import 'package:horopic/widgets/common_widgets.dart';
 
 class UpyunBucketInformation extends StatefulWidget {
   final Map bucketMap;
@@ -23,15 +24,7 @@ class UpyunBucketInformationState extends State<UpyunBucketInformation> {
         elevation: 0,
         centerTitle: true,
         title: titleText('基本信息'),
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withAlpha(204)],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-          ),
-        ),
+        flexibleSpace: getFlexibleSpace(context),
       ),
       body: ListView(
         children: [

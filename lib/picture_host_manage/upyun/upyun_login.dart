@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:fluro/fluro.dart';
 
 import 'package:horopic/utils/common_functions.dart';
+import 'package:horopic/widgets/common_widgets.dart';
 import 'package:horopic/widgets/net_loading_dialog.dart';
 import 'package:horopic/picture_host_manage/manage_api/upyun_manage_api.dart';
 import 'package:horopic/router/application.dart';
@@ -96,15 +97,7 @@ class UpyunLogInState extends State<UpyunLogIn> {
         centerTitle: true,
         elevation: 0,
         title: titleText('登录又拍云'),
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withAlpha(204)],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-          ),
-        ),
+        flexibleSpace: getFlexibleSpace(context),
       ),
       body: signUpPage(),
     );

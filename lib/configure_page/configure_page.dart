@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:dio/dio.dart';
+import 'package:horopic/widgets/common_widgets.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:r_upgrade/r_upgrade.dart';
 import 'package:fluro/fluro.dart';
@@ -115,33 +116,24 @@ class ConfigurePageState extends State<ConfigurePage> with AutomaticKeepAliveCli
     }
 
     if (_updateAvailable) {
-      _showUpdateDialog(version, latestVersion);
+      showCupertinoAlertDialogWithConfirmFunc(
+        title: '通知',
+        content: '发现新版本$latestVersion,当前版本$version,是否更新?',
+        context: context,
+        onConfirm: () async {
+          String url = 'https://pichoro.msq.pub/PicHoro_V$latestVersion.apk';
+          RUpgrade.upgrade(url,
+              fileName: 'PicHoro_V$latestVersion.apk',
+              installType: RUpgradeInstallType.normal,
+              notificationStyle: NotificationStyle.speechAndPlanTime);
+          setState(() {});
+        },
+      );
     } else {
       return showToast(
         "已是最新版本",
       );
     }
-  }
-
-  _showUpdateDialog(String version, String remoteVersion) {
-    showCupertinoAlertDialogWithConfirmFunc(
-      title: '通知',
-      content: '发现新版本$remoteVersion,当前版本$version,是否更新?',
-      context: context,
-      onConfirm: () async {
-        Navigator.of(context).pop();
-        _update(remoteVersion);
-      },
-    );
-  }
-
-  _update(String remoteVersion) async {
-    String url = 'https://pichoro.msq.pub/PicHoro_V$remoteVersion.apk';
-    RUpgrade.upgrade(url,
-        fileName: 'PicHoro_V$remoteVersion.apk',
-        installType: RUpgradeInstallType.normal,
-        notificationStyle: NotificationStyle.speechAndPlanTime);
-    setState(() {});
   }
 
   Widget _buildSettingCard({required String title, required List<Widget> children}) {
@@ -208,15 +200,7 @@ class ConfigurePageState extends State<ConfigurePage> with AutomaticKeepAliveCli
         elevation: 0,
         centerTitle: true,
         title: titleText('设置页面'),
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withValues(alpha: 0.8)],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-          ),
-        ),
+        flexibleSpace: getFlexibleSpace(context),
       ),
       body: ListView(
         physics: const BouncingScrollPhysics(),

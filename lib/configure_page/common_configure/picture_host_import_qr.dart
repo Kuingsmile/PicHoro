@@ -5,7 +5,7 @@ Future<void> _configureSmms(Map<String, dynamic> jsonResult) async {
   try {
     final smmsToken = jsonResult['smms']['token'] ?? '';
     final smmsConfig = SmmsConfigModel(smmsToken);
-    await _saveConfig(SmmsManageAPI.localFile, smmsConfig);
+    await _saveConfig(SmmsManageAPI().localFile(), smmsConfig);
     showToast("sm.ms配置成功");
   } catch (e) {
     _logError('_configureSmms', {}, e);
@@ -97,19 +97,19 @@ Future<void> _configureAlist(Map<String, dynamic> jsonResult) async {
         final alistConfig = AlistConfigModel(alistUrl, alistToken, alistUsername, alistPassword, alistToken,
             alistUploadPath, alistWebPath, alistCustomUrl);
         final alistConfigJson = jsonEncode(alistConfig);
-        final alistConfigFile = await AlistManageAPI.localFile;
+        final alistConfigFile = await AlistManageAPI().localFile();
         await alistConfigFile.writeAsString(alistConfigJson);
         showToast("Alist配置成功");
       } else {
         if (alistUsername.isNotEmpty && alistPassword.isNotEmpty) {
-          var res = await AlistManageAPI.getToken(alistUrl, alistUsername, alistPassword);
+          var res = await AlistManageAPI().getToken(alistUrl, alistUsername, alistPassword);
           if (res[0] != 'success') {
             throw Exception('获取Token失败');
           }
           final alistConfig = AlistConfigModel(
               alistUrl, 'None', alistUsername, alistPassword, res[1], alistUploadPath, alistWebPath, alistCustomUrl);
           final alistConfigJson = jsonEncode(alistConfig);
-          final alistConfigFile = await AlistManageAPI.localFile;
+          final alistConfigFile = await AlistManageAPI().localFile();
           await alistConfigFile.writeAsString(alistConfigJson);
           showToast("Alist配置成功");
         }

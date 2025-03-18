@@ -105,7 +105,6 @@ class Routes {
   static String alistBucketInformation = "/alistBucketInformation";
   static String alistFileExplorer = "/alistFileExplorer";
   static String alistFileInformation = "/alistFileInformation";
-  static String netVideoPlayer = "/netVideoPlayer";
   static String pdfViewer = "/pdfViewer";
   static String webdavFileExplorer = "/webdavFileExplorer";
   static String webdavFileInformation = "/webdavFileInformation";
@@ -214,7 +213,6 @@ class Routes {
     router.define(alistBucketInformation, handler: alistBucketInformationHandler);
     router.define(alistFileExplorer, handler: alistFileExplorerHandler);
     router.define(alistFileInformation, handler: alistFileInformationHandler);
-    router.define(netVideoPlayer, handler: netVideoPlayerHandler);
     router.define(pdfViewer, handler: pdfViewerHandler);
     router.define(webdavFileExplorer, handler: webdavFileExplorerHandler);
     router.define(webdavFileInformation, handler: webdavFileInformationHandler);

@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:dartssh2/dartssh2.dart';
+import 'package:horopic/widgets/common_widgets.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'package:horopic/utils/common_functions.dart';
@@ -60,15 +61,7 @@ class SFTPLocalImagePreviewState extends State<SFTPLocalImagePreview> {
         elevation: 0,
         centerTitle: true,
         title: titleText('图片预览'),
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withAlpha(204)],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-          ),
-        ),
+        flexibleSpace: getFlexibleSpace(context),
       ),
       body: FutureBuilder(
         future: downloadFile(),

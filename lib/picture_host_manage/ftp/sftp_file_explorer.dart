@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'dart:convert';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' as flutter_services;
 
@@ -25,8 +24,9 @@ import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/widgets/net_loading_dialog.dart';
 import 'package:horopic/utils/image_compressor.dart';
-
-bool isCoverFile = false;
+import 'package:horopic/picture_host_manage/common/new_folder_widgets.dart';
+import 'package:horopic/picture_host_manage/common/rename_dialog_widgets.dart';
+import 'package:horopic/widgets/common_widgets.dart';
 
 class SFTPFileExplorer extends StatefulWidget {
   final Map element;
@@ -183,15 +183,7 @@ class SFTPFileExplorerState extends loading_state.BaseLoadingPageState<SFTPFileE
               fontSize: 15,
               fontWeight: FontWeight.bold,
             )),
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withAlpha(204)],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-          ),
-        ),
+        flexibleSpace: getFlexibleSpace(context),
         actions: [
           IconButton(
             icon: const Icon(Icons.terminal, color: Colors.white, size: 30),
@@ -612,7 +604,7 @@ class SFTPFileExplorerState extends loading_state.BaseLoadingPageState<SFTPFileE
                                     return NewFolderDialog(
                                       contentWidget: NewFolderDialogContent(
                                         title: "  请输入新文件夹名\n 不要包含当前目录名",
-                                        okBtnTap: () async {
+                                        onConfirm: () async {
                                           String newName = newFolder.text;
                                           if (newName.isEmpty) {
                                             showToastWithContext(context, "文件夹名不能为空");
@@ -633,8 +625,8 @@ class SFTPFileExplorerState extends loading_state.BaseLoadingPageState<SFTPFileE
                                             showToast('创建失败');
                                           }
                                         },
-                                        vc: newFolder,
-                                        cancelBtnTap: () {},
+                                        folderNameController: newFolder,
+                                        onCancel: () {},
                                       ),
                                     );
                                   });
@@ -693,10 +685,8 @@ class SFTPFileExplorerState extends loading_state.BaseLoadingPageState<SFTPFileE
                         toDelete.add(i);
                       }
                     }
-                    Navigator.pop(context);
                     await deleteAll(toDelete);
                     showToast('删除完成');
-                    return;
                   } catch (e) {
                     flogErr(e, {}, 'SFTPBucketPage', 'deleteAll');
                     showToast('删除失败');
@@ -801,7 +791,7 @@ class SFTPFileExplorerState extends loading_state.BaseLoadingPageState<SFTPFileE
                               'ftp://${widget.element['ftpUser']}@${widget.element['ftpPassword']}@${widget.element['ftpHost']}:${widget.element['ftpPort']}${widget.bucketPrefix}${allInfoList[i]['name']}';
                         }
                         fileName = allInfoList[i]['name'];
-                        finalFormatedurl = linkGeneratorMap[Global.defaultLKformat]!(rawurl, fileName);
+                        finalFormatedurl = getFormatedUrl(rawurl, fileName);
                         multiUrls.add(finalFormatedurl);
                       }
                     }
@@ -895,59 +885,11 @@ class SFTPFileExplorerState extends loading_state.BaseLoadingPageState<SFTPFileE
   }
 
   @override
-  Widget buildEmpty() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Image.asset(
-            'assets/images/empty.png',
-            width: 100,
-            height: 100,
-          ),
-          const Text('没有文件哦，点击右上角添加吧', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118)))
-        ],
-      ),
-    );
-  }
-
-  @override
-  Widget buildError() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Text('加载失败,请检查网络', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))),
-          ElevatedButton(
-            style: ButtonStyle(
-              backgroundColor: WidgetStateProperty.all(Colors.blue),
-            ),
-            onPressed: () {
-              setState(() {
-                state = loading_state.LoadState.loading;
-              });
-              _getBucketList();
-            },
-            child: const Text('重新加载'),
-          )
-        ],
-      ),
-    );
-  }
-
-  @override
-  Widget buildLoading() {
-    return const Center(
-      child: SizedBox(
-        width: 30,
-        height: 30,
-        child: CircularProgressIndicator(
-          strokeWidth: 2,
-          backgroundColor: Colors.transparent,
-          valueColor: AlwaysStoppedAnimation(Colors.blue),
-        ),
-      ),
-    );
+  void onErrorRetry() {
+    setState(() {
+      state = loading_state.LoadState.loading;
+    });
+    _getBucketList();
   }
 
   @override
@@ -991,45 +933,27 @@ class SFTPFileExplorerState extends loading_state.BaseLoadingPageState<SFTPFileE
                         children: [
                           SlidableAction(
                             onPressed: (BuildContext context) async {
-                              showCupertinoDialog(
-                                  barrierDismissible: true,
+                              showCupertinoAlertDialogWithConfirmFunc(
                                   context: context,
-                                  builder: (BuildContext context) {
-                                    return CupertinoAlertDialog(
-                                      title: const Text('通知'),
-                                      content: Text('确定要删除${allInfoList[index]['name']}吗？\n删除后不可恢复!!'),
-                                      actions: <Widget>[
-                                        CupertinoDialogAction(
-                                          child: const Text('取消', style: TextStyle(color: Colors.blue)),
-                                          onPressed: () {
-                                            Navigator.pop(context);
-                                          },
-                                        ),
-                                        CupertinoDialogAction(
-                                          child: const Text('确定', style: TextStyle(color: Colors.blue)),
-                                          onPressed: () async {
-                                            Navigator.pop(context);
-                                            String folderName = widget.bucketPrefix + allInfoList[index]['name'];
-                                            if (folderName.contains('*') || folderName.contains('?')) {
-                                              showToast('文件夹名不能包含特殊字符');
-                                              return;
-                                            }
-                                            var result = await FTPManageAPI.deleteFolderSFTP(
-                                                widget.bucketPrefix + allInfoList[index]['name']);
-                                            if (result[0] == 'success') {
-                                              showToast('删除成功');
-                                              setState(() {
-                                                allInfoList.removeAt(index);
-                                                dirAllInfoList.removeAt(index);
-                                                selectedFilesBool.removeAt(index);
-                                              });
-                                            } else {
-                                              showToast('删除失败');
-                                            }
-                                          },
-                                        ),
-                                      ],
-                                    );
+                                  content: '确定要删除${allInfoList[index]['name']}吗？\n删除后不可恢复!!',
+                                  onConfirm: () async {
+                                    String folderName = widget.bucketPrefix + allInfoList[index]['name'];
+                                    if (folderName.contains('*') || folderName.contains('?')) {
+                                      showToast('文件夹名不能包含特殊字符');
+                                      return;
+                                    }
+                                    var result = await FTPManageAPI.deleteFolderSFTP(
+                                        widget.bucketPrefix + allInfoList[index]['name']);
+                                    if (result[0] == 'success') {
+                                      showToast('删除成功');
+                                      setState(() {
+                                        allInfoList.removeAt(index);
+                                        dirAllInfoList.removeAt(index);
+                                        selectedFilesBool.removeAt(index);
+                                      });
+                                    } else {
+                                      showToast('删除失败');
+                                    }
                                   });
                             },
                             backgroundColor: const Color(0xFFFE4A49),
@@ -1144,43 +1068,25 @@ class SFTPFileExplorerState extends loading_state.BaseLoadingPageState<SFTPFileE
                             ),
                             SlidableAction(
                               onPressed: (BuildContext context) async {
-                                showCupertinoDialog(
-                                    barrierDismissible: true,
+                                showCupertinoAlertDialogWithConfirmFunc(
                                     context: context,
-                                    builder: (BuildContext context) {
-                                      return CupertinoAlertDialog(
-                                        title: const Text('通知'),
-                                        content: Text('确定要删除${allInfoList[index]['name']}吗？'),
-                                        actions: <Widget>[
-                                          CupertinoDialogAction(
-                                            child: const Text('取消', style: TextStyle(color: Colors.blue)),
-                                            onPressed: () {
-                                              Navigator.pop(context);
-                                            },
-                                          ),
-                                          CupertinoDialogAction(
-                                            child: const Text('确定', style: TextStyle(color: Colors.blue)),
-                                            onPressed: () async {
-                                              Navigator.pop(context);
-                                              String filepath = widget.bucketPrefix + allInfoList[index]['name'];
-                                              if (filepath.contains('*') || filepath.contains('?')) {
-                                                showToast('文件名中不能包含特殊字符');
-                                                return;
-                                              }
-                                              var result = await FTPManageAPI.deleteFileSFTP(filepath);
-                                              if (result[0] == 'success') {
-                                                showToast('删除成功');
-                                                setState(() {
-                                                  allInfoList.removeAt(index);
-                                                  selectedFilesBool.removeAt(index);
-                                                });
-                                              } else {
-                                                showToast('删除失败');
-                                              }
-                                            },
-                                          ),
-                                        ],
-                                      );
+                                    content: '确定要删除${allInfoList[index]['name']}吗?',
+                                    onConfirm: () async {
+                                      String filepath = widget.bucketPrefix + allInfoList[index]['name'];
+                                      if (filepath.contains('*') || filepath.contains('?')) {
+                                        showToast('文件名中不能包含特殊字符');
+                                        return;
+                                      }
+                                      var result = await FTPManageAPI.deleteFileSFTP(filepath);
+                                      if (result[0] == 'success') {
+                                        showToast('删除成功');
+                                        setState(() {
+                                          allInfoList.removeAt(index);
+                                          selectedFilesBool.removeAt(index);
+                                        });
+                                      } else {
+                                        showToast('删除失败');
+                                      }
                                     });
                               },
                               backgroundColor: const Color(0xFFFE4A49),
@@ -1351,7 +1257,6 @@ class SFTPFileExplorerState extends loading_state.BaseLoadingPageState<SFTPFileE
             minLeadingWidth: 0,
             title: const Text('复制链接(设置中的默认格式)'),
             onTap: () async {
-              String format = Global.getLKformat();
               String shareUrl = '';
               String customUrl = widget.element['ftpCustomUrl'] == null || widget.element['ftpCustomUrl'] == ''
                   ? 'None'
@@ -1364,7 +1269,7 @@ class SFTPFileExplorerState extends loading_state.BaseLoadingPageState<SFTPFileE
               }
 
               String filename = allInfoList[index]['name'];
-              String formatedLink = linkGeneratorMap[format]!(shareUrl, filename);
+              String formatedLink = getFormatedUrl(shareUrl, filename);
               await flutter_services.Clipboard.setData(flutter_services.ClipboardData(text: formatedLink));
               if (mounted) {
                 Navigator.pop(context);
@@ -1392,7 +1297,7 @@ class SFTPFileExplorerState extends loading_state.BaseLoadingPageState<SFTPFileE
                       return RenameDialog(
                         contentWidget: RenameDialogContent(
                           title: "新文件名 不含当前目录",
-                          okBtnTap: () async {
+                          onConfirm: (bool isCoverFile) async {
                             String newName = vc.text;
                             if (newName == '') {
                               showToast('文件名不能为空');
@@ -1413,8 +1318,8 @@ class SFTPFileExplorerState extends loading_state.BaseLoadingPageState<SFTPFileE
                               showToast('重命名失败');
                             }
                           },
-                          vc: vc,
-                          cancelBtnTap: () {},
+                          renameTextController: vc,
+                          onCancel: () {},
                         ),
                       );
                     });
@@ -1432,43 +1337,25 @@ class SFTPFileExplorerState extends loading_state.BaseLoadingPageState<SFTPFileE
             title: const Text('删除'),
             onTap: () async {
               Navigator.pop(context);
-              showCupertinoDialog(
-                barrierDismissible: true,
+              showCupertinoAlertDialogWithConfirmFunc(
                 context: context,
-                builder: (BuildContext context) {
-                  return CupertinoAlertDialog(
-                    title: const Text('通知'),
-                    content: Text('确定要删除${allInfoList[index]['name']}吗？'),
-                    actions: <Widget>[
-                      CupertinoDialogAction(
-                        child: const Text('取消', style: TextStyle(color: Colors.blue)),
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                      ),
-                      CupertinoDialogAction(
-                        child: const Text('确定', style: TextStyle(color: Colors.blue)),
-                        onPressed: () async {
-                          Navigator.pop(context);
-                          String filepath = widget.bucketPrefix + allInfoList[index]['name'];
-                          if (filepath.contains('*') || filepath.contains('?')) {
-                            showToast('文件名中不能包含特殊字符');
-                            return;
-                          }
-                          var result = await FTPManageAPI.deleteFileSFTP(filepath);
-                          if (result[0] == 'success') {
-                            showToast('删除成功');
-                            setState(() {
-                              allInfoList.removeAt(index);
-                              selectedFilesBool.removeAt(index);
-                            });
-                          } else {
-                            showToast('删除失败');
-                          }
-                        },
-                      ),
-                    ],
-                  );
+                content: '确定要删除${allInfoList[index]['name']}吗?',
+                onConfirm: () async {
+                  String filepath = widget.bucketPrefix + allInfoList[index]['name'];
+                  if (filepath.contains('*') || filepath.contains('?')) {
+                    showToast('文件名中不能包含特殊字符');
+                    return;
+                  }
+                  var result = await FTPManageAPI.deleteFileSFTP(filepath);
+                  if (result[0] == 'success') {
+                    showToast('删除成功');
+                    setState(() {
+                      allInfoList.removeAt(index);
+                      selectedFilesBool.removeAt(index);
+                    });
+                  } else {
+                    showToast('删除失败');
+                  }
                 },
               );
             },
@@ -1528,300 +1415,31 @@ class SFTPFileExplorerState extends loading_state.BaseLoadingPageState<SFTPFileE
               title: const Text('删除'),
               onTap: () async {
                 Navigator.pop(context);
-                showCupertinoDialog(
-                  barrierDismissible: true,
+                showCupertinoAlertDialogWithConfirmFunc(
                   context: context,
-                  builder: (BuildContext context) {
-                    return CupertinoAlertDialog(
-                      title: const Text('通知'),
-                      content: Text('确定要删除${allInfoList[index]['name']}吗？\n删除后不可恢复!!'),
-                      actions: <Widget>[
-                        CupertinoDialogAction(
-                          child: const Text('取消', style: TextStyle(color: Colors.blue)),
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                        ),
-                        CupertinoDialogAction(
-                          child: const Text('确定', style: TextStyle(color: Colors.blue)),
-                          onPressed: () async {
-                            Navigator.pop(context);
-                            String folderName = widget.bucketPrefix + allInfoList[index]['name'];
-                            if (folderName.contains('*') || folderName.contains('?')) {
-                              showToast('文件夹名不能包含特殊字符');
-                              return;
-                            }
-                            var result =
-                                await FTPManageAPI.deleteFolderSFTP(widget.bucketPrefix + allInfoList[index]['name']);
-                            if (result[0] == 'success') {
-                              showToast('删除成功');
-                              setState(() {
-                                allInfoList.removeAt(index);
-                                dirAllInfoList.removeAt(index);
-                                selectedFilesBool.removeAt(index);
-                              });
-                            } else {
-                              showToast('删除失败');
-                            }
-                          },
-                        ),
-                      ],
-                    );
+                  content: '确定要删除${allInfoList[index]['name']}吗？\n删除后不可恢复!!',
+                  onConfirm: () async {
+                    String folderName = widget.bucketPrefix + allInfoList[index]['name'];
+                    if (folderName.contains('*') || folderName.contains('?')) {
+                      showToast('文件夹名不能包含特殊字符');
+                      return;
+                    }
+                    var result = await FTPManageAPI.deleteFolderSFTP(widget.bucketPrefix + allInfoList[index]['name']);
+                    if (result[0] == 'success') {
+                      showToast('删除成功');
+                      setState(() {
+                        allInfoList.removeAt(index);
+                        dirAllInfoList.removeAt(index);
+                        selectedFilesBool.removeAt(index);
+                      });
+                    } else {
+                      showToast('删除失败');
+                    }
                   },
                 );
               }),
         ],
       ),
     );
-  }
-}
-
-class RenameDialog extends AlertDialog {
-  RenameDialog({super.key, required Widget contentWidget})
-      : super(
-          content: contentWidget,
-          contentPadding: EdgeInsets.zero,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(30),
-            //side: BorderSide(color: Colors.blue, width: 3)
-          ),
-        );
-}
-
-//弹出框 修改自https://www.jianshu.com/p/4144837a789b
-double btnHeight = 60;
-double borderWidth = 2;
-
-class RenameDialogContent extends StatefulWidget {
-  final String title;
-  final String cancelBtnTitle;
-  final String okBtnTitle;
-  final VoidCallback cancelBtnTap;
-  final VoidCallback okBtnTap;
-  final TextEditingController vc;
-  const RenameDialogContent({
-    super.key,
-    required this.title,
-    this.cancelBtnTitle = "取消",
-    this.okBtnTitle = "确定",
-    required this.cancelBtnTap,
-    required this.okBtnTap,
-    required this.vc,
-  });
-
-  @override
-  RenameDialogContentState createState() => RenameDialogContentState();
-}
-
-class RenameDialogContentState extends State<RenameDialogContent> {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-        margin: const EdgeInsets.only(top: 20),
-        height: 140,
-        width: 10000,
-        alignment: Alignment.bottomCenter,
-        child: Column(
-          children: [
-            Container(
-                alignment: Alignment.center,
-                child: Text(
-                  widget.title,
-                  style: const TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 20),
-                )),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(30, 0, 30, 0),
-              child: TextFormField(
-                cursorHeight: 20,
-                textAlign: TextAlign.center,
-                style: const TextStyle(color: Colors.black87),
-                controller: widget.vc,
-                validator: (value) {
-                  if (value!.isEmpty) {
-                    return '不能为空';
-                  }
-                  return null;
-                },
-                decoration: const InputDecoration(
-                    enabledBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Color.fromARGB(255, 234, 236, 238)),
-                    ),
-                    focusedBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.blue),
-                    )),
-              ),
-            ),
-            Container(
-              // color: Colors.red,
-              height: btnHeight,
-              margin: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-              child: Column(
-                children: [
-                  Container(
-                    width: double.infinity,
-                    color: const Color.fromARGB(255, 234, 236, 238),
-                    height: borderWidth,
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      TextButton(
-                        onPressed: () {
-                          widget.vc.text = "";
-                          widget.cancelBtnTap();
-                          Navigator.of(context).pop();
-                        },
-                        child: Text(
-                          widget.cancelBtnTitle,
-                          style: const TextStyle(fontSize: 22, color: Colors.blue),
-                        ),
-                      ),
-                      Container(
-                        width: borderWidth,
-                        color: const Color.fromARGB(255, 234, 236, 238),
-                        height: btnHeight - borderWidth - borderWidth,
-                      ),
-                      TextButton(
-                          onPressed: () {
-                            widget.okBtnTap();
-                            Navigator.of(context).pop();
-                            widget.vc.text = "";
-                          },
-                          child: Text(
-                            widget.okBtnTitle,
-                            style: const TextStyle(fontSize: 22, color: Color.fromARGB(255, 169, 173, 177)),
-                          )),
-                    ],
-                  ),
-                ],
-              ),
-            )
-          ],
-        ));
-  }
-}
-
-class NewFolderDialog extends AlertDialog {
-  NewFolderDialog({super.key, required Widget contentWidget})
-      : super(
-          content: contentWidget,
-          contentPadding: EdgeInsets.zero,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(30),
-            //side: BorderSide(color: Colors.blue, width: 3)
-          ),
-        );
-}
-
-//弹出框 修改自https://www.jianshu.com/p/4144837a789b
-
-class NewFolderDialogContent extends StatefulWidget {
-  final String title;
-  final String cancelBtnTitle;
-  final String okBtnTitle;
-  final VoidCallback cancelBtnTap;
-  final VoidCallback okBtnTap;
-  final TextEditingController vc;
-  const NewFolderDialogContent({
-    super.key,
-    required this.title,
-    this.cancelBtnTitle = "取消",
-    this.okBtnTitle = "确定",
-    required this.cancelBtnTap,
-    required this.okBtnTap,
-    required this.vc,
-  });
-
-  @override
-  NewFolderDialogContentState createState() => NewFolderDialogContentState();
-}
-
-class NewFolderDialogContentState extends State<NewFolderDialogContent> {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-        margin: const EdgeInsets.only(top: 20),
-        height: 190,
-        width: 10000,
-        alignment: Alignment.bottomCenter,
-        child: Column(
-          children: [
-            Container(
-                alignment: Alignment.center,
-                child: Text(
-                  widget.title,
-                  style: const TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 20),
-                )),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(30, 0, 30, 0),
-              child: TextFormField(
-                cursorHeight: 20,
-                textAlign: TextAlign.center,
-                style: const TextStyle(color: Colors.black87),
-                controller: widget.vc,
-                validator: (value) {
-                  if (value!.isEmpty) {
-                    return '不能为空';
-                  }
-                  return null;
-                },
-                decoration: const InputDecoration(
-                    enabledBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Color.fromARGB(255, 14, 103, 192)),
-                    ),
-                    focusedBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.blue),
-                    )),
-              ),
-            ),
-            const Spacer(),
-            //A check box with a label
-            Container(
-              // color: Colors.red,
-              height: btnHeight,
-              margin: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-              child: Column(
-                children: [
-                  Container(
-                    width: double.infinity,
-                    color: const Color.fromARGB(255, 234, 236, 238),
-                    height: borderWidth,
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      TextButton(
-                        onPressed: () {
-                          widget.vc.text = "";
-                          widget.cancelBtnTap();
-                          Navigator.of(context).pop();
-                        },
-                        child: Text(
-                          widget.cancelBtnTitle,
-                          style: const TextStyle(fontSize: 22, color: Colors.blue),
-                        ),
-                      ),
-                      Container(
-                        width: borderWidth,
-                        color: const Color.fromARGB(255, 234, 236, 238),
-                        height: btnHeight - borderWidth - borderWidth,
-                      ),
-                      TextButton(
-                          onPressed: () {
-                            widget.okBtnTap();
-                            Navigator.of(context).pop();
-                            widget.vc.text = "";
-                          },
-                          child: Text(
-                            widget.okBtnTitle,
-                            style: const TextStyle(fontSize: 22, color: Colors.blue),
-                          )),
-                    ],
-                  ),
-                ],
-              ),
-            )
-          ],
-        ));
   }
 }

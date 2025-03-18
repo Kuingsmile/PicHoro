@@ -1,158 +1,125 @@
-import 'dart:io';
-import 'dart:convert';
-
 import 'package:dio/dio.dart';
+import 'package:horopic/picture_host_manage/common/base_manage_api.dart';
 import 'package:path_provider/path_provider.dart';
 
-import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/common_functions.dart';
 
-class SmmsManageAPI {
-  static const String smmsAPIUrl = 'https://smms.app/api/v2/';
+class SmmsManageAPI extends BaseManageApi {
+  static final SmmsManageAPI _instance = SmmsManageAPI._internal();
 
-  static Future<File> get localFile async {
-    String path = await _localPath;
-    String defaultUser = Global.getUser();
-    return ensureFileExists(File('$path/${defaultUser}_smms_config.txt'));
+  SmmsManageAPI._internal();
+
+  factory SmmsManageAPI() {
+    return _instance;
   }
 
-  static Future<String> get _localPath async {
-    Directory directory = await getApplicationDocumentsDirectory();
-    return directory.path;
-  }
+  String smmsAPIUrl = 'https://smms.app/api/v2/';
 
-  static Future<String> readSmmsConfig() async {
-    try {
-      final file = await localFile;
-      return await file.readAsString();
-    } catch (e) {
-      flogErr(e, {}, "SmmsManageAPI", "readSmmsConfig");
-      return "Error";
-    }
-  }
+  @override
+  String configFileName() => 'smms_config.txt';
 
-  static Future<Map> getConfigMap() async {
-    String configStr = await readSmmsConfig();
-    if (configStr == '') {
-      return {};
-    }
-    Map configMap = json.decode(configStr);
-    return configMap;
-  }
+  List defaultOnSuccess(response) => ['success'];
 
-  static getUserProfile() async {
+  _makeRequest(
+    String endpoint, {
+    dynamic data,
+    Map<String, dynamic>? queryParameters,
+    Map<String, dynamic>? headers,
+    required Function onSuccess,
+    String method = 'POST',
+    String callFunction = 'makeRequest',
+  }) async {
     try {
       Map configMap = await getConfigMap();
       String token = configMap['token'];
 
+      String url = '$smmsAPIUrl$endpoint';
+
       BaseOptions baseoptions = setBaseOptions();
       baseoptions.headers = {
-        'Authorization': token,
-        'Content-Type': 'multipart/form-data',
+        "Authorization": token,
+        ...?headers,
       };
       Dio dio = Dio(baseoptions);
-      FormData formData = FormData.fromMap({});
 
-      var response = await dio.post('${smmsAPIUrl}profile', data: formData);
-      if (response.statusCode == 200 && response.data['success'] == true) {
-        Map userProfile = response.data['data'];
-        return ['success', userProfile];
+      Response response;
+      if (method == 'GET') {
+        response = await dio.get(url, queryParameters: queryParameters);
+      } else if (method == 'POST') {
+        response = await dio.post(url, data: data, queryParameters: queryParameters);
       } else {
-        return ['failed'];
+        response = await dio.put(url, data: data, queryParameters: queryParameters);
       }
+
+      if (response.statusCode == 200 && response.data['success'] == true) {
+        return onSuccess(response);
+      }
+      flogErr(
+        response,
+        {
+          'url': url,
+          'data': data,
+          'queryParameters': queryParameters,
+          'headers': headers,
+        },
+        "SmmsManageAPI",
+        callFunction,
+      );
     } catch (e) {
-      flogErr(e, {}, "SmmsManageAPI", "getUserProfile");
-      return [e.toString()];
+      flogErr(e, {}, "SmmsManageAPI", callFunction);
     }
+    return ['failed'];
   }
 
-  static getFileList({required int page}) async {
-    try {
-      Map configMap = await getConfigMap();
-      String token = configMap['token'];
-
-      BaseOptions baseoptions = setBaseOptions();
-      baseoptions.headers = {
-        'Authorization': token,
+  getUserProfile() async {
+    return await _makeRequest(
+      'profile',
+      headers: {
         'Content-Type': 'multipart/form-data',
-      };
-      Dio dio = Dio(baseoptions);
-      Map<String, dynamic> params = {
+      },
+      data: FormData.fromMap({}),
+      onSuccess: (response) {
+        return ['success', response.data['data']];
+      },
+      callFunction: 'getUserProfile',
+    );
+  }
+
+  Future<List> getFileList({required int page}) async {
+    return await _makeRequest(
+      'upload_history',
+      queryParameters: {
         'page': page,
-      };
-
-      var response = await dio.get('${smmsAPIUrl}upload_history', queryParameters: params);
-      if (response.statusCode == 200 && response.data['success'] == true) {
-        Map result = response.data;
-        return ['success', result];
-      } else {
-        return ['failed'];
-      }
-    } catch (e) {
-      flogErr(e, {'page': page}, "SmmsManageAPI", "getFileList");
-      return [e.toString()];
-    }
+      },
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+      method: 'GET',
+      onSuccess: (response) {
+        return ['success', response.data];
+      },
+      callFunction: 'getFileList',
+    );
   }
 
-  static uploadFile(String filename, String path) async {
-    try {
-      Map configMap = await getConfigMap();
-      FormData formdata = FormData.fromMap({
+  Future<List<String>> uploadFile(String filename, String path) async {
+    return await _makeRequest(
+      'upload',
+      data: FormData.fromMap({
         "smfile": await MultipartFile.fromFile(path, filename: filename),
         "format": "json",
-      });
-      BaseOptions options = setBaseOptions();
-      options.headers = {
-        "Authorization": configMap["token"],
-        "Content-Type": "multipart/form-data",
-      };
-      Dio dio = Dio(options);
-
-      var response = await dio.post('${smmsAPIUrl}upload', data: formdata);
-      if (response.statusCode == 200 && response.data!['success'] == true) {
-        return ["success"];
-      } else {
-        return ["failed"];
-      }
-    } catch (e) {
-      flogErr(e, {'filename': filename, 'path': path}, "SmmsManageAPI", "uploadFile");
-      return ['error'];
-    }
+      }),
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+      onSuccess: (response) {
+        return ['success'];
+      },
+      callFunction: 'uploadFile',
+    );
   }
 
-  static upLoadFileEntry(
-    List fileList,
-  ) async {
-    int successCount = 0;
-    int failCount = 0;
-
-    for (File fileToTread in fileList) {
-      String path = fileToTread.path;
-      var filename = path.substring(path.lastIndexOf("/") + 1, path.length);
-
-      var uploadResult = await uploadFile(
-        filename,
-        path,
-      );
-      if (uploadResult[0] == "Error") {
-        return showToast('配置错误');
-      } else if (uploadResult[0] == "success") {
-        successCount++;
-      } else {
-        failCount++;
-      }
-    }
-
-    if (successCount == 0) {
-      return showToast('上传失败');
-    } else if (failCount == 0) {
-      return showToast('上传成功');
-    } else {
-      return showToast('成功$successCount,失败$failCount');
-    }
-  }
-
-  static uploadNetworkFile(String fileLink) async {
+  Future<List<String>> uploadNetworkFile(String fileLink) async {
     try {
       String filename = fileLink.substring(fileLink.lastIndexOf("/") + 1, fileLink.length);
       filename = filename.substring(0, !filename.contains("?") ? filename.length : filename.indexOf("?"));
@@ -170,17 +137,16 @@ class SmmsManageAPI {
         filename,
         saveFilePath,
       );
-      if (uploadResult[0] != "success") {
-        return ['failed'];
+      if (uploadResult[0] == "success") {
+        return ['success'];
       }
-      return ['success'];
     } catch (e) {
       flogErr(e, {'fileLink': fileLink}, "SmmsManageAPI", "uploadNetworkFile");
-      return ['failed'];
     }
+    return ['failed'];
   }
 
-  static uploadNetworkFileEntry(
+  uploadNetworkFileEntry(
     List fileList,
   ) async {
     int successCount = 0;
@@ -201,35 +167,22 @@ class SmmsManageAPI {
       return showToast('上传失败');
     } else if (failCount == 0) {
       return showToast('上传成功');
-    } else {
-      return showToast('成功$successCount,失败$failCount');
     }
+    return showToast('成功$successCount,失败$failCount');
   }
 
-  static deleteFile(String hash) async {
-    try {
-      Map configMap = await getConfigMap();
-      Map<String, dynamic> formdata = {
+  Future<List<String>> deleteFile(String hash) async {
+    return await _makeRequest(
+      'delete/$hash',
+      queryParameters: {
         "hash": hash,
         "format": "json",
-      };
-
-      BaseOptions options = setBaseOptions();
-      options.headers = {
-        "Authorization": configMap["token"],
-      };
-      Dio dio = Dio(options);
-      String deleteUrl = "${smmsAPIUrl}delete/$hash";
-
-      var response = await dio.get(deleteUrl, queryParameters: formdata);
-      if (response.statusCode == 200 && response.data!['success'] == true) {
-        return ["success"];
-      } else {
-        return ["failed"];
-      }
-    } catch (e) {
-      flogErr(e, {'hash': hash}, "SmmsManageAPI", "deleteFile");
-      return [e.toString()];
-    }
+      },
+      method: 'GET',
+      onSuccess: (response) {
+        return ['success'];
+      },
+      callFunction: 'deleteFile',
+    );
   }
 }

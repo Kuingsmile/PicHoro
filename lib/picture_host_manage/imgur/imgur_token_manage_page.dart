@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/picture_host_manage/manage_api/imgur_manage_api.dart';
+import 'package:horopic/widgets/common_widgets.dart';
 
 class ImgurTokenManage extends StatefulWidget {
   const ImgurTokenManage({super.key});
@@ -46,15 +47,7 @@ class ImgurTokenManageState extends State<ImgurTokenManage> {
         centerTitle: true,
         elevation: 0,
         title: titleText('Imgur账户管理'),
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withAlpha(204)],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-          ),
-        ),
+        flexibleSpace: getFlexibleSpace(context),
       ),
       body: Center(
         child: ListView(
@@ -103,7 +96,6 @@ class ImgurTokenManageState extends State<ImgurTokenManage> {
                   title: '注销',
                   context: context,
                   onConfirm: () async {
-                    Navigator.pop(context);
                     var queryResult = await ImgurManageAPI.readImgurManageConfig();
                     if (queryResult != 'Error') {
                       var jsonResult = jsonDecode(queryResult);
@@ -114,7 +106,6 @@ class ImgurTokenManageState extends State<ImgurTokenManage> {
                       await ImgurManageAPI.saveImgurManageConfig(imgurUser, clientID, accessToken, proxy);
                       showToast('注销成功');
                       if (mounted) {
-                        Navigator.pop(context);
                         Navigator.pop(context);
                       }
                     } else {

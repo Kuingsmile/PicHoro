@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:horopic/album/action_button.dart';
+import 'package:horopic/widgets/common_widgets.dart';
 import 'package:universal_io/io.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
@@ -207,15 +208,7 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
             statusBarColor: Colors.transparent,
           ),
           shadowColor: Colors.transparent,
-          flexibleSpace: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withValues(alpha: 0.8)],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
-            ),
-          ),
+          flexibleSpace: getFlexibleSpace(context),
           elevation: 0,
           actions: [
             PopupMenuButton(
@@ -340,10 +333,8 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
                           toDelete.add(i);
                         }
                       }
-                      Navigator.pop(context);
                       await removeAllImages(toDelete);
                       showToast('删除完成');
-                      return;
                     } catch (e) {
                       flogErr(e, {}, 'UploadedImagesState', 'build_delete_button');
                       if (context.mounted) {
@@ -374,18 +365,13 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
                 ),
                 footer: CustomFooter(
                   builder: (BuildContext context, LoadStatus? mode) {
-                    Widget body;
-                    if (mode == LoadStatus.idle) {
-                      body = const Text("上拉加载更多");
-                    } else if (mode == LoadStatus.loading) {
-                      body = const CircularProgressIndicator(strokeWidth: 2.0);
-                    } else if (mode == LoadStatus.failed) {
-                      body = const Text("加载失败，请重试");
-                    } else if (mode == LoadStatus.canLoading) {
-                      body = const Text("释放加载更多");
-                    } else {
-                      body = const Text("没有更多图片了");
-                    }
+                    Widget body = switch (mode) {
+                      LoadStatus.idle => const Text("上拉加载更多"),
+                      LoadStatus.loading => const CircularProgressIndicator(strokeWidth: 2.0),
+                      LoadStatus.failed => const Text("加载失败，请重试"),
+                      LoadStatus.canLoading => const Text("释放加载更多"),
+                      _ => const Text("没有更多图片了"),
+                    };
                     return SizedBox(
                       height: 55.0,
                       child: Center(child: body),
@@ -546,8 +532,7 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
                         List<String> multiUrls = [];
                         for (int i = 0; i < _loadedImagesCount; i++) {
                           if (selectedImagesBoolList[i]) {
-                            String finalFormatedurl =
-                                linkGeneratorMap[Global.defaultLKformat]!(imageUrlList[i], imageFileNameList[i]);
+                            String finalFormatedurl = getFormatedUrl(imageUrlList[i], imageFileNameList[i]);
                             multiUrls.add(finalFormatedurl);
                           }
                         }
@@ -632,13 +617,9 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
       if (value == null || value == 10) return;
 
       if (value == 7) {
-        try {
-          await deleteImage(index);
-        } catch (e) {
-          flogErr(e, {}, 'ImagePage', 'handleOnLongPress_delete');
-          if (context.mounted) {
-            showToastWithContext(context, '删除失败');
-          }
+        var deleteResult = await deleteImage(index);
+        if (context.mounted && !deleteResult) {
+          showToastWithContext(context, '删除失败');
         }
       } else {
         final selectedItem = menuItems.firstWhere((item) => item['value'] == value);
@@ -647,71 +628,7 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
     });
   }
 
-  removeAllImages(List imagesIndex) async {
-    bool isDeleteLocal = Global.getIsDeleteLocal();
-    bool isDeleteCloud = Global.getIsDeleteCloud();
-    List<int> sortedIndices = List<int>.from(imagesIndex)..sort((a, b) => b.compareTo(a));
-    for (int index in sortedIndices) {
-      try {
-        Map deleteConfig = {
-          'pictureKey': imagePictureKeyList[index],
-          "name": imageFileNameList[index],
-        };
-
-        if (isDeleteCloud) {
-          var result = await deleterentry(deleteConfig);
-          if (result[0] != 'success') {
-            showToast('云端删除失败');
-            return;
-          }
-        }
-        if (Global.defaultShowedPBhost == 'PBhostExtend1') {
-          await AlbumSQL.deleteData(Global.imageDBExtend!, Global.defaultShowedPBhost, imageIdList[index]);
-          try {
-            await File(imageDisplayedUrlList[index]).delete();
-          } catch (e) {
-            flogErr(e, {}, 'ImagePage', 'deleteALLFTPThumbnail');
-          }
-        } else if (Global.defaultShowedPBhost == 'PBhostExtend2' ||
-            Global.defaultShowedPBhost == 'PBhostExtend3' ||
-            Global.defaultShowedPBhost == 'PBhostExtend4') {
-          await AlbumSQL.deleteData(Global.imageDBExtend!, Global.defaultShowedPBhost, imageIdList[index]);
-        } else {
-          await AlbumSQL.deleteData(Global.imageDB!, Global.defaultShowedPBhost, imageIdList[index]);
-        }
-
-        if (isDeleteLocal) {
-          try {
-            await File(imageLocalPathList[index]).delete();
-          } catch (e) {
-            flogErr(e, {}, 'ImagePage', 'deleteImageAll');
-          }
-        }
-        imageIdList.removeAt(index);
-        imageUrlList.removeAt(index);
-        imageDisplayedUrlList.removeAt(index);
-        imageLocalPathList.removeAt(index);
-        imageFileNameList.removeAt(index);
-        imagePictureKeyList.removeAt(index);
-        setState(() {
-          _loadedImagesCount = imageUrlList.length;
-        });
-      } catch (e) {
-        flogErr(e, {}, 'ImagePage', 'deleteImageAll');
-        rethrow;
-      }
-    }
-
-    // After removing all selected images, update the selectedImagesBoolList for remaining images
-    setState(() {
-      selectedImagesBoolList = List.filled(imageUrlList.length, false, growable: true);
-      _loadedImagesCount = imageUrlList.length < _loadedImagesCount ? imageUrlList.length : _loadedImagesCount;
-    });
-
-    return true;
-  }
-
-  deleteImage(int index) async {
+  Future<bool> _deleteImageAtIndex(int index) async {
     try {
       bool isDeleteLocal = Global.getIsDeleteLocal();
       bool isDeleteCloud = Global.getIsDeleteCloud();
@@ -721,14 +638,16 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
         "name": imageFileNameList[index],
       };
 
+      // Cloud deletion if needed
       if (isDeleteCloud) {
         var result = await deleterentry(deleteConfig);
         if (result[0] != 'success') {
           showToast('云端删除失败');
-          return;
+          return false;
         }
       }
 
+      // Database deletion based on host type
       if (Global.defaultShowedPBhost == 'PBhostExtend1') {
         await AlbumSQL.deleteData(Global.imageDBExtend!, Global.defaultShowedPBhost, imageIdList[index]);
         try {
@@ -743,15 +662,56 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
       } else {
         await AlbumSQL.deleteData(Global.imageDB!, Global.defaultShowedPBhost, imageIdList[index]);
       }
+
+      // Local file deletion if needed
       if (isDeleteLocal) {
         try {
           await File(imageLocalPathList[index]).delete();
         } catch (e) {
-          flogErr(e, {}, 'ImagePage', 'deleteImage');
+          flogErr(e, {}, 'ImagePage', 'deleteLocalFile');
         }
       }
 
+      return true;
+    } catch (e) {
+      flogErr(e, {}, 'ImagePage', 'deleteImageHelper');
+      return false;
+    }
+  }
+
+  removeAllImages(List imagesIndex) async {
+    List<int> sortedIndices = List<int>.from(imagesIndex)..sort((a, b) => b.compareTo(a));
+    bool allSuccessful = true;
+    for (int index in sortedIndices) {
+      bool success = await _deleteImageAtIndex(index);
+      if (success) {
+        imageIdList.removeAt(index);
+        imageUrlList.removeAt(index);
+        imageDisplayedUrlList.removeAt(index);
+        imageLocalPathList.removeAt(index);
+        imageFileNameList.removeAt(index);
+        imagePictureKeyList.removeAt(index);
+      } else {
+        allSuccessful = false;
+        break;
+      }
+    }
+    if (allSuccessful) {
+      // After removing all selected images, update the selectedImagesBoolList for remaining images
       setState(() {
+        selectedImagesBoolList = List.filled(imageUrlList.length, false, growable: true);
+        _loadedImagesCount = imageUrlList.length < _loadedImagesCount ? imageUrlList.length : _loadedImagesCount;
+      });
+      return true;
+    }
+    return false;
+  }
+
+  Future<bool> deleteImage(int index) async {
+    bool success = await _deleteImageAtIndex(index);
+    if (success) {
+      setState(() {
+        // Remove image data from all lists
         imageIdList.removeAt(index);
         imageUrlList.removeAt(index);
         imageDisplayedUrlList.removeAt(index);
@@ -761,10 +721,9 @@ class UploadedImagesState extends State<UploadedImages> with AutomaticKeepAliveC
         selectedImagesBoolList.removeAt(index);
         _loadedImagesCount = _loadedImagesCount > 0 ? _loadedImagesCount - 1 : 0;
       });
-    } catch (e) {
-      flogErr(e, {}, 'ImagePage', 'deleteImage');
-      rethrow;
+      return true;
     }
+    return false;
   }
 
   // 刷新操作

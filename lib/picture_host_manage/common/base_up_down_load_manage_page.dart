@@ -41,6 +41,7 @@ import 'package:horopic/picture_host_manage/common/download/managers/tencent_dow
     as tencent_downloader;
 import 'package:horopic/picture_host_manage/common/download/managers/upyun_download_manager.dart' as upyun_downloader;
 import 'package:horopic/picture_host_manage/common/download/managers/webdav_download_manager.dart' as webdav_downloader;
+import 'package:horopic/widgets/common_widgets.dart';
 
 class BaseUpDownloadManagePage extends StatefulWidget {
   final String userName;
@@ -260,7 +261,6 @@ class BaseUpDownloadManagePageState extends State<BaseUpDownloadManagePage> {
                 content: '是否从任务列表中删除?',
                 title: '通知',
                 onConfirm: () async {
-                  Navigator.pop(context);
                   currentUploadList.remove(currentUploadList[i]);
                   await currentSetUploadList(currentUploadList);
                   uploadPathList.removeAt(i);
@@ -386,7 +386,6 @@ class BaseUpDownloadManagePageState extends State<BaseUpDownloadManagePage> {
                 content: '是否从任务列表中删除?',
                 title: '通知',
                 onConfirm: () async {
-                  Navigator.pop(context);
                   currentDownloadList.remove(currentDownloadList[i]);
                   await currentSetDownloadList(currentDownloadList);
                   if (currentPShost == 'smms') {
@@ -661,15 +660,7 @@ class BaseUpDownloadManagePageState extends State<BaseUpDownloadManagePage> {
             appBar: AppBar(
               centerTitle: true,
               elevation: 0,
-              flexibleSpace: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withValues(alpha: 0.8)],
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                  ),
-                ),
-              ),
+              flexibleSpace: getFlexibleSpace(context),
               title: titleText('上传下载管理'),
               bottom: const TabBar(
                 labelStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),

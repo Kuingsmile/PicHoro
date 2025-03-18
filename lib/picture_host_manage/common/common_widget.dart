@@ -1,11 +1,14 @@
 import 'dart:convert';
 
+import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 import 'package:horopic/picture_host_manage/common/upload/common_service/base_upload_task.dart';
 import 'package:horopic/picture_host_manage/common/download/common_service/base_download_task.dart';
 import 'package:horopic/picture_host_manage/common/download/common_service/base_download_status.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/pages/upload_helper/upload_status.dart';
+import 'package:horopic/utils/global.dart';
+import 'package:horopic/widgets/load_state_change.dart';
 
 //上传列表
 class UploadListItem extends StatefulWidget {
@@ -472,4 +475,39 @@ class DownloadListItemState extends State<DownloadListItem> {
         return Colors.grey;
     }
   }
+}
+
+Widget iconImageLoad(String url, String fileName) {
+  String fileExtension = fileName.split('.').last.toLowerCase();
+  try {
+    if (Global.imgExt.contains(fileExtension)) {
+      return ExtendedImage.network(
+        url,
+        clearMemoryCacheIfFailed: true,
+        retries: 5,
+        height: 50,
+        width: 50,
+        fit: BoxFit.cover,
+        cache: true,
+        loadStateChanged: (state) => defaultLoadStateChanged(state, iconSize: 50),
+      );
+    } else {
+      throw Exception('Not an image file');
+    }
+  } catch (e) {
+    // If the file is not an image, return a default icon
+  }
+  String iconPath = 'assets/icons/';
+  if (fileExtension == '') {
+    iconPath += '_blank.png';
+  } else if (Global.iconList.contains(fileExtension)) {
+    iconPath += '$fileExtension.png';
+  } else {
+    iconPath += 'unknown.png';
+  }
+  return Image.asset(
+    iconPath,
+    width: 50,
+    height: 50,
+  );
 }

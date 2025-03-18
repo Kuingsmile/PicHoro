@@ -9,6 +9,8 @@ import 'package:external_path/external_path.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fluro/fluro.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:horopic/picture_host_manage/common/new_folder_widgets.dart';
+import 'package:horopic/picture_host_manage/common/rename_dialog_widgets.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:path/path.dart' as my_path;
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -582,7 +584,7 @@ class WebdavFileExplorerState extends loading_state.BaseLoadingPageState<WebdavF
                                     return NewFolderDialog(
                                       contentWidget: NewFolderDialogContent(
                                         title: "  请输入新文件夹名\n / 分隔创建嵌套文件夹",
-                                        okBtnTap: () async {
+                                        onConfirm: () async {
                                           String newName = newFolder.text;
                                           if (newName.isEmpty) {
                                             showToastWithContext(context, "文件夹名不能为空");
@@ -603,8 +605,8 @@ class WebdavFileExplorerState extends loading_state.BaseLoadingPageState<WebdavF
                                             showToast('创建失败');
                                           }
                                         },
-                                        vc: newFolder,
-                                        cancelBtnTap: () {},
+                                        folderNameController: newFolder,
+                                        onCancel: () {},
                                       ),
                                     );
                                   });
@@ -668,7 +670,6 @@ class WebdavFileExplorerState extends loading_state.BaseLoadingPageState<WebdavF
                         toDelete.add(i);
                       }
                     }
-                    Navigator.pop(context);
                     await deleteAll(toDelete);
                     showToast('删除完成');
                     return;
@@ -793,7 +794,7 @@ class WebdavFileExplorerState extends loading_state.BaseLoadingPageState<WebdavF
                           rawurl = host + allInfoList[i]['path'];
                         }
 
-                        finalFormatedurl = linkGeneratorMap[Global.defaultLKformat]!(rawurl, fileName);
+                        finalFormatedurl = getFormatedUrl(rawurl, fileName);
 
                         multiUrls.add(finalFormatedurl);
                       }
@@ -886,59 +887,11 @@ class WebdavFileExplorerState extends loading_state.BaseLoadingPageState<WebdavF
   }
 
   @override
-  Widget buildEmpty() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Image.asset(
-            'assets/images/empty.png',
-            width: 100,
-            height: 100,
-          ),
-          const Text('没有文件哦，点击右上角添加吧', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118)))
-        ],
-      ),
-    );
-  }
-
-  @override
-  Widget buildError() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Text('加载失败,请检查网络', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))),
-          ElevatedButton(
-            style: ButtonStyle(
-              backgroundColor: WidgetStateProperty.all(Colors.blue),
-            ),
-            onPressed: () {
-              setState(() {
-                state = loading_state.LoadState.loading;
-              });
-              _getBucketList();
-            },
-            child: const Text('重新加载'),
-          )
-        ],
-      ),
-    );
-  }
-
-  @override
-  Widget buildLoading() {
-    return const Center(
-      child: SizedBox(
-        width: 30,
-        height: 30,
-        child: CircularProgressIndicator(
-          strokeWidth: 2,
-          backgroundColor: Colors.transparent,
-          valueColor: AlwaysStoppedAnimation(Colors.blue),
-        ),
-      ),
-    );
+  void onErrorRetry() {
+    setState(() {
+      state = loading_state.LoadState.loading;
+    });
+    _getBucketList();
   }
 
   @override
@@ -1273,28 +1226,6 @@ class WebdavFileExplorerState extends loading_state.BaseLoadingPageState<WebdavF
                                         '${Routes.mdPreview}?filePath=${Uri.encodeComponent(filePath)}&fileName=${Uri.encodeComponent(fileName)}',
                                         transition: TransitionType.none);
                                   }
-                                } else if (Global.chewieExt
-                                    .contains(allInfoList[index]['name'].split('.').last.toLowerCase())) {
-                                  //预览chewie视频
-                                  String shareUrl = '';
-                                  List videoList = [];
-                                  int newImageIndex = index - dirAllInfoList.length;
-                                  for (int i = dirAllInfoList.length; i < allInfoList.length; i++) {
-                                    if (Global.chewieExt
-                                        .contains(allInfoList[i]['name'].split('.').last.toLowerCase())) {
-                                      shareUrl = host + allInfoList[i]['path'];
-                                      videoList.add({"url": shareUrl, "name": allInfoList[i]['name']});
-                                    } else if (i < index) {
-                                      newImageIndex--;
-                                    }
-                                  }
-                                  Map<String, String> headers = {
-                                    'Authorization':
-                                        generateBasicAuth(widget.element['webdavusername'], widget.element['password'])
-                                  };
-                                  Application.router.navigateTo(this.context,
-                                      '${Routes.netVideoPlayer}?videoList=${Uri.encodeComponent(jsonEncode(videoList))}&index=$newImageIndex&type=${Uri.encodeComponent('normal')}&headers=${Uri.encodeComponent(jsonEncode(headers))}',
-                                      transition: TransitionType.none);
                                 }
                               },
                             ),
@@ -1398,7 +1329,6 @@ class WebdavFileExplorerState extends loading_state.BaseLoadingPageState<WebdavF
             minLeadingWidth: 0,
             title: const Text('复制链接(设置中的默认格式)'),
             onTap: () async {
-              String format = Global.getLKformat();
               String host = widget.element['host'].endsWith('/')
                   ? widget.element['host'].substring(0, widget.element['host'].length - 1)
                   : widget.element['host'];
@@ -1412,7 +1342,7 @@ class WebdavFileExplorerState extends loading_state.BaseLoadingPageState<WebdavF
                 shareUrl = '$host${allInfoList[index]['path']}';
               }
               String filename = my_path.basename(allInfoList[index]['name']);
-              String formatedLink = linkGeneratorMap[format]!(shareUrl, filename);
+              String formatedLink = getFormatedUrl(shareUrl, filename);
               await flutter_services.Clipboard.setData(flutter_services.ClipboardData(text: formatedLink));
               if (mounted) {
                 Navigator.pop(context);
@@ -1440,7 +1370,7 @@ class WebdavFileExplorerState extends loading_state.BaseLoadingPageState<WebdavF
                       return RenameDialog(
                         contentWidget: RenameDialogContent(
                           title: "新文件名 '/'分割文件夹",
-                          okBtnTap: () async {
+                          onConfirm: (bool isCoverFile) async {
                             String newName = vc.text;
                             newName = allInfoList[index]['path']
                                     .substring(0, allInfoList[index]['path'].lastIndexOf('/') + 1) +
@@ -1456,9 +1386,8 @@ class WebdavFileExplorerState extends loading_state.BaseLoadingPageState<WebdavF
                               showToast('重命名失败');
                             }
                           },
-                          vc: vc,
-                          cancelBtnTap: () {},
-                          stateBoolText: '是否覆盖同名文件',
+                          renameTextController: vc,
+                          onCancel: () {},
                         ),
                       );
                     });
@@ -1606,256 +1535,5 @@ class WebdavFileExplorerState extends loading_state.BaseLoadingPageState<WebdavF
         ],
       ),
     );
-  }
-}
-
-class RenameDialog extends AlertDialog {
-  RenameDialog({super.key, required Widget contentWidget})
-      : super(
-          content: contentWidget,
-          contentPadding: EdgeInsets.zero,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(30),
-            //side: BorderSide(color: Colors.blue, width: 3)
-          ),
-        );
-}
-
-//弹出框 修改自https://www.jianshu.com/p/4144837a789b
-double btnHeight = 60;
-double borderWidth = 2;
-
-class RenameDialogContent extends StatefulWidget {
-  final String title;
-  final String cancelBtnTitle;
-  final String okBtnTitle;
-  final VoidCallback cancelBtnTap;
-  final VoidCallback okBtnTap;
-  final TextEditingController vc;
-  final String stateBoolText;
-  const RenameDialogContent(
-      {super.key,
-      required this.title,
-      this.cancelBtnTitle = "取消",
-      this.okBtnTitle = "确定",
-      required this.cancelBtnTap,
-      required this.okBtnTap,
-      required this.vc,
-      required this.stateBoolText});
-
-  @override
-  RenameDialogContentState createState() => RenameDialogContentState();
-}
-
-class RenameDialogContentState extends State<RenameDialogContent> {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-        margin: const EdgeInsets.only(top: 20),
-        height: 140,
-        width: 100,
-        alignment: Alignment.bottomCenter,
-        child: Column(
-          children: [
-            Container(
-                alignment: Alignment.center,
-                child: Text(
-                  widget.title,
-                  style: const TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 20),
-                )),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(30, 0, 30, 0),
-              child: TextFormField(
-                cursorHeight: 20,
-                textAlign: TextAlign.center,
-                style: const TextStyle(color: Colors.black87),
-                controller: widget.vc,
-                validator: (value) {
-                  if (value!.isEmpty) {
-                    return '不能为空';
-                  }
-                  return null;
-                },
-                decoration: const InputDecoration(
-                    enabledBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Color.fromARGB(255, 234, 236, 238)),
-                    ),
-                    focusedBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.blue),
-                    )),
-              ),
-            ),
-            Container(
-              height: btnHeight,
-              margin: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-              child: Column(
-                children: [
-                  Container(
-                    width: double.infinity,
-                    color: const Color.fromARGB(255, 234, 236, 238),
-                    height: borderWidth,
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      TextButton(
-                        onPressed: () {
-                          widget.vc.text = "";
-                          widget.cancelBtnTap();
-                          Navigator.of(context).pop();
-                        },
-                        child: Text(
-                          widget.cancelBtnTitle,
-                          style: const TextStyle(fontSize: 22, color: Colors.blue),
-                        ),
-                      ),
-                      Container(
-                        width: borderWidth,
-                        color: const Color.fromARGB(255, 234, 236, 238),
-                        height: btnHeight - borderWidth - borderWidth,
-                      ),
-                      TextButton(
-                          onPressed: () {
-                            widget.okBtnTap();
-                            Navigator.of(context).pop();
-                            widget.vc.text = "";
-                          },
-                          child: Text(
-                            widget.okBtnTitle,
-                            style: const TextStyle(fontSize: 22, color: Color.fromARGB(255, 169, 173, 177)),
-                          )),
-                    ],
-                  ),
-                ],
-              ),
-            )
-          ],
-        ));
-  }
-}
-
-class NewFolderDialog extends AlertDialog {
-  NewFolderDialog({super.key, required Widget contentWidget})
-      : super(
-          content: contentWidget,
-          contentPadding: EdgeInsets.zero,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(30),
-            //side: BorderSide(color: Colors.blue, width: 3)
-          ),
-        );
-}
-
-//弹出框 修改自https://www.jianshu.com/p/4144837a789b
-
-class NewFolderDialogContent extends StatefulWidget {
-  final String title;
-  final String cancelBtnTitle;
-  final String okBtnTitle;
-  final VoidCallback cancelBtnTap;
-  final VoidCallback okBtnTap;
-  final TextEditingController vc;
-  const NewFolderDialogContent({
-    super.key,
-    required this.title,
-    this.cancelBtnTitle = "取消",
-    this.okBtnTitle = "确定",
-    required this.cancelBtnTap,
-    required this.okBtnTap,
-    required this.vc,
-  });
-
-  @override
-  NewFolderDialogContentState createState() => NewFolderDialogContentState();
-}
-
-class NewFolderDialogContentState extends State<NewFolderDialogContent> {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-        margin: const EdgeInsets.only(top: 20),
-        height: 190,
-        width: 10000,
-        alignment: Alignment.bottomCenter,
-        child: Column(
-          children: [
-            Container(
-                alignment: Alignment.center,
-                child: Text(
-                  widget.title,
-                  style: const TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 20),
-                )),
-            //const Spacer(),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(30, 0, 30, 0),
-              child: TextFormField(
-                cursorHeight: 20,
-                textAlign: TextAlign.center,
-                style: const TextStyle(color: Colors.black87),
-                controller: widget.vc,
-                validator: (value) {
-                  if (value!.isEmpty) {
-                    return '不能为空';
-                  }
-                  return null;
-                },
-                decoration: const InputDecoration(
-                    enabledBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Color.fromARGB(255, 14, 103, 192)),
-                    ),
-                    focusedBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.blue),
-                    )),
-              ),
-            ),
-            const Spacer(),
-            //A check box with a label
-            Container(
-              // color: Colors.red,
-              height: btnHeight,
-              margin: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-              child: Column(
-                children: [
-                  Container(
-                    width: double.infinity,
-                    color: const Color.fromARGB(255, 234, 236, 238),
-                    height: borderWidth,
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      TextButton(
-                        onPressed: () {
-                          widget.vc.text = "";
-                          widget.cancelBtnTap();
-                          Navigator.of(context).pop();
-                        },
-                        child: Text(
-                          widget.cancelBtnTitle,
-                          style: const TextStyle(fontSize: 22, color: Colors.blue),
-                        ),
-                      ),
-                      Container(
-                        width: borderWidth,
-                        color: const Color.fromARGB(255, 234, 236, 238),
-                        height: btnHeight - borderWidth - borderWidth,
-                      ),
-                      TextButton(
-                          onPressed: () {
-                            widget.okBtnTap();
-                            Navigator.of(context).pop();
-                            widget.vc.text = "";
-                          },
-                          child: Text(
-                            widget.okBtnTitle,
-                            style: const TextStyle(fontSize: 22, color: Colors.blue),
-                          )),
-                    ],
-                  ),
-                ],
-              ),
-            )
-          ],
-        ));
   }
 }

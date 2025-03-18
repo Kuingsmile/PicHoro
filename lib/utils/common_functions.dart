@@ -105,11 +105,7 @@ supportedExtensions(String ext) {
   if (extLowerCase.startsWith('.')) {
     extLowerCase = extLowerCase.substring(1);
   }
-  return Global.imgExt.contains(extLowerCase) ||
-      Global.textExt.contains(extLowerCase) ||
-      Global.chewieExt.contains(extLowerCase) ||
-      Global.vlcExt.contains(extLowerCase) ||
-      extLowerCase == 'pdf';
+  return Global.imgExt.contains(extLowerCase) || Global.textExt.contains(extLowerCase) || extLowerCase == 'pdf';
 }
 
 BaseOptions setBaseOptions() {
@@ -160,7 +156,7 @@ showCupertinoAlertDialog({
   return showCupertinoDialog(
       context: context,
       barrierDismissible: barrierDismissible ?? false,
-      builder: (BuildContext context) {
+      builder: (BuildContext dialogContext) {
         return CupertinoAlertDialog(
           title: Text(
             title,
@@ -192,7 +188,7 @@ showCupertinoAlertDialog({
           ),
           actions: [
             CupertinoDialogAction(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () => Navigator.pop(dialogContext),
               child: Text(
                 confirmText,
                 style: TextStyle(
@@ -210,17 +206,17 @@ showCupertinoAlertDialog({
 /// cupertino风格的alertDialog  带确认函数
 showCupertinoAlertDialogWithConfirmFunc({
   required BuildContext context,
-  required String title,
   required String content,
   required onConfirm,
   bool barrierDismissible = true,
+  String title = '通知',
   String cancelText = '取消',
   String confirmText = '确定',
 }) {
   return showCupertinoDialog(
       barrierDismissible: barrierDismissible,
       context: context,
-      builder: (BuildContext context) {
+      builder: (BuildContext dialogContext) {
         return CupertinoAlertDialog(
           title: Text(
             title,
@@ -252,7 +248,7 @@ showCupertinoAlertDialogWithConfirmFunc({
           ),
           actions: <Widget>[
             CupertinoDialogAction(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () => Navigator.pop(dialogContext),
               child: Text(
                 cancelText,
                 style: TextStyle(
@@ -263,9 +259,9 @@ showCupertinoAlertDialogWithConfirmFunc({
               ),
             ),
             CupertinoDialogAction(
-              onPressed: () {
+              onPressed: () async {
+                Navigator.pop(dialogContext);
                 onConfirm();
-                if (context.mounted) Navigator.pop(context);
               },
               child: Text(
                 confirmText,

@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'dart:convert';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' as flutter_services;
 
@@ -9,6 +8,8 @@ import 'package:external_path/external_path.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fluro/fluro.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:horopic/picture_host_manage/common/new_folder_widgets.dart';
+import 'package:horopic/picture_host_manage/common/rename_dialog_widgets.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:path/path.dart' as my_path;
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -23,8 +24,6 @@ import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/widgets/net_loading_dialog.dart';
 import 'package:horopic/utils/image_compressor.dart';
-import 'package:horopic/picture_host_manage/aws/aws_file_explorer.dart'
-    show RenameDialog, RenameDialogContent, NewFolderDialog, NewFolderDialogContent;
 
 bool isCoverFile = false;
 
@@ -581,7 +580,7 @@ class AliyunFileExplorerState extends loading_state.BaseLoadingPageState<AliyunF
                                     return NewFolderDialog(
                                       contentWidget: NewFolderDialogContent(
                                         title: "  请输入新文件夹名\n / 分隔创建嵌套文件夹",
-                                        okBtnTap: () async {
+                                        onConfirm: () async {
                                           String newName = newFolder.text;
                                           if (newName.isEmpty) {
                                             showToastWithContext(context, "文件夹名不能为空");
@@ -602,8 +601,8 @@ class AliyunFileExplorerState extends loading_state.BaseLoadingPageState<AliyunF
                                             showToast('创建失败');
                                           }
                                         },
-                                        vc: newFolder,
-                                        cancelBtnTap: () {},
+                                        folderNameController: newFolder,
+                                        onCancel: () {},
                                       ),
                                     );
                                   });
@@ -662,10 +661,8 @@ class AliyunFileExplorerState extends loading_state.BaseLoadingPageState<AliyunF
                         toDelete.add(i);
                       }
                     }
-                    Navigator.pop(context);
                     await deleteAll(toDelete);
                     showToast('删除完成');
-                    return;
                   } catch (e) {
                     flogErr(e, {}, 'AliyunFileExplorer', 'deleteAll');
                     showToast('删除失败');
@@ -775,7 +772,7 @@ class AliyunFileExplorerState extends loading_state.BaseLoadingPageState<AliyunF
                           rawurl = '$shareUrlPrefix${allInfoList[i]['Key']}';
                           fileName = allInfoList[i]['Key'].substring(allInfoList[i]['Key'].lastIndexOf('/') + 1);
                         }
-                        finalFormatedurl = linkGeneratorMap[Global.defaultLKformat]!(rawurl, fileName);
+                        finalFormatedurl = getFormatedUrl(rawurl, fileName);
                         multiUrls.add(finalFormatedurl);
                       }
                     }
@@ -868,59 +865,11 @@ class AliyunFileExplorerState extends loading_state.BaseLoadingPageState<AliyunF
   }
 
   @override
-  Widget buildEmpty() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Image.asset(
-            'assets/images/empty.png',
-            width: 100,
-            height: 100,
-          ),
-          const Text('没有文件哦，点击右上角添加吧', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118)))
-        ],
-      ),
-    );
-  }
-
-  @override
-  Widget buildError() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Text('加载失败,请检查网络', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))),
-          ElevatedButton(
-            style: ButtonStyle(
-              backgroundColor: WidgetStateProperty.all(Colors.blue),
-            ),
-            onPressed: () {
-              setState(() {
-                state = loading_state.LoadState.loading;
-              });
-              _getBucketList();
-            },
-            child: const Text('重新加载'),
-          )
-        ],
-      ),
-    );
-  }
-
-  @override
-  Widget buildLoading() {
-    return const Center(
-      child: SizedBox(
-        width: 30,
-        height: 30,
-        child: CircularProgressIndicator(
-          strokeWidth: 2,
-          backgroundColor: Colors.transparent,
-          valueColor: AlwaysStoppedAnimation(Colors.blue),
-        ),
-      ),
-    );
+  void onErrorRetry() {
+    setState(() {
+      state = loading_state.LoadState.loading;
+    });
+    _getBucketList();
   }
 
   @override
@@ -964,77 +913,60 @@ class AliyunFileExplorerState extends loading_state.BaseLoadingPageState<AliyunF
                         children: [
                           SlidableAction(
                             onPressed: (BuildContext context) async {
-                              showCupertinoDialog(
-                                  barrierDismissible: true,
+                              Navigator.pop(context);
+                              showCupertinoAlertDialogWithConfirmFunc(
                                   context: context,
-                                  builder: (BuildContext context) {
-                                    return CupertinoAlertDialog(
-                                      title: const Text('通知'),
-                                      content: Text('确定要删除${allInfoList[index]['Prefix']}吗？'),
-                                      actions: <Widget>[
-                                        CupertinoDialogAction(
-                                          child: const Text('取消', style: TextStyle(color: Colors.blue)),
-                                          onPressed: () {
-                                            Navigator.pop(context);
-                                          },
-                                        ),
-                                        CupertinoDialogAction(
-                                          child: const Text('确定', style: TextStyle(color: Colors.blue)),
-                                          onPressed: () async {
-                                            Navigator.pop(context);
-                                            Global.operateDone = false;
-                                            await showDialog(
-                                                context: context,
-                                                barrierDismissible: false,
-                                                builder: (context) {
-                                                  return NetLoadingDialog(
-                                                    outsideDismiss: false,
-                                                    loading: true,
-                                                    loadingText: "删除中...",
-                                                    requestCallBack: AliyunManageAPI.deleteFolder(
-                                                        widget.element, allInfoList[index]['Prefix']),
-                                                  );
-                                                });
-                                            while (!Global.operateDone) {
-                                              await Future.delayed(const Duration(milliseconds: 250));
-                                            }
-                                            Global.operateDone = false;
-                                            var queryResult = await AliyunManageAPI.queryBucketFiles(
-                                                widget.element, {'prefix': widget.bucketPrefix, 'delimiter': '/'});
-                                            var dir = queryResult[1]['ListBucketResult']['CommonPrefixes'];
-                                            if (dir == null) {
-                                              showToast('删除成功');
-                                              setState(() {
-                                                allInfoList.removeAt(index);
-                                                dirAllInfoList.removeAt(index);
-                                                selectedFilesBool.removeAt(index);
-                                              });
-                                            } else if (dir != null) {
-                                              if (dir is! List) {
-                                                dir = [dir];
-                                              }
-                                              bool deleted = true;
-                                              for (var element in dir) {
-                                                if (allInfoList[index]['Prefix'] == element['Prefix']) {
-                                                  deleted = false;
-                                                  break;
-                                                }
-                                              }
-                                              if (deleted == true) {
-                                                showToast('删除成功');
-                                                setState(() {
-                                                  allInfoList.removeAt(index);
-                                                  dirAllInfoList.removeAt(index);
-                                                  selectedFilesBool.removeAt(index);
-                                                });
-                                              } else {
-                                                showToast('删除失败');
-                                              }
-                                            }
-                                          },
-                                        ),
-                                      ],
-                                    );
+                                  content: '确定要删除${allInfoList[index]['Prefix']}吗?',
+                                  onConfirm: () async {
+                                    Global.operateDone = false;
+                                    await showDialog(
+                                        context: context,
+                                        barrierDismissible: false,
+                                        builder: (context) {
+                                          return NetLoadingDialog(
+                                            outsideDismiss: false,
+                                            loading: true,
+                                            loadingText: "删除中...",
+                                            requestCallBack: AliyunManageAPI.deleteFolder(
+                                                widget.element, allInfoList[index]['Prefix']),
+                                          );
+                                        });
+                                    while (!Global.operateDone) {
+                                      await Future.delayed(const Duration(milliseconds: 250));
+                                    }
+                                    Global.operateDone = false;
+                                    var queryResult = await AliyunManageAPI.queryBucketFiles(
+                                        widget.element, {'prefix': widget.bucketPrefix, 'delimiter': '/'});
+                                    var dir = queryResult[1]['ListBucketResult']['CommonPrefixes'];
+                                    if (dir == null) {
+                                      showToast('删除成功');
+                                      setState(() {
+                                        allInfoList.removeAt(index);
+                                        dirAllInfoList.removeAt(index);
+                                        selectedFilesBool.removeAt(index);
+                                      });
+                                    } else if (dir != null) {
+                                      if (dir is! List) {
+                                        dir = [dir];
+                                      }
+                                      bool deleted = true;
+                                      for (var element in dir) {
+                                        if (allInfoList[index]['Prefix'] == element['Prefix']) {
+                                          deleted = false;
+                                          break;
+                                        }
+                                      }
+                                      if (deleted == true) {
+                                        showToast('删除成功');
+                                        setState(() {
+                                          allInfoList.removeAt(index);
+                                          dirAllInfoList.removeAt(index);
+                                          selectedFilesBool.removeAt(index);
+                                        });
+                                      } else {
+                                        showToast('删除失败');
+                                      }
+                                    }
                                   });
                             },
                             backgroundColor: const Color(0xFFFE4A49),
@@ -1169,39 +1101,22 @@ class AliyunFileExplorerState extends loading_state.BaseLoadingPageState<AliyunF
                             ),
                             SlidableAction(
                               onPressed: (BuildContext context) async {
-                                showCupertinoDialog(
-                                    barrierDismissible: true,
+                                Navigator.pop(context);
+                                showCupertinoAlertDialogWithConfirmFunc(
                                     context: context,
-                                    builder: (BuildContext context) {
-                                      return CupertinoAlertDialog(
-                                        title: const Text('通知'),
-                                        content: Text('确定要删除${allInfoList[index]['Key']}吗？'),
-                                        actions: <Widget>[
-                                          CupertinoDialogAction(
-                                            child: const Text('取消', style: TextStyle(color: Colors.blue)),
-                                            onPressed: () {
-                                              Navigator.pop(context);
-                                            },
-                                          ),
-                                          CupertinoDialogAction(
-                                            child: const Text('确定', style: TextStyle(color: Colors.blue)),
-                                            onPressed: () async {
-                                              Navigator.pop(context);
-                                              var result = await AliyunManageAPI.deleteFile(
-                                                  widget.element, allInfoList[index]['Key']);
-                                              if (result[0] == 'success') {
-                                                showToast('删除成功');
-                                                setState(() {
-                                                  allInfoList.removeAt(index);
-                                                  selectedFilesBool.removeAt(index);
-                                                });
-                                              } else {
-                                                showToast('删除失败');
-                                              }
-                                            },
-                                          ),
-                                        ],
-                                      );
+                                    content: '确定要删除${allInfoList[index]['Key']}吗?',
+                                    onConfirm: (BuildContext context) async {
+                                      var result =
+                                          await AliyunManageAPI.deleteFile(widget.element, allInfoList[index]['Key']);
+                                      if (result[0] == 'success') {
+                                        showToast('删除成功');
+                                        setState(() {
+                                          allInfoList.removeAt(index);
+                                          selectedFilesBool.removeAt(index);
+                                        });
+                                      } else {
+                                        showToast('删除失败');
+                                      }
                                     });
                               },
                               backgroundColor: const Color(0xFFFE4A49),
@@ -1306,68 +1221,6 @@ class AliyunFileExplorerState extends loading_state.BaseLoadingPageState<AliyunF
                                         '${Routes.mdPreview}?filePath=${Uri.encodeComponent(filePath)}&fileName=${Uri.encodeComponent(fileName)}',
                                         transition: TransitionType.none);
                                   }
-                                } else if (Global.chewieExt
-                                    .contains(allInfoList[index]['Key'].split('.').last.toLowerCase())) {
-                                  //预览chewie视频
-                                  String shareUrl = '';
-                                  List videoList = [];
-                                  int newImageIndex = index - dirAllInfoList.length;
-                                  for (int i = dirAllInfoList.length; i < allInfoList.length; i++) {
-                                    if (Global.chewieExt
-                                        .contains(allInfoList[i]['Key'].split('.').last.toLowerCase())) {
-                                      shareUrl =
-                                          'https://${widget.element['name']}.${widget.element['location']}.aliyuncs.com/${allInfoList[i]['Key']}';
-                                      videoList.add({"url": shareUrl, "name": allInfoList[i]['Key']});
-                                    } else if (i < index) {
-                                      newImageIndex--;
-                                    }
-                                  }
-                                  Map<String, dynamic> headers = {};
-                                  if (context.mounted) {
-                                    Application.router.navigateTo(this.context,
-                                        '${Routes.netVideoPlayer}?videoList=${Uri.encodeComponent(jsonEncode(videoList))}&index=$newImageIndex&type=${Uri.encodeComponent('normal')}&headers=${Uri.encodeComponent(jsonEncode(headers))}',
-                                        transition: TransitionType.none);
-                                  }
-                                } else if (Global.vlcExt
-                                    .contains(allInfoList[index]['Key'].split('.').last.toLowerCase())) {
-                                  //vlc预览视频
-                                  String shareUrl = '';
-                                  String subUrl = '';
-                                  List videoList = [];
-                                  int newImageIndex = index - dirAllInfoList.length;
-                                  Map subtitleFileMap = {};
-                                  for (int i = dirAllInfoList.length; i < allInfoList.length; i++) {
-                                    if (Global.subtitleFileExt
-                                        .contains(allInfoList[i]['Key'].split('.').last.toLowerCase())) {
-                                      subUrl =
-                                          'https://${widget.element['name']}.${widget.element['location']}.aliyuncs.com/${allInfoList[i]['Key']}';
-                                      subtitleFileMap[allInfoList[i]['Key'].split('.').first] = subUrl;
-                                    }
-                                    if (Global.vlcExt
-                                        .contains(allInfoList[index]['Key'].split('.').last.toLowerCase())) {
-                                      shareUrl =
-                                          'https://${widget.element['name']}.${widget.element['location']}.aliyuncs.com/${allInfoList[i]['Key']}';
-                                      videoList.add({
-                                        "url": shareUrl,
-                                        "name": allInfoList[i]['Key'],
-                                        "subtitlePath": '',
-                                      });
-                                    } else if (i < index) {
-                                      newImageIndex--;
-                                    }
-                                  }
-                                  for (int i = 0; i < videoList.length; i++) {
-                                    if (subtitleFileMap.containsKey(videoList[i]['name'].split('.').first)) {
-                                      videoList[i]['subtitlePath'] =
-                                          subtitleFileMap[videoList[i]['name'].split('.').first];
-                                    }
-                                  }
-                                  Map<String, dynamic> headers = {};
-                                  if (context.mounted) {
-                                    Application.router.navigateTo(this.context,
-                                        '${Routes.netVideoPlayer}?videoList=${Uri.encodeComponent(jsonEncode(videoList))}&index=$newImageIndex&type=${Uri.encodeComponent('mkv')}&headers=${Uri.encodeComponent(jsonEncode(headers))}',
-                                        transition: TransitionType.none);
-                                  }
                                 }
                               },
                             ),
@@ -1466,7 +1319,6 @@ class AliyunFileExplorerState extends loading_state.BaseLoadingPageState<AliyunF
             minLeadingWidth: 0,
             title: const Text('复制链接(设置中的默认格式)'),
             onTap: () async {
-              String format = Global.getLKformat();
               String shareUrlPrefix = '';
               String customUrl = widget.element['customUrl'] == null || widget.element['customUrl'] == ''
                   ? 'None'
@@ -1478,7 +1330,7 @@ class AliyunFileExplorerState extends loading_state.BaseLoadingPageState<AliyunF
               }
               String shareUrl = '$shareUrlPrefix${allInfoList[index]['Key']}';
               String filename = my_path.basename(allInfoList[index]['Key']);
-              String formatedLink = linkGeneratorMap[format]!(shareUrl, filename);
+              String formatedLink = getFormatedUrl(shareUrl, filename);
               await flutter_services.Clipboard.setData(flutter_services.ClipboardData(text: formatedLink));
               if (mounted) {
                 Navigator.pop(context);
@@ -1506,7 +1358,7 @@ class AliyunFileExplorerState extends loading_state.BaseLoadingPageState<AliyunF
                       return RenameDialog(
                         contentWidget: RenameDialogContent(
                           title: "新文件名 '/'分割文件夹",
-                          okBtnTap: () async {
+                          onConfirm: (bool isCoverFile) async {
                             String newName = vc.text;
                             if (isCoverFile) {
                               var copyResult =
@@ -1544,9 +1396,9 @@ class AliyunFileExplorerState extends loading_state.BaseLoadingPageState<AliyunF
                               }
                             }
                           },
-                          vc: vc,
-                          cancelBtnTap: () {},
-                          stateBoolText: '是否覆盖同名文件',
+                          renameTextController: vc,
+                          onCancel: () {},
+                          isShowCoverFileWidget: true,
                         ),
                       );
                     });
@@ -1564,38 +1416,20 @@ class AliyunFileExplorerState extends loading_state.BaseLoadingPageState<AliyunF
             title: const Text('删除'),
             onTap: () async {
               Navigator.pop(context);
-              showCupertinoDialog(
-                barrierDismissible: true,
+              showCupertinoAlertDialogWithConfirmFunc(
                 context: context,
-                builder: (BuildContext context) {
-                  return CupertinoAlertDialog(
-                    title: const Text('通知'),
-                    content: Text('确定要删除${allInfoList[index]['Key']}吗？'),
-                    actions: <Widget>[
-                      CupertinoDialogAction(
-                        child: const Text('取消', style: TextStyle(color: Colors.blue)),
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                      ),
-                      CupertinoDialogAction(
-                        child: const Text('确定', style: TextStyle(color: Colors.blue)),
-                        onPressed: () async {
-                          Navigator.pop(context);
-                          var result = await AliyunManageAPI.deleteFile(widget.element, allInfoList[index]['Key']);
-                          if (result[0] == 'success') {
-                            showToast('删除成功');
-                            setState(() {
-                              allInfoList.removeAt(index);
-                              selectedFilesBool.removeAt(index);
-                            });
-                          } else {
-                            showToast('删除失败');
-                          }
-                        },
-                      ),
-                    ],
-                  );
+                content: '确定要删除${allInfoList[index]['Key']}吗?',
+                onConfirm: (BuildContext context) async {
+                  var result = await AliyunManageAPI.deleteFile(widget.element, allInfoList[index]['Key']);
+                  if (result[0] == 'success') {
+                    showToast('删除成功');
+                    setState(() {
+                      allInfoList.removeAt(index);
+                      selectedFilesBool.removeAt(index);
+                    });
+                  } else {
+                    showToast('删除失败');
+                  }
                 },
               );
             },
@@ -1656,77 +1490,58 @@ class AliyunFileExplorerState extends loading_state.BaseLoadingPageState<AliyunF
               title: const Text('删除'),
               onTap: () async {
                 Navigator.pop(context);
-                showCupertinoDialog(
-                  barrierDismissible: true,
+                showCupertinoAlertDialogWithConfirmFunc(
                   context: context,
-                  builder: (BuildContext context) {
-                    return CupertinoAlertDialog(
-                      title: const Text('通知'),
-                      content: Text('确定要删除${allInfoList[index]['Prefix']}吗？'),
-                      actions: <Widget>[
-                        CupertinoDialogAction(
-                          child: const Text('取消', style: TextStyle(color: Colors.blue)),
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                        ),
-                        CupertinoDialogAction(
-                          child: const Text('确定', style: TextStyle(color: Colors.blue)),
-                          onPressed: () async {
-                            Navigator.pop(context);
-                            Global.operateDone = false;
-                            await showDialog(
-                                context: context,
-                                barrierDismissible: false,
-                                builder: (context) {
-                                  return NetLoadingDialog(
-                                    outsideDismiss: false,
-                                    loading: true,
-                                    loadingText: "删除中...",
-                                    requestCallBack:
-                                        AliyunManageAPI.deleteFolder(widget.element, allInfoList[index]['Prefix']),
-                                  );
-                                });
-                            while (!Global.operateDone) {
-                              await Future.delayed(const Duration(milliseconds: 250));
-                            }
-                            Global.operateDone = false;
-                            var queryResult = await AliyunManageAPI.queryBucketFiles(
-                                widget.element, {'prefix': widget.bucketPrefix, 'delimiter': '/'});
-                            var dir = queryResult[1]['ListBucketResult']['CommonPrefixes'];
-                            if (dir == null) {
-                              showToast('删除成功');
-                              setState(() {
-                                allInfoList.removeAt(index);
-                                dirAllInfoList.removeAt(index);
-                                selectedFilesBool.removeAt(index);
-                              });
-                            } else if (dir != null) {
-                              if (dir is! List) {
-                                dir = [dir];
-                              }
-                              bool deleted = true;
-                              for (var element in dir) {
-                                if (allInfoList[index]['Prefix'] == element['Prefix']) {
-                                  deleted = false;
-                                  break;
-                                }
-                              }
-                              if (deleted == true) {
-                                showToast('删除成功');
-                                setState(() {
-                                  allInfoList.removeAt(index);
-                                  dirAllInfoList.removeAt(index);
-                                  selectedFilesBool.removeAt(index);
-                                });
-                              } else {
-                                showToast('删除失败');
-                              }
-                            }
-                          },
-                        ),
-                      ],
-                    );
+                  content: '确定要删除${allInfoList[index]['Prefix']}吗?',
+                  onConfirm: (BuildContext context) async {
+                    Global.operateDone = false;
+                    await showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (context) {
+                          return NetLoadingDialog(
+                            outsideDismiss: false,
+                            loading: true,
+                            loadingText: "删除中...",
+                            requestCallBack: AliyunManageAPI.deleteFolder(widget.element, allInfoList[index]['Prefix']),
+                          );
+                        });
+                    while (!Global.operateDone) {
+                      await Future.delayed(const Duration(milliseconds: 250));
+                    }
+                    Global.operateDone = false;
+                    var queryResult = await AliyunManageAPI.queryBucketFiles(
+                        widget.element, {'prefix': widget.bucketPrefix, 'delimiter': '/'});
+                    var dir = queryResult[1]['ListBucketResult']['CommonPrefixes'];
+                    if (dir == null) {
+                      showToast('删除成功');
+                      setState(() {
+                        allInfoList.removeAt(index);
+                        dirAllInfoList.removeAt(index);
+                        selectedFilesBool.removeAt(index);
+                      });
+                    } else if (dir != null) {
+                      if (dir is! List) {
+                        dir = [dir];
+                      }
+                      bool deleted = true;
+                      for (var element in dir) {
+                        if (allInfoList[index]['Prefix'] == element['Prefix']) {
+                          deleted = false;
+                          break;
+                        }
+                      }
+                      if (deleted == true) {
+                        showToast('删除成功');
+                        setState(() {
+                          allInfoList.removeAt(index);
+                          dirAllInfoList.removeAt(index);
+                          selectedFilesBool.removeAt(index);
+                        });
+                      } else {
+                        showToast('删除失败');
+                      }
+                    }
                   },
                 );
               }),

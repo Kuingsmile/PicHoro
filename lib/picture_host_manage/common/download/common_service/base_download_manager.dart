@@ -22,8 +22,7 @@ abstract class BaseDownloadManager {
   int runningTasks = 0;
 
   // Function that will be implemented by specific downloaders
-  Future<void> download(String url, String savePath, CancelToken cancelToken,
-      {bool forceDownload = false, Map configMap = const {}});
+  Future<void> download(String url, String savePath, CancelToken cancelToken, {Map configMap = const {}});
 
   // Optional method to override for custom authorization headers
   Future<Map<String, dynamic>> getHeaders(String url,
@@ -311,7 +310,8 @@ abstract class BaseDownloadManager {
 
       var currentRequest = _queue.removeFirst();
 
-      download(currentRequest.url, currentRequest.path, currentRequest.cancelToken);
+      download(currentRequest.url, currentRequest.path, currentRequest.cancelToken,
+          configMap: currentRequest.configMap);
 
       await Future.delayed(const Duration(milliseconds: 500), null);
     }
@@ -319,7 +319,7 @@ abstract class BaseDownloadManager {
 
   // Helper methods for common download operations
   Future<void> processDownload(String url, String savePath, CancelToken cancelToken, String logTag,
-      {bool forceDownload = false, Map configMap = const {}}) async {
+      {Map configMap = const {}}) async {
     try {
       var task = getDownload(url);
 
@@ -403,7 +403,6 @@ abstract class BaseDownloadManager {
       String url, String savePath, String partialFilePath, File partialFile, CancelToken cancelToken,
       {Map configMap = const {}}) async {
     Map<String, dynamic> headers = await getHeaders(url, configMap: configMap);
-
     var response = await dio.download(url, partialFilePath,
         onReceiveProgress: createCallback(url, 0),
         cancelToken: cancelToken,

@@ -38,9 +38,7 @@ class DownloadManager extends BaseDownloadManager {
   }
 
   @override
-  Future<void> download(String url, String savePath, CancelToken cancelToken,
-      {bool forceDownload = false, Map configMap = const {}}) async {
-    await processDownload(url, savePath, cancelToken, 'webdav_DownloadManager',
-        forceDownload: forceDownload, configMap: configMap);
+  Future<void> download(String url, String savePath, CancelToken cancelToken, {Map configMap = const {}}) async {
+    await processDownload(url, savePath, cancelToken, 'webdav_DownloadManager', configMap: configMap);
   }
 }

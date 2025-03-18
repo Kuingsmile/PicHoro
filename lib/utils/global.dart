@@ -424,50 +424,6 @@ class Global {
     'jpg',
   ];
 
-  static List chewieExt = [
-    "aac",
-    "amv", //not validated
-    "avi",
-    "flac",
-    "flv",
-    "m2ts", //not validated
-    "m4a",
-    "m4v",
-    "mp3",
-    "mpeg", //not validated
-    "mpg",
-    "mts",
-    "ogg",
-    "ogv", //not validated
-    "ts",
-    "vob",
-    "wav",
-    "webm",
-    "mp4",
-  ];
-
-  static List vlcExt = [
-    "3g2",
-    "3gp",
-    "asf",
-    "mov",
-    "mxf",
-    "rm",
-    "rmvb",
-    "wmv",
-    "mkv",
-  ];
-
-  static List subtitleFileExt = [
-    'ass',
-    'dfxp',
-    'sbv',
-    'ssa',
-    'ttml'
-        'vtt',
-    'srt',
-  ];
-
   static String getPShost() {
     return SpUtil.getString('key_pshost', defValue: 'lsky.pro')!;
   }

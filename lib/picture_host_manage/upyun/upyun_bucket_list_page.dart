@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:horopic/widgets/common_widgets.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:grouped_list/grouped_list.dart';
 
@@ -150,15 +151,7 @@ class UpyunBucketListState extends loading_state.BaseLoadingPageState<UpyunBucke
         elevation: 0,
         centerTitle: true,
         title: titleText('又拍云存储桶列表'),
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withAlpha(204)],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-          ),
-        ),
+        flexibleSpace: getFlexibleSpace(context),
         actions: [
           IconButton(
             onPressed: () async {
@@ -187,59 +180,11 @@ class UpyunBucketListState extends loading_state.BaseLoadingPageState<UpyunBucke
       );
 
   @override
-  Widget buildEmpty() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Image.asset(
-            'assets/images/empty.png',
-            width: 100,
-            height: 100,
-          ),
-          const Text('没有存储桶，点击右上角添加哦', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118)))
-        ],
-      ),
-    );
-  }
-
-  @override
-  Widget buildError() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Text('加载失败', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))),
-          ElevatedButton(
-            style: ButtonStyle(
-              backgroundColor: WidgetStateProperty.all(Colors.blue),
-            ),
-            onPressed: () {
-              setState(() {
-                state = loading_state.LoadState.loading;
-              });
-              initBucketList();
-            },
-            child: const Text('重新加载'),
-          )
-        ],
-      ),
-    );
-  }
-
-  @override
-  Widget buildLoading() {
-    return const Center(
-      child: SizedBox(
-        width: 30,
-        height: 30,
-        child: CircularProgressIndicator(
-          strokeWidth: 2,
-          backgroundColor: Colors.transparent,
-          valueColor: AlwaysStoppedAnimation(Colors.blue),
-        ),
-      ),
-    );
+  void onErrorRetry() {
+    setState(() {
+      state = loading_state.LoadState.loading;
+    });
+    initBucketList();
   }
 
   @override
@@ -855,36 +800,18 @@ class UpyunBucketListState extends loading_state.BaseLoadingPageState<UpyunBucke
             minLeadingWidth: 0,
             title: const Text('删除存储桶', style: TextStyle(fontSize: 15)),
             onTap: () async {
+              Navigator.pop(context);
               return showCupertinoAlertDialogWithConfirmFunc(
                 title: '删除存储桶',
                 content: '是否删除存储桶？\n删除前请清空该存储桶!',
                 context: context,
                 onConfirm: () async {
-                  try {
-                    Navigator.of(context).pop();
-                    Navigator.of(context).pop();
-                    var result = await UpyunManageAPI.deleteBucket(element['bucket_name']);
-                    if (result[0] == 'success') {
-                      showToast('删除成功');
-                      _onRefresh();
-                      return;
-                    } else {
-                      showToast('删除失败');
-                    }
-                    return;
-                  } catch (e) {
-                    flogErr(
-                      e,
-                      {
-                        'element': element,
-                      },
-                      'UpyunBucketListState',
-                      'buildBottomSheetWidget_deleteBucket',
-                    );
+                  var result = await UpyunManageAPI.deleteBucket(element['bucket_name']);
+                  if (result[0] == 'success') {
+                    showToast('删除成功');
+                    _onRefresh();
+                  } else {
                     showToast('删除失败');
-                    if (context.mounted) {
-                      Navigator.of(context).pop();
-                    }
                   }
                 },
               );

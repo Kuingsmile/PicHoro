@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:horopic/widgets/common_widgets.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:grouped_list/grouped_list.dart';
 import 'package:fluro/fluro.dart';
@@ -19,13 +20,18 @@ class AlistBucketList extends StatefulWidget {
 }
 
 class AlistBucketListState extends loading_state.BaseLoadingPageState<AlistBucketList> {
-  List bucketMap = [];
+  /// 所有存储信息列表
+  List<Map<String, dynamic>> bucketMap = [];
+
+  /// 筛选后存储信息列表
   List filteredBucketMap = [];
   String searchText = '';
   bool isSearching = false;
   TextEditingController searchController = TextEditingController();
-  String sortBy = 'name'; // Options: 'name', 'driver', 'enabled'
+  String sortBy = 'name'; // Options: 'name', 'driver', 'enabled', 'id'
   bool ascending = true;
+
+  AlistManageAPI manageAPI = AlistManageAPI();
 
   RefreshController refreshController = RefreshController(initialRefresh: false);
 
@@ -49,56 +55,25 @@ class AlistBucketListState extends loading_state.BaseLoadingPageState<AlistBucke
   }
 
   void filterBuckets() {
-    if (searchText.isEmpty) {
-      filteredBucketMap = List.from(bucketMap);
-    } else {
-      filteredBucketMap = bucketMap
-          .where((element) =>
-              element['mount_path'].toString().toLowerCase().contains(searchText.toLowerCase()) ||
-              (AlistManageAPI.driverTranslate[element['driver']] ?? element['driver'])
-                  .toString()
-                  .toLowerCase()
-                  .contains(searchText.toLowerCase()))
-          .toList();
-    }
-
-    // Apply sorting
-    switch (sortBy) {
-      case 'name':
-        filteredBucketMap.sort((a, b) => ascending
-            ? a['mount_path'].toString().compareTo(b['mount_path'].toString())
-            : b['mount_path'].toString().compareTo(a['mount_path'].toString()));
-      case 'driver':
-        filteredBucketMap.sort((a, b) => ascending
-            ? a['driver'].toString().compareTo(b['driver'].toString())
-            : b['driver'].toString().compareTo(a['driver'].toString()));
-      case 'enabled':
-        filteredBucketMap.sort((a, b) {
-          bool aEnabled = a['disabled'] == false;
-          bool bEnabled = b['disabled'] == false;
-          return ascending
-              ? aEnabled == bEnabled
-                  ? 0
-                  : aEnabled
-                      ? -1
-                      : 1
-              : aEnabled == bEnabled
-                  ? 0
-                  : aEnabled
-                      ? 1
-                      : -1;
-        });
-    }
-
+    filteredBucketMap = searchText.isEmpty
+        ? List.from(bucketMap)
+        : bucketMap
+            .where((element) =>
+                element['mount_path'].toString().toLowerCase().contains(searchText.toLowerCase()) ||
+                (manageAPI.driverTranslate[element['driver']] ?? element['driver'])
+                    .toString()
+                    .toLowerCase()
+                    .contains(searchText.toLowerCase()))
+            .toList();
     setState(() {});
   }
 
-  //初始化bucketList
+  /// 初始化bucketList
   initBucketList() async {
     bucketMap.clear();
     filteredBucketMap.clear();
     try {
-      var bucketListResponse = await AlistManageAPI.getBucketList();
+      var bucketListResponse = await manageAPI.getBucketList();
       //判断是否获取成功
       if (bucketListResponse[0] != 'success') {
         if (mounted) {
@@ -119,17 +94,13 @@ class AlistBucketListState extends loading_state.BaseLoadingPageState<AlistBucke
         return;
       }
       var allBucketList = bucketListResponse[1]['content'];
-
       if (allBucketList is! List) {
         allBucketList = [allBucketList];
       }
-
       for (var i = 0; i < allBucketList.length; i++) {
         bucketMap.add({for (var key in allBucketList[i].keys) key: allBucketList[i][key]});
       }
-
       filterBuckets();
-
       if (mounted) {
         setState(() {
           if (filteredBucketMap.isEmpty) {
@@ -147,7 +118,6 @@ class AlistBucketListState extends loading_state.BaseLoadingPageState<AlistBucke
           state = loading_state.LoadState.error;
         });
       }
-      showToast('获取失败');
       refreshController.refreshCompleted();
     }
   }
@@ -184,15 +154,7 @@ class AlistBucketListState extends loading_state.BaseLoadingPageState<AlistBucke
                 },
               )
             : titleText('存储列表'),
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withAlpha(204)],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-          ),
-        ),
+        flexibleSpace: getFlexibleSpace(context),
         leading: isSearching
             ? IconButton(
                 icon: const Icon(Icons.arrow_back),
@@ -265,89 +227,43 @@ class AlistBucketListState extends loading_state.BaseLoadingPageState<AlistBucke
                     ],
                   ),
                 ),
+                PopupMenuItem(
+                  value: 'id',
+                  child: Row(
+                    children: [
+                      const Icon(Icons.drag_indicator_rounded),
+                      const SizedBox(width: 10),
+                      const Text('按ID排序'),
+                      if (sortBy == 'id') Icon(ascending ? Icons.arrow_upward : Icons.arrow_downward, size: 16),
+                    ],
+                  ),
+                ),
               ],
             ),
         ],
       );
 
   @override
-  Widget buildEmpty() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Image.asset(
-            'assets/images/empty.png',
-            width: 100,
-            height: 100,
-          ),
-          const SizedBox(height: 20),
-          Text(searchText.isNotEmpty ? '没有找到匹配的存储' : '没有存储，点击右上角添加哦',
-              style: const TextStyle(fontSize: 16, color: Color.fromARGB(136, 121, 118, 118))),
-          if (searchText.isNotEmpty)
-            TextButton(
-              onPressed: () {
-                searchText = '';
-                searchController.clear();
-                filterBuckets();
-              },
-              child: const Text('清除搜索', style: TextStyle(color: Colors.blue)),
-            ),
-        ],
-      ),
-    );
-  }
+  String get emptyText => searchText.isNotEmpty ? '没有找到匹配的存储' : '没有存储，点击右上角添加哦';
 
   @override
-  Widget buildError() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.error_outline, size: 50, color: Colors.red),
-          const SizedBox(height: 20),
-          const Text('加载失败', style: TextStyle(fontSize: 18, color: Color.fromARGB(200, 121, 118, 118))),
-          const SizedBox(height: 20),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-              padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
-            ),
-            onPressed: () {
-              setState(() {
-                state = loading_state.LoadState.loading;
-              });
-              initBucketList();
-            },
-            child: const Text('重新加载'),
-          )
-        ],
-      ),
-    );
-  }
+  List<Widget> get extraEmptyWidgets => [
+        TextButton(
+          onPressed: () {
+            searchText = '';
+            searchController.clear();
+            filterBuckets();
+          },
+          child: const Text('清除搜索', style: TextStyle(color: Colors.blue)),
+        ),
+      ];
 
   @override
-  Widget buildLoading() {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          SizedBox(
-            width: 40,
-            height: 40,
-            child: CircularProgressIndicator(
-              strokeWidth: 2,
-              backgroundColor: Colors.transparent,
-              valueColor: AlwaysStoppedAnimation(Colors.blue),
-            ),
-          ),
-          SizedBox(height: 20),
-          Text('加载中...', style: TextStyle(fontSize: 16, color: Colors.grey)),
-        ],
-      ),
-    );
+  void onErrorRetry() {
+    setState(() {
+      state = loading_state.LoadState.loading;
+    });
+    initBucketList();
   }
 
   @override
@@ -374,7 +290,25 @@ class AlistBucketListState extends loading_state.BaseLoadingPageState<AlistBucke
           shrinkWrap: true,
           elements: filteredBucketMap,
           groupBy: (element) => element['driver'],
-          itemComparator: (item1, item2) => item1['id'].compareTo(item2['id']),
+          itemComparator: (item1, item2) => sortBy == 'id'
+              ? ascending
+                  ? item1['id'].toString().compareTo(item2['id'].toString())
+                  : item2['id'].toString().compareTo(item1['id'].toString())
+              : sortBy == 'name'
+                  ? ascending
+                      ? item1['mount_path'].toString().compareTo(item2['mount_path'].toString())
+                      : item2['mount_path'].toString().compareTo(item1['mount_path'].toString())
+                  : sortBy == 'driver'
+                      ? ascending
+                          ? item1['driver'].toString().compareTo(item2['driver'].toString())
+                          : item2['driver'].toString().compareTo(item1['driver'].toString())
+                      : ascending
+                          ? item1['disabled'] == false
+                              ? 0
+                              : 1
+                          : item2['disabled'] == false
+                              ? 0
+                              : 1,
           groupComparator: (value1, value2) => value2.compareTo(value1),
           groupSeparatorBuilder: (String value) => Container(
             height: 40,
@@ -395,7 +329,7 @@ class AlistBucketListState extends loading_state.BaseLoadingPageState<AlistBucke
               visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
               leading: const Icon(Icons.folder_special, color: Colors.blue),
               title: Text(
-                '${AlistManageAPI.driverTranslate[value] ?? value} (${countBucketLocation(filteredBucketMap, value)})',
+                '${manageAPI.driverTranslate[value] ?? value} (${countBucketLocation(filteredBucketMap, value)})',
                 style: const TextStyle(
                   color: Colors.black87,
                   fontSize: 14,
@@ -462,7 +396,7 @@ class AlistBucketListState extends loading_state.BaseLoadingPageState<AlistBucke
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      AlistManageAPI.driverTranslate[element['driver']] ?? element['driver'],
+                      manageAPI.driverTranslate[element['driver']] ?? element['driver'],
                       style: const TextStyle(fontSize: 12, color: Colors.grey),
                     ),
                   ],
@@ -472,8 +406,9 @@ class AlistBucketListState extends loading_state.BaseLoadingPageState<AlistBucke
                   if (!prefix.endsWith('/')) {
                     prefix += '/';
                   }
+                  Map configMap = await manageAPI.getConfigMap();
                   Application.router.navigateTo(context,
-                      '${Routes.alistFileExplorer}?element=${Uri.encodeComponent(jsonEncode(element))}&bucketPrefix=${Uri.encodeComponent(prefix)}&refresh=${Uri.encodeComponent('Refresh')}',
+                      '${Routes.alistFileExplorer}?currentStorageInfoMap=${Uri.encodeComponent(jsonEncode(element))}&bucketPrefix=${Uri.encodeComponent(prefix)}&refresh=${Uri.encodeComponent('Refresh')}&configMap=${Uri.encodeComponent(jsonEncode(configMap))}',
                       transition: TransitionType.cupertino);
                 },
                 trailing: IconButton(
@@ -572,7 +507,7 @@ class AlistBucketListState extends loading_state.BaseLoadingPageState<AlistBucke
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Text(
-                              AlistManageAPI.driverTranslate[element['driver']] ?? element['driver'],
+                              manageAPI.driverTranslate[element['driver']] ?? element['driver'],
                               style: const TextStyle(
                                 fontSize: 12,
                                 color: Colors.blue,
@@ -594,15 +529,14 @@ class AlistBucketListState extends loading_state.BaseLoadingPageState<AlistBucke
             icon: Icons.check_box_outlined,
             title: '设为默认图床',
             onTap: () async {
-              String path = mountPath;
-              var result = await AlistManageAPI.setDefaultBucket(path);
-              if (result[0] == 'success') {
-                showToast('设置成功');
-                if (mounted) {
-                  Navigator.pop(context);
-                }
-              } else {
+              var result = await manageAPI.setDefaultBucket(mountPath);
+              if (result[0] != 'success') {
                 showToast('设置失败');
+                return;
+              }
+              showToast('设置成功');
+              if (mounted) {
+                Navigator.pop(context);
               }
             },
             iconColor: Colors.green,
@@ -629,36 +563,18 @@ class AlistBucketListState extends loading_state.BaseLoadingPageState<AlistBucke
             icon: Icons.dangerous_outlined,
             title: '卸载存储',
             onTap: () async {
+              Navigator.pop(context);
               return showCupertinoAlertDialogWithConfirmFunc(
                 title: '卸载存储',
                 content: '是否卸载存储？卸载后将无法恢复。',
                 context: context,
                 onConfirm: () async {
-                  try {
-                    Navigator.of(context).pop();
-                    Navigator.of(context).pop();
-                    var result = await AlistManageAPI.deleteBucket(element);
-                    if (result[0] == 'success') {
-                      showToast('卸载成功');
-                      _onRefresh();
-                      return;
-                    } else {
-                      showToast('卸载失败');
-                    }
-                    return;
-                  } catch (e) {
-                    flogErr(
-                      e,
-                      {
-                        'element': element,
-                      },
-                      'AlistBucketPage',
-                      'buildBottomSheetWidget_deleteBucket',
-                    );
-                    showToast('删除失败');
-                    if (context.mounted) {
-                      Navigator.of(context).pop();
-                    }
+                  var result = await manageAPI.deleteBucket(element);
+                  if (result[0] == 'success') {
+                    showToast('卸载成功');
+                    _onRefresh();
+                  } else {
+                    showToast('卸载失败');
                   }
                 },
               );
@@ -738,7 +654,7 @@ class AlistBucketListState extends loading_state.BaseLoadingPageState<AlistBucke
             ),
           ],
           onChanged: (value) async {
-            var response = await AlistManageAPI.changeBucketState(element, value == 'true' ? false : true);
+            var response = await manageAPI.changeBucketState(element, value == 'true' ? false : true);
             if (response[0] == 'success') {
               showToast('修改成功');
               element['disabled'] = value == 'true' ? false : true;

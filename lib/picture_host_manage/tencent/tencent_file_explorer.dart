@@ -9,6 +9,8 @@ import 'package:external_path/external_path.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fluro/fluro.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:horopic/picture_host_manage/common/new_folder_widgets.dart';
+import 'package:horopic/picture_host_manage/common/rename_dialog_widgets.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:path/path.dart' as my_path;
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -23,10 +25,6 @@ import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/widgets/net_loading_dialog.dart';
 import 'package:horopic/utils/image_compressor.dart';
-import 'package:horopic/picture_host_manage/aws/aws_file_explorer.dart'
-    show RenameDialog, RenameDialogContent, NewFolderDialog, NewFolderDialogContent;
-
-bool isCoverFile = false;
 
 class TencentFileExplorer extends StatefulWidget {
   final Map element;
@@ -590,11 +588,10 @@ class TencentFileExplorerState extends loading_state.BaseLoadingPageState<Tencen
                                     return NewFolderDialog(
                                       contentWidget: NewFolderDialogContent(
                                         title: "  请输入新文件夹名\n / 分隔创建嵌套文件夹",
-                                        okBtnTap: () async {
+                                        onConfirm: () async {
                                           String newName = newFolder.text;
                                           if (newName.isEmpty) {
-                                            showToastWithContext(context, "文件夹名不能为空");
-                                            return;
+                                            return showToastWithContext(context, "文件夹名不能为空");
                                           }
                                           var copyResult = await TencentManageAPI.createFolder(
                                               widget.element, widget.bucketPrefix, newName);
@@ -605,8 +602,8 @@ class TencentFileExplorerState extends loading_state.BaseLoadingPageState<Tencen
                                             showToast('创建失败');
                                           }
                                         },
-                                        vc: newFolder,
-                                        cancelBtnTap: () {},
+                                        folderNameController: newFolder,
+                                        onCancel: () {},
                                       ),
                                     );
                                   });
@@ -665,7 +662,6 @@ class TencentFileExplorerState extends loading_state.BaseLoadingPageState<Tencen
                         toDelete.add(i);
                       }
                     }
-                    Navigator.pop(context);
                     await deleteAll(toDelete);
                     showToast('删除完成');
                     return;
@@ -786,7 +782,7 @@ class TencentFileExplorerState extends loading_state.BaseLoadingPageState<Tencen
                           rawurl = '$shareUrlPrefix${allInfoList[i]['Key']}';
                           fileName = allInfoList[i]['Key'].substring(allInfoList[i]['Key'].lastIndexOf('/') + 1);
                         }
-                        finalFormatedurl = linkGeneratorMap[Global.defaultLKformat]!(rawurl, fileName);
+                        finalFormatedurl = getFormatedUrl(rawurl, fileName);
                         multiUrls.add(finalFormatedurl);
                       }
                     }
@@ -880,59 +876,11 @@ class TencentFileExplorerState extends loading_state.BaseLoadingPageState<Tencen
   }
 
   @override
-  Widget buildEmpty() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Image.asset(
-            'assets/images/empty.png',
-            width: 100,
-            height: 100,
-          ),
-          const Text('没有文件哦，点击右上角添加吧', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118)))
-        ],
-      ),
-    );
-  }
-
-  @override
-  Widget buildError() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Text('加载失败,请检查网络', style: TextStyle(fontSize: 20, color: Color.fromARGB(136, 121, 118, 118))),
-          ElevatedButton(
-            style: ButtonStyle(
-              backgroundColor: WidgetStateProperty.all(Colors.blue),
-            ),
-            onPressed: () {
-              setState(() {
-                state = loading_state.LoadState.loading;
-              });
-              _getBucketList();
-            },
-            child: const Text('重新加载'),
-          )
-        ],
-      ),
-    );
-  }
-
-  @override
-  Widget buildLoading() {
-    return const Center(
-      child: SizedBox(
-        width: 30,
-        height: 30,
-        child: CircularProgressIndicator(
-          strokeWidth: 2,
-          backgroundColor: Colors.transparent,
-          valueColor: AlwaysStoppedAnimation(Colors.blue),
-        ),
-      ),
-    );
+  void onErrorRetry() {
+    setState(() {
+      state = loading_state.LoadState.loading;
+    });
+    _getBucketList();
   }
 
   @override
@@ -1326,68 +1274,6 @@ class TencentFileExplorerState extends loading_state.BaseLoadingPageState<Tencen
                                         '${Routes.mdPreview}?filePath=${Uri.encodeComponent(filePath)}&fileName=${Uri.encodeComponent(fileName)}',
                                         transition: TransitionType.none);
                                   }
-                                } else if (Global.chewieExt
-                                    .contains(allInfoList[index]['Key'].split('.').last.toLowerCase())) {
-                                  //预览chewie视频
-                                  String shareUrl = '';
-                                  List videoList = [];
-                                  int newImageIndex = index - dirAllInfoList.length;
-                                  for (int i = dirAllInfoList.length; i < allInfoList.length; i++) {
-                                    if (Global.chewieExt
-                                        .contains(allInfoList[i]['Key'].split('.').last.toLowerCase())) {
-                                      shareUrl =
-                                          'https://${widget.element['name']}.cos.${widget.element['location']}.myqcloud.com/${allInfoList[i]['Key']}';
-                                      videoList.add({"url": shareUrl, "name": allInfoList[i]['Key']});
-                                    } else if (i < index) {
-                                      newImageIndex--;
-                                    }
-                                  }
-                                  Map<String, dynamic> headers = {};
-                                  if (context.mounted) {
-                                    Application.router.navigateTo(this.context,
-                                        '${Routes.netVideoPlayer}?videoList=${Uri.encodeComponent(jsonEncode(videoList))}&index=$newImageIndex&type=${Uri.encodeComponent('normal')}&headers=${Uri.encodeComponent(jsonEncode(headers))}',
-                                        transition: TransitionType.none);
-                                  }
-                                } else if (Global.vlcExt
-                                    .contains(allInfoList[index]['Key'].split('.').last.toLowerCase())) {
-                                  //vlc预览视频
-                                  String shareUrl = '';
-                                  String subUrl = '';
-                                  List videoList = [];
-                                  int newImageIndex = index - dirAllInfoList.length;
-                                  Map subtitleFileMap = {};
-                                  for (int i = dirAllInfoList.length; i < allInfoList.length; i++) {
-                                    if (Global.subtitleFileExt
-                                        .contains(allInfoList[i]['Key'].split('.').last.toLowerCase())) {
-                                      subUrl =
-                                          'https://${widget.element['name']}.cos.${widget.element['location']}.myqcloud.com/${allInfoList[i]['Key']}';
-                                      subtitleFileMap[allInfoList[i]['Key'].split('.').first] = subUrl;
-                                    }
-                                    if (Global.vlcExt
-                                        .contains(allInfoList[index]['Key'].split('.').last.toLowerCase())) {
-                                      shareUrl =
-                                          'https://${widget.element['name']}.cos.${widget.element['location']}.myqcloud.com/${allInfoList[i]['Key']}';
-                                      videoList.add({
-                                        "url": shareUrl,
-                                        "name": allInfoList[i]['Key'],
-                                        "subtitlePath": '',
-                                      });
-                                    } else if (i < index) {
-                                      newImageIndex--;
-                                    }
-                                  }
-                                  for (int i = 0; i < videoList.length; i++) {
-                                    if (subtitleFileMap.containsKey(videoList[i]['name'].split('.').first)) {
-                                      videoList[i]['subtitlePath'] =
-                                          subtitleFileMap[videoList[i]['name'].split('.').first];
-                                    }
-                                  }
-                                  Map<String, dynamic> headers = {};
-                                  if (context.mounted) {
-                                    Application.router.navigateTo(this.context,
-                                        '${Routes.netVideoPlayer}?videoList=${Uri.encodeComponent(jsonEncode(videoList))}&index=$newImageIndex&type=${Uri.encodeComponent('mkv')}&headers=${Uri.encodeComponent(jsonEncode(headers))}',
-                                        transition: TransitionType.none);
-                                  }
                                 }
                               },
                             ),
@@ -1486,7 +1372,6 @@ class TencentFileExplorerState extends loading_state.BaseLoadingPageState<Tencen
             minLeadingWidth: 0,
             title: const Text('复制链接(设置中的默认格式)'),
             onTap: () async {
-              String format = Global.getLKformat();
               String shareUrlPrefix = '';
               String customUrl = widget.element['customUrl'] == null || widget.element['customUrl'] == ''
                   ? 'None'
@@ -1498,7 +1383,7 @@ class TencentFileExplorerState extends loading_state.BaseLoadingPageState<Tencen
               }
               String shareUrl = '$shareUrlPrefix${allInfoList[index]['Key']}';
               String filename = my_path.basename(allInfoList[index]['Key']);
-              String formatedLink = linkGeneratorMap[format]!(shareUrl, filename);
+              String formatedLink = getFormatedUrl(shareUrl, filename);
               await flutter_services.Clipboard.setData(flutter_services.ClipboardData(text: formatedLink));
               if (mounted) {
                 Navigator.pop(context);
@@ -1526,7 +1411,7 @@ class TencentFileExplorerState extends loading_state.BaseLoadingPageState<Tencen
                       return RenameDialog(
                         contentWidget: RenameDialogContent(
                           title: "新文件名 '/'分割文件夹",
-                          okBtnTap: () async {
+                          onConfirm: (bool isCoverFile) async {
                             String newName = vc.text;
                             if (isCoverFile) {
                               var copyResult =
@@ -1564,9 +1449,9 @@ class TencentFileExplorerState extends loading_state.BaseLoadingPageState<Tencen
                               }
                             }
                           },
-                          vc: vc,
-                          cancelBtnTap: () {},
-                          stateBoolText: '是否覆盖同名文件',
+                          renameTextController: vc,
+                          onCancel: () {},
+                          isShowCoverFileWidget: true,
                         ),
                       );
                     });
