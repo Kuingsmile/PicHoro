@@ -18,7 +18,7 @@ class DownloadManager extends BaseDownloadManager {
 
   @override
   Future<Map<String, dynamic>> getHeaders(String url,
-      {bool isPartial = false, int partialFileLength = 0, Map configMap = const {}}) async {
+      {bool isPartial = false, int partialFileLength = 0, Map? configMap = const {}}) async {
     String aliyunHost = url.split('/')[2];
     String bucket = aliyunHost.split('.')[0];
     String urlpath = url.substring(aliyunHost.length + 8);
@@ -37,7 +37,7 @@ class DownloadManager extends BaseDownloadManager {
   }
 
   @override
-  Future<void> download(String url, String savePath, cancelToken, {Map configMap = const {}}) async {
+  Future<void> download(String url, String savePath, cancelToken, {Map? configMap = const {}}) async {
     await processDownload(url, savePath, cancelToken, 'aliyun_DownloadManager', configMap: configMap);
   }
 }

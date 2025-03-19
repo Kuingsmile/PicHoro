@@ -20,7 +20,7 @@ class DownloadManager extends BaseDownloadManager {
 
   @override
   Future<Map<String, dynamic>> getHeaders(String url,
-      {bool isPartial = false, int partialFileLength = 0, Map configMap = const {}}) async {
+      {bool isPartial = false, int partialFileLength = 0, Map? configMap = const {}}) async {
     Map configMap = await WebdavManageAPI.getConfigMap();
     String webdavusername = configMap['webdavusername'];
     String password = configMap['password'];
@@ -38,7 +38,7 @@ class DownloadManager extends BaseDownloadManager {
   }
 
   @override
-  Future<void> download(String url, String savePath, CancelToken cancelToken, {Map configMap = const {}}) async {
+  Future<void> download(String url, String savePath, CancelToken cancelToken, {Map? configMap = const {}}) async {
     await processDownload(url, savePath, cancelToken, 'webdav_DownloadManager', configMap: configMap);
   }
 }

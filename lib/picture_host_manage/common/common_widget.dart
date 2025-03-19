@@ -319,26 +319,26 @@ class DownloadListItemState extends State<DownloadListItem> {
                                           ? '${jsonDecode(widget.url)['object'].split('/').last}'
                                           : widget.url),
                           const SizedBox(height: 4),
-                          if (widget.downloadTask != null)
-                            ValueListenableBuilder(
-                                valueListenable: widget.downloadTask!.status,
-                                builder: (context, value, child) {
-                                  return Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                    decoration: BoxDecoration(
-                                      color: _getStatusColor(value).withValues(alpha: 0.1),
-                                      borderRadius: BorderRadius.circular(12),
+                          ValueListenableBuilder(
+                              valueListenable:
+                                  widget.downloadTask?.status ?? ValueNotifier(DownloadStatus.uninitialized),
+                              builder: (context, value, child) {
+                                return Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: _getStatusColor(value).withValues(alpha: 0.1),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Text(
+                                    "状态: ${downloadStatus[value.toString()]}",
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color: _getStatusColor(value),
+                                      fontWeight: FontWeight.w500,
                                     ),
-                                    child: Text(
-                                      "状态: ${downloadStatus[value.toString()]}",
-                                      style: TextStyle(
-                                        fontSize: 13,
-                                        color: _getStatusColor(value),
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  );
-                                }),
+                                  ),
+                                );
+                              }),
                         ],
                       )),
                       widget.downloadTask != null
@@ -401,6 +401,16 @@ class DownloadListItemState extends State<DownloadListItem> {
                                           strokeWidth: 2,
                                           color: Color(0xFF3498db),
                                         ),
+                                      ),
+                                    );
+                                  case DownloadStatus.uninitialized:
+                                    return const SizedBox(
+                                      width: 32,
+                                      height: 32,
+                                      child: Icon(
+                                        Icons.download_rounded,
+                                        color: Colors.grey,
+                                        size: 32,
                                       ),
                                     );
                                 }
@@ -473,6 +483,8 @@ class DownloadListItemState extends State<DownloadListItem> {
         return const Color(0xFFe74c3c);
       case DownloadStatus.queued:
         return Colors.grey;
+      case DownloadStatus.uninitialized:
+        return Colors.green;
     }
   }
 }

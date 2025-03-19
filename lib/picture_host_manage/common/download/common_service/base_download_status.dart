@@ -1,4 +1,4 @@
-enum DownloadStatus { queued, downloading, completed, failed, paused, canceled }
+enum DownloadStatus { queued, downloading, completed, failed, paused, canceled, uninitialized }
 
 extension DownloadStatusExtension on DownloadStatus {
   bool get isCompleted =>

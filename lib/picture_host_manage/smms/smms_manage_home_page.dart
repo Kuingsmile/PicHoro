@@ -45,25 +45,16 @@ class SmmsManageHomePageState extends loading_state.BaseLoadingPageState<SmmsMan
   }
 
   initProfile() async {
-    try {
-      var profileMap = await SmmsManageAPI().getUserProfile();
-      if (profileMap[0] == 'success') {
-        userProfile = profileMap[1];
-        state = loading_state.LoadState.success;
-        _animationController.forward();
-      } else {
-        state = loading_state.LoadState.error;
-      }
-      if (mounted) {
-        setState(() {});
-      }
-    } catch (e) {
-      flogErr(e, {}, "SmmsManageHomePageState", "initProfile");
-      if (mounted) {
-        setState(() {
-          state = loading_state.LoadState.error;
-        });
-      }
+    var profileMap = await SmmsManageAPI().getUserProfile();
+    if (profileMap[0] == 'success') {
+      userProfile = profileMap[1];
+      state = loading_state.LoadState.success;
+      _animationController.forward();
+    } else {
+      state = loading_state.LoadState.error;
+    }
+    if (mounted) {
+      setState(() {});
     }
   }
 

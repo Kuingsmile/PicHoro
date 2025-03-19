@@ -100,36 +100,28 @@ class SmmsFileExplorerState extends BaseFileExplorerState<SmmsFileExplorer> {
 
   @override
   Future<void> deleteFiles(List<int> toDelete) async {
-    try {
-      for (int i = 0; i < toDelete.length; i++) {
-        var result = await manageAPI.deleteFile(allInfoList[toDelete[i] - i]['hash']);
-        if (result[0] == 'success') {
+    for (int i = 0; i < toDelete.length; i++) {
+      var result = await manageAPI.deleteFile(allInfoList[toDelete[i] - i]['hash']);
+      if (result[0] == 'success') {
+        setState(() {
+          allInfoList.removeAt(toDelete[i] - i);
+          selectedFilesBool.removeAt(toDelete[i] - i);
+        });
+        if (allInfoList.isEmpty) {
           setState(() {
-            allInfoList.removeAt(toDelete[i] - i);
-            selectedFilesBool.removeAt(toDelete[i] - i);
+            state = loading_state.LoadState.empty;
           });
-          if (allInfoList.isEmpty) {
-            setState(() {
-              state = loading_state.LoadState.empty;
-            });
-          }
-        } else {
-          throw Exception(result[0]);
         }
+      } else {
+        throw Exception(result[0]);
       }
-    } catch (e) {
-      flogErr(e, {'toDelete': toDelete}, "SmmsManagePage", "deleteAll");
-      rethrow;
     }
   }
 
   @override
   void navigateToDownloadManagement() async {
     String downloadPath = await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
-    int index = 1;
-    if (Global.smmsDownloadList.isEmpty) {
-      index = 0;
-    }
+    int index = Global.smmsDownloadList.isNotEmpty ? 1 : 0;
     if (mounted) {
       Application.router.navigateTo(context,
           '/baseUpDownloadManagePage?downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=$index&currentListIndex=8',
@@ -151,49 +143,44 @@ class SmmsFileExplorerState extends BaseFileExplorerState<SmmsFileExplorer> {
                 title: const Text('上传照片'),
                 onTap: () async {
                   Navigator.pop(context);
-                  AssetPickerConfig config = const AssetPickerConfig(
-                    maxAssets: 100,
-                    selectedAssets: [],
-                  );
-                  final List<AssetEntity>? pickedImage = await AssetPicker.pickAssets(context, pickerConfig: config);
+                  final List<AssetEntity>? pickedImage = await AssetPicker.pickAssets(context,
+                      pickerConfig: const AssetPickerConfig(
+                        maxAssets: 100,
+                        selectedAssets: [],
+                      ));
                   if (pickedImage == null) {
                     showToast('未选择图片');
-                  } else {
-                    List<File> files = [];
-                    for (var i = 0; i < pickedImage.length; i++) {
-                      File? fileImage = await pickedImage[i].originFile;
-                      if (fileImage != null) {
-                        files.add(fileImage);
-                      }
+                    return;
+                  }
+                  List<File> files = [];
+                  for (var i = 0; i < pickedImage.length; i++) {
+                    File? fileImage = await pickedImage[i].originFile;
+                    if (fileImage != null) {
+                      files.add(fileImage);
                     }
-                    Map configMap = await manageAPI.getConfigMap();
-                    for (int i = 0; i < files.length; i++) {
-                      File compressedFile;
-                      if (Global.isCompress == true) {
-                        ImageCompressor imageCompress = ImageCompressor();
-                        compressedFile = await imageCompress.compressAndGetFile(
-                            files[i].path, my_path.basename(files[i].path), Global.defaultCompressFormat,
-                            minHeight: Global.minHeight, minWidth: Global.minWidth, quality: Global.quality);
-                        files[i] = compressedFile;
-                      } else {
-                        compressedFile = files[i];
-                      }
-                      List uploadList = [files[i].path, my_path.basename(files[i].path), configMap];
-                      String uploadListStr = jsonEncode(uploadList);
-                      Global.smmsUploadList.add(uploadListStr);
+                  }
+                  Map configMap = await manageAPI.getConfigMap();
+                  for (int i = 0; i < files.length; i++) {
+                    if (Global.isCompress == true) {
+                      files[i] = await compressAndGetFile(
+                          files[i].path, my_path.basename(files[i].path), Global.defaultCompressFormat,
+                          minHeight: Global.minHeight, minWidth: Global.minWidth, quality: Global.quality);
                     }
-                    Global.setSmmsUploadList(Global.smmsUploadList);
-                    String downloadPath =
-                        await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
-                    if (mounted) {
-                      Application.router
-                          .navigateTo(context,
-                              '/baseUpDownloadManagePage?downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=0&currentListIndex=8',
-                              transition: TransitionType.inFromRight)
-                          .then((value) {
-                        _getFileList();
-                      });
-                    }
+                    List uploadList = [files[i].path, my_path.basename(files[i].path), configMap];
+                    Global.smmsUploadList.add(jsonEncode(uploadList));
+                  }
+                  Global.smmsUploadList = removeDuplicates(Global.smmsUploadList);
+                  Global.setSmmsUploadList(Global.smmsUploadList);
+                  String downloadPath =
+                      await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
+                  if (mounted) {
+                    Application.router
+                        .navigateTo(context,
+                            '/baseUpDownloadManagePage?downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=0&currentListIndex=8',
+                            transition: TransitionType.inFromRight)
+                        .then((value) {
+                      _getFileList();
+                    });
                   }
                 },
               ),
@@ -258,6 +245,10 @@ class SmmsFileExplorerState extends BaseFileExplorerState<SmmsFileExplorer> {
         Global.smmsSavedNameList.add(allInfoList[i]['filename']);
       }
     }
+    Global.smmsDownloadList = removeDuplicates(Global.smmsDownloadList);
+    Global.smmsSavedNameList = removeDuplicates(Global.smmsSavedNameList);
+    Global.setSmmsDownloadList(Global.smmsDownloadList);
+    Global.setSmmsSavedNameList(Global.smmsSavedNameList);
     String downloadPath = await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
     if (mounted) {
       Application.router.navigateTo(context,

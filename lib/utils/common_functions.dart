@@ -45,6 +45,7 @@ Map downloadStatus = {
   'DownloadStatus.failed': "失败",
   'DownloadStatus.completed': "完成",
   'DownloadStatus.queued': "排队中",
+  'DownloadStatus.uninitialized': "等待中",
 };
 
 Map uploadStatus = {
@@ -668,4 +669,8 @@ void setControllerText(TextEditingController controller, String? value) {
 
 String checkPlaceholder(String? value) {
   return (value == ConfigureTemplate.placeholder || value == null) ? 'None' : value;
+}
+
+List<T> removeDuplicates<T>(List<T> list) {
+  return list.toSet().toList();
 }

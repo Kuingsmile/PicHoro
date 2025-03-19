@@ -18,8 +18,8 @@ class DownloadManager extends BaseDownloadManager {
 
   @override
   Future<Map<String, dynamic>> getHeaders(String url,
-      {bool isPartial = false, int partialFileLength = 0, Map configMap = const {}}) async {
-    Map addition = jsonDecode(configMap['addition']);
+      {bool isPartial = false, int partialFileLength = 0, Map? configMap = const {}}) async {
+    Map addition = jsonDecode(configMap!['addition']);
     Map<String, dynamic> headers = {};
     if (configMap['driver'] == 'BaiduNetdisk' && addition['download_api'] == 'official') {
       headers[HttpHeaders.userAgentHeader] = 'pan.baidu.com';
@@ -31,7 +31,7 @@ class DownloadManager extends BaseDownloadManager {
   }
 
   @override
-  Future<void> download(String url, String savePath, cancelToken, {Map configMap = const {}}) async {
+  Future<void> download(String url, String savePath, cancelToken, {Map? configMap = const {}}) async {
     await processDownload(url, savePath, cancelToken, 'alist_DownloadManager', configMap: configMap);
   }
 }

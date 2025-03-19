@@ -386,9 +386,10 @@ class BaseUpDownloadManagePageState extends State<BaseUpDownloadManagePage> {
                 content: '是否从任务列表中删除?',
                 title: '通知',
                 onConfirm: () async {
+                  await downloadManager.removeDownload(currentDownloadList[i]);
                   currentDownloadList.remove(currentDownloadList[i]);
                   await currentSetDownloadList(currentDownloadList);
-                  if (currentPShost == 'smms') {
+                  if (currentPShost == 'sm.ms') {
                     Global.smmsSavedNameList.remove(Global.smmsSavedNameList[i]);
                     Global.setSmmsSavedNameList(Global.smmsSavedNameList);
                   }
@@ -424,7 +425,6 @@ class BaseUpDownloadManagePageState extends State<BaseUpDownloadManagePage> {
                   } else {
                     await downloadManager.addDownload(url, "$savedDir${downloadManager.getFileNameFromUrl(url)}");
                   }
-
                   setState(() {});
                 }
               },
@@ -444,14 +444,7 @@ class BaseUpDownloadManagePageState extends State<BaseUpDownloadManagePage> {
                 try {
                   await file.delete();
                 } catch (e) {
-                  flogErr(
-                      e,
-                      {
-                        'url': url,
-                        'fileName': fileName,
-                      },
-                      'UpDownloadManagePageState',
-                      '_createDownloadListItem_delete');
+                  // ignore: avoid_print
                 }
                 await downloadManager.removeDownload(url);
                 setState(() {});
@@ -517,6 +510,7 @@ class BaseUpDownloadManagePageState extends State<BaseUpDownloadManagePage> {
                   if (currentPShost == 'sm.ms') {
                     Global.setSmmsSavedNameList([]);
                   }
+                  await downloadManager.removeAllDownloads();
                   setState(() {});
                 },
                 icon: const Icon(Icons.delete_sweep, size: 20),

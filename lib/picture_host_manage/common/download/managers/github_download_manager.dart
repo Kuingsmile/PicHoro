@@ -15,7 +15,7 @@ class DownloadManager extends BaseDownloadManager {
   }
 
   @override
-  Future<void> download(String url, String savePath, cancelToken, {Map configMap = const {}}) async {
+  Future<void> download(String url, String savePath, cancelToken, {Map? configMap = const {}}) async {
     await processDownload(url, savePath, cancelToken, 'github_DownloadManager', configMap: configMap);
   }
 }

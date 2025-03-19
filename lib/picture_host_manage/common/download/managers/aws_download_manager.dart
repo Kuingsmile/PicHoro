@@ -22,7 +22,7 @@ class DownloadManager extends BaseDownloadManager {
   }
 
   @override
-  Future<void> download(String url, String savePath, cancelToken, {Map configMap = const {}}) async {
+  Future<void> download(String url, String savePath, cancelToken, {Map? configMap = const {}}) async {
     await processDownload(url, savePath, cancelToken, 'aws_DownloadManager', configMap: configMap);
   }
 
@@ -33,7 +33,7 @@ class DownloadManager extends BaseDownloadManager {
     String partialFilePath,
     File partialFile,
     CancelToken cancelToken, {
-    Map configMap = const {},
+    Map? configMap = const {},
   }) async {
     Map urlMap = jsonDecode(url);
     String urlpath = urlMap['object'];
@@ -94,7 +94,7 @@ class DownloadManager extends BaseDownloadManager {
   @override
   Future<void> handleNewDownload(
       String url, String savePath, String partialFilePath, File partialFile, CancelToken cancelToken,
-      {Map configMap = const {}}) async {
+      {Map? configMap = const {}}) async {
     Map urlMap = jsonDecode(url);
     String urlpath = urlMap['object'];
     String region = urlMap['region'];

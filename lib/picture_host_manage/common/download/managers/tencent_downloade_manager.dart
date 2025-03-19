@@ -19,7 +19,7 @@ class DownloadManager extends BaseDownloadManager {
 
   @override
   Future<Map<String, dynamic>> getHeaders(String url,
-      {bool isPartial = false, int partialFileLength = 0, Map configMap = const {}}) async {
+      {bool isPartial = false, int partialFileLength = 0, Map? configMap = const {}}) async {
     String tencentHost = url.split('/')[2];
     String urlpath = url.substring(tencentHost.length + 8);
     String method = 'GET';
@@ -43,7 +43,7 @@ class DownloadManager extends BaseDownloadManager {
   }
 
   @override
-  Future<void> download(String url, String savePath, CancelToken cancelToken, {Map configMap = const {}}) async {
+  Future<void> download(String url, String savePath, CancelToken cancelToken, {Map? configMap = const {}}) async {
     await processDownload(url, savePath, cancelToken, 'tencent_DownloadManager', configMap: configMap);
   }
 }

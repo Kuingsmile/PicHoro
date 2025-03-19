@@ -433,19 +433,14 @@ class QiniuFileExplorerState extends loading_state.BaseLoadingPageState<QiniuFil
                                 configMap['area'] = widget.element['area'];
                                 configMap['path'] = widget.bucketPrefix;
                                 for (int i = 0; i < files.length; i++) {
-                                  File compressedFile;
                                   if (Global.imgExt
                                       .contains(my_path.extension(files[i].path).toLowerCase().substring(1))) {
                                     if (Global.isCompress == true) {
-                                      ImageCompressor imageCompress = ImageCompressor();
-                                      compressedFile = await imageCompress.compressAndGetFile(
+                                      files[i] = await compressAndGetFile(
                                           files[i].path, my_path.basename(files[i].path), Global.defaultCompressFormat,
                                           minHeight: Global.minHeight,
                                           minWidth: Global.minWidth,
                                           quality: Global.quality);
-                                      files[i] = compressedFile;
-                                    } else {
-                                      compressedFile = files[i];
                                     }
                                   }
                                   List uploadList = [files[i].path, my_path.basename(files[i].path), configMap];
@@ -497,17 +492,12 @@ class QiniuFileExplorerState extends loading_state.BaseLoadingPageState<QiniuFil
                                 configMap['area'] = widget.element['area'];
                                 configMap['path'] = widget.bucketPrefix;
                                 for (int i = 0; i < files.length; i++) {
-                                  File compressedFile;
                                   if (Global.isCompress == true) {
-                                    ImageCompressor imageCompress = ImageCompressor();
-                                    compressedFile = await imageCompress.compressAndGetFile(
+                                    files[i] = await compressAndGetFile(
                                         files[i].path, my_path.basename(files[i].path), Global.defaultCompressFormat,
                                         minHeight: Global.minHeight,
                                         minWidth: Global.minWidth,
                                         quality: Global.quality);
-                                    files[i] = compressedFile;
-                                  } else {
-                                    compressedFile = files[i];
                                   }
                                   List uploadList = [files[i].path, my_path.basename(files[i].path), configMap];
                                   String uploadListStr = jsonEncode(uploadList);

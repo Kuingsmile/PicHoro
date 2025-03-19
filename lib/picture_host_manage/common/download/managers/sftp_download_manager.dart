@@ -19,7 +19,7 @@ class DownloadManager extends BaseDownloadManager {
   }
 
   @override
-  Future<void> download(String url, String savePath, cancelToken, {Map configMap = const {}}) async {
+  Future<void> download(String url, String savePath, cancelToken, {Map? configMap = const {}}) async {
     await processDownload(url, savePath, cancelToken, 'sftp_DownloadManager', configMap: configMap);
   }
 
@@ -30,7 +30,7 @@ class DownloadManager extends BaseDownloadManager {
     String partialFilePath,
     File partialFile,
     CancelToken cancelToken, {
-    Map configMap = const {},
+    Map? configMap = const {},
   }) async {
     var partialFileLength = await partialFile.length();
     Map configMapFTP = await FTPManageAPI.getConfigMap();
@@ -74,7 +74,7 @@ class DownloadManager extends BaseDownloadManager {
   @override
   Future<void> handleNewDownload(
       String url, String savePath, String partialFilePath, File partialFile, CancelToken cancelToken,
-      {Map configMap = const {}}) async {
+      {Map? configMap = const {}}) async {
     Map configMapFTP = await FTPManageAPI.getConfigMap();
     String ftpHost = configMapFTP['ftpHost'];
     String ftpPort = configMapFTP['ftpPort'];

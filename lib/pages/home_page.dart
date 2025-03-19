@@ -468,8 +468,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
   _processUploadAndReturnToCamera() async {
     File compressedFile;
     if (Global.isCompress == true) {
-      ImageCompressor imageCompress = ImageCompressor();
-      compressedFile = await imageCompress.compressAndGetFile(
+      compressedFile = await compressAndGetFile(
           Global.imageOriginalFile!.path, my_path.basename(Global.imageFile!), Global.defaultCompressFormat,
           minHeight: Global.minHeight, minWidth: Global.minWidth, quality: Global.quality);
       Global.imageFile = '${my_path.dirname(Global.imageFile!)}/${my_path.basename(compressedFile.path)}';
@@ -1203,8 +1202,7 @@ Future<File> processImageFile(File imageFile) async {
   Global.imageFile = fileName;
   File compressedFile;
   if (Global.isCompress) {
-    ImageCompressor imageCompress = ImageCompressor();
-    compressedFile = await imageCompress.compressAndGetFile(
+    compressedFile = await compressAndGetFile(
         imageFile.path, my_path.basename(Global.imageFile!), Global.defaultCompressFormat,
         minHeight: Global.minHeight, minWidth: Global.minWidth, quality: Global.quality);
     Global.imageFile = '${my_path.dirname(Global.imageFile!)}/${my_path.basename(compressedFile.path)}';

@@ -65,10 +65,11 @@ class SmmsManageAPI extends BaseManageApi {
         "SmmsManageAPI",
         callFunction,
       );
+      return [response.toString()];
     } catch (e) {
       flogErr(e, {}, "SmmsManageAPI", callFunction);
+      return [e.toString()];
     }
-    return ['failed'];
   }
 
   getUserProfile() async {

@@ -81,8 +81,13 @@ abstract class BaseFileExplorerState<T extends BaseFileExplorer> extends loading
               context: context,
               content: '确定要删除${getFileName(index)}吗？',
               onConfirm: () async {
-                await onDeleteFile(index);
-                showToast('删除成功');
+                try {
+                  await deleteFiles([index]);
+                  showToast('删除完成');
+                } catch (e) {
+                  flogErr(e, {}, runtimeType.toString(), "delete_button");
+                  showToast('删除失败');
+                }
               });
         },
         backgroundColor: const Color(0xFFFE4A49),
@@ -91,10 +96,6 @@ abstract class BaseFileExplorerState<T extends BaseFileExplorer> extends loading
         position: 'right',
       ),
     ];
-  }
-
-  Future<void> onDeleteFile(int index) async {
-    await deleteFiles([index]);
   }
 
   Widget buildFloatingActionButton() {
