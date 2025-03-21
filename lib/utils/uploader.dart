@@ -42,6 +42,7 @@ uploaderentry({required String path, required String name}) async {
     String defaultConfig = Global.getPShost();
     return await uploadFunc[defaultConfig]!(path: path, name: name, configMap: jsonDecode(configData));
   } catch (e) {
+    flogErr(e, {'path': path, 'name': name}, "uploaderentry", "uploaderentry");
     return ["failed"];
   }
 }

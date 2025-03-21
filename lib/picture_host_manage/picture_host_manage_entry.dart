@@ -109,7 +109,7 @@ class PsHostHomePageState extends State<PsHostHomePage> with AutomaticKeepAliveC
           'assets/icons/upyun.png',
           '又拍云',
           () async {
-            var queryUpyunManage = await UpyunManageAPI.readUpyunManageConfig();
+            var queryUpyunManage = await UpyunManageAPI().readUpyunManageConfig();
             if (queryUpyunManage == 'Error' || queryUpyunManage == '') {
               if (mounted) {
                 Application.router.navigateTo(
@@ -122,7 +122,7 @@ class PsHostHomePageState extends State<PsHostHomePage> with AutomaticKeepAliveC
               showToast('开始校验');
               var jsonResult = jsonDecode(queryUpyunManage);
               String token = jsonResult['token'];
-              var checkTokenResult = await UpyunManageAPI.checkToken(token);
+              var checkTokenResult = await UpyunManageAPI().checkToken(token);
               if (checkTokenResult[0] == 'success') {
                 if (mounted) {
                   Application.router.navigateTo(

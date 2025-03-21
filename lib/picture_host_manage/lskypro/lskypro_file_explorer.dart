@@ -35,7 +35,8 @@ class LskyproFileExplorer extends BaseFileExplorer {
 
 class LskyproFileExplorerState extends BaseFileExplorerState<LskyproFileExplorer> {
   List fileAllInfoList = [];
-  List dirAllInfoList = [];
+
+  LskyproManageAPI manageAPI = LskyproManageAPI();
 
   @override
   Future<void> initializeData() async {
@@ -48,102 +49,76 @@ class LskyproFileExplorerState extends BaseFileExplorerState<LskyproFileExplorer
   }
 
   _getFileList() async {
-    try {
-      if (widget.userProfile['image_num'] == 0) {
+    if (widget.userProfile['image_num'] == 0) {
+      setState(() {
+        state = loading_state.LoadState.empty;
+      });
+      return;
+    }
+    //主页模式
+    if (widget.albumInfo.isEmpty) {
+      //查询相册
+      var albumResult = await manageAPI.getAlbums();
+      if (albumResult[0] == 'success') {
+        dirAllInfoList = albumResult[1].toList();
+      } else {
         setState(() {
-          state = loading_state.LoadState.empty;
+          state = loading_state.LoadState.error;
         });
         return;
       }
-      //主页模式
-      if (widget.albumInfo.isEmpty) {
-        //查询相册
-        var albumResult = await LskyproManageAPI.getAlbums();
-        if (albumResult[0] == 'success') {
-          if (albumResult[1].length >= 1) {
-            dirAllInfoList.clear();
-            dirAllInfoList.addAll(albumResult[1]);
-          } else {
-            dirAllInfoList.clear();
-          }
-        } else {
-          setState(() {
-            state = loading_state.LoadState.error;
-          });
-          return;
-        }
-        //查询文件
-        var fileResult = await LskyproManageAPI.getPhoto(null);
-        if (fileResult[0] == 'success') {
-          if (fileResult[1].length >= 1) {
-            fileAllInfoList.clear();
-            fileAllInfoList.addAll(fileResult[1]);
-          } else {
-            fileAllInfoList.clear();
-          }
-        } else {
-          setState(() {
-            state = loading_state.LoadState.error;
-          });
-          return;
-        }
-        //合并
-        for (var i = 0; i < fileAllInfoList.length; i++) {
-          fileAllInfoList[i]['date'] = DateTime.parse(
-            fileAllInfoList[i]['date'],
-          );
-        }
-        fileAllInfoList.sort((a, b) => b['date'].compareTo(a['date']));
-        allInfoList.clear();
-        allInfoList.addAll(dirAllInfoList);
-        allInfoList.addAll(fileAllInfoList);
+      //查询文件
+      var fileResult = await manageAPI.getPhoto(null);
+      if (fileResult[0] == 'success') {
+        fileAllInfoList = fileResult[1].toList();
       } else {
-        //相册内容模式
-        dirAllInfoList.clear();
-        var fileResult = await LskyproManageAPI.getPhoto(widget.albumInfo['id']);
-        if (fileResult[0] == 'success') {
-          if (fileResult[1].length >= 1) {
-            fileAllInfoList.clear();
-            fileAllInfoList.addAll(fileResult[1]);
-          } else {
-            fileAllInfoList.clear();
-          }
-        } else {
-          setState(() {
-            state = loading_state.LoadState.error;
-          });
-          return;
-        }
-        //合并
-        for (var i = 0; i < fileAllInfoList.length; i++) {
-          fileAllInfoList[i]['date'] = DateTime.parse(
-            fileAllInfoList[i]['date'],
-          );
-        }
-        fileAllInfoList.sort((a, b) => b['date'].compareTo(a['date']));
-        allInfoList.clear();
-        allInfoList.addAll(fileAllInfoList);
+        setState(() {
+          state = loading_state.LoadState.error;
+        });
+        return;
       }
-      if (allInfoList.isEmpty) {
-        if (mounted) {
-          setState(() {
-            state = loading_state.LoadState.empty;
-          });
-        }
+      //合并
+      for (var i = 0; i < fileAllInfoList.length; i++) {
+        fileAllInfoList[i]['date'] = DateTime.parse(
+          fileAllInfoList[i]['date'],
+        );
+      }
+      fileAllInfoList.sort((a, b) => b['date'].compareTo(a['date']));
+      allInfoList = [...dirAllInfoList, ...fileAllInfoList];
+    } else {
+      //相册内容模式
+      dirAllInfoList.clear();
+      var fileResult = await manageAPI.getPhoto(widget.albumInfo['id']);
+      if (fileResult[0] == 'success') {
+        fileAllInfoList = fileResult[1].toList();
       } else {
-        if (mounted) {
-          setState(() {
-            selectedFilesBool.clear();
-            for (var i = 0; i < allInfoList.length; i++) {
-              selectedFilesBool.add(false);
-            }
-            state = loading_state.LoadState.success;
-          });
-        }
+        setState(() {
+          state = loading_state.LoadState.error;
+        });
+        return;
       }
-    } catch (e) {
-      flogErr(e, {}, 'LskyproFileExplorerState', '_getFileList');
-      state = loading_state.LoadState.error;
+      //合并
+      for (var i = 0; i < fileAllInfoList.length; i++) {
+        fileAllInfoList[i]['date'] = DateTime.parse(
+          fileAllInfoList[i]['date'],
+        );
+      }
+      fileAllInfoList.sort((a, b) => b['date'].compareTo(a['date']));
+      allInfoList = [...fileAllInfoList];
+    }
+    if (allInfoList.isEmpty) {
+      if (mounted) {
+        setState(() {
+          state = loading_state.LoadState.empty;
+        });
+      }
+    } else {
+      if (mounted) {
+        setState(() {
+          selectedFilesBool = List.filled(allInfoList.length, false, growable: true);
+          state = loading_state.LoadState.success;
+        });
+      }
     }
     if (mounted) {
       setState(() {});
@@ -154,71 +129,46 @@ class LskyproFileExplorerState extends BaseFileExplorerState<LskyproFileExplorer
   String getShareUrl(int index) => allInfoList[index]?['links']?['url'] ?? '';
 
   @override
-  String getFileName(int index) => allInfoList[index]['name'];
-
-  @override
   String getFileDate(int index) => allInfoList[index]['date'] == null
       ? ''
       : allInfoList[index]['date'].toString().replaceAll('T', ' ').replaceAll('Z', '').substring(0, 19);
 
   @override
   String? getFileSizeForList(int index) {
-    if (index < dirAllInfoList.length) {
-      return null;
-    } else {
-      return allInfoList[index]['size'] == null
-          ? null
-          : getFileSize(int.parse(allInfoList[index]['size'].toString().split('.')[0]) * 1024);
-    }
-  }
-
-  @override
-  Widget getThumbnailWidget(int index) {
-    return index < dirAllInfoList.length
-        ? Image.asset(
-            'assets/icons/folder.png',
-            width: 50,
-            height: 50,
-          )
-        : super.getThumbnailWidget(index);
+    return allInfoList[index]['size'] == null
+        ? null
+        : getFileSize(int.parse(allInfoList[index]['size'].toString().split('.')[0]) * 1024);
   }
 
   @override
   Future<void> deleteFiles(List<int> toDelete) async {
-    try {
-      for (int i = 0; i < toDelete.length; i++) {
-        if ((toDelete[i] - i) < dirAllInfoList.length) {
-          await LskyproManageAPI.deleteAlbum(allInfoList[toDelete[i] - i]['id'].toString());
-          setState(() {
-            allInfoList.removeAt(toDelete[i] - i);
-            dirAllInfoList.removeAt(toDelete[i] - i);
-            selectedFilesBool.removeAt(toDelete[i] - i);
-          });
+    toDelete.sort((a, b) => b.compareTo(a));
+    for (int index in toDelete) {
+      final result = index < dirAllInfoList.length
+          ? await manageAPI.deleteAlbum(allInfoList[index]['id'].toString())
+          : await manageAPI.deleteFile(allInfoList[index]['key']);
+      if (result[0] != 'success') {
+        throw Exception(result[0]);
+      }
+      setState(() {
+        allInfoList.removeAt(index);
+        if (index < dirAllInfoList.length) {
+          dirAllInfoList.removeAt(index);
         } else {
-          await LskyproManageAPI.deleteFile(allInfoList[toDelete[i] - i]['key']);
-          setState(() {
-            allInfoList.removeAt(toDelete[i] - i);
-            fileAllInfoList.removeAt(toDelete[i] - i - dirAllInfoList.length);
-            selectedFilesBool.removeAt(toDelete[i] - i);
-          });
+          fileAllInfoList.removeAt(index - dirAllInfoList.length);
         }
-      }
-      if (allInfoList.isEmpty) {
-        setState(() {
-          state = loading_state.LoadState.empty;
-        });
-      }
-    } catch (e) {
-      flogErr(
-          e,
-          {
-            'toDelete': toDelete,
-          },
-          'LskyproManagePage',
-          'deleteAll');
-      rethrow;
+        selectedFilesBool.removeAt(index);
+      });
+    }
+    if (allInfoList.isEmpty) {
+      setState(() {
+        state = loading_state.LoadState.empty;
+      });
     }
   }
+
+  @override
+  String getPageTitle() => widget.albumInfo.isEmpty ? '相册列表' : widget.albumInfo['name'];
 
   @override
   DateTime getFormatedFileDate(dynamic item) {
@@ -228,26 +178,8 @@ class LskyproFileExplorerState extends BaseFileExplorerState<LskyproFileExplorer
   }
 
   @override
-  String getFormatedFileName(dynamic item) {
-    return item['name'];
-  }
-
-  @override
   int getFormatedSize(dynamic item) {
     return item['size'] == null ? 0 : int.parse(item['size'].toString().split('.')[0]) * 1024;
-  }
-
-  @override
-  void sortListWithDirectories(int Function(dynamic a, dynamic b, bool ascending) comparator, bool ascending) {
-    if (dirAllInfoList.isEmpty) {
-      allInfoList.sort((a, b) => comparator(a, b, ascending));
-    } else {
-      List temp = allInfoList.sublist(dirAllInfoList.length, allInfoList.length);
-      temp.sort((a, b) => comparator(a, b, ascending));
-      allInfoList.clear();
-      allInfoList.addAll(dirAllInfoList);
-      allInfoList.addAll(temp);
-    }
   }
 
   @override
@@ -279,7 +211,7 @@ class LskyproFileExplorerState extends BaseFileExplorerState<LskyproFileExplorer
                       files.add(fileImage);
                     }
                   }
-                  Map configMap = await LskyproManageAPI.getConfigMap();
+                  Map configMap = await manageAPI.getConfigMap();
                   configMap['album_id'] = widget.albumInfo['id'] ?? 'None';
                   for (int i = 0; i < files.length; i++) {
                     if (Global.isCompress == true) {
@@ -292,19 +224,14 @@ class LskyproFileExplorerState extends BaseFileExplorerState<LskyproFileExplorer
                       my_path.basename(files[i].path),
                       configMap,
                     ];
-                    String uploadListStr = jsonEncode(uploadList);
-                    Global.lskyproUploadList.add(uploadListStr);
+                    Global.lskyproUploadList.add(jsonEncode(uploadList));
                   }
+                  Global.lskyproUploadList = removeDuplicates(Global.lskyproUploadList);
                   Global.setLskyproUploadList(Global.lskyproUploadList);
                   String downloadPath =
                       await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
                   if (mounted) {
-                    String albumName = '';
-                    if (widget.albumInfo.isEmpty) {
-                      albumName = '其它';
-                    } else {
-                      albumName = widget.albumInfo['name'];
-                    }
+                    String albumName = widget.albumInfo.isEmpty ? '其它' : widget.albumInfo['name'];
                     Application.router
                         .navigateTo(context,
                             '/baseUpDownloadManagePage?albumName=${Uri.encodeComponent(albumName)}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=0&currentListIndex=6',
@@ -340,8 +267,9 @@ class LskyproFileExplorerState extends BaseFileExplorerState<LskyproFileExplorer
                               outsideDismiss: false,
                               loading: true,
                               loadingText: "上传中...",
-                              requestCallBack: LskyproManageAPI.uploadNetworkFileEntry(
+                              requestCallBack: manageAPI.uploadNetworkFileEntry(
                                 fileLinkList,
+                                widget.albumInfo['id'] ?? 'None',
                               ),
                             );
                           });
@@ -371,16 +299,8 @@ class LskyproFileExplorerState extends BaseFileExplorerState<LskyproFileExplorer
   @override
   void navigateToDownloadManagement() async {
     String downloadPath = await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
-    int index = 1;
-    if (Global.lskyproDownloadList.isEmpty) {
-      index = 0;
-    }
-    String albumName = '';
-    if (widget.albumInfo.isEmpty) {
-      albumName = '其它';
-    } else {
-      albumName = widget.albumInfo['name'];
-    }
+    int index = Global.lskyproDownloadList.isEmpty ? 0 : 1;
+    String albumName = widget.albumInfo.isEmpty ? '其它' : widget.albumInfo['name'];
     if (mounted) {
       Application.router.navigateTo(context,
           '/baseUpDownloadManagePage?albumName=${Uri.encodeComponent(albumName)}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=$index&currentListIndex=6',
@@ -401,19 +321,15 @@ class LskyproFileExplorerState extends BaseFileExplorerState<LskyproFileExplorer
       }
     }
     if (downloadList.isEmpty) {
-      showToast('没有选择文件');
-      return;
+      return showToast('没有选择文件');
     }
     for (int i = 0; i < downloadList.length; i++) {
       Global.lskyproDownloadList.add(downloadList[i]['links']['url']);
     }
+    Global.lskyproDownloadList = removeDuplicates(Global.lskyproDownloadList);
+    Global.setLskyproDownloadList(Global.lskyproDownloadList);
     String downloadPath = await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
-    String albumName = '';
-    if (widget.albumInfo.isEmpty) {
-      albumName = '其它';
-    } else {
-      albumName = widget.albumInfo['name'];
-    }
+    String albumName = widget.albumInfo.isEmpty ? '其它' : widget.albumInfo['name'];
     if (mounted) {
       Application.router.navigateTo(context,
           '/baseUpDownloadManagePage?albumName=${Uri.encodeComponent(albumName)}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=1&currentListIndex=6',
@@ -442,94 +358,46 @@ class LskyproFileExplorerState extends BaseFileExplorerState<LskyproFileExplorer
   }
 
   @override
-  Widget buildBottomSheetWidget(
-    BuildContext context,
-    int index,
-  ) {
-    return FileBottomSheetWidget(
-        thumbnailWidget: getThumbnailWidget(index),
-        fileName: getFileName(index),
-        fileDate: getFileDate(index),
-        actions: index < dirAllInfoList.length
-            ? [
-                BottomSheetAction(
-                    icon: Icons.delete_outline,
-                    iconColor: Color.fromARGB(255, 240, 85, 131),
-                    title: '删除',
-                    onTap: () async {
-                      Navigator.pop(context);
-                      showCupertinoAlertDialogWithConfirmFunc(
-                          context: context,
-                          title: '通知',
-                          content: '确定要删除${allInfoList[index]['name']}吗?',
-                          onConfirm: () async {
-                            var result = await LskyproManageAPI.deleteAlbum(allInfoList[index]['id'].toString());
-                            if (result[0] == 'success') {
-                              showToast('删除成功');
-                              setState(() {
-                                allInfoList.removeAt(index);
-                                dirAllInfoList.removeAt(index);
-                                selectedFilesBool.removeAt(index);
-                              });
-                            } else {
-                              showToast('删除失败');
-                            }
-                          });
-                    })
-              ]
-            : [
-                BottomSheetAction(
-                    icon: Icons.info_outline_rounded,
-                    iconColor: Color.fromARGB(255, 97, 141, 236),
-                    title: '文件详情',
-                    onTap: () async {
-                      Navigator.pop(context);
-                      Map fileMap = allInfoList[index];
-                      fileMap['date'] = getFileDate(index);
-                      Application.router.navigateTo(context,
-                          '${Routes.lskyproFileInformation}?fileMap=${Uri.encodeComponent(jsonEncode(fileMap))}',
-                          transition: TransitionType.cupertino);
-                    }),
-                BottomSheetAction(
-                  icon: Icons.link_rounded,
-                  iconColor: Color.fromARGB(255, 97, 141, 236),
-                  title: '复制链接(设置中的默认格式)',
-                  onTap: () async {
-                    String shareUrl = getShareUrl(index);
-                    String filename = my_path.basename(getFileName(index));
-                    String formatedLink = getFormatedUrl(shareUrl, filename);
-                    await flutter_services.Clipboard.setData(flutter_services.ClipboardData(text: formatedLink));
-                    if (mounted) {
-                      Navigator.pop(context);
-                    }
-                    showToast('复制成功');
-                  },
-                ),
-                BottomSheetAction(
-                  icon: Icons.delete_outline,
-                  iconColor: Color.fromARGB(255, 240, 85, 131),
-                  title: '删除',
-                  onTap: () async {
-                    Navigator.pop(context);
-                    showCupertinoAlertDialogWithConfirmFunc(
-                      context: context,
-                      title: '通知',
-                      content: '确定要删除${allInfoList[index]['name']}吗？',
-                      onConfirm: () async {
-                        var result = await LskyproManageAPI.deleteFile(allInfoList[index]['key']);
-                        if (result[0] == 'success') {
-                          showToast('删除成功');
-                          setState(() {
-                            allInfoList.removeAt(index);
-                            selectedFilesBool.removeAt(index);
-                          });
-                        } else {
-                          showToast('删除失败');
-                        }
-                      },
-                    );
-                  },
-                )
-              ]);
+  List<BottomSheetAction> getExtraActions(int index) {
+    return [
+      BottomSheetAction(
+          icon: Icons.delete_outline,
+          iconColor: Color.fromARGB(255, 240, 85, 131),
+          title: '删除',
+          onTap: () async {
+            Navigator.pop(context);
+            showCupertinoAlertDialogWithConfirmFunc(
+                context: context,
+                title: '通知',
+                content: '确定要删除${allInfoList[index]['name']}吗?',
+                onConfirm: () async {
+                  var result = index < dirAllInfoList.length
+                      ? await manageAPI.deleteAlbum(allInfoList[index]['id'].toString())
+                      : await manageAPI.deleteFile(allInfoList[index]['key']);
+                  if (result[0] == 'success') {
+                    showToast('删除成功');
+                    setState(() {
+                      allInfoList.removeAt(index);
+                      if (index < dirAllInfoList.length) {
+                        dirAllInfoList.removeAt(index);
+                      }
+                      dirAllInfoList.removeAt(index);
+                      selectedFilesBool.removeAt(index);
+                    });
+                  } else {
+                    showToast('删除失败');
+                  }
+                });
+          }),
+    ];
+  }
+
+  @override
+  void onFileInfoTap(int index) {
+    Map fileMap = allInfoList[index];
+    fileMap['date'] = getFileDate(index);
+    Application.router.navigateTo(
+        context, '${Routes.lskyproFileInformation}?fileMap=${Uri.encodeComponent(jsonEncode(fileMap))}',
+        transition: TransitionType.cupertino);
   }
 }

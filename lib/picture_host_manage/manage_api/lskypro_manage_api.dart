@@ -1,77 +1,89 @@
-import 'dart:io';
-import 'dart:convert';
-
 import 'package:dio/dio.dart';
+import 'package:horopic/picture_host_manage/common/base_manage_api.dart';
 import 'package:path_provider/path_provider.dart';
 
-import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/common_functions.dart';
 
-class LskyproManageAPI {
-  static Future<File> get localFile async {
-    final path = await _localPath;
-    String defaultUser = Global.getUser();
-    return ensureFileExists(File('$path/${defaultUser}_host_config.txt'));
+class LskyproManageAPI extends BaseManageApi {
+  static final LskyproManageAPI _instance = LskyproManageAPI._internal();
+
+  LskyproManageAPI._internal();
+
+  factory LskyproManageAPI() {
+    return _instance;
   }
 
-  static Future<String> get _localPath async {
-    final directory = await getApplicationDocumentsDirectory();
-    return directory.path;
-  }
+  @override
+  String configFileName() => 'host_config.txt';
 
-  static Future<String> readLskyproConfig() async {
-    try {
-      final file = await localFile;
-      String contents = await file.readAsString();
-      return contents;
-    } catch (e) {
-      flogErr(e, {}, 'LskyproManageAPI', 'readLskyproConfig');
-      return "Error";
-    }
-  }
-
-  static Future<Map> getConfigMap() async {
-    String configStr = await readLskyproConfig();
-    if (configStr == '') {
-      return {};
-    }
-    return json.decode(configStr);
-  }
-
-  static isString(var variable) {
-    return variable is String;
-  }
-
-  static isFile(var variable) {
-    return variable is File;
-  }
-
-  static getUserInfo() async {
+  _makeRequest(
+    String endpoint, {
+    dynamic data,
+    Map<String, dynamic>? queryParameters,
+    Map<String, dynamic>? headers,
+    required Function onSuccess,
+    String method = 'POST',
+    String callFunction = 'makeRequest',
+  }) async {
     try {
       Map configMap = await getConfigMap();
       String token = configMap["token"];
       String host = configMap["host"];
-      BaseOptions options = setBaseOptions();
-      options.headers = {
+
+      String url = '$host$endpoint';
+
+      BaseOptions baseoptions = setBaseOptions();
+      baseoptions.headers = {
         "Authorization": token,
         "Accept": "application/json",
+        ...?headers,
       };
-      Dio dio = Dio(options);
-      String userInfoUrl = "$host/api/v1/profile";
+      Dio dio = Dio(baseoptions);
 
-      var response = await dio.get(userInfoUrl);
-      if (response.statusCode == 200 && response.data!['status'] == true) {
-        return ['success', response.data];
+      Response response;
+      if (method == 'GET') {
+        response = await dio.get(url, queryParameters: queryParameters);
+      } else if (method == 'POST') {
+        response = await dio.post(url, data: data, queryParameters: queryParameters);
+      } else if (method == 'DELETE') {
+        response = await dio.delete(url, data: data, queryParameters: queryParameters);
       } else {
-        return ['failed'];
+        response = await dio.put(url, data: data, queryParameters: queryParameters);
       }
+
+      if (response.statusCode == 200 && response.data?['status'] == true) {
+        return onSuccess(response);
+      }
+      flogErr(
+        response,
+        {
+          'url': url,
+          'data': data,
+          'queryParameters': queryParameters,
+          'headers': headers,
+        },
+        "LskyproManageAPI",
+        callFunction,
+      );
+      return [response.toString()];
     } catch (e) {
-      flogErr(e, {}, 'LskyproManageAPI', 'getUserInfo');
+      flogErr(e, {}, "LskyproManageAPI", callFunction);
       return [e.toString()];
     }
   }
 
-  static getAlbums() async {
+  getUserInfo() async {
+    return await _makeRequest(
+      '/api/v1/profile',
+      onSuccess: (response) {
+        return ['success', response.data];
+      },
+      method: 'GET',
+      callFunction: 'getUserInfo',
+    );
+  }
+
+  getAlbums() async {
     try {
       Map configMap = await getConfigMap();
       String token = configMap["token"];
@@ -88,31 +100,48 @@ class LskyproManageAPI {
       int lastPage = 1;
       List albums = [];
       var response = await dio.get(userInfoUrl);
-      if (response.statusCode == 200 && response.data!['status'] == true) {
-        lastPage = response.data!['data']['last_page'];
-        if (response.data!['data']['data'].isEmpty) {
+      if (response.statusCode == 200 && response.data['status'] == true) {
+        lastPage = response.data['data']['last_page'];
+        if (response.data['data']['data'].isEmpty) {
           return ['success', []];
         }
-        albums.addAll(response.data!['data']['data']);
+        albums.addAll(response.data['data']['data']);
         for (page = 2; page <= lastPage; page++) {
           response = await dio.get(userInfoUrl, queryParameters: {"page": page});
-          if (response.statusCode == 200 && response.data!['status'] == true) {
-            albums.addAll(response.data!['data']['data']);
+          if (response.statusCode == 200 && response.data['status'] == true) {
+            albums.addAll(response.data['data']['data']);
           } else {
-            return ['failed'];
+            flogErr(
+              response,
+              {
+                'url': userInfoUrl,
+                'headers': options.headers,
+              },
+              'LskyproManageAPI',
+              'getAlbums',
+            );
+            return [response.toString()];
           }
         }
         return ['success', albums];
-      } else {
-        return ['failed'];
       }
+      flogErr(
+        response,
+        {
+          'url': userInfoUrl,
+          'headers': options.headers,
+        },
+        'LskyproManageAPI',
+        'getAlbums',
+      );
+      return [response.toString()];
     } catch (e) {
       flogErr(e, {}, 'LskyproManageAPI', 'getAlbums');
       return [e.toString()];
     }
   }
 
-  static getPhoto(int? albumId) async {
+  getPhoto(int? albumId) async {
     try {
       Map configMap = await getConfigMap();
       String token = configMap["token"];
@@ -141,13 +170,30 @@ class LskyproManageAPI {
           if (response.statusCode == 200 && response.data!['status'] == true) {
             images.addAll(response.data!['data']['data']);
           } else {
-            return ['failed'];
+            flogErr(
+              response,
+              {
+                'url': userInfoUrl,
+                'headers': options.headers,
+              },
+              'LskyproManageAPI',
+              'getPhoto',
+            );
+            return [response.toString()];
           }
         }
         return ['success', images];
-      } else {
-        return ['failed'];
       }
+      flogErr(
+        response,
+        {
+          'url': userInfoUrl,
+          'headers': options.headers,
+        },
+        'LskyproManageAPI',
+        'getPhoto',
+      );
+      return [response.toString()];
     } catch (e) {
       flogErr(
           e,
@@ -160,122 +206,55 @@ class LskyproManageAPI {
     }
   }
 
-  //删除图片
-
-  static deleteFile(String deleteKey) async {
-    try {
-      Map configMap = await getConfigMap();
-      String token = configMap["token"];
-      String host = configMap["host"];
-      Map<String, dynamic> formdata = {
+  deleteFile(String deleteKey) async {
+    return await _makeRequest(
+      '/api/v1/images/$deleteKey',
+      data: {
         "key": deleteKey,
-      };
-      BaseOptions options = setBaseOptions();
-      options.headers = {
-        "Authorization": token,
-        "Accept": "application/json",
-      };
-      Dio dio = Dio(options);
-      String deleteUrl = "$host/api/v1/images/$deleteKey";
-
-      var response = await dio.delete(deleteUrl, data: formdata);
-      if (response.statusCode == 200 && response.data!['status'] == true) {
+      },
+      onSuccess: (response) {
         return ['success'];
-      } else {
-        return ['failed'];
-      }
-    } catch (e) {
-      flogErr(
-          e,
-          {
-            'deleteKey': deleteKey,
-          },
-          'LskyproManageAPI',
-          'deleteFile');
-      return [e.toString()];
-    }
+      },
+      method: 'DELETE',
+      callFunction: 'deleteFile',
+    );
   }
 
-  //删除相册
-  static deleteAlbum(String id) async {
-    try {
-      Map configMap = await getConfigMap();
-      String token = configMap["token"];
-      String host = configMap["host"];
-      Map<String, dynamic> formdata = {
+  deleteAlbum(String id) async {
+    return await _makeRequest(
+      '/api/v1/albums/$id',
+      data: {
         "id": id,
-      };
-      BaseOptions options = setBaseOptions();
-      options.headers = {
-        "Authorization": token,
-        "Accept": "application/json",
-      };
-      Dio dio = Dio(options);
-      String deleteUrl = "$host/api/v1/albums/$id";
-
-      var response = await dio.delete(deleteUrl, data: formdata);
-      if (response.statusCode == 200 && response.data!['status'] == true) {
+      },
+      onSuccess: (response) {
         return ['success'];
-      } else {
-        return ['failed'];
-      }
-    } catch (e) {
-      flogErr(
-          e,
-          {
-            'id': id,
-          },
-          'LskyproManageAPI',
-          'deleteAlbum');
-      return [e.toString()];
-    }
+      },
+      method: 'DELETE',
+      callFunction: 'deleteAlbum',
+    );
   }
 
-  static uploadFile(String filename, String path) async {
-    try {
-      Map configMap = await getConfigMap();
-      String token = configMap["token"];
-      String host = configMap["host"];
-      FormData formdata = FormData.fromMap({
-        "file": await MultipartFile.fromFile(path, filename: filename),
-      });
-      if (configMap["strategy_id"] == "None") {
-        formdata = FormData.fromMap({});
-      } else {
-        formdata = FormData.fromMap({
-          "file": await MultipartFile.fromFile(path, filename: filename),
-          "strategy_id": configMap["strategy_id"],
-        });
-      }
-      BaseOptions options = setBaseOptions();
-      options.headers = {
-        "Authorization": token,
-        "Accept": "application/json",
-        "Content-Type": "multipart/form-data",
-      };
-      Dio dio = Dio(options);
-      String uploadUrl = "$host/api/v1/upload";
-
-      var response = await dio.post(uploadUrl, data: formdata);
-      if (response.statusCode == 200 && response.data!['status'] == true) {
+  uploadFile(String filename, String path, dynamic albumId) async {
+    Map configMap = await getConfigMap();
+    FormData formdata = FormData.fromMap({
+      "file": await MultipartFile.fromFile(path, filename: filename),
+      if (configMap["strategy_id"] != "None") "strategy_id": configMap["strategy_id"],
+      if (albumId != "None") "album_id": albumId.toString(),
+    });
+    return await _makeRequest(
+      '/api/v1/upload',
+      data: formdata,
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+      onSuccess: (response) {
         return ['success'];
-      } else {
-        return ['failed'];
-      }
-    } catch (e) {
-      flogErr(
-          e,
-          {
-            'filename': filename,
-            'path': path,
-          },
-          'LskyproManageAPI',
-          'uploadFile');
-      return [e.toString()];
-    }
+      },
+      callFunction: 'uploadFile',
+    );
   }
 
-  static uploadNetworkFile(String fileLink) async {
+  uploadNetworkFile(String fileLink, dynamic albumId) async {
     try {
       String filename = fileLink.substring(fileLink.lastIndexOf("/") + 1, fileLink.length);
       filename = filename.substring(0, !filename.contains("?") ? filename.length : filename.indexOf("?"));
@@ -286,18 +265,13 @@ class LskyproManageAPI {
       Dio dio = Dio();
       Response response = await dio.download(fileLink, saveFilePath);
       if (response.statusCode == 200) {
-        var uploadResult = await uploadFile(
-          filename,
-          saveFilePath,
-        );
+        var uploadResult = await uploadFile(filename, saveFilePath, albumId);
         if (uploadResult[0] == "success") {
           return ['success'];
-        } else {
-          return ['failed'];
         }
-      } else {
         return ['failed'];
       }
+      return ['failed'];
     } catch (e) {
       flogErr(
           e,
@@ -310,8 +284,9 @@ class LskyproManageAPI {
     }
   }
 
-  static uploadNetworkFileEntry(
+  uploadNetworkFileEntry(
     List fileList,
+    dynamic albumId,
   ) async {
     int successCount = 0;
     int failCount = 0;
@@ -319,7 +294,7 @@ class LskyproManageAPI {
       if (fileLink.isEmpty) {
         continue;
       }
-      var uploadResult = await uploadNetworkFile(fileLink);
+      var uploadResult = await uploadNetworkFile(fileLink, albumId);
       if (uploadResult[0] == "success") {
         successCount++;
       } else {
@@ -331,8 +306,7 @@ class LskyproManageAPI {
       return showToast('上传失败');
     } else if (failCount == 0) {
       return showToast('上传成功');
-    } else {
-      return showToast('成功$successCount,失败$failCount');
     }
+    return showToast('成功$successCount,失败$failCount');
   }
 }

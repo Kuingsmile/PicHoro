@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' as flutter_services;
+import 'package:horopic/picture_host_manage/common/build_bottom_widget.dart';
 
 import 'package:horopic/picture_host_manage/common/file_list_widget.dart';
 import 'package:horopic/widgets/common_widgets.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:path/path.dart' as my_path;
 import 'package:share_plus/share_plus.dart';
 import 'package:msh_checkbox/msh_checkbox.dart';
 
@@ -20,6 +22,7 @@ abstract class BaseFileExplorer extends StatefulWidget {
 
 abstract class BaseFileExplorerState<T extends BaseFileExplorer> extends loading_state.BaseLoadingPageState<T> {
   List allInfoList = [];
+  List dirAllInfoList = [];
   List selectedFilesBool = [];
   bool sorted = true;
   RefreshController refreshController = RefreshController(initialRefresh: false);
@@ -35,12 +38,21 @@ abstract class BaseFileExplorerState<T extends BaseFileExplorer> extends loading
   Future<void> initializeData();
   Future<void> refreshData();
   Future<void> deleteFiles(List<int> toDelete);
-  Widget buildBottomSheetWidget(BuildContext context, int index);
 
   // Optional abstract methods with default implementations
   String getShareUrl(int index);
-  String getFileName(int index);
-  Widget getThumbnailWidget(int index) => iconImageLoad(getShareUrl(index), getFileName(index));
+  String getFileName(int index) => allInfoList[index]['name'];
+
+  Widget getThumbnailWidget(int index) {
+    return index < dirAllInfoList.length
+        ? Image.asset(
+            'assets/icons/folder.png',
+            width: 50,
+            height: 50,
+          )
+        : iconImageLoad(getShareUrl(index), getFileName(index));
+  }
+
   String getFileDate(int index);
   String? getFileSizeForList(int index) {
     int size = allInfoList[index]['size'] ?? 0;
@@ -177,19 +189,18 @@ abstract class BaseFileExplorerState<T extends BaseFileExplorer> extends loading
     } else {
       List multiUrls = [];
       for (int i = 0; i < allInfoList.length; i++) {
+        if (!selectedFilesBool[i]) continue;
         String? rawurl = getShareUrl(i) as String?;
-        if (selectedFilesBool[i] && rawurl != null && rawurl.isNotEmpty) {
+        if (rawurl != null && rawurl.isNotEmpty) {
           String fileName = getFileName(i);
-          String finalFormatedurl = getFormatedUrl(rawurl, fileName);
-          multiUrls.add(finalFormatedurl);
+          multiUrls.add(getFormatedUrl(rawurl, fileName));
         }
       }
-      await flutter_services.Clipboard.setData(flutter_services.ClipboardData(
-          text: multiUrls
-              .toString()
-              .substring(1, multiUrls.toString().length - 1)
-              .replaceAll(', ', '\n')
-              .replaceAll(',', '\n')));
+      if (multiUrls.isEmpty) {
+        showToastWithContext(context, '没有可复制的链接');
+        return;
+      }
+      await flutter_services.Clipboard.setData(flutter_services.ClipboardData(text: multiUrls.join('\n')));
       if (mounted) {
         showToastWithContext(context, '已复制全部链接');
       }
@@ -231,6 +242,7 @@ abstract class BaseFileExplorerState<T extends BaseFileExplorer> extends loading
         icon: const Icon(
           Icons.arrow_back_ios,
           size: 20,
+          color: Colors.white,
         ),
         onPressed: () {
           Navigator.pop(context);
@@ -300,8 +312,13 @@ abstract class BaseFileExplorerState<T extends BaseFileExplorer> extends loading
 
 // Default implementation for sorting with directories preserved
   void sortListWithDirectories(int Function(dynamic a, dynamic b, bool ascending) comparator, bool ascending) {
-    // Override this if your implementation has directories
-    allInfoList.sort((a, b) => comparator(a, b, ascending));
+    if (dirAllInfoList.isEmpty) {
+      allInfoList.sort((a, b) => comparator(a, b, ascending));
+    } else {
+      List temp = allInfoList.sublist(dirAllInfoList.length, allInfoList.length);
+      temp.sort((a, b) => comparator(a, b, ascending));
+      allInfoList = [...dirAllInfoList, ...temp];
+    }
   }
 
 // Helper method to extract DateTime from an item (override as needed)
@@ -310,9 +327,7 @@ abstract class BaseFileExplorerState<T extends BaseFileExplorer> extends loading
   }
 
 // Helper method to format URL (override as needed)
-  String getFormatedFileName(dynamic item) {
-    return item['filename'];
-  }
+  String getFormatedFileName(dynamic item) => item['name'] ?? '';
 
   int getFormatedSize(dynamic item) {
     return item['size'] ?? 0;
@@ -474,6 +489,82 @@ abstract class BaseFileExplorerState<T extends BaseFileExplorer> extends loading
       builder: (context) {
         return buildBottomSheetWidget(context, index);
       },
+    );
+  }
+
+  List<BottomSheetAction> getExtraActions(int index) {
+    return [];
+  }
+
+  void onFileInfoTap(int index) {
+    // Default implementation
+    showToast('Override this method to implement file info tap action');
+  }
+
+  Widget buildBottomSheetWidget(BuildContext context, int index) {
+    return FileBottomSheetWidget(
+      thumbnailWidget: getThumbnailWidget(index),
+      fileName: getFileName(index),
+      fileDate: getFileDate(index),
+      actions: [
+        if (index >= dirAllInfoList.length)
+          BottomSheetAction(
+            icon: Icons.info_outline_rounded,
+            iconColor: const Color.fromARGB(255, 97, 141, 236),
+            title: '文件详情',
+            onTap: () {
+              Navigator.pop(context);
+              onFileInfoTap(index);
+            },
+          ),
+        if (index >= dirAllInfoList.length)
+          BottomSheetAction(
+            icon: Icons.link_rounded,
+            iconColor: const Color.fromARGB(255, 97, 141, 236),
+            title: '复制链接(设置中的默认格式)',
+            onTap: () async {
+              await flutter_services.Clipboard.setData(flutter_services.ClipboardData(
+                  text: getFormatedUrl(getShareUrl(index), my_path.basename(getFileName(index)))));
+              if (mounted) {
+                Navigator.pop(context);
+              }
+              showToast('复制完毕');
+            },
+          ),
+        if (index >= dirAllInfoList.length)
+          BottomSheetAction(
+            icon: Icons.share,
+            iconColor: const Color.fromARGB(255, 76, 175, 80),
+            title: '分享链接',
+            onTap: () {
+              Navigator.pop(context);
+              Share.share(getShareUrl(index));
+            },
+          ),
+        ...getExtraActions(index),
+        BottomSheetAction(
+          icon: Icons.delete_outline,
+          iconColor: const Color.fromARGB(255, 240, 85, 131),
+          title: '删除',
+          onTap: () async {
+            Navigator.pop(context);
+            showCupertinoAlertDialogWithConfirmFunc(
+              context: context,
+              title: '通知',
+              content: '确定要删除${allInfoList[index]['name']}吗？',
+              onConfirm: () async {
+                try {
+                  await deleteFiles([index]);
+                  showToast('删除完成');
+                } catch (e) {
+                  flogErr(e, {}, runtimeType.toString(), "delete_button");
+                  showToast('删除失败');
+                }
+              },
+            );
+          },
+        ),
+      ],
     );
   }
 

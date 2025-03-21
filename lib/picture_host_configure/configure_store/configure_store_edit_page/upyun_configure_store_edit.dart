@@ -232,7 +232,7 @@ class UpyunConfigureStoreEditState extends State<UpyunConfigureStoreEdit> {
 
   _importConfig() async {
     try {
-      Map configMap = await UpyunManageAPI.getConfigMap();
+      Map configMap = await UpyunManageAPI().getConfigMap();
       _bucketController.text = configMap['bucket'] ?? '';
       _operatorController.text = configMap['operator'] ?? '';
       _passwordController.text = configMap['password'] ?? '';

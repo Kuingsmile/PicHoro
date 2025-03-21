@@ -36,6 +36,9 @@ class UpyunBucketListState extends loading_state.BaseLoadingPageState<UpyunBucke
   List selectionList = [];
   bool isUsePSConfig = false;
   bool isUseRemotePSConfig = false;
+
+  UpyunManageAPI manageAPI = UpyunManageAPI();
+
   @override
   void initState() {
     super.initState();
@@ -52,13 +55,13 @@ class UpyunBucketListState extends loading_state.BaseLoadingPageState<UpyunBucke
   _onRefresh() async {
     await initBucketList();
     refreshController.refreshCompleted();
-    var queryUpyun = await UpyunManageAPI.readUpyunConfig();
-    if (queryUpyun != 'Error') {
+    var queryUpyun = await manageAPI.readCurrentConfig();
+    if (queryUpyun != 'Error' && queryUpyun != '') {
       var jsonResult = jsonDecode(queryUpyun);
       nameController.text = jsonResult['operator'];
       passwdController.text = jsonResult['password'];
     }
-    var result = await UpyunManageAPI.getUpyunManageConfigMap();
+    var result = await manageAPI.getUpyunManageConfigMap();
     if (result != 'Error') {
       upyunManageConfigMap = result;
     }
@@ -68,7 +71,7 @@ class UpyunBucketListState extends loading_state.BaseLoadingPageState<UpyunBucke
   initBucketList() async {
     bucketMap.clear();
     try {
-      var bucketListResponse = await UpyunManageAPI.getBucketList();
+      var bucketListResponse = await manageAPI.getBucketList();
       //判断是否获取成功
       if (bucketListResponse[0] != 'success') {
         if (mounted) {
@@ -96,7 +99,7 @@ class UpyunBucketListState extends loading_state.BaseLoadingPageState<UpyunBucke
       for (var i = 0; i < allBucketList.length; i++) {
         String formatedTime = allBucketList[i]['created_at'];
         String bucketName = allBucketList[i]['bucket_name'];
-        var bucketInfoResponse = await UpyunManageAPI.getBucketInfo(bucketName);
+        var bucketInfoResponse = await manageAPI.getBucketInfo(bucketName);
         if (bucketInfoResponse[0] != 'success') {
           if (mounted) {
             setState(() {
@@ -148,33 +151,42 @@ class UpyunBucketListState extends loading_state.BaseLoadingPageState<UpyunBucke
 
   @override
   AppBar get appBar => AppBar(
-        elevation: 0,
+        elevation: 3,
         centerTitle: true,
+        leading: getLeadingIcon(context),
         title: titleText('又拍云存储桶列表'),
         flexibleSpace: getFlexibleSpace(context),
         actions: [
-          IconButton(
-            onPressed: () async {
-              await Application.router
-                  .navigateTo(context, Routes.upyunTokenManagePage, transition: TransitionType.cupertino);
-            },
-            icon: const Icon(
-              Icons.perm_identity,
-              color: Colors.white,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: IconButton(
+              onPressed: () async {
+                await Application.router
+                    .navigateTo(context, Routes.upyunTokenManagePage, transition: TransitionType.cupertino);
+              },
+              icon: const Icon(
+                Icons.perm_identity,
+                color: Colors.white,
+              ),
+              iconSize: 30,
+              tooltip: '令牌管理',
             ),
-            iconSize: 35,
           ),
-          IconButton(
-            onPressed: () async {
-              await Application.router
-                  .navigateTo(context, Routes.upyunNewBucketConfig, transition: TransitionType.cupertino);
-              _onRefresh();
-            },
-            icon: const Icon(
-              Icons.add,
-              color: Colors.white,
+          Padding(
+            padding: const EdgeInsets.only(right: 16.0),
+            child: IconButton(
+              onPressed: () async {
+                await Application.router
+                    .navigateTo(context, Routes.upyunNewBucketConfig, transition: TransitionType.cupertino);
+                _onRefresh();
+              },
+              icon: const Icon(
+                Icons.add_circle_outline,
+                color: Colors.white,
+              ),
+              iconSize: 30,
+              tooltip: '新建存储桶',
             ),
-            iconSize: 35,
           ),
         ],
       );
@@ -216,68 +228,107 @@ class UpyunBucketListState extends loading_state.BaseLoadingPageState<UpyunBucke
           groupBy: (element) => element['status'],
           itemComparator: (item1, item2) => item1['CreationDate'].compareTo(item2['CreationDate']),
           groupComparator: (value1, value2) => value2.compareTo(value1),
-          separator: const Divider(
-            height: 0.1,
-            color: Color.fromARGB(255, 230, 230, 230),
-          ),
+          separator: const SizedBox(height: 6),
           groupSeparatorBuilder: (String value) => Container(
-            height: 30,
-            decoration: const BoxDecoration(
-              color: Color.fromARGB(255, 184, 182, 182),
-              border: Border(
-                bottom: BorderSide(
-                  color: Color.fromARGB(255, 230, 230, 230),
-                  width: 0.1,
+            margin: const EdgeInsets.only(top: 10, bottom: 5),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.blue.shade50,
+              borderRadius: BorderRadius.circular(8),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withValues(alpha: 0.2),
+                  spreadRadius: 1,
+                  blurRadius: 2,
+                  offset: const Offset(0, 1),
                 ),
-              ),
+              ],
             ),
-            child: ListTile(
-              // dense: true,
-              visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
-              title: Text(
-                value,
-                style: const TextStyle(
-                  height: 0.3,
-                  color: Colors.black,
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
+            child: Row(
+              children: [
+                Icon(Icons.folder_special, color: Colors.blue.shade700, size: 20),
+                const SizedBox(width: 8),
+                Text(
+                  value,
+                  style: TextStyle(
+                    color: Colors.blue.shade700,
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
+              ],
             ),
           ),
           itemBuilder: (context, element) {
-            return ListTile(
-                minLeadingWidth: 0,
-                contentPadding: const EdgeInsets.only(left: 20, right: 20),
-                leading: const Icon(
-                  IconData(0xe6ab, fontFamily: 'iconfont'),
-                  color: Colors.blue,
-                  size: 35,
+            return Card(
+              elevation: 2,
+              margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: ListTile(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                leading: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    IconData(0xe6ab, fontFamily: 'iconfont'),
+                    color: Colors.blue,
+                    size: 28,
+                  ),
                 ),
-                title: Text(element['bucket_name']),
-                subtitle: Text(element['CreationDate']),
+                title: Text(
+                  element['bucket_name'],
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
+                  ),
+                ),
+                subtitle: Padding(
+                  padding: const EdgeInsets.only(top: 4.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        element['CreationDate'],
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey.shade600,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '域名: ${element['domains']}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey.shade600,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
                 onTap: () async {
                   Map configElement = {};
                   configElement['bucket'] = element['bucket_name'];
-                  var queryOperator = await UpyunManageAPI.readUpyunOperatorConfig();
-                  if (queryOperator != 'Error') {
-                    var jsonResult = jsonDecode(queryOperator);
-                    // 判断bucket是否存在
-                    if (jsonResult['${element['bucket_name']}'] == null) {
-                      return showToast('请先在底部弹出栏中添加操作员');
-                    }
-                    configElement['operator'] = jsonResult['${element['bucket_name']}']['operator'];
-                    configElement['password'] = jsonResult['${element['bucket_name']}']['password'];
-                  } else {
+                  var queryOperator = await manageAPI.readUpyunOperatorConfig();
+                  if (queryOperator == 'Error') {
+                    return showToast('请先设置操作员信息');
+                  }
+                  var jsonResult = jsonDecode(queryOperator);
+                  // 判断bucket是否存在
+                  if (jsonResult['${element['bucket_name']}'] == null) {
                     return showToast('请先在底部弹出栏中添加操作员');
                   }
+                  configElement['operator'] = jsonResult['${element['bucket_name']}']['operator'];
+                  configElement['password'] = jsonResult['${element['bucket_name']}']['password'];
+
                   String url = element['domains'];
                   if (!url.startsWith('http') && !url.startsWith('https')) {
-                    if (element['https'] == 'true') {
-                      url = 'https://$url';
-                    } else {
-                      url = 'http://$url';
-                    }
+                    url = element['https'] == 'true' ? 'https://$url' : 'http://$url';
                   }
                   if (url.endsWith('/')) {
                     url = url.substring(0, url.length - 1);
@@ -290,16 +341,28 @@ class UpyunBucketListState extends loading_state.BaseLoadingPageState<UpyunBucke
                   }
                 },
                 trailing: IconButton(
-                  icon: const Icon(Icons.more_horiz_outlined),
+                  icon: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(Icons.more_horiz_outlined, color: Colors.blue),
+                  ),
                   onPressed: () async {
                     showModalBottomSheet(
                         isScrollControlled: true,
                         context: context,
+                        shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                        ),
                         builder: (context) {
                           return buildBottomSheetWidget(context, element);
                         });
                   },
-                ));
+                ),
+              ),
+            );
           },
           order: GroupedListOrder.DESC,
         ));
@@ -309,136 +372,199 @@ class UpyunBucketListState extends loading_state.BaseLoadingPageState<UpyunBucke
     return StatefulBuilder(builder: (BuildContext context, void Function(void Function()) setState) {
       return CupertinoAlertDialog(
         title:
-            const Text('请输入网站后缀和图床路径', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.blue)),
-        content: Column(
-          children: [
-            const SizedBox(
-              height: 10,
-            ),
-            CupertinoTextField(
-              textAlign: TextAlign.center,
-              prefix: const Text('后缀：', style: TextStyle(fontSize: 16, color: Color.fromARGB(255, 121, 118, 118))),
-              controller: optionController,
-              placeholder: '网站后缀，非必填',
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            CupertinoTextField(
-              prefix: const Text('路径：', style: TextStyle(fontSize: 16, color: Color.fromARGB(255, 121, 118, 118))),
-              textAlign: TextAlign.center,
-              controller: pathController,
-              placeholder: '图床路径，非必填',
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            CupertinoTextField(
-              prefix: const Text('防盗链密钥', style: TextStyle(fontSize: 16, color: Color.fromARGB(255, 121, 118, 118))),
-              textAlign: TextAlign.center,
-              controller: antiLeechTokenController,
-              placeholder: '防盗链密钥，非必填',
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            CupertinoTextField(
-              prefix: const Text('过期时间', style: TextStyle(fontSize: 16, color: Color.fromARGB(255, 121, 118, 118))),
-              textAlign: TextAlign.center,
-              controller: antiLeechExpireController,
-              placeholder: '防盗链过期时间，非必填',
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            CupertinoTextField(
-              prefix: const Text('操作员：', style: TextStyle(fontSize: 16, color: Color.fromARGB(255, 121, 118, 118))),
-              textAlign: TextAlign.center,
-              controller: defaultOperatorController,
-              placeholder: '操作员',
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            CupertinoTextField(
-              prefix: const Text('密码：', style: TextStyle(fontSize: 16, color: Color.fromARGB(255, 121, 118, 118))),
-              textAlign: TextAlign.center,
-              controller: defaultPasswordController,
-              placeholder: '操作员密码',
-            ),
-            CheckboxListTile(
-                dense: true,
-                title: const Text(
-                  '使用图床配置中的操作员和密码',
-                  style: TextStyle(fontSize: 14),
+            Text('设置默认图床配置', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.blue.shade700)),
+        content: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12.0),
+          child: Column(
+            children: [
+              const SizedBox(height: 10),
+              CupertinoTextField(
+                textAlign: TextAlign.center,
+                prefix: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text('后缀', style: TextStyle(fontSize: 14, color: Colors.grey.shade700)),
                 ),
-                value: isUsePSConfig,
-                onChanged: (value) async {
-                  if (value == true) {
-                    var queryUpyun = await UpyunManageAPI.readUpyunConfig();
-                    if (queryUpyun != 'Error') {
-                      var jsonResult = jsonDecode(queryUpyun);
-                      defaultOperatorController.text = jsonResult['operator'];
-                      defaultPasswordController.text = jsonResult['password'];
+                controller: optionController,
+                placeholder: '网站后缀，非必填',
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.grey.shade300),
+                ),
+                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+              ),
+              const SizedBox(height: 10),
+              CupertinoTextField(
+                prefix: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text('路径', style: TextStyle(fontSize: 14, color: Colors.grey.shade700)),
+                ),
+                textAlign: TextAlign.center,
+                controller: pathController,
+                placeholder: '图床路径，非必填',
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.grey.shade300),
+                ),
+                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+              ),
+              const SizedBox(height: 10),
+              CupertinoTextField(
+                prefix: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text('防盗链密钥', style: TextStyle(fontSize: 14, color: Colors.grey.shade700)),
+                ),
+                textAlign: TextAlign.center,
+                controller: antiLeechTokenController,
+                placeholder: '防盗链密钥，非必填',
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.grey.shade300),
+                ),
+                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+              ),
+              const SizedBox(height: 10),
+              CupertinoTextField(
+                prefix: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text('过期时间', style: TextStyle(fontSize: 14, color: Colors.grey.shade700)),
+                ),
+                textAlign: TextAlign.center,
+                controller: antiLeechExpireController,
+                placeholder: '防盗链过期时间，非必填',
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.grey.shade300),
+                ),
+                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+              ),
+              const SizedBox(height: 10),
+              CupertinoTextField(
+                prefix: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text('操作员', style: TextStyle(fontSize: 14, color: Colors.grey.shade700)),
+                ),
+                textAlign: TextAlign.center,
+                controller: defaultOperatorController,
+                placeholder: '操作员',
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.grey.shade300),
+                ),
+                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+              ),
+              const SizedBox(height: 10),
+              CupertinoTextField(
+                prefix: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text('密码', style: TextStyle(fontSize: 14, color: Colors.grey.shade700)),
+                ),
+                textAlign: TextAlign.center,
+                controller: defaultPasswordController,
+                placeholder: '操作员密码',
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.grey.shade300),
+                ),
+                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+              ),
+              Container(
+                margin: const EdgeInsets.only(top: 12),
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: CheckboxListTile(
+                  dense: true,
+                  title: const Text(
+                    '使用图床配置中的操作员和密码',
+                    style: TextStyle(fontSize: 14),
+                  ),
+                  value: isUsePSConfig,
+                  activeColor: Colors.blue,
+                  onChanged: (value) async {
+                    if (value == true) {
+                      var queryUpyun = await manageAPI.readCurrentConfig();
+                      if (queryUpyun != 'Error' && queryUpyun != '') {
+                        var jsonResult = jsonDecode(queryUpyun);
+                        defaultOperatorController.text = jsonResult['operator'];
+                        defaultPasswordController.text = jsonResult['password'];
+                        setState(() {
+                          if (isUseRemotePSConfig) {
+                            isUseRemotePSConfig = false;
+                          }
+                          isUsePSConfig = value!;
+                        });
+                      } else {
+                        showToast('请先去设置页面配置');
+                      }
+                    } else {
+                      defaultOperatorController.clear();
+                      defaultPasswordController.clear();
                       setState(() {
-                        if (isUseRemotePSConfig) {
-                          isUseRemotePSConfig = false;
-                        }
                         isUsePSConfig = value!;
                       });
-                    } else {
-                      showToast('请先去设置页面配置');
                     }
-                  } else {
-                    defaultOperatorController.clear();
-                    defaultPasswordController.clear();
-                    setState(() {
-                      isUsePSConfig = value!;
-                    });
-                  }
-                }),
-            CheckboxListTile(
-                dense: true,
-                title: const Text(
-                  '使用已设置的操作员信息',
-                  style: TextStyle(fontSize: 14),
+                  },
                 ),
-                value: isUseRemotePSConfig,
-                onChanged: (value) async {
-                  if (value == true) {
-                    var queryOperator = await UpyunManageAPI.readUpyunOperatorConfig();
-                    if (queryOperator != 'Error') {
-                      var jsonResult = jsonDecode(queryOperator);
-                      defaultOperatorController.text = jsonResult['${element['bucket_name']}']['operator'];
-                      defaultPasswordController.text = jsonResult['${element['bucket_name']}']['password'];
+              ),
+              Container(
+                margin: const EdgeInsets.only(top: 6),
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: CheckboxListTile(
+                  dense: true,
+                  title: const Text(
+                    '使用已设置的操作员信息',
+                    style: TextStyle(fontSize: 14),
+                  ),
+                  value: isUseRemotePSConfig,
+                  activeColor: Colors.blue,
+                  onChanged: (value) async {
+                    if (value == true) {
+                      var queryOperator = await manageAPI.readUpyunOperatorConfig();
+                      if (queryOperator != 'Error') {
+                        var jsonResult = jsonDecode(queryOperator);
+                        defaultOperatorController.text = jsonResult['${element['bucket_name']}']['operator'];
+                        defaultPasswordController.text = jsonResult['${element['bucket_name']}']['password'];
+                        setState(() {
+                          if (isUsePSConfig) {
+                            isUsePSConfig = false;
+                          }
+                          isUseRemotePSConfig = value!;
+                        });
+                      } else {
+                        showToast('请先设置操作员信息');
+                      }
+                    } else {
+                      defaultOperatorController.clear();
+                      defaultPasswordController.clear();
                       setState(() {
-                        if (isUsePSConfig) {
-                          isUsePSConfig = false;
-                        }
                         isUseRemotePSConfig = value!;
                       });
-                    } else {
-                      showToast('请先设置操作员信息');
                     }
-                  } else {
-                    defaultOperatorController.clear();
-                    defaultPasswordController.clear();
-                    setState(() {
-                      isUseRemotePSConfig = value!;
-                    });
-                  }
-                }),
-          ],
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
         actions: [
           CupertinoDialogAction(
-            child: const Text('取消'),
+            child: const Text('取消', style: TextStyle(color: Colors.grey)),
             onPressed: () {
               Navigator.of(context).pop();
             },
           ),
           CupertinoDialogAction(
-            child: const Text('确定'),
+            child: const Text('确定', style: TextStyle(fontWeight: FontWeight.bold)),
             onPressed: () async {
               try {
                 var option = optionController.text;
@@ -474,7 +600,7 @@ class UpyunBucketListState extends loading_state.BaseLoadingPageState<UpyunBucke
                 textMap['operator'] = operator;
                 textMap['password'] = password;
 
-                var updateOperator = await UpyunManageAPI.saveUpyunOperatorConfig(
+                var updateOperator = await manageAPI.saveUpyunOperatorConfig(
                   element['bucket_name'],
                   upyunManageConfigMap['email'],
                   textMap['operator'],
@@ -485,7 +611,7 @@ class UpyunBucketListState extends loading_state.BaseLoadingPageState<UpyunBucke
                   return;
                 }
 
-                var result = await UpyunManageAPI.setDefaultBucketFromListPage(element, upyunManageConfigMap, textMap);
+                var result = await manageAPI.setDefaultBucketFromListPage(element, upyunManageConfigMap, textMap);
                 if (result[0] == 'success') {
                   showToast('设置成功');
                   if (mounted) {
@@ -511,75 +637,82 @@ class UpyunBucketListState extends loading_state.BaseLoadingPageState<UpyunBucke
 
   Widget operatorNameAndPasswdInputCupertinoDialog(Map element) {
     return CupertinoAlertDialog(
-      title: const Text('请输入操作员名称和密码'),
-      content: Column(
-        children: [
-          const SizedBox(
-            height: 10,
-          ),
-          CupertinoTextField(
-            textAlign: TextAlign.center,
-            controller: nameController,
-            placeholder: '操作员名称',
-          ),
-          const SizedBox(
-            height: 10,
-          ),
-          CupertinoTextField(
-            textAlign: TextAlign.center,
-            controller: passwdController,
-            placeholder: '操作员密码',
-          ),
-        ],
+      title: Text('设置操作员', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.blue.shade700)),
+      content: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12.0),
+        child: Column(
+          children: [
+            const SizedBox(height: 10),
+            CupertinoTextField(
+              textAlign: TextAlign.center,
+              controller: nameController,
+              placeholder: '操作员名称',
+              decoration: BoxDecoration(
+                color: Colors.grey.shade100,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.grey.shade300),
+              ),
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+            ),
+            const SizedBox(height: 12),
+            CupertinoTextField(
+              textAlign: TextAlign.center,
+              controller: passwdController,
+              placeholder: '操作员密码',
+              decoration: BoxDecoration(
+                color: Colors.grey.shade100,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.grey.shade300),
+              ),
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+              obscureText: true,
+            ),
+          ],
+        ),
       ),
       actions: [
         CupertinoDialogAction(
-          child: const Text('取消'),
+          child: const Text('取消', style: TextStyle(color: Colors.grey)),
           onPressed: () {
             Navigator.of(context).pop();
           },
         ),
         CupertinoDialogAction(
-          child: const Text('确定'),
+          child: const Text('确定', style: TextStyle(fontWeight: FontWeight.bold)),
           onPressed: () async {
             Navigator.of(context).pop();
-            var queryOperator = await UpyunManageAPI.getOperator(
+            var queryOperator = await manageAPI.getOperator(
               element['bucket_name'],
             );
-            if (queryOperator[0] == 'success') {
-              List operatorList = [];
-              for (var operator in queryOperator[1]) {
-                operatorList.add(operator['operator_name']);
-              }
-
-              if (operatorList.contains(nameController.text)) {
-                var updateOperator = await UpyunManageAPI.saveUpyunOperatorConfig(
-                    element['bucket_name'], upyunManageConfigMap['email'], nameController.text, passwdController.text);
-                if (!updateOperator) {
-                  return showToast('更新操作员数据库失败');
-                } else {
-                  return showToast('设置操作员成功');
-                }
-              } else {
-                var addOperator = await UpyunManageAPI.addOperator(
-                  element['bucket_name'],
-                  nameController.text,
-                );
-                if (addOperator[0] == 'success') {
-                  var insertOperator = await UpyunManageAPI.saveUpyunOperatorConfig(element['bucket_name'],
-                      upyunManageConfigMap['email'], nameController.text, passwdController.text);
-                  if (!insertOperator) {
-                    return showToast('插入操作员数据库失败');
-                  } else {
-                    return showToast('设置操作员成功');
-                  }
-                } else {
-                  return showToast('添加操作员失败');
-                }
-              }
-            } else {
+            if (queryOperator[0] != 'success') {
               return showToast('获取操作员失败');
             }
+            List operatorList = [];
+            for (var operator in queryOperator[1]) {
+              operatorList.add(operator['operator_name']);
+            }
+
+            if (operatorList.contains(nameController.text)) {
+              var updateOperator = await manageAPI.saveUpyunOperatorConfig(
+                  element['bucket_name'], upyunManageConfigMap['email'], nameController.text, passwdController.text);
+              if (!updateOperator) {
+                return showToast('更新操作员数据库失败');
+              }
+              return showToast('设置操作员成功');
+            }
+            var addOperator = await manageAPI.addOperator(
+              element['bucket_name'],
+              nameController.text,
+            );
+            if (addOperator[0] == 'success') {
+              var insertOperator = await manageAPI.saveUpyunOperatorConfig(
+                  element['bucket_name'], upyunManageConfigMap['email'], nameController.text, passwdController.text);
+              if (!insertOperator) {
+                return showToast('插入操作员数据库失败');
+              }
+              return showToast('设置操作员成功');
+            }
+            return showToast('添加操作员失败');
           },
         ),
       ],
@@ -652,14 +785,14 @@ class UpyunBucketListState extends loading_state.BaseLoadingPageState<UpyunBucke
                 }
               }
               for (var i = 0; i < operatorList.length; i++) {
-                var removeOperator = await UpyunManageAPI.deleteOperator(element['bucket_name'], operatorList[i]);
+                var removeOperator = await manageAPI.deleteOperator(element['bucket_name'], operatorList[i]);
                 if (removeOperator[0] == 'success') {
-                  var queryOperator = await UpyunManageAPI.readUpyunOperatorConfig();
+                  var queryOperator = await manageAPI.readUpyunOperatorConfig();
                   if (queryOperator != 'Error') {
                     var jsonResult = jsonDecode(queryOperator);
                     var currentOperator = jsonResult['${element['bucket_name']}']['operator'];
                     if (currentOperator == operatorList[i]) {
-                      await UpyunManageAPI.deleteUpyunOperatorConfig(element['bucket_name']);
+                      await manageAPI.deleteUpyunOperatorConfig(element['bucket_name']);
                     }
                   }
                 }
@@ -679,33 +812,90 @@ class UpyunBucketListState extends loading_state.BaseLoadingPageState<UpyunBucke
   }
 
   Widget buildBottomSheetWidget(BuildContext context, Map element) {
-    return SingleChildScrollView(
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withValues(alpha: 0.2),
+            spreadRadius: 1,
+            blurRadius: 10,
+          ),
+        ],
+      ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          ListTile(
-            leading: const Icon(
-              IconData(0xe6ab, fontFamily: 'iconfont'),
-              color: Colors.blue,
+          Container(
+            width: 40,
+            height: 5,
+            margin: const EdgeInsets.only(bottom: 20),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade300,
+              borderRadius: BorderRadius.circular(10),
             ),
-            visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
-            minLeadingWidth: 0,
-            title: Text(
-              element['bucket_name'],
-              style: const TextStyle(fontSize: 14),
-            ),
-            subtitle: Text(element['CreationDate'], style: const TextStyle(fontSize: 12)),
           ),
-          const Divider(
-            height: 0.1,
-            color: Color.fromARGB(255, 230, 230, 230),
-          ),
-          ListTile(
-            leading: const Icon(
-              Icons.check_box_outlined,
-              color: Color.fromARGB(255, 97, 141, 236),
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.blue.shade50,
+              borderRadius: BorderRadius.circular(12),
             ),
-            minLeadingWidth: 0,
-            title: const Text('设为默认图床', style: TextStyle(fontSize: 15)),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.blue.withValues(alpha: 0.1),
+                        spreadRadius: 1,
+                        blurRadius: 3,
+                      ),
+                    ],
+                  ),
+                  child: const Icon(
+                    IconData(0xe6ab, fontFamily: 'iconfont'),
+                    color: Colors.blue,
+                    size: 30,
+                  ),
+                ),
+                const SizedBox(width: 15),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        element['bucket_name'],
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 5),
+                      Text(
+                        element['CreationDate'],
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey.shade700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Divider(height: 10),
+          _buildActionTile(
+            icon: Icons.check_circle_outline,
+            iconColor: Colors.green,
+            title: '设为默认图床',
             onTap: () async {
               Navigator.pop(context);
               await showCupertinoDialog(
@@ -715,34 +905,21 @@ class UpyunBucketListState extends loading_state.BaseLoadingPageState<UpyunBucke
                   context: context);
             },
           ),
-          const Divider(
-            height: 0.1,
-            color: Color.fromARGB(255, 230, 230, 230),
-          ),
-          ListTile(
-            leading: const Icon(
-              Icons.info_outline,
-              color: Color.fromARGB(255, 97, 141, 236),
-            ),
-            minLeadingWidth: 0,
-            title: const Text('存储桶信息', style: TextStyle(fontSize: 15)),
+          _buildActionTile(
+            icon: Icons.info_outline,
+            iconColor: Colors.blue,
+            title: '存储桶信息',
             onTap: () {
+              Navigator.pop(context);
               Application.router.navigateTo(
                   context, '${Routes.upyunBucketInformation}?bucketMap=${Uri.encodeComponent(jsonEncode(element))}',
                   transition: TransitionType.none);
             },
           ),
-          const Divider(
-            height: 0.1,
-            color: Color.fromARGB(255, 230, 230, 230),
-          ),
-          ListTile(
-            leading: const Icon(
-              Icons.manage_accounts_outlined,
-              color: Color.fromARGB(255, 97, 141, 236),
-            ),
-            minLeadingWidth: 0,
-            title: const Text('设置操作员信息', style: TextStyle(fontSize: 15)),
+          _buildActionTile(
+            icon: Icons.manage_accounts_outlined,
+            iconColor: Colors.purple,
+            title: '设置操作员信息',
             onTap: () async {
               Navigator.pop(context);
               await showCupertinoDialog(
@@ -752,15 +929,12 @@ class UpyunBucketListState extends loading_state.BaseLoadingPageState<UpyunBucke
                   context: context);
             },
           ),
-          ListTile(
-            leading: const Icon(
-              Icons.miscellaneous_services_sharp,
-              color: Color.fromARGB(255, 97, 141, 236),
-            ),
-            minLeadingWidth: 0,
-            title: const Text('解绑操作员', style: TextStyle(fontSize: 15)),
+          _buildActionTile(
+            icon: Icons.link_off,
+            iconColor: Colors.orange,
+            title: '解绑操作员',
             onTap: () async {
-              List operatorList = await UpyunManageAPI.getOperator(element['bucket_name']);
+              List operatorList = await manageAPI.getOperator(element['bucket_name']);
               Map operatorMap = {};
               if (operatorList.isEmpty) {
                 return showToast('获取操作员失败');
@@ -788,17 +962,11 @@ class UpyunBucketListState extends loading_state.BaseLoadingPageState<UpyunBucke
               }
             },
           ),
-          const Divider(
-            height: 0.1,
-            color: Color.fromARGB(255, 230, 230, 230),
-          ),
-          ListTile(
-            leading: const Icon(
-              Icons.dangerous_outlined,
-              color: Color.fromARGB(255, 240, 85, 131),
-            ),
-            minLeadingWidth: 0,
-            title: const Text('删除存储桶', style: TextStyle(fontSize: 15)),
+          const Divider(height: 10),
+          _buildActionTile(
+            icon: Icons.delete_outline,
+            iconColor: Colors.red,
+            title: '删除存储桶',
             onTap: () async {
               Navigator.pop(context);
               return showCupertinoAlertDialogWithConfirmFunc(
@@ -806,7 +974,7 @@ class UpyunBucketListState extends loading_state.BaseLoadingPageState<UpyunBucke
                 content: '是否删除存储桶？\n删除前请清空该存储桶!',
                 context: context,
                 onConfirm: () async {
-                  var result = await UpyunManageAPI.deleteBucket(element['bucket_name']);
+                  var result = await manageAPI.deleteBucket(element['bucket_name']);
                   if (result[0] == 'success') {
                     showToast('删除成功');
                     _onRefresh();
@@ -818,6 +986,44 @@ class UpyunBucketListState extends loading_state.BaseLoadingPageState<UpyunBucke
             },
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildActionTile({
+    required IconData icon,
+    required Color iconColor,
+    required String title,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: iconColor.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                icon,
+                color: iconColor,
+                size: 22,
+              ),
+            ),
+            const SizedBox(width: 15),
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

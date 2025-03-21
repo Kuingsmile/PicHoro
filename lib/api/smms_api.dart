@@ -84,7 +84,18 @@ class SmmsImageUploadUtils {
 
     try {
       var response = await dio.get(deleteUrl, queryParameters: formdata);
-      return response.statusCode == 200 ? ["success"] : ["failed"];
+      if (response.statusCode == 200) {
+        return ["success"];
+      }
+      flogErr(
+          response,
+          {
+            'deleteMap': deleteMap,
+            'configMap': configMap,
+          },
+          "SmmsImageUploadUtils",
+          "deleteApi");
+      return ["failed"];
     } catch (e) {
       flogErr(
           e,

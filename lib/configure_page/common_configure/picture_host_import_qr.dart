@@ -190,7 +190,7 @@ Future<void> _configureLankong(Map<String, dynamic> jsonResult) async {
 
       HostConfigModel hostConfig = HostConfigModel(lankongHost, lankongToken, lanKongstrategyId, lanKongalbumId);
       final hostConfigJson = jsonEncode(hostConfig);
-      final hostConfigFile = await LskyproManageAPI.localFile;
+      final hostConfigFile = await LskyproManageAPI().localFile();
       hostConfigFile.writeAsString(hostConfigJson);
       showToast("兰空配置成功");
     }
@@ -425,7 +425,7 @@ Future<void> _configureUpyun(Map<String, dynamic> jsonResult) async {
       upyunAntiLeechExpiration,
     );
     final upyunConfigJson = jsonEncode(upyunConfig);
-    final upyunConfigFile = await UpyunManageAPI.localFile;
+    final upyunConfigFile = await UpyunManageAPI().localFile();
     await upyunConfigFile.writeAsString(upyunConfigJson);
     showToast("又拍云配置成功");
   } catch (e) {

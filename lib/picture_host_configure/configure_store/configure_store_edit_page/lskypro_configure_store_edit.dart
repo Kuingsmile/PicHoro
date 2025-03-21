@@ -176,7 +176,7 @@ class LskyproConfigureStoreEditState extends State<LskyproConfigureStoreEdit> {
 
   _importConfig() async {
     try {
-      Map configMap = await LskyproManageAPI.getConfigMap();
+      Map configMap = await LskyproManageAPI().getConfigMap();
       _hostController.text = configMap['host'];
       _tokenController.text = configMap['token'];
       _strategyIdController.text = configMap['strategy_id'].toString();

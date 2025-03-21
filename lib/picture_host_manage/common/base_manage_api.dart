@@ -10,13 +10,14 @@ class BaseManageApi {
   String configFileName() => 'alist_config.txt';
 
   Future<File> localFile() async {
-    final path = await _localPath();
+    final path = await localPath();
     String defaultUser = Global.getUser();
     return ensureFileExists(File('$path/${defaultUser}_${configFileName()}'));
   }
 
-  Future<String> _localPath() async {
-    return (await getApplicationDocumentsDirectory()).path;
+  Future<String> localPath() async {
+    String path = (await getApplicationDocumentsDirectory()).path;
+    return path;
   }
 
   Future<String> readCurrentConfig() async {
@@ -36,4 +37,8 @@ class BaseManageApi {
     Map<String, dynamic> configMap = json.decode(configStr);
     return configMap;
   }
+
+  bool isString(var variable) => variable is String;
+
+  bool isFile(var variable) => variable is File;
 }

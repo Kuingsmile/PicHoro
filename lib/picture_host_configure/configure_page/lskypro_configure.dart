@@ -43,7 +43,7 @@ class HostConfigState extends State<HostConfig> {
 
   _initConfig() async {
     try {
-      Map configMap = await LskyproManageAPI.getConfigMap();
+      Map configMap = await LskyproManageAPI().getConfigMap();
       _hostController.text = configMap['host'] ?? '';
       _strategyIdController.text = configMap['strategy_id'] ?? '';
       _tokenController = configMap['token'] ?? '';
@@ -481,7 +481,7 @@ class HostConfigState extends State<HostConfig> {
           _tokenController = token;
           final hostConfig = HostConfigModel(host, token, strategyId.toString(), albumID.toString());
           final hostConfigJson = jsonEncode(hostConfig);
-          final hostConfigFile = await LskyproManageAPI.localFile;
+          final hostConfigFile = await LskyproManageAPI().localFile();
           hostConfigFile.writeAsString(hostConfigJson);
           setState(() {});
           if (context.mounted) {
@@ -522,7 +522,7 @@ class HostConfigState extends State<HostConfig> {
         if (response.statusCode == 200 && response.data['status'] == true) {
           final hostConfig = HostConfigModel(host, _tokenController, strategyId.toString(), albumID.toString());
           final hostConfigJson = jsonEncode(hostConfig);
-          final hostConfigFile = await LskyproManageAPI.localFile;
+          final hostConfigFile = await LskyproManageAPI().localFile();
           hostConfigFile.writeAsString(hostConfigJson);
           if (context.mounted) {
             return showCupertinoAlertDialog(
@@ -545,7 +545,7 @@ class HostConfigState extends State<HostConfig> {
 
   checkHostConfig() async {
     try {
-      Map configMap = await LskyproManageAPI.getConfigMap();
+      Map configMap = await LskyproManageAPI().getConfigMap();
       if (configMap.isEmpty) {
         if (context.mounted) {
           return showCupertinoAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");

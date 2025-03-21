@@ -464,7 +464,7 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
     albumId = checkPlaceholder(albumId);
 
     final config = HostConfigModel(host, token, strategyId, albumId);
-    final configFile = await LskyproManageAPI.localFile;
+    final configFile = await LskyproManageAPI().localFile();
     await configFile.writeAsString(jsonEncode(config));
     showToast('设置成功');
     return true;
@@ -547,7 +547,7 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
     String antiLeechType = checkPlaceholder(psInfo['antiLeechType']);
 
     final config = UpyunConfigModel(bucket, operator, password, url, options, path, antiLeechToken, antiLeechType);
-    final configFile = await UpyunManageAPI.localFile;
+    final configFile = await UpyunManageAPI().localFile();
     await configFile.writeAsString(jsonEncode(config));
     showToast('设置成功');
     return true;
@@ -687,8 +687,9 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
               onTap: () async {
                 bool success = await applyConfigAsDefault(widget.psHost, psInfo);
                 if (!success) {
-                  showToast('保存失败');
+                  return showToast('保存失败');
                 }
+                Navigator.pop(context);
               },
             ),
             const Divider(),

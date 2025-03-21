@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:external_path/external_path.dart';
 import 'package:fluro/fluro.dart';
 import 'package:intl/intl.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:flutter/services.dart' as flutter_services;
 import 'package:path/path.dart' as my_path;
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
@@ -19,7 +18,6 @@ import 'package:horopic/router/routers.dart';
 import 'package:horopic/picture_host_manage/common/loading_state.dart' as loading_state;
 import 'package:horopic/utils/image_compressor.dart';
 import 'package:horopic/picture_host_manage/common/base_file_explorer_page.dart';
-import 'package:horopic/picture_host_manage/common/build_bottom_widget.dart';
 
 class SmmsFileExplorer extends BaseFileExplorer {
   const SmmsFileExplorer({
@@ -99,21 +97,23 @@ class SmmsFileExplorerState extends BaseFileExplorerState<SmmsFileExplorer> {
   }
 
   @override
+  String getFormatedFileName(dynamic item) => item['filename'];
+
+  @override
   Future<void> deleteFiles(List<int> toDelete) async {
     for (int i = 0; i < toDelete.length; i++) {
       var result = await manageAPI.deleteFile(allInfoList[toDelete[i] - i]['hash']);
-      if (result[0] == 'success') {
-        setState(() {
-          allInfoList.removeAt(toDelete[i] - i);
-          selectedFilesBool.removeAt(toDelete[i] - i);
-        });
-        if (allInfoList.isEmpty) {
-          setState(() {
-            state = loading_state.LoadState.empty;
-          });
-        }
-      } else {
+      if (result[0] != 'success') {
         throw Exception(result[0]);
+      }
+      setState(() {
+        allInfoList.removeAt(toDelete[i] - i);
+        selectedFilesBool.removeAt(toDelete[i] - i);
+      });
+      if (allInfoList.isEmpty) {
+        setState(() {
+          state = loading_state.LoadState.empty;
+        });
       }
     }
   }
@@ -121,7 +121,7 @@ class SmmsFileExplorerState extends BaseFileExplorerState<SmmsFileExplorer> {
   @override
   void navigateToDownloadManagement() async {
     String downloadPath = await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
-    int index = Global.smmsDownloadList.isNotEmpty ? 1 : 0;
+    final int index = Global.smmsDownloadList.isNotEmpty ? 1 : 0;
     if (mounted) {
       Application.router.navigateTo(context,
           '/baseUpDownloadManagePage?downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=$index&currentListIndex=8',
@@ -233,9 +233,8 @@ class SmmsFileExplorerState extends BaseFileExplorerState<SmmsFileExplorer> {
 
   @override
   Future<void> onDownloadButtonPressed() async {
-    if (!selectedFilesBool.contains(true) || selectedFilesBool.isEmpty) {
-      showToastWithContext(context, '没有选择文件');
-      return;
+    if (!selectedFilesBool.contains(true)) {
+      return showToastWithContext(context, '没有选择文件');
     }
     List downloadList = [];
     for (int i = 0; i < allInfoList.length; i++) {
@@ -266,70 +265,9 @@ class SmmsFileExplorerState extends BaseFileExplorerState<SmmsFileExplorer> {
   }
 
   @override
-  Widget buildBottomSheetWidget(BuildContext context, int index) {
-    return FileBottomSheetWidget(
-      thumbnailWidget: getThumbnailWidget(index),
-      fileName: getFileName(index),
-      fileDate: getFileDate(index),
-      actions: [
-        BottomSheetAction(
-          icon: Icons.info_outline_rounded,
-          iconColor: const Color.fromARGB(255, 97, 141, 236),
-          title: '文件详情',
-          onTap: () async {
-            Navigator.pop(context);
-            Application.router.navigateTo(
-                context, '${Routes.smmsFileInformation}?fileMap=${Uri.encodeComponent(jsonEncode(allInfoList[index]))}',
-                transition: TransitionType.cupertino);
-          },
-        ),
-        BottomSheetAction(
-          icon: Icons.link_rounded,
-          iconColor: const Color.fromARGB(255, 97, 141, 236),
-          title: '复制链接(设置中的默认格式)',
-          onTap: () async {
-            await flutter_services.Clipboard.setData(flutter_services.ClipboardData(
-                text: getFormatedUrl(allInfoList[index]['url'], my_path.basename(getFileName(index)))));
-            if (mounted) {
-              Navigator.pop(context);
-            }
-            showToast('复制完毕');
-          },
-        ),
-        BottomSheetAction(
-          icon: Icons.share,
-          iconColor: const Color.fromARGB(255, 76, 175, 80),
-          title: '分享链接',
-          onTap: () {
-            Navigator.pop(context);
-            Share.share(allInfoList[index]['url']);
-          },
-        ),
-        BottomSheetAction(
-          icon: Icons.delete_outline,
-          iconColor: const Color.fromARGB(255, 240, 85, 131),
-          title: '删除文件',
-          onTap: () async {
-            Navigator.pop(context);
-            showCupertinoAlertDialogWithConfirmFunc(
-              context: context,
-              content: '确定要删除${allInfoList[index]['filename']}吗?',
-              onConfirm: () async {
-                var result = await manageAPI.deleteFile(allInfoList[index]['hash']);
-                if (result[0] != 'success') {
-                  showToast('删除失败');
-                  return;
-                }
-                showToast('删除成功');
-                setState(() {
-                  allInfoList.removeAt(index);
-                  selectedFilesBool.removeAt(index);
-                });
-              },
-            );
-          },
-        ),
-      ],
-    );
+  void onFileInfoTap(int index) {
+    Application.router.navigateTo(
+        context, '${Routes.smmsFileInformation}?fileMap=${Uri.encodeComponent(jsonEncode(allInfoList[index]))}',
+        transition: TransitionType.cupertino);
   }
 }

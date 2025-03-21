@@ -182,6 +182,14 @@ class AlistImageUploadUtils {
       if (response.statusCode != 200 || response.data!['message'] != "success") {
         return ['failed'];
       }
+      flogErr(
+          response,
+          {
+            'deleteMap': deleteMap,
+            'configMap': configMap,
+          },
+          "AlistImageUploadUtils",
+          "deleteApi");
       return ["success"];
     } catch (e) {
       flogErr(

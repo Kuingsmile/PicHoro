@@ -48,25 +48,16 @@ class LskyproManageHomePageState extends loading_state.BaseLoadingPageState<Lsky
   }
 
   initProfile() async {
-    try {
-      var profileMap = await LskyproManageAPI.getUserInfo();
-      if (profileMap[0] == 'success') {
-        userProfile = profileMap[1]['data'];
-        state = loading_state.LoadState.success;
-        _animationController.forward();
-      } else {
-        state = loading_state.LoadState.error;
-      }
-      if (mounted) {
-        setState(() {});
-      }
-    } catch (e) {
-      flogErr(e, {}, 'LskyproManageHomePageState', 'initProfile');
-      if (mounted) {
-        setState(() {
-          state = loading_state.LoadState.error;
-        });
-      }
+    var profileMap = await LskyproManageAPI().getUserInfo();
+    if (profileMap[0] == 'success') {
+      userProfile = profileMap[1]['data'];
+      state = loading_state.LoadState.success;
+      _animationController.forward();
+    } else {
+      state = loading_state.LoadState.error;
+    }
+    if (mounted) {
+      setState(() {});
     }
   }
 
@@ -74,6 +65,16 @@ class LskyproManageHomePageState extends loading_state.BaseLoadingPageState<Lsky
   AppBar get appBar => AppBar(
         elevation: 0,
         centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back_ios,
+            size: 20,
+            color: Colors.white,
+          ),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
         title: titleText('兰空图床'),
         flexibleSpace: getFlexibleSpace(context),
       );
@@ -190,7 +191,16 @@ class LskyproManageHomePageState extends loading_state.BaseLoadingPageState<Lsky
                               backgroundColor: Colors.white,
                               child: Padding(
                                 padding: const EdgeInsets.all(8.0),
-                                child: Image.asset('assets/icons/lskypro.png'),
+                                child: userProfile['avatar'] != null
+                                    ? ClipOval(
+                                        child: Image.network(
+                                          userProfile['avatar'],
+                                          fit: BoxFit.cover,
+                                          width: 64,
+                                          height: 64,
+                                        ),
+                                      )
+                                    : const Icon(Icons.person, size: 40, color: Colors.grey),
                               ),
                             ),
                           ),
@@ -242,13 +252,15 @@ class LskyproManageHomePageState extends loading_state.BaseLoadingPageState<Lsky
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(
-                            Icons.account_circle,
+                            Icons.link,
                             color: Colors.white,
                             size: 20,
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            '兰空图床用户',
+                            userProfile['url'] == null || userProfile['url'] == ''
+                                ? '未获取'
+                                : userProfile['url'].toString(),
                             style: TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.w600,

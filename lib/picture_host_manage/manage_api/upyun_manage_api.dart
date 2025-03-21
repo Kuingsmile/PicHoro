@@ -3,13 +3,22 @@ import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
+import 'package:horopic/picture_host_manage/common/base_manage_api.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/picture_host_configure/configure_page/upyun_configure.dart';
 
-class UpyunManageAPI {
+class UpyunManageAPI extends BaseManageApi {
+  static final UpyunManageAPI _instance = UpyunManageAPI._internal();
+
+  UpyunManageAPI._internal();
+
+  factory UpyunManageAPI() {
+    return _instance;
+  }
+
   static Map<String?, String> tagConvert = {
     'download': '文件下载',
     'picture': '网页图片',
@@ -20,93 +29,54 @@ class UpyunManageAPI {
   static String upyunBaseURL = 'v0.api.upyun.com';
   static String upyunManageURL = 'https://api.upyun.com/';
 
-  static Future<File> get localFile async {
-    final path = await _localPath;
-    String defaultUser = Global.getUser();
-    return ensureFileExists(File('$path/${defaultUser}_upyun_config.txt'));
+  @override
+  String configFileName() => 'upyun_config.txt';
+
+  Future<File> _getLocalFile(String fileName) async {
+    final path = await localPath();
+    return File('$path/$fileName');
   }
 
-  static Future<String> get _localPath async {
-    final directory = await getApplicationDocumentsDirectory();
-    return directory.path;
-  }
+  Future<File> manageLocalFile() async => await _getLocalFile('upyun_manage.txt');
+  Future<File> operatorLocalFile() async => await _getLocalFile('upyun_operator.txt');
 
-  static Future<String> readUpyunConfig() async {
+  Future<String> _readConfigFile(Future<File> Function() fileGetter) async {
     try {
-      final file = await localFile;
-      String contents = await file.readAsString();
-      return contents;
+      final file = await fileGetter();
+      return await file.readAsString();
     } catch (e) {
-      flogErr(e, {}, 'UpyunManageAPI', 'readUpyunConfig');
+      flogErr(e, {}, 'UpyunManageAPI', '_readConfigFile');
       return "Error";
     }
   }
 
-  static Future<Map> getConfigMap() async {
-    String configStr = await readUpyunConfig();
-    if (configStr == '') {
-      return {};
-    }
-    Map configMap = json.decode(configStr);
-    return configMap;
-  }
-
-  static Future<File> get _manageLocalFile async {
-    final path = await _localPath;
-    return File('$path/upyun_manage.txt');
-  }
-
-  static Future<String> readUpyunManageConfig() async {
+  Future<bool> _writeConfigFile(Future<File> Function() fileGetter, String content) async {
     try {
-      final file = await _manageLocalFile;
-      String contents = await file.readAsString();
-      return contents;
-    } catch (e) {
-      flogErr(e, {}, 'UpyunManageAPI', 'readUpyunManageConfig');
-      return "Error";
-    }
-  }
-
-  static Future<bool> saveUpyunManageConfig(String email, String password, String token, String tokenname) async {
-    try {
-      final file = await _manageLocalFile;
-      await file
-          .writeAsString(jsonEncode({'email': email, 'password': password, 'token': token, 'tokenname': tokenname}));
+      final file = await fileGetter();
+      await file.writeAsString(content);
       return true;
     } catch (e) {
-      flogErr(
-          e,
-          {
-            'email': email,
-            'password': password,
-            'token': token,
-            'tokenname': tokenname,
-          },
-          'UpyunManageAPI',
-          'saveUpyunManageConfig');
+      flogErr(e, {'content': content}, 'UpyunManageAPI', '_writeConfigFile');
       return false;
     }
   }
 
-  static Future<File> get _operatorLocalFile async {
-    final path = await _localPath;
-    return File('$path/upyun_operator.txt');
-  }
+  Future<String> readUpyunManageConfig() async => _readConfigFile(manageLocalFile);
+  Future<String> readUpyunOperatorConfig() async => _readConfigFile(operatorLocalFile);
 
-  static Future<String> readUpyunOperatorConfig() async {
+  Future<bool> saveUpyunManageConfig(String email, String password, String token, String tokenname) async {
     try {
-      final file = await _operatorLocalFile;
-      String contents = await file.readAsString();
-      return contents;
+      Map<String, String> data = {'email': email, 'password': password, 'token': token, 'tokenname': tokenname};
+      return await _writeConfigFile(manageLocalFile, jsonEncode(data));
     } catch (e) {
-      flogErr(e, {}, 'UpyunManageAPI', 'readUpyunOperatorConfig');
-      return "Error";
+      flogErr(e, {'email': email, 'token': token}, 'UpyunManageAPI', 'saveUpyunManageConfig');
+      return false;
     }
   }
 
-  static Future<bool> saveUpyunOperatorConfig(String bucket, String email, String operator, String password) async {
+  Future<bool> saveUpyunOperatorConfig(String bucket, String email, String operator, String password) async {
     try {
-      final file = await _operatorLocalFile;
+      final file = await operatorLocalFile();
       var oldContent = {};
       if (!await file.exists()) {
         await file.create();
@@ -132,9 +102,9 @@ class UpyunManageAPI {
     }
   }
 
-  static Future<bool> deleteUpyunOperatorConfig(String bucket) async {
+  Future<bool> deleteUpyunOperatorConfig(String bucket) async {
     try {
-      final file = await _operatorLocalFile;
+      final file = await operatorLocalFile();
       String contents = await file.readAsString();
       Map oldContent = jsonDecode(contents);
       oldContent.remove(bucket);
@@ -146,43 +116,32 @@ class UpyunManageAPI {
     }
   }
 
-  static getUpyunManageConfigMap() async {
-    var queryUpyunManage = await UpyunManageAPI.readUpyunManageConfig();
+  getUpyunManageConfigMap() async {
+    var queryUpyunManage = await readUpyunManageConfig();
     if (queryUpyunManage == 'Error' || queryUpyunManage == '') {
       return 'Error';
-    } else {
-      var jsonResult = jsonDecode(queryUpyunManage);
-      Map upyunManageConfigMap = {
-        'email': jsonResult['email'],
-        'password': jsonResult['password'],
-        'token': jsonResult['token'],
-      };
-      return upyunManageConfigMap;
     }
-  }
-
-  static isString(var variable) {
-    return variable is String;
-  }
-
-  static isFile(var variable) {
-    return variable is File;
+    var jsonResult = jsonDecode(queryUpyunManage);
+    return {
+      'email': jsonResult['email'],
+      'password': jsonResult['password'],
+      'token': jsonResult['token'],
+    };
   }
 
   //get MD5
-  static Future<String> getContentMd5(var variable) async {
+  Future<String> getContentMd5(var variable) async {
     if (isString(variable)) {
       return base64.encode(md5.convert(utf8.encode(variable)).bytes);
     } else if (isFile(variable)) {
       List<int> bytes = await variable.readAsBytes();
       return base64.encode(md5.convert(bytes).bytes);
-    } else {
-      return "";
     }
+    return "";
   }
 
   //get authorization
-  static Future<String> upyunAuthorization(
+  Future<String> upyunAuthorization(
     String method,
     String uri,
     String contentMd5,
@@ -193,17 +152,10 @@ class UpyunManageAPI {
       String passwordMd5 = md5.convert(utf8.encode(operatorPassword)).toString();
       method = method.toUpperCase();
       String date = HttpDate.format(DateTime.now());
-      String stringToSing = '';
       String codedUri = Uri.encodeFull(uri);
-      if (contentMd5 == '') {
-        stringToSing = '$method&$codedUri&$date';
-      } else {
-        stringToSing = '$method&$codedUri&$date&$contentMd5';
-      }
+      String stringToSing = contentMd5.isEmpty ? '$method&$codedUri&$date' : '$method&$codedUri&$date&$contentMd5';
       String signature = base64.encode(Hmac(sha1, utf8.encode(passwordMd5)).convert(utf8.encode(stringToSing)).bytes);
-
-      String authorization = 'UPYUN $operatorName:$signature';
-      return authorization;
+      return 'UPYUN $operatorName:$signature';
     } catch (e) {
       flogErr(
           e,
@@ -220,99 +172,90 @@ class UpyunManageAPI {
     }
   }
 
-  static getToken(String email, String password) async {
+  Future<List<dynamic>> _makeRequest(
+      {required String url,
+      required String method,
+      Map<String, dynamic>? headers,
+      Map<String, dynamic>? params,
+      dynamic data,
+      required Function(Response) onSuccess,
+      String callFunction = '_makeRequest',
+      required Function checkSuccess}) async {
     BaseOptions baseoptions = setBaseOptions();
+    if (headers != null) {
+      baseoptions.headers = headers;
+    }
+
+    Dio dio = Dio(baseoptions);
+    try {
+      Response response;
+      if (method == 'GET') {
+        response = await dio.get(url, queryParameters: params);
+      } else if (method == 'POST') {
+        response = await dio.post(url, data: data, queryParameters: params);
+      } else if (method == 'DELETE') {
+        response = await dio.delete(url, queryParameters: params);
+      } else if (method == 'PUT') {
+        response = await dio.put(url, data: data, queryParameters: params);
+      } else {
+        throw Exception('Unsupported HTTP method: $method');
+      }
+
+      if (checkSuccess(response)) {
+        return onSuccess(response);
+      }
+      flogErr(response, {'url': url, 'data': data}, "UpyunManageAPI", callFunction);
+      return ['failed'];
+    } catch (e) {
+      flogErr(e, {'url': url}, "UpyunManageAPI", callFunction);
+      return [e.toString()];
+    }
+  }
+
+  getToken(String email, String password) async {
     String randomString = randomStringGenerator(32);
     String randomStringForName = randomStringGenerator(20);
-    Dio dio = Dio(baseoptions);
-    Map<String, dynamic> params = {
-      'username': email,
-      'password': password,
-      'code': randomString,
-      'name': randomStringForName,
-      'scope': 'global',
-    };
-    try {
-      var response = await dio.post(
-        'https://api.upyun.com/oauth/tokens',
-        data: jsonEncode(params),
-      );
-      if (response.statusCode != 200) {
-        return ['failed'];
-      }
-      return ['success', response.data];
-    } catch (e) {
-      flogErr(
-          e,
-          {
-            'email': email,
-            'password': password,
-          },
-          'UpyunManageAPI',
-          'getToken');
-      return ['failed'];
-    }
+
+    return _makeRequest(
+      url: 'https://api.upyun.com/oauth/tokens',
+      method: 'POST',
+      data: jsonEncode({
+        'username': email,
+        'password': password,
+        'code': randomString,
+        'name': randomStringForName,
+        'scope': 'global',
+      }),
+      onSuccess: (response) => ['success', response.data],
+      checkSuccess: (response) => response.statusCode == 200,
+      callFunction: 'getToken',
+    );
   }
 
-  static checkToken(String token) async {
-    BaseOptions baseoptions = setBaseOptions();
-    baseoptions.headers = {
-      'Authorization': 'Bearer $token',
-    };
-    Dio dio = Dio(baseoptions);
-    try {
-      var response = await dio.get(
-        'https://api.upyun.com/oauth/tokens',
-      );
-      if (response.statusCode != 200) {
-        return ['failed'];
-      }
-      return ['success'];
-    } catch (e) {
-      flogErr(
-          e,
-          {
-            'token': token,
-          },
-          'UpyunManageAPI',
-          'checkToken');
-      return ['failed'];
-    }
+  checkToken(String token) async {
+    return _makeRequest(
+      url: 'https://api.upyun.com/oauth/tokens',
+      method: 'GET',
+      headers: {'Authorization': 'Bearer $token'},
+      onSuccess: (_) => ['success'],
+      checkSuccess: (response) => response.statusCode == 200,
+      callFunction: 'checkToken',
+    );
   }
 
-  static deleteToken(String token, String tokenname) async {
-    BaseOptions baseoptions = setBaseOptions();
-    baseoptions.headers = {
-      'Authorization': 'Bearer $token',
-    };
-    Map<String, dynamic> params = {
-      'name': tokenname,
-    };
-    Dio dio = Dio(baseoptions);
-    try {
-      var response = await dio.delete(
-        'https://api.upyun.com/oauth/tokens',
-        queryParameters: params,
-      );
-
-      if (response.statusCode != 200) {
-        return ['failed'];
-      }
-      return ['success'];
-    } catch (e) {
-      flogErr(
-          e,
-          {
-            'token': token,
-            'tokenname': tokenname,
-          },
-          'UpyunManageAPI',
-          'deleteToken');
-      return ['failed'];
-    }
+  deleteToken(String token, String tokenname) async {
+    return _makeRequest(
+      url: 'https://api.upyun.com/oauth/tokens',
+      method: 'DELETE',
+      headers: {'Authorization': 'Bearer $token'},
+      params: {'name': tokenname},
+      onSuccess: (_) => ['success'],
+      checkSuccess: (response) => response.statusCode == 200,
+      callFunction: 'deleteToken',
+    );
   }
 
-  static getBucketList() async {
+  getBucketList() async {
     try {
       var configMap = await getUpyunManageConfigMap();
       if (configMap == 'Error') {
@@ -336,274 +279,156 @@ class UpyunManageAPI {
         queryParameters: queryParameters,
       );
       Map responseMap = response.data;
-      if (response.statusCode == 200) {
-        if (responseMap['pager']['max'] == null) {
-          return ['success', responseMap['buckets']];
-        } else {
-          Map tempMap = Map.from(responseMap);
-          while (tempMap['pager']['max'] != null) {
-            max = tempMap['pager']['max'].toString();
-            queryParameters['max'] = max;
-            response = await dio.get(
-              host,
-              queryParameters: queryParameters,
-            );
-            tempMap.clear();
-            tempMap = response.data;
-            if (response.statusCode == 200) {
-              if (tempMap['buckets'] != null) {
-                responseMap['buckets'].addAll(tempMap['buckets']);
-              }
-            } else {
-              return ['failed'];
-            }
-          }
-        }
-        return ['success', responseMap['buckets']];
-      } else {
+      if (response.statusCode != 200) {
+        flogErr(
+            response,
+            {
+              'host': host,
+              'queryParameters': queryParameters,
+            },
+            'UpyunManageAPI',
+            'getBucketList');
         return ['failed'];
       }
+
+      if (responseMap['pager']['max'] == null) {
+        return ['success', responseMap['buckets']];
+      }
+      Map tempMap = Map.from(responseMap);
+      while (tempMap['pager']['max'] != null) {
+        max = tempMap['pager']['max'].toString();
+        queryParameters['max'] = max;
+        response = await dio.get(
+          host,
+          queryParameters: queryParameters,
+        );
+        tempMap.clear();
+        tempMap = response.data;
+        if (response.statusCode != 200 || tempMap['buckets'] == null) {
+          return ['failed'];
+        }
+        responseMap['buckets'].addAll(tempMap['buckets']);
+      }
+      return ['success', responseMap['buckets']];
     } catch (e) {
       flogErr(e, {}, 'UpyunManageAPI', 'getBucketList');
       return [e.toString()];
     }
   }
 
-  static getBucketInfo(String bucketName) async {
+  getBucketInfo(String bucketName) async {
     var configMap = await getUpyunManageConfigMap();
     if (configMap == 'Error') {
       return ['failed'];
     }
-    String token = configMap['token'];
-
-    String host = 'https://api.upyun.com/buckets/info';
-
-    BaseOptions baseoptions = setBaseOptions();
-    baseoptions.headers = {
-      'Authorization': 'Bearer $token',
-    };
-    Map<String, dynamic> params = {
-      'bucket_name': bucketName,
-    };
-    Dio dio = Dio(baseoptions);
-    try {
-      var response = await dio.get(
-        host,
-        queryParameters: params,
-      );
-      if (response.statusCode != 200) {
-        return ['failed'];
-      }
-      return ['success', response.data];
-    } catch (e) {
-      flogErr(
-          e,
-          {
-            'bucketName': bucketName,
-          },
-          'UpyunManageAPI',
-          'getBucketInfo');
-      return [e.toString()];
-    }
+    return _makeRequest(
+      url: 'https://api.upyun.com/buckets/info',
+      method: 'GET',
+      headers: {'Authorization': 'Bearer ${configMap['token']}'},
+      params: {'bucket_name': bucketName},
+      onSuccess: (response) => ['success', response.data],
+      checkSuccess: (response) => response.statusCode == 200,
+      callFunction: 'getBucketInfo',
+    );
   }
 
-  static deleteBucket(String bucketName) async {
+  deleteBucket(String bucketName) async {
     var configMap = await getUpyunManageConfigMap();
     if (configMap == 'Error') {
       return ['failed'];
     }
-    String token = configMap['token'];
-    String password = configMap['password'];
-    String host = 'https://api.upyun.com/buckets/delete';
-
-    BaseOptions baseoptions = setBaseOptions();
-    baseoptions.headers = {
-      'Authorization': 'Bearer $token',
-    };
-    Map<String, dynamic> params = {
-      'bucket_name': bucketName,
-      'password': password,
-    };
-    Dio dio = Dio(baseoptions);
-    try {
-      var response = await dio.post(
-        host,
-        data: params,
-      );
-      if (response.statusCode != 200) {
-        return ['failed'];
-      }
-      return ['success'];
-    } catch (e) {
-      flogErr(
-          e,
-          {
-            'bucketName': bucketName,
-          },
-          'UpyunManageAPI',
-          'deleteBucket');
-      return [e.toString()];
-    }
+    return _makeRequest(
+      url: 'https://api.upyun.com/buckets/delete',
+      method: 'POST',
+      headers: {'Authorization': 'Bearer ${configMap['token']}'},
+      data: {
+        'bucket_name': bucketName,
+        'password': configMap['password'],
+      },
+      onSuccess: (_) => ['success'],
+      checkSuccess: (response) => response.statusCode == 200,
+      callFunction: 'deleteBucket',
+    );
   }
 
-  static putBucket(String bucketName) async {
+  putBucket(String bucketName) async {
     var configMap = await getUpyunManageConfigMap();
     if (configMap == 'Error') {
       return ['failed'];
     }
-    String token = configMap['token'];
-    String host = 'https://api.upyun.com/buckets';
-
-    BaseOptions baseoptions = setBaseOptions();
-    baseoptions.headers = {
-      'Authorization': 'Bearer $token',
-    };
-    Map<String, dynamic> params = {
-      'bucket_name': bucketName,
-      'type': 'file',
-    };
-    Dio dio = Dio(baseoptions);
-    try {
-      var response = await dio.put(
-        host,
-        data: params,
-      );
-      if (response.statusCode != 201) {
-        return ['failed'];
-      }
-      return ['success'];
-    } catch (e) {
-      flogErr(
-          e,
-          {
-            'bucketName': bucketName,
-          },
-          'UpyunManageAPI',
-          'putBucket');
-      return [e.toString()];
-    }
+    return _makeRequest(
+      url: 'https://api.upyun.com/buckets',
+      method: 'PUT',
+      headers: {'Authorization': 'Bearer ${configMap['token']}'},
+      data: {
+        'bucket_name': bucketName,
+        'type': 'file',
+      },
+      onSuccess: (_) => ['success'],
+      checkSuccess: (response) => response.statusCode == 201,
+      callFunction: 'putBucket',
+    );
   }
 
-  static getOperator(String bucketName) async {
+  getOperator(String bucketName) async {
     var configMap = await getUpyunManageConfigMap();
     if (configMap == 'Error') {
       return ['failed'];
     }
-    String token = configMap['token'];
-    String host = 'https://api.upyun.com/buckets/operators';
-
-    BaseOptions baseoptions = setBaseOptions();
-    baseoptions.headers = {
-      'Authorization': 'Bearer $token',
-    };
-    Map<String, dynamic> params = {
-      'bucket_name': bucketName,
-    };
-    Dio dio = Dio(baseoptions);
-    try {
-      var response = await dio.get(
-        host,
-        queryParameters: params,
-      );
-      if (response.statusCode != 200) {
-        return ['failed'];
-      }
-      return ['success', response.data['operators']];
-    } catch (e) {
-      flogErr(
-          e,
-          {
-            'bucketName': bucketName,
-          },
-          'UpyunManageAPI',
-          'getOperator');
-      return [e.toString()];
-    }
+    return _makeRequest(
+      url: 'https://api.upyun.com/buckets/operators',
+      method: 'GET',
+      headers: {'Authorization': 'Bearer ${configMap['token']}'},
+      params: {'bucket_name': bucketName},
+      onSuccess: (response) => ['success', response.data['operators']],
+      checkSuccess: (response) => response.statusCode == 200,
+      callFunction: 'getOperator',
+    );
   }
 
-  static addOperator(String bucketName, String operatorName) async {
+  addOperator(String bucketName, String operatorName) async {
     var configMap = await getUpyunManageConfigMap();
     if (configMap == 'Error') {
       return ['failed'];
     }
-    String token = configMap['token'];
-    String host = 'https://api.upyun.com/buckets/operators';
-
-    BaseOptions baseoptions = setBaseOptions();
-    baseoptions.headers = {
-      'Authorization': 'Bearer $token',
-    };
-    Map<String, dynamic> params = {
-      'bucket_name': bucketName,
-      'operator_name': operatorName,
-    };
-    Dio dio = Dio(baseoptions);
-    try {
-      var response = await dio.put(
-        host,
-        data: params,
-      );
-      if (response.statusCode != 201) {
-        return ['failed'];
-      }
-      return ['success'];
-    } catch (e) {
-      flogErr(
-          e,
-          {
-            'bucketName': bucketName,
-            'operatorName': operatorName,
-          },
-          'UpyunManageAPI',
-          'addOperator');
-      return [e.toString()];
-    }
+    return _makeRequest(
+      url: 'https://api.upyun.com/buckets/operators',
+      method: 'PUT',
+      headers: {'Authorization': 'Bearer ${configMap['token']}'},
+      data: {
+        'bucket_name': bucketName,
+        'operator_name': operatorName,
+      },
+      onSuccess: (_) => ['success'],
+      checkSuccess: (response) => response.statusCode == 201,
+      callFunction: 'addOperator',
+    );
   }
 
-  static deleteOperator(String bucketName, String operatorName) async {
+  deleteOperator(String bucketName, String operatorName) async {
     var configMap = await getUpyunManageConfigMap();
     if (configMap == 'Error') {
       return ['failed'];
     }
-    String token = configMap['token'];
-    String host = 'https://api.upyun.com/buckets/operators';
-
-    BaseOptions baseoptions = setBaseOptions();
-    baseoptions.headers = {
-      'Authorization': 'Bearer $token',
-    };
-    Map<String, dynamic> params = {
-      'bucket_name': bucketName,
-      'operator_name': operatorName,
-    };
-    Dio dio = Dio(baseoptions);
-    try {
-      var response = await dio.delete(
-        host,
-        queryParameters: params,
-      );
-      if (response.statusCode != 200) {
-        return ['failed'];
-      }
-      return ['success'];
-    } catch (e) {
-      flogErr(
-          e,
-          {
-            'bucketName': bucketName,
-            'operatorName': operatorName,
-          },
-          'UpyunManageAPI',
-          'deleteOperator');
-      return [e.toString()];
-    }
+    return _makeRequest(
+      url: 'https://api.upyun.com/buckets/operators',
+      method: 'DELETE',
+      headers: {'Authorization': 'Bearer ${configMap['token']}'},
+      params: {
+        'bucket_name': bucketName,
+        'operator_name': operatorName,
+      },
+      onSuccess: (_) => ['success'],
+      checkSuccess: (response) => response.statusCode == 200,
+      callFunction: 'deleteOperator',
+    );
   }
 
   //存储桶设为默认图床
-  static setDefaultBucketFromListPage(Map element, Map upyunManageConfigMap, Map textMap) async {
+  setDefaultBucketFromListPage(Map element, Map upyunManageConfigMap, Map textMap) async {
     try {
       String bucket = element['bucket_name'];
-      var queryOperator = await UpyunManageAPI.readUpyunOperatorConfig();
+      var queryOperator = await readUpyunOperatorConfig();
       if (queryOperator == 'Error') {
         return ['failed'];
       }
@@ -642,7 +467,7 @@ class UpyunManageAPI {
       final upyunConfig =
           UpyunConfigModel(bucket, operatorName, operatorPassword, url, options, path, antiLeechToken, antiLeechExpire);
       final upyunConfigJson = jsonEncode(upyunConfig);
-      final upyunConfigFile = await localFile;
+      final upyunConfigFile = await localFile();
       await upyunConfigFile.writeAsString(upyunConfigJson);
       return ['success'];
     } catch (e) {
@@ -659,7 +484,7 @@ class UpyunManageAPI {
     }
   }
 
-  static queryBucketFiles(Map element, String prefix) async {
+  queryBucketFiles(Map element, String prefix) async {
     String method = 'GET';
     String bucket = element['bucket'];
     String uri = '/$bucket$prefix';
@@ -679,32 +504,37 @@ class UpyunManageAPI {
       String marker = '';
       var response = await dio.get(url);
       Map responseMap = response.data;
-      if (response.statusCode == 200) {
-        if (responseMap['iter'] == null || responseMap['iter'].toString().isEmpty) {
-          return ['success', responseMap['files']];
-        } else {
-          Map tempMap = Map.from(responseMap);
-          while (tempMap['iter'] != null &&
-              tempMap['iter'].toString().isNotEmpty &&
-              tempMap['iter'].toString() != 'g2gCZAAEbmV4dGQAA2VvZg') {
-            marker = tempMap['iter'];
-            baseoptions.headers['x-list-iter'] = marker;
-            dio = Dio(baseoptions);
-            response = await dio.get(url);
-            tempMap = response.data;
-            if (response.statusCode == 200) {
-              if (tempMap['files'] != null) {
-                responseMap['files'].addAll(tempMap['files']);
-              }
-            } else {
-              return ['failed'];
-            }
-          }
-        }
-        return ['success', responseMap['files']];
-      } else {
+      if (response.statusCode != 200) {
+        flogErr(
+            response,
+            {
+              'url': url,
+              'headers': baseoptions.headers,
+            },
+            'UpyunManageAPI',
+            'queryBucketFiles');
         return ['failed'];
       }
+
+      if (responseMap['iter'] == null || responseMap['iter'].toString().isEmpty) {
+        return ['success', responseMap['files']];
+      }
+      Map tempMap = Map.from(responseMap);
+      while (tempMap['iter'] != null &&
+          tempMap['iter'].toString().isNotEmpty &&
+          tempMap['iter'].toString() != 'g2gCZAAEbmV4dGQAA2VvZg') {
+        marker = tempMap['iter'];
+        baseoptions.headers['x-list-iter'] = marker;
+        dio = Dio(baseoptions);
+        response = await dio.get(url);
+        tempMap = response.data;
+        if (response.statusCode != 200 || tempMap['files'] == null) {
+          return ['failed'];
+        }
+        responseMap['files'].addAll(tempMap['files']);
+      }
+
+      return ['success', responseMap['files']];
     } catch (e) {
       flogErr(e, {'prefix': prefix}, 'UpyunManageAPI', 'queryBucketFiles');
       return [e.toString()];
@@ -712,21 +542,16 @@ class UpyunManageAPI {
   }
 
   //判断是否为空存储桶
-  static isEmptyBucket(Map element) async {
+  isEmptyBucket(Map element) async {
     var queryResult = await queryBucketFiles(element, '/');
-    if (queryResult[0] == 'success') {
-      if (queryResult[1].length == 0) {
-        return ['empty'];
-      } else {
-        return ['notempty'];
-      }
-    } else {
+    if (queryResult[0] != 'success') {
       return ['error'];
     }
+    return queryResult[1].length == 0 ? ['empty'] : ['notempty'];
   }
 
   //新建文件夹
-  static createFolder(Map element, String prefix, String newfolder) async {
+  createFolder(Map element, String prefix, String newfolder) async {
     String method = 'POST';
     String bucket = element['bucket'];
     String operator = element['operator'];
@@ -753,9 +578,16 @@ class UpyunManageAPI {
         return [
           'success',
         ];
-      } else {
-        return ['failed'];
       }
+      flogErr(
+          response,
+          {
+            'url': url,
+            'headers': baseoptions.headers,
+          },
+          'UpyunManageAPI',
+          'createFolder');
+      return ['failed'];
     } catch (e) {
       flogErr(
           e,
@@ -770,7 +602,7 @@ class UpyunManageAPI {
   }
 
   //删除文件
-  static deleteFile(Map element, String prefix, String key) async {
+  deleteFile(Map element, String prefix, String key) async {
     String method = 'DELETE';
     String bucket = element['bucket'];
     String operator = element['operator'];
@@ -794,6 +626,14 @@ class UpyunManageAPI {
     try {
       var response = await dio.delete(url);
       if (response.statusCode != 200) {
+        flogErr(
+            response,
+            {
+              'url': url,
+              'headers': baseoptions.headers,
+            },
+            'UpyunManageAPI',
+            'deleteFile');
         return ['failed'];
       }
       return ['success'];
@@ -812,44 +652,44 @@ class UpyunManageAPI {
   }
 
   //删除文件夹
-  static deleteFolder(Map element, String prefix) async {
+  deleteFolder(Map element, String prefix) async {
     var queryResult = await queryBucketFiles(element, prefix);
     try {
-      if (queryResult[0] == 'success') {
-        List files = [];
-        List folders = [];
-        for (var item in queryResult[1]) {
-          if (item['type'] == 'folder') {
-            folders.add(item['name']);
-          } else {
-            files.add(item['name']);
-          }
-        }
-        if (files.isNotEmpty) {
-          for (var item in files) {
-            var deleteResult = await deleteFile(element, prefix, item);
-            if (deleteResult[0] != 'success') {
-              return ['failed'];
-            }
-          }
-        }
-        if (folders.isNotEmpty) {
-          for (var item in folders) {
-            var deleteResult = await deleteFolder(element, '$prefix/$item');
-            if (deleteResult[0] != 'success') {
-              return ['failed'];
-            }
-          }
-        }
-        var deleteSelfResult = await deleteFile(
-            element, prefix.substring(0, prefix.length - prefix.split('/').last.length - 1), prefix.split('/').last);
-        if (deleteSelfResult[0] != 'success') {
-          return ['failed'];
-        }
-        return ['success'];
-      } else {
+      if (queryResult[0] != 'success') {
         return ['failed'];
       }
+
+      List files = [];
+      List folders = [];
+      for (var item in queryResult[1]) {
+        if (item['type'] == 'folder') {
+          folders.add(item['name']);
+        } else {
+          files.add(item['name']);
+        }
+      }
+      if (files.isNotEmpty) {
+        for (var item in files) {
+          var deleteResult = await deleteFile(element, prefix, item);
+          if (deleteResult[0] != 'success') {
+            return ['failed'];
+          }
+        }
+      }
+      if (folders.isNotEmpty) {
+        for (var item in folders) {
+          var deleteResult = await deleteFolder(element, '$prefix/$item');
+          if (deleteResult[0] != 'success') {
+            return ['failed'];
+          }
+        }
+      }
+      var deleteSelfResult = await deleteFile(
+          element, prefix.substring(0, prefix.length - prefix.split('/').last.length - 1), prefix.split('/').last);
+      if (deleteSelfResult[0] != 'success') {
+        return ['failed'];
+      }
+      return ['success'];
     } catch (e) {
       flogErr(e, {'prefix': prefix}, 'UpyunManageAPI', 'deleteFolder');
       return ['failed'];
@@ -857,7 +697,7 @@ class UpyunManageAPI {
   }
 
   //目录设为默认图床
-  static setDefaultBucket(Map element, String? folder) async {
+  setDefaultBucket(Map element, String? folder) async {
     try {
       Map configMap = await getConfigMap();
       String bucket = element['bucket'];
@@ -887,7 +727,7 @@ class UpyunManageAPI {
       final upyunConfig =
           UpyunConfigModel(bucket, operatorName, operatorPassword, url, options, path, antiLeechToken, antiLeechExpire);
       final upyunConfigJson = jsonEncode(upyunConfig);
-      final upyunConfigFile = await localFile;
+      final upyunConfigFile = await localFile();
       await upyunConfigFile.writeAsString(upyunConfigJson);
       return ['success'];
     } catch (e) {
@@ -897,7 +737,7 @@ class UpyunManageAPI {
   }
 
   //重命名文件
-  static renameFile(Map element, String prefix, String key, String newKey) async {
+  renameFile(Map element, String prefix, String key, String newKey) async {
     String method = 'PUT';
 
     String bucket = element['bucket'];
@@ -937,7 +777,7 @@ class UpyunManageAPI {
   }
 
   //查询是否有重名文件
-  static queryDuplicateName(Map element, String prefix, String key) async {
+  queryDuplicateName(Map element, String prefix, String key) async {
     var queryResult = await queryBucketFiles(element, prefix);
     if (queryResult[0] == 'success') {
       for (var i = 0; i < queryResult[1].length; i++) {
@@ -946,13 +786,12 @@ class UpyunManageAPI {
         }
       }
       return ['notduplicate'];
-    } else {
-      return ['error'];
     }
+    return ['error'];
   }
 
   //上传文件
-  static uploadFile(
+  uploadFile(
     Map element,
     String filename,
     String filepath,
@@ -1018,9 +857,8 @@ class UpyunManageAPI {
       );
       if (response.statusCode == 200) {
         return ['success'];
-      } else {
-        return ['failed'];
       }
+      return ['failed'];
     } catch (e) {
       flogErr(e, {'filename': filename, 'filepath': filepath, 'prefix': prefix}, 'UpyunManageAPI', 'uploadFile');
       return ['error'];
@@ -1028,7 +866,7 @@ class UpyunManageAPI {
   }
 
   //从网络链接下载文件后上传
-  static uploadNetworkFile(String fileLink, Map element, String prefix) async {
+  uploadNetworkFile(String fileLink, Map element, String prefix) async {
     try {
       String filename = fileLink.substring(fileLink.lastIndexOf("/") + 1, fileLink.length);
       filename = filename.substring(0, !filename.contains("?") ? filename.length : filename.indexOf("?"));
@@ -1047,19 +885,16 @@ class UpyunManageAPI {
         );
         if (uploadResult[0] == "success") {
           return ['success'];
-        } else {
-          return ['failed'];
         }
-      } else {
-        return ['failed'];
       }
+      return ['failed'];
     } catch (e) {
       flogErr(e, {'fileLink': fileLink, 'prefix': prefix}, 'UpyunManageAPI', 'uploadNetworkFile');
       return ['failed'];
     }
   }
 
-  static uploadNetworkFileEntry(List fileList, Map element, String prefix) async {
+  uploadNetworkFileEntry(List fileList, Map element, String prefix) async {
     int successCount = 0;
     int failCount = 0;
 
@@ -1079,8 +914,7 @@ class UpyunManageAPI {
       return showToast('上传失败');
     } else if (failCount == 0) {
       return showToast('上传成功');
-    } else {
-      return showToast('成功$successCount,失败$failCount');
     }
+    return showToast('成功$successCount,失败$failCount');
   }
 }

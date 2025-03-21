@@ -82,10 +82,6 @@ class AlistManageAPI extends BaseManageApi {
   @override
   String configFileName() => 'alist_config.txt';
 
-  bool isString(var variable) => variable is String;
-
-  bool isFile(var variable) => variable is File;
-
   Future<List> getToken(String host, String username, String password) async {
     try {
       String url = '$host/api/auth/login';
@@ -230,13 +226,14 @@ class AlistManageAPI extends BaseManageApi {
         "AlistManageAPI",
         callFunction,
       );
+      return [response.toString()];
     } catch (e) {
       flogErr(e, {}, "AlistManageAPI", callFunction);
+      return [e.toString()];
     }
-    return ['failed'];
   }
 
-  getBucketList() async {
+  Future<List> getBucketList() async {
     return await _makeRequest(
       '/api/admin/storage/list',
       method: 'GET',
@@ -245,7 +242,7 @@ class AlistManageAPI extends BaseManageApi {
     );
   }
 
-  changeBucketState(Map element, bool enable) async {
+  Future<List<String>> changeBucketState(Map element, bool enable) async {
     return await _makeRequest(
       '/api/admin/storage/${enable ? 'enable' : 'disable'}',
       queryParameters: {
@@ -256,7 +253,7 @@ class AlistManageAPI extends BaseManageApi {
     );
   }
 
-  deleteBucket(Map element) async {
+  Future<List<String>> deleteBucket(Map element) async {
     return await _makeRequest(
       '/api/admin/storage/delete',
       queryParameters: {
@@ -313,16 +310,35 @@ class AlistManageAPI extends BaseManageApi {
               }
               fileList.addAll(response.data['data']['content']);
             } else {
-              return ['failed'];
+              flogErr(
+                response,
+                {
+                  'url': url,
+                  'data': dataMap,
+                },
+                "AlistManageAPI",
+                "listFolder",
+              );
+              return [response.toString()];
             }
           }
         }
         return ['success', fileList];
       }
+      flogErr(
+        response,
+        {
+          'url': url,
+          'data': dataMap,
+        },
+        "AlistManageAPI",
+        "listFolder",
+      );
+      return [response.toString()];
     } catch (e) {
       flogErr(e, {}, "AlistManageAPI", "listFolder");
+      return [e.toString()];
     }
-    return ['failed'];
   }
 
   getFileInfo(String path) async {

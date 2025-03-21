@@ -23,24 +23,11 @@ class UploadManager extends BaseUploadManager {
     Response response;
     FormData formdata = FormData.fromMap({
       "file": await MultipartFile.fromFile(path, filename: fileName),
+      if (configMap["strategy_id"] != "None") "strategy_id": configMap["strategy_id"],
+      if (configMap["album_id"] != "None") "album_id": configMap["album_id"].toString(),
     });
     String token = configMap["token"];
-    String strategyId = configMap["strategy_id"];
-    String albumId = configMap["album_id"].toString();
-    if (strategyId == "None") {
-      formdata = FormData.fromMap({});
-    } else if (albumId == 'None') {
-      formdata = FormData.fromMap({
-        "file": await MultipartFile.fromFile(path, filename: fileName),
-        "strategy_id": strategyId,
-      });
-    } else {
-      formdata = FormData.fromMap({
-        "file": await MultipartFile.fromFile(path, filename: fileName),
-        "strategy_id": strategyId,
-        "album_id": albumId,
-      });
-    }
+
     BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = {
       "Authorization": token,

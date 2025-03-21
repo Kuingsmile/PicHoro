@@ -72,53 +72,44 @@ class AlistBucketListState extends loading_state.BaseLoadingPageState<AlistBucke
   initBucketList() async {
     bucketMap.clear();
     filteredBucketMap.clear();
-    try {
-      var bucketListResponse = await manageAPI.getBucketList();
-      //判断是否获取成功
-      if (bucketListResponse[0] != 'success') {
-        if (mounted) {
-          setState(() {
-            state = loading_state.LoadState.error;
-          });
-        }
-        refreshController.refreshCompleted();
-        return;
-      }
-      if (bucketListResponse[1]['total'] == 0) {
-        if (mounted) {
-          setState(() {
-            state = loading_state.LoadState.empty;
-          });
-        }
-        refreshController.refreshCompleted();
-        return;
-      }
-      var allBucketList = bucketListResponse[1]['content'];
-      if (allBucketList is! List) {
-        allBucketList = [allBucketList];
-      }
-      for (var i = 0; i < allBucketList.length; i++) {
-        bucketMap.add({for (var key in allBucketList[i].keys) key: allBucketList[i][key]});
-      }
-      filterBuckets();
-      if (mounted) {
-        setState(() {
-          if (filteredBucketMap.isEmpty) {
-            state = loading_state.LoadState.empty;
-          } else {
-            state = loading_state.LoadState.success;
-          }
-          refreshController.refreshCompleted();
-        });
-      }
-    } catch (e) {
-      flogErr(e, {}, 'AlistBucketListState', 'initBucketList');
+
+    var bucketListResponse = await manageAPI.getBucketList();
+    //判断是否获取成功
+    if (bucketListResponse[0] != 'success') {
       if (mounted) {
         setState(() {
           state = loading_state.LoadState.error;
         });
       }
       refreshController.refreshCompleted();
+      return;
+    }
+    if (bucketListResponse[1]['total'] == 0) {
+      if (mounted) {
+        setState(() {
+          state = loading_state.LoadState.empty;
+        });
+      }
+      refreshController.refreshCompleted();
+      return;
+    }
+    var allBucketList = bucketListResponse[1]['content'];
+    if (allBucketList is! List) {
+      allBucketList = [allBucketList];
+    }
+    for (var i = 0; i < allBucketList.length; i++) {
+      bucketMap.add({for (var key in allBucketList[i].keys) key: allBucketList[i][key]});
+    }
+    filterBuckets();
+    if (mounted) {
+      setState(() {
+        if (filteredBucketMap.isEmpty) {
+          state = loading_state.LoadState.empty;
+        } else {
+          state = loading_state.LoadState.success;
+        }
+        refreshController.refreshCompleted();
+      });
     }
   }
 
@@ -570,12 +561,12 @@ class AlistBucketListState extends loading_state.BaseLoadingPageState<AlistBucke
                 context: context,
                 onConfirm: () async {
                   var result = await manageAPI.deleteBucket(element);
-                  if (result[0] == 'success') {
-                    showToast('卸载成功');
-                    _onRefresh();
-                  } else {
+                  if (result[0] != 'success') {
                     showToast('卸载失败');
+                    return;
                   }
+                  showToast('卸载成功');
+                  _onRefresh();
                 },
               );
             },
@@ -654,16 +645,16 @@ class AlistBucketListState extends loading_state.BaseLoadingPageState<AlistBucke
             ),
           ],
           onChanged: (value) async {
-            var response = await manageAPI.changeBucketState(element, value == 'true' ? false : true);
-            if (response[0] == 'success') {
-              showToast('修改成功');
-              element['disabled'] = value == 'true' ? false : true;
-              if (mounted) {
-                Navigator.pop(context);
-                onChanged();
-              }
-            } else {
+            List<String> res = await manageAPI.changeBucketState(element, value == 'true' ? false : true);
+            if (res[0] != 'success') {
               showToast('修改失败');
+              return;
+            }
+            showToast('修改成功');
+            element['disabled'] = value == 'true' ? false : true;
+            if (mounted) {
+              Navigator.pop(context);
+              onChanged();
             }
           },
         ),

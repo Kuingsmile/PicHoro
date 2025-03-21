@@ -14,34 +14,13 @@ class LskyproImageUploadUtils {
     CancelToken? cancelToken,
   }) async {
     try {
-      FormData formdata;
       String albumId = configMap['album_id'] ?? 'None';
       String strategyId = configMap['strategy_id'] ?? 'None';
-      if (albumId == 'None' && strategyId == 'None') {
-        formdata = FormData.fromMap({
-          "file": await MultipartFile.fromFile(path, filename: my_path.basename(name)),
-        });
-      } else {
-        if (strategyId == 'None') {
-          formdata = FormData.fromMap({
-            "file": await MultipartFile.fromFile(path, filename: my_path.basename(name)),
-            "album_id": albumId,
-          });
-        } else {
-          if (albumId == 'None') {
-            formdata = FormData.fromMap({
-              "file": await MultipartFile.fromFile(path, filename: my_path.basename(name)),
-              "strategy_id": strategyId,
-            });
-          } else {
-            formdata = FormData.fromMap({
-              "file": await MultipartFile.fromFile(path, filename: my_path.basename(name)),
-              "strategy_id": configMap["strategy_id"],
-              "album_id": configMap["album_id"],
-            });
-          }
-        }
-      }
+      FormData formdata = FormData.fromMap({
+        "file": await MultipartFile.fromFile(path, filename: my_path.basename(name)),
+        if (strategyId != 'None') "strategy_id": strategyId,
+        if (albumId != 'None') "album_id": albumId,
+      });
       BaseOptions options = setBaseOptions();
       options.headers = {
         "Authorization": configMap["token"],
@@ -52,19 +31,27 @@ class LskyproImageUploadUtils {
       String uploadUrl = configMap["host"] + "/api/v1/upload";
 
       var response = await dio.post(uploadUrl, data: formdata);
-      if (response.statusCode == 200 && response.data!['status'] == true) {
-        String returnUrl = response.data!['data']['links']['url'];
+      if (response.statusCode == 200 && response.data['status'] == true) {
+        String returnUrl = response.data['data']['links']['url'];
         //返回缩略图地址用来在相册显示
-        String displayUrl = response.data!['data']['links']['thumbnail_url'];
+        String displayUrl = response.data['data']['links']['thumbnail_url'];
         Map pictureKeyMap = Map.from(configMap);
-        pictureKeyMap['deletekey'] = response.data!['data']['key'];
+        pictureKeyMap['deletekey'] = response.data['data']['key'];
         String pictureKey = jsonEncode(pictureKeyMap);
         String formatedURL = getFormatedUrl(returnUrl, name);
 
         return ["success", formatedURL, returnUrl, pictureKey, displayUrl];
-      } else {
-        return ["failed"];
       }
+      flogErr(
+          response,
+          {
+            'path': path,
+            'name': name,
+            'response': response.data,
+          },
+          "LskyproImageUploadUtils",
+          "uploadApi");
+      return ["failed"];
     } catch (e) {
       flogErr(
           e,
@@ -95,7 +82,14 @@ class LskyproImageUploadUtils {
       if (response.statusCode == 200 && response.data!['status'] == true) {
         return ["success"];
       }
-      return ["failed"];
+      flogErr(
+          response,
+          {
+            'deleteMap': deleteMap,
+            'configMap': configMap,
+          },
+          "LskyproImageUploadUtils",
+          "deleteApi");
     } catch (e) {
       flogErr(
           e,
@@ -105,7 +99,7 @@ class LskyproImageUploadUtils {
           },
           "LskyproImageUploadUtils",
           "deleteApi");
-      return ["failed"];
     }
+    return ["failed"];
   }
 }

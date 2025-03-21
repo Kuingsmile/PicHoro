@@ -10,6 +10,7 @@ import 'package:fluro/fluro.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:horopic/picture_host_manage/common/new_folder_widgets.dart';
 import 'package:horopic/picture_host_manage/common/rename_dialog_widgets.dart';
+import 'package:horopic/widgets/common_widgets.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:path/path.dart' as my_path;
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -150,15 +151,7 @@ class AliyunFileExplorerState extends loading_state.BaseLoadingPageState<AliyunF
   @override
   AppBar get appBar => AppBar(
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios,
-            size: 20,
-          ),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
+        leading: getLeadingIcon(context),
         titleSpacing: 0,
         title: Text(widget.bucketPrefix == '' ? widget.element['name'] : widget.bucketPrefix,
             style: const TextStyle(

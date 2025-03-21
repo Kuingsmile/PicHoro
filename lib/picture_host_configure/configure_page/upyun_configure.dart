@@ -42,7 +42,7 @@ class UpyunConfigState extends State<UpyunConfig> {
 
   _initConfig() async {
     try {
-      Map configMap = await UpyunManageAPI.getConfigMap();
+      Map configMap = await UpyunManageAPI().getConfigMap();
       _bucketController.text = configMap['bucket'] ?? '';
       _operatorController.text = configMap['operator'] ?? '';
       _passwordController.text = configMap['password'] ?? '';
@@ -265,7 +265,7 @@ class UpyunConfigState extends State<UpyunConfig> {
       final upyunConfig =
           UpyunConfigModel(bucket, upyunOperator, password, url, options, path, antiLeechToken, antiLeechExpiration);
       final upyunConfigJson = jsonEncode(upyunConfig);
-      final upyunConfigFile = await UpyunManageAPI.localFile;
+      final upyunConfigFile = await UpyunManageAPI().localFile();
       await upyunConfigFile.writeAsString(upyunConfigJson);
       showToast('保存成功');
     } catch (e) {
@@ -278,7 +278,7 @@ class UpyunConfigState extends State<UpyunConfig> {
 
   checkUpyunConfig() async {
     try {
-      Map configMap = await UpyunManageAPI.getConfigMap();
+      Map configMap = await UpyunManageAPI().getConfigMap();
 
       if (configMap.isEmpty) {
         if (context.mounted) {

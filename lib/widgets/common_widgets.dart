@@ -11,3 +11,16 @@ Widget getFlexibleSpace(BuildContext context) {
     ),
   );
 }
+
+Widget getLeadingIcon(BuildContext context) {
+  return IconButton(
+    icon: const Icon(
+      Icons.arrow_back_ios,
+      size: 20,
+      color: Colors.white,
+    ),
+    onPressed: () {
+      Navigator.pop(context);
+    },
+  );
+}
