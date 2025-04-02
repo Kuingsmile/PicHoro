@@ -203,10 +203,6 @@ class BaseUpDownloadManagePageState extends State<BaseUpDownloadManagePage> {
     ];
 
     currentPShost = psHosts[widget.currentListIndex];
-    if (currentPShost == 'qiniu') {
-      showToast('请注意设置为公开存储，否则无法下载');
-    }
-
     uploadManager = uploadManagers[widget.currentListIndex];
     downloadManager = downloadManagers[widget.currentListIndex];
     currentUploadManager = uploadManagers[widget.currentListIndex];
@@ -216,28 +212,23 @@ class BaseUpDownloadManagePageState extends State<BaseUpDownloadManagePage> {
     currentDownloadList = downloadLists[widget.currentListIndex];
     currentSetUploadList = setUploadLists[widget.currentListIndex];
     currentSetDownloadList = setDownloadLists[widget.currentListIndex];
+    String picHoroDownloadPath = '${widget.downloadPath}/PicHoro/Download/';
 
-    switch (currentPShost) {
-      case 'lsky.pro':
-        savedDir = '${widget.downloadPath}/PicHoro/Download/lskypro/${widget.albumName}/';
-      case 'imgur':
-        savedDir = '${widget.downloadPath}/PicHoro/Download/imgur/${widget.albumName}/';
-      case 'github':
-        savedDir = '${widget.downloadPath}/PicHoro/Download/github/${widget.userName}/${widget.repoName}/';
-      case 'ftp':
-        savedDir = '${widget.downloadPath}/PicHoro/Download/ftp/${widget.ftpHost}/';
-      case 'sm.ms':
-        savedDir = '${widget.downloadPath}/PicHoro/Download/smms/';
-      default:
-        savedDir = '${widget.downloadPath}/PicHoro/Download/$currentPShost/${widget.bucketName}/';
-    }
+    savedDir = switch (currentPShost) {
+      'lsky.pro' => '${picHoroDownloadPath}lskypro/${widget.albumName}/',
+      'imgur' => '${picHoroDownloadPath}imgur/${widget.albumName}/',
+      'github' => '${picHoroDownloadPath}github/${widget.userName}/${widget.repoName}/',
+      'ftp' => '${picHoroDownloadPath}ftp/${widget.ftpHost}/',
+      'sm.ms' => '${picHoroDownloadPath}smms/',
+      _ => '$picHoroDownloadPath$currentPShost/${widget.bucketName}/',
+    };
+
     if (currentUploadList.isNotEmpty) {
       for (var i = 0; i < currentUploadList.length; i++) {
         var currentElement = jsonDecode(currentUploadList[i]);
         uploadPathList.add(currentElement[0]);
         uploadFileNameList.add(currentElement[1]);
-        Map<String, dynamic> tempMap = currentElement[2];
-        uploadConfigMapList.add(tempMap);
+        uploadConfigMapList.add(currentElement[2]);
       }
     }
     if (currentPShost == 'alist' && currentDownloadList.isNotEmpty) {
@@ -654,6 +645,7 @@ class BaseUpDownloadManagePageState extends State<BaseUpDownloadManagePage> {
             appBar: AppBar(
               centerTitle: true,
               elevation: 0,
+              leading: getLeadingIcon(context),
               flexibleSpace: getFlexibleSpace(context),
               title: titleText('上传下载管理'),
               bottom: const TabBar(

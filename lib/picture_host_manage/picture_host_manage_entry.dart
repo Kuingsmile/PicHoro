@@ -178,7 +178,7 @@ class PsHostHomePageState extends State<PsHostHomePage> with AutomaticKeepAliveC
           'assets/icons/fakesmms.png',
           'Imgur',
           () async {
-            var queryImgurManage = await ImgurManageAPI.readImgurManageConfig();
+            var queryImgurManage = await ImgurManageAPI().readImgurManageConfig();
             if (queryImgurManage == 'Error') {
               if (mounted) {
                 Application.router.navigateTo(
@@ -203,7 +203,7 @@ class PsHostHomePageState extends State<PsHostHomePage> with AutomaticKeepAliveC
                 }
                 return;
               }
-              var checkTokenResult = await ImgurManageAPI.checkToken(imguruser, token, proxy);
+              var checkTokenResult = await ImgurManageAPI().checkToken(imguruser, token, proxy);
               if (checkTokenResult[0] == 'success') {
                 if (mounted) {
                   Application.router.navigateTo(
@@ -349,7 +349,7 @@ class PsHostHomePageState extends State<PsHostHomePage> with AutomaticKeepAliveC
           'Webdav',
           () async {
             try {
-              Map configMap = await WebdavManageAPI.getConfigMap();
+              Map configMap = await WebdavManageAPI().getConfigMap();
               String prefix = configMap['uploadPath'];
               if (prefix == 'None') {
                 prefix = '/';

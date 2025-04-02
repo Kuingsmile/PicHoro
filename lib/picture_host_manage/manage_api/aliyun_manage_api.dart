@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
+import 'package:horopic/picture_host_manage/common/base_manage_api.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as my_path;
 import 'package:xml2json/xml2json.dart';
@@ -11,13 +12,20 @@ import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/picture_host_configure/configure_page/aliyun_configure.dart';
 
-class AliyunManageAPI {
-  static Map<String, String> areaCodeName = {
+class AliyunManageAPI extends BaseManageApi {
+  static final AliyunManageAPI _instance = AliyunManageAPI._internal();
+
+  factory AliyunManageAPI() {
+    return _instance;
+  }
+
+  AliyunManageAPI._internal();
+  Map<String, String> areaCodeName = {
     'oss-cn-hangzhou': '华东1(杭州)',
     'oss-cn-shanghai': '华东2(上海)',
     'oss-cn-nanjing': '华东5(南京本地地域)',
     'oss-cn-fuzhou': '华东6(福州本地地域)',
-    'oss-cn-wuhan': '华中1(武汉本地地域)',
+    'oss-cn-wuhan-lr': '华中1(武汉本地地域)',
     'oss-cn-qingdao': '华北1(青岛)',
     'oss-cn-beijing': '华北2(北京)',
     'oss-cn-zhangjiakou': '华北3(张家口)',
@@ -45,59 +53,11 @@ class AliyunManageAPI {
     'oss-rg-china-mainland': '无地域属性'
   };
 
-  static Future<File> get localFile async {
-    final path = await _localPath;
-    String defaultUser = Global.getUser();
-    return ensureFileExists(File('$path/${defaultUser}_aliyun_config.txt'));
-  }
-
-  static Future<String> get _localPath async {
-    final directory = await getApplicationDocumentsDirectory();
-    return directory.path;
-  }
-
-  static Future<String> readAliyunConfig() async {
-    try {
-      final file = await localFile;
-      String contents = await file.readAsString();
-      return contents;
-    } catch (e) {
-      flogErr(e, {}, 'AliyunManageAPI', 'readAliyunConfig');
-      return "Error";
-    }
-  }
-
-  static Future<Map> getConfigMap() async {
-    String configStr = await readAliyunConfig();
-    if (configStr == '') {
-      return {};
-    }
-    Map configMap = json.decode(configStr);
-    return configMap;
-  }
-
-  static isString(var variable) {
-    return variable is String;
-  }
-
-  static isFile(var variable) {
-    return variable is File;
-  }
-
-  //get MD5
-  static getContentMd5(var variable) async {
-    if (isString(variable)) {
-      return base64.encode(md5.convert(utf8.encode(variable)).bytes);
-    } else if (isFile(variable)) {
-      List<int> bytes = await variable.readAsBytes();
-      return base64.encode(md5.convert(bytes).bytes);
-    } else {
-      return "";
-    }
-  }
+  @override
+  String configFileName() => 'aliyun_config.txt';
 
   //get CanonicalizedOSSHeaders
-  static getCanonicalizedOSSHeaders(Map headers) {
+  getCanonicalizedOSSHeaders(Map headers) {
     //小写
     Map<String, String> lowerHeaders = {};
     headers.forEach((key, value) {
@@ -115,21 +75,20 @@ class AliyunManageAPI {
   }
 
   //get authorization
-  static Future<String> aliyunAuthorization(
+  Future<String> aliyunAuthorization(
       String method, String canonicalizedResource, Map headers, String contentMd5, String contentType) async {
     try {
       Map configMap = await getConfigMap();
       String accessKeyId = configMap['keyId'];
       String accessKeySecret = configMap['keySecret'];
-      String gmtDate = HttpDate.format(DateTime.now());
+      String gmtDate = headers['Date'] ?? HttpDate.format(DateTime.now());
       String uperCaseMethod = method.toUpperCase();
       String canonicalizedOSSHeaders = getCanonicalizedOSSHeaders(headers);
       String stringToSign =
           "$uperCaseMethod\n$contentMd5\n$contentType\n$gmtDate\n$canonicalizedOSSHeaders$canonicalizedResource";
       String signature =
           base64.encode(Hmac(sha1, utf8.encode(accessKeySecret)).convert(utf8.encode(stringToSign)).bytes);
-      String authorization = "OSS $accessKeyId:$signature";
-      return authorization;
+      return "OSS $accessKeyId:$signature";
     } catch (e) {
       flogErr(
           e,
@@ -146,239 +105,196 @@ class AliyunManageAPI {
     }
   }
 
-  //获取bucket列表
-  static getBucketList() async {
+  Future<List<dynamic>> _makeRequest(
+      {required String url,
+      required String method,
+      Map<String, dynamic>? headers,
+      Map<String, dynamic>? params,
+      dynamic data,
+      required Function(Response) onSuccess,
+      String callFunction = '_makeRequest',
+      required Function checkSuccess}) async {
+    BaseOptions baseoptions = setBaseOptions();
+    if (headers != null) {
+      baseoptions.headers = headers;
+    }
+
+    Dio dio = Dio(baseoptions);
     try {
-      String method = 'GET';
-      String canonicalizedResource = '/';
-      String contentMd5 = '';
-      String contentType = '';
-      String host = 'oss-cn-hangzhou.aliyuncs.com';
-      String authorization = await aliyunAuthorization(method, canonicalizedResource, {}, contentMd5, contentType);
-      BaseOptions baseoptions = setBaseOptions();
-      baseoptions.headers = {
+      Response response;
+      if (method == 'GET') {
+        response = await dio.get(url, queryParameters: params);
+      } else if (method == 'POST') {
+        response = await dio.post(url, data: data, queryParameters: params);
+      } else if (method == 'DELETE') {
+        response = await dio.delete(url, data: data, queryParameters: params);
+      } else if (method == 'PUT') {
+        response = await dio.put(url, data: data, queryParameters: params);
+      } else {
+        throw Exception('Unsupported HTTP method: $method');
+      }
+
+      if (checkSuccess(response)) {
+        return onSuccess(response);
+      }
+      flogErr(
+          response,
+          {
+            'url': url,
+            'data': data,
+            'method': method,
+            'params': params,
+            'headers': headers,
+          },
+          "AliyunManageAPI",
+          callFunction);
+      return ['failed'];
+    } catch (e) {
+      flogErr(e, {'url': url, 'data': data, 'method': method, 'params': params, 'headers': headers}, "AliyunManageAPI",
+          callFunction);
+      return [e.toString()];
+    }
+  }
+
+  //获取bucket列表
+  getBucketList() async {
+    String authorization = await aliyunAuthorization('GET', '/', {}, '', '');
+    return await _makeRequest(
+      url: 'https://oss-cn-hangzhou.aliyuncs.com',
+      method: 'GET',
+      headers: {
         'Authorization': authorization,
         'Date': HttpDate.format(DateTime.now()),
-      };
-      Map<String, dynamic> queryParameters = {
-        'max-keys': 1000,
-      };
-
-      Dio dio = Dio(baseoptions);
-
-      var response = await dio.get('https://$host', queryParameters: queryParameters);
-      if (response.statusCode == 200) {
+      },
+      params: {'max-keys': 1000},
+      onSuccess: (response) {
         String responseBody = response.data;
         final myTransformer = Xml2Json();
         myTransformer.parse(responseBody);
         Map responseMap = json.decode(myTransformer.toParker());
         return ['success', responseMap];
-      } else {
-        return ['failed'];
-      }
-    } catch (e) {
-      flogErr(e, {}, "AliyunManageAPI", "getBucketList");
-      return [e.toString()];
-    }
+      },
+      checkSuccess: (response) => response.statusCode == 200,
+      callFunction: 'getBucketList',
+    );
   }
 
+  final List<String> _multiAZSupportedRegions = [
+    'oss-cn-shenzhen',
+    'oss-cn-beijing',
+    'oss-cn-hangzhou',
+    'oss-cn-shanghai',
+    'oss-cn-hongkong',
+    'oss-ap-southeast-1',
+    'oss-ap-southeast-5'
+  ];
+
   //新建存储桶
-  static createBucket(Map newBucketConfigMap) async {
-    try {
-      String method = 'PUT';
-      String bucketName = newBucketConfigMap['bucketName'];
-      String region = newBucketConfigMap['region'];
-      bool multiAZ = newBucketConfigMap['multiAZ'];
-      String xCosACL = newBucketConfigMap['xCosACL'];
-
-      if (multiAZ == true &&
-          region != 'oss-cn-shenzhen' &&
-          region != 'oss-cn-beijing' &&
-          region != 'oss-cn-hangzhou' &&
-          region != 'oss-cn-shanghai' &&
-          region != 'oss-cn-hongkong' &&
-          region != 'oss-ap-southeast-1' &&
-          region != 'oss-ap-southeast-5') {
-        return [
-          'multiAZ error',
-        ];
-      }
-      var body = '<CreateBucketConfiguration><DataRedundancyType>ZRS</DataRedundancyType></CreateBucketConfiguration>';
-      BaseOptions baseoptions = setBaseOptions();
-      baseoptions.headers = {
-        'Date': HttpDate.format(DateTime.now()),
-        'x-oss-acl': xCosACL,
-      };
-      if (multiAZ == true) {
-        baseoptions.headers['content-type'] = 'application/xml';
-        baseoptions.headers['content-length'] = body.length.toString();
-        String contentMd5 = await getContentMd5(body);
-        baseoptions.headers['content-md5'] = await getContentMd5(body);
-        String authorization =
-            await aliyunAuthorization(method, '/$bucketName/', baseoptions.headers, contentMd5, 'application/xml');
-        baseoptions.headers['Authorization'] = authorization;
-      } else {
-        baseoptions.headers['content-type'] = 'application/json';
-        String authorization =
-            await aliyunAuthorization(method, '/$bucketName/', baseoptions.headers, '', 'application/json');
-        baseoptions.headers['Authorization'] = authorization;
-      }
-      Dio dio = Dio(baseoptions);
-
-      Response response;
-      if (multiAZ == true) {
-        response = await dio.put('https://$bucketName.$region.aliyuncs.com', data: body);
-      } else {
-        response = await dio.put('https://$bucketName.$region.aliyuncs.com');
-      }
-      if (response.statusCode == 200) {
-        return ['success'];
-      } else {
-        return ['failed'];
-      }
-    } catch (e) {
-      flogErr(
-          e,
-          {
-            'newBucketConfigMap': newBucketConfigMap,
-          },
-          "AliyunManageAPI",
-          "createBucket");
-      return [e.toString()];
+  createBucket(Map newBucketConfigMap) async {
+    bool multiAZ = newBucketConfigMap['multiAZ'];
+    String region = newBucketConfigMap['region'];
+    if (multiAZ == true && !_multiAZSupportedRegions.contains(region)) {
+      return [
+        'multiAZ error',
+      ];
     }
+    String body = '<CreateBucketConfiguration><DataRedundancyType>ZRS</DataRedundancyType></CreateBucketConfiguration>';
+    String contentMd5 = await getContentMd5(body);
+    Map<String, dynamic> headers = {
+      'Date': HttpDate.format(DateTime.now()),
+      'x-oss-acl': newBucketConfigMap['xCosACL'],
+      if (multiAZ == true) 'content-type': 'application/xml' else 'content-type': 'application/json',
+      if (multiAZ == true) 'content-length': body.length.toString(),
+      if (multiAZ == true) 'content-md5': contentMd5,
+    };
+    String authorization = await aliyunAuthorization(
+      'PUT',
+      '/${newBucketConfigMap['bucketName']}/',
+      headers,
+      contentMd5,
+      multiAZ == true ? 'application/xml' : 'application/json',
+    );
+    headers['Authorization'] = authorization;
+    return await _makeRequest(
+      url: 'https://${newBucketConfigMap['bucketName']}.$region.aliyuncs.com',
+      method: 'PUT',
+      headers: headers,
+      data: multiAZ == true ? body : null,
+      onSuccess: (response) => ['success'],
+      checkSuccess: (response) => response.statusCode == 200,
+      callFunction: 'createBucket',
+    );
   }
 
   //查询存储桶权限
-  static queryACLPolicy(Map element) async {
-    try {
-      String bucket = element['name'];
-      String region = element['location'];
-      String method = 'GET';
-      String urlpath = '/$bucket/?acl';
-      String host = '$bucket.$region.aliyuncs.com';
-
-      BaseOptions baseoptions = setBaseOptions();
-      baseoptions.headers = {
-        'Date': HttpDate.format(DateTime.now()),
-      };
-      String authorization = await aliyunAuthorization(method, urlpath, baseoptions.headers, '', '');
-      baseoptions.headers['Authorization'] = authorization;
-
-      Dio dio = Dio(baseoptions);
-      var response = await dio.get('https://$host?acl', queryParameters: {'acl': ''});
-      var responseBody = response.data;
-      final myTransformer = Xml2Json();
-      myTransformer.parse(responseBody);
-      Map responseMap = json.decode(myTransformer.toParker());
-      if (response.statusCode == 200) {
+  queryACLPolicy(Map element) async {
+    Map<String, dynamic> headers = {
+      'Date': HttpDate.format(DateTime.now()),
+    };
+    String authorization = await aliyunAuthorization('GET', '/${element['name']}/?acl', headers, '', '');
+    headers['Authorization'] = authorization;
+    return await _makeRequest(
+      url: 'https://${element['name']}.${element['location']}.aliyuncs.com/?acl',
+      method: 'GET',
+      headers: headers,
+      onSuccess: (response) {
+        String responseBody = response.data;
+        final myTransformer = Xml2Json();
+        myTransformer.parse(responseBody);
+        Map responseMap = json.decode(myTransformer.toParker());
         return ['success', responseMap];
-      } else {
-        return ['failed'];
-      }
-    } catch (e) {
-      flogErr(e, {'element': element}, "AliyunManageAPI", "queryACLPolicy");
-      return [e.toString()];
-    }
+      },
+      checkSuccess: (response) => response.statusCode == 200,
+      callFunction: 'queryACLPolicy',
+    );
   }
 
-  //删除存储桶
-  static deleteBucket(Map element) async {
-    try {
-      String bucket = element['name'];
-      String region = element['location'];
-
-      String method = 'DELETE';
-      String urlpath = '/$bucket/';
-
-      String host = '$bucket.$region.aliyuncs.com';
-      BaseOptions baseoptions = setBaseOptions();
-      baseoptions.headers = {
-        'Date': HttpDate.format(DateTime.now()),
-        'content-type': 'application/json',
-      };
-      String authorization = await aliyunAuthorization(method, urlpath, baseoptions.headers, '', 'application/json');
-      baseoptions.headers['Authorization'] = authorization;
-      Dio dio = Dio(baseoptions);
-      var response = await dio.delete('https://$host');
-      if (response.statusCode == 204) {
-        return ['success'];
-      } else {
-        return ['failed'];
-      }
-    } catch (e) {
-      flogErr(
-          e,
-          {
-            'element': element,
-          },
-          "AliyunManageAPI",
-          "deleteBucket");
-      return [e.toString()];
-    }
+  /// 删除存储桶
+  deleteBucket(Map element) async {
+    Map<String, dynamic> headers = {
+      'Date': HttpDate.format(DateTime.now()),
+      'content-type': 'application/json',
+    };
+    String authorization = await aliyunAuthorization('DELETE', '/${element['name']}/', headers, '', 'application/json');
+    headers['Authorization'] = authorization;
+    return await _makeRequest(
+      url: 'https://${element['name']}.${element['location']}.aliyuncs.com',
+      method: 'DELETE',
+      headers: headers,
+      onSuccess: (response) => ['success'],
+      checkSuccess: (response) => response.statusCode == 204,
+      callFunction: 'deleteBucket',
+    );
   }
 
-  //更改存储桶权限
-  static changeACLPolicy(Map element, String newACL) async {
-    try {
-      String bucket = element['name'];
-      String region = element['location'];
-
-      String method = 'PUT';
-      String urlpath = '/$bucket/?acl';
-
-      String host = '$bucket.$region.aliyuncs.com';
-      BaseOptions baseoptions = setBaseOptions();
-      Map<String, dynamic> header = {
-        'Date': HttpDate.format(DateTime.now()),
-        'x-oss-acl': newACL,
-        'content-type': 'application/json',
-      };
-      String authorization = await aliyunAuthorization(method, urlpath, header, '', 'application/json');
-
-      baseoptions.headers = header;
-      baseoptions.headers['Authorization'] = authorization;
-      Dio dio = Dio(baseoptions);
-
-      var response = await dio.put('https://$host/?acl');
-      if (response.statusCode == 200) {
-        return ['success'];
-      } else {
-        return ['failed'];
-      }
-    } catch (e) {
-      flogErr(
-          e,
-          {
-            'element': element,
-            'newACL': newACL,
-          },
-          "AliyunManageAPI",
-          "changeACLPolicy");
-      return [e.toString()];
-    }
+  /// 更改存储桶权限
+  changeACLPolicy(Map element, String newACL) async {
+    Map<String, dynamic> headers = {
+      'Date': HttpDate.format(DateTime.now()),
+      'x-oss-acl': newACL,
+      'content-type': 'application/json',
+    };
+    String authorization =
+        await aliyunAuthorization('PUT', '/${element['name']}/?acl', headers, '', 'application/json');
+    headers['Authorization'] = authorization;
+    return await _makeRequest(
+      url: 'https://${element['name']}.${element['location']}.aliyuncs.com/?acl',
+      method: 'PUT',
+      headers: headers,
+      onSuccess: (response) => ['success'],
+      checkSuccess: (response) => response.statusCode == 200,
+      callFunction: 'changeACLPolicy',
+    );
   }
 
   //存储桶设为默认图床
-  static setDefaultBucket(Map element, String? folder) async {
+  setDefaultBucket(Map element, String? folder) async {
     try {
       Map configMap = await getConfigMap();
-      String accessKeyId = configMap['keyId'];
-      String accessKeySecret = configMap['keySecret'];
-      String path = '';
-      String customUrl = configMap['customUrl'];
-      String options = configMap['options'];
-      String area = element['location'];
-      String bucket = element['name'];
-
-      if (folder == null) {
-        path = configMap['path'];
-      } else {
-        path = folder;
-      }
-
-      final aliyunConfig = AliyunConfigModel(accessKeyId, accessKeySecret, bucket, area, path, customUrl, options);
+      final aliyunConfig = AliyunConfigModel(configMap['keyId'], configMap['keySecret'], element['name'],
+          element['location'], folder ?? configMap['path'], configMap['customUrl'], configMap['options']);
       final aliyunConfigJson = jsonEncode(aliyunConfig);
-      final aliyunConfigFile = await localFile;
+      final aliyunConfigFile = await localFile();
       await aliyunConfigFile.writeAsString(aliyunConfigJson);
       return ['success'];
     } catch (e) {
@@ -395,7 +311,7 @@ class AliyunManageAPI {
   }
 
   //查询存储桶文件列表
-  static queryBucketFiles(Map element, Map<String, dynamic> query) async {
+  queryBucketFiles(Map element, Map<String, dynamic> query) async {
     try {
       String bucket = element['name'];
       String region = element['location'];
@@ -421,66 +337,70 @@ class AliyunManageAPI {
       final myTransformer = Xml2Json();
       myTransformer.parse(responseBody);
       Map responseMap = json.decode(myTransformer.toParker());
-      if (response.statusCode == 200) {
-        if (responseMap['ListBucketResult']['IsTruncated'] == null ||
-            responseMap['ListBucketResult']['IsTruncated'] == 'false') {
-          return ['success', responseMap];
-        } else {
-          Map tempMap = Map.from(responseMap);
-          while (tempMap['ListBucketResult']['IsTruncated'] == 'true') {
-            marker = tempMap['ListBucketResult']['NextContinuationToken'];
-            query['continuation-token'] = marker;
-            urlpath = '/$bucket/?continuation-token=$marker';
-            baseoptions.headers = {
-              'Date': HttpDate.format(DateTime.now()),
-            };
-            String authorization = await aliyunAuthorization(method, urlpath, baseoptions.headers, '', '');
-            baseoptions.headers['Authorization'] = authorization;
-
-            dio = Dio(baseoptions);
-            response = await dio.get('https://$host/', queryParameters: query);
-            responseBody = response.data;
-            myTransformer.parse(responseBody);
-            tempMap.clear();
-            tempMap = json.decode(myTransformer.toParker());
-            if (response.statusCode == 200) {
-              if (tempMap['ListBucketResult']['Contents'] != null) {
-                if (tempMap['ListBucketResult']['Contents'] is! List) {
-                  tempMap['ListBucketResult']['Contents'] = [tempMap['ListBucketResult']['Contents']];
-                }
-                if (responseMap['ListBucketResult']['Contents'] == null) {
-                  responseMap['ListBucketResult']['Contents'] = tempMap['ListBucketResult']['Contents'];
-                } else {
-                  if (responseMap['ListBucketResult']['Contents'] is! List) {
-                    responseMap['ListBucketResult']['Contents'] = [responseMap['ListBucketResult']['Contents']];
-                  }
-                  responseMap['ListBucketResult']['Contents'].addAll(tempMap['ListBucketResult']['Contents']);
-                }
-              }
-              if (tempMap['ListBucketResult']['CommonPrefixes'] != null) {
-                if (tempMap['ListBucketResult']['CommonPrefixes'] is! List) {
-                  tempMap['ListBucketResult']['CommonPrefixes'] = [tempMap['ListBucketResult']['CommonPrefixes']];
-                }
-                if (responseMap['ListBucketResult']['CommonPrefixes'] == null) {
-                  responseMap['ListBucketResult']['CommonPrefixes'] = tempMap['ListBucketResult']['CommonPrefixes'];
-                } else {
-                  if (responseMap['ListBucketResult']['CommonPrefixes'] is! List) {
-                    responseMap['ListBucketResult']
-                        ['CommonPrefixes'] = [responseMap['ListBucketResult']['CommonPrefixes']];
-                  }
-                  responseMap['ListBucketResult']['CommonPrefixes']
-                      .addAll(tempMap['ListBucketResult']['CommonPrefixes']);
-                }
-              }
-            } else {
-              return ['failed'];
-            }
-          }
-          return ['success', responseMap];
-        }
-      } else {
+      if (response.statusCode != 200) {
+        flogErr(
+            response,
+            {
+              'url': 'https://$host/',
+              'query': query,
+              'responseBody': responseBody,
+            },
+            "AliyunManageAPI",
+            "queryBucketFiles");
         return ['failed'];
       }
+      if (responseMap['ListBucketResult']['IsTruncated'] == null ||
+          responseMap['ListBucketResult']['IsTruncated'] == 'false') {
+        return ['success', responseMap];
+      }
+      Map tempMap = Map.from(responseMap);
+      while (tempMap['ListBucketResult']['IsTruncated'] == 'true') {
+        marker = tempMap['ListBucketResult']['NextContinuationToken'];
+        query['continuation-token'] = marker;
+        urlpath = '/$bucket/?continuation-token=$marker';
+        baseoptions.headers = {
+          'Date': HttpDate.format(DateTime.now()),
+        };
+        String authorization = await aliyunAuthorization(method, urlpath, baseoptions.headers, '', '');
+        baseoptions.headers['Authorization'] = authorization;
+
+        dio = Dio(baseoptions);
+        response = await dio.get('https://$host/', queryParameters: query);
+        responseBody = response.data;
+        myTransformer.parse(responseBody);
+        tempMap.clear();
+        tempMap = json.decode(myTransformer.toParker());
+        if (response.statusCode != 200) {
+          return ['failed'];
+        }
+        if (tempMap['ListBucketResult']['Contents'] != null) {
+          if (tempMap['ListBucketResult']['Contents'] is! List) {
+            tempMap['ListBucketResult']['Contents'] = [tempMap['ListBucketResult']['Contents']];
+          }
+          if (responseMap['ListBucketResult']['Contents'] == null) {
+            responseMap['ListBucketResult']['Contents'] = tempMap['ListBucketResult']['Contents'];
+          } else {
+            if (responseMap['ListBucketResult']['Contents'] is! List) {
+              responseMap['ListBucketResult']['Contents'] = [responseMap['ListBucketResult']['Contents']];
+            }
+            responseMap['ListBucketResult']['Contents'].addAll(tempMap['ListBucketResult']['Contents']);
+          }
+        }
+        if (tempMap['ListBucketResult']['CommonPrefixes'] != null) {
+          if (tempMap['ListBucketResult']['CommonPrefixes'] is! List) {
+            tempMap['ListBucketResult']['CommonPrefixes'] = [tempMap['ListBucketResult']['CommonPrefixes']];
+          }
+          if (responseMap['ListBucketResult']['CommonPrefixes'] == null) {
+            responseMap['ListBucketResult']['CommonPrefixes'] = tempMap['ListBucketResult']['CommonPrefixes'];
+          } else {
+            if (responseMap['ListBucketResult']['CommonPrefixes'] is! List) {
+              responseMap['ListBucketResult']['CommonPrefixes'] = [responseMap['ListBucketResult']['CommonPrefixes']];
+            }
+            responseMap['ListBucketResult']['CommonPrefixes'].addAll(tempMap['ListBucketResult']['CommonPrefixes']);
+          }
+        }
+      }
+      return ['success', responseMap];
     } catch (e) {
       flogErr(
           e,
@@ -495,251 +415,184 @@ class AliyunManageAPI {
   }
 
   //判断是否为空存储桶
-  static isEmptyBucket(Map element) async {
+  isEmptyBucket(Map element) async {
     var queryResult = await queryBucketFiles(element, {});
-    if (queryResult[0] == 'success') {
-      if (queryResult[1]['ListBucketResult']['Contents'] == null &&
-          queryResult[1]['ListBucketResult']['CommonPrefixes'] == null) {
-        return ['empty'];
-      } else {
-        return ['notempty'];
-      }
-    } else {
+    if (queryResult[0] != 'success') {
       return ['error'];
     }
+
+    if (queryResult[1]['ListBucketResult']['Contents'] == null &&
+        queryResult[1]['ListBucketResult']['CommonPrefixes'] == null) {
+      return ['empty'];
+    }
+    return ['notempty'];
   }
 
-  //重命名文件
-  static copyFile(Map element, String key, String newKey) async {
-    try {
-      String bucket = element['name'];
-      String region = element['location'];
-      String method = 'PUT';
-      String host = '$bucket.$region.aliyuncs.com';
-      String newName = '';
-      if (key.substring(0, key.lastIndexOf('/') + 1) == '') {
-        newName = newKey;
-      } else {
-        newName = key.substring(0, key.lastIndexOf('/') + 1) + newKey;
-      }
-
-      String urlpath = '/$bucket/$newName';
-      String xOssCopySource = '/$bucket/${Uri.encodeComponent(key)}';
-      BaseOptions baseoptions = setBaseOptions();
-      baseoptions.headers = {
-        'Date': HttpDate.format(DateTime.now()),
-        'x-oss-copy-source': xOssCopySource,
-        'x-oss-forbid-overwrite': 'false',
-        'Host': host,
-        'content-type': 'application/json',
-      };
-      String authorization = await aliyunAuthorization(method, urlpath, baseoptions.headers, '', 'application/json');
-      baseoptions.headers['Authorization'] = authorization;
-
-      Dio dio = Dio(baseoptions);
-
-      var response = await dio.put('https://$host/${Uri.encodeComponent(newName)}');
-      if (response.statusCode == 200) {
-        return ['success'];
-      } else {
-        return ['failed'];
-      }
-    } catch (e) {
-      flogErr(
-          e,
-          {
-            'element': element,
-            'key': key,
-            'newKey': newKey,
-          },
-          "AliyunManageAPI",
-          "copyFile");
-      return [e.toString()];
-    }
+  copyFile(Map element, String key, String newKey) async {
+    String newName =
+        key.substring(0, key.lastIndexOf('/') + 1) == '' ? newKey : key.substring(0, key.lastIndexOf('/') + 1) + newKey;
+    String host = '${element['name']}.${element['location']}.aliyuncs.com';
+    Map<String, dynamic> headers = {
+      'Date': HttpDate.format(DateTime.now()),
+      'x-oss-copy-source': '/${element['name']}/${Uri.encodeComponent(key)}',
+      'x-oss-forbid-overwrite': 'false',
+      'Host': host,
+      'content-type': 'application/json',
+    };
+    String authorization = await aliyunAuthorization(
+      'PUT',
+      '/${element['name']}/$newName',
+      headers,
+      '',
+      'application/json',
+    );
+    headers['Authorization'] = authorization;
+    return await _makeRequest(
+      url: 'https://$host/$newName',
+      method: 'PUT',
+      headers: headers,
+      onSuccess: (response) => ['success'],
+      checkSuccess: (response) => response.statusCode == 200,
+      callFunction: 'copyFile',
+    );
   }
 
   //删除文件
-  static deleteFile(Map element, String key) async {
-    try {
-      String bucket = element['name'];
-      String region = element['location'];
-      String method = 'DELETE';
-      String urlpath = '/$bucket/$key';
-      String host = '$bucket.$region.aliyuncs.com';
-
-      BaseOptions baseoptions = setBaseOptions();
-      String contentMD5 = '';
-      String contentType = 'application/json';
-      baseoptions.headers = {
-        'Date': HttpDate.format(DateTime.now()),
-        'content-type': contentType,
-      };
-
-      String authorization = await aliyunAuthorization(method, urlpath, baseoptions.headers, contentMD5, contentType);
-
-      baseoptions.headers['Authorization'] = authorization;
-      Dio dio = Dio(baseoptions);
-
-      var response = await dio.delete('https://$host/$key');
-      if (response.statusCode == HttpStatus.noContent) {
-        return ['success'];
-      } else {
-        return ['failed'];
-      }
-    } catch (e) {
-      flogErr(
-          e,
-          {
-            'element': element,
-            'key': key,
-          },
-          "AliyunManageAPI",
-          "deleteFile");
-      return [e.toString()];
-    }
+  deleteFile(Map element, String key) async {
+    Map<String, dynamic> headers = {
+      'Date': HttpDate.format(DateTime.now()),
+      'content-type': 'application/json',
+    };
+    String authorization =
+        await aliyunAuthorization('DELETE', '/${element['name']}/$key', headers, '', 'application/json');
+    headers['Authorization'] = authorization;
+    return await _makeRequest(
+      url: 'https://${element['name']}.${element['location']}.aliyuncs.com/$key',
+      method: 'DELETE',
+      headers: headers,
+      onSuccess: (response) => ['success'],
+      checkSuccess: (response) => response.statusCode == HttpStatus.noContent,
+      callFunction: 'deleteFile',
+    );
   }
 
   //删除文件夹
-  static deleteFolder(Map element, String key) async {
+  deleteFolder(Map element, String key) async {
     var queryResult = await queryBucketFiles(element, {
       'prefix': key,
       'delimiter': '/',
     });
-    if (queryResult[0] == 'success') {
-      if (queryResult[1]['ListBucketResult']['Contents'] != null) {
-        var contents = queryResult[1]['ListBucketResult']['Contents'];
-        if (contents is List) {
-          for (var i = 0; i < contents.length; i++) {
-            var deleteResult = await deleteFile(element, contents[i]['Key']);
-            if (deleteResult[0] != 'success') {
-              return ['failed'];
-            }
-          }
-        } else {
-          var deleteResult = await deleteFile(element, contents['Key']);
-          if (deleteResult[0] != 'success') {
-            return ['failed'];
-          }
-        }
-      }
-      if (queryResult[1]['ListBucketResult']['CommonPrefixes'] != null) {
-        var commonPrefixes = queryResult[1]['ListBucketResult']['CommonPrefixes'];
-        if (commonPrefixes is List) {
-          for (var i = 0; i < commonPrefixes.length; i++) {
-            var deleteResult = await deleteFolder(element, commonPrefixes[i]['Prefix']);
-            if (deleteResult[0] != 'success') {
-              return ['failed'];
-            }
-          }
-        } else {
-          var deleteResult = await deleteFolder(element, commonPrefixes['Prefix']);
-          if (deleteResult[0] != 'success') {
-            return ['failed'];
-          }
-        }
-      }
-      return ['success'];
-    } else {
+    if (queryResult[0] != 'success') {
       return ['failed'];
     }
+
+    if (queryResult[1]['ListBucketResult']['Contents'] != null) {
+      var contents = queryResult[1]['ListBucketResult']['Contents'];
+      if (contents is List) {
+        for (var i = 0; i < contents.length; i++) {
+          var deleteResult = await deleteFile(element, contents[i]['Key']);
+          if (deleteResult[0] != 'success') {
+            return ['failed'];
+          }
+        }
+      } else {
+        var deleteResult = await deleteFile(element, contents['Key']);
+        if (deleteResult[0] != 'success') {
+          return ['failed'];
+        }
+      }
+    }
+    if (queryResult[1]['ListBucketResult']['CommonPrefixes'] != null) {
+      var commonPrefixes = queryResult[1]['ListBucketResult']['CommonPrefixes'];
+      if (commonPrefixes is List) {
+        for (var i = 0; i < commonPrefixes.length; i++) {
+          var deleteResult = await deleteFolder(element, commonPrefixes[i]['Prefix']);
+          if (deleteResult[0] != 'success') {
+            return ['failed'];
+          }
+        }
+      } else {
+        var deleteResult = await deleteFolder(element, commonPrefixes['Prefix']);
+        if (deleteResult[0] != 'success') {
+          return ['failed'];
+        }
+      }
+    }
+    return ['success'];
   }
 
   //查询是否有重名文件
-  static queryDuplicateName(Map element, String? prefix, String key) async {
+  queryDuplicateName(Map element, String? prefix, String key) async {
     var queryResult = await queryBucketFiles(element, {
       'prefix': prefix,
       'delimiter': '/',
     });
-
-    if (queryResult[0] == 'success') {
-      if (queryResult[1]['ListBucketResult']['Contents'] != null) {
-        var contents = queryResult[1]['ListBucketResult']['Contents'];
-        if (contents is List) {
-          for (var i = 0; i < contents.length; i++) {
-            if (contents[i]['Key'] == key) {
-              return ['duplicate'];
-            }
-          }
-        } else {
-          if (contents['Key'] == key) {
-            return ['duplicate'];
-          }
-        }
-      }
-      if (queryResult[1]['ListBucketResult']['CommonPrefixes'] != null) {
-        var commonPrefixes = queryResult[1]['ListBucketResult']['CommonPrefixes'];
-        if (commonPrefixes is List) {
-          for (var i = 0; i < commonPrefixes.length; i++) {
-            if (commonPrefixes[i]['Prefix'] == key) {
-              return ['duplicate'];
-            }
-          }
-        } else {
-          if (commonPrefixes['Prefix'] == key) {
-            return ['duplicate'];
-          }
-        }
-      }
-      return ['notduplicate'];
-    } else {
+    if (queryResult[0] != 'success') {
       return ['error'];
     }
+
+    if (queryResult[1]['ListBucketResult']['Contents'] != null) {
+      var contents = queryResult[1]['ListBucketResult']['Contents'];
+      if (contents is List) {
+        for (var i = 0; i < contents.length; i++) {
+          if (contents[i]['Key'] == key) {
+            return ['duplicate'];
+          }
+        }
+      } else {
+        if (contents['Key'] == key) {
+          return ['duplicate'];
+        }
+      }
+    }
+    if (queryResult[1]['ListBucketResult']['CommonPrefixes'] != null) {
+      var commonPrefixes = queryResult[1]['ListBucketResult']['CommonPrefixes'];
+      if (commonPrefixes is List) {
+        for (var i = 0; i < commonPrefixes.length; i++) {
+          if (commonPrefixes[i]['Prefix'] == key) {
+            return ['duplicate'];
+          }
+        }
+      } else {
+        if (commonPrefixes['Prefix'] == key) {
+          return ['duplicate'];
+        }
+      }
+    }
+    return ['notduplicate'];
   }
 
   //新建文件夹
-  static createFolder(Map element, String prefix, String newfolder) async {
-    try {
-      String bucket = element['name'];
-      String region = element['location'];
-
-      String method = 'PUT';
-
-      String host = '$bucket.$region.aliyuncs.com';
-
-      String urlpath = '/$bucket/$prefix$newfolder/';
-      if (urlpath.substring(urlpath.length - 1) != '/') {
-        urlpath = '$urlpath/';
-      }
-      BaseOptions baseoptions = setBaseOptions();
-      String contentMD5 = '';
-      String contentType = 'application/json';
-      baseoptions.headers = {
-        'Date': HttpDate.format(DateTime.now()),
-        'content-type': contentType,
-        'content-length': '0',
-        'Host': host,
-      };
-      String authorization = await aliyunAuthorization(method, urlpath, baseoptions.headers, contentMD5, contentType);
-
-      baseoptions.headers['Authorization'] = authorization;
-      Dio dio = Dio(baseoptions);
-
-      String url = 'https://$host/$prefix$newfolder';
-      if (url.substring(url.length - 1) != '/') {
-        url = '$url/';
-      }
-      var response = await dio.put(url);
-      if (response.statusCode == 200) {
-        return ['success'];
-      } else {
-        return ['failed'];
-      }
-    } catch (e) {
-      flogErr(
-          e,
-          {
-            'element': element,
-            'prefix': prefix,
-            'newfolder': newfolder,
-          },
-          "AliyunManageAPI",
-          "createFolder");
-      return [e.toString()];
+  createFolder(Map element, String prefix, String newfolder) async {
+    String host = '${element['name']}.${element['location']}.aliyuncs.com';
+    String urlpath = '/${element['name']}/$prefix$newfolder/';
+    if (urlpath.substring(urlpath.length - 1) != '/') {
+      urlpath = '$urlpath/';
     }
+    Map<String, dynamic> headers = {
+      'Date': HttpDate.format(DateTime.now()),
+      'content-type': 'application/json',
+      'content-length': '0',
+      'Host': host,
+    };
+    String authorization = await aliyunAuthorization('PUT', urlpath, headers, '', 'application/json');
+    headers['Authorization'] = authorization;
+    String url = 'https://$host/$prefix$newfolder';
+    if (url.substring(url.length - 1) != '/') {
+      url = '$url/';
+    }
+    return await _makeRequest(
+      url: url,
+      method: 'PUT',
+      headers: headers,
+      onSuccess: (response) => ['success'],
+      checkSuccess: (response) => response.statusCode == 200,
+      callFunction: 'createFolder',
+    );
   }
 
   //上传文件
-  static uploadFile(
+  uploadFile(
     Map element,
     String filename,
     String filepath,
@@ -795,9 +648,19 @@ class AliyunManageAPI {
       );
       if (response.statusCode == 204) {
         return ['success'];
-      } else {
-        return ['failed'];
       }
+      flogErr(
+          response,
+          {
+            'url': 'https://$host',
+            'formData': formData.fields,
+            'filename': filename,
+            'filepath': filepath,
+            'prefix': prefix,
+          },
+          "AliyunManageAPI",
+          "uploadFile");
+      return ['failed'];
     } catch (e) {
       flogErr(
           e,
@@ -814,7 +677,7 @@ class AliyunManageAPI {
   }
 
   //上传文件API入口
-  static upLoadFileEntry(List fileList, Map element, String prefix) async {
+  upLoadFileEntry(List fileList, Map element, String prefix) async {
     int successCount = 0;
     int failCount = 0;
 
@@ -841,13 +704,12 @@ class AliyunManageAPI {
       return showToast('上传失败');
     } else if (failCount == 0) {
       return showToast('上传成功');
-    } else {
-      return showToast('成功$successCount,失败$failCount');
     }
+    return showToast('成功$successCount,失败$failCount');
   }
 
   //从网络链接下载文件后上传
-  static uploadNetworkFile(String fileLink, Map element, String prefix) async {
+  uploadNetworkFile(String fileLink, Map element, String prefix) async {
     try {
       String filename = fileLink.substring(fileLink.lastIndexOf("/") + 1, fileLink.length);
       filename = filename.substring(0, !filename.contains("?") ? filename.length : filename.indexOf("?"));
@@ -866,19 +728,16 @@ class AliyunManageAPI {
         );
         if (uploadResult[0] == "success") {
           return ['success'];
-        } else {
-          return ['failed'];
         }
-      } else {
-        return ['failed'];
       }
+      return ['failed'];
     } catch (e) {
       flogErr(e, {'fileLink': fileLink, 'element': element, 'prefix': prefix}, "AliyunManageAPI", "uploadNetworkFile");
       return ['failed'];
     }
   }
 
-  static uploadNetworkFileEntry(List fileList, Map element, String prefix) async {
+  uploadNetworkFileEntry(List fileList, Map element, String prefix) async {
     int successCount = 0;
     int failCount = 0;
 
@@ -898,8 +757,7 @@ class AliyunManageAPI {
       return showToast('上传失败');
     } else if (failCount == 0) {
       return showToast('上传成功');
-    } else {
-      return showToast('成功$successCount,失败$failCount');
     }
+    return showToast('成功$successCount,失败$failCount');
   }
 }

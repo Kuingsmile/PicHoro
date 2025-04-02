@@ -155,7 +155,7 @@ Future<void> _configureGithub(Map<String, dynamic> jsonResult) async {
 
     final githubConfig = GithubConfigModel(githubusername, repo, token, storePath, branch, customDomain);
     final githubConfigJson = jsonEncode(githubConfig);
-    final githubConfigFile = await GithubManageAPI.localFile;
+    final githubConfigFile = await GithubManageAPI().localFile();
     await githubConfigFile.writeAsString(githubConfigJson);
     showToast("Github配置成功");
   } catch (e) {
@@ -209,7 +209,7 @@ Future<void> _configureImgur(Map<String, dynamic> jsonResult) async {
     }
     final imgurConfig = ImgurConfigModel(imgurclientId, imgurProxy);
     final imgurConfigJson = jsonEncode(imgurConfig);
-    final imgurConfigFile = await ImgurManageAPI.localFile;
+    final imgurConfigFile = await ImgurManageAPI().localFile();
     await imgurConfigFile.writeAsString(imgurConfigJson);
     showToast("Imgur配置成功");
   } catch (e) {
@@ -253,7 +253,7 @@ Future<void> _configureQiniu(Map<String, dynamic> jsonResult) async {
     final qiniuConfig =
         QiniuConfigModel(qiniuAccessKey, qiniuSecretKey, qiniuBucket, qiniuUrl, qiniuArea, qiniuOptions, qiniuPath);
     final qiniuConfigJson = jsonEncode(qiniuConfig);
-    final qiniuConfigFile = await QiniuManageAPI.localFile;
+    final qiniuConfigFile = await QiniuManageAPI().localFile();
     await qiniuConfigFile.writeAsString(qiniuConfigJson);
     showToast("七牛配置成功");
   } catch (e) {
@@ -301,8 +301,6 @@ Future<void> _configureTencent(Map<String, dynamic> jsonResult) async {
 
       if (tencentOptions.isEmpty) {
         tencentOptions = 'None';
-      } else if (!tencentOptions.startsWith('?')) {
-        tencentOptions = '?$tencentOptions';
       }
 
       final tencentConfig = TencentConfigModel(
@@ -316,7 +314,7 @@ Future<void> _configureTencent(Map<String, dynamic> jsonResult) async {
         tencentOptions,
       );
       final tencentConfigJson = jsonEncode(tencentConfig);
-      final tencentConfigFile = await TencentManageAPI.localFile;
+      final tencentConfigFile = await TencentManageAPI().localFile();
       await tencentConfigFile.writeAsString(tencentConfigJson);
       showToast("腾讯云配置成功");
     }
@@ -360,8 +358,6 @@ Future<void> _configureAliyun(Map<String, dynamic> jsonResult) async {
 
     if (aliyunOptions.isEmpty) {
       aliyunOptions = 'None';
-    } else if (!aliyunOptions.startsWith('?')) {
-      aliyunOptions = '?$aliyunOptions';
     }
 
     final aliyunConfig = AliyunConfigModel(
@@ -374,7 +370,7 @@ Future<void> _configureAliyun(Map<String, dynamic> jsonResult) async {
       aliyunOptions,
     );
     final aliyunConfigJson = jsonEncode(aliyunConfig);
-    final aliyunConfigFile = await AliyunManageAPI.localFile;
+    final aliyunConfigFile = await AliyunManageAPI().localFile();
     await aliyunConfigFile.writeAsString(aliyunConfigJson);
     showToast("阿里云配置成功");
   } catch (e) {

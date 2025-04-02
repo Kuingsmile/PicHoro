@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:crypto/crypto.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/global.dart';
 import 'package:path_provider/path_provider.dart';
@@ -16,8 +17,7 @@ class BaseManageApi {
   }
 
   Future<String> localPath() async {
-    String path = (await getApplicationDocumentsDirectory()).path;
-    return path;
+    return (await getApplicationDocumentsDirectory()).path;
   }
 
   Future<String> readCurrentConfig() async {
@@ -41,4 +41,14 @@ class BaseManageApi {
   bool isString(var variable) => variable is String;
 
   bool isFile(var variable) => variable is File;
+
+  Future<String> getContentMd5(var variable) async {
+    if (isString(variable)) {
+      return base64.encode(md5.convert(utf8.encode(variable)).bytes);
+    } else if (isFile(variable)) {
+      List<int> bytes = await variable.readAsBytes();
+      return base64.encode(md5.convert(bytes).bytes);
+    }
+    return "";
+  }
 }

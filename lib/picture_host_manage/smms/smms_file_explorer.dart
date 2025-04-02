@@ -30,6 +30,7 @@ class SmmsFileExplorer extends BaseFileExplorer {
 
 class SmmsFileExplorerState extends BaseFileExplorerState<SmmsFileExplorer> {
   SmmsManageAPI get manageAPI => SmmsManageAPI();
+
   @override
   Future<void> initializeData() async {
     await _getFileList();
@@ -84,7 +85,7 @@ class SmmsFileExplorerState extends BaseFileExplorerState<SmmsFileExplorer> {
   }
 
   @override
-  String getShareUrl(int index) => allInfoList[index]['url'];
+  Future<String> getShareUrl(int index) async => allInfoList[index]['url'];
 
   @override
   String getFileName(int index) => allInfoList[index]['filename'];

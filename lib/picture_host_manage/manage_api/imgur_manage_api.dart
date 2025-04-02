@@ -2,43 +2,30 @@ import 'dart:io';
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import 'package:horopic/picture_host_manage/common/base_manage_api.dart';
 import 'package:path_provider/path_provider.dart';
 
-import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/dio_proxy_adapter.dart';
 
-class ImgurManageAPI {
-  static Future<File> get localFile async {
-    final path = await _localPath;
-    String defaultUser = Global.getUser();
-    return ensureFileExists(File('$path/${defaultUser}_imgur_config.txt'));
+class ImgurManageAPI extends BaseManageApi {
+  static final ImgurManageAPI _instance = ImgurManageAPI._internal();
+  factory ImgurManageAPI() {
+    return _instance;
   }
+  ImgurManageAPI._internal();
 
-  static Future<String> get _localPath async {
-    final directory = await getApplicationDocumentsDirectory();
-    return directory.path;
-  }
+  @override
+  String configFileName() => 'imgur_config.txt';
 
-  static Future<String> readImgurConfig() async {
-    try {
-      final file = await localFile;
-      String contents = await file.readAsString();
-      return contents;
-    } catch (e) {
-      flogErr(e, {}, 'ImgurManageAPI', 'readImgurConfig');
-      return "Error";
-    }
-  }
-
-  static Future<File> get _manageLocalFile async {
-    final path = await _localPath;
+  Future<File> manageLocalFile() async {
+    final path = await localPath();
     return File('$path/imgur_manage.txt');
   }
 
-  static Future<String> readImgurManageConfig() async {
+  Future<String> readImgurManageConfig() async {
     try {
-      final file = await _manageLocalFile;
+      final file = await manageLocalFile();
       String contents = await file.readAsString();
       return contents;
     } catch (e) {
@@ -47,10 +34,9 @@ class ImgurManageAPI {
     }
   }
 
-  static Future<bool> saveImgurManageConfig(
-      String imgurUsername, String clientid, String accesstoken, String proxy) async {
+  Future<bool> saveImgurManageConfig(String imgurUsername, String clientid, String accesstoken, String proxy) async {
     try {
-      final file = await _manageLocalFile;
+      final file = await manageLocalFile();
       await file.writeAsString(
           jsonEncode({'imguruser': imgurUsername, 'clientid': clientid, 'accesstoken': accesstoken, 'proxy': proxy}));
       return true;
@@ -61,68 +47,77 @@ class ImgurManageAPI {
     }
   }
 
-  static Future<Map> getConfigMap() async {
-    String configStr = await readImgurConfig();
-    if (configStr == '') {
-      return {};
-    }
-    Map configMap = json.decode(configStr);
-    return configMap;
-  }
-
-  static isString(var variable) {
-    return variable is String;
-  }
-
-  static isFile(var variable) {
-    return variable is File;
-  }
-
-  static checkToken(String username, String accesstoken, String proxy) async {
-    BaseOptions options = setBaseOptions();
-    options.headers = {
-      "Authorization": "Bearer $accesstoken",
-    };
-    Dio dio = Dio(options);
-    String proxyClean = '';
-    //判断是否有代理
-    if (proxy != 'None') {
-      if (proxy.startsWith('http://') || proxy.startsWith('https://')) {
-        proxyClean = proxy.split('://')[1];
-      } else {
-        proxyClean = proxy;
-      }
-      dio.httpClientAdapter = useProxy(proxyClean);
-    }
-    String accountUrl = "https://api.imgur.com/3/account/me/settings";
+  _makeRequest(String endpoint, String proxy,
+      {dynamic data,
+      Map<String, dynamic>? queryParameters,
+      Map<String, dynamic>? headers,
+      required Function onSuccess,
+      String method = 'POST',
+      String callFunction = '_makeRequest',
+      required Function checkSuccess}) async {
     try {
-      var response = await dio.get(
-        accountUrl,
-      );
-      if (response.statusCode == 200 && response.data!['success'] == true) {
-        return ["success"];
-      } else {
-        return ["failed"];
+      BaseOptions baseoptions = setBaseOptions();
+      baseoptions.headers = {
+        ...?headers,
+      };
+      Dio dio = Dio(baseoptions);
+      //判断是否有代理
+      if (proxy != 'None') {
+        String proxyClean = proxy.startsWith('http://') || proxy.startsWith('https://') ? proxy.split('://')[1] : proxy;
+        dio.httpClientAdapter = useProxy(proxyClean);
       }
-    } catch (e) {
+      Response response;
+      if (method == 'GET') {
+        response = await dio.get(endpoint, queryParameters: queryParameters);
+      } else if (method == 'POST') {
+        response = await dio.post(endpoint, data: data, queryParameters: queryParameters);
+      } else if (method == 'DELETE') {
+        response = await dio.delete(endpoint, data: data, queryParameters: queryParameters);
+      } else if (method == 'PUT') {
+        response = await dio.put(endpoint, data: data, queryParameters: queryParameters);
+      } else {
+        throw Exception('Unsupported HTTP method: $method');
+      }
+
+      if (checkSuccess(response)) {
+        return onSuccess(response);
+      }
       flogErr(
-        e,
+        response,
         {
-          'username': username,
-          'accesstoken': accesstoken,
+          'endpoint': endpoint,
           'proxy': proxy,
+          'data': data,
+          'queryParameters': queryParameters,
+          'headers': headers,
         },
-        'ImgurManageAPI',
-        'checkToken',
+        "ImgurManageAPI",
+        callFunction,
       );
+      return ['failed'];
+    } catch (e) {
+      flogErr(e, {}, "ImgurManageAPI", callFunction);
       return [e.toString()];
     }
   }
 
-  //get album list
-  static getAlbumList(String username, String accesstoken, String proxy) async {
-    BaseOptions options = setBaseOptions();
+  checkToken(String username, String accesstoken, String proxy) async {
+    return await _makeRequest(
+      "https://api.imgur.com/3/account/me/settings",
+      proxy,
+      headers: {
+        "Authorization": "Bearer $accesstoken",
+      },
+      onSuccess: (Response response) => ["success"],
+      method: 'GET',
+      callFunction: 'checkToken',
+      checkSuccess: (Response response) => response.statusCode == 200 && response.data?['success'] == true,
+    );
+  }
 
+  //get album list
+  getAlbumList(String username, String accesstoken, String proxy) async {
+    BaseOptions options = setBaseOptions();
     options.headers = {
       "Authorization": "Bearer $accesstoken",
     };
@@ -142,14 +137,14 @@ class ImgurManageAPI {
     String accountUrl = "https://api.imgur.com/3/account/$username/albums/ids/$page";
     while (true) {
       try {
-        var response = await dio.get(
+        Response response = await dio.get(
           accountUrl,
         );
-        if (response.statusCode == 200 && response.data!['success'] == true) {
-          if (response.data!['data'].length == 0) {
+        if (response.statusCode == 200 && response.data?['success'] == true) {
+          if (response.data?['data'].length == 0) {
             break;
           } else {
-            albumList.addAll(response.data!['data']);
+            albumList.addAll(response.data?['data']);
             page++;
             accountUrl = "https://api.imgur.com/3/account/$username/albums/ids/$page";
           }
@@ -174,49 +169,22 @@ class ImgurManageAPI {
   }
 
   //get album info
-  static getAlbumInfo(String clienID, String albumhash, String proxy) async {
-    BaseOptions options = setBaseOptions();
-    options.headers = {
-      "Authorization": "Client-ID $clienID",
-    };
-    Dio dio = Dio(options);
-    String proxyClean = '';
-    //判断是否有代理
-    if (proxy != 'None') {
-      if (proxy.startsWith('http://') || proxy.startsWith('https://')) {
-        proxyClean = proxy.split('://')[1];
-      } else {
-        proxyClean = proxy;
-      }
-      dio.httpClientAdapter = useProxy(proxyClean);
-    }
-    String accountUrl = "https://api.imgur.com/3/album/$albumhash";
-    try {
-      var response = await dio.get(
-        accountUrl,
-      );
-      if (response.statusCode == 200 && response.data!['success'] == true) {
-        return ["success", response.data!['data']];
-      } else {
-        return ["failed"];
-      }
-    } catch (e) {
-      flogErr(
-        e,
-        {
-          'clienID': clienID,
-          'albumhash': albumhash,
-          'proxy': proxy,
-        },
-        'ImgurManageAPI',
-        'getAlbumInfo',
-      );
-      return [e.toString()];
-    }
+  getAlbumInfo(String clienID, String albumhash, String proxy) async {
+    return await _makeRequest(
+      "https://api.imgur.com/3/album/$albumhash",
+      proxy,
+      headers: {
+        "Authorization": "Client-ID $clienID",
+      },
+      onSuccess: (response) => ["success", response.data?['data']],
+      method: 'GET',
+      callFunction: 'getAlbumInfo',
+      checkSuccess: (response) => response.statusCode == 200 && response.data?['success'] == true,
+    );
   }
 
   //get all images
-  static getImagesList(String username, String accesstoken, String proxy) async {
+  getImagesList(String username, String accesstoken, String proxy) async {
     BaseOptions options = setBaseOptions();
     options.headers = {
       "Authorization": "Bearer $accesstoken",
@@ -269,7 +237,7 @@ class ImgurManageAPI {
   }
 
   //is no image
-  static isEmptyAccount(String username, String accesstoken, String proxy) async {
+  isEmptyAccount(String username, String accesstoken, String proxy) async {
     var queryResult = await getImagesList(username, accesstoken, proxy);
     if (queryResult[0] != 'success') {
       return ['error'];
@@ -281,293 +249,135 @@ class ImgurManageAPI {
   }
 
   //get images of album
-  static getAlbumImages(String clientID, String albumHash, String proxy) async {
-    BaseOptions options = setBaseOptions();
-    options.headers = {
-      "Authorization": "Client-ID $clientID",
-    };
-    Dio dio = Dio(options);
-    String proxyClean = '';
-    //判断是否有代理
-    if (proxy != 'None') {
-      if (proxy.startsWith('http://') || proxy.startsWith('https://')) {
-        proxyClean = proxy.split('://')[1];
-      } else {
-        proxyClean = proxy;
-      }
-      dio.httpClientAdapter = useProxy(proxyClean);
-    }
-    String accountUrl = "https://api.imgur.com/3/album/$albumHash/images";
-    try {
-      var response = await dio.get(
-        accountUrl,
-      );
-      if (response.statusCode == 200 && response.data!['success'] == true) {
-        return ["success", response.data['data']];
-      } else {
-        return ["failed"];
-      }
-    } catch (e) {
-      flogErr(
-        e,
-        {
-          'clientID': clientID,
-          'albumHash': albumHash,
-          'proxy': proxy,
-        },
-        'ImgurManageAPI',
-        'getAlbumImages',
-      );
-      return [e.toString()];
-    }
+  getAlbumImages(String clientID, String albumHash, String proxy) async {
+    return await _makeRequest(
+      "https://api.imgur.com/3/album/$albumHash/images",
+      proxy,
+      headers: {
+        "Authorization": "Client-ID $clientID",
+      },
+      onSuccess: (response) => ["success", response.data?['data']],
+      method: 'GET',
+      callFunction: 'getAlbumImages',
+      checkSuccess: (response) => response.statusCode == 200 && response.data?['success'] == true,
+    );
   }
 
   //get not in album images
-  static getNotInAlbumImages(String username, String accesstoken, String clientID, String proxy) async {
+  getNotInAlbumImages(String username, String accesstoken, String clientID, String proxy) async {
     var getImagesListResult = await getImagesList(username, accesstoken, proxy);
-    if (getImagesListResult[0] == 'success') {
-      List allImages = getImagesListResult[1];
-      if (allImages.isEmpty) {
-        return ['success', [], []];
-      } else {
-        var getAlbumListResult = await getAlbumList(username, accesstoken, proxy);
-        if (getAlbumListResult[0] == 'success') {
-          List allAlbums = getAlbumListResult[1];
-          if (allAlbums.isEmpty) {
-            return ['success', allImages, allImages];
-          } else {
-            List imagesInAlbum = [];
-            for (var album in allAlbums) {
-              var getAlbumImagesResult = await getAlbumImages(clientID, album, proxy);
-              if (getAlbumImagesResult[0] == 'success') {
-                imagesInAlbum.addAll(getAlbumImagesResult[1]);
-              } else {
-                return ['failed'];
-              }
-            }
-            List notInAlbumImages = [];
-            List allImagesInAlbumID = [];
-            for (var image in imagesInAlbum) {
-              allImagesInAlbumID.add(image['id']);
-            }
-            for (int i = 0; i < allImages.length; i++) {
-              if (!allImagesInAlbumID.contains(allImages[i]['id'])) {
-                notInAlbumImages.add(allImages[i]);
-              }
-            }
-            return ['success', notInAlbumImages, allImages];
-          }
-        } else {
-          return ['failed'];
-        }
-      }
-    } else {
+    if (getImagesListResult[0] != 'success') {
       return ['failed'];
     }
+
+    List allImages = getImagesListResult[1];
+    if (allImages.isEmpty) {
+      return ['success', [], []];
+    }
+    var getAlbumListResult = await getAlbumList(username, accesstoken, proxy);
+    if (getAlbumListResult[0] != 'success') {
+      return ['failed'];
+    }
+
+    List allAlbums = getAlbumListResult[1];
+    if (allAlbums.isEmpty) {
+      return ['success', allImages, allImages];
+    }
+    List imagesInAlbum = [];
+    for (var album in allAlbums) {
+      var getAlbumImagesResult = await getAlbumImages(clientID, album, proxy);
+      if (getAlbumImagesResult[0] != 'success') {
+        return ['failed'];
+      }
+      imagesInAlbum.addAll(getAlbumImagesResult[1]);
+    }
+    List notInAlbumImages = [];
+    List allImagesInAlbumID = [];
+    for (var image in imagesInAlbum) {
+      allImagesInAlbumID.add(image['id']);
+    }
+    for (int i = 0; i < allImages.length; i++) {
+      if (!allImagesInAlbumID.contains(allImages[i]['id'])) {
+        notInAlbumImages.add(allImages[i]);
+      }
+    }
+    return ['success', notInAlbumImages, allImages];
   }
 
   //create album
-  static createAlbum(String accesstoken, String title, String proxy) async {
-    BaseOptions options = setBaseOptions();
-    options.headers = {
-      "Authorization": "Bearer $accesstoken",
-      "Content-Type": "application/json",
-    };
-    Map data = {
-      "title": title,
-      "description": "Created by PicHoro",
-    };
-    Dio dio = Dio(options);
-    String proxyClean = '';
-    //判断是否有代理
-    if (proxy != 'None') {
-      if (proxy.startsWith('http://') || proxy.startsWith('https://')) {
-        proxyClean = proxy.split('://')[1];
-      } else {
-        proxyClean = proxy;
-      }
-      dio.httpClientAdapter = useProxy(proxyClean);
-    }
-    String accountUrl = "https://api.imgur.com/3/album";
-    try {
-      var response = await dio.post(
-        accountUrl,
-        data: jsonEncode(data),
-      );
-      if (response.statusCode == 200 && response.data!['success'] == true) {
-        return ["success", response.data['data']];
-      } else {
-        return ["failed"];
-      }
-    } catch (e) {
-      flogErr(
-        e,
-        {
-          'accesstoken': accesstoken,
-          'title': title,
-          'proxy': proxy,
-        },
-        'ImgurManageAPI',
-        'createAlbum',
-      );
-      return [e.toString()];
-    }
+  createAlbum(String accesstoken, String title, String proxy) async {
+    return await _makeRequest(
+      "https://api.imgur.com/3/album",
+      proxy,
+      data: jsonEncode({
+        "title": title,
+        "description": "Created by PicHoro",
+      }),
+      headers: {
+        "Authorization": "Bearer $accesstoken",
+        "Content-Type": "application/json",
+      },
+      onSuccess: (response) => ["success", response.data?['data']],
+      method: 'POST',
+      callFunction: 'createAlbum',
+      checkSuccess: (response) => response.statusCode == 200 && response.data?['success'] == true,
+    );
   }
 
   //delete album
-  static deleteAlbum(String accesstoken, String albumHash, String proxy) async {
-    BaseOptions options = setBaseOptions();
-    options.headers = {
-      "Authorization": "Bearer $accesstoken",
-    };
-    Dio dio = Dio(options);
-    String proxyClean = '';
-    //判断是否有代理
-    if (proxy != 'None') {
-      if (proxy.startsWith('http://') || proxy.startsWith('https://')) {
-        proxyClean = proxy.split('://')[1];
-      } else {
-        proxyClean = proxy;
-      }
-      dio.httpClientAdapter = useProxy(proxyClean);
-    }
-    String accountUrl = "https://api.imgur.com/3/album/$albumHash";
-    try {
-      var response = await dio.delete(
-        accountUrl,
-      );
-      if (response.statusCode == 200 && response.data!['success'] == true) {
-        return [
-          "success",
-        ];
-      } else {
-        return ["failed"];
-      }
-    } catch (e) {
-      flogErr(
-        e,
-        {
-          'accesstoken': accesstoken,
-          'albumHash': albumHash,
-          'proxy': proxy,
-        },
-        'ImgurManageAPI',
-        'deleteAlbum',
-      );
-      return [e.toString()];
-    }
+  deleteAlbum(String accesstoken, String albumHash, String proxy) async {
+    return await _makeRequest(
+      "https://api.imgur.com/3/album/$albumHash",
+      proxy,
+      headers: {
+        "Authorization": "Bearer $accesstoken",
+      },
+      onSuccess: (response) => ["success"],
+      method: 'DELETE',
+      callFunction: 'deleteAlbum',
+      checkSuccess: (response) => response.statusCode == 200 && response.data?['success'] == true,
+    );
   }
 
   //delete image
-  static deleteImage(String accesstoken, String imageHash, String proxy) async {
-    BaseOptions options = setBaseOptions();
-    options.headers = {
-      "Authorization": "Bearer $accesstoken",
-    };
-    Dio dio = Dio(options);
-    String proxyClean = '';
-    //判断是否有代理
-    if (proxy != 'None') {
-      if (proxy.startsWith('http://') || proxy.startsWith('https://')) {
-        proxyClean = proxy.split('://')[1];
-      } else {
-        proxyClean = proxy;
-      }
-      dio.httpClientAdapter = useProxy(proxyClean);
-    }
-    String accountUrl = "https://api.imgur.com/3/image/$imageHash";
-    try {
-      var response = await dio.delete(
-        accountUrl,
-      );
-      if (response.statusCode == 200 && response.data!['success'] == true) {
-        return [
-          "success",
-        ];
-      } else {
-        return ["failed"];
-      }
-    } catch (e) {
-      flogErr(
-        e,
-        {
-          'accesstoken': accesstoken,
-          'imageHash': imageHash,
-          'proxy': proxy,
-        },
-        'ImgurManageAPI',
-        'deleteImage',
-      );
-      return [e.toString()];
-    }
+  deleteImage(String accesstoken, String imageHash, String proxy) async {
+    return await _makeRequest(
+      "https://api.imgur.com/3/image/$imageHash",
+      proxy,
+      headers: {
+        "Authorization": "Bearer $accesstoken",
+      },
+      onSuccess: (response) => ["success"],
+      method: 'DELETE',
+      callFunction: 'deleteImage',
+      checkSuccess: (response) => response.statusCode == 200 && response.data?['success'] == true,
+    );
   }
 
   //add image to album
-  static uploadFile(String accesstoken, String albumHash, String filename, String filepath, String proxy) async {
-    FormData formdata;
-    if (albumHash == 'None') {
-      formdata = FormData.fromMap({
-        "image": await MultipartFile.fromFile(filepath, filename: filename),
-        "type": "file",
-        "name": filename,
-        "description": "Uploaded by PicHoro",
-      });
-    } else {
-      formdata = FormData.fromMap({
-        "image": await MultipartFile.fromFile(filepath, filename: filename),
-        "type": "file",
-        "album": albumHash,
-        "name": filename,
-        "description": "Uploaded by PicHoro",
-      });
-    }
-
-    BaseOptions options = setBaseOptions();
-    options.headers = {
-      "Authorization": "Bearer $accesstoken",
-    };
-    Dio dio = Dio(options);
-    String proxyClean = '';
-    //判断是否有代理
-    if (proxy != 'None') {
-      if (proxy.startsWith('http://') || proxy.startsWith('https://')) {
-        proxyClean = proxy.split('://')[1];
-      } else {
-        proxyClean = proxy;
-      }
-      dio.httpClientAdapter = useProxy(proxyClean);
-    }
-    String accountUrl = "https://api.imgur.com/3/image";
-    try {
-      var response = await dio.post(
-        accountUrl,
-        data: formdata,
-      );
-      if (response.statusCode == 200 && response.data!['success'] == true) {
-        return [
-          "success",
-        ];
-      } else {
-        return ["failed"];
-      }
-    } catch (e) {
-      flogErr(
-        e,
-        {
-          'accesstoken': accesstoken,
-          'albumHash': albumHash,
-          'filename': filename,
-          'filepath': filepath,
-          'proxy': proxy,
-        },
-        'ImgurManageAPI',
-        'uploadFile',
-      );
-      return [e.toString()];
-    }
+  uploadFile(String accesstoken, String albumHash, String filename, String filepath, String proxy) async {
+    FormData formdata = FormData.fromMap({
+      "image": await MultipartFile.fromFile(filepath, filename: filename),
+      "type": "file",
+      "name": filename,
+      if (albumHash != 'None') "album": albumHash,
+      "description": "Uploaded by PicHoro",
+    });
+    return await _makeRequest(
+      "https://api.imgur.com/3/image",
+      proxy,
+      data: formdata,
+      headers: {
+        "Authorization": "Bearer $accesstoken",
+      },
+      onSuccess: (response) => ["success"],
+      method: 'POST',
+      callFunction: 'uploadFile',
+      checkSuccess: (response) => response.statusCode == 200 && response.data?['success'] == true,
+    );
   }
 
-  static uploadNetworkFile(String fileLink, String accesstoken, String albumHash, String proxy) async {
+  uploadNetworkFile(String fileLink, String accesstoken, String albumHash, String proxy) async {
     try {
       String filename = fileLink.substring(fileLink.lastIndexOf("/") + 1, fileLink.length);
       filename = filename.substring(0, !filename.contains("?") ? filename.length : filename.indexOf("?"));
@@ -601,7 +411,7 @@ class ImgurManageAPI {
     }
   }
 
-  static uploadNetworkFileEntry(List fileList, String accesstoken, String albumHash, String proxy) async {
+  uploadNetworkFileEntry(List fileList, String accesstoken, String albumHash, String proxy) async {
     int successCount = 0;
     int failCount = 0;
     for (String fileLink in fileList) {

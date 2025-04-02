@@ -198,6 +198,7 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
       appBar: AppBar(
         centerTitle: true,
         elevation: 0,
+        leading: getLeadingIcon(context),
         title: titleText(psNameTranslate[widget.psHost]!),
         flexibleSpace: getFlexibleSpace(context),
         actions: [
@@ -352,7 +353,7 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
     String options = checkPlaceholder(psInfo['options']);
 
     final config = AliyunConfigModel(keyId, keySecret, bucket, area, path, customUrl, options);
-    final configFile = await AliyunManageAPI.localFile;
+    final configFile = await AliyunManageAPI().localFile();
     await configFile.writeAsString(jsonEncode(config));
     showToast('设置成功');
     return true;
@@ -426,7 +427,7 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
     customDomain = checkPlaceholder(customDomain);
 
     final config = GithubConfigModel(githubusername, repo, token, storePath, branch, customDomain);
-    final configFile = await GithubManageAPI.localFile;
+    final configFile = await GithubManageAPI().localFile();
     await configFile.writeAsString(jsonEncode(config));
     showToast('设置成功');
     return true;
@@ -444,7 +445,7 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
     proxy = checkPlaceholder(proxy);
 
     final config = ImgurConfigModel(clientId, proxy);
-    final configFile = await ImgurManageAPI.localFile;
+    final configFile = await ImgurManageAPI().localFile();
     await configFile.writeAsString(jsonEncode(config));
     showToast('设置成功');
     return true;
@@ -486,7 +487,7 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
     String path = checkPlaceholder(psInfo['path']);
 
     final config = QiniuConfigModel(accessKey, secretKey, bucket, url, area, options, path);
-    final configFile = await QiniuManageAPI.localFile;
+    final configFile = await QiniuManageAPI().localFile();
     await configFile.writeAsString(jsonEncode(config));
     showToast('设置成功');
     return true;
@@ -524,7 +525,7 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
     String options = checkPlaceholder(psInfo['options']);
 
     final config = TencentConfigModel(secretId, secretKey, bucket, appId, area, path, customUrl, options);
-    final configFile = await TencentManageAPI.localFile;
+    final configFile = await TencentManageAPI().localFile();
     await configFile.writeAsString(jsonEncode(config));
     showToast('设置成功');
     return true;
@@ -591,7 +592,7 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
     String webPath = checkPlaceholder(psInfo['webPath']);
 
     final config = WebdavConfigModel(host, webdavusername, password, uploadPath, customUrl, webPath);
-    final configFile = await WebdavManageAPI.localFile;
+    final configFile = await WebdavManageAPI().localFile();
     await configFile.writeAsString(jsonEncode(config));
     showToast('设置成功');
     return true;

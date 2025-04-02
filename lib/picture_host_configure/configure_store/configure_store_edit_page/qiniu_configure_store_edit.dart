@@ -226,7 +226,7 @@ class QiniuConfigureStoreEditState extends State<QiniuConfigureStoreEdit> {
 
   _importConfig() async {
     try {
-      Map configMap = await QiniuManageAPI.getConfigMap();
+      Map configMap = await QiniuManageAPI().getConfigMap();
       _accessKeyController.text = configMap['accessKey'];
       _secretKeyController.text = configMap['secretKey'];
       _bucketController.text = configMap['bucket'];

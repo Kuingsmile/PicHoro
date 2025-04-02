@@ -199,7 +199,7 @@ class GithubConfigureStoreEditState extends State<GithubConfigureStoreEdit> {
 
   _importConfig() async {
     try {
-      Map configMap = await GithubManageAPI.getConfigMap();
+      Map configMap = await GithubManageAPI().getConfigMap();
       _githubusernameController.text = configMap['githubusername'];
       _repoController.text = configMap['repo'];
       _tokenController.text = configMap['token'];

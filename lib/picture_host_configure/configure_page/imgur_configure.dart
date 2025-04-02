@@ -33,7 +33,7 @@ class ImgurConfigState extends State<ImgurConfig> {
 
   _initConfig() async {
     try {
-      Map configMap = await ImgurManageAPI.getConfigMap();
+      Map configMap = await ImgurManageAPI().getConfigMap();
       _clientIdController.text = configMap['clientId'] ?? '';
       setControllerText(_proxyController, configMap['proxy']);
       setState(() {});
@@ -166,7 +166,7 @@ class ImgurConfigState extends State<ImgurConfig> {
 
       final imgurConfig = ImgurConfigModel(clientId, proxy);
       final imgurConfigJson = jsonEncode(imgurConfig);
-      final imgurConfigFile = await ImgurManageAPI.localFile;
+      final imgurConfigFile = await ImgurManageAPI().localFile();
       await imgurConfigFile.writeAsString(imgurConfigJson);
       showToast('保存成功');
       return;
@@ -180,7 +180,7 @@ class ImgurConfigState extends State<ImgurConfig> {
 
   checkImgurConfig() async {
     try {
-      Map configMap = await ImgurManageAPI.getConfigMap();
+      Map configMap = await ImgurManageAPI().getConfigMap();
       if (configMap.isEmpty) {
         if (context.mounted) {
           return showCupertinoAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");

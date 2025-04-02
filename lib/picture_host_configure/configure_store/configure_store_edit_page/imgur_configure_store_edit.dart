@@ -142,7 +142,7 @@ class ImgurConfigureStoreEditState extends State<ImgurConfigureStoreEdit> {
 
   _importConfig() async {
     try {
-      Map configMap = await ImgurManageAPI.getConfigMap();
+      Map configMap = await ImgurManageAPI().getConfigMap();
       _clientIdController.text = configMap['clientId'];
       if (configMap['proxy'] != 'None') {
         _proxyController.text = configMap['proxy'];

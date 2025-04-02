@@ -229,177 +229,269 @@ class GithubNewRepoConfigState extends State<GithubNewRepoConfig> {
 
   @override
   Widget build(BuildContext context) {
+    final formKey = GlobalKey<FormState>();
+
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
+        leading: getLeadingIcon(context),
         title: titleText('新建仓库'),
         flexibleSpace: getFlexibleSpace(context),
-      ),
-      body: ListView(
-        children: [
-          TextFormField(
-            decoration: const InputDecoration(
-              label: Center(child: Text('仓库名称')),
-              hintText: '设定仓库名称',
-            ),
-            controller: repoNameController,
-            textAlign: TextAlign.center,
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return '请输入仓库名称';
-              }
-              return null;
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh, color: Colors.white),
+            tooltip: '重置设置',
+            onPressed: () {
+              setState(() {
+                resetgithubManageConfigMap();
+                repoNameController.clear();
+                descriptionController.clear();
+                homepageController.clear();
+              });
+              showToast('设置已重置');
             },
           ),
-          TextFormField(
-            decoration: const InputDecoration(
-              label: Center(child: Text('可选：仓库描述')),
-              hintText: '设定仓库描述',
-            ),
-            controller: descriptionController,
-            textAlign: TextAlign.center,
-          ),
-          TextFormField(
-            decoration: const InputDecoration(
-              label: Center(child: Text('可选：仓库主页')),
-              hintText: '主页网址',
-            ),
-            controller: homepageController,
-            textAlign: TextAlign.center,
-          ),
-          ListTile(
-            title: const Text('gitignore模板'),
-            trailing: DropdownButton(
-              alignment: Alignment.centerRight,
-              underline: Container(),
-              icon: const Icon(Icons.arrow_drop_down, size: 30),
-              autofocus: true,
-              value: githubManageConfigMap['gitignore_template'],
-              items: createFromList(gitignoreTemplates, 15),
-              onChanged: (value) {
-                githubManageConfigMap['gitignore_template'] = value;
-                setState(() {});
-              },
-            ),
-          ),
-          ListTile(
-            title: const Text('许可证'),
-            trailing: DropdownButton(
-              alignment: Alignment.centerRight,
-              underline: Container(),
-              icon: const Icon(Icons.arrow_drop_down, size: 30),
-              autofocus: true,
-              value: githubManageConfigMap['license_template'],
-              items: createFromMap(licenseTemplate, 14),
-              onChanged: (value) {
-                githubManageConfigMap['license_template'] = value;
-                setState(() {});
-              },
-            ),
-          ),
-          ListTile(
-            title: const Text('是否私有'),
-            trailing: Switch(
-              value: githubManageConfigMap['private'],
-              onChanged: (value) {
-                githubManageConfigMap['private'] = value;
-                setState(() {});
-              },
-            ),
-          ),
-          ListTile(
-            title: const Text('是否初始化README'),
-            trailing: Switch(
-              value: githubManageConfigMap['auto_init'],
-              onChanged: (value) {
-                githubManageConfigMap['auto_init'] = value;
-                setState(() {});
-              },
-            ),
-          ),
-          ListTile(
-            title: const Text('是否启用issues'),
-            trailing: Switch(
-              value: githubManageConfigMap['has_issues'],
-              onChanged: (value) {
-                githubManageConfigMap['has_issues'] = value;
-                setState(() {});
-              },
-            ),
-          ),
-          ListTile(
-            title: const Text('是否启用wiki'),
-            trailing: Switch(
-              value: githubManageConfigMap['has_wiki'],
-              onChanged: (value) {
-                githubManageConfigMap['has_wiki'] = value;
-                setState(() {});
-              },
-            ),
-          ),
-          ListTile(
-            title: const Text('是否启用projects'),
-            trailing: Switch(
-              value: githubManageConfigMap['has_projects'],
-              onChanged: (value) {
-                githubManageConfigMap['has_projects'] = value;
-                setState(() {});
-              },
-            ),
-          ),
-          ListTile(
-            title: const Text('是否作为模板'),
-            trailing: Switch(
-              value: githubManageConfigMap['is_template'],
-              onChanged: (value) {
-                githubManageConfigMap['is_template'] = value;
-                setState(() {});
-              },
-            ),
-          ),
-          ListTile(
-            subtitle: ElevatedButton(
-              onPressed: () async {
-                if (descriptionController.text.isNotEmpty) {
-                  githubManageConfigMap['description'] = descriptionController.text;
-                }
-                if (homepageController.text.isNotEmpty) {
-                  githubManageConfigMap['homepage'] = homepageController.text;
-                }
-                if (repoNameController.text.isEmpty) {
-                  showToast('请输入仓库名称');
-                  return;
-                } else {
-                  githubManageConfigMap['name'] = repoNameController.text;
-                }
-                if (githubManageConfigMap['gitignore_template'] == 'None') {
-                  githubManageConfigMap.remove('gitignore_template');
-                }
-                if (githubManageConfigMap['license_template'] == 'None') {
-                  githubManageConfigMap.remove('license_template');
-                }
-                await showDialog(
-                    context: context,
-                    barrierDismissible: false,
-                    builder: (context) {
-                      return NetLoadingDialog(
-                        outsideDismiss: false,
-                        loading: true,
-                        loadingText: "创建中...",
-                        requestCallBack: GithubManageAPI.createRepo(
-                          githubManageConfigMap,
-                        ),
-                      );
-                    });
-                if (mounted) {
-                  Navigator.pop(context);
-                }
-              },
-              child: const Text('创建'),
-            ),
-          ),
         ],
+      ),
+      body: Form(
+        key: formKey,
+        child: ListView(
+          padding: const EdgeInsets.all(16.0),
+          children: [
+            // Basic Info Card
+            Card(
+              elevation: 2,
+              margin: const EdgeInsets.only(bottom: 16),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      '基本信息',
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      decoration: const InputDecoration(
+                        labelText: '仓库名称',
+                        hintText: '设定仓库名称',
+                        border: OutlineInputBorder(),
+                        prefixIcon: Icon(Icons.folder),
+                      ),
+                      controller: repoNameController,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return '请输入仓库名称';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      decoration: const InputDecoration(
+                        labelText: '仓库描述 (可选)',
+                        hintText: '设定仓库描述',
+                        border: OutlineInputBorder(),
+                        prefixIcon: Icon(Icons.description),
+                      ),
+                      controller: descriptionController,
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      decoration: const InputDecoration(
+                        labelText: '仓库主页 (可选)',
+                        hintText: '主页网址',
+                        border: OutlineInputBorder(),
+                        prefixIcon: Icon(Icons.language),
+                      ),
+                      controller: homepageController,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            // Templates Card
+            Card(
+              elevation: 2,
+              margin: const EdgeInsets.only(bottom: 16),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      '模板选择',
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 16),
+                    DropdownButtonFormField(
+                      decoration: const InputDecoration(
+                        labelText: 'gitignore模板',
+                        border: OutlineInputBorder(),
+                        prefixIcon: Icon(Icons.code),
+                      ),
+                      isExpanded: true,
+                      value: githubManageConfigMap['gitignore_template'],
+                      items: createFromList(gitignoreTemplates, 15),
+                      onChanged: (value) {
+                        githubManageConfigMap['gitignore_template'] = value;
+                        setState(() {});
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    DropdownButtonFormField(
+                      decoration: const InputDecoration(
+                        labelText: '许可证',
+                        border: OutlineInputBorder(),
+                        prefixIcon: Icon(Icons.gavel),
+                      ),
+                      isExpanded: true,
+                      value: githubManageConfigMap['license_template'],
+                      items: createFromMap(licenseTemplate, 14),
+                      onChanged: (value) {
+                        githubManageConfigMap['license_template'] = value;
+                        setState(() {});
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            // Settings Card
+            Card(
+              elevation: 2,
+              margin: const EdgeInsets.only(bottom: 16),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      '仓库设置',
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    SwitchListTile(
+                      title: const Text('私有仓库'),
+                      subtitle: const Text('仅对您和您选择的协作者可见'),
+                      value: githubManageConfigMap['private'],
+                      onChanged: (value) {
+                        githubManageConfigMap['private'] = value;
+                        setState(() {});
+                      },
+                    ),
+                    const Divider(),
+                    SwitchListTile(
+                      title: const Text('初始化README'),
+                      subtitle: const Text('创建包含仓库名的README文件'),
+                      value: githubManageConfigMap['auto_init'],
+                      onChanged: (value) {
+                        githubManageConfigMap['auto_init'] = value;
+                        setState(() {});
+                      },
+                    ),
+                    const Divider(),
+                    SwitchListTile(
+                      title: const Text('启用Issues'),
+                      subtitle: const Text('问题追踪和反馈功能'),
+                      value: githubManageConfigMap['has_issues'],
+                      onChanged: (value) {
+                        githubManageConfigMap['has_issues'] = value;
+                        setState(() {});
+                      },
+                    ),
+                    const Divider(),
+                    SwitchListTile(
+                      title: const Text('启用Wiki'),
+                      subtitle: const Text('项目文档和知识库'),
+                      value: githubManageConfigMap['has_wiki'],
+                      onChanged: (value) {
+                        githubManageConfigMap['has_wiki'] = value;
+                        setState(() {});
+                      },
+                    ),
+                    const Divider(),
+                    SwitchListTile(
+                      title: const Text('启用Projects'),
+                      subtitle: const Text('项目管理工具'),
+                      value: githubManageConfigMap['has_projects'],
+                      onChanged: (value) {
+                        githubManageConfigMap['has_projects'] = value;
+                        setState(() {});
+                      },
+                    ),
+                    const Divider(),
+                    SwitchListTile(
+                      title: const Text('作为模板'),
+                      subtitle: const Text('允许其他用户将此仓库用作模板'),
+                      value: githubManageConfigMap['is_template'],
+                      onChanged: (value) {
+                        githubManageConfigMap['is_template'] = value;
+                        setState(() {});
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            // Create Button
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16.0),
+              child: ElevatedButton.icon(
+                onPressed: () async {
+                  if (!formKey.currentState!.validate()) {
+                    return;
+                  }
+
+                  if (descriptionController.text.isNotEmpty) {
+                    githubManageConfigMap['description'] = descriptionController.text;
+                  }
+                  if (homepageController.text.isNotEmpty) {
+                    githubManageConfigMap['homepage'] = homepageController.text;
+                  }
+                  githubManageConfigMap['name'] = repoNameController.text;
+
+                  if (githubManageConfigMap['gitignore_template'] == 'None') {
+                    githubManageConfigMap.remove('gitignore_template');
+                  }
+                  if (githubManageConfigMap['license_template'] == 'None') {
+                    githubManageConfigMap.remove('license_template');
+                  }
+
+                  await showDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (context) {
+                        return NetLoadingDialog(
+                          outsideDismiss: false,
+                          loading: true,
+                          loadingText: "创建中...",
+                          requestCallBack: GithubManageAPI().createRepo(
+                            githubManageConfigMap,
+                          ),
+                        );
+                      });
+
+                  if (mounted) {
+                    Navigator.pop(context);
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size(double.infinity, 50),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                icon: const Icon(Icons.create_new_folder),
+                label: const Text('创建仓库', style: TextStyle(fontSize: 18)),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

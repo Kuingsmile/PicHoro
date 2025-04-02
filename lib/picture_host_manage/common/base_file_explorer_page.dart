@@ -22,6 +22,7 @@ abstract class BaseFileExplorer extends StatefulWidget {
 
 abstract class BaseFileExplorerState<T extends BaseFileExplorer> extends loading_state.BaseLoadingPageState<T> {
   List allInfoList = [];
+  List fileAllInfoList = [];
   List dirAllInfoList = [];
   List selectedFilesBool = [];
   bool sorted = true;
@@ -30,7 +31,9 @@ abstract class BaseFileExplorerState<T extends BaseFileExplorer> extends loading
   @override
   void initState() {
     super.initState();
+    dirAllInfoList.clear();
     allInfoList.clear();
+    fileAllInfoList.clear();
     initializeData();
   }
 
@@ -39,18 +42,26 @@ abstract class BaseFileExplorerState<T extends BaseFileExplorer> extends loading
   Future<void> refreshData();
   Future<void> deleteFiles(List<int> toDelete);
 
+  bool isShowSortByDate() {
+    return true;
+  }
+
   // Optional abstract methods with default implementations
-  String getShareUrl(int index);
+  Future<String> getShareUrl(int index);
   String getFileName(int index) => allInfoList[index]['name'];
 
-  Widget getThumbnailWidget(int index) {
+  Map<String, String> getHeaders(int index) => {};
+
+  Future<Widget> getThumbnailWidget(int index) async {
+    Map<String, String> headers = getHeaders(index);
+
     return index < dirAllInfoList.length
         ? Image.asset(
             'assets/icons/folder.png',
             width: 50,
             height: 50,
           )
-        : iconImageLoad(getShareUrl(index), getFileName(index));
+        : iconImageLoad(await getShareUrl(index), getFileName(index), headers: headers);
   }
 
   String getFileDate(int index);
@@ -78,8 +89,8 @@ abstract class BaseFileExplorerState<T extends BaseFileExplorer> extends loading
   List<Widget> getSlidableActions(int index) {
     return [
       getSlidableAction(
-        onPressed: (BuildContext context) {
-          String shareUrl = getShareUrl(index);
+        onPressed: (BuildContext context) async {
+          String shareUrl = await getShareUrl(index);
           Share.share(shareUrl);
         },
         backgroundColor: const Color.fromARGB(255, 109, 196, 116),
@@ -190,7 +201,7 @@ abstract class BaseFileExplorerState<T extends BaseFileExplorer> extends loading
       List multiUrls = [];
       for (int i = 0; i < allInfoList.length; i++) {
         if (!selectedFilesBool[i]) continue;
-        String? rawurl = getShareUrl(i) as String?;
+        String? rawurl = await getShareUrl(i) as String?;
         if (rawurl != null && rawurl.isNotEmpty) {
           String fileName = getFileName(i);
           multiUrls.add(getFormatedUrl(rawurl, fileName));
@@ -257,12 +268,13 @@ abstract class BaseFileExplorerState<T extends BaseFileExplorer> extends loading
 // Default sort options, can be overridden by subclasses
   List<PopupMenuItem> getSortMenuItems() {
     return [
-      buildSortMenuItem(
-        '修改时间排序',
-        (a, b, ascending) => ascending
-            ? getFormatedFileDate(a).compareTo(getFormatedFileDate(b))
-            : getFormatedFileDate(b).compareTo(getFormatedFileDate(a)),
-      ),
+      if (isShowSortByDate())
+        buildSortMenuItem(
+          '修改时间排序',
+          (a, b, ascending) => ascending
+              ? getFormatedFileDate(a).compareTo(getFormatedFileDate(b))
+              : getFormatedFileDate(b).compareTo(getFormatedFileDate(a)),
+        ),
       buildSortMenuItem(
         '文件名称排序',
         (a, b, ascending) => ascending
@@ -337,9 +349,14 @@ abstract class BaseFileExplorerState<T extends BaseFileExplorer> extends loading
     return getFormatedFileName(item).split('.').last;
   }
 
+  List<Widget> getExtraAppBarActions() {
+    return [];
+  }
+
 // Build the app bar actions
   List<Widget> buildAppBarActions() {
     return [
+      ...getExtraAppBarActions(),
       PopupMenuButton(
         icon: const Icon(
           Icons.sort,
@@ -524,7 +541,7 @@ abstract class BaseFileExplorerState<T extends BaseFileExplorer> extends loading
             title: '复制链接(设置中的默认格式)',
             onTap: () async {
               await flutter_services.Clipboard.setData(flutter_services.ClipboardData(
-                  text: getFormatedUrl(getShareUrl(index), my_path.basename(getFileName(index)))));
+                  text: getFormatedUrl(await getShareUrl(index), my_path.basename(getFileName(index)))));
               if (mounted) {
                 Navigator.pop(context);
               }
@@ -536,9 +553,9 @@ abstract class BaseFileExplorerState<T extends BaseFileExplorer> extends loading
             icon: Icons.share,
             iconColor: const Color.fromARGB(255, 76, 175, 80),
             title: '分享链接',
-            onTap: () {
+            onTap: () async {
               Navigator.pop(context);
-              Share.share(getShareUrl(index));
+              Share.share(await getShareUrl(index));
             },
           ),
         ...getExtraActions(index),
@@ -551,7 +568,7 @@ abstract class BaseFileExplorerState<T extends BaseFileExplorer> extends loading
             showCupertinoAlertDialogWithConfirmFunc(
               context: context,
               title: '通知',
-              content: '确定要删除${allInfoList[index]['name']}吗？',
+              content: '确定要删除${getFileName(index)}吗？',
               onConfirm: () async {
                 try {
                   await deleteFiles([index]);

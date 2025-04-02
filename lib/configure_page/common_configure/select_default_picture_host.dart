@@ -275,6 +275,7 @@ class AllPShostState extends State<AllPShost> {
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
+        leading: getLeadingIcon(context),
         title: titleText('图床设置'),
         flexibleSpace: getFlexibleSpace(context),
       ),

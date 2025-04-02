@@ -40,6 +40,7 @@ class MarkDownPreviewState extends State<MarkDownPreview> {
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
+        leading: getLeadingIcon(context),
         title: titleText(widget.fileName),
         flexibleSpace: getFlexibleSpace(context),
       ),

@@ -34,8 +34,6 @@ class LskyproFileExplorer extends BaseFileExplorer {
 }
 
 class LskyproFileExplorerState extends BaseFileExplorerState<LskyproFileExplorer> {
-  List fileAllInfoList = [];
-
   LskyproManageAPI manageAPI = LskyproManageAPI();
 
   @override
@@ -59,24 +57,23 @@ class LskyproFileExplorerState extends BaseFileExplorerState<LskyproFileExplorer
     if (widget.albumInfo.isEmpty) {
       //查询相册
       var albumResult = await manageAPI.getAlbums();
-      if (albumResult[0] == 'success') {
-        dirAllInfoList = albumResult[1].toList();
-      } else {
+      if (albumResult[0] != 'success') {
         setState(() {
           state = loading_state.LoadState.error;
         });
         return;
       }
+      dirAllInfoList = albumResult[1].toList();
       //查询文件
       var fileResult = await manageAPI.getPhoto(null);
-      if (fileResult[0] == 'success') {
-        fileAllInfoList = fileResult[1].toList();
-      } else {
+      if (fileResult[0] != 'success') {
         setState(() {
           state = loading_state.LoadState.error;
         });
         return;
       }
+      fileAllInfoList = fileResult[1].toList();
+
       //合并
       for (var i = 0; i < fileAllInfoList.length; i++) {
         fileAllInfoList[i]['date'] = DateTime.parse(
@@ -106,27 +103,20 @@ class LskyproFileExplorerState extends BaseFileExplorerState<LskyproFileExplorer
       fileAllInfoList.sort((a, b) => b['date'].compareTo(a['date']));
       allInfoList = [...fileAllInfoList];
     }
-    if (allInfoList.isEmpty) {
-      if (mounted) {
-        setState(() {
+    if (mounted) {
+      setState(() {
+        if (allInfoList.isEmpty) {
           state = loading_state.LoadState.empty;
-        });
-      }
-    } else {
-      if (mounted) {
-        setState(() {
+        } else {
           selectedFilesBool = List.filled(allInfoList.length, false, growable: true);
           state = loading_state.LoadState.success;
-        });
-      }
-    }
-    if (mounted) {
-      setState(() {});
+        }
+      });
     }
   }
 
   @override
-  String getShareUrl(int index) => allInfoList[index]?['links']?['url'] ?? '';
+  Future<String> getShareUrl(int index) async => allInfoList[index]?['links']?['url'] ?? '';
 
   @override
   String getFileDate(int index) => allInfoList[index]['date'] == null

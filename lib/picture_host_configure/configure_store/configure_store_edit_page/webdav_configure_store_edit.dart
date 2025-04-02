@@ -202,7 +202,7 @@ class WebdavConfigureStoreEditState extends State<WebdavConfigureStoreEdit> {
 
   _importConfig() async {
     try {
-      Map configMap = await WebdavManageAPI.getConfigMap();
+      Map configMap = await WebdavManageAPI().getConfigMap();
       _hostController.text = configMap['host'];
       _webdavusernameController.text = configMap['webdavusername'];
       _passwordController.text = configMap['password'];

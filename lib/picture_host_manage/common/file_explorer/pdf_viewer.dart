@@ -76,6 +76,7 @@ class PdfViewerState extends State<PdfViewer> {
         elevation: 0,
         centerTitle: true,
         title: titleText('预览'),
+        leading: getLeadingIcon(context),
         flexibleSpace: getFlexibleSpace(context),
         actions: <Widget>[
           IconButton(

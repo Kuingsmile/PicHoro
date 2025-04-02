@@ -49,6 +49,7 @@ class AuthorInformation extends StatelessWidget {
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
+        leading: getLeadingIcon(context),
         title: titleText('交流群'),
         flexibleSpace: getFlexibleSpace(context),
       ),

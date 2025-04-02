@@ -289,6 +289,7 @@ class LogPageState extends loading_state.BaseLoadingPageState<LogPage> {
         centerTitle: true,
         elevation: 0,
         title: titleText('软件日志'),
+        leading: getLeadingIcon(context),
         flexibleSpace: getFlexibleSpace(context),
         actions: [
           IconButton(

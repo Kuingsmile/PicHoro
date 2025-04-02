@@ -99,6 +99,7 @@ class DefaultPShostSelectState extends State<DefaultPShostSelect> {
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
+        leading: getLeadingIcon(context),
         title: titleText('默认图床选择'),
         flexibleSpace: getFlexibleSpace(context),
       ),

@@ -90,12 +90,8 @@ class AliyunImageUploadUtils {
       }
 
       if (options == 'None') {
-        displayUrl = "$displayUrl?x-oss-process=image/resize,m_lfit,h_500,w_500";
+        displayUrl = displayUrl;
       } else {
-        //网站后缀以?开头
-        if (!options.startsWith('?')) {
-          options = '?$options';
-        }
         returnUrl = '$returnUrl$options';
         displayUrl = '$displayUrl$options';
       }
@@ -154,7 +150,7 @@ class AliyunImageUploadUtils {
       baseOptions.headers = {
         'Host': '$bucket.$area.aliyuncs.com',
         'Authorization': '$authorization$signature',
-        'Date': HttpDate.format(DateTime.now()),
+        'Date': date,
         'Content-type': 'application/json',
       };
       Dio dio = Dio(baseOptions);

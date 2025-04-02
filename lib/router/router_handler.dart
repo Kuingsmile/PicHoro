@@ -81,7 +81,6 @@ import 'package:horopic/picture_host_manage/imgur/imgur_file_information_page.da
 
 import 'package:horopic/picture_host_manage/ftp/sftp_file_explorer.dart';
 import 'package:horopic/picture_host_manage/ftp/sftp_file_information_page.dart';
-import 'package:horopic/picture_host_manage/ftp/ssh_terminal.dart';
 import 'package:horopic/picture_host_manage/ftp/sftp_local_image_preview.dart';
 
 import 'package:horopic/picture_host_manage/common/file_explorer/md_preview.dart';
@@ -710,12 +709,6 @@ var sftpFileInformationHandler = Handler(handlerFunc: (BuildContext? context, Ma
   return SFTPFileInformation(
     fileMap: fileMap,
   );
-});
-
-//ssh terminal页面
-var sshTerminalHandler = Handler(handlerFunc: (BuildContext? context, Map<String, List<String>> params) {
-  var configMap = json.decode(params['configMap']!.first);
-  return SSHTermimal(configMap: configMap);
 });
 
 //sftp图片预览

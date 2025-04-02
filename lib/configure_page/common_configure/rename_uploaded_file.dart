@@ -237,6 +237,7 @@ class RenameFileState extends State<RenameFile> {
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
+        leading: getLeadingIcon(context),
         title: titleText('文件重命名'),
         flexibleSpace: getFlexibleSpace(context),
       ),

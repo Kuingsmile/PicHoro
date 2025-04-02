@@ -185,17 +185,6 @@ class SFTPFileExplorerState extends loading_state.BaseLoadingPageState<SFTPFileE
             )),
         flexibleSpace: getFlexibleSpace(context),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.terminal, color: Colors.white, size: 30),
-            onPressed: () async {
-              Map configMap = await FTPManageAPI.getConfigMap();
-              if (mounted) {
-                Application.router.navigateTo(
-                    context, '${Routes.sshTerminal}?configMap=${Uri.encodeComponent(jsonEncode(configMap))}',
-                    transition: TransitionType.cupertino);
-              }
-            },
-          ),
           PopupMenuButton(
             icon: const Icon(
               Icons.sort,

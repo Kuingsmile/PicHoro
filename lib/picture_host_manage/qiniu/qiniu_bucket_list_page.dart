@@ -22,6 +22,12 @@ class QiniuBucketList extends StatefulWidget {
 
 class QiniuBucketListState extends loading_state.BaseLoadingPageState<QiniuBucketList> {
   List bucketMap = [];
+  List filteredBucketMap = [];
+  String searchText = '';
+  bool isSearching = false;
+  TextEditingController searchController = TextEditingController();
+  String sortBy = 'name'; // Options: 'name'
+  bool ascending = true;
 
   RefreshController refreshController = RefreshController(initialRefresh: false);
   TextEditingController domainController = TextEditingController();
@@ -30,6 +36,8 @@ class QiniuBucketListState extends loading_state.BaseLoadingPageState<QiniuBucke
   TextEditingController areaController = TextEditingController();
   TextEditingController optionController = TextEditingController();
   bool isUseRemotePSConfig = false;
+
+  QiniuManageAPI manageAPI = QiniuManageAPI();
 
   @override
   void initState() {
@@ -44,6 +52,7 @@ class QiniuBucketListState extends loading_state.BaseLoadingPageState<QiniuBucke
     pathController.dispose();
     areaController.dispose();
     optionController.dispose();
+    searchController.dispose();
     super.dispose();
   }
 
@@ -54,16 +63,27 @@ class QiniuBucketListState extends loading_state.BaseLoadingPageState<QiniuBucke
 
   _configMapWithCatch() async {
     try {
-      var configMap = await QiniuManageAPI.getConfigMap();
+      var configMap = await manageAPI.getConfigMap();
       return configMap;
     } catch (e) {
       return null;
     }
   }
 
+  void filterBuckets() {
+    filteredBucketMap = searchText.isEmpty
+        ? List.from(bucketMap)
+        : bucketMap
+            .where((element) => element['name'].toString().toLowerCase().contains(searchText.toLowerCase()))
+            .toList();
+    setState(() {});
+  }
+
   //初始化bucketList
   initBucketList() async {
     bucketMap.clear();
+    filteredBucketMap.clear();
+
     try {
       var configMap = await _configMapWithCatch();
       if (configMap != null) {
@@ -75,7 +95,7 @@ class QiniuBucketListState extends loading_state.BaseLoadingPageState<QiniuBucke
         }
       }
 
-      var bucketListResponse = await QiniuManageAPI.getBucketNameList();
+      var bucketListResponse = await manageAPI.getBucketNameList();
 
       //判断是否获取成功
       if (bucketListResponse[0] != 'success') {
@@ -110,9 +130,12 @@ class QiniuBucketListState extends loading_state.BaseLoadingPageState<QiniuBucke
           'tag': '存储桶',
         });
       }
+
+      filterBuckets();
+
       if (mounted) {
         setState(() {
-          if (bucketMap.isEmpty) {
+          if (filteredBucketMap.isEmpty) {
             state = loading_state.LoadState.empty;
           } else {
             state = loading_state.LoadState.success;
@@ -135,24 +158,108 @@ class QiniuBucketListState extends loading_state.BaseLoadingPageState<QiniuBucke
   @override
   AppBar get appBar => AppBar(
         elevation: 0,
-        centerTitle: true,
-        title: titleText('七牛云存储桶列表'),
+        centerTitle: !isSearching,
+        title: isSearching
+            ? TextField(
+                controller: searchController,
+                autofocus: true,
+                decoration: const InputDecoration(
+                  hintText: '搜索存储桶...',
+                  border: InputBorder.none,
+                  hintStyle: TextStyle(color: Colors.white70),
+                ),
+                style: const TextStyle(color: Colors.white),
+                onChanged: (value) {
+                  searchText = value;
+                  filterBuckets();
+                },
+              )
+            : titleText('存储桶'),
         flexibleSpace: getFlexibleSpace(context),
+        leading: isSearching
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () {
+                  setState(() {
+                    isSearching = false;
+                    searchText = '';
+                    searchController.clear();
+                    filterBuckets();
+                  });
+                },
+              )
+            : getLeadingIcon(context),
         actions: [
-          IconButton(
-            onPressed: () async {
-              await Application.router
-                  .navigateTo(context, Routes.qiniuNewBucketConfig, transition: TransitionType.cupertino);
-              _onRefresh();
-            },
-            icon: const Icon(
-              Icons.add,
-              color: Colors.white,
+          if (!isSearching)
+            IconButton(
+              onPressed: () {
+                setState(() {
+                  isSearching = true;
+                });
+              },
+              icon: const Icon(
+                Icons.search,
+                color: Colors.white,
+              ),
             ),
-            iconSize: 35,
-          )
+          if (!isSearching)
+            PopupMenuButton<String>(
+              icon: const Icon(Icons.sort, color: Colors.white),
+              onSelected: (value) {
+                if (sortBy == value) {
+                  ascending = !ascending;
+                } else {
+                  sortBy = value;
+                  ascending = true;
+                }
+                filterBuckets();
+              },
+              itemBuilder: (context) => [
+                PopupMenuItem(
+                  value: 'name',
+                  child: Row(
+                    children: [
+                      const Icon(Icons.sort_by_alpha),
+                      const SizedBox(width: 10),
+                      const Text('按名称排序'),
+                      if (sortBy == 'name') Icon(ascending ? Icons.arrow_upward : Icons.arrow_downward, size: 16),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          if (!isSearching)
+            IconButton(
+              onPressed: () async {
+                await Application.router
+                    .navigateTo(context, Routes.qiniuNewBucketConfig, transition: TransitionType.cupertino);
+                _onRefresh();
+              },
+              icon: const Icon(
+                Icons.add,
+                color: Colors.white,
+              ),
+              iconSize: 30,
+            )
         ],
       );
+
+  @override
+  String get emptyText => searchText.isNotEmpty ? '没有找到匹配的存储桶' : '没有存储桶，点击右上角添加哦';
+
+  @override
+  List<Widget> get extraEmptyWidgets => searchText.isNotEmpty
+      ? [
+          TextButton(
+            onPressed: () {
+              searchText = '';
+              searchController.clear();
+              filterBuckets();
+            },
+            child: const Text('清除搜索', style: TextStyle(color: Colors.blue)),
+          ),
+        ]
+      : [];
 
   @override
   void onErrorRetry() {
@@ -216,7 +323,7 @@ class QiniuBucketListState extends loading_state.BaseLoadingPageState<QiniuBucke
                 value: isUseRemotePSConfig,
                 onChanged: (value) async {
                   if (value == true) {
-                    var queryQiniu = await QiniuManageAPI.readQiniuManageConfig();
+                    var queryQiniu = await manageAPI.readQiniuManageConfig();
                     if (queryQiniu != 'Error') {
                       var jsonResult = jsonDecode(queryQiniu);
                       domainController.text = jsonResult['domain'];
@@ -274,12 +381,12 @@ class QiniuBucketListState extends loading_state.BaseLoadingPageState<QiniuBucke
                 textMap['domain'] = domain;
                 textMap['area'] = area;
                 var insertQiniuManage =
-                    await QiniuManageAPI.saveQiniuManageConfig(element['name'], textMap['domain'], textMap['area']);
+                    await manageAPI.saveQiniuManageConfig(element['name'], textMap['domain'], textMap['area']);
                 if (!insertQiniuManage) {
                   showToast('数据保存错误');
                   return;
                 }
-                var result = await QiniuManageAPI.setDefaultBucketFromListPage(element, textMap, null);
+                var result = await manageAPI.setDefaultBucketFromListPage(element, textMap, null);
                 if (result[0] == 'success') {
                   showToast('设置成功');
                   if (mounted) {
@@ -307,18 +414,19 @@ class QiniuBucketListState extends loading_state.BaseLoadingPageState<QiniuBucke
     });
   }
 
+  countBucketLocation(List elements) {
+    return elements.length;
+  }
+
   @override
   Widget buildSuccess() {
     return SmartRefresher(
         enablePullDown: true,
         enablePullUp: false,
-        header: const ClassicHeader(
-          refreshStyle: RefreshStyle.Follow,
-          idleText: '下拉刷新',
-          refreshingText: '正在刷新',
-          completeText: '刷新完成',
-          failedText: '刷新失败',
-          releaseText: '释放刷新',
+        header: const WaterDropHeader(
+          waterDropColor: Colors.blue,
+          complete: Text('刷新完成', style: TextStyle(color: Colors.grey)),
+          failed: Text('刷新失败', style: TextStyle(color: Colors.red)),
         ),
         footer: const ClassicFooter(
           loadStyle: LoadStyle.ShowWhenLoading,
@@ -332,52 +440,97 @@ class QiniuBucketListState extends loading_state.BaseLoadingPageState<QiniuBucke
         onRefresh: _onRefresh,
         child: GroupedListView(
           shrinkWrap: true,
-          elements: bucketMap,
+          elements: filteredBucketMap,
           groupBy: (element) => element['tag'],
-          itemComparator: (item1, item2) => item1['name'].compareTo(item2['name']),
+          itemComparator: (item1, item2) => ascending
+              ? item1['name'].toString().compareTo(item2['name'].toString())
+              : item2['name'].toString().compareTo(item1['name'].toString()),
           groupComparator: (value1, value2) => value2.compareTo(value1),
-          separator: const Divider(
-            height: 0.1,
-            color: Color.fromARGB(255, 230, 230, 230),
-          ),
+          separator: const SizedBox(height: 0),
           groupSeparatorBuilder: (String value) => Container(
-            height: 30,
-            decoration: const BoxDecoration(
-              color: Color.fromARGB(255, 184, 182, 182),
-              border: Border(
-                bottom: BorderSide(
-                  color: Color.fromARGB(255, 230, 230, 230),
-                  width: 0.1,
+            height: 40,
+            margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+            decoration: BoxDecoration(
+              color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withValues(alpha: 0.2),
+                  spreadRadius: 1,
+                  blurRadius: 1,
+                  offset: const Offset(0, 1),
                 ),
-              ),
+              ],
             ),
-            child: const ListTile(
-              visualDensity: VisualDensity(horizontal: 0, vertical: -4),
+            child: ListTile(
+              visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
+              leading: const Icon(Icons.folder_special, color: Colors.blue),
               title: Text(
-                '存储桶',
-                style: TextStyle(
-                  height: 0.3,
-                  color: Colors.black,
-                  fontSize: 12,
+                '$value (${countBucketLocation(filteredBucketMap)})',
+                style: const TextStyle(
+                  color: Colors.black87,
+                  fontSize: 14,
                   fontWeight: FontWeight.bold,
                 ),
               ),
             ),
           ),
           itemBuilder: (context, element) {
-            return ListTile(
-                minLeadingWidth: 0,
-                contentPadding: const EdgeInsets.only(left: 20, right: 20),
-                leading: const Icon(
-                  IconData(0xe6ab, fontFamily: 'iconfont'),
-                  color: Colors.blue,
-                  size: 35,
+            String bucketName = element['name'].toString();
+            String displayName = bucketName.length > 20
+                ? '${bucketName.substring(0, 10)}...${bucketName.substring(bucketName.length - 10)}'
+                : bucketName;
+
+            return Card(
+              margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              elevation: 2,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+                side: BorderSide(
+                  color: Colors.blue.withValues(alpha: 0.3),
+                  width: 1,
                 ),
-                title: Text(element['name']),
+              ),
+              child: ListTile(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                leading: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.blue.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    IconData(0xe6ab, fontFamily: 'iconfont'),
+                    color: Colors.blue,
+                    size: 25,
+                  ),
+                ),
+                title: Text(
+                  displayName,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 16,
+                  ),
+                ),
+                subtitle: const Row(
+                  children: [
+                    Icon(
+                      Icons.cloud_done_outlined,
+                      size: 14,
+                      color: Colors.green,
+                    ),
+                    SizedBox(width: 4),
+                    Text(
+                      '七牛云存储',
+                      style: TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
+                  ],
+                ),
                 onTap: () async {
                   Map<String, dynamic> textMap = {};
                   textMap['name'] = element['name'];
-                  var queryQiniuManage = await QiniuManageAPI.readQiniuManageConfig();
+                  var queryQiniuManage = await manageAPI.readQiniuManageConfig();
                   if (queryQiniuManage == 'Error') {
                     showToast('请先设置域名和区域');
                     return;
@@ -397,48 +550,102 @@ class QiniuBucketListState extends loading_state.BaseLoadingPageState<QiniuBucke
                   }
                 },
                 trailing: IconButton(
-                  icon: const Icon(Icons.more_horiz_outlined),
+                  icon: const Icon(Icons.more_vert),
                   onPressed: () async {
                     showModalBottomSheet(
                         isScrollControlled: true,
+                        shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                        ),
                         context: context,
                         builder: (context) {
                           return buildBottomSheetWidget(context, element);
                         });
                   },
-                ));
+                ),
+              ),
+            );
           },
           order: GroupedListOrder.DESC,
         ));
   }
 
   Widget buildBottomSheetWidget(BuildContext context, Map element) {
-    return SingleChildScrollView(
+    String bucketName = element['name'].toString();
+    String displayName = bucketName.length > 20
+        ? '${bucketName.substring(0, 10)}...${bucketName.substring(bucketName.length - 10)}'
+        : bucketName;
+
+    return Container(
+      padding: const EdgeInsets.only(top: 16, bottom: 16),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          ListTile(
-            leading: const Icon(
-              IconData(0xe6ab, fontFamily: 'iconfont'),
-              color: Colors.blue,
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.blue.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
             ),
-            visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
-            minLeadingWidth: 0,
-            title: Text(
-              element['name'],
-              style: const TextStyle(fontSize: 14),
+            child: Row(
+              children: [
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: Colors.blue.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(
+                    IconData(0xe6ab, fontFamily: 'iconfont'),
+                    color: Colors.blue,
+                    size: 28,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        displayName,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: Colors.blue.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Text(
+                              '七牛云存储桶',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.blue,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
-          const Divider(
-            height: 0.1,
-            color: Color.fromARGB(255, 230, 230, 230),
-          ),
-          ListTile(
-            leading: const Icon(
-              Icons.check_box_outlined,
-              color: Color.fromARGB(255, 97, 141, 236),
-            ),
-            minLeadingWidth: 0,
-            title: const Text('设为默认图床', style: TextStyle(fontSize: 15)),
+          const SizedBox(height: 8),
+          const Divider(),
+          _buildActionTile(
+            icon: Icons.check_box_outlined,
+            title: '设为默认图床',
             onTap: () async {
               Navigator.pop(context);
               await showCupertinoDialog(
@@ -447,35 +654,24 @@ class QiniuBucketListState extends loading_state.BaseLoadingPageState<QiniuBucke
                   },
                   context: context);
             },
+            iconColor: Colors.green,
           ),
-          const Divider(
-            height: 0.1,
-            color: Color.fromARGB(255, 230, 230, 230),
-          ),
-          ListTile(
-            leading: const Icon(
-              Icons.settings_outlined,
-              color: Color.fromARGB(255, 97, 141, 236),
-            ),
-            minLeadingWidth: 0,
-            title: const Text('设置存储桶参数', style: TextStyle(fontSize: 15)),
+          _buildActionTile(
+            icon: Icons.settings_outlined,
+            title: '设置存储桶参数',
             onTap: () {
               Navigator.pop(context);
               Application.router.navigateTo(
                   context, '${Routes.qiniuBucketDomainAreaConfig}?element=${Uri.encodeComponent(jsonEncode(element))}',
                   transition: TransitionType.cupertino);
             },
+            iconColor: Colors.blue,
           ),
-          const Divider(
-            height: 0.1,
-            color: Color.fromARGB(255, 230, 230, 230),
-          ),
-          ListTile(
-            leading: const Icon(Icons.public, color: Color.fromARGB(255, 97, 141, 236)),
-            minLeadingWidth: 0,
-            title: const Text('设为公开', style: TextStyle(fontSize: 15)),
+          _buildActionTile(
+            icon: Icons.public,
+            title: '设为公开',
             onTap: () async {
-              var result = await QiniuManageAPI.setACL(element, '0');
+              var result = await manageAPI.setACL(element, '0');
               if (result[0] == 'success') {
                 showToast('设置成功');
                 if (mounted) {
@@ -485,20 +681,13 @@ class QiniuBucketListState extends loading_state.BaseLoadingPageState<QiniuBucke
                 showToast('设置失败');
               }
             },
+            iconColor: Colors.purple,
           ),
-          const Divider(
-            height: 0.1,
-            color: Color.fromARGB(255, 230, 230, 230),
-          ),
-          ListTile(
-            leading: const Icon(
-              Icons.lock_outline,
-              color: Color.fromARGB(255, 97, 141, 236),
-            ),
-            minLeadingWidth: 0,
-            title: const Text('设为私有', style: TextStyle(fontSize: 15)),
+          _buildActionTile(
+            icon: Icons.lock_outline,
+            title: '设为私有',
             onTap: () async {
-              var result = await QiniuManageAPI.setACL(element, '1');
+              var result = await manageAPI.setACL(element, '1');
               if (result[0] == 'success') {
                 showToast('设置成功');
                 if (mounted) {
@@ -508,18 +697,11 @@ class QiniuBucketListState extends loading_state.BaseLoadingPageState<QiniuBucke
                 showToast('设置失败');
               }
             },
+            iconColor: Colors.amber,
           ),
-          const Divider(
-            height: 0.1,
-            color: Color.fromARGB(255, 230, 230, 230),
-          ),
-          ListTile(
-            leading: const Icon(
-              Icons.dangerous_outlined,
-              color: Color.fromARGB(255, 240, 85, 131),
-            ),
-            minLeadingWidth: 0,
-            title: const Text('删除存储桶', style: TextStyle(fontSize: 15)),
+          _buildActionTile(
+            icon: Icons.dangerous_outlined,
+            title: '删除存储桶',
             onTap: () async {
               Navigator.pop(context);
               return showCupertinoAlertDialogWithConfirmFunc(
@@ -527,7 +709,7 @@ class QiniuBucketListState extends loading_state.BaseLoadingPageState<QiniuBucke
                 content: '是否删除存储桶？\n删除前请清空该存储桶!',
                 context: context,
                 onConfirm: () async {
-                  var result = await QiniuManageAPI.deleteBucket(element);
+                  var result = await manageAPI.deleteBucket(element);
                   if (result[0] == 'success') {
                     showToast('删除成功');
                     _onRefresh();
@@ -537,9 +719,35 @@ class QiniuBucketListState extends loading_state.BaseLoadingPageState<QiniuBucke
                 },
               );
             },
+            iconColor: Colors.red,
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildActionTile({
+    required IconData icon,
+    required String title,
+    required Function() onTap,
+    required Color iconColor,
+  }) {
+    return ListTile(
+      leading: Container(
+        width: 36,
+        height: 36,
+        decoration: BoxDecoration(
+          color: iconColor.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Icon(
+          icon,
+          color: iconColor,
+        ),
+      ),
+      minLeadingWidth: 0,
+      title: Text(title, style: const TextStyle(fontSize: 16)),
+      onTap: onTap,
     );
   }
 }

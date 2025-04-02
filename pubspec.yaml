@@ -82,7 +82,6 @@ dependencies:
   webview_flutter: ^4.2.3
   wechat_assets_picker: ^9.5.0
   xml2json: ^6.2.0
-  xterm: ^4.0.0
   minio: ^3.5.0
   android_system_font:
     git:

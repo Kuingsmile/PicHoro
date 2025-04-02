@@ -49,12 +49,12 @@ class GithubReposListState extends loading_state.BaseLoadingPageState<GithubRepo
   initRepoList() async {
     repoMap.clear();
     try {
-      Map configMap = await GithubManageAPI.getConfigMap();
+      Map configMap = await GithubManageAPI().getConfigMap();
       dynamic bucketListResponse;
       if (configMap['githubusername'].toString().toLowerCase() == widget.showedUsername.toLowerCase()) {
-        bucketListResponse = await GithubManageAPI.getReposList();
+        bucketListResponse = await GithubManageAPI().getReposList();
       } else {
-        bucketListResponse = await GithubManageAPI.getOtherReposList(widget.showedUsername);
+        bucketListResponse = await GithubManageAPI().getOtherReposList(widget.showedUsername);
       }
       //判断是否获取成功
       if (bucketListResponse[0] != 'success') {
@@ -124,13 +124,14 @@ class GithubReposListState extends loading_state.BaseLoadingPageState<GithubRepo
   AppBar get appBar => AppBar(
         elevation: 0,
         centerTitle: true,
+        leading: getLeadingIcon(context),
         title: titleText('${widget.showedUsername}的仓库', fontsize: 16),
         flexibleSpace: getFlexibleSpace(context),
         actions: [
           IconButton(
             onPressed: () async {
               try {
-                var configMap = await GithubManageAPI.getConfigMap();
+                var configMap = await GithubManageAPI().getConfigMap();
                 if (configMap['githubusername'].toString().toLowerCase() == widget.showedUsername.toLowerCase()) {
                   if (mounted) {
                     await Application.router
@@ -144,7 +145,7 @@ class GithubReposListState extends loading_state.BaseLoadingPageState<GithubRepo
                 showToast('获取失败');
               }
             },
-            icon: const Icon(Icons.add),
+            icon: const Icon(Icons.add, color: Colors.white),
             iconSize: 35,
           )
         ],
@@ -166,21 +167,19 @@ class GithubReposListState extends loading_state.BaseLoadingPageState<GithubRepo
     return SmartRefresher(
         enablePullDown: true,
         enablePullUp: false,
-        header: const ClassicHeader(
-          refreshStyle: RefreshStyle.Follow,
-          idleText: '下拉刷新',
-          refreshingText: '正在刷新',
-          completeText: '刷新完成',
-          failedText: '刷新失败',
-          releaseText: '释放刷新',
+        header: const WaterDropHeader(
+          waterDropColor: Colors.blue,
+          complete: Text('刷新完成', style: TextStyle(color: Colors.grey)),
+          failed: Text('刷新失败', style: TextStyle(color: Colors.grey)),
         ),
-        footer: const ClassicFooter(
+        footer: ClassicFooter(
           loadStyle: LoadStyle.ShowWhenLoading,
           idleText: '上拉加载',
           loadingText: '正在加载',
           noDataText: '没有更多了',
-          failedText: '没有更多了',
+          failedText: '加载失败',
           canLoadingText: '释放加载',
+          textStyle: TextStyle(color: Theme.of(context).primaryColor),
         ),
         controller: refreshController,
         onRefresh: _onRefresh,
@@ -192,44 +191,88 @@ class GithubReposListState extends loading_state.BaseLoadingPageState<GithubRepo
                 item1['name'].toString().toLowerCase(),
               ),
           groupComparator: (value1, value2) => value2.compareTo(value1),
-          separator: const Divider(
-            height: 0.1,
-            color: Color.fromARGB(255, 230, 230, 230),
+          separator: Divider(
+            height: 1,
+            thickness: 0.3,
+            color: Colors.grey.withValues(alpha: 0.3),
+            indent: 70,
           ),
           groupSeparatorBuilder: (String value) => Container(
-            height: 30,
-            decoration: const BoxDecoration(
-              color: Color.fromARGB(255, 184, 182, 182),
-              border: Border(
-                bottom: BorderSide(
-                  color: Color.fromARGB(255, 230, 230, 230),
-                  width: 0.1,
-                ),
-              ),
+            height: 45,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(0),
             ),
-            child: ListTile(
-              visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
-              title: Text(
-                '$value(${countRepoVisibility(repoMap, value)})',
-                style: const TextStyle(
-                  height: 0.3,
-                  color: Colors.black,
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).primaryColor,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    value.toUpperCase(),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
-              ),
+                const SizedBox(width: 8),
+                Text(
+                  '(${countRepoVisibility(repoMap, value)})',
+                  style: TextStyle(
+                    color: Theme.of(context).primaryColor,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
             ),
           ),
           itemBuilder: (context, element) {
-            return ListTile(
+            return Card(
+              elevation: 0,
+              margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              child: ListTile(
                 minLeadingWidth: 0,
-                contentPadding: const EdgeInsets.only(left: 20, right: 20),
-                leading: Image.asset(
-                  'assets/images/githubrepo.png',
-                  width: 30,
-                  height: 30,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                leading: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Image.asset(
+                    'assets/images/githubrepo.png',
+                    width: 24,
+                    height: 24,
+                  ),
                 ),
-                title: Text(element['name']),
+                title: Text(
+                  element['name'],
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                subtitle: element['description'] != null && element['description'].toString().isNotEmpty
+                    ? Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: Text(
+                          element['description'],
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[600],
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      )
+                    : null,
                 onTap: () async {
                   Map newElement = Map.from(element);
                   newElement['showedUsername'] = widget.showedUsername;
@@ -238,15 +281,29 @@ class GithubReposListState extends loading_state.BaseLoadingPageState<GithubRepo
                       transition: TransitionType.cupertino);
                 },
                 trailing: IconButton(
-                    icon: const Icon(Icons.more_horiz_outlined),
-                    onPressed: () async {
-                      showModalBottomSheet(
-                          isScrollControlled: true,
-                          context: context,
-                          builder: (context) {
-                            return buildBottomSheetWidget(context, element);
-                          });
-                    }));
+                  icon: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: const Icon(Icons.more_horiz_outlined, size: 20),
+                  ),
+                  onPressed: () async {
+                    showModalBottomSheet(
+                      isScrollControlled: true,
+                      context: context,
+                      shape: const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                      ),
+                      builder: (context) {
+                        return buildBottomSheetWidget(context, element);
+                      },
+                    );
+                  },
+                ),
+              ),
+            );
           },
           order: GroupedListOrder.DESC,
         ));
@@ -256,22 +313,36 @@ class GithubReposListState extends loading_state.BaseLoadingPageState<GithubRepo
     return SingleChildScrollView(
       child: Column(
         children: [
-          ListTile(
-            leading: const Icon(
-              IconData(0xe6ab, fontFamily: 'iconfont'),
-              color: Colors.blue,
+          Container(
+            margin: const EdgeInsets.only(top: 8),
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: Colors.grey.withValues(alpha: 0.3),
+              borderRadius: BorderRadius.circular(2),
             ),
-            visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
+          ),
+          ListTile(
+            leading: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(
+                IconData(0xe6ab, fontFamily: 'iconfont'),
+                color: Colors.blue,
+                size: 20,
+              ),
+            ),
+            visualDensity: const VisualDensity(horizontal: 0, vertical: -2),
             minLeadingWidth: 0,
             title: Text(
               element['name'],
-              style: const TextStyle(fontSize: 14),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
           ),
-          const Divider(
-            height: 0.1,
-            color: Color.fromARGB(255, 230, 230, 230),
-          ),
+          const Divider(height: 1),
           ListTile(
             leading: const Icon(
               Icons.check_box_outlined,
@@ -281,12 +352,12 @@ class GithubReposListState extends loading_state.BaseLoadingPageState<GithubRepo
             title: const Text('设为默认图床', style: TextStyle(fontSize: 15)),
             onTap: () async {
               try {
-                var configMap = await GithubManageAPI.getConfigMap();
+                var configMap = await GithubManageAPI().getConfigMap();
                 if (widget.showedUsername.toLowerCase() != configMap['githubusername'].toString().toLowerCase()) {
                   showToast('该仓库不属于当前登录用户');
                   return;
                 }
-                var result = await GithubManageAPI.setDefaultRepo(element, null);
+                var result = await GithubManageAPI().setDefaultRepo(element, null);
                 if (result[0] == 'success') {
                   showToast('设置成功');
                   if (mounted) {
@@ -312,6 +383,7 @@ class GithubReposListState extends loading_state.BaseLoadingPageState<GithubRepo
             minLeadingWidth: 0,
             title: const Text('仓库信息', style: TextStyle(fontSize: 15)),
             onTap: () {
+              Navigator.pop(context);
               Application.router.navigateTo(
                   context, '${Routes.githubRepoInformation}?repoMap=${Uri.encodeComponent(jsonEncode(element))}',
                   transition: TransitionType.none);

@@ -33,8 +33,6 @@ class UpyunFileExplorer extends BaseFileExplorer {
 }
 
 class UpyunFileExplorerState extends BaseFileExplorerState<UpyunFileExplorer> {
-  List fileAllInfoList = [];
-
   TextEditingController vc = TextEditingController();
   TextEditingController newFolder = TextEditingController();
   TextEditingController fileLink = TextEditingController();
@@ -85,11 +83,13 @@ class UpyunFileExplorerState extends BaseFileExplorerState<UpyunFileExplorer> {
   }
 
   @override
-  String getShareUrl(int index) => '${widget.element['url']}/${widget.bucketPrefix}${allInfoList[index]['name']}';
+  Future<String> getShareUrl(int index) async =>
+      '${widget.element['url']}/${widget.bucketPrefix}${allInfoList[index]['name']}';
 
   @override
   String getFileDate(int index) =>
       DateTime.fromMillisecondsSinceEpoch(allInfoList[index]['last_modified'] * 1000).toString().substring(0, 19);
+
   @override
   String? getFileSizeForList(int index) {
     int size = allInfoList[index]['length'] ?? 0;

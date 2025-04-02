@@ -489,7 +489,7 @@ class DownloadListItemState extends State<DownloadListItem> {
   }
 }
 
-Widget iconImageLoad(String url, String fileName) {
+Widget iconImageLoad(String url, String fileName, {Map<String, String>? headers}) {
   String fileExtension = fileName.split('.').last.toLowerCase();
   try {
     if (Global.imgExt.contains(fileExtension)) {
@@ -500,6 +500,7 @@ Widget iconImageLoad(String url, String fileName) {
         height: 50,
         width: 50,
         fit: BoxFit.cover,
+        headers: headers,
         cache: true,
         loadStateChanged: (state) => defaultLoadStateChanged(state, iconSize: 50),
       );

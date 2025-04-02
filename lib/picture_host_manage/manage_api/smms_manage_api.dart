@@ -65,9 +65,18 @@ class SmmsManageAPI extends BaseManageApi {
         "SmmsManageAPI",
         callFunction,
       );
-      return [response.toString()];
+      return ['failed'];
     } catch (e) {
-      flogErr(e, {}, "SmmsManageAPI", callFunction);
+      flogErr(
+          e,
+          {
+            'endpoint': endpoint,
+            'data': data,
+            'queryParameters': queryParameters,
+            'headers': headers,
+          },
+          "SmmsManageAPI",
+          callFunction);
       return [e.toString()];
     }
   }
@@ -113,9 +122,7 @@ class SmmsManageAPI extends BaseManageApi {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
-      onSuccess: (response) {
-        return ['success'];
-      },
+      onSuccess: (response) => ['success'],
       callFunction: 'uploadFile',
     );
   }

@@ -56,7 +56,7 @@ class RenameDialogContentState extends State<RenameDialogContent> {
       width: MediaQuery.of(context).size.width * 0.85,
       constraints: BoxConstraints(
         minHeight: 200,
-        maxHeight: widget.isShowCoverFileWidget ? 250 : 200,
+        maxHeight: widget.isShowCoverFileWidget ? 260 : 200,
       ),
       decoration: BoxDecoration(
         color: backgroundColor,

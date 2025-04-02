@@ -40,7 +40,7 @@ Widget getFileListWidget({
   required BuildContext context,
   required List<Widget> slidableActions,
   required bool isSelected,
-  required Widget thumbnailWidget,
+  required Future<Widget> thumbnailWidget,
   required String fileName,
   required String fileDate,
   String? fileSize,
@@ -89,7 +89,18 @@ Widget getFileListWidget({
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(6),
-                      child: thumbnailWidget,
+                      child: FutureBuilder<Widget>(
+                        future: thumbnailWidget,
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState == ConnectionState.waiting) {
+                            return const Center(child: CircularProgressIndicator());
+                          } else if (snapshot.hasError) {
+                            return const Icon(Icons.error, color: Colors.red);
+                          } else {
+                            return snapshot.data!;
+                          }
+                        },
+                      ),
                     ),
                   ),
                   title: Text(

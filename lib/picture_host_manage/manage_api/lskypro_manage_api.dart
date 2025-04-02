@@ -65,9 +65,18 @@ class LskyproManageAPI extends BaseManageApi {
         "LskyproManageAPI",
         callFunction,
       );
-      return [response.toString()];
+      return ['failed'];
     } catch (e) {
-      flogErr(e, {}, "LskyproManageAPI", callFunction);
+      flogErr(
+          e,
+          {
+            'endpoint': endpoint,
+            'data': data,
+            'queryParameters': queryParameters,
+            'headers': headers,
+          },
+          "LskyproManageAPI",
+          callFunction);
       return [e.toString()];
     }
   }
@@ -212,9 +221,7 @@ class LskyproManageAPI extends BaseManageApi {
       data: {
         "key": deleteKey,
       },
-      onSuccess: (response) {
-        return ['success'];
-      },
+      onSuccess: (response) => ['success'],
       method: 'DELETE',
       callFunction: 'deleteFile',
     );
@@ -226,9 +233,7 @@ class LskyproManageAPI extends BaseManageApi {
       data: {
         "id": id,
       },
-      onSuccess: (response) {
-        return ['success'];
-      },
+      onSuccess: (response) => ['success'],
       method: 'DELETE',
       callFunction: 'deleteAlbum',
     );
@@ -247,9 +252,7 @@ class LskyproManageAPI extends BaseManageApi {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
-      onSuccess: (response) {
-        return ['success'];
-      },
+      onSuccess: (response) => ['success'],
       callFunction: 'uploadFile',
     );
   }

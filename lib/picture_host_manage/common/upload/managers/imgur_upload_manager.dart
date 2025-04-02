@@ -22,29 +22,18 @@ class UploadManager extends BaseUploadManager {
 
   @override
   Future<void> performUpload(String path, String fileName, Map configMap, CancelToken cancelToken) async {
-    String accesstoken = configMap['accesstoken'];
     String albumHash = configMap['albumhash'];
     String proxy = configMap['proxy'];
-    FormData formdata;
-    if (albumHash == 'None') {
-      formdata = FormData.fromMap({
-        "image": await MultipartFile.fromFile(path, filename: fileName),
-        "type": "file",
-        "name": fileName,
-        "description": "Uploaded by PicHoro",
-      });
-    } else {
-      formdata = FormData.fromMap({
-        "image": await MultipartFile.fromFile(path, filename: fileName),
-        "type": "file",
-        "album": albumHash,
-        "name": fileName,
-        "description": "Uploaded by PicHoro",
-      });
-    }
+    FormData formdata = FormData.fromMap({
+      "image": await MultipartFile.fromFile(path, filename: fileName),
+      "type": "file",
+      if (albumHash != 'None') "album": albumHash,
+      "name": fileName,
+      "description": "Uploaded by PicHoro",
+    });
     BaseOptions baseoptions = setBaseOptions();
     baseoptions.headers = {
-      "Authorization": "Bearer $accesstoken",
+      "Authorization": "Bearer ${configMap['accesstoken']}",
     };
     Dio dio = Dio(baseoptions);
     String proxyClean = '';

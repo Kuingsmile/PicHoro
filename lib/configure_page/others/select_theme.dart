@@ -88,6 +88,7 @@ class ChangeThemeState extends State<ChangeTheme> {
         appBar: AppBar(
           elevation: 0,
           centerTitle: true,
+          leading: getLeadingIcon(context),
           title: titleText('主题设置'),
           flexibleSpace: getFlexibleSpace(context),
         ),

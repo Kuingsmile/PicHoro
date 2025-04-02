@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class FileBottomSheetWidget extends StatelessWidget {
-  final Widget thumbnailWidget;
+  final Future<Widget> thumbnailWidget;
   final String fileName;
   final String fileDate;
   final List<BottomSheetAction> actions;
@@ -58,7 +58,18 @@ class FileBottomSheetWidget extends StatelessWidget {
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(7),
-                    child: thumbnailWidget,
+                    child: FutureBuilder<Widget>(
+                      future: thumbnailWidget,
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return const Center(child: CircularProgressIndicator());
+                        } else if (snapshot.hasError) {
+                          return const Icon(Icons.error, size: 40);
+                        } else {
+                          return snapshot.data!;
+                        }
+                      },
+                    ),
                   ),
                 ),
                 const SizedBox(width: 16),

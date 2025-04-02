@@ -23,7 +23,7 @@ class DownloadManager extends BaseDownloadManager {
     String tencentHost = url.split('/')[2];
     String urlpath = url.substring(tencentHost.length + 8);
     String method = 'GET';
-    Map tencentConfig = await TencentManageAPI.getConfigMap();
+    Map tencentConfig = await TencentManageAPI().getConfigMap();
 
     String secretId = tencentConfig['secretId'];
     String secretKey = tencentConfig['secretKey'];
@@ -36,7 +36,7 @@ class DownloadManager extends BaseDownloadManager {
       headers['Range'] = 'bytes=$partialFileLength-';
     }
 
-    String authorization = TencentManageAPI.tecentAuthorization(method, urlpath, headers, secretId, secretKey, {});
+    String authorization = TencentManageAPI().tecentAuthorization(method, urlpath, headers, secretId, secretKey, {});
     headers['Authorization'] = authorization;
 
     return headers;

@@ -17,6 +17,8 @@ class ImgurTokenManageState extends State<ImgurTokenManage> {
   String imgurUser = '';
   String accessToken = '';
   String proxy = '';
+  bool isLoading = true;
+
   @override
   initState() {
     super.initState();
@@ -24,7 +26,11 @@ class ImgurTokenManageState extends State<ImgurTokenManage> {
   }
 
   _getTokens() async {
-    var result = await ImgurManageAPI.readImgurManageConfig();
+    setState(() {
+      isLoading = true;
+    });
+
+    var result = await ImgurManageAPI().readImgurManageConfig();
     if (result == 'Error') {
       clientID = 'Error';
       imgurUser = 'Error';
@@ -37,7 +43,51 @@ class ImgurTokenManageState extends State<ImgurTokenManage> {
       accessToken = jsonResult['accesstoken'];
       proxy = jsonResult['proxy'];
     }
-    setState(() {});
+
+    setState(() {
+      isLoading = false;
+    });
+  }
+
+  Widget _buildInfoCard(String title, String value, IconData icon) {
+    return Card(
+      elevation: 3,
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(icon, color: Theme.of(context).primaryColor),
+                const SizedBox(width: 10),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const Divider(),
+            const SizedBox(height: 8),
+            SelectableText(
+              value,
+              style: TextStyle(
+                color: Colors.blue.shade700,
+                fontSize: 15,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -46,79 +96,121 @@ class ImgurTokenManageState extends State<ImgurTokenManage> {
       appBar: AppBar(
         centerTitle: true,
         elevation: 0,
+        leading: getLeadingIcon(context),
         title: titleText('Imgur账户管理'),
         flexibleSpace: getFlexibleSpace(context),
       ),
-      body: Center(
-        child: ListView(
-          children: [
-            const ListTile(
-              dense: true,
-              title: Center(child: Text('imgur用户名', style: TextStyle(fontSize: 20))),
-            ),
-            ListTile(
-              title: Center(
-                child: SelectableText(imgurUser, style: const TextStyle(color: Colors.blue)),
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      margin: const EdgeInsets.only(bottom: 16),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Theme.of(context).primaryColor.withValues(alpha: 0.7),
+                            Theme.of(context).primaryColor.withValues(alpha: 0.3),
+                          ],
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          CircleAvatar(
+                            backgroundColor: Colors.white,
+                            radius: 30,
+                            child: Icon(
+                              Icons.account_circle,
+                              size: 40,
+                              color: Theme.of(context).primaryColor,
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  "Imgur账户信息",
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                Text(
+                                  imgurUser != 'Error' ? "用户名: $imgurUser" : "未登录或加载失败",
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    _buildInfoCard('Client ID', clientID, Icons.vpn_key),
+                    _buildInfoCard('Access Token', accessToken, Icons.token),
+                    _buildInfoCard('代理设置', proxy, Icons.settings_ethernet),
+                    Padding(
+                      padding: const EdgeInsets.all(24.0),
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          showCupertinoAlertDialogWithConfirmFunc(
+                            content: '是否注销用户?',
+                            title: '注销',
+                            context: context,
+                            onConfirm: () async {
+                              var queryResult = await ImgurManageAPI().readImgurManageConfig();
+                              if (queryResult != 'Error') {
+                                var jsonResult = jsonDecode(queryResult);
+                                String imgurUser = jsonResult['imguruser'];
+                                String clientID = jsonResult['clientid'];
+                                String accessToken = 'None';
+                                String proxy = 'None';
+                                await ImgurManageAPI().saveImgurManageConfig(imgurUser, clientID, accessToken, proxy);
+                                showToast('注销成功');
+                                if (mounted) {
+                                  Navigator.pop(context);
+                                  _getTokens(); // Refresh the data
+                                }
+                              } else {
+                                showToast('注销失败');
+                              }
+                            },
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          backgroundColor: Colors.redAccent,
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.logout),
+                            SizedBox(width: 8),
+                            Text(
+                              '注销',
+                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-            const ListTile(
-              dense: true,
-              title: Center(child: Text('Client ID', style: TextStyle(fontSize: 20))),
-            ),
-            ListTile(
-              title: Center(
-                child: SelectableText(clientID, style: const TextStyle(color: Colors.blue)),
-              ),
-            ),
-            const ListTile(
-              dense: true,
-              title: Center(child: Text('Access Token', style: TextStyle(fontSize: 20))),
-            ),
-            ListTile(
-              title: Center(
-                child: SelectableText(accessToken, style: const TextStyle(color: Colors.blue)),
-              ),
-            ),
-            const ListTile(
-              dense: true,
-              title: Center(child: Text('代理', style: TextStyle(fontSize: 20))),
-            ),
-            ListTile(
-              title: Center(
-                child: SelectableText(proxy, style: const TextStyle(color: Colors.blue)),
-              ),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () async {
-                showCupertinoAlertDialogWithConfirmFunc(
-                  content: '是否注销用户?',
-                  title: '注销',
-                  context: context,
-                  onConfirm: () async {
-                    var queryResult = await ImgurManageAPI.readImgurManageConfig();
-                    if (queryResult != 'Error') {
-                      var jsonResult = jsonDecode(queryResult);
-                      String imgurUser = jsonResult['imguruser'];
-                      String clientID = jsonResult['clientid'];
-                      String accessToken = 'None';
-                      String proxy = 'None';
-                      await ImgurManageAPI.saveImgurManageConfig(imgurUser, clientID, accessToken, proxy);
-                      showToast('注销成功');
-                      if (mounted) {
-                        Navigator.pop(context);
-                      }
-                    } else {
-                      showToast('注销失败');
-                    }
-                  },
-                );
-              },
-              child: const Text('注销'),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

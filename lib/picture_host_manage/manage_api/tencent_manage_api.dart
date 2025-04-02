@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:crypto/crypto.dart';
+import 'package:horopic/picture_host_manage/common/base_manage_api.dart';
 import 'package:xml2json/xml2json.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -11,7 +12,15 @@ import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/picture_host_configure/configure_page/tencent_configure.dart';
 import 'package:horopic/api/tencent_api.dart';
 
-class TencentManageAPI {
+class TencentManageAPI extends BaseManageApi {
+  static final TencentManageAPI _instance = TencentManageAPI._internal();
+
+  factory TencentManageAPI() {
+    return _instance;
+  }
+
+  TencentManageAPI._internal();
+
   static Map<String, String> areaCodeName = {
     'ap-beijing-1': '北京一区',
     'ap-beijing': '北京',
@@ -37,38 +46,11 @@ class TencentManageAPI {
     'eu-frankfurt': '法兰克福'
   };
 
-  static Future<File> get localFile async {
-    String path = await _localPath;
-    String defaultUser = Global.getUser();
-    return ensureFileExists(File('$path/${defaultUser}_tencent_config.txt'));
-  }
-
-  static Future<String> get _localPath async {
-    final directory = await getApplicationDocumentsDirectory();
-    return directory.path;
-  }
-
-  static Future<String> readTencentConfig() async {
-    try {
-      final file = await localFile;
-      return await file.readAsString();
-    } catch (e) {
-      flogErr(e, {}, "TencentManageAPI", "readTencentConfig");
-      return "Error";
-    }
-  }
-
-  static Future<Map> getConfigMap() async {
-    String configStr = await readTencentConfig();
-    if (configStr == '') {
-      return {};
-    }
-    Map configMap = json.decode(configStr);
-    return configMap;
-  }
+  @override
+  String configFileName() => 'tencent_config.txt';
 
   //authorization
-  static String tecentAuthorization(
+  String tecentAuthorization(
       String method, String urlpath, Map header, String secretId, String secretKey, Map? urlParam) {
     int startTimestamp = DateTime.now().millisecondsSinceEpoch ~/ 1000;
     int endTimestamp = startTimestamp + 86400;
@@ -129,247 +111,225 @@ class TencentManageAPI {
     return authorization;
   }
 
+  Future<List<dynamic>> _makeRequest(
+      {required String url,
+      required String method,
+      Map<String, dynamic>? headers,
+      Map<String, dynamic>? params,
+      dynamic data,
+      required Function(Response) onSuccess,
+      String callFunction = '_makeRequest',
+      required Function checkSuccess}) async {
+    BaseOptions baseoptions = setBaseOptions();
+    if (headers != null) {
+      baseoptions.headers = headers;
+    }
+
+    Dio dio = Dio(baseoptions);
+    try {
+      Response response;
+      if (method == 'GET') {
+        response = await dio.get(url, queryParameters: params);
+      } else if (method == 'POST') {
+        response = await dio.post(url, data: data, queryParameters: params);
+      } else if (method == 'DELETE') {
+        response = await dio.delete(url, data: data, queryParameters: params);
+      } else if (method == 'PUT') {
+        response = await dio.put(url, data: data, queryParameters: params);
+      } else {
+        throw Exception('Unsupported HTTP method: $method');
+      }
+
+      if (checkSuccess(response)) {
+        return onSuccess(response);
+      }
+      flogErr(
+          response,
+          {
+            'url': url,
+            'data': data,
+            'method': method,
+            'params': params,
+            'headers': headers,
+          },
+          "TencentManageAPI",
+          callFunction);
+      return ['failed'];
+    } catch (e) {
+      flogErr(e, {'url': url, 'data': data, 'method': method, 'params': params, 'headers': headers}, "TencentManageAPI",
+          callFunction);
+      return [e.toString()];
+    }
+  }
+
   //获取存储桶列表
-  static getBucketList() async {
+  getBucketList() async {
     try {
       Map configMap = await getConfigMap();
-      String method = 'GET';
-      String urlpath = '/';
-      String secretId = configMap['secretId'];
-      String secretKey = configMap['secretKey'];
-
-      String host = 'service.cos.myqcloud.com';
-
-      Map header = {
+      Map<String, dynamic> header = {
         'Host': 'service.cos.myqcloud.com',
       };
-
-      String authorization = tecentAuthorization(method, urlpath, header, secretId, secretKey, {});
-
-      BaseOptions baseoptions = setBaseOptions();
-      baseoptions.headers = {
-        'Authorization': authorization,
-        'Host': host,
-      };
-      Dio dio = Dio(baseoptions);
-
-      var response = await dio.get('https://$host');
-      if (response.statusCode == 200) {
-        String responseBody = response.data;
-        final myTransformer = Xml2Json();
-        myTransformer.parse(responseBody);
-        Map responseMap = json.decode(myTransformer.toParker());
-        return ['success', responseMap];
-      } else {
-        return ['failed'];
-      }
+      String authorization = tecentAuthorization('GET', '/', header, configMap['secretId'], configMap['secretKey'], {});
+      header['Authorization'] = authorization;
+      return await _makeRequest(
+        url: 'https://service.cos.myqcloud.com',
+        method: 'GET',
+        headers: header,
+        onSuccess: (response) {
+          String responseBody = response.data;
+          final myTransformer = Xml2Json();
+          myTransformer.parse(responseBody);
+          Map responseMap = json.decode(myTransformer.toParker());
+          return ['success', responseMap];
+        },
+        checkSuccess: (response) => response.statusCode == 200,
+        callFunction: 'getBucketList',
+      );
     } catch (e) {
       flogErr(e, {}, "TencentManageAPI", "getBucketList");
-      return [e.toString()];
+      return ['failed'];
     }
   }
 
   //新建存储桶
-  static createBucket(Map newBucketConfigMap) async {
+  createBucket(Map newBucketConfigMap) async {
     try {
       Map configMap = await getConfigMap();
-      String appId = configMap['appId'];
       String bucket = newBucketConfigMap['bucketName'];
       String region = newBucketConfigMap['region'];
+      if (!bucket.endsWith('-appId')) {
+        bucket = '$bucket-${configMap['appId']}';
+      }
       bool multiAZ = newBucketConfigMap['multiAZ'];
-      String xCosACL = newBucketConfigMap['xCosACL'];
-
-      if (multiAZ == true &&
-          (region != 'ap-beijing' && region != 'ap-guangzhou') &&
-          (region != 'ap-shanghai' && region != 'ap-singapore')) {
+      List multiAZList = ['ap-beijing', 'ap-guangzhou', 'ap-shanghai', 'ap-singapore'];
+      if (multiAZ == true && !multiAZList.contains(region)) {
         return [
           'multiAZ error',
         ];
       }
-      var body = '<CreateBucketConfiguration><BucketAZConfig>MAZ</BucketAZConfig></CreateBucketConfiguration>';
-      var bodyMd5 = md5.convert(utf8.encode(body));
-      String base64BodyMd5 = base64.encode(bodyMd5.bytes);
-      if (!bucket.endsWith('-appId')) {
-        bucket = '$bucket-$appId';
-      }
-
-      String method = 'PUT';
-      String urlpath = '/';
-      String secretId = configMap['secretId'];
-      String secretKey = configMap['secretKey'];
-      String host = '$bucket.cos.$region.myqcloud.com';
+      String body = '<CreateBucketConfiguration><BucketAZConfig>MAZ</BucketAZConfig></CreateBucketConfiguration>';
+      String bodyMd5 = base64.encode(md5.convert(utf8.encode(body)).bytes);
       Map<String, dynamic> header = {
-        'Host': host,
-        'x-cos-acl': xCosACL,
+        'Host': '$bucket.cos.$region.myqcloud.com',
+        'x-cos-acl': newBucketConfigMap['xCosACL'],
+        if (multiAZ == true) ...{
+          'content-type': 'application/xml',
+          'content-length': body.length.toString(),
+          'content-md5': bodyMd5,
+        },
       };
-
-      if (multiAZ == true) {
-        header['content-type'] = 'application/xml';
-        header['content-length'] = body.length.toString();
-        header['content-md5'] = base64BodyMd5;
-      }
-
-      String authorization = tecentAuthorization(method, urlpath, header, secretId, secretKey, {});
-
-      BaseOptions baseoptions = setBaseOptions();
-      baseoptions.headers = header;
-      baseoptions.headers['Authorization'] = authorization;
-      Dio dio = Dio(baseoptions);
-
-      Response response;
-      if (multiAZ == true) {
-        response = await dio.put('https://$host', data: body);
-      } else {
-        response = await dio.put('https://$host');
-      }
-
-      if (response.statusCode == 200) {
-        return ['success'];
-      } else {
-        return ['failed'];
-      }
+      String authorization = tecentAuthorization('PUT', '/', header, configMap['secretId'], configMap['secretKey'], {});
+      header['Authorization'] = authorization;
+      return await _makeRequest(
+        url: 'https://$bucket.cos.$region.myqcloud.com',
+        method: 'PUT',
+        headers: header,
+        data: multiAZ == true ? body : null,
+        onSuccess: (response) => ['success'],
+        checkSuccess: (response) => response.statusCode == 200,
+        callFunction: 'createBucket',
+      );
     } catch (e) {
       flogErr(e, {'newBucketConfigMap': newBucketConfigMap}, "TencentManageAPI", "createBucket");
-      return [e.toString()];
+      return ['failed'];
     }
   }
 
   //删除存储桶
-  static deleteBucket(Map element) async {
+  deleteBucket(Map element) async {
     try {
       Map configMap = await getConfigMap();
-      String bucket = element['name'];
-      String region = element['location'];
-
-      String method = 'DELETE';
-      String urlpath = '/';
-      String secretId = configMap['secretId'];
-      String secretKey = configMap['secretKey'];
-      String host = '$bucket.cos.$region.myqcloud.com';
+      String host = '${element['name']}.cos.${element['location']}.myqcloud.com';
       Map<String, dynamic> header = {
         'Host': host,
       };
-      String authorization = tecentAuthorization(method, urlpath, header, secretId, secretKey, {});
-
-      BaseOptions baseoptions = setBaseOptions();
-      baseoptions.headers = header;
-      baseoptions.headers['Authorization'] = authorization;
-      Dio dio = Dio(baseoptions);
-
-      var response = await dio.delete('https://$host');
-
-      if (response.statusCode == 204) {
-        return ['success'];
-      } else {
-        return ['failed'];
-      }
-    } catch (e) {
-      flogErr(
-        e,
-        {'element': element},
-        "TencentManageAPI",
-        "deleteBucket",
+      String authorization =
+          tecentAuthorization('DELETE', '/', header, configMap['secretId'], configMap['secretKey'], {});
+      header['Authorization'] = authorization;
+      return await _makeRequest(
+        url: 'https://$host',
+        method: 'DELETE',
+        headers: header,
+        onSuccess: (response) => ['success'],
+        checkSuccess: (response) => response.statusCode == 204,
+        callFunction: 'deleteBucket',
       );
-      return [e.toString()];
+    } catch (e) {
+      flogErr(e, {'element': element}, "TencentManageAPI", "deleteBucket");
+      return ['failed'];
     }
   }
 
   //查询存储桶权限
-  static queryACLPolicy(Map element) async {
+  queryACLPolicy(Map element) async {
     try {
       Map configMap = await getConfigMap();
-      String bucket = element['name'];
-      String region = element['location'];
-
-      String method = 'GET';
-      String urlpath = '/';
-      String secretId = configMap['secretId'];
-      String secretKey = configMap['secretKey'];
-      String host = '$bucket.cos.$region.myqcloud.com';
       Map<String, dynamic> header = {
-        'Host': host,
+        'Host': '${element['name']}.cos.${element['location']}.myqcloud.com',
       };
-      String authorization = tecentAuthorization(method, urlpath, header, secretId, secretKey, {'acl': ''});
-
-      BaseOptions baseoptions = setBaseOptions();
-      baseoptions.headers = header;
-      baseoptions.headers['Authorization'] = authorization;
-      Dio dio = Dio(baseoptions);
-
-      var response = await dio.get('https://$host/?acl');
-      var responseBody = response.data;
-      final myTransformer = Xml2Json();
-      myTransformer.parse(responseBody);
-      Map responseMap = json.decode(myTransformer.toParker());
-
-      if (response.statusCode == 200) {
-        return ['success', responseMap];
-      } else {
-        return ['failed'];
-      }
+      String authorization =
+          tecentAuthorization('GET', '/', header, configMap['secretId'], configMap['secretKey'], {'acl': ''});
+      header['Authorization'] = authorization;
+      return await _makeRequest(
+        url: 'https://${element['name']}.cos.${element['location']}.myqcloud.com/?acl',
+        method: 'GET',
+        headers: header,
+        onSuccess: (response) {
+          String responseBody = response.data;
+          final myTransformer = Xml2Json();
+          myTransformer.parse(responseBody);
+          Map responseMap = json.decode(myTransformer.toParker());
+          return ['success', responseMap];
+        },
+        checkSuccess: (response) => response.statusCode == 200,
+        callFunction: 'queryACLPolicy',
+      );
     } catch (e) {
       flogErr(e, {'element': element}, "TencentManageAPI", "queryACLPolicy");
-      return [e.toString()];
+      return ['failed'];
     }
   }
 
   //更改存储桶权限
-  static changeACLPolicy(Map element, String newACL) async {
+  changeACLPolicy(Map element, String newACL) async {
     try {
       Map configMap = await getConfigMap();
-      String bucket = element['name'];
-      String region = element['location'];
-
-      String method = 'PUT';
-      String urlpath = '/';
-      String secretId = configMap['secretId'];
-      String secretKey = configMap['secretKey'];
-      String host = '$bucket.cos.$region.myqcloud.com';
       Map<String, dynamic> header = {
-        'Host': host,
+        'Host': '${element['name']}.cos.${element['location']}.myqcloud.com',
         'x-cos-acl': newACL,
       };
-      String authorization = tecentAuthorization(method, urlpath, header, secretId, secretKey, {'acl': ''});
-
-      BaseOptions baseoptions = setBaseOptions();
-      baseoptions.headers = header;
-      baseoptions.headers['Authorization'] = authorization;
-      Dio dio = Dio(baseoptions);
-
-      var response = await dio.put('https://$host/?acl');
-      if (response.statusCode == 200) {
-        return ['success'];
-      } else {
-        return ['failed'];
-      }
+      String authorization =
+          tecentAuthorization('PUT', '/', header, configMap['secretId'], configMap['secretKey'], {'acl': ''});
+      header['Authorization'] = authorization;
+      return await _makeRequest(
+        url: 'https://${element['name']}.cos.${element['location']}.myqcloud.com/?acl',
+        method: 'PUT',
+        headers: header,
+        onSuccess: (response) => ['success'],
+        checkSuccess: (response) => response.statusCode == 200,
+        callFunction: 'changeACLPolicy',
+      );
     } catch (e) {
       flogErr(e, {'element': element, 'newACL': newACL}, "TencentManageAPI", "changeACLPolicy");
-      return [e.toString()];
+      return ['failed'];
     }
   }
 
   //存储桶设为默认图床
-  static setDefaultBucket(Map element, String? folder) async {
+  setDefaultBucket(Map element, String? folder) async {
     try {
       Map configMap = await getConfigMap();
-      String secretId = configMap['secretId'];
-      String secretKey = configMap['secretKey'];
-      String appId = configMap['appId'];
-      String path = '';
-      String customUrl = configMap['customUrl'];
-      String options = configMap['options'];
-      String area = element['location'];
-      String bucket = element['name'];
-
-      if (folder == null) {
-        path = configMap['path'];
-      } else {
-        path = folder;
-      }
-
-      final tencentConfig = TencentConfigModel(secretId, secretKey, bucket, appId, area, path, customUrl, options);
+      final tencentConfig = TencentConfigModel(
+          configMap['secretId'],
+          configMap['secretKey'],
+          element['name'],
+          configMap['appId'],
+          element['location'],
+          folder ?? configMap['path'],
+          configMap['customUrl'],
+          configMap['options']);
       final tencentConfigJson = jsonEncode(tencentConfig);
-      final tencentConfigFile = await localFile;
+      final tencentConfigFile = await localFile();
       await tencentConfigFile.writeAsString(tencentConfigJson);
       return ['success'];
     } catch (e) {
@@ -379,23 +339,19 @@ class TencentManageAPI {
   }
 
   //查询存储桶文件列表
-  static queryBucketFiles(Map element, Map<String, dynamic> query) async {
+  queryBucketFiles(Map element, Map<String, dynamic> query) async {
     try {
       Map configMap = await getConfigMap();
       String bucket = element['name'];
       String region = element['location'];
-
-      String method = 'GET';
-      String urlpath = '/';
-      String secretId = configMap['secretId'];
-      String secretKey = configMap['secretKey'];
       String host = '$bucket.cos.$region.myqcloud.com';
       Map<String, dynamic> header = {
         'Host': host,
       };
       query['max-keys'] = 1000;
 
-      String authorization = tecentAuthorization(method, urlpath, header, secretId, secretKey, query);
+      String authorization =
+          tecentAuthorization('GET', '/', header, configMap['secretId'], configMap['secretKey'], query);
 
       BaseOptions baseoptions = setBaseOptions();
       baseoptions.headers = header;
@@ -408,58 +364,56 @@ class TencentManageAPI {
       final myTransformer = Xml2Json();
       myTransformer.parse(responseBody);
       Map responseMap = json.decode(myTransformer.toParker());
-      if (response.statusCode == 200) {
-        if (responseMap['ListBucketResult']['IsTruncated'] == null ||
-            responseMap['ListBucketResult']['IsTruncated'] == 'false') {
-          return ['success', responseMap];
-        } else {
-          Map tempMap = Map.from(responseMap);
-          while (tempMap['ListBucketResult']['IsTruncated'] == 'true') {
-            marker = tempMap['ListBucketResult']['NextMarker'];
-            query['marker'] = marker;
-            response = await dio.get('https://$host', queryParameters: query);
-            responseBody = response.data;
-            myTransformer.parse(responseBody);
-            tempMap.clear();
-            tempMap = json.decode(myTransformer.toParker());
-            if (response.statusCode == 200) {
-              if (tempMap['ListBucketResult']['Contents'] != null) {
-                if (tempMap['ListBucketResult']['Contents'] is! List) {
-                  tempMap['ListBucketResult']['Contents'] = [tempMap['ListBucketResult']['Contents']];
-                }
-                if (responseMap['ListBucketResult']['Contents'] == null) {
-                  responseMap['ListBucketResult']['Contents'] = tempMap['ListBucketResult']['Contents'];
-                } else {
-                  if (responseMap['ListBucketResult']['Contents'] is! List) {
-                    responseMap['ListBucketResult']['Contents'] = [responseMap['ListBucketResult']['Contents']];
-                  }
-                  responseMap['ListBucketResult']['Contents'].addAll(tempMap['ListBucketResult']['Contents']);
-                }
-              }
-              if (tempMap['ListBucketResult']['CommonPrefixes'] != null) {
-                if (tempMap['ListBucketResult']['CommonPrefixes'] is! List) {
-                  tempMap['ListBucketResult']['CommonPrefixes'] = [tempMap['ListBucketResult']['CommonPrefixes']];
-                }
-                if (responseMap['ListBucketResult']['CommonPrefixes'] == null) {
-                  responseMap['ListBucketResult']['CommonPrefixes'] = tempMap['ListBucketResult']['CommonPrefixes'];
-                } else {
-                  if (responseMap['ListBucketResult']['CommonPrefixes'] is! List) {
-                    responseMap['ListBucketResult']
-                        ['CommonPrefixes'] = [responseMap['ListBucketResult']['CommonPrefixes']];
-                  }
-                  responseMap['ListBucketResult']['CommonPrefixes']
-                      .addAll(tempMap['ListBucketResult']['CommonPrefixes']);
-                }
-              }
-            } else {
-              return ['failed'];
-            }
-          }
-          return ['success', responseMap];
-        }
-      } else {
+      if (response.statusCode != 200) {
         return ['failed'];
       }
+
+      if (responseMap['ListBucketResult']['IsTruncated'] == null ||
+          responseMap['ListBucketResult']['IsTruncated'] == 'false') {
+        return ['success', responseMap];
+      }
+
+      Map tempMap = Map.from(responseMap);
+      while (tempMap['ListBucketResult']['IsTruncated'] == 'true') {
+        marker = tempMap['ListBucketResult']['NextMarker'];
+        query['marker'] = marker;
+        response = await dio.get('https://$host', queryParameters: query);
+        responseBody = response.data;
+        myTransformer.parse(responseBody);
+        tempMap.clear();
+        tempMap = json.decode(myTransformer.toParker());
+        if (response.statusCode != 200) {
+          return ['failed'];
+        }
+
+        if (tempMap['ListBucketResult']['Contents'] != null) {
+          if (tempMap['ListBucketResult']['Contents'] is! List) {
+            tempMap['ListBucketResult']['Contents'] = [tempMap['ListBucketResult']['Contents']];
+          }
+          if (responseMap['ListBucketResult']['Contents'] == null) {
+            responseMap['ListBucketResult']['Contents'] = tempMap['ListBucketResult']['Contents'];
+          } else {
+            if (responseMap['ListBucketResult']['Contents'] is! List) {
+              responseMap['ListBucketResult']['Contents'] = [responseMap['ListBucketResult']['Contents']];
+            }
+            responseMap['ListBucketResult']['Contents'].addAll(tempMap['ListBucketResult']['Contents']);
+          }
+        }
+        if (tempMap['ListBucketResult']['CommonPrefixes'] != null) {
+          if (tempMap['ListBucketResult']['CommonPrefixes'] is! List) {
+            tempMap['ListBucketResult']['CommonPrefixes'] = [tempMap['ListBucketResult']['CommonPrefixes']];
+          }
+          if (responseMap['ListBucketResult']['CommonPrefixes'] == null) {
+            responseMap['ListBucketResult']['CommonPrefixes'] = tempMap['ListBucketResult']['CommonPrefixes'];
+          } else {
+            if (responseMap['ListBucketResult']['CommonPrefixes'] is! List) {
+              responseMap['ListBucketResult']['CommonPrefixes'] = [responseMap['ListBucketResult']['CommonPrefixes']];
+            }
+            responseMap['ListBucketResult']['CommonPrefixes'].addAll(tempMap['ListBucketResult']['CommonPrefixes']);
+          }
+        }
+      }
+      return ['success', responseMap];
     } catch (e) {
       flogErr(e, {'element': element, 'query': query}, "TencentManageAPI", "queryBucketFiles");
       return [e.toString()];
@@ -467,272 +421,187 @@ class TencentManageAPI {
   }
 
   //判断是否为空存储桶
-  static isEmptyBucket(Map element) async {
+  isEmptyBucket(Map element) async {
     var queryResult = await queryBucketFiles(element, {});
-    if (queryResult[0] == 'success') {
-      if (queryResult[1]['ListBucketResult']['Contents'] == null &&
-          queryResult[1]['ListBucketResult']['CommonPrefixes'] == null) {
-        return ['empty'];
-      } else {
-        return ['notempty'];
-      }
-    } else {
+    if (queryResult[0] != 'success') {
       return ['error'];
     }
+    if (queryResult[1]['ListBucketResult']['Contents'] == null &&
+        queryResult[1]['ListBucketResult']['CommonPrefixes'] == null) {
+      return ['empty'];
+    }
+    return ['notempty'];
   }
 
   //删除文件
-  static deleteFile(Map element, String key) async {
+  deleteFile(Map element, String key) async {
     try {
       Map configMap = await getConfigMap();
-      String bucket = element['name'];
-      String region = element['location'];
-
-      String method = 'DELETE';
-      String urlpath = '/$key';
-      String secretId = configMap['secretId'];
-      String secretKey = configMap['secretKey'];
-      String host = '$bucket.cos.$region.myqcloud.com';
       Map<String, dynamic> header = {
-        'Host': host,
+        'Host': '${element['name']}.cos.${element['location']}.myqcloud.com',
       };
-      String authorization = tecentAuthorization(method, urlpath, header, secretId, secretKey, {});
-
-      BaseOptions baseoptions = setBaseOptions();
-      baseoptions.headers = header;
-      baseoptions.headers['Authorization'] = authorization;
-      Dio dio = Dio(baseoptions);
-
-      var response = await dio.delete('https://$host/$key');
-      if (response.statusCode == 204) {
-        return ['success'];
-      } else {
-        return ['failed'];
-      }
+      String authorization =
+          tecentAuthorization('DELETE', '/$key', header, configMap['secretId'], configMap['secretKey'], {});
+      header['Authorization'] = authorization;
+      return await _makeRequest(
+        url: 'https://${element['name']}.cos.${element['location']}.myqcloud.com/$key',
+        method: 'DELETE',
+        headers: header,
+        onSuccess: (response) => ['success'],
+        checkSuccess: (response) => response.statusCode == 204,
+        callFunction: 'deleteFile',
+      );
     } catch (e) {
       flogErr(e, {'element': element, 'key': key}, "TencentManageAPI", "deleteFile");
-      return [e.toString()];
-    }
-  }
-
-  //删除文件夹
-  static deleteFolder(Map element, String key) async {
-    var queryResult = await queryBucketFiles(element, {
-      'prefix': key,
-      'delimiter': '/',
-    });
-    if (queryResult[0] == 'success') {
-      if (queryResult[1]['ListBucketResult']['Contents'] != null) {
-        var contents = queryResult[1]['ListBucketResult']['Contents'];
-        if (contents is List) {
-          for (var i = 0; i < contents.length; i++) {
-            var deleteResult = await deleteFile(element, contents[i]['Key']);
-            if (deleteResult[0] != 'success') {
-              return ['failed'];
-            }
-          }
-        } else {
-          var deleteResult = await deleteFile(element, contents['Key']);
-          if (deleteResult[0] != 'success') {
-            return ['failed'];
-          }
-        }
-      }
-      if (queryResult[1]['ListBucketResult']['CommonPrefixes'] != null) {
-        var commonPrefixes = queryResult[1]['ListBucketResult']['CommonPrefixes'];
-        if (commonPrefixes is List) {
-          for (var i = 0; i < commonPrefixes.length; i++) {
-            var deleteResult = await deleteFolder(element, commonPrefixes[i]['Prefix']);
-            if (deleteResult[0] != 'success') {
-              return ['failed'];
-            }
-          }
-        } else {
-          var deleteResult = await deleteFolder(element, commonPrefixes['Prefix']);
-          if (deleteResult[0] != 'success') {
-            return ['failed'];
-          }
-        }
-      }
-      return ['success'];
-    } else {
       return ['failed'];
     }
   }
 
+  //删除文件夹
+  deleteFolder(Map element, String key) async {
+    var queryResult = await queryBucketFiles(element, {
+      'prefix': key,
+      'delimiter': '/',
+    });
+    if (queryResult[0] != 'success') {
+      return ['failed'];
+    }
+
+    if (queryResult[1]['ListBucketResult']['Contents'] != null) {
+      var contents = queryResult[1]['ListBucketResult']['Contents'];
+      if (contents is List) {
+        for (var i = 0; i < contents.length; i++) {
+          var deleteResult = await deleteFile(element, contents[i]['Key']);
+          if (deleteResult[0] != 'success') {
+            return ['failed'];
+          }
+        }
+      } else {
+        var deleteResult = await deleteFile(element, contents['Key']);
+        if (deleteResult[0] != 'success') {
+          return ['failed'];
+        }
+      }
+    }
+    if (queryResult[1]['ListBucketResult']['CommonPrefixes'] != null) {
+      var commonPrefixes = queryResult[1]['ListBucketResult']['CommonPrefixes'];
+      if (commonPrefixes is List) {
+        for (var i = 0; i < commonPrefixes.length; i++) {
+          var deleteResult = await deleteFolder(element, commonPrefixes[i]['Prefix']);
+          if (deleteResult[0] != 'success') {
+            return ['failed'];
+          }
+        }
+      } else {
+        var deleteResult = await deleteFolder(element, commonPrefixes['Prefix']);
+        if (deleteResult[0] != 'success') {
+          return ['failed'];
+        }
+      }
+    }
+    return ['success'];
+  }
+
   //重命名文件
-  static copyFile(Map element, String key, String newKey) async {
+  copyFile(Map element, String key, String newKey) async {
     try {
       Map configMap = await getConfigMap();
-      String bucket = element['name'];
-      String region = element['location'];
-
-      String method = 'PUT';
-
-      String secretId = configMap['secretId'];
-      String secretKey = configMap['secretKey'];
-      String host = '$bucket.cos.$region.myqcloud.com';
-      String newName = '';
-      if (key.substring(0, key.lastIndexOf('/') + 1) == '') {
-        newName = newKey;
-      } else {
-        newName = key.substring(0, key.lastIndexOf('/') + 1) + newKey;
-      }
-      String urlpath = '/$newName';
-      String xCosCopySource = '/$bucket.cos.$region.myqcloud.com/${Uri.encodeComponent(key)}';
-
+      String host = '${element['name']}.cos.${element['location']}.myqcloud.com';
+      String newName = key.substring(0, key.lastIndexOf('/') + 1) == ''
+          ? newKey
+          : key.substring(0, key.lastIndexOf('/') + 1) + newKey;
       Map<String, dynamic> header = {
         'Host': host,
-        'x-cos-copy-source': xCosCopySource,
+        'x-cos-copy-source': '/$host/${Uri.encodeComponent(key)}',
       };
-      String authorization = tecentAuthorization(method, urlpath, header, secretId, secretKey, {});
-
-      BaseOptions baseoptions = setBaseOptions();
-      baseoptions.headers = header;
-      baseoptions.headers['Authorization'] = authorization;
-      Dio dio = Dio(baseoptions);
-
-      var response = await dio.put('https://$host/$newName');
-      if (response.statusCode != 200) {
-        return ['failed'];
-      }
-      return ['success'];
-    } catch (e) {
-      flogErr(
-        e,
-        {'element': element, 'key': key, 'newKey': newKey},
-        "TencentManageAPI",
-        "copyFile",
+      String authorization =
+          tecentAuthorization('PUT', '/$newName', header, configMap['secretId'], configMap['secretKey'], {});
+      header['Authorization'] = authorization;
+      return await _makeRequest(
+        url: 'https://$host/$newName',
+        method: 'PUT',
+        headers: header,
+        onSuccess: (response) => ['success'],
+        checkSuccess: (response) => response.statusCode == 200,
+        callFunction: 'copyFile',
       );
-      return [e.toString()];
+    } catch (e) {
+      flogErr(e, {'element': element, 'key': key}, "TencentManageAPI", "copyFile");
+      return ['failed'];
     }
   }
 
   //查询是否有重名文件
-  static queryDuplicateName(Map element, String? prefix, String key) async {
+  queryDuplicateName(Map element, String? prefix, String key) async {
     var queryResult = await queryBucketFiles(element, {
       'prefix': prefix,
       'delimiter': '/',
     });
-
-    if (queryResult[0] == 'success') {
-      if (queryResult[1]['ListBucketResult']['Contents'] != null) {
-        var contents = queryResult[1]['ListBucketResult']['Contents'];
-        if (contents is List) {
-          for (var i = 0; i < contents.length; i++) {
-            if (contents[i]['Key'] == key) {
-              return ['duplicate'];
-            }
-          }
-        } else {
-          if (contents['Key'] == key) {
-            return ['duplicate'];
-          }
-        }
-      }
-      if (queryResult[1]['ListBucketResult']['CommonPrefixes'] != null) {
-        var commonPrefixes = queryResult[1]['ListBucketResult']['CommonPrefixes'];
-        if (commonPrefixes is List) {
-          for (var i = 0; i < commonPrefixes.length; i++) {
-            if (commonPrefixes[i]['Prefix'] == key) {
-              return ['duplicate'];
-            }
-          }
-        } else {
-          if (commonPrefixes['Prefix'] == key) {
-            return ['duplicate'];
-          }
-        }
-      }
-      return ['notduplicate'];
-    } else {
+    if (queryResult[0] != 'success') {
       return ['error'];
     }
-  }
 
-  //下载文件
-  static downloadFile(Map element, String key, String path) async {
-    try {
-      Map configMap = await getConfigMap();
-      String bucket = element['name'];
-      String region = element['location'];
-
-      String method = 'GET';
-
-      String secretId = configMap['secretId'];
-      String secretKey = configMap['secretKey'];
-      String host = '$bucket.cos.$region.myqcloud.com';
-
-      String urlpath = '/$key';
-
-      Map<String, dynamic> header = {
-        'Host': host,
-      };
-      String authorization = tecentAuthorization(method, urlpath, header, secretId, secretKey, {});
-
-      BaseOptions baseoptions = setBaseOptions();
-      baseoptions.headers = header;
-      baseoptions.headers['Authorization'] = authorization;
-      Dio dio = Dio(baseoptions);
-
-      Response response = await dio.download('https://$host/$key', path);
-      if (response.statusCode == 200) {
-        return ['success'];
+    if (queryResult[1]['ListBucketResult']['Contents'] != null) {
+      var contents = queryResult[1]['ListBucketResult']['Contents'];
+      if (contents is List) {
+        for (var i = 0; i < contents.length; i++) {
+          if (contents[i]['Key'] == key) {
+            return ['duplicate'];
+          }
+        }
       } else {
-        return ['failed'];
+        if (contents['Key'] == key) {
+          return ['duplicate'];
+        }
       }
-    } catch (e) {
-      flogErr(
-        e,
-        {'element': element, 'key': key, 'path': path},
-        "TencentManageAPI",
-        "downloadFile",
-      );
-      return [e.toString()];
     }
+    if (queryResult[1]['ListBucketResult']['CommonPrefixes'] != null) {
+      var commonPrefixes = queryResult[1]['ListBucketResult']['CommonPrefixes'];
+      if (commonPrefixes is List) {
+        for (var i = 0; i < commonPrefixes.length; i++) {
+          if (commonPrefixes[i]['Prefix'] == key) {
+            return ['duplicate'];
+          }
+        }
+      } else {
+        if (commonPrefixes['Prefix'] == key) {
+          return ['duplicate'];
+        }
+      }
+    }
+    return ['notduplicate'];
   }
 
   //新建文件夹
-  static createFolder(Map element, String prefix, String newfolder) async {
+  createFolder(Map element, String prefix, String newfolder) async {
     try {
       Map configMap = await getConfigMap();
-      String bucket = element['name'];
-      String region = element['location'];
-
-      String method = 'PUT';
-
-      String secretId = configMap['secretId'];
-      String secretKey = configMap['secretKey'];
-      String host = '$bucket.cos.$region.myqcloud.com';
-
       String urlpath = '/$prefix$newfolder';
       if (urlpath.substring(urlpath.length - 1) != '/') {
         urlpath = '$urlpath/';
       }
-
       Map<String, dynamic> header = {
-        'Host': host,
+        'Host': '${element['name']}.cos.${element['location']}.myqcloud.com',
       };
-      String authorization = tecentAuthorization(method, urlpath, header, secretId, secretKey, {});
-
-      BaseOptions baseoptions = setBaseOptions();
-      baseoptions.headers = header;
-      baseoptions.headers['Authorization'] = authorization;
-      Dio dio = Dio(baseoptions);
-
-      var response = await dio.put('https://$host$urlpath');
-      if (response.statusCode != 200) {
-        return ['failed'];
-      }
-      return ['success'];
+      String authorization =
+          tecentAuthorization('PUT', urlpath, header, configMap['secretId'], configMap['secretKey'], {});
+      header['Authorization'] = authorization;
+      return await _makeRequest(
+        url: 'https://${element['name']}.cos.${element['location']}.myqcloud.com$urlpath',
+        method: 'PUT',
+        headers: header,
+        onSuccess: (response) => ['success'],
+        checkSuccess: (response) => response.statusCode == 200,
+        callFunction: 'createFolder',
+      );
     } catch (e) {
       flogErr(e, {'element': element, 'prefix': prefix, 'newfolder': newfolder}, "TencentManageAPI", "createFolder");
-      return [e.toString()];
+      return ['failed'];
     }
   }
 
   //上传文件
-  static uploadFile(
+  uploadFile(
     Map element,
     String filename,
     String filepath,
@@ -806,7 +675,7 @@ class TencentManageAPI {
   }
 
   //上传文件API入口
-  static upLoadFileEntry(List fileList, Map element, String prefix) async {
+  upLoadFileEntry(List fileList, Map element, String prefix) async {
     int successCount = 0;
     int failCount = 0;
 
@@ -833,13 +702,12 @@ class TencentManageAPI {
       return showToast('上传失败');
     } else if (failCount == 0) {
       return showToast('上传成功');
-    } else {
-      return showToast('成功$successCount,失败$failCount');
     }
+    return showToast('成功$successCount,失败$failCount');
   }
 
   //从网络链接下载文件后上传
-  static uploadNetworkFile(String fileLink, Map element, String prefix) async {
+  uploadNetworkFile(String fileLink, Map element, String prefix) async {
     try {
       String filename = fileLink.substring(fileLink.lastIndexOf("/") + 1, fileLink.length);
       filename = filename.substring(0, !filename.contains("?") ? filename.length : filename.indexOf("?"));
@@ -870,7 +738,7 @@ class TencentManageAPI {
     }
   }
 
-  static uploadNetworkFileEntry(List fileList, Map element, String prefix) async {
+  uploadNetworkFileEntry(List fileList, Map element, String prefix) async {
     int successCount = 0;
     int failCount = 0;
 
@@ -890,8 +758,7 @@ class TencentManageAPI {
       return showToast('上传失败');
     } else if (failCount == 0) {
       return showToast('上传成功');
-    } else {
-      return showToast('成功$successCount,失败$failCount');
     }
+    return showToast('成功$successCount,失败$failCount');
   }
 }

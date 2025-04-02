@@ -31,7 +31,7 @@ class UploadManager extends BaseUploadManager {
     if (!uploadPath.endsWith('/')) {
       uploadPath = '$uploadPath/';
     }
-    webdav.Client client = await WebdavManageAPI.getWebdavClient();
+    webdav.Client client = await WebdavManageAPI().getWebdavClient();
     await client.writeFromFile(path, uploadPath + fileName, onProgress: createCallback(path, fileName));
   }
 

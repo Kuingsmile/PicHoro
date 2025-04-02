@@ -99,6 +99,7 @@ class CompressConfigureState extends State<CompressConfigure> {
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
+        leading: getLeadingIcon(context),
         title: titleText('压缩选项'),
         flexibleSpace: getFlexibleSpace(context),
       ),

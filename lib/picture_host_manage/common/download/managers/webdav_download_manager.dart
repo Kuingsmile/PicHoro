@@ -21,7 +21,7 @@ class DownloadManager extends BaseDownloadManager {
   @override
   Future<Map<String, dynamic>> getHeaders(String url,
       {bool isPartial = false, int partialFileLength = 0, Map? configMap = const {}}) async {
-    Map configMap = await WebdavManageAPI.getConfigMap();
+    Map configMap = await WebdavManageAPI().getConfigMap();
     String webdavusername = configMap['webdavusername'];
     String password = configMap['password'];
 

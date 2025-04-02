@@ -109,8 +109,12 @@ class AlistFileInformationState extends State<AlistFileInformation> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar:
-          AppBar(elevation: 0, centerTitle: true, title: titleText('文件基本信息'), flexibleSpace: getFlexibleSpace(context)),
+      appBar: AppBar(
+          elevation: 0,
+          centerTitle: true,
+          leading: getLeadingIcon(context),
+          title: titleText('文件基本信息'),
+          flexibleSpace: getFlexibleSpace(context)),
       body: ListView(
         physics: const BouncingScrollPhysics(),
         padding: const EdgeInsets.symmetric(vertical: 16.0),

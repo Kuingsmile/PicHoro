@@ -42,6 +42,7 @@ class AliyunNewBucketConfigState extends State<AliyunNewBucketConfig> {
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
+        leading: getLeadingIcon(context),
         title: titleText('新建存储桶'),
         flexibleSpace: getFlexibleSpace(context),
       ),
@@ -66,10 +67,10 @@ class AliyunNewBucketConfigState extends State<AliyunNewBucketConfig> {
               icon: const Icon(Icons.arrow_drop_down, size: 30),
               autofocus: true,
               value: newBucketConfig['region'],
-              items: AliyunManageAPI.areaCodeName.keys.map((e) {
+              items: AliyunManageAPI().areaCodeName.keys.map((e) {
                 return DropdownMenuItem(
                   value: e,
-                  child: Text('${AliyunManageAPI.areaCodeName[e]}'),
+                  child: Text('${AliyunManageAPI().areaCodeName[e]}'),
                 );
               }).toList(),
               onChanged: (value) {
@@ -109,19 +110,38 @@ class AliyunNewBucketConfigState extends State<AliyunNewBucketConfig> {
           ListTile(
             title: const Text('开启多AZ特性'),
             subtitle: const Text('仅限特定区域'),
-            trailing: Switch(
-              value: newBucketConfig['multiAZ'],
-              onChanged: (value) {
-                setState(() {
-                  newBucketConfig['multiAZ'] = value;
-                });
-              },
+            trailing: Tooltip(
+              message: '多可用区特性提供更高的数据可靠性',
+              child: Switch(
+                value: newBucketConfig['multiAZ'],
+                activeColor: Theme.of(context).primaryColor,
+                onChanged: (value) {
+                  setState(() {
+                    newBucketConfig['multiAZ'] = value;
+                  });
+                },
+              ),
             ),
           ),
-          ListTile(
-            subtitle: ElevatedButton(
+          const SizedBox(height: 20),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: ElevatedButton(
               onPressed: () async {
-                var result = await AliyunManageAPI.createBucket(newBucketConfig);
+                // Show loading indicator
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (context) => const Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                );
+
+                var result = await AliyunManageAPI().createBucket(newBucketConfig);
+
+                // Close loading indicator
+                if (mounted) Navigator.pop(context);
+
                 if (result[0] == 'success') {
                   resetBucketConfig();
                   if (mounted) {
@@ -130,17 +150,39 @@ class AliyunNewBucketConfigState extends State<AliyunNewBucketConfig> {
                   }
                 } else if (result[0] == 'multiAZ error') {
                   if (mounted) {
-                    showToastWithContext(context, "该区域不支持多AZ特性");
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text('创建失败'),
+                        content: const Text('该区域不支持多AZ特性，请关闭多AZ选项或选择其他区域'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text('确定'),
+                          ),
+                        ],
+                      ),
+                    );
                   }
                 } else {
                   if (mounted) {
-                    showToastWithContext(context, "创建失败");
+                    showToastWithContext(context, "创建失败: ${result[1]}");
                   }
                 }
               },
-              child: const Text('创建'),
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size.fromHeight(50),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: const Text(
+                '创建存储桶',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
             ),
           ),
+          const SizedBox(height: 30),
         ],
       ),
     );

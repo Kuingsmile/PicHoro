@@ -151,12 +151,8 @@ class TencentImageUploadUtils {
       }
 
       if (options == 'None') {
-        displayUrl = "$displayUrl?imageMogr2/thumbnail/500x500";
+        displayUrl = displayUrl;
       } else {
-        //网站后缀以?开头
-        if (!options.startsWith('?')) {
-          options = '?$options';
-        }
         returnUrl = '$returnUrl$options';
         displayUrl = '$displayUrl$options';
       }

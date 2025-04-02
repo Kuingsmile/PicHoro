@@ -31,7 +31,7 @@ class DownloadManager extends BaseDownloadManager {
     if (isPartial) {
       header['Range'] = 'bytes=$partialFileLength-';
     }
-    String authorization = await AliyunManageAPI.aliyunAuthorization(method, canonicalizedResource, header, '', '');
+    String authorization = await AliyunManageAPI().aliyunAuthorization(method, canonicalizedResource, header, '', '');
     header['Authorization'] = authorization;
     return header;
   }

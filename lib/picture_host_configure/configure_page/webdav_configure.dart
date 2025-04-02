@@ -36,7 +36,7 @@ class WebdavConfigState extends State<WebdavConfig> {
 
   _initConfig() async {
     try {
-      Map configMap = await WebdavManageAPI.getConfigMap();
+      Map configMap = await WebdavManageAPI().getConfigMap();
       _hostController.text = configMap['host'] ?? '';
       _usernameController.text = configMap['webdavusername'] ?? '';
       _passwdController.text = configMap['password'] ?? '';
@@ -246,7 +246,7 @@ class WebdavConfigState extends State<WebdavConfig> {
     try {
       final webdavConfig = WebdavConfigModel(host, username, password, uploadPath, customUrl, webPath);
       final webdavConfigJson = jsonEncode(webdavConfig);
-      final webdavConfigFile = await WebdavManageAPI.localFile;
+      final webdavConfigFile = await WebdavManageAPI().localFile();
       webdavConfigFile.writeAsString(webdavConfigJson);
       setState(() {});
       showToast('保存成功');
@@ -260,7 +260,7 @@ class WebdavConfigState extends State<WebdavConfig> {
 
   checkWebdavConfig() async {
     try {
-      Map configMap = await WebdavManageAPI.getConfigMap();
+      Map configMap = await WebdavManageAPI().getConfigMap();
       if (configMap.isEmpty) {
         if (context.mounted) {
           return showCupertinoAlertDialog(context: context, title: "检查失败!", content: "请先配置上传参数.");

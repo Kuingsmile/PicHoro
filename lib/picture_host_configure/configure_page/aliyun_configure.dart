@@ -44,7 +44,7 @@ class AliyunConfigState extends State<AliyunConfig> {
 
   _initConfig() async {
     try {
-      Map configMap = await AliyunManageAPI.getConfigMap();
+      Map configMap = await AliyunManageAPI().getConfigMap();
       _keyIdController.text = configMap['keyId'] ?? '';
       _keySecretController.text = configMap['keySecret'] ?? '';
       _bucketController.text = configMap['bucket'] ?? '';
@@ -261,13 +261,11 @@ class AliyunConfigState extends State<AliyunConfig> {
       //格式化网站后缀，以?开头
       if (options.isEmpty) {
         options = 'None';
-      } else if (!options.startsWith('?')) {
-        options = '?$options';
       }
 
       final aliyunConfig = AliyunConfigModel(keyId, keySecret, bucket, area, path, customUrl, options);
       final aliyunConfigJson = jsonEncode(aliyunConfig);
-      final aliyunConfigFile = await AliyunManageAPI.localFile;
+      final aliyunConfigFile = await AliyunManageAPI().localFile();
       await aliyunConfigFile.writeAsString(aliyunConfigJson);
       showToast('保存成功');
     } catch (e) {
@@ -280,7 +278,7 @@ class AliyunConfigState extends State<AliyunConfig> {
 
   checkAliyunConfig() async {
     try {
-      Map configMap = await AliyunManageAPI.getConfigMap();
+      Map configMap = await AliyunManageAPI().getConfigMap();
 
       if (configMap.isEmpty) {
         if (context.mounted) {

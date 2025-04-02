@@ -121,6 +121,7 @@ class SmmsFileInformationState extends State<SmmsFileInformation> {
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
+        leading: getLeadingIcon(context),
         title: titleText('文件基本信息'),
         flexibleSpace: getFlexibleSpace(context),
       ),

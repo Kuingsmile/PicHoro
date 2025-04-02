@@ -237,7 +237,7 @@ class TencentConfigureStoreEditState extends State<TencentConfigureStoreEdit> {
 
   _importConfig() async {
     try {
-      Map configMap = await TencentManageAPI.getConfigMap();
+      Map configMap = await TencentManageAPI().getConfigMap();
       _secretIdController.text = configMap['secretId'];
       _secretKeyController.text = configMap['secretKey'];
       _bucketController.text = configMap['bucket'];

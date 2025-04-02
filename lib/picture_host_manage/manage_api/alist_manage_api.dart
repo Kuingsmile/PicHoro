@@ -114,8 +114,8 @@ class AlistManageAPI extends BaseManageApi {
 
   refreshToken() async {
     Map configMap = await getConfigMap();
-    String uploadPath = configMap['uploadPath'];
-    String token = configMap['token'];
+    String uploadPath = configMap['uploadPath'] ?? 'None';
+    String token = configMap['token'] ?? '';
     var res = await getToken(configMap['host'], configMap['alistusername'], configMap['password']);
     if (res[0] != 'success') {
       return ['failed'];
@@ -188,7 +188,7 @@ class AlistManageAPI extends BaseManageApi {
     Map<String, dynamic>? headers,
     required Function onSuccess,
     String method = 'POST',
-    String callFunction = 'makeRequest',
+    String callFunction = '_makeRequest',
   }) async {
     try {
       Map configMap = await getConfigMap();
@@ -226,9 +226,18 @@ class AlistManageAPI extends BaseManageApi {
         "AlistManageAPI",
         callFunction,
       );
-      return [response.toString()];
+      return ['failed'];
     } catch (e) {
-      flogErr(e, {}, "AlistManageAPI", callFunction);
+      flogErr(
+          e,
+          {
+            'url': endpoint,
+            'data': data,
+            'queryParameters': queryParameters,
+            'headers': headers,
+          },
+          "AlistManageAPI",
+          callFunction);
       return [e.toString()];
     }
   }

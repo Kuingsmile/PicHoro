@@ -4,15 +4,10 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' as flutter_services;
-
 import 'package:external_path/external_path.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fluro/fluro.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:path/path.dart' as my_path;
-import 'package:pull_to_refresh/pull_to_refresh.dart';
-import 'package:msh_checkbox/msh_checkbox.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -25,9 +20,10 @@ import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/widgets/net_loading_dialog.dart';
 import 'package:horopic/utils/image_compressor.dart';
 import 'package:horopic/picture_host_manage/common/new_folder_widgets.dart';
-import 'package:horopic/widgets/common_widgets.dart';
+import 'package:horopic/picture_host_manage/common/base_file_explorer_page.dart';
+import 'package:horopic/picture_host_manage/common/build_bottom_widget.dart';
 
-class GithubFileExplorer extends StatefulWidget {
+class GithubFileExplorer extends BaseFileExplorer {
   final Map element;
   final String bucketPrefix;
   const GithubFileExplorer({super.key, required this.element, required this.bucketPrefix});
@@ -36,34 +32,37 @@ class GithubFileExplorer extends StatefulWidget {
   GithubFileExplorerState createState() => GithubFileExplorerState();
 }
 
-class GithubFileExplorerState extends loading_state.BaseLoadingPageState<GithubFileExplorer> {
+class GithubFileExplorerState extends BaseFileExplorerState<GithubFileExplorer> {
   Map config = {};
-  List fileAllInfoList = [];
-  List dirAllInfoList = [];
-  List allInfoList = [];
   String adminUserName = '';
   String suffixToken = 'None';
 
-  List selectedFilesBool = [];
-  RefreshController refreshController = RefreshController(initialRefresh: false);
   TextEditingController vc = TextEditingController();
   TextEditingController newFolder = TextEditingController();
   TextEditingController fileLink = TextEditingController();
-  bool sorted = true;
+
+  GithubManageAPI manageAPI = GithubManageAPI();
 
   @override
-  void initState() {
-    super.initState();
-    fileAllInfoList.clear();
-    dirAllInfoList.clear();
-    _getBucketList();
+  Future<void> initializeData() async {
+    await _getBucketList();
+  }
+
+  @override
+  Future<void> refreshData() async {
+    await _getBucketList();
   }
 
   _getBucketList() async {
-    var configMap = await GithubManageAPI.getConfigMap();
+    var configMap = await manageAPI.getConfigMap();
     adminUserName = configMap['githubusername'];
+    List files = [];
+    List dirs = [];
+    files.clear();
+    dirs.clear();
+    var rootDirSha = '';
     if (widget.bucketPrefix == '') {
-      var rootdir = await GithubManageAPI.getRootDirSha(
+      var rootdir = await manageAPI.getRootDirSha(
           widget.element['showedUsername'], widget.element['name'], widget.element['default_branch']);
       if (rootdir[0] != 'success') {
         if (mounted) {
@@ -73,134 +72,45 @@ class GithubFileExplorerState extends loading_state.BaseLoadingPageState<GithubF
         }
         return;
       }
-      var res =
-          await GithubManageAPI.getRepoDirList(widget.element['showedUsername'], widget.element['name'], rootdir[1]);
-      if (res[0] != 'success') {
-        if (mounted) {
-          setState(() {
-            state = loading_state.LoadState.error;
-          });
-        }
-        return;
-      }
-
-      List files = [];
-      List dirs = [];
-      files.clear();
-      dirs.clear();
-      for (var i = 0; i < res[1].length; i++) {
-        if (res[1][i]['type'] == 'blob') {
-          files.add(res[1][i]);
-        } else if (res[1][i]['type'] == 'tree') {
-          dirs.add(res[1][i]);
-        }
-      }
-      files.sort((a, b) => a['path'].compareTo(b['path']));
-      dirs.sort((a, b) => a['path'].compareTo(b['path']));
-      if (files.isEmpty) {
-        fileAllInfoList.clear();
-      } else {
-        fileAllInfoList.clear();
-        fileAllInfoList.addAll(files);
-      }
-      if (dirs.isEmpty) {
-        dirAllInfoList.clear();
-      } else {
-        dirAllInfoList.clear();
-        dirAllInfoList.addAll(dirs);
-      }
-      allInfoList.clear();
-      allInfoList.addAll(dirAllInfoList);
-      allInfoList.addAll(fileAllInfoList);
-      if (allInfoList.isEmpty) {
-        if (mounted) {
-          setState(() {
-            state = loading_state.LoadState.empty;
-          });
-        }
-      } else {
-        if (mounted) {
-          setState(() {
-            selectedFilesBool.clear();
-            for (var i = 0; i < allInfoList.length; i++) {
-              selectedFilesBool.add(false);
-            }
-            state = loading_state.LoadState.success;
-          });
-        }
-      }
-      return;
-    } else {
-      var res = await GithubManageAPI.getRepoDirList(
-          widget.element['showedUsername'], widget.element['name'], widget.element['bucketSha']);
-      if (res[0] != 'success') {
-        if (mounted) {
-          setState(() {
-            state = loading_state.LoadState.error;
-          });
-        }
-        return;
-      }
-
-      List files = [];
-      List dirs = [];
-      files.clear();
-      dirs.clear();
-      for (var i = 0; i < res[1].length; i++) {
-        if (res[1][i]['type'] == 'blob') {
-          files.add(res[1][i]);
-        } else if (res[1][i]['type'] == 'tree') {
-          dirs.add(res[1][i]);
-        }
-      }
-      files.sort((a, b) => a['path'].compareTo(b['path']));
-      dirs.sort((a, b) => a['path'].compareTo(b['path']));
-      if (files.isEmpty) {
-        fileAllInfoList.clear();
-      } else {
-        fileAllInfoList.clear();
-        fileAllInfoList.addAll(files);
-      }
-      if (dirs.isEmpty) {
-        dirAllInfoList.clear();
-      } else {
-        dirAllInfoList.clear();
-        dirAllInfoList.addAll(dirs);
-      }
-      allInfoList.clear();
-      allInfoList.addAll(dirAllInfoList);
-      allInfoList.addAll(fileAllInfoList);
-      if (allInfoList.isEmpty) {
-        if (mounted) {
-          setState(() {
-            state = loading_state.LoadState.empty;
-          });
-        }
-      } else {
-        if (mounted) {
-          setState(() {
-            selectedFilesBool.clear();
-            for (var i = 0; i < allInfoList.length; i++) {
-              selectedFilesBool.add(false);
-            }
-            state = loading_state.LoadState.success;
-          });
-        }
+      rootDirSha = rootdir[1];
+    }
+    var res = await manageAPI.getRepoDirList(widget.element['showedUsername'], widget.element['name'],
+        widget.bucketPrefix == '' ? rootDirSha : widget.element['bucketSha']);
+    if (res[0] != 'success') {
+      if (mounted) {
+        setState(() {
+          state = loading_state.LoadState.error;
+        });
       }
       return;
     }
-  }
 
-  _onrefresh() async {
-    _getBucketList();
-    refreshController.refreshCompleted();
+    for (var i = 0; i < res[1].length; i++) {
+      if (res[1][i]['type'] == 'blob') {
+        files.add(res[1][i]);
+      } else if (res[1][i]['type'] == 'tree') {
+        dirs.add(res[1][i]);
+      }
+    }
+    files.sort((a, b) => a['path'].compareTo(b['path']));
+    dirs.sort((a, b) => a['path'].compareTo(b['path']));
+    fileAllInfoList = files.isEmpty ? [] : List.from(files);
+    dirAllInfoList = dirs.isEmpty ? [] : List.from(dirs);
+    allInfoList = [...dirAllInfoList, ...fileAllInfoList];
+    if (mounted) {
+      setState(() {
+        if (allInfoList.isEmpty) {
+          state = loading_state.LoadState.empty;
+        } else {
+          selectedFilesBool = List.filled(allInfoList.length, false, growable: true);
+          state = loading_state.LoadState.success;
+        }
+      });
+    }
   }
 
   @override
-  void dispose() {
-    refreshController.dispose();
-    super.dispose();
-  }
+  bool isShowSortByDate() => false;
 
   downloadFile(String urlpath, String fileName) async {
     try {
@@ -218,1410 +128,500 @@ class GithubFileExplorerState extends loading_state.BaseLoadingPageState<GithubF
       );
       if (response.statusCode == 200) {
         return tempfile.path;
-      } else {
-        return 'error';
       }
+      return 'error';
     } catch (e) {
       flogErr(e, {}, 'githubFileExplorerState', 'downloadFile');
     }
     return 'error';
   }
 
-  @override
-  AppBar get appBar => AppBar(
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios,
-            size: 20,
-          ),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-        titleSpacing: 0,
-        flexibleSpace: getFlexibleSpace(context),
-        title: Text(
-            widget.bucketPrefix == ''
-                ? widget.element['name']
-                : widget.bucketPrefix.substring(0, widget.bucketPrefix.length - 1).split('/').last,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 15,
-              fontWeight: FontWeight.bold,
-            )),
-        actions: [
-          PopupMenuButton(
-            icon: const Icon(
-              Icons.sort,
-              color: Colors.white,
-              size: 25,
-            ),
-            position: PopupMenuPosition.under,
-            itemBuilder: (BuildContext context) {
-              return [
-                PopupMenuItem(
-                  child: const Center(
-                      child: Text(
-                    '文件名称排序',
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 15,
-                    ),
-                  )),
-                  onTap: () {
-                    if (sorted == true) {
-                      if (dirAllInfoList.isEmpty) {
-                        allInfoList.sort((a, b) {
-                          return a['path'].compareTo(b['path']);
-                        });
-                      } else {
-                        List temp = allInfoList.sublist(dirAllInfoList.length, allInfoList.length);
-                        temp.sort((a, b) {
-                          return a['path'].compareTo(b['path']);
-                        });
-                        allInfoList.clear();
-                        allInfoList.addAll(dirAllInfoList);
-                        allInfoList.addAll(temp);
-                      }
-                      setState(() {
-                        sorted = false;
-                      });
-                    } else {
-                      if (dirAllInfoList.isEmpty) {
-                        allInfoList.sort((a, b) {
-                          return b['path'].compareTo(a['path']);
-                        });
-                      } else {
-                        List temp = allInfoList.sublist(dirAllInfoList.length, allInfoList.length);
-                        temp.sort((a, b) {
-                          return b['path'].compareTo(a['path']);
-                        });
-                        allInfoList.clear();
-                        allInfoList.addAll(dirAllInfoList);
-                        allInfoList.addAll(temp);
-                      }
-                      setState(() {
-                        sorted = true;
-                      });
-                    }
-                  },
-                ),
-                PopupMenuItem(
-                  child: const Center(
-                      child: Text(
-                    '文件大小排序',
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 15,
-                    ),
-                  )),
-                  onTap: () {
-                    if (sorted == true) {
-                      if (dirAllInfoList.isEmpty) {
-                        allInfoList.sort((a, b) {
-                          return a['size'].compareTo(b['size']);
-                        });
-                      } else {
-                        List temp = allInfoList.sublist(dirAllInfoList.length, allInfoList.length);
-                        temp.sort((a, b) {
-                          return a['size'].compareTo(b['size']);
-                        });
-                        allInfoList.clear();
-                        allInfoList.addAll(dirAllInfoList);
-                        allInfoList.addAll(temp);
-                      }
-                      setState(() {
-                        sorted = false;
-                      });
-                    } else {
-                      if (dirAllInfoList.isEmpty) {
-                        allInfoList.sort((a, b) {
-                          return b['size'].compareTo(a['size']);
-                        });
-                      } else {
-                        List temp = allInfoList.sublist(dirAllInfoList.length, allInfoList.length);
-                        temp.sort((a, b) {
-                          return b['size'].compareTo(a['size']);
-                        });
-                        allInfoList.clear();
-                        allInfoList.addAll(dirAllInfoList);
-                        allInfoList.addAll(temp);
-                      }
-                      setState(() {
-                        sorted = true;
-                      });
-                    }
-                  },
-                ),
-                PopupMenuItem(
-                  child: const Center(
-                      child: Text(
-                    '文件类型排序',
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 15,
-                    ),
-                  )),
-                  onTap: () {
-                    if (sorted == true) {
-                      if (dirAllInfoList.isEmpty) {
-                        allInfoList.sort((a, b) {
-                          String type = a['path'].split('.').last;
-                          String type2 = b['path'].split('.').last;
-                          if (type.isEmpty) {
-                            return 1;
-                          } else if (type2.isEmpty) {
-                            return -1;
-                          } else {
-                            return type.compareTo(type2);
-                          }
-                        });
-                      } else {
-                        List temp = allInfoList.sublist(dirAllInfoList.length, allInfoList.length);
-                        temp.sort((a, b) {
-                          String type = a['path'].split('.').last;
-                          String type2 = b['path'].split('.').last;
-                          if (type.isEmpty) {
-                            return 1;
-                          } else if (type2.isEmpty) {
-                            return -1;
-                          } else {
-                            return type.compareTo(type2);
-                          }
-                        });
-                        allInfoList.clear();
-                        allInfoList.addAll(dirAllInfoList);
-                        allInfoList.addAll(temp);
-                      }
-                      setState(() {
-                        sorted = false;
-                      });
-                    } else {
-                      if (dirAllInfoList.isEmpty) {
-                        allInfoList.sort((a, b) {
-                          String type = a['path'].split('.').last;
-                          String type2 = b['path'].split('.').last;
-                          if (type.isEmpty) {
-                            return -1;
-                          } else if (type2.isEmpty) {
-                            return 1;
-                          } else {
-                            return type2.compareTo(type);
-                          }
-                        });
-                      } else {
-                        List temp = allInfoList.sublist(dirAllInfoList.length, allInfoList.length);
-                        temp.sort((a, b) {
-                          String type = a['path'].split('.').last;
-                          String type2 = b['path'].split('.').last;
-                          if (type.isEmpty) {
-                            return -1;
-                          } else if (type2.isEmpty) {
-                            return 1;
-                          } else {
-                            return type2.compareTo(type);
-                          }
-                        });
-                        allInfoList.clear();
-                        allInfoList.addAll(dirAllInfoList);
-                        allInfoList.addAll(temp);
-                      }
-                      setState(() {
-                        sorted = true;
-                      });
-                    }
-                  },
-                ),
-              ];
-            },
-          ),
-          IconButton(
-              onPressed: () {
-                showModalBottomSheet(
-                    context: context,
-                    builder: (BuildContext bc) {
-                      return SafeArea(
-                          child: Wrap(
-                        children: [
-                          ListTile(
-                            minLeadingWidth: 0,
-                            leading: const Icon(Icons.file_present_outlined, color: Colors.blue),
-                            title: const Text('上传文件(可多选)'),
-                            onTap: () async {
-                              if (widget.element['showedUsername'] != adminUserName) {
-                                showToast('您没有权限上传文件');
-                                return;
-                              }
-                              Navigator.pop(context);
-                              FilePickerResult? pickresult = await FilePicker.platform.pickFiles(
-                                allowMultiple: true,
-                              );
-                              if (pickresult == null) {
-                                showToast('未选择文件');
-                              } else {
-                                List<File> files = pickresult.paths.map((path) => File(path!)).toList();
-                                Map configMapTemp = await GithubManageAPI.getConfigMap();
-                                Map configMap = {};
-                                configMap['githubusername'] = configMapTemp['githubusername'];
-                                configMap['token'] = configMapTemp['token'];
-                                configMap['default_branch'] = widget.element['default_branch'];
-                                configMap['savePath'] = widget.bucketPrefix;
-                                configMap['repo'] = widget.element['name'];
-                                for (int i = 0; i < files.length; i++) {
-                                  if (Global.imgExt
-                                      .contains(my_path.extension(files[i].path).toLowerCase().substring(1))) {
-                                    if (Global.isCompress == true) {
-                                      files[i] = await compressAndGetFile(
-                                          files[i].path, my_path.basename(files[i].path), Global.defaultCompressFormat,
-                                          minHeight: Global.minHeight,
-                                          minWidth: Global.minWidth,
-                                          quality: Global.quality);
-                                    }
-                                  }
-                                  List uploadList = [files[i].path, my_path.basename(files[i].path), configMap];
-                                  String uploadListStr = jsonEncode(uploadList);
-                                  Global.githubUploadList.add(uploadListStr);
-                                }
-                                Global.setGithubUploadList(Global.githubUploadList);
-                                String downloadPath = await ExternalPath.getExternalStoragePublicDirectory(
-                                    ExternalPath.DIRECTORY_DOWNLOAD);
-                                if (mounted) {
-                                  Application.router
-                                      .navigateTo(context,
-                                          '/baseUpDownloadManagePage?userName=${Uri.encodeComponent(widget.element['showedUsername'])}&repoName=${Uri.encodeComponent(widget.element['name'])}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=0&currentListIndex=4',
-                                          transition: TransitionType.inFromRight)
-                                      .then((value) {
-                                    _getBucketList();
-                                  });
-                                }
-                              }
-                            },
-                          ),
-                          ListTile(
-                            minLeadingWidth: 0,
-                            leading: const Icon(Icons.image_outlined, color: Colors.blue),
-                            title: const Text('上传照片(可多选)'),
-                            onTap: () async {
-                              if (widget.element['showedUsername'] != adminUserName) {
-                                showToast('您没有权限上传照片');
-                                return;
-                              }
-                              Navigator.pop(context);
-                              AssetPickerConfig config = const AssetPickerConfig(
-                                maxAssets: 100,
-                                selectedAssets: [],
-                              );
-                              final List<AssetEntity>? pickedImage =
-                                  await AssetPicker.pickAssets(context, pickerConfig: config);
-                              if (pickedImage == null) {
-                                showToast('未选择照片');
-                              } else {
-                                List<File> files = [];
-                                for (var i = 0; i < pickedImage.length; i++) {
-                                  File? fileImage = await pickedImage[i].originFile;
-                                  if (fileImage != null) {
-                                    files.add(fileImage);
-                                  }
-                                }
-                                Map configMapTemp = await GithubManageAPI.getConfigMap();
-                                Map configMap = {};
-                                configMap['githubusername'] = configMapTemp['githubusername'];
-                                configMap['token'] = configMapTemp['token'];
-                                configMap['default_branch'] = widget.element['default_branch'];
-                                configMap['savePath'] = widget.bucketPrefix;
-                                configMap['repo'] = widget.element['name'];
-                                for (int i = 0; i < files.length; i++) {
-                                  if (Global.isCompress == true) {
-                                    files[i] = await compressAndGetFile(
-                                        files[i].path, my_path.basename(files[i].path), Global.defaultCompressFormat,
-                                        minHeight: Global.minHeight,
-                                        minWidth: Global.minWidth,
-                                        quality: Global.quality);
-                                  }
-                                  List uploadList = [files[i].path, my_path.basename(files[i].path), configMap];
-                                  String uploadListStr = jsonEncode(uploadList);
-                                  Global.githubUploadList.add(uploadListStr);
-                                }
-                                Global.setGithubUploadList(Global.githubUploadList);
-                                String downloadPath = await ExternalPath.getExternalStoragePublicDirectory(
-                                    ExternalPath.DIRECTORY_DOWNLOAD);
-                                if (mounted) {
-                                  Application.router
-                                      .navigateTo(context,
-                                          '/baseUpDownloadManagePage?userName=${Uri.encodeComponent(widget.element['showedUsername'])}&repoName=${Uri.encodeComponent(widget.element['name'])}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=0&currentListIndex=4',
-                                          transition: TransitionType.inFromRight)
-                                      .then((value) {
-                                    _getBucketList();
-                                  });
-                                }
-                              }
-                            },
-                          ),
-                          ListTile(
-                            minLeadingWidth: 0,
-                            leading: const Icon(Icons.link, color: Colors.blue),
-                            title: const Text('上传剪贴板内链接(换行分隔多个)'),
-                            onTap: () async {
-                              if (widget.element['showedUsername'] != adminUserName) {
-                                showToast('您没有权限上传链接');
-                                return;
-                              }
-                              Navigator.pop(context);
-                              var url = await flutter_services.Clipboard.getData('text/plain');
-                              if (url == null || url.text == null || url.text!.isEmpty) {
-                                if (mounted) {
-                                  showToastWithContext(context, "剪贴板为空");
-                                }
-                                return;
-                              }
-                              try {
-                                String urlStr = url.text!;
-                                List fileLinkList = urlStr.split("\n");
-                                if (context.mounted) {
-                                  await showDialog(
-                                      context: context,
-                                      barrierDismissible: false,
-                                      builder: (context) {
-                                        return NetLoadingDialog(
-                                          outsideDismiss: false,
-                                          loading: true,
-                                          loadingText: "上传中...",
-                                          requestCallBack: GithubManageAPI.uploadNetworkFileEntry(
-                                              fileLinkList, widget.element, widget.bucketPrefix),
-                                        );
-                                      });
-                                }
-                                _getBucketList();
-                              } catch (e) {
-                                flogErr(
-                                    e,
-                                    {
-                                      'url': url.text,
-                                    },
-                                    'GithubManagePage',
-                                    'uploadNetworkFileEntry');
-                                if (mounted) {
-                                  showToastWithContext(context, "错误");
-                                }
-                                return;
-                              }
-                            },
-                          ),
-                          ListTile(
-                            minLeadingWidth: 0,
-                            leading: const Icon(
-                              Icons.folder_open_outlined,
-                              color: Colors.blue,
-                            ),
-                            title: const Text('新建文件夹'),
-                            onTap: () async {
-                              if (widget.element['showedUsername'] != adminUserName) {
-                                showToastWithContext(context, "只有管理员才能新建文件夹");
-                                return;
-                              }
-                              Navigator.pop(context);
-                              showDialog(
-                                  barrierDismissible: false,
-                                  context: context,
-                                  builder: (context) {
-                                    return NewFolderDialog(
-                                      contentWidget: NewFolderDialogContent(
-                                        title: "  请输入新文件夹名\n / 分隔创建嵌套文件夹",
-                                        onConfirm: () async {
-                                          String newName = newFolder.text;
-                                          if (newName.isEmpty) {
-                                            return showToastWithContext(context, "文件夹名不能为空");
-                                          }
-                                          if (newName.startsWith("/")) {
-                                            newName = newName.substring(1);
-                                          }
-                                          var copyResult = await GithubManageAPI.createFolder(
-                                              widget.element, widget.bucketPrefix + newName);
-                                          if (copyResult[0] == 'success') {
-                                            showToast('创建成功');
-                                            setState(() {
-                                              _getBucketList();
-                                            });
-                                          } else {
-                                            showToast('创建失败');
-                                          }
-                                        },
-                                        folderNameController: newFolder,
-                                        onCancel: () {},
-                                      ),
-                                    );
-                                  });
-                            },
-                          ),
-                        ],
-                      ));
-                    });
-              },
-              icon: const Icon(
-                Icons.add,
-                color: Colors.white,
-                size: 30,
-              )),
-          IconButton(
-              onPressed: () async {
-                String downloadPath =
-                    await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
-                int index = 1;
-                if (Global.githubDownloadList.isEmpty) {
-                  index = 0;
-                }
-                if (mounted) {
-                  Application.router
-                      .navigateTo(context,
-                          '/baseUpDownloadManagePage?userName=${Uri.encodeComponent(widget.element['showedUsername'])}&repoName=${Uri.encodeComponent(widget.element['name'])}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=$index&currentListIndex=4',
-                          transition: TransitionType.inFromRight)
-                      .then((value) {
-                    _getBucketList();
-                  });
-                }
-              },
-              icon: const Icon(
-                Icons.import_export,
-                color: Colors.white,
-                size: 25,
-              )),
-          IconButton(
-            icon: selectedFilesBool.contains(true)
-                ? const Icon(Icons.delete, color: Color.fromARGB(255, 236, 127, 120), size: 30.0)
-                : const Icon(Icons.delete_outline, color: Colors.white, size: 30.0),
-            onPressed: () async {
-              if (!selectedFilesBool.contains(true) || selectedFilesBool.isEmpty) {
-                showToastWithContext(context, '没有选择文件');
-                return;
-              }
-              return showCupertinoAlertDialogWithConfirmFunc(
-                title: '删除全部文件',
-                content: '是否删除全部选择的文件？\n请谨慎选择!',
-                context: context,
-                onConfirm: () async {
-                  try {
-                    List<int> toDelete = [];
-                    for (int i = 0; i < allInfoList.length; i++) {
-                      if (selectedFilesBool[i]) {
-                        toDelete.add(i);
-                      }
-                    }
-                    await deleteAll(toDelete);
-                    showToast('删除完成');
-                  } catch (e) {
-                    flogErr(e, {}, 'GithubFileExplorerState', 'deleteAll');
-                    showToast('删除失败');
-                  }
-                },
-              );
-            },
-          ),
-        ],
-      );
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: appBar,
-      body: buildStateWidget,
-      floatingActionButtonLocation: state == loading_state.LoadState.error ||
-              state == loading_state.LoadState.empty ||
-              state == loading_state.LoadState.loading
-          ? null
-          : FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: state == loading_state.LoadState.error ||
-              state == loading_state.LoadState.empty ||
-              state == loading_state.LoadState.loading
-          ? null
-          : floatingActionButton,
-    );
+  bool isPublicFile() {
+    if (widget.element['showedUsername'].toString().toLowerCase() != adminUserName.toLowerCase() ||
+        widget.element['private'] == false) {
+      return true;
+    }
+    return false;
   }
 
-  Widget get floatingActionButton => Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          SizedBox(
-              height: 40,
-              width: 40,
-              child: FloatingActionButton(
-                heroTag: 'download',
-                backgroundColor:
-                    selectedFilesBool.contains(true) ? const Color.fromARGB(255, 180, 236, 182) : Colors.transparent,
-                onPressed: () async {
-                  if (!selectedFilesBool.contains(true) || selectedFilesBool.isEmpty) {
-                    showToastWithContext(context, '没有选择文件');
-                    return;
-                  }
-                  if (widget.element['showedUsername'] != adminUserName || widget.element['private'] == false) {
-                    List downloadList = [];
-                    for (int i = 0; i < allInfoList.length; i++) {
-                      if (selectedFilesBool[i] && i >= dirAllInfoList.length) {
-                        downloadList.add(allInfoList[i]);
-                      }
-                    }
-                    if (downloadList.isEmpty) {
-                      showToast('没有选择文件');
-                      return;
-                    }
-                    String hostPrefix =
-                        'https://ghproxy.com/https://raw.githubusercontent.com/${widget.element['showedUsername']}/${widget.element['name']}/${widget.element['default_branch']}/${widget.bucketPrefix}';
-                    List<String> urlList = [];
-                    for (int i = 0; i < downloadList.length; i++) {
-                      urlList.add(hostPrefix + downloadList[i]['path']);
-                    }
-                    Global.githubDownloadList.addAll(urlList);
-                    Global.setGithubDownloadList(Global.githubDownloadList);
-                    String downloadPath =
-                        await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
-                    Application.router.navigateTo(context,
-                        '/baseUpDownloadManagePage?userName=${Uri.encodeComponent(widget.element['showedUsername'])}&repoName=${Uri.encodeComponent(widget.element['name'])}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=1&currentListIndex=4',
-                        transition: TransitionType.inFromRight);
-                  } else {
-                    List downloadList = [];
-                    for (int i = 0; i < allInfoList.length; i++) {
-                      if (selectedFilesBool[i] && i >= dirAllInfoList.length) {
-                        downloadList.add(allInfoList[i]);
-                      }
-                    }
-                    if (downloadList.isEmpty) {
-                      showToast('没有选择文件');
-                      return;
-                    }
-                    showToast('私有仓库获取链接时间长，请耐心等待');
-                    List<String> urlList = [];
-                    for (int i = 0; i < downloadList.length; i++) {
-                      var result = await GithubManageAPI.getRepoFileContent(
-                        widget.element['showedUsername'],
-                        widget.element['name'],
-                        widget.bucketPrefix + downloadList[i]['path'],
-                      );
-                      if (result[0] == 'success') {
-                        urlList.add('https://ghproxy.com/${result[1]['download_url']}');
-                      }
-                    }
-                    Global.githubDownloadList.addAll(urlList);
-                    Global.setGithubDownloadList(Global.githubDownloadList);
-                    String downloadPath =
-                        await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
-                    Application.router.navigateTo(context,
-                        '/baseUpDownloadManagePage?userName=${Uri.encodeComponent(widget.element['showedUsername'])}&repoName=${Uri.encodeComponent(widget.element['name'])}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=1&currentListIndex=4',
-                        transition: TransitionType.inFromRight);
-                  }
-                },
-                child: const Icon(
-                  Icons.download,
-                  color: Colors.white,
-                  size: 25,
-                ),
-              )),
-          const SizedBox(width: 20),
-          SizedBox(
-              height: 40,
-              width: 40,
-              child: FloatingActionButton(
-                heroTag: 'copy',
-                backgroundColor:
-                    selectedFilesBool.contains(true) ? const Color.fromARGB(255, 232, 177, 241) : Colors.transparent,
-                elevation: 5,
-                onPressed: () async {
-                  if (!selectedFilesBool.contains(true)) {
-                    showToastWithContext(context, '请先选择文件');
-                    return;
-                  } else {
-                    if (widget.element['showedUsername'] != adminUserName || widget.element['private'] == false) {
-                      List multiUrls = [];
-                      for (int i = 0; i < allInfoList.length; i++) {
-                        if (selectedFilesBool[i]) {
-                          String finalFormatedurl = ' ';
-                          String rawurl = '';
-                          String fileName = '';
-                          rawurl =
-                              'https://raw.githubusercontent.com/${widget.element['showedUsername']}/${widget.element['name']}/${widget.element['default_branch']}/${widget.bucketPrefix}${allInfoList[i]['path']}';
-                          fileName = allInfoList[i]['path'];
-                          finalFormatedurl = getFormatedUrl(rawurl, fileName);
+  @override
+  Future<String> getShareUrl(int index) async {
+    String defaultUrl =
+        'https://raw.githubusercontent.com/${widget.element['showedUsername']}/${widget.element['name']}/${widget.element['default_branch']}/${widget.bucketPrefix}${allInfoList[index]['path']}';
+    if (isPublicFile()) {
+      return defaultUrl;
+    }
+    var res = await manageAPI.getRepoFileContent(
+      widget.element['showedUsername'],
+      widget.element['name'],
+      widget.bucketPrefix + allInfoList[index]['path'],
+    );
+    if (res[0] != 'success') {
+      return defaultUrl;
+    }
+    return Uri.decodeFull(res[1]['download_url']);
+  }
 
-                          multiUrls.add(finalFormatedurl);
-                        }
-                      }
-                      await flutter_services.Clipboard.setData(flutter_services.ClipboardData(
-                          text: multiUrls
-                              .toString()
-                              .substring(1, multiUrls.toString().length - 1)
-                              .replaceAll(', ', '\n')
-                              .replaceAll(',', '\n')));
-                      if (mounted) {
-                        showToastWithContext(context, '已复制全部链接');
-                      }
-                    } else {
-                      showToastWithContext(context, '私有仓库获取链接时间较长，请耐心等待');
-                      List multiUrls = [];
-                      int successCount = 0;
-                      int failCount = 0;
-                      for (int i = 0; i < allInfoList.length; i++) {
-                        if (selectedFilesBool[i]) {
-                          String finalFormatedurl = ' ';
-                          String rawurl = '';
-                          String fileName = '';
-                          var res = await GithubManageAPI.getRepoFileContent(
-                            widget.element['showedUsername'],
-                            widget.element['name'],
-                            widget.bucketPrefix + allInfoList[i]['path'],
-                          );
-                          if (res[0] == 'success') {
-                            successCount++;
-                            rawurl = Uri.decodeFull(res[1]['download_url']);
-                          } else {
-                            failCount++;
-                          }
-                          fileName = allInfoList[i]['path'];
-                          finalFormatedurl = getFormatedUrl(rawurl, fileName);
-                          multiUrls.add(finalFormatedurl);
-                        }
-                      }
-                      await flutter_services.Clipboard.setData(flutter_services.ClipboardData(
-                          text: multiUrls
-                              .toString()
-                              .substring(1, multiUrls.toString().length - 1)
-                              .replaceAll(', ', '\n')
-                              .replaceAll(',', '\n')));
-                      if (successCount == 0) {
-                        showToast('获取链接失败');
-                      } else if (failCount == 0) {
-                        showToast('获取链接成功');
-                      } else {
-                        showToast('获取链接成功$successCount个');
-                      }
-                    }
-                  }
-                },
-                child: const Icon(
-                  Icons.copy,
-                  color: Colors.white,
-                  size: 20,
-                ),
-              )),
-          const SizedBox(width: 20),
-          SizedBox(
-              height: 40,
-              width: 40,
-              child: FloatingActionButton(
-                heroTag: 'select',
-                backgroundColor: const Color.fromARGB(255, 248, 196, 237),
-                elevation: 50,
-                onPressed: () async {
-                  if (allInfoList.isEmpty) {
-                    showToastWithContext(context, '目录为空');
-                    return;
-                  } else if (selectedFilesBool.contains(true)) {
-                    setState(() {
-                      for (int i = 0; i < selectedFilesBool.length; i++) {
-                        selectedFilesBool[i] = false;
-                      }
-                    });
-                  } else {
-                    setState(() {
-                      for (int i = 0; i < selectedFilesBool.length; i++) {
-                        selectedFilesBool[i] = true;
-                      }
-                    });
-                  }
-                },
-                child: const Icon(
-                  Icons.check_circle_outline,
-                  color: Colors.white,
-                  size: 25,
-                ),
-              )),
-        ],
-      );
+  @override
+  String getFileName(int index) => allInfoList[index]['path'];
 
-  deleteAll(List toDelete) async {
-    try {
-      for (int i = 0; i < toDelete.length; i++) {
-        if ((toDelete[i] - i) < dirAllInfoList.length) {
-          await GithubManageAPI.deleteFolder(
-            widget.element['showedUsername'],
-            widget.element['name'],
-            '${widget.bucketPrefix + dirAllInfoList[toDelete[i] - i]['path']}/',
-            widget.element['default_branch'],
-            allInfoList[toDelete[i] - i]['sha'],
-          );
-          setState(() {
-            allInfoList.removeAt(toDelete[i] - i);
-            dirAllInfoList.removeAt(toDelete[i] - i);
-            selectedFilesBool.removeAt(toDelete[i] - i);
-          });
+  @override
+  String getFileDate(int index) {
+    return '';
+  }
+
+  @override
+  String? getFileSizeForList(int index) {
+    int size = int.parse((allInfoList[index]['size'] ?? 0).toString().split('.')[0]);
+    return size > 0 ? getFileSize(size) : null;
+  }
+
+  @override
+  Future<void> onFileItemTap(int index) async {
+    if (index < dirAllInfoList.length) {
+      Map newElement = Map.from(widget.element);
+      String prefix = '${widget.bucketPrefix + allInfoList[index]['path']}/';
+      newElement['bucketSha'] = allInfoList[index]['sha'];
+      Application.router.navigateTo(context,
+          '${Routes.githubFileExplorer}?element=${Uri.encodeComponent(jsonEncode(newElement))}&bucketPrefix=${Uri.encodeComponent(prefix)}',
+          transition: TransitionType.cupertino);
+    } else {
+      String urlList = '';
+      //判断是否为图片文本
+      if (!Global.imgExt.contains(allInfoList[index]['path'].split('.').last.toLowerCase()) &&
+          !Global.textExt.contains(allInfoList[index]['path'].split('.').last.toLowerCase())) {
+        showToast('不支持的格式');
+        return;
+      }
+      if (Global.imgExt.contains(allInfoList[index]['path'].split('.').last.toLowerCase())) {
+        //预览图片
+        if (isPublicFile()) {
+          int newImageIndex = index - dirAllInfoList.length;
+          for (int i = dirAllInfoList.length; i < allInfoList.length; i++) {
+            if (Global.imgExt.contains(allInfoList[i]['path'].split('.').last.toLowerCase())) {
+              urlList +=
+                  'https://raw.githubusercontent.com/${widget.element['showedUsername']}/${widget.element['name']}/${widget.element['default_branch']}/${widget.bucketPrefix}${allInfoList[i]['path']},';
+            } else if (i < index) {
+              newImageIndex--;
+            }
+          }
+          urlList = urlList.substring(0, urlList.length - 1);
+          if (context.mounted) {
+            Application.router.navigateTo(
+                context, '${Routes.albumImagePreview}?index=$newImageIndex&images=${Uri.encodeComponent(urlList)}',
+                transition: TransitionType.none);
+          }
         } else {
-          await GithubManageAPI.deleteRepoFile(
+          int newImageIndex = 0;
+          showToast('请稍候，正在获取图片地址');
+          var result = await manageAPI.getRepoFileContent(
             widget.element['showedUsername'],
             widget.element['name'],
-            widget.bucketPrefix + allInfoList[toDelete[i] - i]['path'],
-            allInfoList[toDelete[i] - i]['sha'],
-            widget.element['default_branch'],
+            widget.bucketPrefix + allInfoList[index]['path'],
           );
-          setState(() {
-            allInfoList.removeAt(toDelete[i] - i);
-            fileAllInfoList.removeAt(toDelete[i] - i - dirAllInfoList.length);
-            selectedFilesBool.removeAt(toDelete[i] - i);
-          });
+          if (result[0] == 'success') {
+            urlList += '${result[1]['download_url']}';
+          } else {
+            showToast('获取图片地址失败');
+            return;
+          }
+          if (context.mounted) {
+            Application.router.navigateTo(
+                context, '${Routes.albumImagePreview}?index=$newImageIndex&images=${Uri.encodeComponent(urlList)}',
+                transition: TransitionType.none);
+          }
+        }
+      } else if (Global.textExt.contains(allInfoList[index]['path'].split('.').last.toLowerCase())) {
+        if (isPublicFile()) {
+          String urlPath =
+              'https://raw.githubusercontent.com/${widget.element['showedUsername']}/${widget.element['name']}/${widget.element['default_branch']}/${widget.bucketPrefix}${allInfoList[index]['path']}';
+          showToast('开始获取文件');
+          String filePath = await downloadFile(urlPath, allInfoList[index]['path']);
+          String fileName = allInfoList[index]['path'];
+          if (filePath == 'error') {
+            showToast('获取失败');
+            return;
+          }
+          if (context.mounted) {
+            Application.router.navigateTo(context,
+                '${Routes.mdPreview}?filePath=${Uri.encodeComponent(filePath)}&fileName=${Uri.encodeComponent(fileName)}',
+                transition: TransitionType.none);
+          }
+        } else {
+          showToast('请稍候');
+          var result = await manageAPI.getRepoFileContent(
+            widget.element['showedUsername'],
+            widget.element['name'],
+            widget.bucketPrefix + allInfoList[index]['path'],
+          );
+          if (result[0] == 'success') {
+            urlList += '${result[1]['download_url']}';
+          } else {
+            showToast('获取失败');
+            return;
+          }
+          String filePath = await downloadFile(urlList, allInfoList[index]['path']);
+          String fileName = allInfoList[index]['path'];
+          if (filePath == 'error') {
+            showToast('获取失败');
+            return;
+          }
+          if (context.mounted) {
+            Application.router.navigateTo(context,
+                '${Routes.mdPreview}?filePath=${Uri.encodeComponent(filePath)}&fileName=${Uri.encodeComponent(fileName)}',
+                transition: TransitionType.none);
+          }
         }
       }
-      if (allInfoList.isEmpty) {
-        setState(() {
-          state = loading_state.LoadState.empty;
-        });
-      }
-    } catch (e) {
-      flogErr(
-          e,
-          {
-            'toDelete': toDelete,
-          },
-          'GithubFileExplorerState',
-          'deleteAll');
-      rethrow;
     }
   }
 
   @override
-  void onErrorRetry() {
-    setState(() {
-      state = loading_state.LoadState.loading;
-    });
-    _getBucketList();
+  Future<void> deleteFiles(List<int> toDelete) async {
+    toDelete.sort((a, b) => b.compareTo(a));
+    for (int index in toDelete) {
+      var result = index < dirAllInfoList.length
+          ? await manageAPI.deleteFolder(
+              widget.element['showedUsername'],
+              widget.element['name'],
+              '${widget.bucketPrefix + dirAllInfoList[index]['path']}/',
+              widget.element['default_branch'],
+              dirAllInfoList[index]['sha'],
+            )
+          : await manageAPI.deleteRepoFile(
+              widget.element['showedUsername'],
+              widget.element['name'],
+              widget.bucketPrefix + allInfoList[index]['path'],
+              allInfoList[index]['sha'],
+              widget.element['default_branch'],
+            );
+      if (result[0] != 'success') {
+        throw Exception(result[0]);
+      }
+      setState(() {
+        allInfoList.removeAt(index);
+        if (index < dirAllInfoList.length) {
+          dirAllInfoList.removeAt(index);
+        } else {
+          fileAllInfoList.removeAt(index - dirAllInfoList.length);
+        }
+        selectedFilesBool.removeAt(index);
+      });
+    }
+    if (allInfoList.isEmpty) {
+      setState(() {
+        state = loading_state.LoadState.empty;
+      });
+    }
   }
 
   @override
-  Widget buildSuccess() {
-    if (allInfoList.isEmpty) {
-      return buildEmpty();
-    } else {
-      return SmartRefresher(
-        controller: refreshController,
-        enablePullDown: true,
-        enablePullUp: false,
-        header: const ClassicHeader(
-          refreshStyle: RefreshStyle.Follow,
-          idleText: '下拉刷新',
-          refreshingText: '正在刷新',
-          completeText: '刷新完成',
-          failedText: '刷新失败',
-          releaseText: '释放刷新',
-        ),
-        footer: const ClassicFooter(
-          loadStyle: LoadStyle.ShowWhenLoading,
-          idleText: '上拉加载',
-          loadingText: '正在加载',
-          noDataText: '没有更多啦',
-          failedText: '没有更多啦',
-          canLoadingText: '释放加载',
-        ),
-        onRefresh: _onrefresh,
-        child: ListView.builder(
-          itemCount: allInfoList.length,
-          itemBuilder: (context, index) {
-            if (index < dirAllInfoList.length) {
-              return Container(
-                padding: const EdgeInsets.only(left: 10, right: 10),
-                child: Column(
-                  children: [
-                    Slidable(
-                      direction: Axis.horizontal,
-                      endActionPane: ActionPane(
-                        motion: const ScrollMotion(),
-                        children: [
-                          SlidableAction(
-                            onPressed: (BuildContext context) async {
-                              if (widget.element['showedUsername'] == adminUserName) {
-                                showCupertinoAlertDialogWithConfirmFunc(
-                                    context: context,
-                                    content: '确定要删除${allInfoList[index]['path']}吗?',
-                                    onConfirm: () async {
-                                      await showDialog(
-                                          context: context,
-                                          barrierDismissible: false,
-                                          builder: (context) {
-                                            return NetLoadingDialog(
-                                              outsideDismiss: false,
-                                              loading: true,
-                                              loadingText: "删除中...",
-                                              requestCallBack: GithubManageAPI.deleteFolder(
-                                                  widget.element['showedUsername'],
-                                                  widget.element['name'],
-                                                  '${widget.bucketPrefix + allInfoList[index]['path']}/',
-                                                  widget.element['default_branch'],
-                                                  allInfoList[index]['sha']),
-                                            );
-                                          });
-                                      setState(() {
-                                        showToast('操作完毕');
-                                        _onrefresh();
-                                      });
-                                    });
+  String getPageTitle() => widget.bucketPrefix == ''
+      ? widget.element['name']
+      : widget.bucketPrefix.substring(0, widget.bucketPrefix.length - 1).split('/').last;
+
+  @override
+  DateTime getFormatedFileDate(dynamic item) {
+    return DateTime.now();
+  }
+
+  @override
+  String getFormatedFileName(dynamic item) {
+    return item['path'];
+  }
+
+  Future<void> _processUploadFiles(List<File> files, bool isSkipImageCheck) async {
+    Map configMapTemp = await manageAPI.getConfigMap();
+    Map configMap = {
+      'githubusername': configMapTemp['githubusername'],
+      'token': configMapTemp['token'],
+      'default_branch': widget.element['default_branch'],
+      'savePath': widget.bucketPrefix,
+      'repo': widget.element['name'],
+    };
+    for (int i = 0; i < files.length; i++) {
+      if (isSkipImageCheck || Global.imgExt.contains(my_path.extension(files[i].path).toLowerCase().substring(1))) {
+        if (Global.isCompress == true) {
+          files[i] = await compressAndGetFile(
+              files[i].path, my_path.basename(files[i].path), Global.defaultCompressFormat,
+              minHeight: Global.minHeight, minWidth: Global.minWidth, quality: Global.quality);
+        }
+      }
+      List uploadList = [files[i].path, my_path.basename(files[i].path), configMap];
+      String uploadListStr = jsonEncode(uploadList);
+      Global.githubUploadList.add(uploadListStr);
+    }
+    Global.githubUploadList = removeDuplicates(Global.githubUploadList);
+    Global.setGithubUploadList(Global.githubUploadList);
+    String downloadPath = await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
+    if (mounted) {
+      Application.router
+          .navigateTo(context,
+              '/baseUpDownloadManagePage?userName=${Uri.encodeComponent(widget.element['showedUsername'])}&repoName=${Uri.encodeComponent(widget.element['name'])}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=0&currentListIndex=4',
+              transition: TransitionType.inFromRight)
+          .then((value) {
+        _getBucketList();
+      });
+    }
+  }
+
+  @override
+  void showUploadOptions(BuildContext context) {
+    showModalBottomSheet(
+        context: context,
+        builder: (BuildContext bc) {
+          return SafeArea(
+              child: Wrap(
+            children: [
+              ListTile(
+                minLeadingWidth: 0,
+                leading: const Icon(Icons.file_present_outlined, color: Colors.blue),
+                title: const Text('上传文件'),
+                onTap: () async {
+                  if (widget.element['showedUsername'].toString().toLowerCase() != adminUserName.toLowerCase()) {
+                    showToast('您没有权限上传');
+                    return;
+                  }
+                  Navigator.pop(context);
+                  FilePickerResult? pickresult = await FilePicker.platform.pickFiles(
+                    allowMultiple: true,
+                  );
+                  if (pickresult == null) {
+                    return showToast('未选择文件');
+                  }
+                  List<File> files = pickresult.paths.map((path) => File(path!)).toList();
+                  await _processUploadFiles(files, false);
+                },
+              ),
+              ListTile(
+                minLeadingWidth: 0,
+                leading: const Icon(Icons.image_outlined, color: Colors.blue),
+                title: const Text('上传照片'),
+                onTap: () async {
+                  if (widget.element['showedUsername'].toString().toLowerCase() != adminUserName.toLowerCase()) {
+                    showToast('您没有权限上传');
+                    return;
+                  }
+                  Navigator.pop(context);
+                  AssetPickerConfig config = const AssetPickerConfig(
+                    maxAssets: 100,
+                    selectedAssets: [],
+                  );
+                  final List<AssetEntity>? pickedImage = await AssetPicker.pickAssets(context, pickerConfig: config);
+                  if (pickedImage == null) {
+                    return showToast('未选择照片');
+                  }
+                  List<File> files = [];
+                  for (var i = 0; i < pickedImage.length; i++) {
+                    File? fileImage = await pickedImage[i].originFile;
+                    if (fileImage != null) {
+                      files.add(fileImage);
+                    }
+                  }
+                  await _processUploadFiles(files, true);
+                },
+              ),
+              ListTile(
+                minLeadingWidth: 0,
+                leading: const Icon(Icons.link, color: Colors.blue),
+                title: const Text('上传剪贴板内链接'),
+                onTap: () async {
+                  if (widget.element['showedUsername'].toString().toLowerCase() != adminUserName.toLowerCase()) {
+                    showToast('您没有权限上传');
+                    return;
+                  }
+                  Navigator.pop(context);
+                  var url = await flutter_services.Clipboard.getData('text/plain');
+                  if (url == null || url.text == null || url.text!.isEmpty) {
+                    if (mounted) {
+                      showToastWithContext(context, "剪贴板为空");
+                    }
+                    return;
+                  }
+                  try {
+                    String urlStr = url.text!;
+                    List fileLinkList = urlStr.split("\n");
+                    if (context.mounted) {
+                      await showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (context) {
+                            return NetLoadingDialog(
+                              outsideDismiss: false,
+                              loading: true,
+                              loadingText: "上传中...",
+                              requestCallBack:
+                                  manageAPI.uploadNetworkFileEntry(fileLinkList, widget.element, widget.bucketPrefix),
+                            );
+                          });
+                    }
+                    _getBucketList();
+                  } catch (e) {
+                    flogErr(
+                        e,
+                        {
+                          'url': url.text,
+                        },
+                        'GithubManagePage',
+                        'uploadNetworkFileEntry');
+                    if (mounted) {
+                      showToastWithContext(context, "错误");
+                    }
+                    return;
+                  }
+                },
+              ),
+              ListTile(
+                minLeadingWidth: 0,
+                leading: const Icon(
+                  Icons.folder_open_outlined,
+                  color: Colors.blue,
+                ),
+                title: const Text('新建文件夹'),
+                onTap: () async {
+                  if (widget.element['showedUsername'].toString().toLowerCase() != adminUserName.toLowerCase()) {
+                    showToastWithContext(context, "只有管理员才能新建文件夹");
+                    return;
+                  }
+                  Navigator.pop(context);
+                  showDialog(
+                      barrierDismissible: false,
+                      context: context,
+                      builder: (context) {
+                        return NewFolderDialog(
+                          contentWidget: NewFolderDialogContent(
+                            title: "新文件夹名 / 分隔",
+                            onConfirm: () async {
+                              String newName = newFolder.text;
+                              if (newName.isEmpty) {
+                                return showToastWithContext(context, "文件夹名不能为空");
+                              }
+                              if (newName.startsWith("/")) {
+                                newName = newName.substring(1);
+                              }
+                              var copyResult =
+                                  await manageAPI.createFolder(widget.element, widget.bucketPrefix + newName);
+                              if (copyResult[0] == 'success') {
+                                showToast('创建成功');
+                                setState(() {
+                                  _getBucketList();
+                                });
                               } else {
-                                showToast('您没有权限删除');
+                                showToast('创建失败');
                               }
                             },
-                            backgroundColor: const Color(0xFFFE4A49),
-                            foregroundColor: Colors.white,
-                            spacing: 0,
-                            icon: Icons.delete,
-                            label: '删除',
+                            folderNameController: newFolder,
+                            onCancel: () {},
                           ),
-                        ],
-                      ),
-                      child: Stack(
-                        fit: StackFit.loose,
-                        children: [
-                          Container(
-                            color: selectedFilesBool[index] ? const Color(0x311192F3) : Colors.transparent,
-                            child: ListTile(
-                              minLeadingWidth: 0,
-                              minVerticalPadding: 0,
-                              leading: Image.asset(
-                                'assets/icons/folder.png',
-                                width: 30,
-                                height: 32,
-                              ),
-                              title: Text(allInfoList[index]['path'], style: const TextStyle(fontSize: 16)),
-                              trailing: IconButton(
-                                icon: const Icon(Icons.more_horiz),
-                                onPressed: () {
-                                  if (widget.element['showedUsername'] == adminUserName) {
-                                    String iconPath = 'assets/icons/folder.png';
-                                    showModalBottomSheet(
-                                        isScrollControlled: true,
-                                        context: context,
-                                        builder: (context) {
-                                          return buildFolderBottomSheetWidget(context, index, iconPath);
-                                        });
-                                  } else {
-                                    showToast('您没有权限');
-                                  }
-                                },
-                              ),
-                              onTap: () {
-                                Map newElement = Map.from(widget.element);
-                                String prefix = '${widget.bucketPrefix + allInfoList[index]['path']}/';
-                                newElement['bucketSha'] = allInfoList[index]['sha'];
-                                Application.router.navigateTo(context,
-                                    '${Routes.githubFileExplorer}?element=${Uri.encodeComponent(jsonEncode(newElement))}&bucketPrefix=${Uri.encodeComponent(prefix)}',
-                                    transition: TransitionType.cupertino);
-                              },
-                            ),
-                          ),
-                          Positioned(
-                            left: -0.5,
-                            top: 20,
-                            child: Container(
-                              decoration: const BoxDecoration(
-                                  borderRadius: BorderRadius.all(Radius.circular(55)),
-                                  color: Color.fromARGB(255, 235, 242, 248)),
-                              padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-                              child: MSHCheckbox(
-                                colorConfig: MSHColorConfig.fromCheckedUncheckedDisabled(
-                                    checkedColor: Colors.blue, uncheckedColor: Colors.blue, disabledColor: Colors.blue),
-                                size: 17,
-                                value: selectedFilesBool[index],
-                                style: MSHCheckboxStyle.fillScaleCheck,
-                                onChanged: (selected) {
-                                  setState(() {
-                                    if (selected) {
-                                      selectedFilesBool[index] = true;
-                                    } else {
-                                      selectedFilesBool[index] = false;
-                                    }
-                                  });
-                                },
-                              ),
-                            ),
-                          )
-                        ],
-                      ),
-                    ),
-                    const Divider(
-                      height: 1,
-                    )
-                  ],
-                ),
-              );
-            } else {
-              String fileExtension = allInfoList[index]['path'].split('.').last;
-              fileExtension = fileExtension.toLowerCase();
-              String iconPath = 'assets/icons/';
-              if (fileExtension == '') {
-                iconPath += '_blank.png';
-              } else if (Global.iconList.contains(fileExtension)) {
-                iconPath += '$fileExtension.png';
-              } else {
-                iconPath += 'unknown.png';
+                        );
+                      });
+                },
+              ),
+            ],
+          ));
+        });
+  }
+
+  @override
+  Future<void> onDownloadButtonPressed() async {
+    if (!selectedFilesBool.contains(true) || selectedFilesBool.isEmpty) {
+      showToastWithContext(context, '没有选择文件');
+      return;
+    }
+    List<String> urlList = [];
+    List downloadList = [];
+    for (int i = 0; i < allInfoList.length; i++) {
+      if (selectedFilesBool[i] && i >= dirAllInfoList.length) {
+        downloadList.add(allInfoList[i]);
+      }
+    }
+    if (downloadList.isEmpty) {
+      showToast('没有选择文件');
+      return;
+    }
+    if (isPublicFile()) {
+      String hostPrefix =
+          'https://raw.githubusercontent.com/${widget.element['showedUsername']}/${widget.element['name']}/${widget.element['default_branch']}/${widget.bucketPrefix}';
+      for (int i = 0; i < downloadList.length; i++) {
+        urlList.add(hostPrefix + downloadList[i]['path']);
+      }
+    } else {
+      for (int i = 0; i < downloadList.length; i++) {
+        var result = await manageAPI.getRepoFileContent(
+          widget.element['showedUsername'],
+          widget.element['name'],
+          widget.bucketPrefix + downloadList[i]['path'],
+        );
+        if (result[0] == 'success') {
+          urlList.add('${result[1]['download_url']}');
+        }
+      }
+    }
+    Global.githubDownloadList.addAll(urlList);
+    Global.githubDownloadList = removeDuplicates(Global.githubDownloadList);
+    Global.setGithubDownloadList(Global.githubDownloadList);
+    String downloadPath = await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
+    Application.router.navigateTo(context,
+        '/baseUpDownloadManagePage?userName=${Uri.encodeComponent(widget.element['showedUsername'])}&repoName=${Uri.encodeComponent(widget.element['name'])}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=1&currentListIndex=4',
+        transition: TransitionType.inFromRight);
+  }
+
+  @override
+  void navigateToDownloadManagement() async {
+    String downloadPath = await ExternalPath.getExternalStoragePublicDirectory(ExternalPath.DIRECTORY_DOWNLOAD);
+    int index = Global.githubDownloadList.isEmpty ? 0 : 1;
+    if (mounted) {
+      Application.router
+          .navigateTo(context,
+              '/baseUpDownloadManagePage?userName=${Uri.encodeComponent(widget.element['showedUsername'])}&repoName=${Uri.encodeComponent(widget.element['name'])}&downloadPath=${Uri.encodeComponent(downloadPath)}&tabIndex=$index&currentListIndex=4',
+              transition: TransitionType.inFromRight)
+          .then((value) {
+        _getBucketList();
+      });
+    }
+  }
+
+  @override
+  void onFileInfoTap(int index) {
+    Map<String, dynamic> fileMap = Map<String, dynamic>.from(allInfoList[index]);
+    fileMap.addAll({
+      'downloadurl':
+          'https://raw.githubusercontent.com/${widget.element['showedUsername']}/${widget.element['name']}/${widget.element['default_branch']}/${widget.bucketPrefix}${fileMap['path']}',
+      'private': widget.element['private'],
+      'path': widget.bucketPrefix + fileMap['path'],
+      'showedUsername': widget.element['showedUsername'],
+      'name': widget.element['name'],
+      'default_branch': widget.element['default_branch'],
+      'dir': widget.bucketPrefix,
+    });
+    Application.router.navigateTo(
+        context, '${Routes.githubFileInformation}?fileMap=${Uri.encodeComponent(jsonEncode(fileMap))}',
+        transition: TransitionType.cupertino);
+  }
+
+  @override
+  List<BottomSheetAction> getExtraActions(int index) {
+    return [
+      if (index < dirAllInfoList.length)
+        BottomSheetAction(
+          icon: Icons.delete_outline,
+          iconColor: Color.fromARGB(255, 97, 141, 236),
+          title: '设为图床默认目录',
+          onTap: () async {
+            var result = await manageAPI.setDefaultRepo(
+              widget.element,
+              '${widget.bucketPrefix + allInfoList[index]['path']}/',
+            );
+            if (result[0] == 'success') {
+              showToast('设置成功');
+              if (mounted) {
+                Navigator.pop(context);
               }
-              return Container(
-                padding: const EdgeInsets.only(left: 10, right: 10),
-                child: Column(
-                  children: [
-                    Slidable(
-                        key: Key(allInfoList[index]['path']),
-                        direction: Axis.horizontal,
-                        endActionPane: ActionPane(
-                          motion: const ScrollMotion(),
-                          children: [
-                            SlidableAction(
-                              onPressed: (BuildContext context) async {
-                                if (widget.element['showedUsername'] != adminUserName ||
-                                    widget.element['private'] == false) {
-                                  String shareUrl =
-                                      'https://raw.githubusercontent.com/${widget.element['showedUsername']}/${widget.element['name']}/${widget.element['default_branch']}/${widget.bucketPrefix}${allInfoList[index]['path']}';
-                                  Share.share(shareUrl);
-                                } else {
-                                  showToast('开始获取私有仓库分享链接');
-                                  var result = await GithubManageAPI.getRepoFileContent(
-                                      widget.element['showedUsername'],
-                                      widget.element['name'],
-                                      widget.bucketPrefix + allInfoList[index]['path']);
-                                  if (result[0] == 'success') {
-                                    String shareUrl = result[1]['download_url'];
-                                    Share.share(shareUrl);
-                                  } else {
-                                    showToast('获取失败');
-                                  }
-                                }
-                              },
-                              autoClose: true,
-                              padding: EdgeInsets.zero,
-                              backgroundColor: const Color.fromARGB(255, 109, 196, 116),
-                              foregroundColor: Colors.white,
-                              icon: Icons.share,
-                              label: '分享',
-                            ),
-                            SlidableAction(
-                              onPressed: (BuildContext context) async {
-                                if (widget.element['showedUsername'] == adminUserName) {
-                                  showCupertinoAlertDialogWithConfirmFunc(
-                                    context: context,
-                                    content: '确定要删除${allInfoList[index]['path']}吗?',
-                                    onConfirm: () async {
-                                      String path = widget.bucketPrefix + allInfoList[index]['path'];
-                                      var result = await GithubManageAPI.deleteRepoFile(
-                                          widget.element['showedUsername'],
-                                          widget.element['name'],
-                                          path,
-                                          allInfoList[index]['sha'],
-                                          widget.element['default_branch']);
-                                      if (result[0] == 'success') {
-                                        showToast('删除成功');
-                                        setState(() {
-                                          allInfoList.removeAt(index);
-                                          selectedFilesBool.removeAt(index);
-                                        });
-                                      } else {
-                                        showToast('删除失败');
-                                      }
-                                    },
-                                  );
-                                } else {
-                                  showToast('只有管理员才能删除文件');
-                                }
-                              },
-                              backgroundColor: const Color(0xFFFE4A49),
-                              foregroundColor: Colors.white,
-                              icon: Icons.delete,
-                              label: '删除',
-                            ),
-                          ],
-                        ),
-                        child: Stack(fit: StackFit.loose, children: [
-                          Container(
-                            color: selectedFilesBool[index] ? const Color(0x311192F3) : Colors.transparent,
-                            child: ListTile(
-                              minLeadingWidth: 0,
-                              minVerticalPadding: 0,
-                              leading: Image.asset(
-                                iconPath,
-                                width: 30,
-                                height: 30,
-                              ),
-                              title: Text(
-                                  allInfoList[index]['path'].length > 20
-                                      ? allInfoList[index]['path'].substring(0, 10) +
-                                          '...${allInfoList[index]['path'].substring(allInfoList[index]['path'].length - 10)}'
-                                      : allInfoList[index]['path'],
-                                  style: const TextStyle(fontSize: 14)),
-                              subtitle:
-                                  Text(getFileSize(allInfoList[index]['size']), style: const TextStyle(fontSize: 12)),
-                              trailing: IconButton(
-                                icon: const Icon(Icons.more_horiz),
-                                onPressed: () {
-                                  showModalBottomSheet(
-                                      isScrollControlled: true,
-                                      context: context,
-                                      builder: (context) {
-                                        return buildBottomSheetWidget(context, index, iconPath);
-                                      });
-                                },
-                              ),
-                              onTap: () async {
-                                String urlList = '';
-                                //判断是否为图片文本
-                                if (!Global.imgExt.contains(allInfoList[index]['path'].split('.').last.toLowerCase()) &&
-                                    !Global.textExt
-                                        .contains(allInfoList[index]['path'].split('.').last.toLowerCase())) {
-                                  showToast('不支持的格式');
-                                  return;
-                                }
-                                if (Global.imgExt.contains(allInfoList[index]['path'].split('.').last.toLowerCase())) {
-                                  //预览图片
-                                  if (widget.element['showedUsername'] != adminUserName ||
-                                      widget.element['private'] == false) {
-                                    int newImageIndex = index - dirAllInfoList.length;
-                                    for (int i = dirAllInfoList.length; i < allInfoList.length; i++) {
-                                      if (Global.imgExt
-                                          .contains(allInfoList[i]['path'].split('.').last.toLowerCase())) {
-                                        if (widget.element['showedUsername'] != adminUserName ||
-                                            widget.element['private'] == false) {
-                                          urlList +=
-                                              'https://ghproxy.com/https://raw.githubusercontent.com/${widget.element['showedUsername']}/${widget.element['name']}/${widget.element['default_branch']}/${widget.bucketPrefix}${allInfoList[i]['path']},';
-                                        } else {
-                                          var result = await GithubManageAPI.getRepoFileContent(
-                                            widget.element['showedUsername'],
-                                            widget.element['name'],
-                                            widget.bucketPrefix + allInfoList[i]['path'],
-                                          );
-                                          if (result[0] == 'success') {
-                                            urlList += 'https://ghproxy.com/${result[1]['download_url']},';
-                                          }
-                                        }
-                                      } else if (i < index) {
-                                        newImageIndex--;
-                                      }
-                                    }
-                                    urlList = urlList.substring(0, urlList.length - 1);
-                                    if (context.mounted) {
-                                      Application.router.navigateTo(this.context,
-                                          '${Routes.albumImagePreview}?index=$newImageIndex&images=${Uri.encodeComponent(urlList)}',
-                                          transition: TransitionType.none);
-                                    }
-                                  } else {
-                                    int newImageIndex = 0;
-                                    showToast('请稍候，正在获取图片地址');
-                                    var result = await GithubManageAPI.getRepoFileContent(
-                                      widget.element['showedUsername'],
-                                      widget.element['name'],
-                                      widget.bucketPrefix + allInfoList[index]['path'],
-                                    );
-                                    if (result[0] == 'success') {
-                                      urlList += 'https://ghproxy.com/${result[1]['download_url']}';
-                                    } else {
-                                      showToast('获取图片地址失败');
-                                      return;
-                                    }
-                                    if (context.mounted) {
-                                      Application.router.navigateTo(this.context,
-                                          '${Routes.albumImagePreview}?index=$newImageIndex&images=${Uri.encodeComponent(urlList)}',
-                                          transition: TransitionType.none);
-                                    }
-                                  }
-                                } else if (Global.textExt
-                                    .contains(allInfoList[index]['path'].split('.').last.toLowerCase())) {
-                                  if (widget.element['showedUsername'] != adminUserName ||
-                                      widget.element['private'] == false) {
-                                    String urlPath =
-                                        'https://ghproxy.com/https://raw.githubusercontent.com/${widget.element['showedUsername']}/${widget.element['name']}/${widget.element['default_branch']}/${widget.bucketPrefix}${allInfoList[index]['path']}';
-                                    showToast('开始获取文件');
-                                    String filePath = await downloadFile(urlPath, allInfoList[index]['path']);
-                                    String fileName = allInfoList[index]['path'];
-                                    if (filePath == 'error') {
-                                      showToast('获取失败');
-                                      return;
-                                    }
-                                    if (context.mounted) {
-                                      Application.router.navigateTo(this.context,
-                                          '${Routes.mdPreview}?filePath=${Uri.encodeComponent(filePath)}&fileName=${Uri.encodeComponent(fileName)}',
-                                          transition: TransitionType.none);
-                                    }
-                                  } else {
-                                    showToast('请稍候，正在获取文件地址');
-                                    var result = await GithubManageAPI.getRepoFileContent(
-                                      widget.element['showedUsername'],
-                                      widget.element['name'],
-                                      widget.bucketPrefix + allInfoList[index]['path'],
-                                    );
-                                    if (result[0] == 'success') {
-                                      urlList += 'https://ghproxy.com/${result[1]['download_url']}';
-                                    } else {
-                                      showToast('获取文件地址失败');
-                                      return;
-                                    }
-                                    String filePath = await downloadFile(urlList, allInfoList[index]['path']);
-                                    String fileName = allInfoList[index]['path'];
-                                    if (filePath == 'error') {
-                                      showToast('获取文件失败');
-                                      return;
-                                    }
-                                    if (context.mounted) {
-                                      Application.router.navigateTo(this.context,
-                                          '${Routes.mdPreview}?filePath=${Uri.encodeComponent(filePath)}&fileName=${Uri.encodeComponent(fileName)}',
-                                          transition: TransitionType.none);
-                                    }
-                                  }
-                                }
-                              },
-                            ),
-                          ),
-                          Positioned(
-                            left: 0,
-                            top: 22,
-                            child: Container(
-                              decoration: const BoxDecoration(
-                                  borderRadius: BorderRadius.all(Radius.circular(55)),
-                                  color: Color.fromARGB(255, 235, 242, 248)),
-                              padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-                              child: MSHCheckbox(
-                                colorConfig: MSHColorConfig.fromCheckedUncheckedDisabled(
-                                    checkedColor: Colors.blue, uncheckedColor: Colors.blue, disabledColor: Colors.blue),
-                                size: 17,
-                                value: selectedFilesBool[index],
-                                style: MSHCheckboxStyle.fillScaleCheck,
-                                onChanged: (selected) {
-                                  setState(() {
-                                    if (selected) {
-                                      selectedFilesBool[index] = true;
-                                    } else {
-                                      selectedFilesBool[index] = false;
-                                    }
-                                  });
-                                },
-                              ),
-                            ),
-                          ),
-                        ])),
-                    const Divider(
-                      height: 1,
-                    )
-                  ],
-                ),
-              );
+            } else {
+              showToast('设置失败');
             }
           },
         ),
-      );
-    }
-  }
-
-  Widget buildBottomSheetWidget(BuildContext context, int index, String iconPath) {
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          ListTile(
-            leading: Image.asset(
-              iconPath,
-              width: 30,
-              height: 30,
-            ),
-            visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
-            minLeadingWidth: 0,
-            title: Text(
-                allInfoList[index]['path'].length > 20
-                    ? allInfoList[index]['path'].substring(0, 10) +
-                        '...${allInfoList[index]['path'].substring(allInfoList[index]['path'].length - 10)}'
-                    : allInfoList[index]['path'],
-                style: const TextStyle(fontSize: 14)),
-            subtitle: Text(getFileSize(allInfoList[index]['size']), style: const TextStyle(fontSize: 12)),
-          ),
-          const Divider(
-            height: 0.1,
-            color: Color.fromARGB(255, 230, 230, 230),
-          ),
-          ListTile(
-              leading: const Icon(
-                Icons.info_outline_rounded,
-                color: Color.fromARGB(255, 97, 141, 236),
-              ),
-              minLeadingWidth: 0,
-              title: const Text('文件详情'),
-              onTap: () async {
-                Navigator.pop(context);
-                Map<String, dynamic> fileMap = allInfoList[index];
-                fileMap['downloadurl'] =
-                    'https://raw.githubusercontent.com/${widget.element['showedUsername']}/${widget.element['name']}/${widget.element['default_branch']}/${widget.bucketPrefix}${fileMap['path']}';
-                fileMap['private'] = widget.element['private'];
-                fileMap['path'] = widget.bucketPrefix + fileMap['path'];
-                fileMap['showedUsername'] = widget.element['showedUsername'];
-                fileMap['name'] = widget.element['name'];
-                fileMap['default_branch'] = widget.element['default_branch'];
-                fileMap['dir'] = widget.bucketPrefix;
-                Application.router.navigateTo(
-                    context, '${Routes.githubFileInformation}?fileMap=${Uri.encodeComponent(jsonEncode(fileMap))}',
-                    transition: TransitionType.cupertino);
-              }),
-          const Divider(
-            height: 0.1,
-            color: Color.fromARGB(255, 230, 230, 230),
-          ),
-          ListTile(
-            leading: const Icon(
-              Icons.link_rounded,
-              color: Color.fromARGB(255, 97, 141, 236),
-            ),
-            minLeadingWidth: 0,
-            title: const Text('复制链接(设置中的默认格式)'),
-            onTap: () async {
-              if (widget.element['showedUsername'] != adminUserName || widget.element['private'] == false) {
-                String shareUrl =
-                    'https://raw.githubusercontent.com/${widget.element['showedUsername']}/${widget.element['name']}/${widget.element['default_branch']}/${widget.bucketPrefix}${allInfoList[index]['path']}';
-                String filename = my_path.basename(allInfoList[index]['path']);
-                String formatedLink = getFormatedUrl(shareUrl, filename);
-                await flutter_services.Clipboard.setData(flutter_services.ClipboardData(text: formatedLink));
-                if (mounted) {
-                  Navigator.pop(context);
-                }
-                showToast('复制完毕');
-              } else {
-                showToast('开始获取私有仓库链接');
-                var result = await GithubManageAPI.getRepoFileContent(
-                  widget.element['showedUsername'],
-                  widget.element['name'],
-                  widget.bucketPrefix + allInfoList[index]['path'],
-                );
-                if (result[0] == 'success') {
-                  String shareUrl = result[1]['download_url'];
-                  String filename = my_path.basename(allInfoList[index]['path']);
-                  String formatedLink = getFormatedUrl(shareUrl, filename);
-                  await flutter_services.Clipboard.setData(flutter_services.ClipboardData(text: formatedLink));
-                  if (mounted) {
-                    Navigator.pop(context);
-                  }
-                  showToast('复制完毕');
-                } else {
-                  showToast('获取失败');
-                }
-              }
-            },
-          ),
-          const Divider(
-            height: 0.1,
-            color: Color.fromARGB(255, 230, 230, 230),
-          ),
-          ListTile(
-            leading: const Icon(
-              Icons.delete_outline,
-              color: Color.fromARGB(255, 240, 85, 131),
-            ),
-            minLeadingWidth: 0,
-            title: const Text('删除'),
-            onTap: () async {
-              if (widget.element['showedUsername'] == adminUserName) {
-                Navigator.pop(context);
-                showCupertinoAlertDialogWithConfirmFunc(
-                  context: context,
-                  content: '确定要删除${allInfoList[index]['path']}吗?',
-                  onConfirm: () async {
-                    String path = widget.bucketPrefix + allInfoList[index]['path'];
-                    var result = await GithubManageAPI.deleteRepoFile(widget.element['showedUsername'],
-                        widget.element['name'], path, allInfoList[index]['sha'], widget.element['default_branch']);
-                    if (result[0] == 'success') {
-                      showToast('删除成功');
-                      setState(() {
-                        allInfoList.removeAt(index);
-                        selectedFilesBool.removeAt(index);
-                      });
-                    } else {
-                      showToast('删除失败');
-                    }
-                  },
-                );
-              } else {
-                showToast('只有管理员才能删除文件');
-              }
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget buildFolderBottomSheetWidget(BuildContext context, int index, String iconPath) {
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          ListTile(
-            leading: Image.asset(
-              iconPath,
-              width: 30,
-              height: 30,
-            ),
-            minLeadingWidth: 0,
-            title: Text(allInfoList[index]['path'], style: const TextStyle(fontSize: 15)),
-          ),
-          const Divider(
-            height: 0.1,
-            color: Color.fromARGB(255, 230, 230, 230),
-          ),
-          ListTile(
-            leading: const Icon(
-              Icons.beenhere_outlined,
-              color: Color.fromARGB(255, 97, 141, 236),
-            ),
-            minLeadingWidth: 0,
-            title: const Text('设为图床默认目录'),
-            onTap: () async {
-              var result = await GithubManageAPI.setDefaultRepo(
-                widget.element,
-                '${widget.bucketPrefix + allInfoList[index]['path']}/',
-              );
-              if (result[0] == 'success') {
-                showToast('设置成功');
-                if (mounted) {
-                  Navigator.pop(context);
-                }
-              } else {
-                showToast('设置失败');
-              }
-            },
-          ),
-          const Divider(
-            height: 0.1,
-            color: Color.fromARGB(255, 230, 230, 230),
-          ),
-          ListTile(
-              leading: const Icon(
-                Icons.delete_outline,
-                color: Color.fromARGB(255, 240, 85, 131),
-              ),
-              minLeadingWidth: 0,
-              title: const Text('删除'),
-              onTap: () async {
-                Navigator.pop(context);
-                showCupertinoAlertDialogWithConfirmFunc(
-                  context: context,
-                  content: '确定要删除目录${allInfoList[index]['path']}吗?',
-                  onConfirm: () async {
-                    await showDialog(
-                        context: context,
-                        barrierDismissible: false,
-                        builder: (context) {
-                          return NetLoadingDialog(
-                            outsideDismiss: false,
-                            loading: true,
-                            loadingText: "删除中...",
-                            requestCallBack: GithubManageAPI.deleteFolder(
-                                widget.element['showedUsername'],
-                                widget.element['name'],
-                                '${widget.bucketPrefix + allInfoList[index]['path']}/',
-                                widget.element['default_branch'],
-                                allInfoList[index]['sha']),
-                          );
-                        });
-                    setState(() {
-                      showToast('操作完毕');
-                      _onrefresh();
-                    });
-                  },
-                );
-              }),
-        ],
-      ),
-    );
+    ];
   }
 }

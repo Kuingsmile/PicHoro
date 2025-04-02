@@ -37,7 +37,7 @@ class GithubConfigState extends State<GithubConfig> {
 
   _initConfig() async {
     try {
-      Map configMap = await GithubManageAPI.getConfigMap();
+      Map configMap = await GithubManageAPI().getConfigMap();
       _githubusernameController.text = configMap['githubusername'] ?? '';
       _repoController.text = configMap['repo'] ?? '';
       _tokenController.text = configMap['token'] ?? '';
@@ -240,7 +240,7 @@ class GithubConfigState extends State<GithubConfig> {
 
       final githubConfig = GithubConfigModel(githubusername, repo, token, storePath, branch, customDomain);
       final githubConfigJson = jsonEncode(githubConfig);
-      final githubConfigFile = await GithubManageAPI.localFile;
+      final githubConfigFile = await GithubManageAPI().localFile();
       await githubConfigFile.writeAsString(githubConfigJson);
       showToast('保存成功');
     } catch (e) {
@@ -253,7 +253,7 @@ class GithubConfigState extends State<GithubConfig> {
 
   checkGithubConfig() async {
     try {
-      Map configMap = await GithubManageAPI.getConfigMap();
+      Map configMap = await GithubManageAPI().getConfigMap();
 
       if (configMap.isEmpty) {
         if (context.mounted) {

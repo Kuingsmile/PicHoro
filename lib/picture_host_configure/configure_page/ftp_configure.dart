@@ -7,7 +7,6 @@ import 'package:fluro/fluro.dart';
 import 'package:horopic/utils/event_bus_utils.dart';
 
 import 'package:horopic/widgets/net_loading_dialog.dart';
-import 'package:horopic/router/routers.dart';
 import 'package:horopic/router/application.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/utils/global.dart';
@@ -275,27 +274,6 @@ class FTPConfigState extends State<FTPConfig> {
                         .navigateTo(context, '/configureStorePage?psHost=ftp', transition: TransitionType.cupertino);
                     await _initConfig();
                     setState(() {});
-                  },
-                ),
-                ConfigureWidgets.buildDivider(),
-                ConfigureWidgets.buildSettingItem(
-                  context: context,
-                  title: '连接SSH终端',
-                  icon: Icons.terminal,
-                  onTap: () async {
-                    Map configMap = {
-                      'ftpHost': _ftpHostController.text,
-                      'ftpPort': _ftpPortController.text,
-                      'ftpUser': _ftpUserController.text,
-                      'ftpPassword': _ftpPasswordController.text,
-                    };
-                    if (_ftpConfigMap['ftpType'] == 'FTP') {
-                      showToast('只支持SSH/SFTP类型');
-                      return;
-                    }
-                    Application.router.navigateTo(
-                        context, '${Routes.sshTerminal}?configMap=${Uri.encodeComponent(jsonEncode(configMap))}',
-                        transition: TransitionType.cupertino);
                   },
                 ),
                 ConfigureWidgets.buildDivider(),

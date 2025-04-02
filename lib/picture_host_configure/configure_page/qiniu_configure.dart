@@ -42,7 +42,7 @@ class QiniuConfigState extends State<QiniuConfig> {
 
   _initConfig() async {
     try {
-      Map configMap = await QiniuManageAPI.getConfigMap();
+      Map configMap = await QiniuManageAPI().getConfigMap();
       _accessKeyController.text = configMap['accessKey'] ?? '';
       _secretKeyController.text = configMap['secretKey'] ?? '';
       _bucketController.text = configMap['bucket'] ?? '';
@@ -263,7 +263,7 @@ class QiniuConfigState extends State<QiniuConfig> {
 
       final qiniuConfig = QiniuConfigModel(accessKey, secretKey, bucket, url, area, options, path);
       final qiniuConfigJson = jsonEncode(qiniuConfig);
-      final qiniuConfigFile = await QiniuManageAPI.localFile;
+      final qiniuConfigFile = await QiniuManageAPI().localFile();
       await qiniuConfigFile.writeAsString(qiniuConfigJson);
       showToast('保存成功');
     } catch (e) {
@@ -276,7 +276,7 @@ class QiniuConfigState extends State<QiniuConfig> {
 
   checkQiniuConfig() async {
     try {
-      Map configMap = await QiniuManageAPI.getConfigMap();
+      Map configMap = await QiniuManageAPI().getConfigMap();
 
       if (configMap.isEmpty) {
         if (context.mounted) {

@@ -86,6 +86,7 @@ class ConfigureWidgets {
     return AppBar(
       elevation: 0,
       centerTitle: true,
+      leading: getLeadingIcon(context),
       title: titleText(
         title,
         fontsize: 18,

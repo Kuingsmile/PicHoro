@@ -43,7 +43,7 @@ class TencentConfigState extends State<TencentConfig> {
 
   _initConfig() async {
     try {
-      Map configMap = await TencentManageAPI.getConfigMap();
+      Map configMap = await TencentManageAPI().getConfigMap();
       _secretIdController.text = configMap['secretId'] ?? '';
       _secretKeyController.text = configMap['secretKey'] ?? '';
       _bucketController.text = configMap['bucket'] ?? '';
@@ -282,7 +282,7 @@ class TencentConfigState extends State<TencentConfig> {
 
       final tencentConfig = TencentConfigModel(secretId, secretKey, bucket, appId, area, path, customUrl, options);
       final tencentConfigJson = jsonEncode(tencentConfig);
-      final tencentConfigFile = await TencentManageAPI.localFile;
+      final tencentConfigFile = await TencentManageAPI().localFile();
       await tencentConfigFile.writeAsString(tencentConfigJson);
       showToast('保存成功');
     } catch (e) {
@@ -295,7 +295,7 @@ class TencentConfigState extends State<TencentConfig> {
 
   checkTencentConfig() async {
     try {
-      Map configMap = await TencentManageAPI.getConfigMap();
+      Map configMap = await TencentManageAPI().getConfigMap();
 
       if (configMap.isEmpty) {
         if (context.mounted) {

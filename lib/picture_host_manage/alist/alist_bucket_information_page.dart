@@ -163,6 +163,7 @@ class AlistBucketInformationState extends State<AlistBucketInformation> {
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
+        leading: getLeadingIcon(context),
         title: titleText('存储信息详情'),
         flexibleSpace: getFlexibleSpace(context),
       ),

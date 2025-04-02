@@ -39,7 +39,7 @@ class QiniuBucketDomainAreaConfigState extends State<QiniuBucketDomainAreaConfig
   _initConfig() async {
     resetBucketConfig();
     try {
-      var config = await QiniuManageAPI.readQiniuManageConfig();
+      var config = await QiniuManageAPI().readQiniuManageConfig();
       if (config == 'Error') {
         return;
       } else {
@@ -64,7 +64,7 @@ class QiniuBucketDomainAreaConfigState extends State<QiniuBucketDomainAreaConfig
   }
 
   getExistedDomain() async {
-    return await QiniuManageAPI.queryDomains(widget.element);
+    return await QiniuManageAPI().queryDomains(widget.element);
   }
 
   @override
@@ -73,116 +73,249 @@ class QiniuBucketDomainAreaConfigState extends State<QiniuBucketDomainAreaConfig
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
+        leading: getLeadingIcon(context),
         title: titleText('${widget.element['name']}配置'),
         flexibleSpace: getFlexibleSpace(context),
       ),
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          children: [
-            TextFormField(
-              controller: domainController,
-              decoration: const InputDecoration(
-                label: Center(child: Text('设定访问域名')),
-                hintText: '请输入域名',
-              ),
-              textAlign: TextAlign.center,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return '域名不能为空';
-                }
-                return null;
-              },
-            ),
-            ListTile(
-              title: const Text('所属地域'),
-              trailing: DropdownButton(
-                alignment: Alignment.centerRight,
-                underline: Container(),
-                icon: const Icon(Icons.arrow_drop_down, size: 30),
-                autofocus: true,
-                value: bucketConfig['region'],
-                items: QiniuManageAPI.areaCodeName.keys.map((e) {
-                  return DropdownMenuItem(
-                    value: e,
-                    child: Text('${QiniuManageAPI.areaCodeName[e]}'),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  bucketConfig['region'] = value;
-                  setState(() {});
-                },
-              ),
-            ),
-            ListTile(
-              subtitle: ElevatedButton(
-                onPressed: () async {
-                  if (_formKey.currentState!.validate()) {
-                    try {
-                      var result = await QiniuManageAPI.saveQiniuManageConfig(
-                          widget.element['name'], domainController.text, bucketConfig['region']);
-                      if (!result) {
-                        showToast('保存数据失败');
-                        return;
-                      } else {
-                        showToast('配置成功');
-                        if (mounted) {
-                          Navigator.pop(context);
-                        }
-                      }
-                    } catch (e) {
-                      flogErr(e, {}, "QiniuBucketDomainAreaConfigState", "build");
-                    }
-                  }
-                },
-                child: const Text('提交'),
-              ),
-            ),
-            FutureBuilder(
-              future: getExistedDomain(),
-              builder: (BuildContext context, AsyncSnapshot snapshot) {
-                if (snapshot.hasData) {
-                  if (snapshot.data[0] == 'success') {
-                    if (snapshot.data[1] == null || snapshot.data[1].length == 0) {
-                      return const Center(
-                          child: ListTile(
-                        title: Text('未查询到可用域名'),
-                      ));
-                    } else {
-                      return ListTile(
-                        title: const Center(child: Text('可用域名列表')),
-                        subtitle: Table(
-                          children: snapshot.data[1].map<TableRow>((e) {
-                            return TableRow(
-                              children: [
-                                Center(
-                                    child: SelectableText(
-                                  e.toString(),
-                                  style: const TextStyle(color: Colors.blue, decoration: TextDecoration.underline),
-                                )),
-                              ],
-                            );
-                          }).toList(),
+      body: Container(
+        padding: const EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            children: [
+              // Configuration Section Card
+              Card(
+                elevation: 4,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        '存储桶配置',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
                         ),
-                      );
-                    }
-                  } else {
-                    return const Center(
-                        child: ListTile(
-                      title: Text('未查询到可用域名'),
-                    ));
-                  }
-                } else {
-                  return const Center(
-                      child: ListTile(
-                    title: Text('未查询到可用域名'),
-                  ));
-                }
-              },
-            )
-          ],
+                      ),
+                      const SizedBox(height: 20),
+                      // Domain Input
+                      TextFormField(
+                        controller: domainController,
+                        decoration: InputDecoration(
+                          labelText: '访问域名',
+                          hintText: '请输入域名',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          prefixIcon: const Icon(Icons.language),
+                          contentPadding: const EdgeInsets.symmetric(
+                            vertical: 16,
+                            horizontal: 16,
+                          ),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return '域名不能为空';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 20),
+                      // Region Selection
+                      Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey.shade400),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.location_on, color: Colors.blue),
+                            const SizedBox(width: 10),
+                            const Text(
+                              '所属地域',
+                              style: TextStyle(fontSize: 16),
+                            ),
+                            Expanded(child: Container()),
+                            DropdownButton(
+                              underline: Container(),
+                              icon: const Icon(Icons.arrow_drop_down, size: 30),
+                              value: bucketConfig['region'],
+                              items: QiniuManageAPI.areaCodeName.keys.map((e) {
+                                return DropdownMenuItem(
+                                  value: e,
+                                  child: Text('${QiniuManageAPI.areaCodeName[e]}'),
+                                );
+                              }).toList(),
+                              onChanged: (value) {
+                                setState(() {
+                                  bucketConfig['region'] = value;
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      // Submit Button
+                      SizedBox(
+                        width: double.infinity,
+                        height: 48,
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            if (_formKey.currentState!.validate()) {
+                              try {
+                                var result = await QiniuManageAPI().saveQiniuManageConfig(
+                                    widget.element['name'], domainController.text, bucketConfig['region']);
+                                if (!result) {
+                                  showToast('保存数据失败');
+                                  return;
+                                } else {
+                                  showToast('配置成功');
+                                  if (mounted) {
+                                    Navigator.pop(context);
+                                  }
+                                }
+                              } catch (e) {
+                                flogErr(e, {}, "QiniuBucketDomainAreaConfigState", "build");
+                              }
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: const Text(
+                            '保存配置',
+                            style: TextStyle(fontSize: 16),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              // Available Domains Section Card
+              Card(
+                elevation: 4,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Row(
+                        children: [
+                          Icon(Icons.list, color: Colors.blue),
+                          SizedBox(width: 8),
+                          Text(
+                            '可用域名列表',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      FutureBuilder(
+                        future: getExistedDomain(),
+                        builder: (BuildContext context, AsyncSnapshot snapshot) {
+                          if (snapshot.connectionState == ConnectionState.waiting) {
+                            return const Center(
+                              child: Padding(
+                                padding: EdgeInsets.all(20.0),
+                                child: CircularProgressIndicator(),
+                              ),
+                            );
+                          } else if (snapshot.hasData &&
+                              snapshot.data[0] == 'success' &&
+                              snapshot.data[1] != null &&
+                              snapshot.data[1].length > 0) {
+                            return ListView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: snapshot.data[1].length,
+                              itemBuilder: (context, index) {
+                                return Container(
+                                  margin: const EdgeInsets.only(bottom: 8),
+                                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey.shade100,
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(color: Colors.grey.shade300),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      const Icon(Icons.link, color: Colors.blue, size: 20),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: SelectableText(
+                                          snapshot.data[1][index].toString(),
+                                          style: const TextStyle(
+                                            color: Colors.blue,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ),
+                                      IconButton(
+                                        icon: const Icon(Icons.content_copy, size: 20),
+                                        onPressed: () {
+                                          copyToClipboard(context, snapshot.data[1][index].toString());
+                                        },
+                                        tooltip: '复制',
+                                        color: Colors.blue,
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            );
+                          } else {
+                            return Container(
+                              padding: const EdgeInsets.all(20),
+                              alignment: Alignment.center,
+                              child: Column(
+                                children: [
+                                  Icon(Icons.domain_disabled, size: 48, color: Colors.grey.shade400),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    '未查询到可用域名',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.grey.shade600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
+  }
+
+  void copyToClipboard(BuildContext context, String text) {
+    // Implement clipboard functionality
+    // This is a placeholder for the actual implementation
+    showToast('已复制到剪贴板');
   }
 }

@@ -94,7 +94,6 @@ class Routes {
   static String imgurFileInformation = "/imgurFileInformation";
   static String sftpFileExplorer = "/sftpFileExplorer";
   static String sftpFileInformation = "/sftpFileInformation";
-  static String sshTerminal = "/sshTerminal";
   static String sftpLocalImagePreview = "/sftpLocalImagePreview";
   static String mdPreview = "/mdPreview";
   static String awsBucketList = "/awsBucketList";
@@ -201,7 +200,6 @@ class Routes {
     router.define(imgurFileInformation, handler: imgurFileInformationHandler);
     router.define(sftpFileExplorer, handler: sftpFileExplorerHandler);
     router.define(sftpFileInformation, handler: sftpFileInformationHandler);
-    router.define(sshTerminal, handler: sshTerminalHandler);
     router.define(sftpLocalImagePreview, handler: sftplocalImagePreviewHandler);
     router.define(mdPreview, handler: mdFilePreviewHandler);
     router.define(awsBucketList, handler: awsBucketListHandler);

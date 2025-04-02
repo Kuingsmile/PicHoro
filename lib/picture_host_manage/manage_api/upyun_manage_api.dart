@@ -129,17 +129,6 @@ class UpyunManageAPI extends BaseManageApi {
     };
   }
 
-  //get MD5
-  Future<String> getContentMd5(var variable) async {
-    if (isString(variable)) {
-      return base64.encode(md5.convert(utf8.encode(variable)).bytes);
-    } else if (isFile(variable)) {
-      List<int> bytes = await variable.readAsBytes();
-      return base64.encode(md5.convert(bytes).bytes);
-    }
-    return "";
-  }
-
   //get authorization
   Future<String> upyunAuthorization(
     String method,
@@ -194,7 +183,7 @@ class UpyunManageAPI extends BaseManageApi {
       } else if (method == 'POST') {
         response = await dio.post(url, data: data, queryParameters: params);
       } else if (method == 'DELETE') {
-        response = await dio.delete(url, queryParameters: params);
+        response = await dio.delete(url, data: data, queryParameters: params);
       } else if (method == 'PUT') {
         response = await dio.put(url, data: data, queryParameters: params);
       } else {
@@ -204,10 +193,20 @@ class UpyunManageAPI extends BaseManageApi {
       if (checkSuccess(response)) {
         return onSuccess(response);
       }
-      flogErr(response, {'url': url, 'data': data}, "UpyunManageAPI", callFunction);
+      flogErr(
+          response, {'url': url, 'data': data, 'params': params, 'headers': headers}, "UpyunManageAPI", callFunction);
       return ['failed'];
     } catch (e) {
-      flogErr(e, {'url': url}, "UpyunManageAPI", callFunction);
+      flogErr(
+          e,
+          {
+            'url': url,
+            'data': data,
+            'params': params,
+            'headers': headers,
+          },
+          "UpyunManageAPI",
+          callFunction);
       return [e.toString()];
     }
   }

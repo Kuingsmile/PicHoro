@@ -212,7 +212,7 @@ class AliyunConfigureStoreEditState extends State<AliyunConfigureStoreEdit> {
 
   _importConfig() async {
     try {
-      Map configMap = await AliyunManageAPI.getConfigMap();
+      Map configMap = await AliyunManageAPI().getConfigMap();
       _keyIdController.text = configMap['keyId'];
       _keySecretController.text = configMap['keySecret'];
       _bucketController.text = configMap['bucket'];

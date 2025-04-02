@@ -8,7 +8,7 @@ class WebdavImageUploadUtils {
   //上传接口
   static uploadApi({required String path, required String name, required Map configMap}) async {
     try {
-      webdav.Client client = await WebdavManageAPI.getWebdavClient();
+      webdav.Client client = await WebdavManageAPI().getWebdavClient();
       String uploadPath = configMap['uploadPath'];
       String customUrl = configMap['customUrl'] ?? 'None';
       String webPath = configMap['webPath'] ?? 'None';

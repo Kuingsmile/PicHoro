@@ -32,6 +32,7 @@ class WebdavImagePreviewState extends State<WebdavImagePreview> {
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
+        leading: getLeadingIcon(context),
         title: titleText('图片预览'),
         flexibleSpace: getFlexibleSpace(context),
       ),

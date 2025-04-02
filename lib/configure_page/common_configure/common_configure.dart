@@ -76,6 +76,7 @@ class CommonConfigState extends State<CommonConfig> {
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
+        leading: getLeadingIcon(context),
         title: titleText(
           '通用设置',
         ),

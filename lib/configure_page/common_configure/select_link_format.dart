@@ -66,6 +66,7 @@ class LinkFormatSelectState extends State<LinkFormatSelect> {
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
+        leading: getLeadingIcon(context),
         title: titleText(
           '链接格式选择',
         ),

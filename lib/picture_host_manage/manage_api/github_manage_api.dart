@@ -3,119 +3,118 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/services.dart';
+import 'package:horopic/picture_host_manage/common/base_manage_api.dart';
 import 'package:path_provider/path_provider.dart';
 
-import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/picture_host_configure/configure_page/github_configure.dart';
 
-class GithubManageAPI {
-  static Future<File> get localFile async {
-    final path = await _localPath;
-    String defaultUser = Global.getUser();
-    return ensureFileExists(File('$path/${defaultUser}_github_config.txt'));
+class GithubManageAPI extends BaseManageApi {
+  static final GithubManageAPI _instance = GithubManageAPI._internal();
+
+  factory GithubManageAPI() {
+    return _instance;
   }
 
-  static Future<String> get _localPath async {
-    final directory = await getApplicationDocumentsDirectory();
-    return directory.path;
-  }
+  GithubManageAPI._internal();
 
-  static Future<String> readGithubConfig() async {
+  @override
+  String configFileName() => 'github_config.txt';
+
+  Future<List<dynamic>> _makeRequest(
+      {required String url,
+      required String method,
+      Map<String, dynamic>? headers,
+      Map<String, dynamic>? params,
+      dynamic data,
+      required Function(Response) onSuccess,
+      dynamic onFailure,
+      String callFunction = '_makeRequest',
+      required Function checkSuccess}) async {
+    BaseOptions baseoptions = setBaseOptions();
+    if (headers != null) {
+      baseoptions.headers = headers;
+    }
+    Dio dio = Dio(baseoptions);
     try {
-      final file = await localFile;
-      String contents = await file.readAsString();
-      return contents;
+      Response response;
+      if (method == 'GET') {
+        response = await dio.get(url, queryParameters: params);
+      } else if (method == 'POST') {
+        response = await dio.post(url, data: data, queryParameters: params);
+      } else if (method == 'DELETE') {
+        response = await dio.delete(url, data: data, queryParameters: params);
+      } else if (method == 'PUT') {
+        response = await dio.put(url, data: data, queryParameters: params);
+      } else {
+        throw Exception('Unsupported HTTP method: $method');
+      }
+
+      if (checkSuccess(response)) {
+        return onSuccess(response);
+      }
+      flogErr(
+          response,
+          {
+            'url': url,
+            'data': data,
+            'method': method,
+            'params': params,
+            'headers': headers,
+          },
+          "GithubManageAPI",
+          callFunction);
+      return onFailure ?? ['failed'];
     } catch (e) {
-      flogErr(e, {}, 'GithubManageAPI', 'readGithubConfig');
-      return "Error";
+      flogErr(e, {'url': url, 'data': data, 'method': method, 'params': params, 'headers': headers}, "GithubManageAPI",
+          callFunction);
+      return [e.toString()];
     }
   }
 
-  static Future<Map> getConfigMap() async {
-    String configStr = await readGithubConfig();
-    if (configStr == '') {
-      return {};
-    }
-    Map configMap = json.decode(configStr);
-    return configMap;
-  }
-
-  static isString(var variable) {
-    return variable is String;
-  }
-
-  static isFile(var variable) {
-    return variable is File;
-  }
-
-  static getUserInfo() async {
+  getUserInfo() async {
     try {
       Map configMap = await getConfigMap();
-      String githubusername = configMap['githubusername'];
-      String token = configMap['token'];
-      String host = 'https://api.github.com/users/$githubusername';
-
-      BaseOptions baseoptions = setBaseOptions();
-      baseoptions.headers = {
-        'Authorization': token,
-        'Accept': 'application/vnd.github+json',
-      };
-
-      Dio dio = Dio(baseoptions);
-
-      var response = await dio.get(host);
-      if (response.statusCode == 200) {
-        return ['success', response.data];
-      } else {
-        return ['failed'];
-      }
+      String host = 'https://api.github.com/users/${configMap['githubusername']}';
+      return await _makeRequest(
+        url: host,
+        method: 'GET',
+        headers: {
+          'Authorization': configMap['token'],
+          'Accept': 'application/vnd.github+json',
+        },
+        onSuccess: (response) => ['success', response.data],
+        checkSuccess: (response) => response.statusCode == 200,
+        callFunction: 'getUserInfo',
+      );
     } catch (e) {
       flogErr(e, {}, "GithubManageAPI", "getUserInfo");
       return [e.toString()];
     }
   }
 
-  // 获取仓库列表
-  static getReposList() async {
+  getReposList() async {
     try {
-      List reposList = [];
       Map configMap = await getConfigMap();
-      String token = configMap['token'];
+      List reposList = [];
       String host = 'https://api.github.com/user/repos';
-      int page = 1;
-      int perPage = 10;
-
-      BaseOptions baseoptions = setBaseOptions();
-      baseoptions.headers = {
-        'Authorization': token,
-        'Accept': 'application/vnd.github+json',
-      };
-
+      int page = 0;
+      BaseOptions baseoptions = setBaseOptions()
+        ..headers = {
+          'Authorization': configMap['token'],
+          'Accept': 'application/vnd.github+json',
+        };
       Dio dio = Dio(baseoptions);
-
-      var response = await dio.get(host, queryParameters: {'page': page, 'per_page': perPage});
-      if (response.statusCode == 200) {
-        if (response.data.length > 0) {
-          reposList.addAll(response.data);
-        } else {
+      while (true) {
+        page = page + 1;
+        var response = await dio.get(host, queryParameters: {'page': page, 'per_page': 10});
+        if (response.statusCode != 200) {
+          return ['failed'];
+        }
+        if (response.data.length <= 0) {
           return ['success', reposList];
         }
-        while (true) {
-          page += 1;
-          response = await dio.get(host, queryParameters: {'page': page, 'per_page': perPage});
-          if (response.statusCode == 200) {
-            if (response.data.length > 0) {
-              reposList.addAll(response.data);
-            } else {
-              return ['success', reposList];
-            }
-          } else {
-            return ['failed'];
-          }
-        }
-      } else {
-        return ['failed'];
+        reposList.addAll(response.data);
       }
     } catch (e) {
       flogErr(e, {}, "GithubManageAPI", "getReposList");
@@ -123,47 +122,30 @@ class GithubManageAPI {
     }
   }
 
-  // 获取仓库列表
-  static getOtherReposList(String username) async {
+  getOtherReposList(String username) async {
     try {
-      List reposList = [];
       Map configMap = await getConfigMap();
-      String token = configMap['token'];
-
+      List reposList = [];
       String host = 'https://api.github.com/users/$username/repos';
-      int page = 1;
-      int perPage = 10;
-
+      int page = 0;
       BaseOptions baseoptions = setBaseOptions();
       baseoptions.headers = {
-        'Authorization': token,
+        'Authorization': configMap['token'],
         'Accept': 'application/vnd.github+json',
       };
-
       Dio dio = Dio(baseoptions);
 
-      var response = await dio.get(host, queryParameters: {'page': page, 'per_page': perPage});
-      if (response.statusCode == 200) {
+      while (true) {
+        page = page + 1;
+        var response = await dio.get(host, queryParameters: {'page': page, 'per_page': 10});
+        if (response.statusCode != 200) {
+          return ['failed'];
+        }
         if (response.data.length > 0) {
           reposList.addAll(response.data);
         } else {
           return ['success', reposList];
         }
-        while (true) {
-          page += 1;
-          response = await dio.get(host, queryParameters: {'page': page, 'per_page': perPage});
-          if (response.statusCode == 200) {
-            if (response.data.length > 0) {
-              reposList.addAll(response.data);
-            } else {
-              return ['success', reposList];
-            }
-          } else {
-            return ['failed'];
-          }
-        }
-      } else {
-        return ['failed'];
       }
     } catch (e) {
       flogErr(
@@ -178,26 +160,22 @@ class GithubManageAPI {
   }
 
   //创建仓库
-  static createRepo(Map newRepoInfo) async {
+  createRepo(Map newRepoInfo) async {
     try {
       Map configMap = await getConfigMap();
-      String token = configMap['token'];
       String host = 'https://api.github.com/user/repos';
-
-      BaseOptions baseoptions = setBaseOptions();
-      baseoptions.headers = {
-        'Authorization': token,
-        'Accept': 'application/vnd.github+json',
-      };
-
-      Dio dio = Dio(baseoptions);
-
-      var response = await dio.post(host, data: newRepoInfo);
-      if (response.statusCode == 201) {
-        return showToast('创建成功');
-      } else {
-        return showToast('创建失败');
-      }
+      return await _makeRequest(
+        url: host,
+        method: 'POST',
+        headers: {
+          'Authorization': configMap['token'],
+          'Accept': 'application/vnd.github+json',
+        },
+        data: newRepoInfo,
+        onSuccess: (response) => showToast('创建成功'),
+        checkSuccess: (response) => response.statusCode == 201,
+        callFunction: 'createRepo',
+      );
     } catch (e) {
       flogErr(
           e,
@@ -211,28 +189,21 @@ class GithubManageAPI {
   }
 
   //获取仓库根目录sha
-  static getRootDirSha(String username, String repoName, String branch) async {
+  getRootDirSha(String username, String repoName, String branch) async {
     try {
       Map configMap = await getConfigMap();
-      String token = configMap['token'];
       String host = 'https://api.github.com/repos/$username/$repoName/branches/$branch';
-
-      BaseOptions baseoptions = setBaseOptions();
-      baseoptions.headers = {
-        'Authorization': token,
-        'Accept': 'application/vnd.github+json',
-      };
-
-      Dio dio = Dio(baseoptions);
-
-      var response = await dio.get(host);
-      if (response.statusCode == 200) {
-        String sha = response.data['commit']['commit']['tree']['sha'];
-
-        return ['success', sha];
-      } else {
-        return ['failed'];
-      }
+      return await _makeRequest(
+        url: host,
+        method: 'GET',
+        headers: {
+          'Authorization': configMap['token'],
+          'Accept': 'application/vnd.github+json',
+        },
+        onSuccess: (response) => ['success', response.data['commit']['commit']['tree']['sha']],
+        checkSuccess: (response) => response.statusCode == 200,
+        callFunction: 'getRootDirSha',
+      );
     } catch (e) {
       flogErr(
           e,
@@ -247,28 +218,21 @@ class GithubManageAPI {
     }
   }
 
-  //获取仓库目录文件列表
-  static getRepoDirList(String username, String repoName, String sha) async {
+  getRepoDirList(String username, String repoName, String sha) async {
     try {
       Map configMap = await getConfigMap();
-      String token = configMap['token'];
       String host = 'https://api.github.com/repos/$username/$repoName/git/trees/$sha';
-
-      BaseOptions baseoptions = setBaseOptions();
-      baseoptions.headers = {
-        'Authorization': token,
-        'Accept': 'application/vnd.github+json',
-      };
-
-      Dio dio = Dio(baseoptions);
-
-      var response = await dio.get(host);
-      if (response.statusCode == 200) {
-        List fileList = response.data['tree'];
-        return ['success', fileList];
-      } else {
-        return ['failed'];
-      }
+      return await _makeRequest(
+        url: host,
+        method: 'GET',
+        headers: {
+          'Authorization': configMap['token'],
+          'Accept': 'application/vnd.github+json',
+        },
+        onSuccess: (response) => ['success', response.data['tree']],
+        checkSuccess: (response) => response.statusCode == 200,
+        callFunction: 'getRepoDirList',
+      );
     } catch (e) {
       flogErr(
           e,
@@ -283,29 +247,19 @@ class GithubManageAPI {
     }
   }
 
-  //判断是否是空目录
-  static isDirEmpty(String username, String repoName, String bucketPrefix) async {
+  isDirEmpty(String username, String repoName, String bucketPrefix) async {
     try {
       Map configMap = await getConfigMap();
-      String token = configMap['token'];
       String host = 'https://api.github.com/repos/$username/$repoName/contents/$bucketPrefix';
-
       BaseOptions baseoptions = setBaseOptions();
       baseoptions.headers = {
-        'Authorization': token,
+        'Authorization': configMap['token'],
         'Accept': 'application/vnd.github+json',
       };
-
       Dio dio = Dio(baseoptions);
-
       var response = await dio.get(host);
       if (response.statusCode == 200) {
-        List fileList = response.data;
-        if (fileList.isEmpty) {
-          return ['empty'];
-        } else {
-          return ['not empty'];
-        }
+        return response.data.isEmpty ? ['empty'] : ['not empty'];
       }
     } catch (e) {
       if (e is DioException && e.toString().contains('This repository is empty')) {
@@ -325,27 +279,21 @@ class GithubManageAPI {
   }
 
   //获取仓库文件内容
-  static getRepoFileContent(String username, String repoName, String filePath) async {
+  getRepoFileContent(String username, String repoName, String filePath) async {
     try {
       Map configMap = await getConfigMap();
-      String token = configMap['token'];
       String host = 'https://api.github.com/repos/$username/$repoName/contents/$filePath';
-
-      BaseOptions baseoptions = setBaseOptions();
-      baseoptions.headers = {
-        'Authorization': token,
-        'Accept': 'application/vnd.github+json',
-      };
-
-      Dio dio = Dio(baseoptions);
-
-      var response = await dio.get(host);
-      if (response.statusCode == 200) {
-        var content = response.data;
-        return ['success', content];
-      } else {
-        return ['failed'];
-      }
+      return await _makeRequest(
+        url: host,
+        method: 'GET',
+        headers: {
+          'Authorization': configMap['token'],
+          'Accept': 'application/vnd.github+json',
+        },
+        onSuccess: (response) => ['success', response.data],
+        checkSuccess: (response) => response.statusCode == 200,
+        callFunction: 'getRepoFileContent',
+      );
     } catch (e) {
       flogErr(
           e,
@@ -360,33 +308,26 @@ class GithubManageAPI {
     }
   }
 
-  //删除仓库文件
-  static deleteRepoFile(String username, String repoName, String path, String sha, String branch) async {
+  deleteRepoFile(String username, String repoName, String path, String sha, String branch) async {
     try {
       Map configMap = await getConfigMap();
-      String token = configMap['token'];
       String host = 'https://api.github.com/repos/$username/$repoName/contents/$path';
-
-      BaseOptions baseoptions = setBaseOptions();
-      baseoptions.headers = {
-        'Authorization': token,
-        'Accept': 'application/vnd.github+json',
-      };
-
-      Map<String, dynamic> data = {
-        'message': 'deleted by PicHoro app',
-        'sha': sha,
-        'branch': branch,
-      };
-
-      Dio dio = Dio(baseoptions);
-
-      var response = await dio.delete(host, data: data);
-      if (response.statusCode == 200) {
-        return ['success'];
-      } else {
-        return ['failed'];
-      }
+      return await _makeRequest(
+        url: host,
+        method: 'DELETE',
+        headers: {
+          'Authorization': configMap['token'],
+          'Accept': 'application/vnd.github+json',
+        },
+        data: {
+          'message': 'deleted by PicHoro app',
+          'sha': sha,
+          'branch': branch,
+        },
+        onSuccess: (response) => ['success'],
+        checkSuccess: (response) => response.statusCode == 200,
+        callFunction: 'deleteRepoFile',
+      );
     } catch (e) {
       flogErr(
           e,
@@ -404,7 +345,7 @@ class GithubManageAPI {
   }
 
   //删除仓库目录
-  static deleteFolder(
+  deleteFolder(
     String username,
     String repoName,
     String path,
@@ -450,26 +391,13 @@ class GithubManageAPI {
     }
   }
 
-  //仓库设为默认图床
-  static setDefaultRepo(Map element, String? folder) async {
+  setDefaultRepo(Map element, String? folder) async {
     try {
       Map configMap = await getConfigMap();
-      String githubusername = configMap['githubusername'];
-      String repo = element['name'];
-      String token = configMap['token'];
-      String branch = element['default_branch'];
-      String customDomain = 'None';
-      String storePath = '';
-
-      if (folder == null) {
-        storePath = configMap['storePath'];
-      } else {
-        storePath = folder;
-      }
-
-      final githubConfig = GithubConfigModel(githubusername, repo, token, storePath, branch, customDomain);
+      final githubConfig = GithubConfigModel(configMap['githubusername'], element['name'], configMap['token'],
+          folder ?? configMap['storePath'], element['default_branch'], 'None');
       final githubConfigJson = jsonEncode(githubConfig);
-      final githubConfigFile = await localFile;
+      final githubConfigFile = await localFile();
       await githubConfigFile.writeAsString(githubConfigJson);
       return ['success'];
     } catch (e) {
@@ -485,12 +413,10 @@ class GithubManageAPI {
     }
   }
 
-  //新建文件夹
-  static createFolder(Map element, String newPrefix) async {
+  createFolder(Map element, String newPrefix) async {
     try {
       Map configMap = await getConfigMap();
       String token = configMap['token'];
-
       String assetPath = 'assets/validateImage/PicHoroValidate.jpeg';
       String appDir = await getApplicationDocumentsDirectory().then((value) {
         return value.path;
@@ -536,9 +462,8 @@ class GithubManageAPI {
         return [
           'success',
         ];
-      } else {
-        return ['failed'];
       }
+      return ['failed'];
     } catch (e) {
       flogErr(
           e,
@@ -552,8 +477,7 @@ class GithubManageAPI {
     }
   }
 
-  //上传文件
-  static uploadFile(Map element, String filename, String filePath, String newPrefix) async {
+  uploadFile(Map element, String filename, String filePath, String newPrefix) async {
     try {
       Map configMap = await getConfigMap();
       String token = configMap['token'];
@@ -594,9 +518,8 @@ class GithubManageAPI {
         return [
           'success',
         ];
-      } else {
-        return ['failed'];
       }
+      return ['failed'];
     } catch (e) {
       flogErr(
           e,
@@ -613,7 +536,7 @@ class GithubManageAPI {
   }
 
   //从网络链接下载文件后上传
-  static uploadNetworkFile(String fileLink, Map element, String prefix) async {
+  uploadNetworkFile(String fileLink, Map element, String prefix) async {
     try {
       String filename = fileLink.substring(fileLink.lastIndexOf("/") + 1, fileLink.length);
       filename = filename.substring(0, !filename.contains("?") ? filename.length : filename.indexOf("?"));
@@ -632,12 +555,9 @@ class GithubManageAPI {
         );
         if (uploadResult[0] == "success") {
           return ['success'];
-        } else {
-          return ['failed'];
         }
-      } else {
-        return ['failed'];
       }
+      return ['failed'];
     } catch (e) {
       flogErr(
           e,
@@ -652,7 +572,7 @@ class GithubManageAPI {
     }
   }
 
-  static uploadNetworkFileEntry(List fileList, Map element, String prefix) async {
+  uploadNetworkFileEntry(List fileList, Map element, String prefix) async {
     int successCount = 0;
     int failCount = 0;
 
@@ -672,8 +592,7 @@ class GithubManageAPI {
       return showToast('上传失败');
     } else if (failCount == 0) {
       return showToast('上传成功');
-    } else {
-      return showToast('成功$successCount,失败$failCount');
     }
+    return showToast('成功$successCount,失败$failCount');
   }
 }

@@ -46,7 +46,6 @@ class AlistFileExplorer extends BaseFileExplorer {
 }
 
 class AlistFileExplorerState extends BaseFileExplorerState<AlistFileExplorer> {
-  List fileAllInfoList = [];
   TextEditingController vc = TextEditingController();
   TextEditingController newFolder = TextEditingController();
   TextEditingController fileLink = TextEditingController();
@@ -108,7 +107,7 @@ class AlistFileExplorerState extends BaseFileExplorerState<AlistFileExplorer> {
   }
 
   @override
-  String getShareUrl(int index) {
+  Future<String> getShareUrl(int index) async {
     final isDirectory = index < dirAllInfoList.length;
     final fileName = isDirectory ? dirAllInfoList[index]['name'] : allInfoList[index]['name'];
     final baseUrl = widget.configMap['host'];
@@ -116,7 +115,6 @@ class AlistFileExplorerState extends BaseFileExplorerState<AlistFileExplorer> {
     if (!isDirectory && allInfoList[index]['sign'] != null && allInfoList[index]['sign'].isNotEmpty) {
       return '$path?sign=${allInfoList[index]['sign']}';
     }
-
     return path;
   }
 
@@ -148,7 +146,7 @@ class AlistFileExplorerState extends BaseFileExplorerState<AlistFileExplorer> {
         int newImageIndex = index - dirAllInfoList.length;
         for (int i = dirAllInfoList.length; i < allInfoList.length; i++) {
           if (Global.imgExt.contains(allInfoList[i]['name'].split('.').last.toLowerCase())) {
-            shareUrl = getShareUrl(i);
+            shareUrl = await getShareUrl(i);
             urlList += '$shareUrl,';
           } else if (i < index) {
             newImageIndex--;
@@ -163,11 +161,11 @@ class AlistFileExplorerState extends BaseFileExplorerState<AlistFileExplorer> {
       } else if (fileExt == 'pdf') {
         if (context.mounted) {
           Application.router.navigateTo(context,
-              '${Routes.pdfViewer}?url=${Uri.encodeComponent(getShareUrl(index))}&fileName=${Uri.encodeComponent(allInfoList[index]['name'])}&headers=${Uri.encodeComponent(jsonEncode({}))}',
+              '${Routes.pdfViewer}?url=${Uri.encodeComponent(await getShareUrl(index))}&fileName=${Uri.encodeComponent(allInfoList[index]['name'])}&headers=${Uri.encodeComponent(jsonEncode({}))}',
               transition: TransitionType.none);
         }
       } else if (Global.textExt.contains(fileExt)) {
-        String shareUrl = getShareUrl(index);
+        String shareUrl = await getShareUrl(index);
         showToast('开始获取文件');
         String filePath = await downloadTxtFile(shareUrl, allInfoList[index]['name'], null);
         String fileName = allInfoList[index]['name'];

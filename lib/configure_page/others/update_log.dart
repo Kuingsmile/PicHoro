@@ -30,6 +30,7 @@ class UpdateLogState extends State<UpdateLog> {
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
+        leading: getLeadingIcon(context),
         title: titleText(
           '更新日志',
         ),
