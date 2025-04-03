@@ -3,45 +3,26 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:minio/models.dart';
 import 'package:sqflite/utils/utils.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:minio/minio.dart';
 
-import 'package:horopic/utils/global.dart';
 import 'package:horopic/utils/common_functions.dart';
 import 'package:horopic/picture_host_configure/configure_page/aws_configure.dart';
+import 'package:horopic/picture_host_manage/common/base_manage_api.dart';
 
-class AwsManageAPI {
-  static Future<File> get localFile async {
-    final path = await _localPath;
-    String defaultUser = Global.getUser();
-    return ensureFileExists(File('$path/${defaultUser}_aws_config.txt'));
+class AwsManageAPI extends BaseManageApi {
+  static final AwsManageAPI _instance = AwsManageAPI._internal();
+
+  factory AwsManageAPI() {
+    return _instance;
   }
 
-  static Future<String> get _localPath async {
-    final directory = await getApplicationDocumentsDirectory();
-    return directory.path;
-  }
+  AwsManageAPI._internal();
 
-  static Future<String> readAwsConfig() async {
-    try {
-      final file = await localFile;
-      String contents = await file.readAsString();
-      return contents;
-    } catch (e) {
-      flogErr(e, {}, 'AwsManageAPI', 'readAwsConfig');
-      return "Error";
-    }
-  }
-
-  static Future<Map> getConfigMap() async {
-    String configStr = await readAwsConfig();
-    if (configStr == '') {
-      return {};
-    }
-    Map configMap = json.decode(configStr);
-    return configMap;
-  }
+  @override
+  String configFileName() => 'aws_config.txt';
 
   static getDate(String type) {
     var now = DateTime.now();
@@ -62,7 +43,6 @@ class AwsManageAPI {
         result.writeCharCode(char);
         continue;
       }
-
       if (char == '-'.codeUnitAt(0) ||
           char == '_'.codeUnitAt(0) ||
           char == '.'.codeUnitAt(0) ||
@@ -72,15 +52,13 @@ class AwsManageAPI {
         result.writeCharCode(char);
         continue;
       }
-
       result.write('%');
       result.write(hex([char]).toUpperCase());
     }
     return result.toString();
   }
 
-  //获取存储桶列表
-  static getBucketList() async {
+  Future<Minio?> getMinioClient(String region) async {
     try {
       Map configMap = await getConfigMap();
       String accessKeyId = configMap['accessKeyId'];
@@ -92,30 +70,35 @@ class AwsManageAPI {
         endpoint = endpointList[0];
         port = int.parse(endpointList[1]);
       }
-      String region = configMap['region'];
       bool isEnableSSL = configMap['isEnableSSL'] ?? true;
-
-      Minio minio;
-      if (region == 'None') {
-        minio = Minio(
-          endPoint: endpoint,
-          port: port,
-          accessKey: accessKeyId,
-          secretKey: secretAccessKey,
-          useSSL: isEnableSSL,
-        );
-      } else {
-        minio = Minio(
-          endPoint: endpoint,
-          port: port,
-          accessKey: accessKeyId,
-          secretKey: secretAccessKey,
-          useSSL: isEnableSSL,
-          region: region,
-        );
+      if (endpoint.contains('amazonaws.com')) {
+        if (!endpoint.contains(region)) {
+          endpoint = 's3.$region.amazonaws.com';
+        }
       }
+      return Minio(
+        endPoint: endpoint,
+        port: port,
+        accessKey: accessKeyId,
+        secretKey: secretAccessKey,
+        useSSL: isEnableSSL,
+        region: region == 'None' ? null : region,
+      );
+    } catch (e) {
+      flogErr(e, {}, 'AwsManageAPI', 'getMinioClient');
+      return null;
+    }
+  }
 
-      var response = await minio.listBuckets();
+  //获取存储桶列表
+  getBucketList() async {
+    try {
+      Map configMap = await getConfigMap();
+      Minio? minio = await getMinioClient(configMap['region']);
+      if (minio == null) {
+        return ['failed'];
+      }
+      List<Bucket> response = await minio.listBuckets();
       return ['success', response];
     } catch (e) {
       flogErr(e, {}, 'AwsManageAPI', 'getBucketList');
@@ -123,7 +106,7 @@ class AwsManageAPI {
     }
   }
 
-  static getBucketRegion(String bucket) async {
+  getBucketRegion(String bucket) async {
     try {
       Map configMap = await getConfigMap();
       String accessKeyId = configMap['accessKeyId'];
@@ -149,9 +132,7 @@ class AwsManageAPI {
         secretKey: secretAccessKey,
         useSSL: isEnableSSL,
       );
-
-      var response = await minio.getBucketRegion(bucket);
-
+      String response = await minio.getBucketRegion(bucket);
       return ['success', response];
     } catch (e) {
       flogErr(
@@ -166,53 +147,15 @@ class AwsManageAPI {
   }
 
   //新建存储桶
-  static createBucket(Map newBucketConfigMap) async {
+  createBucket(Map newBucketConfigMap) async {
     try {
-      Map configMap = await getConfigMap();
-      String accessKeyId = configMap['accessKeyId'];
-      String secretAccessKey = configMap['secretAccessKey'];
       String bucket = newBucketConfigMap['bucketName'];
-      String endpoint = configMap['endpoint'];
-      int? port;
-      if (endpoint.contains(':')) {
-        List<String> endpointList = endpoint.split(':');
-        endpoint = endpointList[0];
-        port = int.parse(endpointList[1]);
-      }
       String region = newBucketConfigMap['region'];
-      bool isEnableSSL = configMap['isEnableSSL'] ?? true;
-
-      if (endpoint.contains('amazonaws.com')) {
-        if (!endpoint.contains(region)) {
-          endpoint = 's3.$region.amazonaws.com';
-        }
+      Minio? minio = await getMinioClient(region);
+      if (minio == null) {
+        return ['failed'];
       }
-
-      Minio minio;
-      if (region == 'None') {
-        minio = Minio(
-          endPoint: endpoint,
-          port: port,
-          accessKey: accessKeyId,
-          secretKey: secretAccessKey,
-          useSSL: isEnableSSL,
-        );
-      } else {
-        minio = Minio(
-          endPoint: endpoint,
-          port: port,
-          accessKey: accessKeyId,
-          secretKey: secretAccessKey,
-          useSSL: isEnableSSL,
-          region: region,
-        );
-      }
-
-      if (region == 'None') {
-        await minio.makeBucket(bucket);
-      } else {
-        await minio.makeBucket(bucket, region);
-      }
+      await minio.makeBucket(bucket, region == 'None' ? null : region);
       return ['success'];
     } catch (e) {
       flogErr(
@@ -226,51 +169,16 @@ class AwsManageAPI {
     }
   }
 
-  //删除存储桶
-  static deleteBucket(Map element) async {
+  deleteBucket(Map element) async {
     try {
-      Map configMap = await getConfigMap();
-      String accessKeyId = configMap['accessKeyId'];
-      String secretAccessKey = configMap['secretAccessKey'];
       String bucket = element['name'];
-      String endpoint = configMap['endpoint'];
-      int? port;
-      if (endpoint.contains(':')) {
-        List<String> endpointList = endpoint.split(':');
-        endpoint = endpointList[0];
-        port = int.parse(endpointList[1]);
-      }
       String region = element['region'];
-      bool isEnableSSL = configMap['isEnableSSL'] ?? true;
-
-      if (endpoint.contains('amazonaws.com')) {
-        if (!endpoint.contains(region)) {
-          endpoint = 's3.$region.amazonaws.com';
-        }
+      Minio? minio = await getMinioClient(region);
+      if (minio == null) {
+        return ['failed'];
       }
-      Minio minio;
-      if (region == 'None') {
-        minio = Minio(
-          endPoint: endpoint,
-          port: port,
-          accessKey: accessKeyId,
-          secretKey: secretAccessKey,
-          useSSL: isEnableSSL,
-        );
-      } else {
-        minio = Minio(
-          endPoint: endpoint,
-          port: port,
-          accessKey: accessKeyId,
-          secretKey: secretAccessKey,
-          useSSL: isEnableSSL,
-          region: region,
-        );
-      }
-
-      var response = await minio.removeBucket(bucket);
-
-      return ['success', response];
+      await minio.removeBucket(bucket);
+      return ['success'];
     } catch (e) {
       flogErr(
           e,
@@ -283,36 +191,23 @@ class AwsManageAPI {
     }
   }
 
-  //存储桶设为默认图床
-  static setDefaultBucket(Map element, String? folder) async {
+  setDefaultBucket(Map element, String? folder) async {
     try {
       Map configMap = await getConfigMap();
-      String accessKeyId = configMap['accessKeyId'];
-      String secretAccessKey = configMap['secretAccessKey'];
-      String bucket = element['name'];
       String endpoint = configMap['endpoint'];
       String region = element['region'];
-      String uploadPath = '';
-      String customUrl = configMap['customUrl'];
       bool isS3PathStyle = configMap['isS3PathStyle'] ?? false;
       bool isEnableSSL = configMap['isEnableSSL'] ?? true;
-
       if (endpoint.contains('amazonaws.com')) {
         if (!endpoint.contains(region)) {
           endpoint = 's3.$region.amazonaws.com';
         }
       }
-
-      if (folder == null) {
-        uploadPath = configMap['uploadPath'];
-      } else {
-        uploadPath = folder;
-      }
-
-      final awsConfig = AwsConfigModel(
-          accessKeyId, secretAccessKey, bucket, endpoint, region, uploadPath, customUrl, isS3PathStyle, isEnableSSL);
+      String uploadPath = folder ?? configMap['uploadPath'];
+      final awsConfig = AwsConfigModel(configMap['accessKeyId'], configMap['secretAccessKey'], element['name'],
+          endpoint, region, uploadPath, configMap['customUrl'], isS3PathStyle, isEnableSSL);
       final awsConfigJson = jsonEncode(awsConfig);
-      final awsConfigFile = await localFile;
+      final awsConfigFile = await localFile();
       await awsConfigFile.writeAsString(awsConfigJson);
       return ['success'];
     } catch (e) {
@@ -321,49 +216,14 @@ class AwsManageAPI {
     }
   }
 
-  //查询存储桶文件列表
-  static queryBucketFiles(Map element, Map<String, dynamic> query) async {
+  queryBucketFiles(Map element, Map<String, dynamic> query) async {
     try {
-      Map configMap = await getConfigMap();
-      String accessKeyId = configMap['accessKeyId'];
-      String secretAccessKey = configMap['secretAccessKey'];
       String bucket = element['name'];
-      String endpoint = configMap['endpoint'];
-      int? port;
-      if (endpoint.contains(':')) {
-        List<String> endpointList = endpoint.split(':');
-        endpoint = endpointList[0];
-        port = int.parse(endpointList[1]);
-      }
       String region = element['region'];
-      bool isEnableSSL = configMap['isEnableSSL'] ?? true;
-
-      if (endpoint.contains('amazonaws.com')) {
-        if (!endpoint.contains(region)) {
-          endpoint = 's3.$region.amazonaws.com';
-        }
+      Minio? minio = await getMinioClient(region);
+      if (minio == null) {
+        return ['failed'];
       }
-
-      Minio minio;
-      if (region == 'None') {
-        minio = Minio(
-          endPoint: endpoint,
-          port: port,
-          accessKey: accessKeyId,
-          secretKey: secretAccessKey,
-          useSSL: isEnableSSL,
-        );
-      } else {
-        minio = Minio(
-          endPoint: endpoint,
-          port: port,
-          accessKey: accessKeyId,
-          secretKey: secretAccessKey,
-          useSSL: isEnableSSL,
-          region: region,
-        );
-      }
-
       Map objects = {
         'contents': [],
         'commonPrefixes': [],
@@ -382,51 +242,15 @@ class AwsManageAPI {
     }
   }
 
-  //删除文件
-  static deleteFile(Map element, String key) async {
+  deleteFile(Map element, String key) async {
     try {
-      Map configMap = await getConfigMap();
-      String accessKeyId = configMap['accessKeyId'];
-      String secretAccessKey = configMap['secretAccessKey'];
       String bucket = element['name'];
-      String endpoint = configMap['endpoint'];
-      int? port;
-      if (endpoint.contains(':')) {
-        List<String> endpointList = endpoint.split(':');
-        endpoint = endpointList[0];
-        port = int.parse(endpointList[1]);
-      }
       String region = element['region'];
-      bool isEnableSSL = configMap['isEnableSSL'] ?? true;
-
-      if (endpoint.contains('amazonaws.com')) {
-        if (!endpoint.contains(region)) {
-          endpoint = 's3.$region.amazonaws.com';
-        }
+      Minio? minio = await getMinioClient(region);
+      if (minio == null) {
+        return ['failed'];
       }
-
-      Minio minio;
-      if (region == 'None') {
-        minio = Minio(
-          endPoint: endpoint,
-          port: port,
-          accessKey: accessKeyId,
-          secretKey: secretAccessKey,
-          useSSL: isEnableSSL,
-        );
-      } else {
-        minio = Minio(
-          endPoint: endpoint,
-          port: port,
-          accessKey: accessKeyId,
-          secretKey: secretAccessKey,
-          useSSL: isEnableSSL,
-          region: region,
-        );
-      }
-
       var response = await minio.removeObject(bucket, key);
-
       return ['success', response];
     } catch (e) {
       flogErr(e, {'element': element, 'key': key}, 'AwsManageAPI', 'deleteFile');
@@ -435,37 +259,37 @@ class AwsManageAPI {
   }
 
   //删除文件夹
-  static deleteFolder(Map element, String prefix) async {
+  deleteFolder(Map element, String prefix) async {
     try {
       var queryResult = await queryBucketFiles(element, {
         'prefix': prefix,
       });
 
-      if (queryResult[0] == 'success') {
-        List files = [];
-        List folders = [];
-        files = queryResult[1]['Contents'];
-        folders = queryResult[1]['CommonPrefixes'];
-        if (files.isNotEmpty) {
-          for (var item in files) {
-            var deleteResult = await deleteFile(element, item.key);
-            if (deleteResult[0] != 'success') {
-              return ['failed'];
-            }
-          }
-        }
-        if (folders.isNotEmpty) {
-          for (var item in folders) {
-            var deleteResult = await deleteFolder(element, item);
-            if (deleteResult[0] != 'success') {
-              return ['failed'];
-            }
-          }
-        }
-        return ['success'];
-      } else {
+      if (queryResult[0] != 'success') {
         return ['failed'];
       }
+
+      List files = [];
+      List folders = [];
+      files = queryResult[1]['Contents'];
+      folders = queryResult[1]['CommonPrefixes'];
+      if (files.isNotEmpty) {
+        for (var item in files) {
+          var deleteResult = await deleteFile(element, item.key);
+          if (deleteResult[0] != 'success') {
+            return ['failed'];
+          }
+        }
+      }
+      if (folders.isNotEmpty) {
+        for (var item in folders) {
+          var deleteResult = await deleteFolder(element, item);
+          if (deleteResult[0] != 'success') {
+            return ['failed'];
+          }
+        }
+      }
+      return ['success'];
     } catch (e) {
       flogErr(e, {'element': element, 'prefix': prefix}, 'AwsManageAPI', 'deleteFolder');
       return ['failed'];
@@ -473,52 +297,19 @@ class AwsManageAPI {
   }
 
   //重命名文件
-  static copyFile(Map element, String key, String newKey) async {
+  copyFile(Map element, String key, String newKey) async {
     try {
-      Map configMap = await getConfigMap();
-      String accessKeyId = configMap['accessKeyId'];
-      String secretAccessKey = configMap['secretAccessKey'];
       String bucket = element['name'];
-      String endpoint = configMap['endpoint'];
-      int? port;
-      if (endpoint.contains(':')) {
-        List<String> endpointList = endpoint.split(':');
-        endpoint = endpointList[0];
-        port = int.parse(endpointList[1]);
-      }
       String region = element['region'];
-      bool isEnableSSL = configMap['isEnableSSL'] ?? true;
-      if (endpoint.contains('amazonaws.com')) {
-        if (!endpoint.contains(region)) {
-          endpoint = 's3.$region.amazonaws.com';
-        }
+      Minio? minio = await getMinioClient(region);
+      if (minio == null) {
+        return ['failed'];
       }
-      Minio minio;
-      if (region == 'None') {
-        minio = Minio(
-          endPoint: endpoint,
-          port: port,
-          accessKey: accessKeyId,
-          secretKey: secretAccessKey,
-          useSSL: isEnableSSL,
-        );
-      } else {
-        minio = Minio(
-          endPoint: endpoint,
-          port: port,
-          accessKey: accessKeyId,
-          secretKey: secretAccessKey,
-          useSSL: isEnableSSL,
-          region: region,
-        );
-      }
-
       var response = await minio.copyObject(
         bucket,
         newKey,
         '$bucket/$key',
       );
-
       return ['success', response];
     } catch (e) {
       flogErr(e, {'element': element, 'key': key, 'newKey': newKey}, 'AwsManageAPI', 'copyFile');
@@ -527,87 +318,55 @@ class AwsManageAPI {
   }
 
   //查询是否有重名文件
-  static queryDuplicateName(Map element, String? prefix, String key) async {
+  queryDuplicateName(Map element, String? prefix, String key) async {
     var queryResult = await queryBucketFiles(element, {
       'prefix': prefix,
     });
 
-    if (queryResult[0] == 'success') {
-      if (queryResult[1]['Contents'] != null) {
-        var contents = queryResult[1]['Contents'];
-        if (contents is List) {
-          for (var i = 0; i < contents.length; i++) {
-            if (contents[i].key == key) {
-              return ['duplicate'];
-            }
-          }
-        } else {
-          if (contents.key == key) {
-            return ['duplicate'];
-          }
-        }
-      }
-      if (queryResult[1]['CommonPrefixes'] != null) {
-        var commonPrefixes = queryResult[1]['CommonPrefixes'];
-        if (commonPrefixes is List) {
-          for (var i = 0; i < commonPrefixes.length; i++) {
-            if (commonPrefixes[i] == key) {
-              return ['duplicate'];
-            }
-          }
-        } else {
-          if (commonPrefixes == key) {
-            return ['duplicate'];
-          }
-        }
-      }
-      return ['notduplicate'];
-    } else {
+    if (queryResult[0] != 'success') {
       return ['error'];
     }
+
+    if (queryResult[1]['Contents'] != null) {
+      var contents = queryResult[1]['Contents'];
+      if (contents is List) {
+        for (var i = 0; i < contents.length; i++) {
+          if (contents[i].key == key) {
+            return ['duplicate'];
+          }
+        }
+      } else {
+        if (contents.key == key) {
+          return ['duplicate'];
+        }
+      }
+    }
+    if (queryResult[1]['CommonPrefixes'] != null) {
+      var commonPrefixes = queryResult[1]['CommonPrefixes'];
+      if (commonPrefixes is List) {
+        for (var i = 0; i < commonPrefixes.length; i++) {
+          if (commonPrefixes[i] == key) {
+            return ['duplicate'];
+          }
+        }
+      } else {
+        if (commonPrefixes == key) {
+          return ['duplicate'];
+        }
+      }
+    }
+    return ['notduplicate'];
   }
 
   //新建文件夹
-  static createFolder(Map element, String prefix, String newfolder) async {
+  createFolder(Map element, String prefix, String newfolder) async {
     try {
-      Map configMap = await getConfigMap();
-      String accessKeyId = configMap['accessKeyId'];
-      String secretAccessKey = configMap['secretAccessKey'];
       String bucket = element['name'];
-      String endpoint = configMap['endpoint'];
-      int? port;
-      if (endpoint.contains(':')) {
-        List<String> endpointList = endpoint.split(':');
-        endpoint = endpointList[0];
-        port = int.parse(endpointList[1]);
-      }
       String region = element['region'];
-      bool isEnableSSL = configMap['isEnableSSL'] ?? true;
-      if (endpoint.contains('amazonaws.com')) {
-        if (!endpoint.contains(region)) {
-          endpoint = 's3.$region.amazonaws.com';
-        }
+      Minio? minio = await getMinioClient(region);
+      if (minio == null) {
+        return ['failed'];
       }
-      Minio minio;
-      if (region == 'None') {
-        minio = Minio(
-          endPoint: endpoint,
-          port: port,
-          accessKey: accessKeyId,
-          secretKey: secretAccessKey,
-          useSSL: isEnableSSL,
-        );
-      } else {
-        minio = Minio(
-          endPoint: endpoint,
-          port: port,
-          accessKey: accessKeyId,
-          secretKey: secretAccessKey,
-          useSSL: isEnableSSL,
-          region: region,
-        );
-      }
-
       var response = await minio.putObject(bucket, '$prefix$newfolder/placeholder.txt', Stream.fromIterable([]));
       return ['success', response];
     } catch (e) {
@@ -617,60 +376,21 @@ class AwsManageAPI {
   }
 
   //上传文件
-  static uploadFile(
+  uploadFile(
     Map element,
     String filename,
     String filepath,
     String prefix,
   ) async {
     try {
-      Map configMap = await getConfigMap();
-      String accessKeyId = configMap['accessKeyId'];
-      String secretAccessKey = configMap['secretAccessKey'];
       String bucket = element['name'];
-      String endpoint = configMap['endpoint'];
-      int? port;
-      if (endpoint.contains(':')) {
-        List<String> endpointList = endpoint.split(':');
-        endpoint = endpointList[0];
-        port = int.parse(endpointList[1]);
-      }
       String region = element['region'];
-      bool isEnableSSL = configMap['isEnableSSL'] ?? true;
       String uploadPath = prefix;
-      if (endpoint.contains('amazonaws.com')) {
-        if (!endpoint.contains(region)) {
-          endpoint = 's3.$region.amazonaws.com';
-        }
+      Minio? minio = await getMinioClient(region);
+      if (minio == null) {
+        return ['failed'];
       }
-      //云存储的路径
-      String urlpath = '';
-      if (uploadPath != '') {
-        urlpath = '$uploadPath$filename';
-      } else {
-        urlpath = filename;
-      }
-
-      Minio minio;
-      if (region == 'None') {
-        minio = Minio(
-          endPoint: endpoint,
-          port: port,
-          accessKey: accessKeyId,
-          secretKey: secretAccessKey,
-          useSSL: isEnableSSL,
-        );
-      } else {
-        minio = Minio(
-          endPoint: endpoint,
-          port: port,
-          accessKey: accessKeyId,
-          secretKey: secretAccessKey,
-          useSSL: isEnableSSL,
-          region: region,
-        );
-      }
-
+      String urlpath = uploadPath != '' ? '$uploadPath/$filename' : filename;
       Stream<Uint8List> stream = File(filepath).openRead().cast();
       await minio.putObject(
         bucket,
@@ -695,7 +415,7 @@ class AwsManageAPI {
   }
 
   //上传文件API入口
-  static upLoadFileEntry(List fileList, Map element, String prefix) async {
+  upLoadFileEntry(List fileList, Map element, String prefix) async {
     int successCount = 0;
     int failCount = 0;
 
@@ -722,13 +442,12 @@ class AwsManageAPI {
       return showToast('上传失败');
     } else if (failCount == 0) {
       return showToast('上传成功');
-    } else {
-      return showToast('成功$successCount,失败$failCount');
     }
+    return showToast('成功$successCount,失败$failCount');
   }
 
   //从网络链接下载文件后上传
-  static uploadNetworkFile(String fileLink, Map element, String prefix) async {
+  uploadNetworkFile(String fileLink, Map element, String prefix) async {
     try {
       String filename = fileLink.substring(fileLink.lastIndexOf("/") + 1, fileLink.length);
       filename = filename.substring(0, !filename.contains("?") ? filename.length : filename.indexOf("?"));
@@ -747,19 +466,16 @@ class AwsManageAPI {
         );
         if (uploadResult[0] == "success") {
           return ['success'];
-        } else {
-          return ['failed'];
         }
-      } else {
-        return ['failed'];
       }
+      return ['failed'];
     } catch (e) {
       flogErr(e, {'fileLink': fileLink, 'element': element, 'prefix': prefix}, "AwsManageAPI", "uploadNetworkFile");
       return ['failed'];
     }
   }
 
-  static uploadNetworkFileEntry(List fileList, Map element, String prefix) async {
+  uploadNetworkFileEntry(List fileList, Map element, String prefix) async {
     int successCount = 0;
     int failCount = 0;
 
@@ -779,8 +495,7 @@ class AwsManageAPI {
       return showToast('上传失败');
     } else if (failCount == 0) {
       return showToast('上传成功');
-    } else {
-      return showToast('成功$successCount,失败$failCount');
     }
+    return showToast('成功$successCount,失败$failCount');
   }
 }

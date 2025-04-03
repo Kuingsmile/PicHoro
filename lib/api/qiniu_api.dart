@@ -137,23 +137,14 @@ class QiniuImageUploadUtils {
       );
 
       if (response.statusCode == HttpStatus.ok) {
-        String returnUrl = '';
-        String displayUrl = '';
-
-        if (options == 'None') {
-          returnUrl = '$url/${response.data['key']}';
-          displayUrl = '$url/${response.data['key']}';
-        } else {
-          returnUrl = '$url/${response.data['key']}$options';
-          displayUrl = '$url/${response.data['key']}$options';
-        }
+        String returnUrl = '$url/${response.data['key']}${options == 'None' ? '' : options}';
+        String displayUrl = returnUrl;
         String formatedURL = getFormatedUrl(returnUrl, name);
         Map pictureKeyMap = Map.from(configMap);
         String pictureKey = jsonEncode(pictureKeyMap);
         return ["success", formatedURL, returnUrl, pictureKey, displayUrl];
-      } else {
-        return ['failed'];
       }
+      return ['failed'];
     } catch (e) {
       flogErr(
           e,
@@ -168,41 +159,41 @@ class QiniuImageUploadUtils {
   }
 
   static deleteApi({required Map deleteMap, required Map configMap}) async {
-    String fileName = deleteMap['name'];
-    Map configMapFromPictureKey = jsonDecode(deleteMap['pictureKey']);
-
-    String accessKey = configMapFromPictureKey['accessKey'];
-    String secretKey = configMapFromPictureKey['secretKey'];
-    String bucket = configMapFromPictureKey['bucket'];
-    String qiniupath = configMapFromPictureKey['path'];
-    String key = '';
-    if (qiniupath.startsWith('/')) {
-      qiniupath = qiniupath.substring(1);
-    }
-    if (fileName.startsWith('/')) {
-      fileName = fileName.substring(1);
-    }
-
-    if (qiniupath == 'None') {
-      key = fileName;
-    } else {
-      key = '$qiniupath/$fileName';
-    }
-
-    String encodedEntryURI = urlSafeBase64Encode(utf8.encode('$bucket:$key'));
-
-    BaseOptions baseOptions = setBaseOptions();
-    String authToken = getAuthToken('DELETE', '/delete/$encodedEntryURI', null, 'rs.qiniuapi.com',
-        'application/x-www-form-urlencoded', '', accessKey, secretKey);
-    baseOptions.headers = {
-      "Authorization": "Qiniu $authToken",
-      "Content-Type": "application/x-www-form-urlencoded",
-    };
-
-    Dio dio = Dio(baseOptions);
-    String deleteUrl = "http://rs.qiniuapi.com/delete/$encodedEntryURI";
-
     try {
+      String fileName = deleteMap['name'];
+      Map configMapFromPictureKey = jsonDecode(deleteMap['pictureKey']);
+
+      String accessKey = configMapFromPictureKey['accessKey'];
+      String secretKey = configMapFromPictureKey['secretKey'];
+      String bucket = configMapFromPictureKey['bucket'];
+      String qiniupath = configMapFromPictureKey['path'];
+      String key = '';
+      if (qiniupath.startsWith('/')) {
+        qiniupath = qiniupath.substring(1);
+      }
+      if (fileName.startsWith('/')) {
+        fileName = fileName.substring(1);
+      }
+
+      if (qiniupath == 'None') {
+        key = fileName;
+      } else {
+        key = '$qiniupath/$fileName';
+      }
+
+      String encodedEntryURI = urlSafeBase64Encode(utf8.encode('$bucket:$key'));
+
+      BaseOptions baseOptions = setBaseOptions();
+      String authToken = getAuthToken('DELETE', '/delete/$encodedEntryURI', null, 'rs.qiniuapi.com',
+          'application/x-www-form-urlencoded', '', accessKey, secretKey);
+      baseOptions.headers = {
+        "Authorization": "Qiniu $authToken",
+        "Content-Type": "application/x-www-form-urlencoded",
+      };
+
+      Dio dio = Dio(baseOptions);
+      String deleteUrl = "http://rs.qiniuapi.com/delete/$encodedEntryURI";
+
       var response = await dio.delete(deleteUrl);
       if (response.statusCode != 200) {
         return ["failed"];

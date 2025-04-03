@@ -34,33 +34,15 @@ class AwsImageUploadUtils {
         uploadPath = '${uploadPath.replaceAll(RegExp(r'^/*|/*$'), '')}/';
       }
       //云存储的路径
-      String urlpath = '';
-      if (uploadPath != 'None') {
-        urlpath = '$uploadPath$name';
-      } else {
-        urlpath = name;
-      }
+      String urlpath = uploadPath != 'None' ? '$uploadPath$name' : name;
 
-      Minio minio;
-      if (region == 'None') {
-        minio = Minio(
+      Minio minio = Minio(
           endPoint: endpoint,
           port: port,
           accessKey: accessKeyId,
           secretKey: secretAccessKey,
           useSSL: isEnableSSL,
-        );
-      } else {
-        minio = Minio(
-          endPoint: endpoint,
-          port: port,
-          accessKey: accessKeyId,
-          secretKey: secretAccessKey,
-          useSSL: isEnableSSL,
-          region: region,
-        );
-      }
-
+          region: region == 'None' ? null : region);
       Stream<Uint8List> stream = File(path).openRead().cast();
       String contentType = getContentType(my_path.extension(path).substring(1));
       await minio.putObject(
@@ -77,29 +59,22 @@ class AwsImageUploadUtils {
           customUrl = customUrl.substring(0, customUrl.length - 1);
         }
         returnUrl = '$customUrl/$urlpath';
-        displayUrl = '$customUrl/$urlpath';
+        displayUrl = returnUrl;
       } else {
         if (endpoint.contains('amazonaws.com')) {
-          if (isS3PathStyle) {
-            returnUrl = 'https://s3.$region.amazonaws.com/$bucket/$urlpath';
-            displayUrl = 'https://s3.$region.amazonaws.com/$bucket/$urlpath';
-          } else {
-            returnUrl = 'https://$bucket.s3.$region.amazonaws.com/$urlpath';
-            displayUrl = 'https://$bucket.s3.$region.amazonaws.com/$urlpath';
-          }
+          returnUrl = isS3PathStyle
+              ? 'https://s3.$region.amazonaws.com/$bucket/$urlpath'
+              : 'https://$bucket.s3.$region.amazonaws.com/$urlpath';
+          displayUrl = returnUrl;
         } else {
           String httpPrefix = isEnableSSL ? 'https' : 'http';
           String fullEndpoint = '$endpoint${port == null ? '' : ':${port.toString()}'}';
-          if (isS3PathStyle) {
-            returnUrl = '$httpPrefix://$fullEndpoint/$bucket/$urlpath';
-            displayUrl = '$httpPrefix://$fullEndpoint/$bucket/$urlpath';
-          } else {
-            returnUrl = '$httpPrefix://$bucket.$fullEndpoint/$urlpath';
-            displayUrl = '$httpPrefix://$bucket.$fullEndpoint/$urlpath';
-          }
+          returnUrl = isS3PathStyle
+              ? '$httpPrefix://$fullEndpoint/$bucket/$urlpath'
+              : '$httpPrefix://$bucket.$fullEndpoint/$urlpath';
+          displayUrl = returnUrl;
         }
       }
-
       String formatedURL = getFormatedUrl(returnUrl, name);
       Map pictureKeyMap = Map.from(configMap);
       String pictureKey = jsonEncode(pictureKeyMap);
@@ -118,58 +93,38 @@ class AwsImageUploadUtils {
   }
 
   static deleteApi({required Map deleteMap, required Map configMap}) async {
-    Map configMapFromPictureKey = jsonDecode(deleteMap['pictureKey']);
-    String fileName = deleteMap['name'];
-    String accessKeyId = configMapFromPictureKey['accessKeyId'];
-    String secretAccessKey = configMapFromPictureKey['secretAccessKey'];
-    String bucket = configMapFromPictureKey['bucket'];
-    String endpoint = configMapFromPictureKey['endpoint'];
-    int? port;
-    if (endpoint.contains(':')) {
-      List<String> endpointList = endpoint.split(':');
-      endpoint = endpointList[0];
-      port = int.parse(endpointList[1]);
-    }
-    String region = configMapFromPictureKey['region'];
-    String uploadPath = configMapFromPictureKey['uploadPath'];
-    bool isEnableSSL = configMapFromPictureKey['isEnableSSL'] ?? true;
-    if (uploadPath != 'None') {
-      if (uploadPath.startsWith('/')) {
-        uploadPath = uploadPath.substring(1);
-      }
-      if (!uploadPath.endsWith('/')) {
-        uploadPath = '$uploadPath/';
-      }
-    }
-
-    String urlpath = '';
-    if (uploadPath != 'None') {
-      urlpath = '$uploadPath$fileName';
-    } else {
-      urlpath = fileName;
-    }
-
-    Minio minio;
-    if (region == 'None') {
-      minio = Minio(
-        endPoint: endpoint,
-        port: port,
-        accessKey: accessKeyId,
-        secretKey: secretAccessKey,
-        useSSL: isEnableSSL,
-      );
-    } else {
-      minio = Minio(
-        endPoint: endpoint,
-        port: port,
-        accessKey: accessKeyId,
-        secretKey: secretAccessKey,
-        useSSL: isEnableSSL,
-        region: region,
-      );
-    }
-
     try {
+      Map configMapFromPictureKey = jsonDecode(deleteMap['pictureKey']);
+      String fileName = deleteMap['name'];
+      String accessKeyId = configMapFromPictureKey['accessKeyId'];
+      String secretAccessKey = configMapFromPictureKey['secretAccessKey'];
+      String bucket = configMapFromPictureKey['bucket'];
+      String endpoint = configMapFromPictureKey['endpoint'];
+      int? port;
+      if (endpoint.contains(':')) {
+        List<String> endpointList = endpoint.split(':');
+        endpoint = endpointList[0];
+        port = int.parse(endpointList[1]);
+      }
+      String region = configMapFromPictureKey['region'];
+      String uploadPath = configMapFromPictureKey['uploadPath'];
+      bool isEnableSSL = configMapFromPictureKey['isEnableSSL'] ?? true;
+      if (uploadPath != 'None') {
+        if (uploadPath.startsWith('/')) {
+          uploadPath = uploadPath.substring(1);
+        }
+        if (!uploadPath.endsWith('/')) {
+          uploadPath = '$uploadPath/';
+        }
+      }
+      String urlpath = uploadPath != 'None' ? '$uploadPath$fileName' : fileName;
+      Minio minio = Minio(
+          endPoint: endpoint,
+          port: port,
+          accessKey: accessKeyId,
+          secretKey: secretAccessKey,
+          useSSL: isEnableSSL,
+          region: region == 'None' ? null : region);
       await minio.removeObject(bucket, urlpath);
       return ['success'];
     } catch (e) {

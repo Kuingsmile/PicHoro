@@ -175,46 +175,46 @@ class TencentImageUploadUtils {
   }
 
   static deleteApi({required Map deleteMap, required Map configMap}) async {
-    Map configMapFromPictureKey = jsonDecode(deleteMap['pictureKey']);
-    String fileName = deleteMap['name'];
-    String secretId = configMapFromPictureKey['secretId'];
-    String secretKey = configMapFromPictureKey['secretKey'];
-    String bucket = configMapFromPictureKey['bucket'];
-    String area = configMapFromPictureKey['area'];
-    String tencentpath = configMapFromPictureKey['path'];
-    String deleteHost = 'https://$bucket.cos.$area.myqcloud.com';
-    String urlpath = '';
-    if (tencentpath != 'None') {
-      if (tencentpath.startsWith('/')) {
-        tencentpath = tencentpath.substring(1);
-      }
-      if (!tencentpath.endsWith('/')) {
-        tencentpath = '$tencentpath/';
-      }
-      deleteHost = '$deleteHost/$tencentpath$fileName';
-      urlpath = '/$tencentpath$fileName';
-    } else {
-      deleteHost = '$deleteHost/$fileName';
-      urlpath = '/$fileName';
-    }
-    BaseOptions baseOptions = setBaseOptions();
-    Map<String, dynamic> headers = {
-      'Host': '$bucket.cos.$area.myqcloud.com',
-    };
-    String deleteAuthorization = TencentImageUploadUtils.getDeleteAuthorization(
-      'DELETE',
-      urlpath,
-      headers,
-      secretId,
-      secretKey,
-    );
-    baseOptions.headers = {
-      'Host': '$bucket.cos.$area.myqcloud.com',
-      'Authorization': deleteAuthorization,
-    };
-    Dio dio = Dio(baseOptions);
-
     try {
+      Map configMapFromPictureKey = jsonDecode(deleteMap['pictureKey']);
+      String fileName = deleteMap['name'];
+      String secretId = configMapFromPictureKey['secretId'];
+      String secretKey = configMapFromPictureKey['secretKey'];
+      String bucket = configMapFromPictureKey['bucket'];
+      String area = configMapFromPictureKey['area'];
+      String tencentpath = configMapFromPictureKey['path'];
+      String deleteHost = 'https://$bucket.cos.$area.myqcloud.com';
+      String urlpath = '';
+      if (tencentpath != 'None') {
+        if (tencentpath.startsWith('/')) {
+          tencentpath = tencentpath.substring(1);
+        }
+        if (!tencentpath.endsWith('/')) {
+          tencentpath = '$tencentpath/';
+        }
+        deleteHost = '$deleteHost/$tencentpath$fileName';
+        urlpath = '/$tencentpath$fileName';
+      } else {
+        deleteHost = '$deleteHost/$fileName';
+        urlpath = '/$fileName';
+      }
+      BaseOptions baseOptions = setBaseOptions();
+      Map<String, dynamic> headers = {
+        'Host': '$bucket.cos.$area.myqcloud.com',
+      };
+      String deleteAuthorization = TencentImageUploadUtils.getDeleteAuthorization(
+        'DELETE',
+        urlpath,
+        headers,
+        secretId,
+        secretKey,
+      );
+      baseOptions.headers = {
+        'Host': '$bucket.cos.$area.myqcloud.com',
+        'Authorization': deleteAuthorization,
+      };
+      Dio dio = Dio(baseOptions);
+
       var response = await dio.delete(
         deleteHost,
       );

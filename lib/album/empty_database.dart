@@ -67,6 +67,7 @@ class EmptyDatabaseState extends State<EmptyDatabase> {
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
+        leading: getLeadingIcon(context),
         title: titleText('选择需要清空的数据库'),
         flexibleSpace: getFlexibleSpace(context),
       ),

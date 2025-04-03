@@ -275,7 +275,7 @@ class AwsConfigureStoreEditState extends State<AwsConfigureStoreEdit> {
 
   _importConfig() async {
     try {
-      Map configMap = await AwsManageAPI.getConfigMap();
+      Map configMap = await AwsManageAPI().getConfigMap();
       _accessKeyIDController.text = configMap['accessKeyId'];
       _secretAccessKeyController.text = configMap['secretAccessKey'];
       _bucketController.text = configMap['bucket'];

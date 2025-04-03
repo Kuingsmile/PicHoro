@@ -81,17 +81,18 @@ class GithubImageUploadUtils {
   }
 
   static Future<List<String>> deleteApi({required Map deleteMap, required Map configMap}) async {
-    Map configMapFromPictureKey = jsonDecode(deleteMap['pictureKey']);
-    Map<String, dynamic> formdata = {
-      "message": "deleted by PicHoro app",
-      "sha": configMapFromPictureKey['sha'],
-      "branch": configMapFromPictureKey["branch"],
-    };
-
-    Dio dio = _getDio(configMapFromPictureKey);
-    String deleteUrl = _getUrl(configMapFromPictureKey["githubusername"], configMapFromPictureKey["repo"],
-        configMapFromPictureKey['storePath'].toString(), deleteMap["name"]);
     try {
+      Map configMapFromPictureKey = jsonDecode(deleteMap['pictureKey']);
+      Map<String, dynamic> formdata = {
+        "message": "deleted by PicHoro app",
+        "sha": configMapFromPictureKey['sha'],
+        "branch": configMapFromPictureKey["branch"],
+      };
+
+      Dio dio = _getDio(configMapFromPictureKey);
+      String deleteUrl = _getUrl(configMapFromPictureKey["githubusername"], configMapFromPictureKey["repo"],
+          configMapFromPictureKey['storePath'].toString(), deleteMap["name"]);
+
       var response = await dio.delete(deleteUrl, data: jsonEncode(formdata));
       if (response.statusCode != 200) {
         return ["failed"];

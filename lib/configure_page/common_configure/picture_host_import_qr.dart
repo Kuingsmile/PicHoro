@@ -45,7 +45,7 @@ Future<void> _configureAws(Map<String, dynamic> jsonResult) async {
     final awsConfig = AwsConfigModel(accessKeyId, secretKey, bucket, endpoint, region.isEmpty ? 'None' : region,
         uploadPath, customUrl, usePathStyle, isEnableSSL);
 
-    await _saveConfig(AwsManageAPI.localFile, awsConfig);
+    await _saveConfig(AwsManageAPI().localFile(), awsConfig);
     showToast("AWS S3配置成功");
   } catch (e) {
     _logError('_configureAws', {}, e);

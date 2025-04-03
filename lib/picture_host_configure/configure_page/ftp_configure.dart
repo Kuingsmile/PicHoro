@@ -55,7 +55,7 @@ class FTPConfigState extends State<FTPConfig> {
   _initConfig() async {
     resetFtpConfigMap();
     try {
-      Map configMap = await FTPManageAPI.getConfigMap();
+      Map configMap = await FTPManageAPI().getConfigMap();
       _ftpHostController.text = configMap['ftpHost'] ?? '';
       _ftpPortController.text = configMap['ftpPort'] ?? '';
       _ftpConfigMap['ftpType'] = configMap['ftpType'] ?? 'FTP';
@@ -334,7 +334,7 @@ class FTPConfigState extends State<FTPConfig> {
       final ftpConfig = FTPConfigModel(ftpHost, ftpPort, ftpUser, ftpPassword, ftpType, isAnonymous, ftpUploadPath,
           ftpHomeDir, ftpCustomUrl, ftpWebPath);
       final ftpConfigJson = jsonEncode(ftpConfig);
-      final ftpConfigFile = await FTPManageAPI.localFile;
+      final ftpConfigFile = await FTPManageAPI().localFile();
       await ftpConfigFile.writeAsString(ftpConfigJson);
       showToast('保存成功');
     } catch (e) {
@@ -347,7 +347,7 @@ class FTPConfigState extends State<FTPConfig> {
 
   checkFTPConfig() async {
     try {
-      Map configMap = await FTPManageAPI.getConfigMap();
+      Map configMap = await FTPManageAPI().getConfigMap();
 
       if (configMap.isEmpty) {
         if (context.mounted) {

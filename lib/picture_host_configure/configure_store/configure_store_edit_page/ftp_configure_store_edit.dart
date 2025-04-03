@@ -344,7 +344,7 @@ class FtpConfigureStoreEditState extends State<FtpConfigureStoreEdit> {
 
   _importConfig() async {
     try {
-      Map configMap = await FTPManageAPI.getConfigMap();
+      Map configMap = await FTPManageAPI().getConfigMap();
       _ftpHostController.text = configMap['ftpHost'];
       _ftpPortController.text = configMap['ftpPort'];
       if (configMap['ftpUser'] != 'None') {

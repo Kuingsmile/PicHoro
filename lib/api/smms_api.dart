@@ -70,19 +70,19 @@ class SmmsImageUploadUtils {
   }
 
   static Future<List<String>> deleteApi({required Map deleteMap, required Map configMap}) async {
-    Map<String, String> formdata = {
-      "hash": deleteMap["pictureKey"],
-      "format": "json",
-    };
-
-    BaseOptions options = setBaseOptions();
-    options.headers = {
-      "Authorization": configMap["token"],
-    };
-    Dio dio = Dio(options);
-    String deleteUrl = '$_baseUrl$_deleteEndpoint/${deleteMap["pictureKey"]}';
-
     try {
+      Map<String, String> formdata = {
+        "hash": deleteMap["pictureKey"],
+        "format": "json",
+      };
+
+      BaseOptions options = setBaseOptions();
+      options.headers = {
+        "Authorization": configMap["token"],
+      };
+      Dio dio = Dio(options);
+      String deleteUrl = '$_baseUrl$_deleteEndpoint/${deleteMap["pictureKey"]}';
+
       var response = await dio.get(deleteUrl, queryParameters: formdata);
       if (response.statusCode == 200) {
         return ["success"];

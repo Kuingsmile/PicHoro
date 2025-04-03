@@ -231,7 +231,7 @@ class PsHostHomePageState extends State<PsHostHomePage> with AutomaticKeepAliveC
           'assets/images/ftp.png',
           'SSH/SFTP',
           () async {
-            Map configMap = await FTPManageAPI.getConfigMap();
+            Map configMap = await FTPManageAPI().getConfigMap();
             if (mounted && configMap['ftpType'] == 'SFTP') {
               String startDir = configMap['ftpHomeDir'];
               if (startDir == 'None') {

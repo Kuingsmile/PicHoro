@@ -22,23 +22,14 @@ class DownloadManager extends BaseDownloadManager {
       {bool isPartial = false, int partialFileLength = 0, Map? configMap = const {}}) async {
     String tencentHost = url.split('/')[2];
     String urlpath = url.substring(tencentHost.length + 8);
-    String method = 'GET';
     Map tencentConfig = await TencentManageAPI().getConfigMap();
-
-    String secretId = tencentConfig['secretId'];
-    String secretKey = tencentConfig['secretKey'];
-
     Map<String, dynamic> headers = {
       'Host': tencentHost,
+      if (isPartial) 'Range': 'bytes=$partialFileLength-',
     };
-
-    if (isPartial) {
-      headers['Range'] = 'bytes=$partialFileLength-';
-    }
-
-    String authorization = TencentManageAPI().tecentAuthorization(method, urlpath, headers, secretId, secretKey, {});
+    String authorization = TencentManageAPI()
+        .tecentAuthorization('GET', urlpath, headers, tencentConfig['secretId'], tencentConfig['secretKey'], {});
     headers['Authorization'] = authorization;
-
     return headers;
   }
 

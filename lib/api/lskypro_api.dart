@@ -66,18 +66,19 @@ class LskyproImageUploadUtils {
   }
 
   static deleteApi({required Map deleteMap, required Map configMap}) async {
-    Map configMapFromPictureKey = jsonDecode(deleteMap['pictureKey']);
-    Map<String, dynamic> formdata = {
-      "key": configMapFromPictureKey["deletekey"],
-    };
-    BaseOptions options = setBaseOptions();
-    options.headers = {
-      "Authorization": configMapFromPictureKey["token"],
-      "Accept": "application/json",
-    };
-    Dio dio = Dio(options);
-    String deleteUrl = configMapFromPictureKey["host"] + "/api/v1/images/${configMapFromPictureKey["deletekey"]}";
     try {
+      Map configMapFromPictureKey = jsonDecode(deleteMap['pictureKey']);
+      Map<String, dynamic> formdata = {
+        "key": configMapFromPictureKey["deletekey"],
+      };
+      BaseOptions options = setBaseOptions();
+      options.headers = {
+        "Authorization": configMapFromPictureKey["token"],
+        "Accept": "application/json",
+      };
+      Dio dio = Dio(options);
+      String deleteUrl = configMapFromPictureKey["host"] + "/api/v1/images/${configMapFromPictureKey["deletekey"]}";
+
       var response = await dio.delete(deleteUrl, data: formdata);
       if (response.statusCode == 200 && response.data!['status'] == true) {
         return ["success"];
@@ -90,6 +91,7 @@ class LskyproImageUploadUtils {
           },
           "LskyproImageUploadUtils",
           "deleteApi");
+      return ["failed"];
     } catch (e) {
       flogErr(
           e,

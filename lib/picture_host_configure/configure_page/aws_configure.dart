@@ -40,7 +40,7 @@ class AwsConfigState extends State<AwsConfig> {
 
   _initConfig() async {
     try {
-      Map configMap = await AwsManageAPI.getConfigMap();
+      Map configMap = await AwsManageAPI().getConfigMap();
       _accessKeyIDController.text = configMap['accessKeyId'] ?? '';
       _secretAccessKeyController.text = configMap['secretAccessKey'] ?? '';
       _bucketController.text = configMap['bucket'] ?? '';
@@ -313,7 +313,7 @@ class AwsConfigState extends State<AwsConfig> {
       final awsConfig = AwsConfigModel(
           accessKeyID, secretAccessKey, bucket, endpoint, region, uploadPath, customUrl, isS3PathStyle, isEnableSSL);
       final awsConfigJson = jsonEncode(awsConfig);
-      final awsConfigFile = await AwsManageAPI.localFile;
+      final awsConfigFile = await AwsManageAPI().localFile();
       await awsConfigFile.writeAsString(awsConfigJson);
       showToast('保存成功');
     } catch (e) {
@@ -326,7 +326,7 @@ class AwsConfigState extends State<AwsConfig> {
 
   checkAwsConfig() async {
     try {
-      Map configMap = await AwsManageAPI.getConfigMap();
+      Map configMap = await AwsManageAPI().getConfigMap();
 
       if (configMap.isEmpty) {
         if (context.mounted) {

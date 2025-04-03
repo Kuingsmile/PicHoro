@@ -40,7 +40,7 @@ class DownloadManager extends BaseDownloadManager {
     String region = urlMap['region'];
     String bucket = urlMap['bucket'];
 
-    Map configMap = await AwsManageAPI.getConfigMap();
+    Map configMap = await AwsManageAPI().getConfigMap();
 
     String accessKeyId = configMap['accessKeyId'];
     String secretAccessKey = configMap['secretAccessKey'];
@@ -58,25 +58,14 @@ class DownloadManager extends BaseDownloadManager {
       }
     }
 
-    Minio minio;
-    if (region == 'None') {
-      minio = Minio(
+    Minio minio = Minio(
         endPoint: endpoint,
         port: port,
         accessKey: accessKeyId,
         secretKey: secretAccessKey,
         useSSL: isEnableSSL,
-      );
-    } else {
-      minio = Minio(
-        endPoint: endpoint,
-        port: port,
-        accessKey: accessKeyId,
-        secretKey: secretAccessKey,
-        useSSL: isEnableSSL,
-        region: region,
-      );
-    }
+        region: region == 'None' ? null : region);
+
     try {
       final stream = await minio.getObject(bucket, urlpath);
 
@@ -95,56 +84,21 @@ class DownloadManager extends BaseDownloadManager {
   Future<void> handleNewDownload(
       String url, String savePath, String partialFilePath, File partialFile, CancelToken cancelToken,
       {Map? configMap = const {}}) async {
-    Map urlMap = jsonDecode(url);
-    String urlpath = urlMap['object'];
-    String region = urlMap['region'];
-    String bucket = urlMap['bucket'];
-
-    Map configMap = await AwsManageAPI.getConfigMap();
-
-    String accessKeyId = configMap['accessKeyId'];
-    String secretAccessKey = configMap['secretAccessKey'];
-    String endpoint = configMap['endpoint'];
-    int? port;
-    if (endpoint.contains(':')) {
-      List<String> endpointList = endpoint.split(':');
-      endpoint = endpointList[0];
-      port = int.parse(endpointList[1]);
-    }
-    bool isEnableSSL = configMap['isEnableSSL'] ?? true;
-    if (endpoint.contains('amazonaws.com')) {
-      if (!endpoint.contains(region)) {
-        endpoint = 's3.$region.amazonaws.com';
-      }
-    }
-
-    Minio minio;
-    if (region == 'None') {
-      minio = Minio(
-        endPoint: endpoint,
-        port: port,
-        accessKey: accessKeyId,
-        secretKey: secretAccessKey,
-        useSSL: isEnableSSL,
-      );
-    } else {
-      minio = Minio(
-        endPoint: endpoint,
-        port: port,
-        accessKey: accessKeyId,
-        secretKey: secretAccessKey,
-        useSSL: isEnableSSL,
-        region: region,
-      );
-    }
     try {
+      Map urlMap = jsonDecode(url);
+      String urlpath = urlMap['object'];
+      String region = urlMap['region'];
+      String bucket = urlMap['bucket'];
+      Minio? minio = await AwsManageAPI().getMinioClient(region);
+      if (minio == null) {
+        throw Exception('Minio client is null');
+      }
       final stream = await minio.getObject(bucket, urlpath);
       partialFile.createSync(recursive: true);
       var ioSink = partialFile.openWrite(mode: FileMode.writeOnlyAppend);
       await ioSink.addStream(stream);
       await ioSink.close();
       await partialFile.rename(savePath);
-
       setStatus(getDownload(url), DownloadStatus.completed);
     } catch (e) {
       rethrow;
@@ -154,7 +108,6 @@ class DownloadManager extends BaseDownloadManager {
   @override
   String getFileNameFromUrl(String url) {
     Map urlMap = jsonDecode(url);
-    String fileName = urlMap['object'].split('/').last;
-    return fileName;
+    return urlMap['object'].split('/').last;
   }
 }

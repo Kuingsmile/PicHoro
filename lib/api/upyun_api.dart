@@ -136,46 +136,47 @@ class UpyunImageUploadUtils {
   }
 
   static deleteApi({required Map deleteMap, required Map configMap}) async {
-    String fileName = deleteMap['name'];
-    Map configMapFromPictureKey = jsonDecode(deleteMap['pictureKey']);
-    String bucket = configMapFromPictureKey['bucket'];
-    String upyunOperator = configMapFromPictureKey['operator'];
-    String password = configMapFromPictureKey['password'];
-    String upyunpath = configMapFromPictureKey['path'];
-
-    String deleteHost = 'http://v0.api.upyun.com';
-    String urlpath = '';
-    if (upyunpath != 'None') {
-      if (upyunpath.startsWith('/')) {
-        upyunpath = upyunpath.substring(1);
-      }
-
-      if (!upyunpath.endsWith('/')) {
-        upyunpath = '$upyunpath/';
-      }
-      deleteHost = '$deleteHost/$bucket/$upyunpath$fileName';
-      urlpath = '$upyunpath$fileName';
-    } else {
-      deleteHost = '$deleteHost/$bucket/$fileName';
-      urlpath = fileName;
-    }
-    BaseOptions baseOptions = setBaseOptions();
-    var date = HttpDate.format(DateTime.now());
-    String method = 'DELETE';
-    String uri = '/$bucket/$urlpath';
-    String codedUri = Uri.encodeFull(uri);
-    String stringToSign = '$method&$codedUri&$date';
-    String passwordMd5 = md5.convert(utf8.encode(password)).toString();
-    String signature = base64.encode(Hmac(sha1, utf8.encode(passwordMd5)).convert(utf8.encode(stringToSign)).bytes);
-    String authorization = 'UPYUN $upyunOperator:$signature';
-    baseOptions.headers = {
-      'Host': 'v0.api.upyun.com',
-      'Authorization': authorization,
-      'Date': date,
-      'x-upyun-async': 'true',
-    };
-    Dio dio = Dio(baseOptions);
     try {
+      String fileName = deleteMap['name'];
+      Map configMapFromPictureKey = jsonDecode(deleteMap['pictureKey']);
+      String bucket = configMapFromPictureKey['bucket'];
+      String upyunOperator = configMapFromPictureKey['operator'];
+      String password = configMapFromPictureKey['password'];
+      String upyunpath = configMapFromPictureKey['path'];
+
+      String deleteHost = 'http://v0.api.upyun.com';
+      String urlpath = '';
+      if (upyunpath != 'None') {
+        if (upyunpath.startsWith('/')) {
+          upyunpath = upyunpath.substring(1);
+        }
+
+        if (!upyunpath.endsWith('/')) {
+          upyunpath = '$upyunpath/';
+        }
+        deleteHost = '$deleteHost/$bucket/$upyunpath$fileName';
+        urlpath = '$upyunpath$fileName';
+      } else {
+        deleteHost = '$deleteHost/$bucket/$fileName';
+        urlpath = fileName;
+      }
+      BaseOptions baseOptions = setBaseOptions();
+      var date = HttpDate.format(DateTime.now());
+      String method = 'DELETE';
+      String uri = '/$bucket/$urlpath';
+      String codedUri = Uri.encodeFull(uri);
+      String stringToSign = '$method&$codedUri&$date';
+      String passwordMd5 = md5.convert(utf8.encode(password)).toString();
+      String signature = base64.encode(Hmac(sha1, utf8.encode(passwordMd5)).convert(utf8.encode(stringToSign)).bytes);
+      String authorization = 'UPYUN $upyunOperator:$signature';
+      baseOptions.headers = {
+        'Host': 'v0.api.upyun.com',
+        'Authorization': authorization,
+        'Date': date,
+        'x-upyun-async': 'true',
+      };
+      Dio dio = Dio(baseOptions);
+
       var response = await dio.delete(
         deleteHost,
       );

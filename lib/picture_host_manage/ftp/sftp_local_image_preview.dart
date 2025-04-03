@@ -60,6 +60,7 @@ class SFTPLocalImagePreviewState extends State<SFTPLocalImagePreview> {
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
+        leading: getLeadingIcon(context),
         title: titleText('图片预览'),
         flexibleSpace: getFlexibleSpace(context),
       ),

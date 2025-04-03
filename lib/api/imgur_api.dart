@@ -67,27 +67,27 @@ class ImgurImageUploadUtils {
   }
 
   static deleteApi({required Map deleteMap, required Map configMap}) async {
-    Map deleteMapFromPictureKey = jsonDecode(deleteMap['pictureKey']);
-    String deletehash = deleteMapFromPictureKey["deletehash"];
-
-    BaseOptions options = setBaseOptions();
-    options.headers = {
-      "Authorization": "Client-ID ${deleteMapFromPictureKey["clientId"]}",
-    };
-    Dio dio = Dio(options);
-    String deleteUrl = "https://api.imgur.com/3/image/$deletehash";
-    String proxy = configMap["proxy"];
-    String proxyClean = '';
-    if (proxy != 'None') {
-      if (proxy.startsWith('http://') || proxy.startsWith('https://')) {
-        proxyClean = proxy.split('://')[1];
-      } else {
-        proxyClean = proxy;
-      }
-      dio.httpClientAdapter = useProxy(proxyClean);
-    }
-
     try {
+      Map deleteMapFromPictureKey = jsonDecode(deleteMap['pictureKey']);
+      String deletehash = deleteMapFromPictureKey["deletehash"];
+
+      BaseOptions options = setBaseOptions();
+      options.headers = {
+        "Authorization": "Client-ID ${deleteMapFromPictureKey["clientId"]}",
+      };
+      Dio dio = Dio(options);
+      String deleteUrl = "https://api.imgur.com/3/image/$deletehash";
+      String proxy = configMap["proxy"];
+      String proxyClean = '';
+      if (proxy != 'None') {
+        if (proxy.startsWith('http://') || proxy.startsWith('https://')) {
+          proxyClean = proxy.split('://')[1];
+        } else {
+          proxyClean = proxy;
+        }
+        dio.httpClientAdapter = useProxy(proxyClean);
+      }
+
       var response = await dio.delete(deleteUrl);
       if (response.statusCode != 200 || response.data!['success'] != true) {
         return ["failed"];

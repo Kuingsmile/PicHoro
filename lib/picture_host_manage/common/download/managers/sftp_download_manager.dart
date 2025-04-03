@@ -33,7 +33,7 @@ class DownloadManager extends BaseDownloadManager {
     Map? configMap = const {},
   }) async {
     var partialFileLength = await partialFile.length();
-    Map configMapFTP = await FTPManageAPI.getConfigMap();
+    Map configMapFTP = await FTPManageAPI().getConfigMap();
     String ftpHost = configMapFTP['ftpHost'];
     String ftpPort = configMapFTP['ftpPort'];
     String ftpUser = configMapFTP['ftpUser'];
@@ -75,20 +75,11 @@ class DownloadManager extends BaseDownloadManager {
   Future<void> handleNewDownload(
       String url, String savePath, String partialFilePath, File partialFile, CancelToken cancelToken,
       {Map? configMap = const {}}) async {
-    Map configMapFTP = await FTPManageAPI.getConfigMap();
-    String ftpHost = configMapFTP['ftpHost'];
-    String ftpPort = configMapFTP['ftpPort'];
-    String ftpUser = configMapFTP['ftpUser'];
-    String ftpPassword = configMapFTP['ftpPassword'];
     try {
-      final socket = await SSHSocket.connect(ftpHost, int.parse(ftpPort));
-      final client = SSHClient(
-        socket,
-        username: ftpUser,
-        onPasswordRequest: () {
-          return ftpPassword;
-        },
-      );
+      SSHClient? client = await FTPManageAPI().getSFTPClient();
+      if (client == null) {
+        throw Exception('Failed to connect to SFTP server');
+      }
       final sftp = await client.sftp();
       var remoteFile = await sftp.open(url, mode: SftpFileOpenMode.read);
       var fileSize = await remoteFile.stat().then((value) => value.size);

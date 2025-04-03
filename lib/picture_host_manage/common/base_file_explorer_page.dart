@@ -66,7 +66,7 @@ abstract class BaseFileExplorerState<T extends BaseFileExplorer> extends loading
 
   String getFileDate(int index);
   String? getFileSizeForList(int index) {
-    int size = allInfoList[index]['size'] ?? 0;
+    int size = int.parse((allInfoList[index]['size'] ?? 0).toString().split('.')[0]);
     return size > 0 ? getFileSize(size) : null;
   }
 

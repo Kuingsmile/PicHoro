@@ -43,36 +43,18 @@ class UploadManager extends BaseUploadManager {
     }
 
     //云存储的路径
-    String urlpath = '';
-    if (uploadPath != '') {
-      urlpath = '$uploadPath$fileName';
-    } else {
-      urlpath = fileName;
-    }
-    Minio minio;
-    if (region == 'None') {
-      minio = Minio(
-        endPoint: endpoint,
-        port: port,
-        accessKey: accessKeyId,
-        secretKey: secretAccessKey,
-        useSSL: isEnableSSL,
-      );
-    } else {
-      minio = Minio(
-        endPoint: endpoint,
-        port: port,
-        accessKey: accessKeyId,
-        secretKey: secretAccessKey,
-        useSSL: isEnableSSL,
-        region: region,
-      );
-    }
-
+    String urlpath = uploadPath != '' ? '$uploadPath$fileName' : fileName;
+    Minio minio = Minio(
+      endPoint: endpoint,
+      port: port,
+      accessKey: accessKeyId,
+      secretKey: secretAccessKey,
+      useSSL: isEnableSSL,
+      region: region == 'None' ? null : region,
+    );
     int fileSize = File(path).lengthSync();
     Stream<Uint8List> stream = File(path).openRead().cast();
     String? contentType = getContentType(my_path.extension(path).substring(1));
-
     await minio.putObject(bucket, urlpath, stream, metadata: {"Content-Type": contentType}, onProgress: (int sent) {
       getUpload(fileName)?.progress.value = sent / fileSize;
     });

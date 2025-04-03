@@ -27,10 +27,8 @@ class DownloadManager extends BaseDownloadManager {
     Map<String, dynamic> header = {
       'Host': aliyunHost,
       'Date': HttpDate.format(DateTime.now()),
+      if (isPartial) 'Range': 'bytes=$partialFileLength-',
     };
-    if (isPartial) {
-      header['Range'] = 'bytes=$partialFileLength-';
-    }
     String authorization = await AliyunManageAPI().aliyunAuthorization(method, canonicalizedResource, header, '', '');
     header['Authorization'] = authorization;
     return header;

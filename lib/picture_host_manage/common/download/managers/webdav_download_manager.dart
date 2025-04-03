@@ -22,19 +22,11 @@ class DownloadManager extends BaseDownloadManager {
   Future<Map<String, dynamic>> getHeaders(String url,
       {bool isPartial = false, int partialFileLength = 0, Map? configMap = const {}}) async {
     Map configMap = await WebdavManageAPI().getConfigMap();
-    String webdavusername = configMap['webdavusername'];
-    String password = configMap['password'];
-
-    Map<String, dynamic> headers = {
-      'Authorization': generateBasicAuth(webdavusername, password),
+    return {
+      'Authorization': generateBasicAuth(configMap['webdavusername'], configMap['password']),
       'User-Agent': 'pan.baidu.com',
+      if (isPartial) 'Range': 'bytes=$partialFileLength-',
     };
-
-    if (isPartial) {
-      headers['Range'] = 'bytes=$partialFileLength-';
-    }
-
-    return headers;
   }
 
   @override

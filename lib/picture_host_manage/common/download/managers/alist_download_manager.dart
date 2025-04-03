@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:horopic/picture_host_manage/common/download/common_service/base_download_manager.dart';
 
@@ -20,14 +19,11 @@ class DownloadManager extends BaseDownloadManager {
   Future<Map<String, dynamic>> getHeaders(String url,
       {bool isPartial = false, int partialFileLength = 0, Map? configMap = const {}}) async {
     Map addition = jsonDecode(configMap!['addition']);
-    Map<String, dynamic> headers = {};
-    if (configMap['driver'] == 'BaiduNetdisk' && addition['download_api'] == 'official') {
-      headers[HttpHeaders.userAgentHeader] = 'pan.baidu.com';
-    }
-    if (isPartial) {
-      headers['Range'] = 'bytes=$partialFileLength-';
-    }
-    return headers;
+    return {
+      if (isPartial) 'Range': 'bytes=$partialFileLength-',
+      if (configMap['driver'] == 'BaiduNetdisk' && addition['download_api'] == 'official')
+        "user-agent": 'pan.baidu.com',
+    };
   }
 
   @override

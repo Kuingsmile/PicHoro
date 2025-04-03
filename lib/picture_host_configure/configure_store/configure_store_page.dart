@@ -378,7 +378,7 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
 
     final config = AwsConfigModel(
         accessKeyId, secretAccessKey, bucket, endpoint, region, uploadPath, customUrl, isS3PathStyle, isEnableSSL);
-    final configFile = await AwsManageAPI.localFile;
+    final configFile = await AwsManageAPI().localFile();
     await configFile.writeAsString(jsonEncode(config));
     showToast('设置成功');
     return true;
@@ -404,7 +404,7 @@ class ConfigureStorePageState extends State<ConfigureStorePage> {
 
     final config = FTPConfigModel(
         ftpHost, ftpPort, ftpUser, ftpPassword, ftpType, isAnonymous, uploadPath, ftpHomeDir, ftpCustomUrl, ftpWebPath);
-    final configFile = await FTPManageAPI.localFile;
+    final configFile = await FTPManageAPI().localFile();
     await configFile.writeAsString(jsonEncode(config));
     showToast('设置成功');
     return true;
