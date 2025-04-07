@@ -22,7 +22,7 @@ Map<String, Function> uploadFunc = {
 };
 
 ///获取图床配置文件
-Future<File> get _localFile async {
+Future<File> localFile() async {
   final directory = await getApplicationDocumentsDirectory();
   String defaultConfig = Global.getPShost();
   String defaultUser = Global.getUser();
@@ -32,13 +32,15 @@ Future<File> get _localFile async {
 
 ///读取图床配置文件
 Future<String> readPictureHostConfig() async {
-  return (await _localFile).readAsString();
+  return (await localFile()).readAsString();
 }
 
 uploaderentry({required String path, required String name}) async {
   try {
     String configData = await readPictureHostConfig();
-    if (configData == '') return ["failed"];
+    if (configData == '') {
+      return ["failed"];
+    }
     String defaultConfig = Global.getPShost();
     return await uploadFunc[defaultConfig]!(path: path, name: name, configMap: jsonDecode(configData));
   } catch (e) {

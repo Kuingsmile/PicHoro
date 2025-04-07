@@ -8,7 +8,7 @@
 
 ## 简介
 
-PicHoro 是一款基于 Flutter 的手机端云存储平台/图床管理和文件上传/下载工具，最新版本 **V2.4.0**。
+PicHoro 是一款基于 Flutter 的手机端云存储平台/图床管理和文件上传/下载工具，最新版本 **V3.0.0**。
 
 - 与 PicGo/PicList 配置互通，可直接扫码导入
 - 支持云存储/图床/云服务器平台和网盘管理（通过 [Alist](https://alist.nn.ci/zh/)）
@@ -80,7 +80,7 @@ PicHoro 是一款基于 Flutter 的手机端云存储平台/图床管理和文�
 ### 安卓
 
 - **Github 下载**: [Github release](https://github.com/Kuingsmile/PicHoro/releases)
-- **官网下载**: [最新版本 V2.4.0](https://pichoro.msq.pub/PicHoro_V2.4.0.apk)
+- **官网下载**: [最新版本 V3.0.0](https://pichoro.msq.pub/PicHoro_V2.4.0.apk)
 
 ### iOS
 
@@ -88,61 +88,27 @@ PicHoro 是一款基于 Flutter 的手机端云存储平台/图床管理和文�
 
 ## 应用展示
 
-<div><video controls src="https://user-images.githubusercontent.com/96409857/205264099-a3a5d040-df75-4ae2-9773-f4d61fe3fb0a.mp4" muted="false"></video></div>
-
 <table rules="none">
   <tr>
-    <td><img src="https://user-images.githubusercontent.com/96409857/203718727-ceac86b4-8cb5-49c5-8ee3-bcfce51710cb.jpg" width="200" height="400" alt="主页面"/></td>
-    <td><img src="https://user-images.githubusercontent.com/96409857/203718378-fd4cf22f-b801-4356-9a8b-9d51a0db0e54.jpg" width="200" height="400" alt="相册页面"/></td>
-    <td><img src="https://user-images.githubusercontent.com/96409857/211286619-63e406aa-0736-4581-bd9e-adde92209dba.png" width="200" height="400" alt="文件管理"/></td>
+    <td><img src="https://github.com/user-attachments/assets/567296e9-3408-498c-b4b8-9e5d3bf0a78a" width="200" height="400" alt="主页面"/></td>
+    <td><img src="https://github.com/user-attachments/assets/601ac48d-3895-460e-ba3c-b8aa70b58870" width="200" height="400" alt="相册页面"/></td>
+    <td><img src="https://github.com/user-attachments/assets/d103a07f-8cec-465b-8c71-162fcbcd83c4" width="200" height="400" alt="文件管理"/></td>
   </tr>
    <tr>
-    <td><img src="https://user-images.githubusercontent.com/96409857/211286730-2e0c05b3-5093-4738-8378-7d2c273a694b.png" width="200" height="400" alt="设置页面"/></td>
-    <td><img src="https://user-images.githubusercontent.com/96409857/203719066-b6e45be8-eb8f-49da-bea2-78f3d4379591.jpg" width="200" height="400" alt="图床配置"/></td>
-    <td><img src="https://user-images.githubusercontent.com/96409857/203719617-b54a49bb-d9f9-4917-a68a-b4a46f951ee0.png" width="200" height="400" alt="文件上传"/></td>
+    <td><img src="https://github.com/user-attachments/assets/32f65a09-de1b-4038-817c-15a215d60da0" width="200" height="400" alt="设置页面"/></td>
+    <td><img src="https://github.com/user-attachments/assets/f9f0c1f5-f49c-4337-9ccd-34a6e91d1217" width="200" height="400" alt="图床配置"/></td>
+    <td><img src="https://github.com/user-attachments/assets/4f424b59-c40f-4fbc-8abc-fddd0fd809f0" width="200" height="400" alt="通用设置"/></td>
   </tr>
    <tr>
-    <td><img src="https://user-images.githubusercontent.com/96409857/203719608-34170e4c-2d6f-4e3a-990a-f61c610417e9.png" width="200" height="400" alt="预览功能"/></td>
-    <td><img src="https://user-images.githubusercontent.com/96409857/203720199-38266fae-e0fa-4aad-8315-f272bc8b6add.jpg" width="200" height="400" alt="自定义链接"/></td>
-    <td><img src="https://user-images.githubusercontent.com/96409857/203720359-26717390-1789-4750-97dd-27836da322da.jpg" width="200" height="400" alt="文件管理"/></td>
-  </tr>
-  <tr>
-    <td><img src="https://user-images.githubusercontent.com/96409857/203720473-577368a7-ed29-461b-b8f2-4077dd02ca84.jpg" width="200" height="400" alt="上传历史"/></td>
-    <td><img src="https://user-images.githubusercontent.com/96409857/203720565-4d4008a5-198f-451d-b0cc-b1780291f2b7.png" width="200" height="400" alt="SSH终端"/></td>
-    <td><img src="https://user-images.githubusercontent.com/96409857/203720614-4bfd6e0c-ea16-4ed1-945d-c5c5524c89a6.png" width="200" height="400" alt="配置导出"/></td>
+    <td><img src="https://github.com/user-attachments/assets/167aecbc-a74d-4d10-bd43-e43af7d9d24d" width="200" height="400" alt="管理页面"/></td>
+    <td><img src="https://github.com/user-attachments/assets/053ba6e7-2762-4822-8a17-d7fd23964a1e" width="200" height="400" alt="文件列表"/></td>
+    <td><img src="https://github.com/user-attachments/assets/9638734e-3488-4667-8f9c-9320f99fc033" width="200" height="400" alt="上传下载"/></td>
   </tr>
 </table>
 
 ## 最近更新
 
 详细更新日志请查看[更新日志](https://github.com/Kuingsmile/PicHoro/blob/main/Version_update_log.md)
-
-### 2024-07-19 **V2.4.0**
-
-#### 新增功能:
-
-- 与 AList 3.35 版本保持同步
-- `alist` 图床现在支持设置管理员 token
-- `sm.ms` 图床上传重复图片时不再判定为失败
-- S3 兼容平台支持带端口号的 endpoint
-- S3 兼容平台支持设置是否启用 SSL 连接和 S3 path style
-- 优化图床导入，支持 PicList 内置 AList、兰空图床、ftp 图床、WebDAV 图床及 alist 图床插件配置
-- 优化文件 mime 类型判断，兼容更多文件类型并默认使用 `application/octet-stream`
-- 重命名占位符 `{m}` 和 `{d}` 固定为两位数字，如 `01`、`02`
-- 新增重命名占位符: `{h}`(小时)、`{i}`(分钟)、`{s}`(秒)、`{ms}`(毫秒)、`{str-num}`
-- 默认自定义重命名格式修改为 `{Y}{m}{d}{h}{i}{ms}`，与 PicGo 一致
-- 默认自定义链接格式修改为 `![$fileName]($url)`
-- 设置图床配置时自动去除开头和结尾多余空格
-
-#### 修复问题:
-
-- alist 备用设置中无法设置网址路径的问题
-- alist 设置了网址路径时返回地址多了一个 '/' 的问题
-- alist 返回链接是平台直链而非 alist 专用网址的问题
-- 特定情况下 `ftp` 图床返回链接错误的问题
-- ftp 图床设置页面打开错误的问题
-- 导入 `imgur` 配置时错误保存到 `smms` 的问题
-- 关闭自动复制链接后仍然会复制到剪贴板的问题
 
 ## 开发与交流
 
@@ -158,7 +124,7 @@ PicHoro 是一款基于 Flutter 的手机端云存储平台/图床管理和文�
 
 ### 软件修改步骤
 
-1. 准备环境: 安装 Android Studio、Android SDK 21+ 和 Flutter 3.13
+1. 准备环境: 安装 Android Studio、Android SDK 21+ 和 Flutter 3.27
 2. 克隆仓库: `git clone https://github.com/Kuingsmile/PicHoro.git`
 3. Windows 用户推荐使用 VSCode 编辑和调试代码
 
