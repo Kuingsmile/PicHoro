@@ -471,7 +471,10 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
       compressedFile = await compressAndGetFile(
           Global.imageOriginalFile!.path, my_path.basename(Global.imageFile!), Global.defaultCompressFormat,
           minHeight: Global.minHeight, minWidth: Global.minWidth, quality: Global.quality);
-      Global.imageFile = '${my_path.dirname(Global.imageFile!)}/${my_path.basename(compressedFile.path)}';
+      String directoryPath = my_path.dirname(Global.imageFile!);
+      directoryPath = directoryPath == '.' ? '' : directoryPath;
+      String fileName = my_path.basename(compressedFile.path);
+      Global.imageFile = directoryPath.isEmpty ? fileName : '$directoryPath/$fileName';
     } else {
       compressedFile = Global.imageOriginalFile!;
     }
@@ -1205,7 +1208,10 @@ Future<File> processImageFile(File imageFile) async {
     compressedFile = await compressAndGetFile(
         imageFile.path, my_path.basename(Global.imageFile!), Global.defaultCompressFormat,
         minHeight: Global.minHeight, minWidth: Global.minWidth, quality: Global.quality);
-    Global.imageFile = '${my_path.dirname(Global.imageFile!)}/${my_path.basename(compressedFile.path)}';
+    String directory = my_path.dirname(Global.imageFile!);
+    directory = directory == '.' ? '' : directory;
+    String compressedFileName = my_path.basename(compressedFile.path);
+    Global.imageFile = directory.isEmpty ? compressedFileName : '$directory/$compressedFileName';
   } else {
     compressedFile = imageFile;
   }
