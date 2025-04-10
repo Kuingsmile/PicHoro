@@ -8,7 +8,7 @@
 
 ## 简介
 
-PicHoro 是一款基于 Flutter 的手机端云存储平台/图床管理和文件上传/下载工具，最新版本 **V3.0.0**。
+PicHoro 是一款基于 Flutter 的手机端云存储平台/图床管理和文件上传/下载工具，最新版本 **V3.0.1**。
 
 - 与 PicGo/PicList 配置互通，可直接扫码导入
 - 支持云存储/图床/云服务器平台和网盘管理（通过 [Alist](https://alist.nn.ci/zh/)）
@@ -80,7 +80,7 @@ PicHoro 是一款基于 Flutter 的手机端云存储平台/图床管理和文�
 ### 安卓
 
 - **Github 下载**: [Github release](https://github.com/Kuingsmile/PicHoro/releases)
-- **官网下载**: [最新版本 V3.0.0](https://pichoro.msq.pub/PicHoro_V2.4.0.apk)
+- **官网下载**: [最新版本 V3.0.1](https://pichoro.msq.pub/PicHoro_V3.0.1.apk)
 
 ### iOS
 
