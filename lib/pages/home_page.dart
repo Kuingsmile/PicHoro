@@ -36,6 +36,18 @@ class HomePage extends StatefulWidget {
 class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<HomePage> {
   final ImagePicker _picker = ImagePicker();
 
+    static const Map<String, IconData> _hostIcons = {
+      'upyun': IconData(0x0055),
+      'tencent': IconData(0x0054),
+      'sm.ms': IconData(0x0053),
+      'qiniu': IconData(0x0051),
+      'lsky.pro': IconData(0x004C),
+      'imgur': IconData(0x0049),
+      'github': IconData(0x0047),
+      'ftp': IconData(0x0046),
+      'aliyun': IconData(0x0041),
+    };
+
   /// 剪贴板图片链接
   List clipboardList = [];
 
@@ -745,7 +757,7 @@ class HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin<H
         .map((host) => SpeedDialChild(
               shape: const CircleBorder(),
               child: Icon(
-                IconData(host['icon']),
+                _hostIcons[host['id']] ?? Icons.image,
                 color: Colors.white,
               ),
               backgroundColor:
