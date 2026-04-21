@@ -124,7 +124,7 @@ PicHoro 是一款基于 Flutter 的手机端云存储平台/图床管理和文�
 
 ### 软件修改步骤
 
-1. 准备环境: 安装 Android Studio、Android SDK 21+ 和 Flutter 3.27
+1. 准备环境: 安装 Android Studio、Android SDK 21+ 和 Flutter 3.29.0
 2. 克隆仓库: `git clone https://github.com/Kuingsmile/PicHoro.git`
 3. Windows 用户推荐使用 VSCode 编辑和调试代码
 
