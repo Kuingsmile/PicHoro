@@ -5,10 +5,17 @@
 *.swp
 .DS_Store
 .atom/
+.build/
 .buildlog/
 .history
 .svn/
+.swiftpm/
+.vscode/
 migrate_working_dir/
+
+# FVM Version Cache
+.fvm/
+.fvmrc
 
 # IntelliJ related
 *.iml
@@ -89,6 +96,7 @@ app.*.map.json
 **/ios/Flutter/flutter_assets/
 **/ios/ServiceDefinitions.json
 **/ios/Runner/GeneratedPluginRegistrant.*
+**/ios/Flutter/flutter_export_environment.sh
 
 # 针对flutter当做module集成进现有项目时，.ios目录下的文件
 **/.ios/**/*.mode1v3
@@ -115,3 +123,4 @@ app.*.map.json
 **/.ios/Flutter/flutter_assets/
 **/.ios/ServiceDefinitions.json
 **/.ios/Runner/GeneratedPluginRegistrant.*
+
